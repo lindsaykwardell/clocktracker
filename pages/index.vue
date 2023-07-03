@@ -1,5 +1,5 @@
 <template>
-  <template v-if="games.length">
+  <template v-if="games?.length">
     <div class="w-full overflow-scroll">
       <table class="w-[1000px] md:w-11/12 m-auto my-6">
         <thead class="font-bold font-piratesbay text-left text-xl">
