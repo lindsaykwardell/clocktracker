@@ -1,0 +1,140 @@
+<template>
+  <section class="py-6">
+    <h2 class="font-piratesbay text-4xl text-center">Add Game</h2>
+    <form class="max-w-[1000px] m-auto py-6" @submit.prevent="submitGame">
+      <fieldset class="flex gap-5 border rounded border-stone-500 p-4 my-3">
+        <legend>Game Setup</legend>
+        <!-- date -->
+        <label>
+          <span class="block">Date</span>
+          <input
+            type="date"
+            v-model="date"
+            class="block w-full border border-stone-500 rounded-md p-2"
+          />
+        </label>
+        <!-- script -->
+        <label>
+          <span class="block">Script</span>
+          <input
+            type="text"
+            v-model="script"
+            class="block w-full border border-stone-500 rounded-md p-2"
+          />
+        </label>
+        <!-- location -->
+        <label>
+          <span class="block">Location</span>
+          <input
+            type="text"
+            v-model="location"
+            class="block w-full border border-stone-500 rounded-md p-2"
+          />
+        </label>
+        <!-- player count -->
+        <label>
+          <span class="block">Player Count</span>
+          <input
+            type="number"
+            v-model="playerCount"
+            class="block w-full border border-stone-500 rounded-md p-2"
+          />
+        </label>
+      </fieldset>
+      <!-- initialCharacter -->
+      <fieldset class="flex gap-5 border rounded border-stone-500 p-4 my-3">
+        <legend>Player Setup</legend>
+        <label>
+          <span class="block">Initial Character</span>
+          <input
+            type="text"
+            v-model="initialCharacter"
+            class="block w-full border border-stone-500 rounded-md p-2"
+          />
+        </label>
+        <label>
+          <span class="block">Alignment</span>
+          <select
+            v-model="alignment"
+            class="block w-full border border-stone-500 rounded-md p-2"
+          >
+            <option value="Good">Good</option>
+            <option value="Evil">Evil</option>
+          </select>
+        </label>
+      </fieldset>
+      <fieldset class="flex gap-5 border rounded border-stone-500 p-4 my-3">
+        <legend>Game Results</legend>
+        <label>
+          <span class="block">Final 3?</span>
+          <select
+            v-model="final3"
+            class="block w-full border border-stone-500 rounded-md p-2"
+          >
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </label>
+        <label>
+          <span class="block">Win?</span>
+          <select
+            v-model="win"
+            class="block w-full border border-stone-500 rounded-md p-2"
+          >
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </label>
+      </fieldset>
+      <button
+        type="submit"
+        class="block w-full bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded"
+      >
+        Add Game
+      </button>
+    </form>
+  </section>
+</template>
+
+<script setup>
+const { addGame } = useGames();
+const router = useRouter();
+
+// Generate bindings for the v-model to connect to for the above inputs
+const date = ref("");
+const script = ref("");
+const location = ref("");
+const playerCount = ref(0);
+const initialCharacter = ref("");
+const alignment = ref("Good");
+const final3 = ref("false");
+const win = ref("false");
+
+function submitGame() {
+  addGame({
+    date: date.value,
+    script: script.value,
+    location: location.value,
+    playerCount: playerCount.value,
+    initialCharacter: initialCharacter.value,
+    alignment: alignment.value,
+    final3: final3.value === "true",
+    win: win.value === "true",
+  });
+
+  // Redirect to the home page
+  router.push("/");
+}
+</script>
+
+<style scoped>
+input,
+select {
+  color: black;
+  height: 2.5rem;
+}
+
+label {
+  flex: 1 1 0%;
+}
+</style>

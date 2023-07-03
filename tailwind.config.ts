@@ -5,7 +5,7 @@ export default <Partial<Config>>{
     extend: {
       fontFamily: {
         piratesbay: ["PiratesBay", "serif"],
-        roboto: ["Roboto Slab", "serif"],
+        raleway: ["Raleway", "sans-serif"],
       },
     },
   },
