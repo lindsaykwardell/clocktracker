@@ -5,7 +5,9 @@
       class="w-[75px]"
       alt="Demon Head"
     />
-    <h1 class="font-piratesbay text-stone-200 text-3xl">ClockTracker</h1>
+    <h1 class="font-piratesbay text-stone-200 text-3xl hidden md:block">
+      ClockTracker
+    </h1>
     <div class="flex-grow flex justify-end gap-4">
       <nuxt-link
         to="/"
@@ -18,7 +20,7 @@
             alt=""
           />
         </div>
-        Home
+        <span class="hidden md:inline">Home</span>
       </nuxt-link>
       <nuxt-link
         to="/add-game"
@@ -31,7 +33,7 @@
             alt=""
           />
         </div>
-        Add Game
+        <span class="hidden md:inline">Add Game</span>
       </nuxt-link>
       <!-- <nuxt-link
         to="/settings"

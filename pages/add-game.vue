@@ -2,7 +2,7 @@
   <section class="py-6">
     <h2 class="font-piratesbay text-4xl text-center">Add Game</h2>
     <form class="max-w-[1000px] m-auto py-6" @submit.prevent="submitGame">
-      <fieldset class="flex gap-5 border rounded border-stone-500 p-4 my-3">
+      <fieldset class="flex flex-col md:flex-row gap-5 border rounded border-stone-500 p-4 my-3">
         <legend>Game Setup</legend>
         <!-- date -->
         <label>
@@ -42,7 +42,7 @@
         </label>
       </fieldset>
       <!-- initialCharacter -->
-      <fieldset class="flex gap-5 border rounded border-stone-500 p-4 my-3">
+      <fieldset class="flex flex-col md:flex-row gap-5 border rounded border-stone-500 p-4 my-3">
         <legend>Player Setup</legend>
         <label>
           <span class="block">Initial Character</span>
@@ -63,7 +63,7 @@
           </select>
         </label>
       </fieldset>
-      <fieldset class="flex gap-5 border rounded border-stone-500 p-4 my-3">
+      <fieldset class="flex flex-col md:flex-row gap-5 border rounded border-stone-500 p-4 my-3">
         <legend>Game Results</legend>
         <label>
           <span class="block">Final 3?</span>
