@@ -30,6 +30,9 @@ export const useGames = () => {
       },
     };
   } else {
-    return computed<Game[]>(() => []);
+    return {
+      games: computed<Game[]>(() => []),
+      addGame: (game: Partial<Game>) => {},
+    }
   }
 };

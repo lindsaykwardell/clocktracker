@@ -5,15 +5,13 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { Game } from "composables/useGames";
 import { Bar } from "vue-chartjs";
 
-const props = defineProps({
-  games: {
-    type: Array,
-    required: true,
-  },
-});
+const props = defineProps<{
+  games: Game[];
+}>();
 
 const chartData = computed(() => ({
   labels: ["Yes", "No"],

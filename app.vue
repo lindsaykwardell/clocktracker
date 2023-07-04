@@ -53,7 +53,7 @@
   <NuxtPage />
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {
   Chart as ChartJS,
   Title,

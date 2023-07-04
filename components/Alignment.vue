@@ -5,15 +5,13 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { Game } from "composables/useGames";
 import { Pie } from "vue-chartjs";
 
-const props = defineProps({
-  games: {
-    type: Array,
-    required: true,
-  },
-});
+const props = defineProps<{
+  games: Game[];
+}>();
 
 const alignment = computed(() => {
   const val = { good: 0, evil: 0 };
