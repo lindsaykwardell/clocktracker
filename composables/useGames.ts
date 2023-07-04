@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
+import naturalOrder from "natural-order";
 
 export type Game = {
   id: string;
@@ -10,6 +11,7 @@ export type Game = {
   alignment: "Good" | "Evil";
   final3: boolean;
   win: boolean;
+  notes: string;
 };
 
 export const useGames = () => {
@@ -18,7 +20,7 @@ export const useGames = () => {
 
     return {
       games: computed<Game[]>({
-        get: () => games,
+        get: () => naturalOrder(games).orderBy("desc").sort(["date"]),
         set: (value) => {
           localStorage.setItem("games", JSON.stringify(value));
           games = value;
@@ -33,6 +35,6 @@ export const useGames = () => {
     return {
       games: computed<Game[]>(() => []),
       addGame: (game: Partial<Game>) => {},
-    }
+    };
   }
 };

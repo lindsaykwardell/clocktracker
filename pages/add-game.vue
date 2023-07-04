@@ -92,6 +92,14 @@
           </select>
         </label>
       </fieldset>
+      <fieldset class="border rounded border-stone-500 p-4 my-3">
+        <legend>Notes</legend>
+        <textarea
+          v-model="notes"
+          class="block w-full border border-stone-500 rounded-md p-2"
+          rows="5"
+        ></textarea>
+      </fieldset>
       <button
         type="submit"
         class="block w-full bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded"
@@ -115,6 +123,7 @@ const initialCharacter = ref("");
 const alignment = ref<"Good" | "Evil">("Good");
 const final3 = ref("false");
 const win = ref("false");
+const notes = ref("");
 
 function submitGame() {
   addGame({
@@ -126,6 +135,7 @@ function submitGame() {
     alignment: alignment.value,
     final3: final3.value === "true",
     win: win.value === "true",
+    notes: notes.value,
   });
 
   // Redirect to the home page

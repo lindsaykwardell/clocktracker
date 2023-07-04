@@ -1,7 +1,7 @@
 <template>
   <template v-if="games?.length">
-    <GameOverviewTable :games="orderedGames" />
-    <PlayerCharts :games="orderedGames" />
+    <GameOverviewTable :games="games" />
+    <PlayerCharts :games="games" />
   </template>
   <template v-else>
     <p class="text-center text-2xl">No games yet!</p>
@@ -16,6 +16,4 @@
 
 <script setup lang="ts">
 const { games } = useGames();
-
-const orderedGames = computed(() => [...games.value].reverse());
 </script>
