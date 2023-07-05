@@ -10,12 +10,14 @@
   },
   "devDependencies": {
     "@nuxt/devtools": "latest",
+    "@nuxtjs/supabase": "^0.3.8",
     "@nuxtjs/tailwindcss": "^6.8.0",
     "@types/node": "^18",
     "@types/uuid": "^9.0.2",
     "nuxt": "^3.6.1"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.26.0",
     "chart.js": "^4.3.0",
     "natural-order": "^2.0.2",
     "uuid": "^9.0.0",

@@ -1,116 +1,122 @@
 <template>
-  <section class="py-6">
-    <h2 class="font-piratesbay text-4xl text-center">Add Game</h2>
-    <form class="max-w-[1000px] m-auto py-6" @submit.prevent="submitGame">
-      <fieldset
-        class="flex flex-col md:flex-row gap-5 border rounded border-stone-500 p-4 my-3"
-      >
-        <legend>Game Setup</legend>
-        <!-- date -->
-        <label>
-          <span class="block">Date</span>
-          <input
-            type="date"
-            v-model="date"
+  <DashboardTemplate>
+    <section class="py-6">
+      <h2 class="font-piratesbay text-4xl text-center">Add Game</h2>
+      <form class="max-w-[1000px] m-auto py-6" @submit.prevent="submitGame">
+        <fieldset
+          class="flex flex-col md:flex-row gap-5 border rounded border-stone-500 p-4 my-3"
+        >
+          <legend>Game Setup</legend>
+          <!-- date -->
+          <label>
+            <span class="block">Date</span>
+            <input
+              type="date"
+              v-model="date"
+              class="block w-full border border-stone-500 rounded-md p-2"
+            />
+          </label>
+          <!-- script -->
+          <label>
+            <span class="block">Script</span>
+            <input
+              type="text"
+              v-model="script"
+              class="block w-full border border-stone-500 rounded-md p-2"
+            />
+          </label>
+          <!-- location -->
+          <label>
+            <span class="block">Location</span>
+            <input
+              type="text"
+              v-model="location"
+              class="block w-full border border-stone-500 rounded-md p-2"
+            />
+          </label>
+          <!-- player count -->
+          <label>
+            <span class="block">Player Count</span>
+            <input
+              type="number"
+              v-model="playerCount"
+              class="block w-full border border-stone-500 rounded-md p-2"
+            />
+          </label>
+        </fieldset>
+        <!-- initialCharacter -->
+        <fieldset
+          class="flex flex-col md:flex-row gap-5 border rounded border-stone-500 p-4 my-3"
+        >
+          <legend>Player Setup</legend>
+          <label>
+            <span class="block">Initial Character</span>
+            <input
+              type="text"
+              v-model="initialCharacter"
+              class="block w-full border border-stone-500 rounded-md p-2"
+            />
+          </label>
+          <label>
+            <span class="block">Alignment</span>
+            <select
+              v-model="alignment"
+              class="block w-full border border-stone-500 rounded-md p-2"
+            >
+              <option value="Good">Good</option>
+              <option value="Evil">Evil</option>
+            </select>
+          </label>
+        </fieldset>
+        <fieldset
+          class="flex flex-col md:flex-row gap-5 border rounded border-stone-500 p-4 my-3"
+        >
+          <legend>Game Results</legend>
+          <label>
+            <span class="block">Final 3?</span>
+            <select
+              v-model="final3"
+              class="block w-full border border-stone-500 rounded-md p-2"
+            >
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+            </select>
+          </label>
+          <label>
+            <span class="block">Win?</span>
+            <select
+              v-model="win"
+              class="block w-full border border-stone-500 rounded-md p-2"
+            >
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+            </select>
+          </label>
+        </fieldset>
+        <fieldset class="border rounded border-stone-500 p-4 my-3">
+          <legend>Notes</legend>
+          <textarea
+            v-model="notes"
             class="block w-full border border-stone-500 rounded-md p-2"
-          />
-        </label>
-        <!-- script -->
-        <label>
-          <span class="block">Script</span>
-          <input
-            type="text"
-            v-model="script"
-            class="block w-full border border-stone-500 rounded-md p-2"
-          />
-        </label>
-        <!-- location -->
-        <label>
-          <span class="block">Location</span>
-          <input
-            type="text"
-            v-model="location"
-            class="block w-full border border-stone-500 rounded-md p-2"
-          />
-        </label>
-        <!-- player count -->
-        <label>
-          <span class="block">Player Count</span>
-          <input
-            type="number"
-            v-model="playerCount"
-            class="block w-full border border-stone-500 rounded-md p-2"
-          />
-        </label>
-      </fieldset>
-      <!-- initialCharacter -->
-      <fieldset
-        class="flex flex-col md:flex-row gap-5 border rounded border-stone-500 p-4 my-3"
-      >
-        <legend>Player Setup</legend>
-        <label>
-          <span class="block">Initial Character</span>
-          <input
-            type="text"
-            v-model="initialCharacter"
-            class="block w-full border border-stone-500 rounded-md p-2"
-          />
-        </label>
-        <label>
-          <span class="block">Alignment</span>
-          <select
-            v-model="alignment"
-            class="block w-full border border-stone-500 rounded-md p-2"
-          >
-            <option value="Good">Good</option>
-            <option value="Evil">Evil</option>
-          </select>
-        </label>
-      </fieldset>
-      <fieldset
-        class="flex flex-col md:flex-row gap-5 border rounded border-stone-500 p-4 my-3"
-      >
-        <legend>Game Results</legend>
-        <label>
-          <span class="block">Final 3?</span>
-          <select
-            v-model="final3"
-            class="block w-full border border-stone-500 rounded-md p-2"
-          >
-            <option value="true">Yes</option>
-            <option value="false">No</option>
-          </select>
-        </label>
-        <label>
-          <span class="block">Win?</span>
-          <select
-            v-model="win"
-            class="block w-full border border-stone-500 rounded-md p-2"
-          >
-            <option value="true">Yes</option>
-            <option value="false">No</option>
-          </select>
-        </label>
-      </fieldset>
-      <fieldset class="border rounded border-stone-500 p-4 my-3">
-        <legend>Notes</legend>
-        <textarea
-          v-model="notes"
-          class="block w-full border border-stone-500 rounded-md p-2"
-          rows="5"
-        ></textarea>
-      </fieldset>
-      <button
-        type="submit"
-        class="block w-full bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded"
-      >
-        Add Game
-      </button>
-    </form>
-  </section>
+            rows="5"
+          ></textarea>
+        </fieldset>
+        <button
+          type="submit"
+          class="block w-full bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded"
+        >
+          Add Game
+        </button>
+      </form>
+    </section>
+  </DashboardTemplate>
 </template>
 
 <script setup lang="ts">
+definePageMeta({
+  middleware: "auth",
+});
+
 const { addGame } = useGames();
 const router = useRouter();
 
