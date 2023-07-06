@@ -12,6 +12,8 @@ import {
   CategoryScale,
   LinearScale,
   ArcElement,
+  PointElement,
+  LineElement
 } from "chart.js";
 
 useHead({
@@ -27,7 +29,9 @@ ChartJS.register(
   BarElement,
   CategoryScale,
   LinearScale,
-  ArcElement
+  ArcElement,
+  PointElement,
+  LineElement
 );
 </script>
 

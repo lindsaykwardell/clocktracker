@@ -49,5 +49,10 @@ const chartOptions = computed(() => ({
       stacked: true,
     },
   },
+  plugins: {
+    legend: {
+      display: false,
+    },
+  },
 }));
 </script>

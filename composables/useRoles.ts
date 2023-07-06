@@ -169,7 +169,7 @@ export const useRoles = () => {
   return {
     roles,
     townsfolk,
-    isTownfolk: (role: string) => townsfolk.includes(role),
+    isTownsfolk: (role: string) => townsfolk.includes(role),
     outsiders,
     isOutsider: (role: string) => outsiders.includes(role),
     minions,
