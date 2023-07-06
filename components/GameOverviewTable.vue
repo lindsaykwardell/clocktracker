@@ -34,7 +34,6 @@
 <script setup lang="ts">
 // import the type "game" from prisma client
 import type { game } from "@prisma/client";
-import { Alignment } from "@prisma/client";
 import dayjs from "dayjs";
 
 defineProps<{
@@ -46,7 +45,7 @@ function formatDate(date: Date) {
 }
 
 function rowHighlight(game: game) {
-  if (game.alignment === Alignment.GOOD) {
+  if (game.alignment === "GOOD") {
     if (game.win) {
       return "bg-blue-400 dark:bg-blue-800";
     } else {

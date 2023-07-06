@@ -6,7 +6,7 @@
 </template>
 
 <script setup lang="ts">
-import { game, Alignment } from "@prisma/client";
+import type { game } from "@prisma/client";
 import { Pie } from "vue-chartjs";
 
 const props = defineProps<{
@@ -17,7 +17,7 @@ const alignment = computed(() => {
   const val = { good: 0, evil: 0 };
 
   for (const game of props.games) {
-    if (game.alignment === Alignment.GOOD) {
+    if (game.alignment === "GOOD") {
       val.good++;
     } else {
       val.evil++;
