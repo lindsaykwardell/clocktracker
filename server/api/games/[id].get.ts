@@ -3,24 +3,20 @@ import { PrismaClient, game } from "@prisma/client";
 
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
-  const gameId = +(handler.context.params?.id || 0);
+  const gameId = handler.context.params?.id;
 
   if (!user) {
-    return {
+    throw createError({
       status: 401,
-      body: {
-        message: "Unauthorized",
-      },
-    };
+      statusMessage: "Unauthorized",
+    })
   }
 
   if (!gameId) {
-    return {
+    throw createError({
       status: 400,
-      body: {
-        message: "Bad Request",
-      },
-    };
+      statusMessage: "Bad Request",
+    })
   }
 
   const prisma = new PrismaClient();
@@ -31,12 +27,10 @@ export default defineEventHandler(async (handler) => {
   });
 
   if (!game || game.user_id !== user.id) {
-    return {
+    throw createError({
       status: 404,
-      body: {
-        message: "Not Found",
-      },
-    };
+      statusMessage: "Not Found",
+    })
   }
 
   return game;

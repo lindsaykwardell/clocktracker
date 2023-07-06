@@ -5,12 +5,10 @@ export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
 
   if (!user) {
-    return {
+    throw createError({
       status: 401,
-      body: {
-        message: "Unauthorized",
-      },
-    };
+      statusMessage: "Unauthorized",
+    })
   }
 
   const prisma = new PrismaClient();

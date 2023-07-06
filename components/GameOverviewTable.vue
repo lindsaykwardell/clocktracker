@@ -19,6 +19,7 @@
           v-for="game in games"
           :class="rowHighlight(game)"
           @click="viewGame(game.id)"
+          class="cursor-pointer transition duration-150"
         >
           <td>{{ formatDate(game.date) }}</td>
           <td>{{ game.script }}</td>
@@ -74,20 +75,20 @@ function formatDate(date: Date) {
 function rowHighlight(game: game) {
   if (game.alignment === "GOOD") {
     if (game.win) {
-      return "bg-blue-400 dark:bg-blue-800";
+      return "bg-blue-400 dark:bg-blue-800 hover:bg-blue-600";
     } else {
-      return "bg-blue-200 dark:bg-blue-600";
+      return "bg-blue-200 dark:bg-blue-600 hover:bg-blue-400";
     }
   } else {
     if (game.win) {
-      return "bg-red-400 dark:bg-red-800";
+      return "bg-red-400 dark:bg-red-800 hover:bg-red-600";
     } else {
-      return "bg-red-200 dark:bg-red-600";
+      return "bg-red-200 dark:bg-red-600 hover:bg-red-400";
     }
   }
 }
 
-function viewGame(id: number) {
+function viewGame(id: string) {
   router.push(`/game/${id}`);
 }
 </script>

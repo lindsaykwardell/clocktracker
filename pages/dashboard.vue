@@ -28,7 +28,7 @@ useHead({
 
 const games = await useFetch<game[]>(`/api/games`);
 
-async function deleteGame(id: number) {
+async function deleteGame(id: string) {
   if (confirm("Are you sure you want to delete this game?")) {
     const result = await fetch(`/api/games/${id}`, {
       method: "delete",

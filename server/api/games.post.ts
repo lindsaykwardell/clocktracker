@@ -6,21 +6,17 @@ export default defineEventHandler(async (handler) => {
   const body = await readBody<game | null>(handler);
 
   if (!user) {
-    return {
+    throw createError({
       status: 401,
-      body: {
-        message: "Unauthorized",
-      },
-    };
+      statusMessage: "Unauthorized",
+    })
   }
 
   if (!body) {
-    return {
+    throw createError({
       status: 400,
-      body: {
-        message: "Bad Request",
-      },
-    };
+      statusMessage: "Bad Request",
+    })
   }
 
   const prisma = new PrismaClient();
