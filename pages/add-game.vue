@@ -63,8 +63,8 @@
               v-model="alignment"
               class="block w-full border border-stone-500 rounded-md p-2"
             >
-              <option value="Good">Good</option>
-              <option value="Evil">Evil</option>
+              <option value="GOOD">Good</option>
+              <option value="EVIL">Evil</option>
             </select>
           </label>
         </fieldset>
@@ -113,11 +113,11 @@
 </template>
 
 <script setup lang="ts">
+import dayjs from "dayjs";
 definePageMeta({
   middleware: "auth",
 });
 
-const { addGame } = useGames();
 const router = useRouter();
 
 // Generate bindings for the v-model to connect to for the above inputs
@@ -126,26 +126,32 @@ const script = ref("");
 const location = ref("");
 const playerCount = ref(0);
 const initialCharacter = ref("");
-const alignment = ref<"Good" | "Evil">("Good");
+const alignment = ref<"GOOD" | "EVIL">("GOOD");
 const final3 = ref("false");
 const win = ref("false");
 const notes = ref("");
 
-function submitGame() {
-  addGame({
-    date: date.value,
-    script: script.value,
-    location: location.value,
-    playerCount: playerCount.value,
-    initialCharacter: initialCharacter.value,
-    alignment: alignment.value,
-    final3: final3.value === "true",
-    win: win.value === "true",
-    notes: notes.value,
+async function submitGame() {
+  const { error } = await useFetch("/api/games", {
+    method: "POST",
+    body: JSON.stringify({
+      date: dayjs(date.value).toISOString(),
+      script: script.value,
+      location: location.value,
+      player_count: playerCount.value,
+      initial_character: initialCharacter.value,
+      alignment: alignment.value,
+      final3: final3.value === "true",
+      win: win.value === "true",
+      notes: notes.value,
+    }),
   });
 
-  // Redirect to the home page
-  router.push("/");
+  if (error.value) {
+    console.error(error.value);
+  } else {
+    router.push("/dashboard");
+  }
 }
 </script>
 
@@ -154,6 +160,10 @@ input,
 select {
   color: black;
   height: 2.5rem;
+}
+
+textarea {
+  color: black;
 }
 
 label {

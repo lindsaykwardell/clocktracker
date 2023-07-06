@@ -15,7 +15,7 @@
       </thead>
       <tbody>
         <tr v-for="game in games" :class="rowHighlight(game)">
-          <td>{{ game.date }}</td>
+          <td>{{ formatDate(game.date) }}</td>
           <td>{{ game.script }}</td>
           <td>{{ game.location }}</td>
           <td>{{ game.playerCount }}</td>
@@ -35,10 +35,15 @@
 // import the type "game" from prisma client
 import type { game } from "@prisma/client";
 import { Alignment } from "@prisma/client";
+import dayjs from "dayjs";
 
 defineProps<{
   games: game[];
 }>();
+
+function formatDate(date: Date) {
+  return dayjs(date).format("MM/DD/YYYY");
+}
 
 function rowHighlight(game: game) {
   if (game.alignment === Alignment.GOOD) {
