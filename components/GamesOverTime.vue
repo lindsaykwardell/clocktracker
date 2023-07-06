@@ -49,5 +49,23 @@ const chartOptions = computed(() => ({
       display: false,
     },
   },
+  scales: {
+    x: {
+      stacked: true,
+      ticks: {
+        min: 0,
+        stepSize: 1,
+        max: 4,
+      },
+    },
+    y: {
+      stacked: true,
+      ticks: {
+        min: 0,
+        stepSize: 1,
+        max: 4,
+      },
+    },
+  },
 }));
 </script>

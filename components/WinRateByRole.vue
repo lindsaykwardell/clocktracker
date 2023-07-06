@@ -86,9 +86,19 @@ const chartOptions = computed(() => ({
   scales: {
     x: {
       stacked: true,
+      ticks: {
+        min: 0,
+        stepSize: 1,
+        max: 4,
+      },
     },
     y: {
       stacked: true,
+      ticks: {
+        min: 0,
+        stepSize: 1,
+        max: 4,
+      },
     },
   },
   plugins: {
