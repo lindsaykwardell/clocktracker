@@ -1,8 +1,17 @@
 <template>
   <DashboardTemplate>
     <template v-if="games.data.value?.length">
-      <GameOverviewTable :games="games.data.value" @delete="deleteGame" />
-      <PlayerCharts :games="games.data.value" />
+      <section class="flex flex-col md:flex-row gap-8">
+        <div class="w-full md:w-3/4 flex flex-col gap-8">
+          <GameOverviewTable :games="games.data.value" @delete="deleteGame" />
+          <GamesOverTime class="w-full max-h-[450px] flex justify-center flex-col items-center p-2" :games="games.data.value" />
+        </div>
+        <div class="flex flex-wrap w-full md:w-1/4">
+          <WinRate class="w-full sm:w-1/2 md:w-full p-2" :games="games.data.value" />
+          <Alignment class="w-full sm:w-1/2 md:w-full p-2" :games="games.data.value" />
+          <RoleType class="w-full sm:w-1/2 md:w-full p-2" :games="games.data.value" />
+        </div>
+      </section>
     </template>
     <template v-else>
       <p class="text-center text-2xl my-4 font-piratesbay">No games yet!</p>

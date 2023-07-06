@@ -1,6 +1,6 @@
 <template>
-  <div class="w-full max-h-[500px] overflow-scroll">
-    <table class="w-[1000px] md:w-11/12 m-auto my-6">
+  <div class="max-h-[500px] overflow-scroll">
+    <table class="w-[1000px] md:w-full m-auto my-6">
       <thead class="font-bold font-piratesbay text-left text-xl">
         <tr>
           <th @click="orderGames('date')">
