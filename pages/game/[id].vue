@@ -24,7 +24,7 @@
             {{ game.data.value?.location }}
           </label>
           <label>
-            <span class="block">Player Count</span>
+            <span class="block">Players</span>
             {{ game.data.value?.player_count }}
           </label>
         </fieldset>

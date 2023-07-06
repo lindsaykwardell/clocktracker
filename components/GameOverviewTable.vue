@@ -6,7 +6,7 @@
           <th>Date</th>
           <th>Script</th>
           <th>Location</th>
-          <th>Player Count</th>
+          <th>Players</th>
           <th>Initial Character</th>
           <th>End Alignment</th>
           <th>Final 3?</th>

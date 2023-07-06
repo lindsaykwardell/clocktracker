@@ -52,7 +52,7 @@
             />
           </label>
           <label>
-            <span class="block">Player Count</span>
+            <span class="block">Players</span>
             <input
               type="number"
               v-model="playerCount"
