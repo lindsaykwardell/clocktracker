@@ -20,9 +20,9 @@
             alt=""
           />
         </div>
-        <span class="hidden md:inline">{{
-          user?.user_metadata.full_name
-        }}</span>
+        <span class="hidden md:inline">
+          {{ user?.user_metadata.full_name }}
+        </span>
       </nuxt-link>
       <nuxt-link
         to="/add-game"
