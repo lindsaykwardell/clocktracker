@@ -8,7 +8,7 @@
         </div>
         <div class="flex flex-wrap w-full md:w-1/4">
           <WinRate class="w-full sm:w-1/2 md:w-full p-2" :games="games.data.value" />
-          <Alignment class="w-full sm:w-1/2 md:w-full p-2" :games="games.data.value" />
+          <!-- <Alignment class="w-full sm:w-1/2 md:w-full p-2" :games="games.data.value" /> -->
           <RoleType class="w-full sm:w-1/2 md:w-full p-2" :games="games.data.value" />
         </div>
       </section>
