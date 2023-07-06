@@ -22,9 +22,13 @@ definePageMeta({
   middleware: "auth",
 });
 
+useHead({
+  title: "Dashboard",
+});
+
 const games = await useFetch<game[]>(`/api/games`);
 
-async function deleteGame(id: bigint) {
+async function deleteGame(id: number) {
   if (confirm("Are you sure you want to delete this game?")) {
     const result = await fetch(`/api/games/${id}`, {
       method: "delete",

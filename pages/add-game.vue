@@ -139,6 +139,10 @@ definePageMeta({
   middleware: "auth",
 });
 
+useHead({
+  title: "Add Game",
+});
+
 const router = useRouter();
 const { roles } = useRoles();
 const { baseScripts } = useScripts();

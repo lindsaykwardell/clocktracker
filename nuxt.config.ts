@@ -6,7 +6,10 @@ export default defineNuxtConfig({
     head: {
       charset: "utf-8",
       viewport: "width=device-width, initial-scale=1",
-      link: [{ rel: "stylesheet", href: "/index.css" }],
+      link: [
+        { rel: "stylesheet", href: "/index.css" },
+        { rel: "icon", type: "image/png", href: "/demon-head.png" },
+      ],
     },
   },
 });

@@ -1,7 +1,7 @@
 <template>
   <header class="sticky top-0 bg-stone-900 p-2 flex items-center gap-4">
     <img
-      src="https://www.pdxbotc.com/img/demon-head.png"
+      src="/demon-head.png"
       class="w-[75px]"
       alt="Demon Head"
     />

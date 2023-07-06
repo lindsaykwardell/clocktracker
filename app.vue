@@ -14,6 +14,12 @@ import {
   ArcElement,
 } from "chart.js";
 
+useHead({
+  titleTemplate: (titleChunk) => {
+    return titleChunk ? `${titleChunk} - ClockTracker` : "ClockTracker";
+  },
+});
+
 ChartJS.register(
   Title,
   Tooltip,
