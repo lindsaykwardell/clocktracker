@@ -7,7 +7,6 @@
           class="flex flex-col md:flex-row gap-5 border rounded border-stone-500 p-4 my-3"
         >
           <legend>Game Setup</legend>
-          <!-- date -->
           <label>
             <span class="block">Date</span>
             <input
@@ -16,16 +15,34 @@
               class="block w-full border border-stone-500 rounded-md p-2"
             />
           </label>
-          <!-- script -->
           <label>
             <span class="block">Script</span>
             <input
               type="text"
+              list="scripts"
               v-model="script"
               class="block w-full border border-stone-500 rounded-md p-2"
             />
+            <datalist id="scripts">
+              <option
+                v-for="script in baseScripts"
+                :value="script"
+                :key="script"
+              >
+                {{ script }}
+              </option>
+            </datalist>
           </label>
-          <!-- location -->
+          <label>
+            <span class="block">Location Type</span>
+            <select
+              v-model="locationType"
+              class="block w-full border border-stone-500 rounded-md p-2"
+            >
+              <option value="IN_PERSON">In Person</option>
+              <option value="ONLINE">Online</option>
+            </select>
+          </label>
           <label>
             <span class="block">Location</span>
             <input
@@ -34,7 +51,6 @@
               class="block w-full border border-stone-500 rounded-md p-2"
             />
           </label>
-          <!-- player count -->
           <label>
             <span class="block">Player Count</span>
             <input
@@ -44,7 +60,6 @@
             />
           </label>
         </fieldset>
-        <!-- initialCharacter -->
         <fieldset
           class="flex flex-col md:flex-row gap-5 border rounded border-stone-500 p-4 my-3"
         >
@@ -53,9 +68,15 @@
             <span class="block">Initial Character</span>
             <input
               type="text"
+              list="characters"
               v-model="initialCharacter"
               class="block w-full border border-stone-500 rounded-md p-2"
             />
+            <datalist id="characters">
+              <option v-for="role in roles" :value="role" :key="role">
+                {{ role }}
+              </option>
+            </datalist>
           </label>
           <label>
             <span class="block">Alignment</span>
@@ -119,10 +140,13 @@ definePageMeta({
 });
 
 const router = useRouter();
+const { roles } = useRoles();
+const { baseScripts } = useScripts();
 
 // Generate bindings for the v-model to connect to for the above inputs
 const date = ref("");
 const script = ref("");
+const locationType = ref<"ONLINE" | "IN_PERSON">("IN_PERSON");
 const location = ref("");
 const playerCount = ref(0);
 const initialCharacter = ref("");
@@ -137,6 +161,7 @@ async function submitGame() {
     body: JSON.stringify({
       date: dayjs(date.value).toISOString(),
       script: script.value,
+      location_type: locationType.value,
       location: location.value,
       player_count: playerCount.value,
       initial_character: initialCharacter.value,

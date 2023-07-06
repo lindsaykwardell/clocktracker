@@ -19,7 +19,7 @@
           <td>{{ formatDate(game.date) }}</td>
           <td>{{ game.script }}</td>
           <td>{{ game.location }}</td>
-          <td>{{ game.playerCount }}</td>
+          <td>{{ game.player_count }}</td>
           <td>{{ game.initial_character }}</td>
           <td>{{ game.alignment }}</td>
           <td>

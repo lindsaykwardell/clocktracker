@@ -8,11 +8,12 @@ datasource db {
 }
 
 model game {
-  id                Int       @id @default(autoincrement())
+  id                Int          @id @default(autoincrement())
   user_id           String
-  created_at        DateTime? @default(now()) @db.Timestamptz(6)
+  created_at        DateTime?    @default(now()) @db.Timestamptz(6)
   date              DateTime
   script            String
+  location_type     LocationType @default(ONLINE)
   location          String
   player_count      Int
   initial_character String
@@ -25,4 +26,9 @@ model game {
 enum Alignment {
   GOOD
   EVIL
+}
+
+enum LocationType {
+  ONLINE
+  IN_PERSON
 }
