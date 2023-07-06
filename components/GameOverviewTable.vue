@@ -3,20 +3,60 @@
     <table class="w-[1000px] md:w-11/12 m-auto my-6">
       <thead class="font-bold font-piratesbay text-left text-xl">
         <tr>
-          <th>Date</th>
-          <th>Script</th>
-          <th>Location</th>
-          <th>Players</th>
-          <th>Initial Character</th>
-          <th>End Alignment</th>
-          <th>Final 3?</th>
-          <th>Win?</th>
+          <th @click="orderGames('date')">
+            Date
+            <span v-if="orderBy === 'date'">
+              {{ orderDirection === "asc" ? "⬆" : "⬇" }}
+            </span>
+          </th>
+          <th @click="orderGames('script')">
+            Script
+            <span v-if="orderBy === 'script'">
+              {{ orderDirection === "asc" ? "⬆" : "⬇" }}
+            </span>
+          </th>
+          <th @click="orderGames('location')">
+            Location
+            <span v-if="orderBy === 'location'">
+              {{ orderDirection === "asc" ? "⬆" : "⬇" }}
+            </span>
+          </th>
+          <th @click="orderGames('player_count')">
+            Players
+            <span v-if="orderBy === 'player_count'">
+              {{ orderDirection === "asc" ? "⬆" : "⬇" }}
+            </span>
+          </th>
+          <th @click="orderGames('initial_character')">
+            Initial Character
+            <span v-if="orderBy === 'initial_character'">
+              {{ orderDirection === "asc" ? "⬆" : "⬇" }}
+            </span>
+          </th>
+          <th @click="orderGames('alignment')">
+            End Alignment
+            <span v-if="orderBy === 'alignment'">
+              {{ orderDirection === "asc" ? "⬆" : "⬇" }}
+            </span>
+          </th>
+          <th @click="orderGames('final3')">
+            Final 3?
+            <span v-if="orderBy === 'final3'">
+              {{ orderDirection === "asc" ? "⬆" : "⬇" }}
+            </span>
+          </th>
+          <th @click="orderGames('win')">
+            Win?
+            <span v-if="orderBy === 'win'">
+              {{ orderDirection === "asc" ? "⬆" : "⬇" }}
+            </span>
+          </th>
           <th></th>
         </tr>
       </thead>
       <tbody>
         <tr
-          v-for="game in games"
+          v-for="game in orderedGames"
           :class="rowHighlight(game)"
           @click="viewGame(game.id)"
           class="cursor-pointer transition duration-150"
@@ -56,17 +96,32 @@
 </template>
 
 <script setup lang="ts">
-// import the type "game" from prisma client
 import type { game } from "@prisma/client";
 import dayjs from "dayjs";
+import naturalOrder from "natural-order";
 
 const router = useRouter();
 
-defineProps<{
+const props = defineProps<{
   games: game[];
 }>();
-
 const emits = defineEmits(["delete"]);
+
+const orderBy = ref("date");
+const orderDirection = ref<"asc" | "desc">("desc");
+
+const orderedGames = computed(() =>
+  naturalOrder(props.games).orderBy(orderDirection.value).sort([orderBy.value])
+);
+
+function orderGames(column: string) {
+  if (orderBy.value === column) {
+    orderDirection.value = orderDirection.value === "asc" ? "desc" : "asc";
+  } else {
+    orderBy.value = column;
+    orderDirection.value = "desc";
+  }
+}
 
 function formatDate(date: Date) {
   return dayjs(date).format("MM/DD/YYYY");
@@ -92,3 +147,9 @@ function viewGame(id: string) {
   router.push(`/game/${id}`);
 }
 </script>
+
+<style scoped>
+th {
+  @apply cursor-pointer select-none;
+}
+</style>
