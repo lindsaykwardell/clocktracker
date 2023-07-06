@@ -8,9 +8,9 @@
 </template>
 
 <script setup lang="ts">
-import { Game } from "composables/useGames";
+import type { game } from "@prisma/client";
 
 defineProps<{
-  games: Game[];
+  games: game[];
 }>();
 </script>

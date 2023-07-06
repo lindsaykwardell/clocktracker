@@ -1,8 +1,8 @@
 <template>
   <DashboardTemplate>
-    <template v-if="games?.length">
-      <GameOverviewTable :games="games" />
-      <PlayerCharts :games="games" />
+    <template v-if="games.data.value?.length">
+      <GameOverviewTable :games="games.data.value" />
+      <PlayerCharts :games="games.data.value" />
     </template>
     <template v-else>
       <p class="text-center text-2xl">No games yet!</p>
@@ -17,9 +17,10 @@
 </template>
 
 <script setup lang="ts">
+import type { game } from "@prisma/client";
 definePageMeta({
   middleware: "auth",
 });
 
-const { games } = useGames();
+const games = await useFetch<game[]>(`/api/games`);
 </script>

@@ -14,9 +14,11 @@
     "@nuxtjs/tailwindcss": "^6.8.0",
     "@types/node": "^18",
     "@types/uuid": "^9.0.2",
-    "nuxt": "^3.6.1"
+    "nuxt": "^3.6.1",
+    "prisma": "^4.16.2"
   },
   "dependencies": {
+    "@prisma/client": "^4.16.2",
     "@supabase/supabase-js": "^2.26.0",
     "chart.js": "^4.3.0",
     "natural-order": "^2.0.2",

@@ -19,7 +19,7 @@
           <td>{{ game.script }}</td>
           <td>{{ game.location }}</td>
           <td>{{ game.playerCount }}</td>
-          <td>{{ game.initialCharacter }}</td>
+          <td>{{ game.initial_character }}</td>
           <td>{{ game.alignment }}</td>
           <td>
             {{ game.final3 === null ? "-" : game.final3 ? "Yes" : "No" }}
@@ -32,14 +32,16 @@
 </template>
 
 <script setup lang="ts">
-import { Game } from "composables/useGames";
+// import the type "game" from prisma client
+import type { game } from "@prisma/client";
+import { Alignment } from "@prisma/client";
 
 defineProps<{
-  games: Game[];
+  games: game[];
 }>();
 
-function rowHighlight(game: Game) {
-  if (game.alignment === "Good") {
+function rowHighlight(game: game) {
+  if (game.alignment === Alignment.GOOD) {
     if (game.win) {
       return "bg-blue-400 dark:bg-blue-800";
     } else {
