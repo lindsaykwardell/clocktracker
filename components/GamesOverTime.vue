@@ -6,12 +6,12 @@
 </template>
 
 <script setup lang="ts">
-import type { game } from "@prisma/client";
+import type { Game } from "@prisma/client";
 import { Line } from "vue-chartjs";
 import dayjs from "dayjs";
 
 const props = defineProps<{
-  games: game[];
+  games: Game[];
 }>();
 
 // Get past six months

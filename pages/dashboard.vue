@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import type { game } from "@prisma/client";
+import type { Game, Character } from "@prisma/client";
 definePageMeta({
   middleware: "auth",
 });
@@ -26,7 +26,9 @@ useHead({
   title: "Dashboard",
 });
 
-const games = await useFetch<game[]>(`/api/games`);
+const games = await useFetch<(Game & { player_characters: Character[] })[]>(
+  `/api/games`
+);
 
 async function deleteGame(id: string) {
   if (confirm("Are you sure you want to delete this game?")) {

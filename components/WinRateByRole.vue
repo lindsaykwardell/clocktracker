@@ -6,13 +6,13 @@
 </template>
 
 <script setup lang="ts">
-import type { game } from "@prisma/client";
+import type { Game, Character } from "@prisma/client";
 import { Bar } from "vue-chartjs";
 
 const { isTownsfolk, isOutsider, isMinion, isDemon, isTraveler } = useRoles();
 
 const props = defineProps<{
-  games: game[];
+  games: (Game & { player_characters: Character[] })[];
 }>();
 
 const chartData = computed(() => ({
@@ -22,10 +22,10 @@ const chartData = computed(() => ({
       label: "Townsfolk",
       data: [
         props.games.filter(
-          (game) => isTownsfolk(game.initial_character) && game.win
+          (game) => isTownsfolk(game.player_characters[0].name) && game.win
         ).length,
         props.games.filter(
-          (game) => isTownsfolk(game.initial_character) && !game.win
+          (game) => isTownsfolk(game.player_characters[0].name) && !game.win
         ).length,
       ],
       backgroundColor: "blue",
@@ -34,10 +34,10 @@ const chartData = computed(() => ({
       label: "Outsider",
       data: [
         props.games.filter(
-          (game) => isOutsider(game.initial_character) && game.win
+          (game) => isOutsider(game.player_characters[0].name) && game.win
         ).length,
         props.games.filter(
-          (game) => isOutsider(game.initial_character) && !game.win
+          (game) => isOutsider(game.player_characters[0].name) && !game.win
         ).length,
       ],
       backgroundColor: "lightblue",
@@ -46,10 +46,10 @@ const chartData = computed(() => ({
       label: "Minion",
       data: [
         props.games.filter(
-          (game) => isMinion(game.initial_character) && game.win
+          (game) => isMinion(game.player_characters[0].name) && game.win
         ).length,
         props.games.filter(
-          (game) => isMinion(game.initial_character) && !game.win
+          (game) => isMinion(game.player_characters[0].name) && !game.win
         ).length,
       ],
       backgroundColor: "pink",
@@ -58,10 +58,10 @@ const chartData = computed(() => ({
       label: "Demon",
       data: [
         props.games.filter(
-          (game) => isDemon(game.initial_character) && game.win
+          (game) => isDemon(game.player_characters[0].name) && game.win
         ).length,
         props.games.filter(
-          (game) => isDemon(game.initial_character) && !game.win
+          (game) => isDemon(game.player_characters[0].name) && !game.win
         ).length,
       ],
       backgroundColor: "red",
@@ -70,10 +70,10 @@ const chartData = computed(() => ({
       label: "Traveler",
       data: [
         props.games.filter(
-          (game) => isTraveler(game.initial_character) && game.win
+          (game) => isTraveler(game.player_characters[0].name) && game.win
         ).length,
         props.games.filter(
-          (game) => isTraveler(game.initial_character) && !game.win
+          (game) => isTraveler(game.player_characters[0].name) && !game.win
         ).length,
       ],
       backgroundColor: "purple",

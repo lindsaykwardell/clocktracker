@@ -7,8 +7,8 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model game {
-  id                String          @id @default(uuid())
+model Game {
+  id                String       @id @default(uuid())
   user_id           String
   created_at        DateTime?    @default(now()) @db.Timestamptz(6)
   date              DateTime
@@ -16,11 +16,18 @@ model game {
   location_type     LocationType @default(ONLINE)
   location          String
   player_count      Int
-  initial_character String
-  alignment         Alignment
+  player_characters Character[]
   final3            Boolean?
   win               Boolean
   notes             String
+}
+
+model Character {
+  id        Int       @id @default(autoincrement())
+  name      String
+  alignment Alignment
+  game      Game?     @relation(fields: [game_id], references: [id])
+  game_id   String?
 }
 
 enum Alignment {

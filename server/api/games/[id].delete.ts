@@ -1,5 +1,5 @@
 import type { User } from "@supabase/supabase-js";
-import { PrismaClient, game } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
@@ -9,14 +9,14 @@ export default defineEventHandler(async (handler) => {
     throw createError({
       status: 401,
       statusMessage: "Unauthorized",
-    })
+    });
   }
 
   if (!gameId) {
     throw createError({
       status: 400,
       statusMessage: "Bad Request",
-    })
+    });
   }
 
   const prisma = new PrismaClient();
@@ -30,7 +30,7 @@ export default defineEventHandler(async (handler) => {
     throw createError({
       status: 404,
       statusMessage: "Not Found",
-    })
+    });
   }
 
   // delete the game

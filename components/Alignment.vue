@@ -6,18 +6,18 @@
 </template>
 
 <script setup lang="ts">
-import type { game } from "@prisma/client";
+import type { Game, Character } from "@prisma/client";
 import { Pie } from "vue-chartjs";
 
 const props = defineProps<{
-  games: game[];
+  games: (Game & { player_characters: Character[] })[];
 }>();
 
 const alignment = computed(() => {
   const val = { good: 0, evil: 0 };
 
   for (const game of props.games) {
-    if (game.alignment === "GOOD") {
+    if (game.player_characters[0].alignment === "GOOD") {
       val.good++;
     } else {
       val.evil++;

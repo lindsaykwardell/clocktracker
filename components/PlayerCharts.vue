@@ -11,11 +11,11 @@
 </template>
 
 <script setup lang="ts">
-import type { game } from "@prisma/client";
+import type { Game, Character } from "@prisma/client";
 import RoleType from "./RoleType.vue";
 import GamesOverTime from "./GamesOverTime.vue";
 
 defineProps<{
-  games: game[];
+  games: (Game & { player_characters: Character[] })[];
 }>();
 </script>

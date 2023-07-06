@@ -6,11 +6,11 @@
 </template>
 
 <script setup lang="ts">
-import type { game } from "@prisma/client";
+import type { Game, Character } from "@prisma/client";
 import { Pie } from "vue-chartjs";
 
 const props = defineProps<{
-  games: game[];
+  games: (Game & { player_characters: Character[] })[];
 }>();
 
 const { isTownsfolk, isOutsider, isMinion, isDemon, isTraveler } = useRoles();
@@ -19,11 +19,11 @@ const roles = computed(() => {
   const val = { townsfolk: 0, outsider: 0, minion: 0, demon: 0, traveler: 0 };
 
   for (const game of props.games) {
-    if (isTownsfolk(game.initial_character)) val.townsfolk++;
-    if (isOutsider(game.initial_character)) val.outsider++;
-    if (isMinion(game.initial_character)) val.minion++;
-    if (isDemon(game.initial_character)) val.demon++;
-    if (isTraveler(game.initial_character)) val.traveler++;
+    if (isTownsfolk(game.player_characters[0].name)) val.townsfolk++;
+    if (isOutsider(game.player_characters[0].name)) val.outsider++;
+    if (isMinion(game.player_characters[0].name)) val.minion++;
+    if (isDemon(game.player_characters[0].name)) val.demon++;
+    if (isTraveler(game.player_characters[0].name)) val.traveler++;
   }
 
   return val;

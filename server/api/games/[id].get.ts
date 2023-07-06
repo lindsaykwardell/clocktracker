@@ -1,5 +1,5 @@
 import type { User } from "@supabase/supabase-js";
-import { PrismaClient, game } from "@prisma/client";
+import { PrismaClient, Game, Character } from "@prisma/client";
 
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
@@ -24,6 +24,9 @@ export default defineEventHandler(async (handler) => {
     where: {
       id: gameId,
     },
+    include: {
+      player_characters: true,
+    }
   });
 
   if (!game || game.user_id !== user.id) {

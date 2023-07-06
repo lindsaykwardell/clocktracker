@@ -17,7 +17,11 @@
           </label>
           <label>
             <span class="block">Location Type</span>
-            {{ game.data.value?.location_type === "ONLINE" ? "Online" : "In Person" }}
+            {{
+              game.data.value?.location_type === "ONLINE"
+                ? "Online"
+                : "In Person"
+            }}
           </label>
           <label>
             <span class="block">Location</span>
@@ -34,11 +38,15 @@
           <legend>Player Setup</legend>
           <label>
             <span class="block">Initial Character</span>
-            {{ game.data.value?.initial_character }}
+            {{ game.data.value?.player_characters[0].name }}
           </label>
           <label>
             <span class="block">Alignment</span>
-            {{ game.data.value?.alignment === "GOOD" ? "Good" : "Evil" }}
+            {{
+              game.data.value?.player_characters[0].alignment === "GOOD"
+                ? "Good"
+                : "Evil"
+            }}
           </label>
         </fieldset>
         <fieldset
@@ -66,13 +74,15 @@
 </template>
 
 <script setup lang="ts">
-import type { game } from "@prisma/client";
+import type { Game, Character } from "@prisma/client";
 import dayjs from "dayjs";
 
 const router = useRouter();
 const route = useRoute();
 
-const game = await useFetch<game>(`/api/games/${route.params.id}`);
+const game = await useFetch<Game & { player_characters: Character[] }>(
+  `/api/games/${route.params.id}`
+);
 
 if (game.error.value?.statusCode === 404) {
   router.push("/404");

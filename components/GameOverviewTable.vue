@@ -65,8 +65,8 @@
           <td>{{ game.script }}</td>
           <td>{{ game.location }}</td>
           <td>{{ game.player_count }}</td>
-          <td>{{ game.initial_character }}</td>
-          <td>{{ game.alignment }}</td>
+          <td>{{ game.player_characters[0].name }}</td>
+          <td>{{ game.player_characters[0].alignment }}</td>
           <td>
             {{ game.final3 === null ? "-" : game.final3 ? "Yes" : "No" }}
           </td>
@@ -96,14 +96,14 @@
 </template>
 
 <script setup lang="ts">
-import type { game } from "@prisma/client";
+import type { Game, Character } from "@prisma/client";
 import dayjs from "dayjs";
 import naturalOrder from "natural-order";
 
 const router = useRouter();
 
 const props = defineProps<{
-  games: game[];
+  games: (Game & { player_characters: Character[] })[];
 }>();
 const emits = defineEmits(["delete"]);
 
@@ -127,8 +127,8 @@ function formatDate(date: Date) {
   return dayjs(date).format("MM/DD/YYYY");
 }
 
-function rowHighlight(game: game) {
-  if (game.alignment === "GOOD") {
+function rowHighlight(game: Game & { player_characters: Character[] }) {
+  if (game.player_characters[0].alignment === "GOOD") {
     if (game.win) {
       return "bg-blue-400 dark:bg-blue-800 hover:bg-blue-600";
     } else {

@@ -168,8 +168,12 @@ async function submitGame() {
       location_type: locationType.value,
       location: location.value,
       player_count: playerCount.value,
-      initial_character: initialCharacter.value,
-      alignment: alignment.value,
+      player_characters: [
+        {
+          name: initialCharacter.value,
+          alignment: alignment.value,
+        },
+      ],
       final3: final3.value === "true",
       win: win.value === "true",
       notes: notes.value,

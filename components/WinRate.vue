@@ -6,11 +6,11 @@
 </template>
 
 <script setup lang="ts">
-import type { game } from "@prisma/client";
+import type { Game, Character } from "@prisma/client";
 import { Bar } from "vue-chartjs";
 
 const props = defineProps<{
-  games: game[];
+  games: (Game & { player_characters: Character[] })[];
 }>();
 
 const chartData = computed(() => ({
@@ -19,20 +19,24 @@ const chartData = computed(() => ({
     {
       label: "Good",
       data: [
-        props.games.filter((game) => game.alignment === "GOOD" && game.win)
-          .length,
-        props.games.filter((game) => game.alignment === "GOOD" && !game.win)
-          .length,
+        props.games.filter(
+          (game) => game.player_characters[0].alignment === "GOOD" && game.win
+        ).length,
+        props.games.filter(
+          (game) => game.player_characters[0].alignment === "GOOD" && !game.win
+        ).length,
       ],
       backgroundColor: "blue",
     },
     {
       label: "Evil",
       data: [
-        props.games.filter((game) => game.alignment === "EVIL" && game.win)
-          .length,
-        props.games.filter((game) => game.alignment === "EVIL" && !game.win)
-          .length,
+        props.games.filter(
+          (game) => game.player_characters[0].alignment === "EVIL" && game.win
+        ).length,
+        props.games.filter(
+          (game) => game.player_characters[0].alignment === "EVIL" && !game.win
+        ).length,
       ],
       backgroundColor: "red",
     },
