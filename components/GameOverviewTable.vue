@@ -15,7 +15,11 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="game in games" :class="rowHighlight(game)">
+        <tr
+          v-for="game in games"
+          :class="rowHighlight(game)"
+          @click="viewGame(game.id)"
+        >
           <td>{{ formatDate(game.date) }}</td>
           <td>{{ game.script }}</td>
           <td>{{ game.location }}</td>
@@ -27,7 +31,7 @@
           </td>
           <td>{{ game.win ? "Yes" : "No" }}</td>
           <td>
-            <button @click="emits('delete', game.id)">
+            <button @click.stop="emits('delete', game.id)">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="32"
@@ -55,6 +59,8 @@
 import type { game } from "@prisma/client";
 import dayjs from "dayjs";
 
+const router = useRouter();
+
 defineProps<{
   games: game[];
 }>();
@@ -79,5 +85,9 @@ function rowHighlight(game: game) {
       return "bg-red-200 dark:bg-red-600";
     }
   }
+}
+
+function viewGame(id: number) {
+  router.push(`/game/${id}`);
 }
 </script>
