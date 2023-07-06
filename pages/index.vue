@@ -36,6 +36,9 @@ definePageMeta({
 async function login() {
   await supabase.auth.signInWithOAuth({
     provider: "discord",
+    options: {
+      queryParams: { prompt: "none" },
+    },
   });
 }
 
