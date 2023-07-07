@@ -43,6 +43,6 @@ enum LocationType {
 
 model UserSettings {
   user_id          String  @id
-  username         String
+  username         String  @unique
   finished_welcome Boolean @default(false)
 }

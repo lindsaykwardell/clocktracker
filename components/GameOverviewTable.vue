@@ -71,7 +71,7 @@
             {{ game.final3 === null ? "-" : game.final3 ? "Yes" : "No" }}
           </td>
           <td>{{ game.win ? "Yes" : "No" }}</td>
-          <td>
+          <td v-if="!readonly">
             <button @click.stop="emits('delete', game.id)">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -104,6 +104,7 @@ const router = useRouter();
 
 const props = defineProps<{
   games: (Game & { player_characters: Character[] })[];
+  readonly: boolean;
 }>();
 const emits = defineEmits(["delete"]);
 
