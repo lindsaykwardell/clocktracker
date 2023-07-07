@@ -82,6 +82,7 @@ useHead({
 });
 
 const user = useSupabaseUser();
+const supabase = useSupabaseClient();
 const openTab = ref<"all" | "charts">("all");
 
 const games = await useFetch<(Game & { player_characters: Character[] })[]>(

@@ -68,6 +68,20 @@
             {{ game.data.value?.notes }}
           </p>
         </fieldset>
+        <fieldset class="border rounded border-stone-500 p-4 my-3">
+          <legend>Images</legend>
+          <div class="flex flex-col gap-5">
+            <div class="flex flex-wrap gap-5">
+              <div v-for="file in game.data.value?.image_urls" :key="file">
+                <a :href="fullImageUrl(file)" target="_blank"
+                  ><img
+                    :src="fullImageUrl(file)"
+                    class="w-64 h-64 object-cover"
+                /></a>
+              </div>
+            </div>
+          </div>
+        </fieldset>
       </section>
     </div>
   </DashboardTemplate>
@@ -86,6 +100,10 @@ const game = await useFetch<Game & { player_characters: Character[] }>(
 
 if (game.error.value?.statusCode === 404) {
   router.push("/404");
+}
+
+function fullImageUrl(file: string) {
+  return `https://cmqipexuzbvsgfglyqvq.supabase.co/storage/v1/object/public/game-attachments/${file}`;
 }
 </script>
 

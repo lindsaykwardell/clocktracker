@@ -20,6 +20,7 @@ model Game {
   final3            Boolean?
   win               Boolean
   notes             String
+  image_urls        String[]
 }
 
 model Character {

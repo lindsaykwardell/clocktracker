@@ -122,11 +122,54 @@
             rows="5"
           ></textarea>
         </fieldset>
+        <fieldset class="border rounded border-stone-500 p-4 my-3">
+          <legend>Images</legend>
+          <div class="flex flex-col gap-5">
+            <button
+              type="button"
+              @click="uploadFile"
+              class="block w-full bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded"
+            >
+              Select Images
+            </button>
+            <div class="flex flex-wrap gap-5">
+              <div v-for="file in displayFiles" :key="file.name">
+                <span class="block">{{ file.name }}</span>
+                <img :src="file.url" class="w-64 h-64 object-cover" />
+                <button @click="removeFile(file.name)">Remove</button>
+              </div>
+            </div>
+          </div>
+        </fieldset>
         <button
           type="submit"
           class="block w-full bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded"
+          :disabled="inFlight"
         >
-          Add Game
+          <template v-if="inFlight">
+            <svg
+              class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            Uploading
+          </template>
+          <template v-else>Add Game</template>
         </button>
       </form>
     </section>
@@ -135,6 +178,8 @@
 
 <script setup lang="ts">
 import dayjs from "dayjs";
+import { v4 as uuid } from "uuid";
+
 definePageMeta({
   middleware: "auth",
 });
@@ -146,6 +191,8 @@ useHead({
 const router = useRouter();
 const { roles } = useRoles();
 const { baseScripts } = useScripts();
+const supabase = useSupabaseClient();
+const inFlight = ref(false);
 
 // Generate bindings for the v-model to connect to for the above inputs
 const date = ref("");
@@ -158,8 +205,54 @@ const alignment = ref<"GOOD" | "EVIL">("GOOD");
 const final3 = ref("false");
 const win = ref("false");
 const notes = ref("");
+const files = ref<File[]>([]);
+
+function uploadFile() {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.multiple = true;
+  input.accept = "image/jpg, image/jpeg, image/png";
+  input.onchange = selectFiles;
+  input.click();
+}
+
+function selectFiles(event: Event) {
+  const uploadedFiles = (event.target as HTMLInputElement).files;
+  if (!uploadedFiles) return;
+
+  files.value = Array.from(uploadedFiles);
+}
+
+const displayFiles = computed(() =>
+  files.value.map((file) => ({
+    name: file.name,
+    url: URL.createObjectURL(file),
+  }))
+);
+
+function removeFile(name: string) {
+  files.value = files.value.filter((file) => file.name !== name);
+}
 
 async function submitGame() {
+  inFlight.value = true;
+
+  // Upload images to Supabase
+  const urls = [];
+
+  for (const file of files.value) {
+    const { data, error } = await supabase.storage
+      .from("game-attachments")
+      .upload(`${uuid()}`, file);
+
+    if (error) {
+      inFlight.value = false;
+      throw error;
+    }
+
+    urls.push(data?.path);
+  }
+
   const { error } = await useFetch("/api/games", {
     method: "POST",
     body: JSON.stringify({
@@ -177,10 +270,12 @@ async function submitGame() {
       final3: final3.value === "true",
       win: win.value === "true",
       notes: notes.value,
+      image_urls: urls,
     }),
   });
 
   if (error.value) {
+    inFlight.value = false;
     console.error(error.value);
   } else {
     router.push("/dashboard");
