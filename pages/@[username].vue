@@ -58,12 +58,6 @@
     </template>
     <template v-else>
       <p class="text-center text-2xl my-4 font-piratesbay">No games yet!</p>
-      <nuxt-link
-        to="/add-game"
-        class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded text-center text-xl m-auto block w-[300px] my-8"
-      >
-        Add Your First Game
-      </nuxt-link>
     </template>
   </DashboardTemplate>
 </template>
