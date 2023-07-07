@@ -2,7 +2,7 @@
   <header
     class="sticky top-0 bg-stone-900 p-2 flex items-center gap-4 border-t-8 border-purple-950"
   >
-    <nuxt-link to="/" class="flex items-center gap-4">
+    <nuxt-link :to="user ? '/dashboard' : '/'" class="flex items-center gap-4">
       <img src="/demon-head.png" class="w-[75px]" alt="Demon Head" />
       <h1
         class="font-piratesbay text-stone-200 text-3xl hidden md:block select-none"

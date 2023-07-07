@@ -13,7 +13,13 @@
           </label>
           <label>
             <span class="block">Script</span>
-            {{ game.data.value?.script }}
+            <a
+              :href="scriptLink(game.data.value?.script as string)"
+              target="_blank"
+              class="hover:underline"
+            >
+              {{ game.data.value?.script }}
+            </a>
           </label>
           <label>
             <span class="block">Location Type</span>
@@ -110,6 +116,21 @@ if (game.error.value?.statusCode === 404) {
 
 function fullImageUrl(file: string) {
   return `${config.public.supabase.url}/storage/v1/object/public/game-attachments/${file}`;
+}
+
+function scriptLink(script: string) {
+  if (script === "Trouble Brewing")
+    return "https://wiki.bloodontheclocktower.com/Trouble_Brewing";
+  if (script === "Bad Moon Rising")
+    return "https://wiki.bloodontheclocktower.com/Bad_Moon_Rising";
+  if (script === "Sects & Violets")
+    return "https://wiki.bloodontheclocktower.com/Sects_%26_Violets";
+  else {
+    return `https://botc-scripts.azurewebsites.net/?search=${script.replace(
+      / /g,
+      "+"
+    )}&script_type=&include=&exclude=&edition=&author=`;
+  }
 }
 </script>
 
