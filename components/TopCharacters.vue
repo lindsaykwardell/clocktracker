@@ -3,7 +3,14 @@
     <h3 class="font-piratesbay text-2xl text-center">Top Characters</h3>
     <ul>
       <li v-for="(character, i) in characters" :key="character.name">
-        {{ i + 1 }}. {{ character.name }} ({{ character.count }})
+        {{ i + 1 }}.
+        <a
+          :href="`https://wiki.bloodontheclocktower.com/${character.name}`"
+          target="_blank"
+          class="hover:underline"
+          >{{ character.name }}</a
+        >
+        ({{ character.count }})
       </li>
     </ul>
   </div>

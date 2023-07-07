@@ -38,7 +38,12 @@
           <legend>Player Setup</legend>
           <label>
             <span class="block">Initial Character</span>
-            {{ game.data.value?.player_characters[0].name }}
+            <a
+              :href="`https://wiki.bloodontheclocktower.com/${game.data.value?.player_characters[0].name}`"
+              target="_blank"
+              class="hover:underline"
+              >{{ game.data.value?.player_characters[0].name }}</a
+            >
           </label>
           <label>
             <span class="block">Alignment</span>
@@ -91,7 +96,7 @@
 import type { Game, Character } from "@prisma/client";
 import dayjs from "dayjs";
 
-const config = useRuntimeConfig()
+const config = useRuntimeConfig();
 const router = useRouter();
 const route = useRoute();
 
