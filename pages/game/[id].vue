@@ -91,6 +91,7 @@
 import type { Game, Character } from "@prisma/client";
 import dayjs from "dayjs";
 
+const config = useRuntimeConfig()
 const router = useRouter();
 const route = useRoute();
 
@@ -103,7 +104,7 @@ if (game.error.value?.statusCode === 404) {
 }
 
 function fullImageUrl(file: string) {
-  return `https://cmqipexuzbvsgfglyqvq.supabase.co/storage/v1/object/public/game-attachments/${file}`;
+  return `${config.public.supabase.url}/storage/v1/object/public/game-attachments/${file}`;
 }
 </script>
 
