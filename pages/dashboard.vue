@@ -1,7 +1,7 @@
 <template>
   <DashboardTemplate>
     <template v-if="games.data.value?.length">
-      <section class="flex flex-col md:flex-row gap-8">
+      <section class="flex flex-col md:flex-row gap-8 pb-12 md:pb-0">
         <div class="w-full md:w-3/4 flex flex-col gap-8">
           <div
             class="flex flex-col-reverse md:flex-row gap-4"
