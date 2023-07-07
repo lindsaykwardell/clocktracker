@@ -17,7 +17,7 @@
           />
         </div>
         <span class="hidden md:inline">
-          {{ user?.user_metadata.full_name }}
+          Home
         </span>
       </nuxt-link>
       <nuxt-link

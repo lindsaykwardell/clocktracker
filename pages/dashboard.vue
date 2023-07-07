@@ -3,23 +3,40 @@
     <template v-if="games.data.value?.length">
       <section class="flex flex-col md:flex-row gap-8">
         <div class="w-full md:w-3/4 flex flex-col gap-8">
-          <div class="flex flex-col md:flex-row gap-4">
-            <GameOverviewTable
-              class="flex-grow"
-              :games="games.data.value"
-              @delete="deleteGame"
-            />
-            <TopCharacters
-              class="w-full sm:w-1/3 md:w-1/6 p-2"
-              :games="games.data.value"
-            />
+          <div
+            class="flex flex-col-reverse md:flex-row gap-4"
+            :class="{
+              'hidden md:block': openTab === 'charts',
+              flex: openTab !== 'charts',
+            }"
+          >
+            <div class="flex-grow">
+              <h3 class="font-piratesbay text-2xl text-center">
+                {{ user?.user_metadata.full_name }}'s Games
+              </h3>
+              <GameOverviewTable
+                :games="games.data.value"
+                @delete="deleteGame"
+              />
+            </div>
+            <TopCharacters class="md:w-1/6 p-2" :games="games.data.value" />
           </div>
           <GamesOverTime
             class="w-full max-h-[450px] flex justify-center flex-col items-center p-2"
+            :class="{
+              'hidden md:block': openTab !== 'charts',
+              block: openTab === 'charts',
+            }"
             :games="games.data.value"
           />
         </div>
-        <div class="flex flex-wrap w-full md:w-1/4">
+        <div
+          class="flex flex-wrap w-full md:w-1/4"
+          :class="{
+            'hidden md:block': openTab !== 'charts',
+            block: openTab === 'charts',
+          }"
+        >
           <WinRate
             class="w-full sm:w-1/2 md:w-full p-2"
             :games="games.data.value"
@@ -29,6 +46,16 @@
             class="w-full sm:w-1/2 md:w-full p-2"
             :games="games.data.value"
           />
+        </div>
+      </section>
+      <section class="fixed md:hidden bottom-0 w-screen bg-stone-950">
+        <div class="flex justify-around">
+          <button class="flex-1 py-5" @click="openTab = 'all'">
+            All Games
+          </button>
+          <button class="flex-1 py-5" @click="openTab = 'charts'">
+            Charts
+          </button>
         </div>
       </section>
     </template>
@@ -53,6 +80,9 @@ definePageMeta({
 useHead({
   title: "Dashboard",
 });
+
+const user = useSupabaseUser();
+const openTab = ref<"all" | "charts">("all");
 
 const games = await useFetch<(Game & { player_characters: Character[] })[]>(
   `/api/games`
