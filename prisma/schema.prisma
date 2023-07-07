@@ -40,3 +40,9 @@ enum LocationType {
   ONLINE
   IN_PERSON
 }
+
+model UserSettings {
+  user_id          String  @id
+  username         String
+  finished_welcome Boolean @default(false)
+}

@@ -143,7 +143,7 @@
         </fieldset>
         <button
           type="submit"
-          class="block w-full bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded"
+          class="w-full bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
           :disabled="inFlight"
         >
           <template v-if="inFlight">
@@ -167,7 +167,7 @@
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
               ></path>
             </svg>
-            Uploading
+            Saving...
           </template>
           <template v-else>Add Game</template>
         </button>

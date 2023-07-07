@@ -1,5 +1,6 @@
 <template>
   <main
+    v-if="!user"
     class="w-full h-screen flex flex-col items-center justify-center gap-12"
   >
     <h1 class="font-piratesbay text-stone-200 text-5xl">ClockTracker</h1>
@@ -38,13 +39,14 @@ async function login() {
     provider: "discord",
     options: {
       queryParams: { prompt: "none" },
+      redirectTo: `${window.location.host}/welcome`,
     },
   });
 }
 
 watchEffect(() => {
   if (user.value) {
-    router.push("/dashboard");
+    router.push("/welcome");
   }
 });
 </script>
