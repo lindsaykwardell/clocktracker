@@ -1,10 +1,6 @@
 <template>
-  <header class="sticky top-0 bg-stone-900 p-2 flex items-center gap-4">
-    <img
-      src="/demon-head.png"
-      class="w-[75px]"
-      alt="Demon Head"
-    />
+  <header class="sticky top-0 bg-stone-900 p-2 flex items-center gap-4 border-t-8 border-purple-950">
+    <img src="/demon-head.png" class="w-[75px]" alt="Demon Head" />
     <h1 class="font-piratesbay text-stone-200 text-3xl hidden md:block">
       ClockTracker
     </h1>
@@ -65,7 +61,7 @@
       </button>
     </div>
   </header>
-  <main class="p-3">
+  <main class="">
     <slot />
   </main>
 </template>

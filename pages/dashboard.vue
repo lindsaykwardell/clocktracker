@@ -3,13 +3,32 @@
     <template v-if="games.data.value?.length">
       <section class="flex flex-col md:flex-row gap-8">
         <div class="w-full md:w-3/4 flex flex-col gap-8">
-          <GameOverviewTable :games="games.data.value" @delete="deleteGame" />
-          <GamesOverTime class="w-full max-h-[450px] flex justify-center flex-col items-center p-2" :games="games.data.value" />
+          <div class="flex flex-col md:flex-row gap-4">
+            <GameOverviewTable
+              class="flex-grow"
+              :games="games.data.value"
+              @delete="deleteGame"
+            />
+            <TopCharacters
+              class="w-full sm:w-1/3 md:w-1/6 p-2"
+              :games="games.data.value"
+            />
+          </div>
+          <GamesOverTime
+            class="w-full max-h-[450px] flex justify-center flex-col items-center p-2"
+            :games="games.data.value"
+          />
         </div>
         <div class="flex flex-wrap w-full md:w-1/4">
-          <WinRate class="w-full sm:w-1/2 md:w-full p-2" :games="games.data.value" />
+          <WinRate
+            class="w-full sm:w-1/2 md:w-full p-2"
+            :games="games.data.value"
+          />
           <!-- <Alignment class="w-full sm:w-1/2 md:w-full p-2" :games="games.data.value" /> -->
-          <RoleType class="w-full sm:w-1/2 md:w-full p-2" :games="games.data.value" />
+          <RoleType
+            class="w-full sm:w-1/2 md:w-full p-2"
+            :games="games.data.value"
+          />
         </div>
       </section>
     </template>
