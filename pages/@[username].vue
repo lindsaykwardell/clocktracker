@@ -58,7 +58,8 @@
     </template>
     <template v-else>
       <p class="text-center text-2xl my-4 font-piratesbay">
-        {{ username }} has no games yet!</p>
+        {{ username }} has no games yet!
+      </p>
     </template>
   </DashboardTemplate>
 </template>
