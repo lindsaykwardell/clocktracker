@@ -2,15 +2,7 @@ import type { User } from "@supabase/supabase-js";
 import { PrismaClient } from "@prisma/client";
 
 export default defineEventHandler(async (handler) => {
-  const user: User | null = handler.context.user;
   const gameId = handler.context.params?.id;
-
-  if (!user) {
-    throw createError({
-      status: 401,
-      statusMessage: "Unauthorized",
-    });
-  }
 
   if (!gameId) {
     throw createError({
@@ -29,7 +21,7 @@ export default defineEventHandler(async (handler) => {
     },
   });
 
-  if (!game || game.user_id !== user.id) {
+  if (!game) {
     throw createError({
       status: 404,
       statusMessage: "Not Found",
