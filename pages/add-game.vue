@@ -13,6 +13,7 @@
               type="date"
               v-model="date"
               class="block w-full border border-stone-500 rounded-md p-2"
+              required
             />
           </label>
           <label>
@@ -22,6 +23,7 @@
               list="scripts"
               v-model="script"
               class="block w-full border border-stone-500 rounded-md p-2"
+              required
             />
             <datalist id="scripts">
               <option
@@ -39,8 +41,8 @@
               v-model="locationType"
               class="block w-full border border-stone-500 rounded-md p-2"
             >
-              <option value="IN_PERSON">In Person</option>
               <option value="ONLINE">Online</option>
+              <option value="IN_PERSON">In Person</option>
             </select>
           </label>
           <label>
@@ -57,6 +59,9 @@
               type="number"
               v-model="playerCount"
               class="block w-full border border-stone-500 rounded-md p-2"
+              required
+              min="5"
+              max="20"
             />
           </label>
         </fieldset>
@@ -71,6 +76,7 @@
               list="characters"
               v-model="initialCharacter"
               class="block w-full border border-stone-500 rounded-md p-2"
+              required
             />
             <datalist id="characters">
               <option v-for="role in roles" :value="role" :key="role">
@@ -145,7 +151,7 @@
           type="submit"
           class="w-full bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
           :disabled="inFlight"
-        >
+        > 
           <template v-if="inFlight">
             <svg
               class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
@@ -197,7 +203,7 @@ const inFlight = ref(false);
 // Generate bindings for the v-model to connect to for the above inputs
 const date = ref("");
 const script = ref("");
-const locationType = ref<"ONLINE" | "IN_PERSON">("IN_PERSON");
+const locationType = ref<"ONLINE" | "IN_PERSON">("ONLINE");
 const location = ref("");
 const playerCount = ref(0);
 const initialCharacter = ref("");
