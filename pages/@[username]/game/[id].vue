@@ -19,7 +19,12 @@
             />
             <div>
               <h2 class="text-3xl font-piratesbay">
-                {{ player.data.value?.username }}
+                <a
+                  class="hover:underline"
+                  :href="`/@${player.data.value?.username}`"
+                >
+                  {{ player.data.value?.username }}
+                </a>
               </h2>
               <div
                 class="font-julee text-2xl"
@@ -30,7 +35,12 @@
                     game.data.value.player_characters[0].alignment === 'EVIL',
                 }"
               >
-                {{ game.data.value.player_characters[0].name }}
+                <a
+                  :href="`https://wiki.bloodontheclocktower.com/${game.data.value?.player_characters[0].name}`"
+                  target="_blank"
+                  class="hover:underline"
+                  >{{ game.data.value?.player_characters[0].name }}</a
+                >
               </div>
               <time
                 :datetime="dayjs(game.data.value.date).toISOString()"
@@ -43,7 +53,7 @@
           <div class="flex flex-col md:flex-row gap-4 mt-4">
             <label class="flex gap-3 items-center">
               <span>Script</span>
-              <a :href="scriptLink(game.data.value.script)">
+              <a class="hover:underline" :href="scriptLink(game.data.value.script)">
                 {{ game.data.value.script }}
               </a>
             </label>
