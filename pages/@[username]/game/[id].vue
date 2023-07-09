@@ -53,7 +53,10 @@
           <div class="flex flex-col md:flex-row gap-4 mt-4">
             <label class="flex gap-3 items-center">
               <span>Script</span>
-              <a class="hover:underline" :href="scriptLink(game.data.value.script)">
+              <a
+                class="hover:underline"
+                :href="scriptLink(game.data.value.script)"
+              >
                 {{ game.data.value.script }}
               </a>
             </label>
@@ -118,16 +121,67 @@ const route = useRoute();
 const game = await useFetch<Game & { player_characters: Character[] }>(
   `/api/games/${route.params.id}`
 );
+const player = await useFetch(`/api/user/${route.params.username}`);
 
-if (game.error.value?.statusCode === 404) {
+if (
+  game.error.value?.statusCode === 404 ||
+  player.error.value?.statusCode === 404
+) {
   router.push("/404");
 }
 
 useHead({
-  title: `${game.data.value?.script}`,
+  title: `${player.data.value?.username} | ${game.data.value?.script}`,
+  meta: [
+    {
+      hid: "description",
+      name: "description",
+      content: `Game of ${game.data.value?.script} played by ${
+        player.data.value?.username
+      } on ${dayjs(game.data.value?.date).format("MMMM D, YYYY")}.`,
+    },
+    {
+      property: "og:title",
+      content: `${player.data.value?.username} | ${game.data.value?.script}`,
+    },
+    {
+      property: "og:description",
+      content: `Game of ${game.data.value?.script} played by ${
+        player.data.value?.username
+      } on ${dayjs(game.data.value?.date).format("MMMM D, YYYY")}.`,
+    },
+    {
+      property: "og:image",
+      content: scriptLogo(game.data.value?.script as string),
+    },
+    {
+      property: "og:url",
+      content: route.fullPath,
+    },
+    {
+      property: "twitter:card",
+      content: "summary_large_image",
+    },
+    {
+      property: "twitter:url",
+      content: route.fullPath,
+    },
+    {
+      property: "twitter:title",
+      content: `${player.data.value?.username} | ${game.data.value?.script}`,
+    },
+    {
+      property: "twitter:description",
+      content: `Game of ${game.data.value?.script} played by ${
+        player.data.value?.username
+      } on ${dayjs(game.data.value?.date).format("MMMM D, YYYY")}.`,
+    },
+    {
+      property: "twitter:image",
+      content: scriptLogo(game.data.value?.script as string),
+    },
+  ],
 });
-
-const player = await useFetch(`/api/user/${route.params.username}`);
 
 function fullImageUrl(file: string) {
   return `${config.public.supabase.url}/storage/v1/object/public/game-attachments/${file}`;
