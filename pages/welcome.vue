@@ -20,6 +20,7 @@
         <input
           v-model="username"
           class="block w-full border border-stone-500 rounded-md p-2"
+          required
         />
       </label>
       <button
@@ -52,6 +53,7 @@
         </template>
         <template v-else>Save Settings</template>
       </button>
+      <span class="text-red-600">{{ errorMessage }}</span>
     </form>
   </main>
 </template>
@@ -64,6 +66,7 @@ definePageMeta({
 const render = ref(false);
 const router = useRouter();
 const inFlight = ref(false);
+const errorMessage = ref<string>();
 
 const user = useSupabaseUser();
 const settings = await useFetch("/api/settings");
@@ -88,6 +91,7 @@ async function saveSettings() {
 
   if (error.value) {
     console.error(error);
+    errorMessage.value = error.value.statusMessage;
     inFlight.value = false;
     return;
   }
