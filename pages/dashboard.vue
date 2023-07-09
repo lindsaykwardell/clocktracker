@@ -14,7 +14,7 @@
               <h3 class="font-piratesbay text-2xl text-center">
                 {{ user?.user_metadata.full_name }}'s Games
               </h3>
-              <GameOverviewTable
+              <GameOverviewGrid
                 :games="games.data.value"
                 @delete="deleteGame"
                 :username="user?.user_metadata.full_name"
