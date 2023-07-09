@@ -92,19 +92,23 @@
         </div>
         <img :src="scriptLogo(game.data.value.script)" class="w-64 h-64" />
       </div>
-      <h3 class="font-piratesbay text-2xl">Notes and Images</h3>
-      <p>
-        {{ game.data.value?.notes }}
-      </p>
-      <div class="flex flex-col gap-5">
-        <div class="flex flex-wrap gap-5">
-          <div v-for="file in game.data.value?.image_urls" :key="file">
-            <a :href="fullImageUrl(file)" target="_blank"
-              ><img :src="fullImageUrl(file)" class="w-64 h-64 object-cover"
-            /></a>
+      <template
+        v-if="game.data.value.notes || game.data.value.image_urls.length"
+      >
+        <h3 class="font-piratesbay text-2xl">Notes and Images</h3>
+        <p v-if="game.data.value.notes" class="bg-stone-100 p-4 shadow-lg my-3">
+          {{ game.data.value?.notes }}
+        </p>
+        <div class="flex flex-col gap-5">
+          <div class="flex flex-wrap gap-5">
+            <div v-for="file in game.data.value?.image_urls" :key="file">
+              <a :href="fullImageUrl(file)" target="_blank">
+                <img :src="fullImageUrl(file)" class="w-64 h-64 object-cover shadow-lg" />
+              </a>
+            </div>
           </div>
         </div>
-      </div>
+      </template>
     </section>
   </DashboardTemplate>
 </template>
