@@ -45,4 +45,6 @@ model UserSettings {
   user_id          String  @id
   username         String  @unique
   finished_welcome Boolean @default(false)
+  avatar           String?
+  email            String  @default("your@address.here")
 }

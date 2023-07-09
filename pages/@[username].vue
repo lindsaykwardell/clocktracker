@@ -76,6 +76,5 @@ const games = await useFetch<(Game & { player_characters: Character[] })[]>(
   `/api/user/${username}/games`
 );
 
-const user = useSupabaseUser();
 const openTab = ref<"all" | "charts">("all");
 </script>

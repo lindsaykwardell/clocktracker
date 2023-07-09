@@ -1,7 +1,10 @@
 <template>
   <DashboardTemplate>
-    <div class="flex flex-col items-center justify-center">
-      <h1 class="text-4xl font-bold font-piratesbay">View Game</h1>
+    <div class="flex flex-col items-center justify-center py-4">
+      <h2 class="text-4xl font-bold font-piratesbay">
+        {{ game.data.value?.script }} |
+        {{ dayjs(game.data.value?.date).format("MMMM D, YYYY") }}
+      </h2>
       <section class="w-[1000px] m-auto py-6">
         <fieldset
           class="flex flex-col md:flex-row gap-5 border rounded border-stone-500 p-4 my-3"
@@ -113,6 +116,13 @@ const game = await useFetch<Game & { player_characters: Character[] }>(
 if (game.error.value?.statusCode === 404) {
   router.push("/404");
 }
+
+const player = await useFetch<{ user_id: string; username: string }>(
+  `/api/players/${game.data.value?.user_id}`
+);
+useHead({
+  title: `${game.data.value?.script}`,
+});
 
 function fullImageUrl(file: string) {
   return `${config.public.supabase.url}/storage/v1/object/public/game-attachments/${file}`;

@@ -8,7 +8,13 @@
     <h2 class="text-stone-200 text-2xl font-piratesbay">
       Welcome, {{ user?.user_metadata.full_name }}
     </h2>
-    <form class="flex flex-col gap-4" @submit.prevent="saveSettings">
+    <form
+      class="flex flex-col gap-4 items-center"
+      @submit.prevent="saveSettings"
+    >
+      <Avatar
+        :value="settings.data.value?.avatar || settings.data.value?.email"
+      />
       <label class="block w-[300px]">
         <span class="block">Username</span>
         <input
@@ -61,8 +67,6 @@ const inFlight = ref(false);
 
 const user = useSupabaseUser();
 const settings = await useFetch("/api/settings");
-
-console.log(settings.data.value);
 
 if (settings.data.value?.finished_welcome) {
   router.push("/dashboard");
