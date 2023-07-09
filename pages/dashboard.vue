@@ -17,6 +17,7 @@
               <GameOverviewTable
                 :games="games.data.value"
                 @delete="deleteGame"
+                :username="user?.user_metadata.full_name"
               />
             </div>
             <TopCharacters class="md:w-1/6 p-2" :games="games.data.value" />

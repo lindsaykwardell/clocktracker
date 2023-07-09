@@ -6,6 +6,7 @@ export default <Partial<Config>>{
       fontFamily: {
         piratesbay: ["PiratesBay", "serif"],
         raleway: ["Raleway", "sans-serif"],
+        julee: ["Julee", "cursive"],
       },
     },
   },

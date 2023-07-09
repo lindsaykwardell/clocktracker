@@ -104,7 +104,8 @@ const router = useRouter();
 
 const props = defineProps<{
   games: (Game & { player_characters: Character[] })[];
-  readonly: boolean;
+  readonly?: boolean;
+  username: string;
 }>();
 const emits = defineEmits(["delete"]);
 
@@ -145,7 +146,7 @@ function rowHighlight(game: Game & { player_characters: Character[] }) {
 }
 
 function viewGame(id: string) {
-  router.push(`/game/${id}`);
+  router.push(`/@${props.username}/game/${id}`);
 }
 </script>
 

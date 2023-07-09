@@ -14,7 +14,11 @@
               <h3 class="font-piratesbay text-2xl text-center">
                 {{ username }}'s Games
               </h3>
-              <GameOverviewTable :games="games.data.value" readonly />
+              <GameOverviewTable
+                :games="games.data.value"
+                readonly
+                :username="username"
+              />
             </div>
             <TopCharacters class="md:w-1/6 p-2" :games="games.data.value" />
           </div>
