@@ -4,3 +4,7 @@
   font-family: PiratesBay;
   src: url(/fonts/piratesbay.ttf);
 }
+
+.token {
+  background-image: url('/img/token-bg.png');
+}

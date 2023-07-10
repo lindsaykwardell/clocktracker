@@ -3,7 +3,7 @@
     <div v-for="game in orderedGames" class="w-full sm:w-1/2 lg:w-1/3 p-2">
       <button
         @click="viewGame(game.id)"
-        class="relative w-full bg-gradient-to-b from-stone-100 hover:from-stone-200 to-stone-400 hover:to-stone-500 flex flex-col items-center cursor-pointer rounded overflow-hidden text-black h-72"
+        class="relative w-full bg-gradient-to-b from-purple-800 hover:from-purple-900 to-stone-900 hover:to-stone-950 flex flex-col items-center cursor-pointer rounded overflow-hidden text-black h-72"
       >
         <img
           v-if="game.image_urls[0]"
@@ -14,19 +14,12 @@
           class="flex-grow items-center justify-center flex font-julee text-3xl"
         >
           <div
-            class="relative rounded-full w-48 h-48 bg-gradient-to-b from-yellow-100 to-stone-400 shadow-xl border-2 flex justify-center items-center"
-            :class="{
-              'border-blue-800': game.player_characters[0].alignment === 'GOOD',
-              'border-red-800': game.player_characters[0].alignment === 'EVIL',
-            }"
+            class="token bg-center bg-cover relative rounded-full w-48 h-48 shadow-xl border-black flex justify-center items-center"
           >
             <img
               class="w-40 h-40"
               :src="roles.toImage(game.player_characters[0].name)"
             />
-            <span class="absolute text-2xl font-bold bottom-[20px]">
-              {{ game.player_characters[0].name }}
-            </span>
           </div>
         </div>
         <div

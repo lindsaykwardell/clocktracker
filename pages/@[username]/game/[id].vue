@@ -26,6 +26,17 @@
                   {{ player.data.value?.username }}
                 </a>
               </h2>
+              <div
+                class="font-julee text-2xl font-bold bottom-[20px]"
+                :class="{
+                  'text-blue-800':
+                    game.data.value.player_characters[0].alignment === 'GOOD',
+                  'text-red-800':
+                    game.data.value.player_characters[0].alignment === 'EVIL',
+                }"
+              >
+                {{ game.data.value.player_characters[0].name }}
+              </div>
               <time
                 :datetime="dayjs(game.data.value.date).toISOString()"
                 class="text-sm"
@@ -40,13 +51,7 @@
                 class="hover:underline flex flex-col items-center"
               >
                 <div
-                  class="relative rounded-full w-32 h-32 bg-gradient-to-b from-yellow-100 to-stone-400 shadow-xl border-2 flex justify-center items-center"
-                  :class="{
-                    'border-blue-800':
-                      game.data.value.player_characters[0].alignment === 'GOOD',
-                    'border-red-800':
-                      game.data.value.player_characters[0].alignment === 'EVIL',
-                  }"
+                  class="token bg-center bg-cover relative rounded-full w-32 h-32 shadow-xl border-black flex justify-center items-center"
                 >
                   <img
                     class="w-24 h-24 object-contain"
@@ -54,9 +59,6 @@
                       roles.toImage(game.data.value.player_characters[0].name)
                     "
                   />
-                  <span class="absolute text-lg font-bold bottom-[15px]">
-                    {{ game.data.value.player_characters[0].name }}
-                  </span>
                 </div>
               </a>
             </div>
@@ -101,7 +103,10 @@
             </label>
           </fieldset>
         </div>
-        <img :src="scriptLogo(game.data.value.script)" class="w-48 md:w-64 h-48 md:h-64" />
+        <img
+          :src="scriptLogo(game.data.value.script)"
+          class="w-48 md:w-64 h-48 md:h-64"
+        />
       </div>
       <template
         v-if="game.data.value.notes || game.data.value.image_urls.length"
