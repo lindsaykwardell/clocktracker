@@ -151,6 +151,7 @@ if (
   game.error.value?.statusCode === 404 ||
   player.error.value?.statusCode === 404
 ) {
+  console.error(game.error.value, player.error.value);
   router.push("/404");
 }
 
