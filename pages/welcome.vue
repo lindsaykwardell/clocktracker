@@ -72,7 +72,7 @@ const user = useSupabaseUser();
 const settings = await useFetch("/api/settings");
 
 if (settings.data.value?.finished_welcome) {
-  router.push("/dashboard");
+  router.push("/");
 } else {
   render.value = true;
 }
@@ -96,7 +96,7 @@ async function saveSettings() {
     return;
   }
 
-  router.push("/dashboard");
+  router.push("/");
 }
 </script>
 

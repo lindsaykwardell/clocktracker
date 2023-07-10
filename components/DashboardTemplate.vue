@@ -2,7 +2,7 @@
   <header
     class="sticky z-10 top-0 bg-stone-900 p-2 flex items-center gap-4 border-t-8 border-purple-950"
   >
-    <nuxt-link :to="user ? '/dashboard' : '/'" class="flex items-center gap-4">
+    <nuxt-link to="/" class="flex items-center gap-4">
       <img src="/demon-head.png" class="w-[75px]" alt="Demon Head" />
       <h1
         class="font-piratesbay text-stone-200 text-3xl hidden md:block select-none"
@@ -13,7 +13,7 @@
     <nav class="flex-grow flex justify-end gap-4">
       <template v-if="user">
         <nuxt-link
-          to="/dashboard"
+          to="/"
           class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center"
         >
           <div class="w-[50px] overflow-hidden">
@@ -23,7 +23,7 @@
               alt=""
             />
           </div>
-          <span class="hidden md:inline"> Home </span>
+          <span class="hidden md:inline"> My Profile </span>
         </nuxt-link>
         <nuxt-link
           to="/add-game"

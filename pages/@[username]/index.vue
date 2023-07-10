@@ -1,6 +1,11 @@
 <template>
   <DashboardTemplate>
-    <Dashboard :username="username" :games="games.data.value || []" readonly />
+    <Dashboard
+      :username="username"
+      :games="games.data.value || []"
+      :readonly="readonly"
+      @deleteGame="deleteGame"
+    />
   </DashboardTemplate>
 </template>
 
@@ -9,7 +14,10 @@ import type { Game, Character } from "@prisma/client";
 const route = useRoute();
 const username = useRoute().params.username as string;
 
+const user = useSupabaseUser();
 const player = await useFetch(`/api/user/${username}`);
+
+const readonly = computed(() => player.data.value?.user_id !== user.value?.id);
 
 useHead({
   title: username,
@@ -62,5 +70,13 @@ const games = await useFetch<(Game & { player_characters: Character[] })[]>(
   `/api/user/${username}/games`
 );
 
-const openTab = ref<"all" | "charts">("all");
+async function deleteGame(id: string) {
+  if (confirm("Are you sure you want to delete this game?")) {
+    const result = await fetch(`/api/games/${id}`, {
+      method: "delete",
+    }).then((res) => res.json());
+
+    games.data.value = games.data.value!.filter((game) => game.id !== id);
+  }
+}
 </script>

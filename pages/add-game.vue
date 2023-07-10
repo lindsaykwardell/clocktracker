@@ -284,7 +284,7 @@ async function submitGame() {
     inFlight.value = false;
     console.error(error.value);
   } else {
-    router.push("/dashboard");
+    router.push("/");
   }
 }
 </script>

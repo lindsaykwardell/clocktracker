@@ -1,7 +1,14 @@
-export default defineNuxtRouteMiddleware((to, from) => {
+export default defineNuxtRouteMiddleware(async (to, from) => {
   const user = useSupabaseUser();
 
   if (user.value) {
-    return navigateTo("/dashboard");
+    const settings = await useFetch("/api/settings");
+
+    if (settings.error.value || !settings.data.value) {
+      console.error(settings.error.value);
+      return;
+    }
+
+    return navigateTo(`/@${settings.data.value.username}`);
   }
 });
