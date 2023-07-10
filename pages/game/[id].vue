@@ -117,9 +117,6 @@ if (game.error.value?.statusCode === 404) {
   router.push("/404");
 }
 
-const player = await useFetch<{ user_id: string; username: string }>(
-  `/api/players/${game.data.value?.user_id}`
-);
 useHead({
   title: `${game.data.value?.script}`,
 });
