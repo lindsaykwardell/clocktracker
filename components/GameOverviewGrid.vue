@@ -9,15 +9,16 @@
           class="flex-grow items-center justify-center flex font-julee text-3xl"
         >
           <div
-            class="rounded-full w-48 h-48 bg-gradient-to-b from-stone-300 via-stone-300 shadow-xl border border-3 flex items-center justify-center"
+            class="relative rounded-full w-48 h-48 bg-gradient-to-b from-yellow-100 to-stone-400 shadow-xl border-2 flex justify-center items-center"
             :class="{
-              'to-blue-600 border-blue-800':
-                game.player_characters[0].alignment === 'GOOD',
-              'to-red-600 border-blue-800':
-                game.player_characters[0].alignment === 'EVIL',
+              'border-blue-800': game.player_characters[0].alignment === 'GOOD',
+              'border-red-800': game.player_characters[0].alignment === 'EVIL',
             }"
           >
-            {{ game.player_characters[0].name }}
+            <img class="w-40 h-40" :src="roles.toImage(game.player_characters[0].name)" />
+            <span class="absolute text-2xl font-bold bottom-[20px]">
+              {{ game.player_characters[0].name }}
+            </span>
           </div>
         </div>
         <div
@@ -40,6 +41,7 @@ import naturalOrder from "natural-order";
 
 const router = useRouter();
 const { scriptLogo } = useScripts();
+const roles = useRoles();
 
 const props = defineProps<{
   games: (Game & { player_characters: Character[] })[];

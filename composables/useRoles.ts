@@ -193,5 +193,11 @@ export const useRoles = () => {
         return null;
       }
     },
+    toImage: (role: string) => {
+      return `/img/role/${role
+        .toLowerCase()
+        .replace(/ /g, "")
+        .replace(/-/g, "")}.png`;
+    },
   };
 };
