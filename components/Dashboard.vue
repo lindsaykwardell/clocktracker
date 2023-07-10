@@ -46,14 +46,72 @@
           :games="games"
         />
         <div
-          class="flex flex-col-reverse md:flex-row gap-4"
+          class="flex flex-col gap-4"
           :class="{
             'hidden md:block': openTab === 'charts',
             flex: openTab !== 'charts',
           }"
         >
+          <div class="flex gap-3 justify-end px-4">
+            <button
+              class="rounded w-[100px] py-1 justify-center font-piratesbay text-lg flex gap-2 bg-stone-600 hover:bg-stone-700 transition duration-150"
+              :class="{
+                'bg-stone-600': gameView !== 'grid',
+                'bg-stone-700': gameView === 'grid',
+              }"
+              @click="gameView = 'grid'"
+              :disabled="gameView === 'grid'"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 32 32"
+              >
+                <path
+                  fill="currentColor"
+                  d="M12 4H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 8H6V6h6zm14-8h-6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 8h-6V6h6zm-14 6H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2zm0 8H6v-6h6zm14-8h-6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2zm0 8h-6v-6h6z"
+                />
+              </svg>
+              Grid
+            </button>
+            <button
+              class="rounded w-[100px] py-1 justify-center font-piratesbay text-lg flex gap-2 bg-stone-600 hover:bg-stone-700 transition duration-150"
+              :class="{
+                'bg-stone-600': gameView !== 'table',
+                'bg-stone-700': gameView === 'table',
+              }"
+              @click="gameView = 'table'"
+              :disabled="gameView === 'table'"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 32 32"
+              >
+                <path
+                  fill="currentColor"
+                  d="M12 29H5a2.002 2.002 0 0 1-2-2v-7a2.002 2.002 0 0 1 2-2h7a2.002 2.002 0 0 1 2 2v7a2.002 2.002 0 0 1-2 2Zm-7-9v7h7v-7Z"
+                />
+                <path
+                  fill="currentColor"
+                  d="M27 3H5a2 2 0 0 0-2 2v10h2v-4h10v4h2v-4h10v7H17v2h10v7H17v2h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm0 6H5V5h22Z"
+                />
+              </svg>
+              Table
+            </button>
+          </div>
           <div class="flex-grow">
             <GameOverviewGrid
+              v-if="gameView === 'grid'"
+              :games="games"
+              :username="username"
+              :readonly="readonly"
+              @delete="emit('deleteGame', $event)"
+            />
+            <GameOverviewTable
+              v-if="gameView === 'table'"
               :games="games"
               :username="username"
               :readonly="readonly"
@@ -84,6 +142,7 @@
 <script setup lang="ts">
 import type { Game, Character } from "@prisma/client";
 const openTab = ref<"all" | "charts">("all");
+const gameView = ref<"grid" | "table">("grid");
 
 const props = defineProps<{
   username: string;
