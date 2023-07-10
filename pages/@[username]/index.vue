@@ -20,7 +20,6 @@
                 :username="username"
               />
             </div>
-            <TopCharacters class="md:w-1/6 p-2" :games="games.data.value" />
           </div>
           <GamesOverTime
             class="w-full max-h-[450px] flex justify-center flex-col items-center p-2"
@@ -38,6 +37,10 @@
             block: openTab === 'charts',
           }"
         >
+          <TopCharacters
+            class="w-full sm:w-1/2 md:w-full p-2"
+            :games="games.data.value"
+          />
           <WinRate
             class="w-full sm:w-1/2 md:w-full p-2"
             :games="games.data.value"
