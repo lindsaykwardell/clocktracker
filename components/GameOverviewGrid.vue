@@ -1,8 +1,8 @@
 <template>
   <div class="flex flex-wrap">
     <div v-for="game in orderedGames" class="w-full sm:w-1/2 lg:w-1/3 p-2">
-      <button
-        @click="viewGame(game.id)"
+      <a
+        :href="`/@${username}/game/${game.id}`"
         class="relative w-full bg-gradient-to-b from-purple-800 hover:from-purple-900 to-stone-900 hover:to-stone-950 flex flex-col items-center cursor-pointer rounded overflow-hidden text-black h-72 bg-cover bg-center"
         :class="{
           'trouble-brewing': game.script === 'Trouble Brewing',
@@ -31,7 +31,9 @@
             />
           </div>
         </div>
-        <div class="absolute w-full top-0 left-0 bg-gradient-to-b from-black/75 via-black/50 to-black-0 h-[100px]"></div>
+        <div
+          class="absolute w-full top-0 left-0 bg-gradient-to-b from-black/75 via-black/50 to-black-0 h-[100px]"
+        ></div>
         <div
           class="absolute bottom-0 w-full p-1 text-black text-left bg-stone-300"
         >
@@ -49,7 +51,7 @@
         >
           <img :src="scriptLogo(game.script)" class="w-full object-contain" />
         </div>
-      </button>
+      </a>
     </div>
   </div>
 </template>
@@ -105,10 +107,6 @@ function rowHighlight(game: Game & { player_characters: Character[] }) {
       return "bg-red-200 dark:bg-red-600 hover:bg-red-400";
     }
   }
-}
-
-function viewGame(id: string) {
-  router.push(`/@${props.username}/game/${id}`);
 }
 
 function fullImageUrl(file: string) {
