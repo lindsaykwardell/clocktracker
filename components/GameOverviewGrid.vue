@@ -5,6 +5,11 @@
         @click="viewGame(game.id)"
         class="relative w-full bg-gradient-to-b from-stone-100 hover:from-stone-200 to-stone-400 hover:to-stone-500 flex flex-col items-center cursor-pointer rounded overflow-hidden text-black h-64"
       >
+        <img
+          v-if="game.image_urls[0]"
+          :src="fullImageUrl(game.image_urls[0])"
+          class="absolute bottom-0 w-full h-full object-cover blur"
+        />
         <div
           class="flex-grow items-center justify-center flex font-julee text-3xl"
         >
@@ -15,7 +20,10 @@
               'border-red-800': game.player_characters[0].alignment === 'EVIL',
             }"
           >
-            <img class="w-40 h-40" :src="roles.toImage(game.player_characters[0].name)" />
+            <img
+              class="w-40 h-40"
+              :src="roles.toImage(game.player_characters[0].name)"
+            />
             <span class="absolute text-2xl font-bold bottom-[20px]">
               {{ game.player_characters[0].name }}
             </span>
@@ -42,6 +50,7 @@ import naturalOrder from "natural-order";
 const router = useRouter();
 const { scriptLogo } = useScripts();
 const roles = useRoles();
+const config = useRuntimeConfig();
 
 const props = defineProps<{
   games: (Game & { player_characters: Character[] })[];
@@ -88,6 +97,10 @@ function rowHighlight(game: Game & { player_characters: Character[] }) {
 
 function viewGame(id: string) {
   router.push(`/@${props.username}/game/${id}`);
+}
+
+function fullImageUrl(file: string) {
+  return `${config.public.supabase.url}/storage/v1/object/public/game-attachments/${file}`;
 }
 </script>
 
