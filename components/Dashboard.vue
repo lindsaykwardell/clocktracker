@@ -3,32 +3,33 @@
     <template v-if="games.length">
       <section class="flex flex-col md:flex-row gap-8 pb-12 md:pb-0">
         <div
-          class="flex flex-wrap w-full md:w-1/4"
+          class="flex flex-col w-full md:w-1/4 p-2"
           :class="{
             'hidden md:block': openTab !== 'charts',
             block: openTab === 'charts',
           }"
         >
-          <div class="flex gap-4 items-center p-2">
-            <Avatar :value="player.avatar || ''" class="border-2 shadow-xl" />
-            <h3 class="font-piratesbay text-2xl md:text-4xl">
-              {{ player.display_name }}
-            </h3>
-          </div>
+          <Avatar
+            :value="player.avatar || ''"
+            class="border-2 shadow-xl m-auto"
+          />
+          <h3 class="font-piratesbay text-2xl lg:text-4xl text-center">
+            {{ player.display_name }}
+          </h3>
           <TopCharacters class="w-full sm:w-1/2 md:w-full p-2" :games="games" />
           <WinRate class="w-full sm:w-1/2 md:w-full p-2" :games="games" />
           <RoleType class="w-full sm:w-1/2 md:w-full p-2" :games="games" />
         </div>
         <div class="w-full md:w-3/4 flex flex-col gap-8">
           <div
-            class="gap-4 items-center p-2"
+            class="flex-col items-center p-2"
             :class="{
               hidden: openTab !== 'all',
               'flex md:hidden': openTab === 'all',
             }"
           >
             <Avatar :value="player.avatar || ''" class="border-2 shadow-xl" />
-            <h3 class="font-piratesbay text-2xl md:text-4xl">
+            <h3 class="font-piratesbay text-2xl xl:text-4xl">
               {{ player.display_name }}
             </h3>
           </div>
