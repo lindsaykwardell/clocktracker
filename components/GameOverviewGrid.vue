@@ -30,8 +30,9 @@
             {{ game.script }}
           </span>
         </div>
+        <img class="absolute top-1 left-1 w-20 h-20" :src="game.win ? '/img/win.png' : '/img/loss.png'" />
         <div
-          class="absolute top-1 left-1 w-20 h-20 text-sm text-black font-julee flex flex-col justify-center items-center"
+          class="absolute bottom-1 right-0 w-20 h-20 text-sm text-black font-julee flex flex-col justify-center items-center bg-stone-300 rounded-lg p-1"
         >
           <img :src="scriptLogo(game.script)" class="w-full object-contain" />
         </div>
