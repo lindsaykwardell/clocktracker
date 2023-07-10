@@ -17,7 +17,7 @@
                   game.data.value.player_characters[0].alignment === 'EVIL',
               }"
             />
-            <div>
+            <div class="flex-grow">
               <h2 class="text-3xl font-piratesbay">
                 <a
                   class="hover:underline"
@@ -26,28 +26,39 @@
                   {{ player.data.value?.username }}
                 </a>
               </h2>
-              <div
-                class="font-julee text-2xl"
-                :class="{
-                  'text-blue-600':
-                    game.data.value.player_characters[0].alignment === 'GOOD',
-                  'text-red-600':
-                    game.data.value.player_characters[0].alignment === 'EVIL',
-                }"
-              >
-                <a
-                  :href="`https://wiki.bloodontheclocktower.com/${game.data.value?.player_characters[0].name}`"
-                  target="_blank"
-                  class="hover:underline"
-                  >{{ game.data.value?.player_characters[0].name }}</a
-                >
-              </div>
               <time
                 :datetime="dayjs(game.data.value.date).toISOString()"
                 class="text-sm"
               >
                 {{ dayjs(game.data.value.date).format("MMMM D, YYYY") }}
               </time>
+            </div>
+            <div class="font-julee text-2xl">
+              <a
+                :href="`https://wiki.bloodontheclocktower.com/${game.data.value?.player_characters[0].name}`"
+                target="_blank"
+                class="hover:underline flex flex-col items-center"
+              >
+                <div
+                  class="relative rounded-full w-32 h-32 bg-gradient-to-b from-yellow-100 to-stone-400 shadow-xl border-2 flex justify-center items-center"
+                  :class="{
+                    'border-blue-800':
+                      game.data.value.player_characters[0].alignment === 'GOOD',
+                    'border-red-800':
+                      game.data.value.player_characters[0].alignment === 'EVIL',
+                  }"
+                >
+                  <img
+                    class="w-24 h-24 object-contain"
+                    :src="
+                      roles.toImage(game.data.value.player_characters[0].name)
+                    "
+                  />
+                  <span class="absolute text-lg font-bold bottom-[15px]">
+                    {{ game.data.value.player_characters[0].name }}
+                  </span>
+                </div>
+              </a>
             </div>
           </div>
           <div class="flex flex-col md:flex-row gap-4 mt-4">
@@ -103,7 +114,10 @@
           <div class="flex flex-wrap gap-5">
             <div v-for="file in game.data.value?.image_urls" :key="file">
               <a :href="fullImageUrl(file)" target="_blank">
-                <img :src="fullImageUrl(file)" class="w-64 h-64 object-cover shadow-lg" />
+                <img
+                  :src="fullImageUrl(file)"
+                  class="w-64 h-64 object-cover shadow-lg"
+                />
               </a>
             </div>
           </div>
@@ -118,6 +132,7 @@ import type { Game, Character } from "@prisma/client";
 import dayjs from "dayjs";
 
 const { scriptLogo } = useScripts();
+const roles = useRoles();
 const config = useRuntimeConfig();
 const router = useRouter();
 const route = useRoute();
