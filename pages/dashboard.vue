@@ -2,8 +2,44 @@
   <DashboardTemplate>
     <template v-if="games.data.value?.length">
       <section class="flex flex-col md:flex-row gap-8 pb-12 md:pb-0">
-        <div class="w-full md:w-3/4 flex flex-col gap-8">
+        <div
+          class="flex flex-wrap w-full md:w-1/4"
+          :class="{
+            'hidden md:block': openTab !== 'charts',
+            block: openTab === 'charts',
+          }"
+        >
           <div class="flex gap-4 items-center p-2">
+            <Avatar
+              :value="user?.user_metadata.avatar_url"
+              class="border-2 shadow-xl"
+            />
+            <h3 class="font-piratesbay text-4xl">
+              {{ user?.user_metadata.full_name }}
+            </h3>
+          </div>
+          <TopCharacters
+            class="w-full sm:w-1/2 md:w-full p-2"
+            :games="games.data.value"
+          />
+          <WinRate
+            class="w-full sm:w-1/2 md:w-full p-2"
+            :games="games.data.value"
+          />
+          <!-- <Alignment class="w-full sm:w-1/2 md:w-full p-2" :games="games.data.value" /> -->
+          <RoleType
+            class="w-full sm:w-1/2 md:w-full p-2"
+            :games="games.data.value"
+          />
+        </div>
+        <div class="w-full md:w-3/4 flex flex-col gap-8">
+          <div
+            class="gap-4 items-center p-2"
+            :class="{
+              hidden: openTab !== 'all',
+              'flex md:hidden': openTab === 'all',
+            }"
+          >
             <Avatar
               :value="user?.user_metadata.avatar_url"
               class="border-2 shadow-xl"
@@ -35,27 +71,6 @@
               />
             </div>
           </div>
-        </div>
-        <div
-          class="flex flex-wrap w-full md:w-1/4"
-          :class="{
-            'hidden md:block': openTab !== 'charts',
-            block: openTab === 'charts',
-          }"
-        >
-          <TopCharacters
-            class="w-full sm:w-1/2 md:w-full p-2"
-            :games="games.data.value"
-          />
-          <WinRate
-            class="w-full sm:w-1/2 md:w-full p-2"
-            :games="games.data.value"
-          />
-          <!-- <Alignment class="w-full sm:w-1/2 md:w-full p-2" :games="games.data.value" /> -->
-          <RoleType
-            class="w-full sm:w-1/2 md:w-full p-2"
-            :games="games.data.value"
-          />
         </div>
       </section>
       <section class="fixed md:hidden bottom-0 w-screen bg-stone-950">

@@ -3,7 +3,16 @@
     <div v-for="game in orderedGames" class="w-full sm:w-1/2 lg:w-1/3 p-2">
       <button
         @click="viewGame(game.id)"
-        class="relative w-full bg-gradient-to-b from-purple-800 hover:from-purple-900 to-stone-900 hover:to-stone-950 flex flex-col items-center cursor-pointer rounded overflow-hidden text-black h-72"
+        class="relative w-full bg-gradient-to-b from-purple-800 hover:from-purple-900 to-stone-900 hover:to-stone-950 flex flex-col items-center cursor-pointer rounded overflow-hidden text-black h-72 bg-cover bg-center"
+        :class="{
+          'trouble-brewing': game.script === 'Trouble Brewing',
+          'sects-and-violets': game.script === 'Sects & Violets',
+          'bad-moon-rising': game.script === 'Bad Moon Rising',
+          'custom-script':
+            ['Trouble Brewing', 'Sects & Violets', 'Bad Moon Rising'].indexOf(
+              game.script
+            ) === -1,
+        }"
       >
         <img
           v-if="game.image_urls[0]"
@@ -22,6 +31,7 @@
             />
           </div>
         </div>
+        <div class="absolute w-full top-0 left-0 bg-gradient-to-b from-black/75 via-black/50 to-black-0 h-[100px]"></div>
         <div
           class="absolute bottom-0 w-full p-1 text-black text-left bg-stone-300"
         >
@@ -30,9 +40,12 @@
             {{ game.script }}
           </span>
         </div>
-        <img class="absolute top-1 left-1 w-20 h-20" :src="game.win ? '/img/win.png' : '/img/loss.png'" />
+        <img
+          class="absolute top-1 right-1 w-12 h-12"
+          :src="game.win ? '/img/win.png' : '/img/loss.png'"
+        />
         <div
-          class="absolute bottom-1 right-0 w-20 h-20 text-sm text-black font-julee flex flex-col justify-center items-center bg-stone-300 rounded-lg p-1"
+          class="absolute top-1 left-1 w-20 h-20 text-sm text-black font-julee flex flex-col justify-center items-center rounded-lg p-1"
         >
           <img :src="scriptLogo(game.script)" class="w-full object-contain" />
         </div>
@@ -106,5 +119,21 @@ function fullImageUrl(file: string) {
 <style scoped>
 th {
   @apply cursor-pointer select-none;
+}
+
+.trouble-brewing {
+  background-image: url("/img/trouble-brewing-bg.webp");
+}
+
+.sects-and-violets {
+  background-image: url("/img/sects-and-violets-bg.webp");
+}
+
+.bad-moon-rising {
+  background-image: url("/img/bad-moon-rising-bg.webp");
+}
+
+.custom-script {
+  background-image: url("/img/custom-script-bg.webp");
 }
 </style>
