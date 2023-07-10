@@ -21,15 +21,15 @@ export default defineEventHandler(async (handler) => {
 
   const prisma = new PrismaClient();
 
-  const existingUsername = (
+  const existingUser = (
     await prisma.userSettings.findFirst({
       where: {
         username: body.username,
       },
     })
-  )?.username;
+  );
 
-  if (existingUsername) {
+  if (existingUser && existingUser.user_id !== user.id) {
     throw createError({
       status: 409,
       statusMessage: "Username already exists",

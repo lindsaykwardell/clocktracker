@@ -35,6 +35,7 @@ export default defineEventHandler(async (handler) => {
       username: existingUsername
         ? faker.internet.userName()
         : user.user_metadata.full_name,
+      display_name: user.user_metadata.full_name,
       avatar: user.user_metadata.avatar_url,
       email: user.email,
     },

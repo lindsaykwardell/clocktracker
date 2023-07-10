@@ -23,6 +23,30 @@
           required
         />
       </label>
+      <label class="block w-[300px]">
+        <span class="block">Display name</span>
+        <input
+          v-model="displayName"
+          class="block w-full border border-stone-500 rounded-md p-2"
+          required
+        />
+      </label>
+      <label class="block w-[300px]">
+        <span class="block">Pronouns</span>
+        <input
+          v-model="pronouns"
+          class="block w-full border border-stone-500 rounded-md p-2"
+          required
+        />
+      </label>
+      <label class="block w-[300px]">
+        <span class="block">Location</span>
+        <input
+          v-model="location"
+          class="block w-full border border-stone-500 rounded-md p-2"
+          required
+        />
+      </label>
       <button
         type="submit"
         class="w-full bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
@@ -78,6 +102,9 @@ if (settings.data.value?.finished_welcome) {
 }
 
 const username = ref(settings.data.value?.username);
+const displayName = ref(settings.data.value?.display_name);
+const pronouns = ref(settings.data.value?.pronouns);
+const location = ref(settings.data.value?.location);
 
 async function saveSettings() {
   inFlight.value = true;
@@ -85,6 +112,9 @@ async function saveSettings() {
     method: "POST",
     body: JSON.stringify({
       username: username.value,
+      display_name: displayName.value,
+      pronouns: pronouns.value,
+      location: location.value,
       finished_welcome: true,
     }),
   });

@@ -1,7 +1,7 @@
 <template>
   <DashboardTemplate>
     <Dashboard
-      :username="username"
+      :player="player.data.value"
       :games="games.data.value || []"
       :readonly="readonly"
       @deleteGame="deleteGame"

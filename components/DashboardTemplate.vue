@@ -38,19 +38,19 @@
           </div>
           <span class="hidden md:inline">Add Game</span>
         </nuxt-link>
-        <!-- <nuxt-link
-        to="/settings"
-        class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center"
-      >
-        <div class="w-[50px] overflow-hidden">
-          <img
-            src="https://wiki.bloodontheclocktower.com/images/9/98/Icon_tinker.png"
-            class="max-w-[125%]"
-            alt=""
-          />
-        </div>
-        Settings
-      </nuxt-link> -->
+        <nuxt-link
+          to="/settings"
+          class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center"
+        >
+          <div class="w-[50px] overflow-hidden">
+            <img
+              src="https://wiki.bloodontheclocktower.com/images/9/98/Icon_tinker.png"
+              class="max-w-[125%]"
+              alt=""
+            />
+          </div>
+          <span class="hidden md:inline">Settings</span>
+        </nuxt-link>
         <button
           @click="signOut"
           class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center"

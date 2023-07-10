@@ -1,7 +1,7 @@
 <template>
   <img
     :src="avatarUrl"
-    class="rounded-full w-24 h-24 shadow-lg border border-black"
+    class="rounded-full w-16 md:w-24 h-16 md:h-24 shadow-lg border border-black"
   />
 </template>
 

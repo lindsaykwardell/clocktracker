@@ -42,9 +42,22 @@ enum LocationType {
 }
 
 model UserSettings {
-  user_id          String  @id
-  username         String  @unique
-  finished_welcome Boolean @default(false)
+  user_id          String         @id
+  username         String         @unique
+  display_name     String
+  finished_welcome Boolean        @default(false)
   avatar           String?
-  email            String  @default("your@address.here")
+  email            String         @default("your@address.here")
+  pronouns         String?
+  bio              String         @default("")
+  location         String?
+  links            ExternalLink[]
+}
+
+model ExternalLink {
+  id           Int          @id @default(autoincrement())
+  user         UserSettings @relation(fields: [user_id], references: [user_id])
+  user_id      String
+  service_name String
+  url          String
 }
