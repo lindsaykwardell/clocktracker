@@ -32,7 +32,10 @@
         <div
           class="absolute bottom-0 w-full p-1 text-black text-left bg-stone-300"
         >
-          {{ formatDate(game.date) }}
+          {{ formatDate(game.date) }} |
+          <span class="font-bold">
+            {{ game.script }}
+          </span>
         </div>
         <div
           class="absolute bottom-1 right-1 w-20 h-20 text-sm text-black font-julee flex flex-col justify-center items-center"
