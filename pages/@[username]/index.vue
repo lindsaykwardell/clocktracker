@@ -3,6 +3,23 @@
     <template v-if="games.data.value?.length">
       <section class="flex flex-col md:flex-row gap-8 pb-12 md:pb-0">
         <div class="w-full md:w-3/4 flex flex-col gap-8">
+          <div class="flex gap-4 items-center p-2">
+            <Avatar
+              :value="player.data.value?.avatar || ''"
+              class="border-2 shadow-xl"
+            />
+            <h3 class="font-piratesbay text-4xl">
+              {{ player.data.value?.username }}
+            </h3>
+          </div>
+          <GamesOverTime
+            class="w-full max-h-[200px] flex justify-center flex-col items-center p-2"
+            :class="{
+              'hidden md:block': openTab !== 'charts',
+              block: openTab === 'charts',
+            }"
+            :games="games.data.value"
+          />
           <div
             class="flex flex-col-reverse md:flex-row gap-4"
             :class="{
@@ -11,24 +28,13 @@
             }"
           >
             <div class="flex-grow">
-              <h3 class="font-piratesbay text-2xl text-center">
-                {{ username }}'s Games
-              </h3>
               <GameOverviewGrid
                 :games="games.data.value"
-                readonly
                 :username="username"
+                readonly
               />
             </div>
           </div>
-          <GamesOverTime
-            class="w-full max-h-[450px] flex justify-center flex-col items-center p-2"
-            :class="{
-              'hidden md:block': openTab !== 'charts',
-              block: openTab === 'charts',
-            }"
-            :games="games.data.value"
-          />
         </div>
         <div
           class="flex flex-wrap w-full md:w-1/4"
