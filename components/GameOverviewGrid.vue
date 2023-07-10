@@ -31,7 +31,7 @@
           </span>
         </div>
         <div
-          class="absolute bottom-1 right-1 w-20 h-20 text-sm text-black font-julee flex flex-col justify-center items-center"
+          class="absolute top-1 left-1 w-20 h-20 text-sm text-black font-julee flex flex-col justify-center items-center"
         >
           <img :src="scriptLogo(game.script)" class="w-full object-contain" />
         </div>
