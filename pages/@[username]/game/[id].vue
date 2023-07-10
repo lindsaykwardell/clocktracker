@@ -2,11 +2,11 @@
   <DashboardTemplate>
     <section
       v-if="game.data.value"
-      class="bg-gradient-to-b from-stone-100 to-stone-300 text-black w-4/5 m-auto my-4 rounded shadow-lg p-4"
+      class="bg-gradient-to-b from-stone-100 to-stone-300 text-black w-full lg:w-4/5 m-auto my-4 rounded shadow-lg p-4"
     >
-      <div class="flex flex-col-reverse md:flex-row">
-        <div class="flex-grow flex flex-col">
-          <div class="flex flex-col md:flex-row gap-4">
+      <div class="flex flex-col-reverse md:flex-row items-center">
+        <div class="flex-grow flex flex-col w-full">
+          <div class="flex flex-col md:flex-row gap-4 items-center">
             <Avatar
               :value="player.data.value?.avatar || ''"
               class="border-2 shadow-xl"
@@ -88,7 +88,7 @@
             </label>
           </div>
           <fieldset
-            class="flex flex-col md:flex-row gap-5 border rounded border-stone-500 p-4 my-3"
+            class="flex flex-col sm:flex-row gap-5 border rounded border-stone-500 p-4 my-3"
           >
             <legend>Game Results</legend>
             <label>
@@ -101,7 +101,7 @@
             </label>
           </fieldset>
         </div>
-        <img :src="scriptLogo(game.data.value.script)" class="w-64 h-64" />
+        <img :src="scriptLogo(game.data.value.script)" class="w-48 md:w-64 h-48 md:h-64" />
       </div>
       <template
         v-if="game.data.value.notes || game.data.value.image_urls.length"

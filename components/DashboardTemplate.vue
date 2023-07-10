@@ -1,6 +1,6 @@
 <template>
   <header
-    class="sticky top-0 bg-stone-900 p-2 flex items-center gap-4 border-t-8 border-purple-950"
+    class="sticky z-10 top-0 bg-stone-900 p-2 flex items-center gap-4 border-t-8 border-purple-950"
   >
     <nuxt-link :to="user ? '/dashboard' : '/'" class="flex items-center gap-4">
       <img src="/demon-head.png" class="w-[75px]" alt="Demon Head" />
