@@ -3,9 +3,9 @@
     v-if="render"
     class="w-full h-screen flex flex-col items-center justify-center gap-12"
   >
-    <h1 class="font-piratesbay text-stone-200 text-4xl">ClockTracker</h1>
+    <h1 class="font-dumbledor text-stone-200 text-4xl">ClockTracker</h1>
     <img class="w-[100px]" src="/demon-head.png" alt="Demon Head" />
-    <h2 class="text-stone-200 text-2xl font-piratesbay">
+    <h2 class="text-stone-200 text-2xl font-dumbledor">
       Welcome, {{ user?.user_metadata.full_name }}
     </h2>
     <form

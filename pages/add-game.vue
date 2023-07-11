@@ -1,7 +1,7 @@
 <template>
   <DashboardTemplate>
     <section class="py-6">
-      <h2 class="font-piratesbay text-4xl text-center">Add Game</h2>
+      <h2 class="font-dumbledor text-4xl text-center">Add Game</h2>
       <form class="max-w-[1000px] m-auto py-6" @submit.prevent="submitGame">
         <fieldset
           class="flex flex-col flex-wrap md:flex-row gap-5 border rounded border-stone-500 p-4 my-3"

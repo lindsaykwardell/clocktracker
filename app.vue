@@ -13,7 +13,7 @@ import {
   LinearScale,
   ArcElement,
   PointElement,
-  LineElement
+  LineElement,
 } from "chart.js";
 
 useHead({
@@ -37,7 +37,7 @@ ChartJS.register(
 
 <style>
 body {
-  @apply bg-stone-800 font-raleway text-stone-100;
+  @apply bg-stone-800 font-gothic text-stone-100;
 }
 
 .router-link-active {

@@ -13,7 +13,7 @@
             :value="player.avatar || ''"
             class="border-2 shadow-xl m-auto"
           />
-          <h3 class="font-piratesbay text-2xl lg:text-4xl text-center">
+          <h3 class="font-dumbledor text-2xl lg:text-3xl text-center">
             {{ player.display_name }}
           </h3>
           <TopCharacters class="w-full sm:w-1/2 md:w-full p-2" :games="games" />
@@ -29,7 +29,7 @@
             }"
           >
             <Avatar :value="player.avatar || ''" class="border-2 shadow-xl" />
-            <h3 class="font-piratesbay text-2xl xl:text-4xl">
+            <h3 class="font-dumbledor text-2xl xl:text-3xl">
               {{ player.display_name }}
             </h3>
           </div>
@@ -50,7 +50,7 @@
           >
             <div class="flex gap-3 justify-end px-4">
               <button
-                class="rounded w-[100px] py-1 justify-center font-piratesbay text-lg flex gap-2 bg-stone-600 hover:bg-stone-700 transition duration-150"
+                class="rounded w-[100px] py-1 justify-center font-dumbledor text-lg flex gap-2 bg-stone-600 hover:bg-stone-700 transition duration-150"
                 :class="{
                   'bg-stone-600': gameView !== 'grid',
                   'bg-stone-700': gameView === 'grid',
@@ -72,7 +72,7 @@
                 Grid
               </button>
               <button
-                class="rounded w-[100px] py-1 justify-center font-piratesbay text-lg flex gap-2 bg-stone-600 hover:bg-stone-700 transition duration-150"
+                class="rounded w-[100px] py-1 justify-center font-dumbledor text-lg flex gap-2 bg-stone-600 hover:bg-stone-700 transition duration-150"
                 :class="{
                   'bg-stone-600': gameView !== 'table',
                   'bg-stone-700': gameView === 'table',
@@ -129,7 +129,7 @@
       </section>
     </template>
     <template v-else>
-      <p class="text-center text-2xl my-4 font-piratesbay">No games yet!</p>
+      <p class="text-center text-2xl my-4 font-dumbledor">No games yet!</p>
       <nuxt-link
         to="/add-game"
         class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded text-center text-xl m-auto block w-[300px] my-8"

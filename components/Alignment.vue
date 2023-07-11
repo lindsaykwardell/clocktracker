@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h3 class="font-piratesbay text-2xl text-center">Alignment</h3>
+    <h3 class="font-dumbledor text-2xl text-center">Alignment</h3>
     <Pie id="alignment" :data="chartData" :options="chartOptions" />
   </div>
 </template>

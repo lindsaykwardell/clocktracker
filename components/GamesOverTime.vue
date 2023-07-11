@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h3 class="font-piratesbay text-2xl text-center">Recent Game Counts</h3>
+    <h3 class="font-dumbledor text-2xl text-center">Recent Game Counts</h3>
     <Line id="games-over-time" :data="chartData" :options="chartOptions" />
   </div>
 </template>

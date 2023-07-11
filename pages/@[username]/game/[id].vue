@@ -22,18 +22,18 @@
               }"
             />
             <div class="flex-grow">
-              <h2 class="text-3xl font-piratesbay">
+              <h2 class="text-3xl font-dumbledor">
                 <a
                   class="hover:underline"
                   :href="`/@${player.data.value?.username}`"
                 >
-                  {{ player.data.value?.username }}
+                  {{ player.data.value?.display_name }}
                 </a>
               </h2>
               <div class="flex flex-col md:flex-row gap-2">
                 <div
                   v-for="(character, i) in game.data.value.player_characters"
-                  class="font-julee text-2xl font-bold bottom-[20px]"
+                  class="font-dumbledor text-xl font-bold bottom-[20px]"
                   :class="{
                     'text-blue-800': character.alignment === 'GOOD',
                     'text-red-800': character.alignment === 'EVIL',
@@ -57,7 +57,7 @@
                 {{ dayjs(game.data.value.date).format("MMMM D, YYYY") }}
               </time>
             </div>
-            <div class="font-julee text-2xl">
+            <div class="font-dumbledor text-2xl">
               <a
                 :href="`https://wiki.bloodontheclocktower.com/${
                   game.data.value?.player_characters[
@@ -124,7 +124,10 @@
               <span>Players</span>
               {{ game.data.value.player_count }}
             </label>
-            <label class="flex gap-3 items-center">
+            <label
+              v-if="game.data.value.community"
+              class="flex gap-3 items-center"
+            >
               <span>Community</span>
               {{ game.data.value.community }}
             </label>
@@ -162,7 +165,7 @@
       <template
         v-if="game.data.value.notes || game.data.value.image_urls.length"
       >
-        <h3 class="font-piratesbay text-2xl">Notes and Images</h3>
+        <h3 class="font-dumbledor text-2xl">Notes and Images</h3>
         <p v-if="game.data.value.notes" class="bg-stone-100 p-4 shadow-lg my-3">
           {{ game.data.value?.notes }}
         </p>

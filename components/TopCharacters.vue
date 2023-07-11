@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h3 class="font-piratesbay text-2xl text-center">Top Characters</h3>
+    <h3 class="font-dumbledor text-2xl text-center">Top Characters</h3>
     <ul>
       <li v-for="(character, i) in characters" :key="character.name">
         {{ i + 1 }}.

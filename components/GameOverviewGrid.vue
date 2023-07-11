@@ -23,7 +23,7 @@
           class="absolute bottom-0 w-full h-full object-cover blur"
         />
         <div
-          class="flex-grow items-center justify-center flex font-julee text-3xl"
+          class="flex-grow items-center justify-center flex font-dumbledor text-3xl"
         >
           <div
             class="token bg-center bg-cover relative rounded-full w-36 h-36 md:w-48 md:h-48 shadow-xl border border-black flex justify-center items-center"
@@ -69,13 +69,13 @@
           :src="game.win ? '/img/win.png' : '/img/loss.png'"
         />
         <div
-          class="absolute top-1 left-1 w-16 h-16 md:w-20 md:h-20 text-sm text-black font-julee flex flex-col justify-center items-center rounded-lg p-1"
+          class="absolute top-1 left-1 w-16 h-16 md:w-20 md:h-20 text-sm text-black font-dumbledor flex flex-col justify-center items-center rounded-lg p-1"
         >
           <img :src="scriptLogo(game.script)" class="w-full object-contain" />
         </div>
         <div v-if="!isBaseScript(game.script)" class="absolute bottom-0 left-0">
           <div
-            class="font-piratesbay text-white md:text-lg bg-gradient-to-tr from-black/75 via-black/50 to-black-0 p-1"
+            class="font-dumbledor text-white md:text-lg bg-gradient-to-tr from-black/75 via-black/50 to-black-0 p-1"
           >
             {{ game.script }}
           </div>

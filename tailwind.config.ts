@@ -4,7 +4,8 @@ export default <Partial<Config>>{
   theme: {
     extend: {
       fontFamily: {
-        piratesbay: ["PiratesBay", "serif"],
+        dumbledor: ["Dumbledor", "serif"],
+        gothic: ["Trade Gothic", "sans-serif"],
         raleway: ["Raleway", "sans-serif"],
         julee: ["Julee", "cursive"],
       },

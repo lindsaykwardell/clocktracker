@@ -1,10 +1,15 @@
 @import url("https://fonts.googleapis.com/css2?family=Julee&family=Raleway&display=swap");
 
 @font-face {
-  font-family: PiratesBay;
-  src: url(/fonts/piratesbay.ttf);
+  font-family: Dumbledor;
+  src: url(/fonts/dumbledor.ttf);
+}
+
+@font-face {
+  font-family: "Trade Gothic";
+  src: url(/fonts/tradegothic.ttf);
 }
 
 .token {
-  background-image: url('/img/token-bg.png');
+  background-image: url("/img/token-bg.png");
 }

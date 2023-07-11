@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h3 class="font-piratesbay text-2xl text-center">Win Rate</h3>
+    <h3 class="font-dumbledor text-2xl text-center">Win Rate</h3>
     <Bar id="winrate" :data="chartData" :options="chartOptions" />
   </div>
 </template>
