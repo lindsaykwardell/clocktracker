@@ -1,7 +1,7 @@
 <template>
   <template v-if="player">
     <template v-if="games.length">
-      <section class="flex flex-col md:flex-row gap-8 pb-12 md:pb-0">
+      <section class="flex flex-col md:flex-row gap-8 pb-20 md:pb-0">
         <div
           class="flex flex-col w-full md:w-1/4 p-2"
           :class="{

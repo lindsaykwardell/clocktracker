@@ -1,6 +1,9 @@
 <template>
   <div class="flex flex-wrap">
-    <div v-for="game in orderedGames" class="w-full sm:w-1/2 lg:w-1/3 p-2">
+    <div
+      v-for="game in orderedGames"
+      class="w-1/2 lg:w-1/3 md:p-2 border border-black md:border-none"
+    >
       <a
         :href="`/@${username}/game/${game.id}`"
         class="relative w-full bg-gradient-to-b from-purple-800 hover:from-purple-900 to-stone-900 hover:to-stone-950 flex flex-col items-center cursor-pointer rounded overflow-hidden text-black h-72 bg-cover bg-center"
@@ -23,10 +26,10 @@
           class="flex-grow items-center justify-center flex font-julee text-3xl"
         >
           <div
-            class="token bg-center bg-cover relative rounded-full w-48 h-48 shadow-xl border border-black flex justify-center items-center"
+            class="token bg-center bg-cover relative rounded-full w-36 h-36 md:w-48 md:h-48 shadow-xl border border-black flex justify-center items-center"
           >
             <img
-              class="w-40 h-40"
+              class="w-32 h-32 md:w-40 md:h-40"
               :src="
                 roles.toImage(
                   game.player_characters[game.player_characters.length - 1].name
@@ -38,10 +41,10 @@
                 game.player_characters[game.player_characters.length - 1]
                   .related
               "
-              class="token bg-center bg-cover absolute bottom-0 right-0 rounded-full w-16 h-16 shadow-xl border border-black flex justify-center items-center"
+              class="token bg-center bg-cover absolute bottom-0 right-0 rounded-full w-12 h-12 md:w-16 md:h-16 shadow-xl border border-black flex justify-center items-center"
             >
               <img
-                class="w-12 h-12"
+                class="md:w-12 md:h-12"
                 :src="
                   roles.toImage(
                     game.player_characters[game.player_characters.length - 1]
@@ -54,9 +57,9 @@
         </div>
         <div
           class="absolute w-full top-0 left-0 bg-gradient-to-b from-black/75 via-black/50 to-black-0 h-[100px]"
-        ></div>
+        />
         <div
-          class="absolute bottom-0 w-full p-1 text-black text-left bg-stone-300"
+          class="absolute bottom-0 w-full p-1 text-black text-sm md:text-base text-left bg-stone-300"
         >
           {{ formatDate(game.date) }} |
           <span class="font-bold">
@@ -64,11 +67,11 @@
           </span>
         </div>
         <img
-          class="absolute top-1 right-1 w-12 h-12"
+          class="absolute top-2 right-2 w-8 h-8 md:w-12 md:h-12"
           :src="game.win ? '/img/win.png' : '/img/loss.png'"
         />
         <div
-          class="absolute top-1 left-1 w-20 h-20 text-sm text-black font-julee flex flex-col justify-center items-center rounded-lg p-1"
+          class="absolute top-1 left-1 w-16 h-16 md:w-20 md:h-20 text-sm text-black font-julee flex flex-col justify-center items-center rounded-lg p-1"
         >
           <img :src="scriptLogo(game.script)" class="w-full object-contain" />
         </div>
