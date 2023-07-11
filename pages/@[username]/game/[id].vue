@@ -99,6 +99,10 @@
               {{ game.data.value.player_count }}
             </label>
             <label class="flex gap-3 items-center">
+              <span>Community</span>
+              {{ game.data.value.community }}
+            </label>
+            <label class="flex gap-3 items-center">
               <span>Location</span>
               {{
                 game.data.value.location_type === "IN_PERSON"
