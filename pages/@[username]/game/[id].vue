@@ -68,7 +68,7 @@
                 class="hover:underline flex flex-col items-center"
               >
                 <div
-                  class="token bg-center bg-cover relative rounded-full w-32 h-32 shadow-xl border-black flex justify-center items-center"
+                  class="token bg-center bg-cover relative rounded-full w-32 h-32 shadow-xl border border-black flex justify-center items-center"
                 >
                   <img
                     class="w-24 h-24 object-contain"
@@ -80,6 +80,25 @@
                       )
                     "
                   />
+                  <div
+                    v-if="
+                      game.data.value.player_characters[
+                        game.data.value.player_characters.length - 1
+                      ].related
+                    "
+                    class="token bg-center bg-cover absolute bottom-0 right-0 rounded-full w-12 h-12 shadow-xl border border-black flex justify-center items-center"
+                  >
+                    <img
+                      class="w-8 h-8"
+                      :src="
+                        roles.toImage(
+                          game.data.value.player_characters[
+                            game.data.value.player_characters.length - 1
+                          ].related || ''
+                        )
+                      "
+                    />
+                  </div>
                 </div>
               </a>
             </div>
