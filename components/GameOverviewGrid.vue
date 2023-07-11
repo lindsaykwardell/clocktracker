@@ -23,13 +23,33 @@
           class="flex-grow items-center justify-center flex font-julee text-3xl"
         >
           <div
-            class="token bg-center bg-cover relative rounded-full w-48 h-48 shadow-xl border-black flex justify-center items-center"
+            class="token bg-center bg-cover relative rounded-full w-48 h-48 shadow-xl border border-black flex justify-center items-center"
           >
             <img
               class="w-40 h-40"
-              :src="roles.toImage(game.player_characters[game.player_characters.length - 1
-                  ].name)"
+              :src="
+                roles.toImage(
+                  game.player_characters[game.player_characters.length - 1].name
+                )
+              "
             />
+            <div
+              v-if="
+                game.player_characters[game.player_characters.length - 1]
+                  .related
+              "
+              class="token bg-center bg-cover absolute bottom-0 right-0 rounded-full w-16 h-16 shadow-xl border border-black flex justify-center items-center"
+            >
+              <img
+                class="w-12 h-12"
+                :src="
+                  roles.toImage(
+                    game.player_characters[game.player_characters.length - 1]
+                      .related || ''
+                  )
+                "
+              />
+            </div>
           </div>
         </div>
         <div
