@@ -15,7 +15,8 @@ model Game {
   script            String
   location_type     LocationType @default(ONLINE)
   location          String
-  player_count      Int
+  community         String       @default("")
+  player_count      Int?
   player_characters Character[]
   final3            Boolean?
   win               Boolean
@@ -26,6 +27,7 @@ model Game {
 model Character {
   id        Int       @id @default(autoincrement())
   name      String
+  related   String?
   alignment Alignment
   game      Game?     @relation(fields: [game_id], references: [id])
   game_id   String?

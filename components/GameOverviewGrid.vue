@@ -27,7 +27,8 @@
           >
             <img
               class="w-40 h-40"
-              :src="roles.toImage(game.player_characters[0].name)"
+              :src="roles.toImage(game.player_characters[game.player_characters.length - 1
+                  ].name)"
             />
           </div>
         </div>
@@ -61,7 +62,6 @@ import type { Game, Character } from "@prisma/client";
 import dayjs from "dayjs";
 import naturalOrder from "natural-order";
 
-const router = useRouter();
 const { scriptLogo } = useScripts();
 const roles = useRoles();
 const config = useRuntimeConfig();
@@ -91,22 +91,6 @@ function orderGames(column: string) {
 
 function formatDate(date: Date) {
   return dayjs(date).format("MM/DD/YYYY");
-}
-
-function rowHighlight(game: Game & { player_characters: Character[] }) {
-  if (game.player_characters[0].alignment === "GOOD") {
-    if (game.win) {
-      return "bg-blue-400 dark:bg-blue-800 hover:bg-blue-600";
-    } else {
-      return "bg-blue-200 dark:bg-blue-600 hover:bg-blue-400";
-    }
-  } else {
-    if (game.win) {
-      return "bg-red-400 dark:bg-red-800 hover:bg-red-600";
-    } else {
-      return "bg-red-200 dark:bg-red-600 hover:bg-red-400";
-    }
-  }
 }
 
 function fullImageUrl(file: string) {

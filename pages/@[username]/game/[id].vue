@@ -12,9 +12,13 @@
               class="border-2 shadow-xl"
               :class="{
                 'border-blue-600':
-                  game.data.value.player_characters[0].alignment === 'GOOD',
+                  game.data.value.player_characters[
+                    game.data.value.player_characters.length - 1
+                  ].alignment === 'GOOD',
                 'border-red-600':
-                  game.data.value.player_characters[0].alignment === 'EVIL',
+                  game.data.value.player_characters[
+                    game.data.value.player_characters.length - 1
+                  ].alignment === 'EVIL',
               }"
             />
             <div class="flex-grow">
@@ -26,16 +30,25 @@
                   {{ player.data.value?.username }}
                 </a>
               </h2>
-              <div
-                class="font-julee text-2xl font-bold bottom-[20px]"
-                :class="{
-                  'text-blue-800':
-                    game.data.value.player_characters[0].alignment === 'GOOD',
-                  'text-red-800':
-                    game.data.value.player_characters[0].alignment === 'EVIL',
-                }"
-              >
-                {{ game.data.value.player_characters[0].name }}
+              <div class="flex flex-col md:flex-row gap-2">
+                <div
+                  v-for="(character, i) in game.data.value.player_characters"
+                  class="font-julee text-2xl font-bold bottom-[20px]"
+                  :class="{
+                    'text-blue-800': character.alignment === 'GOOD',
+                    'text-red-800': character.alignment === 'EVIL',
+                  }"
+                >
+                  {{ character.name }}
+                  <template v-if="character.related">
+                    ({{ character.related }})
+                  </template>
+                  <template
+                    v-if="i !== game.data.value.player_characters.length - 1"
+                  >
+                    ➡
+                  </template>
+                </div>
               </div>
               <time
                 :datetime="dayjs(game.data.value.date).toISOString()"
@@ -46,7 +59,11 @@
             </div>
             <div class="font-julee text-2xl">
               <a
-                :href="`https://wiki.bloodontheclocktower.com/${game.data.value?.player_characters[0].name}`"
+                :href="`https://wiki.bloodontheclocktower.com/${
+                  game.data.value?.player_characters[
+                    game.data.value.player_characters.length - 1
+                  ].name
+                }`"
                 target="_blank"
                 class="hover:underline flex flex-col items-center"
               >
@@ -56,7 +73,11 @@
                   <img
                     class="w-24 h-24 object-contain"
                     :src="
-                      roles.toImage(game.data.value.player_characters[0].name)
+                      roles.toImage(
+                        game.data.value.player_characters[
+                          game.data.value.player_characters.length - 1
+                        ].name
+                      )
                     "
                   />
                 </div>
