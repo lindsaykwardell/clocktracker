@@ -79,6 +79,13 @@
                         ].name
                       )
                     "
+                    :onerror="`this.src='/img/role/${
+                      game.data.value.player_characters[
+                        game.data.value.player_characters.length - 1
+                      ].alignment === 'GOOD'
+                        ? 'good'
+                        : 'evil'
+                    }.png'; this.onerror=null;`"
                   />
                   <div
                     v-if="
