@@ -12,9 +12,8 @@
       class="flex flex-col gap-4 items-center"
       @submit.prevent="saveSettings"
     >
-      <Avatar
-        :value="settings.data.value?.avatar || settings.data.value?.email"
-      />
+      <Avatar :value="avatar" />
+      <button @click.prevent.stop="selectAvatar">Upload new avatar</button>
       <label class="block w-[300px]">
         <span class="block">Username</span>
         <input
@@ -83,6 +82,8 @@
 </template>
 
 <script setup lang="ts">
+import { v4 as uuid } from "uuid";
+
 definePageMeta({
   middleware: "auth",
 });
@@ -92,8 +93,10 @@ const router = useRouter();
 const inFlight = ref(false);
 const errorMessage = ref<string>();
 
+const supabase = useSupabaseClient();
 const user = useSupabaseUser();
 const settings = await useFetch("/api/settings");
+const config = useRuntimeConfig();
 
 if (settings.data.value?.finished_welcome) {
   router.push("/");
@@ -101,10 +104,38 @@ if (settings.data.value?.finished_welcome) {
   render.value = true;
 }
 
+const avatar = ref(settings.data.value?.avatar || "");
 const username = ref(settings.data.value?.username);
 const displayName = ref(settings.data.value?.display_name);
 const pronouns = ref(settings.data.value?.pronouns);
 const location = ref(settings.data.value?.location);
+
+function selectAvatar() {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/jpg, image/jpeg, image/png";
+  input.onchange = uploadAvatar;
+  input.click();
+}
+
+async function uploadAvatar(event: Event) {
+  const newlyUploadedAvatar = (event.target as HTMLInputElement).files?.[0];
+
+  if (!newlyUploadedAvatar) {
+    return;
+  }
+
+  const { data, error } = await supabase.storage
+    .from("avatars")
+    .upload(`${uuid()}`, newlyUploadedAvatar);
+
+  if (error) {
+    inFlight.value = false;
+    throw error;
+  }
+
+  avatar.value = `${config.public.supabase.url}/storage/v1/object/public/avatars/${data.path}`;
+}
 
 async function saveSettings() {
   inFlight.value = true;
@@ -116,6 +147,7 @@ async function saveSettings() {
       pronouns: pronouns.value,
       location: location.value,
       finished_welcome: true,
+      avatar: avatar.value,
     }),
   });
 
