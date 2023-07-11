@@ -58,16 +58,6 @@
         <div
           class="absolute w-full top-0 left-0 bg-gradient-to-b from-black/75 via-black/50 to-black-0 h-[100px]"
         />
-        <!-- <div
-          class="absolute bottom-0 w-full p-1 text-black text-sm md:text-base text-left bg-gradient-to-b from-stone-300/25 to-stone-300/75"
-        >
-          <div>
-            {{ formatDate(game.date) }}
-          </div>
-          <div class="font-bold">
-            {{ game.script }}
-          </div>
-        </div> -->
         <img
           class="absolute top-2 right-2 w-8 h-8 md:w-12 md:h-12"
           :src="game.win ? '/img/win.png' : '/img/loss.png'"
@@ -75,12 +65,12 @@
         <div
           class="absolute top-1 left-1 w-16 h-16 md:w-20 md:h-20 text-sm text-black font-julee flex flex-col justify-center items-center rounded-lg p-1"
         >
-          <img
-            v-if="isBaseScript(game.script)"
-            :src="scriptLogo(game.script)"
-            class="w-full object-contain"
-          />
-          <div v-else class="font-piratesbay text-white absolute left-2 top-0 md:text-lg">
+          <img :src="scriptLogo(game.script)" class="w-full object-contain" />
+        </div>
+        <div v-if="!isBaseScript(game.script)" class="absolute bottom-0 left-0">
+          <div
+            class="font-piratesbay text-white md:text-lg bg-gradient-to-tr from-black/75 via-black/50 to-black-0 p-1"
+          >
             {{ game.script }}
           </div>
         </div>
