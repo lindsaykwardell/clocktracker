@@ -25,5 +25,8 @@ export const useScripts = () => {
         return "/img/custom-script.webp";
       }
     },
+    isBaseScript: (script: Script | string) => {
+      return baseScripts.includes(script as Script);
+    },
   };
 };

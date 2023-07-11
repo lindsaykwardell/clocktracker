@@ -6,7 +6,7 @@
     >
       <a
         :href="`/@${username}/game/${game.id}`"
-        class="relative w-full bg-gradient-to-b from-purple-800 hover:from-purple-900 to-stone-900 hover:to-stone-950 flex flex-col items-center cursor-pointer rounded overflow-hidden text-black h-72 bg-cover bg-center"
+        class="relative w-full bg-gradient-to-b from-purple-800 hover:from-purple-900 to-stone-900 hover:to-stone-950 flex flex-col items-center cursor-pointer rounded overflow-hidden text-black h-48 md:h-72 bg-cover bg-center"
         :class="{
           'trouble-brewing': game.script === 'Trouble Brewing',
           'sects-and-violets': game.script === 'Sects & Violets',
@@ -58,14 +58,16 @@
         <div
           class="absolute w-full top-0 left-0 bg-gradient-to-b from-black/75 via-black/50 to-black-0 h-[100px]"
         />
-        <div
-          class="absolute bottom-0 w-full p-1 text-black text-sm md:text-base text-left bg-stone-300"
+        <!-- <div
+          class="absolute bottom-0 w-full p-1 text-black text-sm md:text-base text-left bg-gradient-to-b from-stone-300/25 to-stone-300/75"
         >
-          {{ formatDate(game.date) }} |
-          <span class="font-bold">
+          <div>
+            {{ formatDate(game.date) }}
+          </div>
+          <div class="font-bold">
             {{ game.script }}
-          </span>
-        </div>
+          </div>
+        </div> -->
         <img
           class="absolute top-2 right-2 w-8 h-8 md:w-12 md:h-12"
           :src="game.win ? '/img/win.png' : '/img/loss.png'"
@@ -73,7 +75,14 @@
         <div
           class="absolute top-1 left-1 w-16 h-16 md:w-20 md:h-20 text-sm text-black font-julee flex flex-col justify-center items-center rounded-lg p-1"
         >
-          <img :src="scriptLogo(game.script)" class="w-full object-contain" />
+          <img
+            v-if="isBaseScript(game.script)"
+            :src="scriptLogo(game.script)"
+            class="w-full object-contain"
+          />
+          <div v-else class="font-piratesbay text-white absolute left-2 top-0 md:text-lg">
+            {{ game.script }}
+          </div>
         </div>
       </a>
     </div>
@@ -85,7 +94,7 @@ import type { Game, Character } from "@prisma/client";
 import dayjs from "dayjs";
 import naturalOrder from "natural-order";
 
-const { scriptLogo } = useScripts();
+const { scriptLogo, isBaseScript } = useScripts();
 const roles = useRoles();
 const config = useRuntimeConfig();
 
@@ -140,5 +149,10 @@ th {
 
 .custom-script {
   background-image: url("/img/custom-script-bg.webp");
+}
+
+.custom-script-name {
+  -webkit-text-stroke-width: 1px;
+  -webkit-text-stroke-color: white;
 }
 </style>
