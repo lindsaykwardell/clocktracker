@@ -256,7 +256,7 @@ const supabase = useSupabaseClient();
 const inFlight = ref(false);
 
 // Generate bindings for the v-model to connect to for the above inputs
-const date = ref("");
+const date = ref(dayjs().format("YYYY-MM-DD"));
 const script = ref("");
 const locationType = ref<"ONLINE" | "IN_PERSON">("ONLINE");
 const location = ref("");
