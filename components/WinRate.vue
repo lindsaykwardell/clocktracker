@@ -20,10 +20,14 @@ const chartData = computed(() => ({
       label: "Good",
       data: [
         props.games.filter(
-          (game) => game.player_characters[0].alignment === "GOOD" && game.win
+          (game) =>
+            game.player_characters[game.player_characters.length - 1]
+              .alignment === "GOOD" && game.win
         ).length,
         props.games.filter(
-          (game) => game.player_characters[0].alignment === "GOOD" && !game.win
+          (game) =>
+            game.player_characters[game.player_characters.length - 1]
+              .alignment === "GOOD" && !game.win
         ).length,
       ],
       backgroundColor: "blue",
@@ -32,10 +36,14 @@ const chartData = computed(() => ({
       label: "Evil",
       data: [
         props.games.filter(
-          (game) => game.player_characters[0].alignment === "EVIL" && game.win
+          (game) =>
+            game.player_characters[game.player_characters.length - 1]
+              .alignment === "EVIL" && game.win
         ).length,
         props.games.filter(
-          (game) => game.player_characters[0].alignment === "EVIL" && !game.win
+          (game) =>
+            game.player_characters[game.player_characters.length - 1]
+              .alignment === "EVIL" && !game.win
         ).length,
       ],
       backgroundColor: "red",

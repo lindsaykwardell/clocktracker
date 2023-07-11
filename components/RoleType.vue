@@ -19,11 +19,13 @@ const roles = computed(() => {
   const val = { townsfolk: 0, outsider: 0, minion: 0, demon: 0, traveler: 0 };
 
   for (const game of props.games) {
-    if (isTownsfolk(game.player_characters[0].name)) val.townsfolk++;
-    if (isOutsider(game.player_characters[0].name)) val.outsider++;
-    if (isMinion(game.player_characters[0].name)) val.minion++;
-    if (isDemon(game.player_characters[0].name)) val.demon++;
-    if (isTraveler(game.player_characters[0].name)) val.traveler++;
+    for (const character of game.player_characters) {
+      if (isTownsfolk(character.name)) val.townsfolk++;
+      if (isOutsider(character.name)) val.outsider++;
+      if (isMinion(character.name)) val.minion++;
+      if (isDemon(character.name)) val.demon++;
+      if (isTraveler(character.name)) val.traveler++;
+    }
   }
 
   return val;
