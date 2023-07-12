@@ -11,7 +11,7 @@ export default defineEventHandler(async (handler) => {
   });
 
   if (!user) {
-    console.error(`User not found: ${username}`)
+    console.error(`User not found: ${username}`);
     throw createError({
       status: 404,
       statusMessage: "Not Found",
@@ -23,5 +23,8 @@ export default defineEventHandler(async (handler) => {
     username: user.username,
     display_name: user.display_name,
     avatar: user.avatar,
+    pronouns: user.pronouns,
+    bio: user.bio,
+    location: user.location,
   };
 });

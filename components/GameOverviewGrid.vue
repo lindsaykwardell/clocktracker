@@ -2,7 +2,7 @@
   <div class="flex flex-wrap">
     <div
       v-for="game in orderedGames"
-      class="w-1/2 lg:w-1/3 md:p-2 border border-black md:border-none"
+      class="w-1/2 lg:w-1/3 xl:w-1/4 md:p-2 border border-black md:border-none"
     >
       <a
         :href="`/@${username}/game/${game.id}`"
@@ -61,21 +61,14 @@
             </div>
           </div>
         </div>
-        <div
-          class="absolute w-full top-0 left-0 bg-gradient-to-b from-black/75 via-black/50 to-black-0 h-[100px]"
-        />
+        <div class="absolute w-full top-0 left-0" />
         <img
           class="absolute top-2 right-2 w-8 h-8 md:w-12 md:h-12"
           :src="game.win ? '/img/win.png' : '/img/loss.png'"
         />
-        <div
-          class="absolute top-1 left-1 w-16 h-16 md:w-20 md:h-20 text-sm text-black font-dumbledor flex flex-col justify-center items-center rounded-lg p-1"
-        >
-          <img :src="scriptLogo(game.script)" class="w-full object-contain" />
-        </div>
-        <div v-if="!isBaseScript(game.script)" class="absolute bottom-0 left-0">
+        <div class="absolute bottom-0 left-0 w-full">
           <div
-            class="font-dumbledor text-white md:text-lg bg-gradient-to-tr from-black/75 via-black/50 to-black-0 p-1"
+            class="font-gothic text-white md:text-lg bg-gradient-to-tr from-black/75 via-black/50 to-black-25 p-1"
           >
             {{ game.script }}
           </div>
@@ -90,7 +83,6 @@ import type { Game, Character } from "@prisma/client";
 import dayjs from "dayjs";
 import naturalOrder from "natural-order";
 
-const { scriptLogo, isBaseScript } = useScripts();
 const roles = useRoles();
 const config = useRuntimeConfig();
 

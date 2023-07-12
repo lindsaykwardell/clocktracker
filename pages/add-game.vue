@@ -1,5 +1,5 @@
 <template>
-  <DashboardTemplate>
+  <AuthenticatedTemplate>
     <section class="py-6">
       <h2 class="font-dumbledor text-4xl text-center">Add Game</h2>
       <form class="max-w-[1000px] m-auto py-6" @submit.prevent="submitGame">
@@ -234,7 +234,7 @@
         </button>
       </form>
     </section>
-  </DashboardTemplate>
+  </AuthenticatedTemplate>
 </template>
 
 <script setup lang="ts">

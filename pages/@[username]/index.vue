@@ -1,12 +1,12 @@
 <template>
-  <DashboardTemplate>
+  <AuthenticatedTemplate>
     <Dashboard
       :player="player.data.value"
       :games="games.data.value || []"
       :readonly="readonly"
       @deleteGame="deleteGame"
     />
-  </DashboardTemplate>
+  </AuthenticatedTemplate>
 </template>
 
 <script setup lang="ts">

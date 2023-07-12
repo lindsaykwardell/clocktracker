@@ -1,8 +1,8 @@
 <template>
-  <DashboardTemplate>
+  <AuthenticatedTemplate>
     <section
       v-if="game.data.value"
-      class="bg-gradient-to-b from-stone-100 to-stone-300 text-black w-full lg:w-4/5 m-auto my-4 rounded shadow-lg p-4"
+      class="bg-gradient-to-b from-stone-100 to-stone-300 text-black w-full lg:w-4/5 m-auto md:my-4 rounded shadow-lg p-4"
     >
       <div class="flex flex-col-reverse md:flex-row items-center">
         <div class="flex-grow flex flex-col w-full">
@@ -183,7 +183,7 @@
         </div>
       </template>
     </section>
-  </DashboardTemplate>
+  </AuthenticatedTemplate>
 </template>
 
 <script setup lang="ts">

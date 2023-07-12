@@ -1,5 +1,5 @@
 <template>
-  <DashboardTemplate>
+  <AuthenticatedTemplate>
     <section
       class="w-full flex flex-col items-center justify-center gap-12 py-4"
     >
@@ -48,7 +48,6 @@
             v-model="bio"
             class="block w-full border border-stone-500 rounded-md p-2 text-black"
             rows="5"
-            required
           ></textarea>
         </label>
         <button
@@ -84,7 +83,7 @@
         <span class="text-red-600">{{ errorMessage }}</span>
       </form>
     </section>
-  </DashboardTemplate>
+  </AuthenticatedTemplate>
 </template>
 
 <script setup lang="ts">
