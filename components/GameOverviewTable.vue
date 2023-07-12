@@ -1,6 +1,6 @@
 <template>
   <div class="overflow-scroll">
-    <table class="w-[1000px] md:w-full m-auto my-6">
+    <table class="w-[1000px] lg:w-full m-auto my-6">
       <thead class="font-bold font-dumbledor text-left text-xl">
         <tr>
           <th @click="orderGames('date')">
@@ -27,8 +27,8 @@
               {{ orderDirection === "asc" ? "⬆" : "⬇" }}
             </span>
           </th>
-          <th @click="orderGames('initial_character')">
-            Initial Character
+          <th>
+            End Character
             <span v-if="orderBy === 'initial_character'">
               {{ orderDirection === "asc" ? "⬆" : "⬇" }}
             </span>
@@ -65,8 +65,15 @@
           <td>{{ game.script }}</td>
           <td>{{ game.location }}</td>
           <td>{{ game.player_count }}</td>
-          <td>{{ game.player_characters[0].name }}</td>
-          <td>{{ game.player_characters[0].alignment }}</td>
+          <td>
+            {{ game.player_characters[game.player_characters.length - 1].name }}
+          </td>
+          <td>
+            {{
+              game.player_characters[game.player_characters.length - 1]
+                .alignment
+            }}
+          </td>
           <td>
             {{ game.final3 === null ? "-" : game.final3 ? "Yes" : "No" }}
           </td>
@@ -130,7 +137,10 @@ function formatDate(date: Date) {
 }
 
 function rowHighlight(game: Game & { player_characters: Character[] }) {
-  if (game.player_characters[0].alignment === "GOOD") {
+  if (
+    game.player_characters[game.player_characters.length - 1].alignment ===
+    "GOOD"
+  ) {
     if (game.win) {
       return "bg-blue-400 dark:bg-blue-800 hover:bg-blue-600";
     } else {
