@@ -175,7 +175,7 @@
               <a :href="fullImageUrl(file)" target="_blank">
                 <img
                   :src="fullImageUrl(file)"
-                  class="w-64 h-64 object-cover shadow-lg"
+                  class="w-full sm:w-1/2 md:w-64 md:h-64 object-cover shadow-lg"
                 />
               </a>
             </div>
