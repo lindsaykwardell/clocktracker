@@ -46,6 +46,7 @@
                 ? 'good'
                 : 'evil'
             }.png'; this.onerror=null;`"
+            loading="lazy"
           />
           <div
             v-if="
@@ -61,6 +62,7 @@
                     .related || ''
                 )
               "
+              loading="lazy"
             />
           </div>
         </div>
