@@ -93,7 +93,7 @@
                 :readonly="readonly"
                 @delete="emit('deleteGame', $event)"
               />
-              <GameOverviewTable
+              <GameOverviewList
                 v-if="gameView === 'table'"
                 :games="games"
                 :username="player.username"
