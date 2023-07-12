@@ -30,7 +30,7 @@
             </div>
           </div>
           <div class="bg-stone-900 p-4 w-full md:w-3/4 lg:w-2/3 xl:w-1/2 m-auto shadow-xl">
-            <p class="whitespace-pre">
+            <p class="whitespace-pre-wrap	">
               {{ player.bio }}
             </p>
           </div>

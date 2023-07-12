@@ -166,7 +166,7 @@
         v-if="game.data.value.notes || game.data.value.image_urls.length"
       >
         <h3 class="font-dumbledor text-2xl">Notes and Images</h3>
-        <p v-if="game.data.value.notes" class="bg-stone-100 p-4 shadow-lg my-3 whitespace-pre">
+        <p v-if="game.data.value.notes" class="bg-stone-100 p-4 shadow-lg my-3 whitespace-pre-wrap">
           {{ game.data.value?.notes }}
         </p>
         <div class="flex flex-col gap-5">
