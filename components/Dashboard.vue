@@ -37,7 +37,7 @@
           <div class="flex flex-col gap-4">
             <div class="flex gap-3 justify-end px-4">
               <button
-                class="rounded w-[100px] py-1 justify-center font-dumbledor text-lg flex gap-2 bg-stone-600 hover:bg-stone-700 transition duration-150"
+                class="rounded w-[100px] py-1 justify-center text-lg flex gap-2 bg-stone-600 hover:bg-stone-700 transition duration-150"
                 :class="{
                   'bg-stone-600': gameView !== 'grid',
                   'bg-stone-700': gameView === 'grid',
@@ -59,7 +59,7 @@
                 Grid
               </button>
               <button
-                class="rounded w-[100px] py-1 justify-center font-dumbledor text-lg flex gap-2 bg-stone-600 hover:bg-stone-700 transition duration-150"
+                class="rounded w-[100px] py-1 justify-center text-lg flex gap-2 bg-stone-600 hover:bg-stone-700 transition duration-150"
                 :class="{
                   'bg-stone-600': gameView !== 'table',
                   'bg-stone-700': gameView === 'table',
