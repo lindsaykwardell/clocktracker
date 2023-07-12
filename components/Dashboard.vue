@@ -13,7 +13,9 @@
                   class="border-2 shadow-xl flex-shrink"
                   size="lg"
                 />
-                <div class="flex-grow flex flex-col items-center md:items-start">
+                <div
+                  class="flex-grow flex flex-col items-center md:items-start"
+                >
                   <h3 class="font-dumbledor text-2xl lg:text-3xl">
                     {{ player.display_name }}
                   </h3>
@@ -42,11 +44,9 @@
                 </div>
               </div>
               <hr class="border-stone-100 w-full my-4" />
-              <div class="p-4">
-                <p class="whitespace-pre-wrap">
-                  {{ player.bio }}
-                </p>
-              </div>
+              <p class="whitespace-pre-wrap text-left w-full py-4">
+                {{ player.bio }}
+              </p>
             </div>
           </div>
           <div class="flex flex-col gap-4">
