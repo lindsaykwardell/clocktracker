@@ -85,7 +85,7 @@
                 Table
               </button>
             </div>
-            <div class="w-screen overflow-hidden">
+            <div class="w-screen md:w-auto overflow-hidden">
               <GameOverviewGrid
                 v-if="gameView === 'grid'"
                 :games="games"

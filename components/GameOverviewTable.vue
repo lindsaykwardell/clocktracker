@@ -1,6 +1,6 @@
 <template>
   <div class="overflow-scroll">
-    <table class="w-[1000px] lg:w-full m-auto my-6">
+    <table class="w-[1000px] md:w-full m-auto my-6">
       <thead class="font-bold font-dumbledor text-left text-xl">
         <tr>
           <th @click="orderGames('date')">
@@ -15,12 +15,12 @@
               {{ orderDirection === "asc" ? "⬆" : "⬇" }}
             </span>
           </th>
-          <th @click="orderGames('location')">
+          <!-- <th @click="orderGames('location')">
             Location
             <span v-if="orderBy === 'location'">
               {{ orderDirection === "asc" ? "⬆" : "⬇" }}
             </span>
-          </th>
+          </th> -->
           <th @click="orderGames('player_count')">
             Players
             <span v-if="orderBy === 'player_count'">
@@ -28,23 +28,23 @@
             </span>
           </th>
           <th>
-            End Character
+            Character
             <span v-if="orderBy === 'initial_character'">
               {{ orderDirection === "asc" ? "⬆" : "⬇" }}
             </span>
           </th>
           <th @click="orderGames('alignment')">
-            End Alignment
+            Alignment
             <span v-if="orderBy === 'alignment'">
               {{ orderDirection === "asc" ? "⬆" : "⬇" }}
             </span>
           </th>
-          <th @click="orderGames('final3')">
+          <!-- <th @click="orderGames('final3')">
             Final 3?
             <span v-if="orderBy === 'final3'">
               {{ orderDirection === "asc" ? "⬆" : "⬇" }}
             </span>
-          </th>
+          </th> -->
           <th @click="orderGames('win')">
             Win?
             <span v-if="orderBy === 'win'">
@@ -63,7 +63,7 @@
         >
           <td>{{ formatDate(game.date) }}</td>
           <td>{{ game.script }}</td>
-          <td>{{ game.location }}</td>
+          <!-- <td>{{ game.location }}</td> -->
           <td>{{ game.player_count }}</td>
           <td>
             {{ game.player_characters[game.player_characters.length - 1].name }}
@@ -74,9 +74,9 @@
                 .alignment
             }}
           </td>
-          <td>
+          <!-- <td>
             {{ game.final3 === null ? "-" : game.final3 ? "Yes" : "No" }}
-          </td>
+          </td> -->
           <td>{{ game.win ? "Yes" : "No" }}</td>
           <td v-if="!readonly">
             <button @click.stop="emits('delete', game.id)">
