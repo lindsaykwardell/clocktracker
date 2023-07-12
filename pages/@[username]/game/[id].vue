@@ -172,7 +172,7 @@
         <div class="flex flex-col gap-5">
           <div class="flex flex-wrap gap-5">
             <div v-for="file in game.data.value?.image_urls" :key="file">
-              <a :href="fullImageUrl(file)" target="_blank">
+              <a :href="fullImageUrl(file)" target="_blank" class="w-full sm:w-1/2 md:w-64 md:h-64">
                 <img
                   :src="fullImageUrl(file)"
                   class="w-full sm:w-1/2 md:w-64 md:h-64 object-cover shadow-lg"
