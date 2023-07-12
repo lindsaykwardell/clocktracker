@@ -2,7 +2,7 @@
   <div class="flex flex-wrap">
     <div
       v-for="game in orderedGames"
-      class="w-1/2 lg:w-1/3 xl:w-1/4 md:p-2 border border-black md:border-none"
+      class="w-1/2 lg:w-1/3 xl:w-1/4 border border-black"
     >
       <a
         :href="`/@${username}/game/${game.id}`"
@@ -20,7 +20,7 @@
         <img
           v-if="game.image_urls[0]"
           :src="fullImageUrl(game.image_urls[0])"
-          class="absolute bottom-0 w-full h-full object-cover blur"
+          class="absolute bottom-0 w-full h-full object-cover blur-sm"
         />
         <div
           class="flex-grow items-center justify-center flex font-dumbledor text-3xl"
