@@ -29,8 +29,10 @@
               {{ player.location }}
             </div>
           </div>
-          <div class="bg-stone-900 p-4 w-full md:w-3/4 lg:w-2/3 xl:w-1/2 m-auto shadow-xl">
-            <p class="whitespace-pre-wrap	">
+          <div
+            class="bg-stone-900 p-4 w-full md:w-3/4 lg:w-2/3 xl:w-1/2 m-auto shadow-xl"
+          >
+            <p class="whitespace-pre-wrap">
               {{ player.bio }}
             </p>
           </div>
@@ -123,13 +125,13 @@ const gameView = ref<"grid" | "table">("grid");
 
 defineProps<{
   player: {
-    user_id: string;
     username: string;
+    user_id: string;
     display_name: string;
     avatar: string | null;
-    pronouns: string;
-    location: string;
+    pronouns: string | null;
     bio: string;
+    location: string | null;
   } | null;
   games: (Game & { player_characters: Character[] })[];
   readonly?: boolean;
