@@ -85,7 +85,7 @@
                 Table
               </button>
             </div>
-            <div class="flex-grow">
+            <div class="w-screen overflow-hidden">
               <GameOverviewGrid
                 v-if="gameView === 'grid'"
                 :games="games"
