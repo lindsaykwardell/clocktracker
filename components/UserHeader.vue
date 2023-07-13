@@ -37,7 +37,7 @@
       <p class="whitespace-pre-wrap text-left w-full py-4">
         {{ player.bio }}
       </p>
-      
+      <slot />
     </div>
   </div>
 </template>

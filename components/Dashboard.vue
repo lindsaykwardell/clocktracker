@@ -110,7 +110,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Game, Character, UserSettings } from "@prisma/client";
+import type { Game, Character } from "@prisma/client";
 import naturalOrder from "natural-order";
 
 const gameView = ref<"grid" | "table">("grid");

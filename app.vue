@@ -39,8 +39,4 @@ ChartJS.register(
 body {
   @apply bg-stone-800 font-gothic text-stone-100;
 }
-
-.router-link-active {
-  @apply underline;
-}
 </style>
