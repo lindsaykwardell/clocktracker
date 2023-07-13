@@ -8,9 +8,11 @@
       <div class="hidden md:block md:col-span-2 z-10">Location</div>
       <div class="hidden md:block md:col-span-2 z-10">Community</div>
       <div class="hidden md:block md:col-span-1 z-10">Players</div>
-      <div class="col-span-2 md:col-span-1 z-10 text-right md:text-left">Win/Loss</div>
+      <div class="col-span-2 md:col-span-1 z-10 text-right md:text-left">
+        Win/Loss
+      </div>
     </div>
-    <div v-for="game in orderedGames" class="w-full border border-black">
+    <div v-for="game in games" class="w-full border border-black">
       <a
         :href="`/@${username}/game/${game.id}`"
         class="relative w-full cursor-pointer overflow-hidden min-h-12 min-md:h-16 bg-cover grid grid-cols-12 bg-center items-center gap-2 p-2"
@@ -37,11 +39,11 @@
             class="md:w-12 md:h-12"
             :src="
               roles.toImage(
-                game.player_characters[game.player_characters.length - 1].name
+                game.last_character.name
               )
             "
             :onerror="`this.src='/img/role/${
-              game.player_characters[game.player_characters.length - 1]
+              game.last_character
                 .alignment === 'GOOD'
                 ? 'good'
                 : 'evil'
@@ -50,7 +52,7 @@
           />
           <div
             v-if="
-              game.player_characters[game.player_characters.length - 1].related
+              game.last_character.related
             "
             class="token bg-center bg-cover absolute -bottom-1 -right-1 rounded-full w-4 h-4 md:w-6 md:h-6 shadow-xl border border-black flex justify-center items-center"
           >
@@ -58,7 +60,7 @@
               class=""
               :src="
                 roles.toImage(
-                  game.player_characters[game.player_characters.length - 1]
+                  game.last_character
                     .related || ''
                 )
               "
@@ -96,33 +98,18 @@
 <script setup lang="ts">
 import type { Game, Character } from "@prisma/client";
 import dayjs from "dayjs";
-import naturalOrder from "natural-order";
 
 const roles = useRoles();
 const config = useRuntimeConfig();
 
-const props = defineProps<{
-  games: (Game & { player_characters: Character[] })[];
+defineProps<{
+  games: (Game & {
+    player_characters: Character[];
+    last_character: Character;
+  })[];
   readonly?: boolean;
   username: string;
 }>();
-const emits = defineEmits(["delete"]);
-
-const orderBy = ref("date");
-const orderDirection = ref<"asc" | "desc">("desc");
-
-const orderedGames = computed(() =>
-  naturalOrder(props.games).orderBy(orderDirection.value).sort([orderBy.value])
-);
-
-function orderGames(column: string) {
-  if (orderBy.value === column) {
-    orderDirection.value = orderDirection.value === "asc" ? "desc" : "asc";
-  } else {
-    orderBy.value = column;
-    orderDirection.value = "desc";
-  }
-}
 
 function formatDate(date: Date) {
   return dayjs(date).format("M/D/YYYY");
