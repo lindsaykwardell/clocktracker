@@ -4,11 +4,11 @@
     <div class="w-full grid grid-cols-12 px-2 text-xl">
       <div class="col-span-3 md:col-span-2 xl:col-span-1">Character</div>
       <div class="hidden md:block md:col-span-2 xl:col-span-1 z-10">Date</div>
-      <div class="col-span-7 md:col-span-2 xl:col-span-4 z-10">Script</div>
+      <div class="col-span-6 md:col-span-2 xl:col-span-4 z-10">Script</div>
       <div class="hidden md:block md:col-span-2 z-10">Location</div>
       <div class="hidden md:block md:col-span-2 z-10">Community</div>
       <div class="hidden md:block md:col-span-1 z-10">Players</div>
-      <div class="w-8 h-8 md:w-12 md:h-12 col-span-1 z-10">Win/Loss</div>
+      <div class="col-span-2 md:col-span-1 z-10 text-right md:text-left">Win/Loss</div>
     </div>
     <div v-for="game in orderedGames" class="w-full border border-black">
       <a
