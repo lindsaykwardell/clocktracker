@@ -1,152 +1,98 @@
 <template>
   <template v-if="player">
     <template v-if="games.length">
-      <section class="flex flex-col md:flex-row gap-8 pb-20 md:pb-0">
-        <div class="w-full flex flex-col gap-8">
-          <div class="bg-stone-950 shadow-lg">
-            <div
-              class="flex flex-col items-center p-2 w-full md:w-3/4 lg:w-2/3 xl:w-1/2 m-auto"
-            >
-              <div class="flex flex-col md:flex-row items-center gap-3 w-full">
-                <Avatar
-                  :value="player.avatar || ''"
-                  class="border-2 shadow-xl flex-shrink"
-                  size="lg"
-                />
-                <div
-                  class="flex-grow flex flex-col items-center md:items-start"
+      <section class="w-full flex flex-col md:flex-row gap-8 pb-20 md:pb-0">
+        <div class="w-full flex flex-col gap-4">
+          <div class="flex flex-col md:flex-row gap-3 px-4">
+            <label class="flex gap-2 items-center">
+              <span class="block whitespace-nowrap w-20 md:w-auto"
+                >Sort By</span
+              >
+              <select
+                v-model="sortBy"
+                class="w-full rounded p-1 text-lg bg-stone-600"
+              >
+                <option value="date">Date</option>
+                <option value="character">Character</option>
+                <option value="script">Script</option>
+                <option value="location">Location</option>
+                <option value="community">Community</option>
+                <option value="players">Players</option>
+              </select>
+            </label>
+            <label class="flex gap-2 items-center">
+              <span class="block whitespace-nowrap w-20 md:w-auto">Order</span>
+              <select
+                v-model="orderBy"
+                class="w-full rounded p-1 text-lg bg-stone-600"
+              >
+                <option value="asc">Ascending</option>
+                <option value="desc">Descending</option>
+              </select>
+            </label>
+            <div class="flex-grow"></div>
+            <div class="flex gap-2 items-center">
+              <button
+                class="rounded w-[100px] py-1 justify-center text-lg flex gap-2 bg-stone-600 hover:bg-stone-700 transition duration-150"
+                :class="{
+                  'bg-stone-600': gameView !== 'grid',
+                  'bg-stone-700': gameView === 'grid',
+                }"
+                @click="gameView = 'grid'"
+                :disabled="gameView === 'grid'"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="32"
+                  height="32"
+                  viewBox="0 0 32 32"
                 >
-                  <h3 class="font-dumbledor text-2xl lg:text-3xl">
-                    {{ player.display_name }}
-                  </h3>
-                  <div class="md:text-lg text-stone-400">
-                    {{ player.username }}
-                    <template v-if="player.pronouns">
-                      | {{ player.pronouns }}</template
-                    >
-                  </div>
-                  <div
-                    class="md:text-lg text-stone-400 flex gap-2 items-center"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="32"
-                      height="32"
-                      viewBox="0 0 32 32"
-                    >
-                      <path
-                        fill="currentColor"
-                        d="M16 2a14 14 0 1 0 14 14A14.016 14.016 0 0 0 16 2ZM4.02 16.394l1.338.446L7 19.303v1.283a1 1 0 0 0 .293.707L10 24v2.377a11.994 11.994 0 0 1-5.98-9.983ZM16 28a11.968 11.968 0 0 1-2.572-.285L14 26l1.805-4.512a1 1 0 0 0-.097-.926l-1.411-2.117a1 1 0 0 0-.832-.445h-4.93l-1.248-1.873L9.414 14H11v2h2v-2.734l3.868-6.77l-1.736-.992L14.277 7h-2.742L10.45 5.371A11.861 11.861 0 0 1 20 4.7V8a1 1 0 0 0 1 1h1.465a1 1 0 0 0 .832-.445l.877-1.316A12.033 12.033 0 0 1 26.894 11H22.82a1 1 0 0 0-.98.804l-.723 4.47a1 1 0 0 0 .54 1.055L25 19l.685 4.056A11.98 11.98 0 0 1 16 28Z"
-                      />
-                    </svg>
-                    {{ player.location }}
-                  </div>
-                </div>
-              </div>
-              <hr class="border-stone-100 w-full my-4" />
-              <p class="whitespace-pre-wrap text-left w-full py-4">
-                {{ player.bio }}
-              </p>
+                  <path
+                    fill="currentColor"
+                    d="M12 4H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 8H6V6h6zm14-8h-6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 8h-6V6h6zm-14 6H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2zm0 8H6v-6h6zm14-8h-6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2zm0 8h-6v-6h6z"
+                  />
+                </svg>
+                Grid
+              </button>
+              <button
+                class="rounded w-[100px] py-1 justify-center text-lg flex gap-2 bg-stone-600 hover:bg-stone-700 transition duration-150"
+                :class="{
+                  'bg-stone-600': gameView !== 'table',
+                  'bg-stone-700': gameView === 'table',
+                }"
+                @click="gameView = 'table'"
+                :disabled="gameView === 'table'"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="32"
+                  height="32"
+                  viewBox="0 0 32 32"
+                >
+                  <path
+                    fill="currentColor"
+                    d="M12 29H5a2.002 2.002 0 0 1-2-2v-7a2.002 2.002 0 0 1 2-2h7a2.002 2.002 0 0 1 2 2v7a2.002 2.002 0 0 1-2 2Zm-7-9v7h7v-7Z"
+                  />
+                  <path
+                    fill="currentColor"
+                    d="M27 3H5a2 2 0 0 0-2 2v10h2v-4h10v4h2v-4h10v7H17v2h10v7H17v2h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm0 6H5V5h22Z"
+                  />
+                </svg>
+                Table
+              </button>
             </div>
           </div>
-          <div class="flex flex-col gap-4">
-            <div class="flex flex-col md:flex-row gap-3 px-4">
-              <label class="flex gap-2 items-center">
-                <span class="block whitespace-nowrap w-20 md:w-auto"
-                  >Sort By</span
-                >
-                <select
-                  v-model="sortBy"
-                  class="w-full rounded p-1 text-lg bg-stone-600"
-                >
-                  <option value="date">Date</option>
-                  <option value="character">Character</option>
-                  <option value="script">Script</option>
-                  <option value="location">Location</option>
-                  <option value="community">Community</option>
-                  <option value="players">Players</option>
-                </select>
-              </label>
-              <label class="flex gap-2 items-center">
-                <span class="block whitespace-nowrap w-20 md:w-auto"
-                  >Order</span
-                >
-                <select
-                  v-model="orderBy"
-                  class="w-full rounded p-1 text-lg bg-stone-600"
-                >
-                  <option value="asc">Ascending</option>
-                  <option value="desc">Descending</option>
-                </select>
-              </label>
-              <div class="flex-grow"></div>
-              <div class="flex gap-2 items-center">
-                <button
-                  class="rounded w-[100px] py-1 justify-center text-lg flex gap-2 bg-stone-600 hover:bg-stone-700 transition duration-150"
-                  :class="{
-                    'bg-stone-600': gameView !== 'grid',
-                    'bg-stone-700': gameView === 'grid',
-                  }"
-                  @click="gameView = 'grid'"
-                  :disabled="gameView === 'grid'"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="32"
-                    height="32"
-                    viewBox="0 0 32 32"
-                  >
-                    <path
-                      fill="currentColor"
-                      d="M12 4H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 8H6V6h6zm14-8h-6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 8h-6V6h6zm-14 6H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2zm0 8H6v-6h6zm14-8h-6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2zm0 8h-6v-6h6z"
-                    />
-                  </svg>
-                  Grid
-                </button>
-                <button
-                  class="rounded w-[100px] py-1 justify-center text-lg flex gap-2 bg-stone-600 hover:bg-stone-700 transition duration-150"
-                  :class="{
-                    'bg-stone-600': gameView !== 'table',
-                    'bg-stone-700': gameView === 'table',
-                  }"
-                  @click="gameView = 'table'"
-                  :disabled="gameView === 'table'"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="32"
-                    height="32"
-                    viewBox="0 0 32 32"
-                  >
-                    <path
-                      fill="currentColor"
-                      d="M12 29H5a2.002 2.002 0 0 1-2-2v-7a2.002 2.002 0 0 1 2-2h7a2.002 2.002 0 0 1 2 2v7a2.002 2.002 0 0 1-2 2Zm-7-9v7h7v-7Z"
-                    />
-                    <path
-                      fill="currentColor"
-                      d="M27 3H5a2 2 0 0 0-2 2v10h2v-4h10v4h2v-4h10v7H17v2h10v7H17v2h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm0 6H5V5h22Z"
-                    />
-                  </svg>
-                  Table
-                </button>
-              </div>
-            </div>
-            <div class="w-screen md:w-auto overflow-hidden">
-              <GameOverviewGrid
-                v-if="gameView === 'grid'"
-                :games="sortedGames"
-                :username="player.username"
-                :readonly="readonly"
-                @delete="emit('deleteGame', $event)"
-              />
-              <GameOverviewList
-                v-if="gameView === 'table'"
-                :games="sortedGames"
-                :username="player.username"
-                :readonly="readonly"
-                @delete="emit('deleteGame', $event)"
-              />
-            </div>
+          <div class="w-screen md:w-auto overflow-hidden">
+            <GameOverviewGrid
+              v-if="gameView === 'grid'"
+              :games="sortedGames"
+              :username="player.username"
+            />
+            <GameOverviewList
+              v-if="gameView === 'table'"
+              :games="sortedGames"
+              :username="player.username"
+            />
           </div>
         </div>
       </section>
@@ -184,10 +130,7 @@ const props = defineProps<{
     location: string | null;
   } | null;
   games: (Game & { player_characters: Character[] })[];
-  readonly?: boolean;
 }>();
-
-const emit = defineEmits(["deleteGame"]);
 
 const sortedGames = computed(() =>
   naturalOrder(

@@ -1,11 +1,16 @@
 <template>
   <AuthenticatedTemplate>
-    <Dashboard
-      :player="player.data.value"
-      :games="games.data.value || []"
-      :readonly="readonly"
-      @deleteGame="deleteGame"
-    />
+    <div class="w-full flex flex-col gap-8">
+      <UserHeader :player="player.data.value" />
+      <template v-if="route.query.view === 'charts'">
+        <div>Charts! Woo!</div>
+      </template>
+      <Dashboard
+        v-else
+        :player="player.data.value"
+        :games="games.data.value || []"
+      />
+    </div>
   </AuthenticatedTemplate>
 </template>
 
@@ -16,6 +21,9 @@ const username = useRoute().params.username as string;
 
 const user = useSupabaseUser();
 const player = await useFetch(`/api/user/${username}`);
+const games = await useFetch<(Game & { player_characters: Character[] })[]>(
+  `/api/user/${username}/games`
+);
 
 const readonly = computed(() => player.data.value?.user_id !== user.value?.id);
 
@@ -65,18 +73,4 @@ useHead({
     },
   ],
 });
-
-const games = await useFetch<(Game & { player_characters: Character[] })[]>(
-  `/api/user/${username}/games`
-);
-
-async function deleteGame(id: string) {
-  if (confirm("Are you sure you want to delete this game?")) {
-    const result = await fetch(`/api/games/${id}`, {
-      method: "delete",
-    }).then((res) => res.json());
-
-    games.data.value = games.data.value!.filter((game) => game.id !== id);
-  }
-}
 </script>
