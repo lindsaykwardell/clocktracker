@@ -209,7 +209,7 @@
               d="M2 26h28v2H2zM25.4 9c.8-.8.8-2 0-2.8l-3.6-3.6c-.8-.8-2-.8-2.8 0l-15 15V24h6.4l15-15zm-5-5L24 7.6l-3 3L17.4 7l3-3zM6 22v-3.6l10-10l3.6 3.6l-10 10H6z"
             />
           </svg>
-          Edit Game
+          Edit
         </a>
         <button
           @click="deleteGame"
@@ -230,7 +230,7 @@
             <path d="M320 160h-14.6l-10.7 241h14.6z" fill="currentColor" />
             <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
           </svg>
-          Delete Game
+          Delete
         </button>
       </div>
     </section>
