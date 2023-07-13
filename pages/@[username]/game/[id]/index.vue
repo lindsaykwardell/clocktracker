@@ -168,13 +168,20 @@
         v-if="game.data.value.notes || game.data.value.image_urls.length"
       >
         <h3 class="font-dumbledor text-2xl">Notes and Images</h3>
-        <p v-if="game.data.value.notes" class="bg-stone-100 p-4 shadow-lg my-3 whitespace-pre-wrap">
+        <p
+          v-if="game.data.value.notes"
+          class="bg-stone-100 p-4 shadow-lg my-3 whitespace-pre-wrap"
+        >
           {{ game.data.value?.notes }}
         </p>
         <div class="flex flex-col gap-5">
           <div class="flex flex-wrap gap-5">
             <div v-for="file in game.data.value?.image_urls" :key="file">
-              <a :href="fullImageUrl(file)" target="_blank" class="w-full sm:w-1/2 md:w-64 md:h-64">
+              <a
+                :href="fullImageUrl(file)"
+                target="_blank"
+                class="w-full sm:w-1/2 md:w-64 md:h-64"
+              >
                 <img
                   :src="fullImageUrl(file)"
                   class="w-full sm:w-1/2 md:w-64 md:h-64 object-cover shadow-lg"
@@ -184,6 +191,45 @@
           </div>
         </div>
       </template>
+      <div class="pt-4 flex justify-between md:justify-end gap-4">
+        <a
+          class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial"
+          :href="`/@${route.params.username}/game/${route.params.id}/edit`"
+          ><svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 32 32"
+          >
+            <path
+              fill="currentColor"
+              d="M2 26h28v2H2zM25.4 9c.8-.8.8-2 0-2.8l-3.6-3.6c-.8-.8-2-.8-2.8 0l-15 15V24h6.4l15-15zm-5-5L24 7.6l-3 3L17.4 7l3-3zM6 22v-3.6l10-10l3.6 3.6l-10 10H6z"
+            />
+          </svg>
+          Edit Game
+        </a>
+        <button
+          @click="deleteGame"
+          class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial"
+          :href="`/@${route.params.username}/game/${route.params.id}/edit`"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 512 512"
+          >
+            <path
+              d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
+              fill="currentColor"
+            />
+            <path d="M249 160h14v241h-14z" fill="currentColor" />
+            <path d="M320 160h-14.6l-10.7 241h14.6z" fill="currentColor" />
+            <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
+          </svg>
+          Delete Game
+        </button>
+      </div>
     </section>
   </AuthenticatedTemplate>
 </template>
@@ -280,6 +326,16 @@ function scriptLink(script: string) {
       / /g,
       "+"
     )}&script_type=&include=&exclude=&edition=&author=`;
+  }
+}
+
+async function deleteGame() {
+  if (confirm("Are you sure you want to delete this game?")) {
+    const result = await fetch(`/api/games/${route.params.id}`, {
+      method: "delete",
+    }).then((res) => res.json());
+
+    router.push(`/@${route.params.username}`);
   }
 }
 </script>
