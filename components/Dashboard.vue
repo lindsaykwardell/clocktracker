@@ -1,5 +1,5 @@
 <template>
-  <template v-if="player">
+  <template v-if="player && ready">
     <template v-if="games.length">
       <section class="w-full flex flex-col md:flex-row gap-8 pb-20 md:pb-0">
         <div class="w-full flex flex-col gap-4">
@@ -113,6 +113,7 @@
 import type { Game, Character } from "@prisma/client";
 import naturalOrder from "natural-order";
 
+const ready = ref(false);
 const gameView = ref<"grid" | "table">("grid");
 const sortBy = ref<
   "character" | "date" | "script" | "location" | "community" | "players"
@@ -165,13 +166,17 @@ const sortedGames = computed(() =>
 onMounted(() => {
   const lastSortBy = localStorage.getItem("lastSortBy");
   const lastOrderBy = localStorage.getItem("lastOrderBy");
-  console.log(lastSortBy, lastOrderBy);
+  const lastGameView = localStorage.getItem("lastGameView");
   if (lastSortBy) {
     sortBy.value = lastSortBy as any;
   }
   if (lastOrderBy) {
     orderBy.value = lastOrderBy as any;
   }
+  if (lastGameView) {
+    gameView.value = lastGameView as any;
+  }
+  ready.value = true
 });
 
 watch(
@@ -185,6 +190,12 @@ watch(
   () => orderBy.value,
   (value) => {
     localStorage.setItem("lastOrderBy", value);
+  }
+);
+watch(
+  () => gameView.value,
+  (value) => {
+    localStorage.setItem("lastGameView", value);
   }
 );
 </script>
