@@ -3,8 +3,7 @@
     v-if="!user"
     class="w-full h-screen flex flex-col items-center justify-center gap-12"
   >
-    <h1 class="font-dumbledor text-stone-200 text-5xl">ClockTracker</h1>
-    <img src="/demon-head.png" alt="Demon Head" />
+    <img src="/logo.png" class="w-11/12 sm:w-[400px]" alt="ClockTracker" />
     <button
       class="text-center text-lg w-[300px] bg-[#5865F2] hover:bg-[#4752C4] transition duration-150 text-white font-bold py-2 px-4 rounded flex justify-center gap-4 items-center"
       @click="login"
