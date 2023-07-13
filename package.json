@@ -21,6 +21,7 @@
   "dependencies": {
     "@faker-js/faker": "^8.0.2",
     "@prisma/client": "^4.16.2",
+    "@sentry/node": "^7.58.1",
     "@sentry/tracing": "^7.58.1",
     "@sentry/vue": "^7.58.1",
     "@supabase/supabase-js": "^2.26.0",
