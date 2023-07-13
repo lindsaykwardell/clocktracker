@@ -13,7 +13,7 @@
     <div v-for="game in orderedGames" class="w-full border border-black">
       <a
         :href="`/@${username}/game/${game.id}`"
-        class="relative w-full cursor-pointer overflow-hidden h-20 md:h-28 bg-cover grid grid-cols-12 bg-center items-center gap-2 p-2 lg:text-lg xl:text-xl"
+        class="relative w-full cursor-pointer overflow-hidden min-h-12 min-md:h-16 bg-cover grid grid-cols-12 bg-center items-center gap-2 p-2"
         :class="{
           'trouble-brewing': game.script === 'Trouble Brewing',
           'sects-and-violets': game.script === 'Sects & Violets',
@@ -31,10 +31,10 @@
         />
         <div class="absolute bottom-0 left-0 z-0 w-full h-full bg-black/50" />
         <div
-          class="token bg-center bg-cover relative rounded-full w-16 h-16 md:w-24 md:h-24 shadow-xl border border-black flex justify-center items-center col-span-3 md:col-span-2 xl:col-span-1"
+          class="token bg-center bg-cover relative rounded-full w-8 h-8 md:w-12 md:h-12 shadow-xl border border-black flex justify-center items-center col-span-3 md:col-span-2 xl:col-span-1"
         >
           <img
-            class="md:w-20 md:h-20"
+            class="md:w-12 md:h-12"
             :src="
               roles.toImage(
                 game.player_characters[game.player_characters.length - 1].name
@@ -52,7 +52,7 @@
             v-if="
               game.player_characters[game.player_characters.length - 1].related
             "
-            class="token bg-center bg-cover absolute bottom-0 right-0 rounded-full w-6 h-6 md:w-8 md:h-8 shadow-xl border border-black flex justify-center items-center"
+            class="token bg-center bg-cover absolute -bottom-1 -right-1 rounded-full w-4 h-4 md:w-6 md:h-6 shadow-xl border border-black flex justify-center items-center"
           >
             <img
               class=""
