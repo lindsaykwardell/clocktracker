@@ -26,7 +26,7 @@
         }"
       >
         <nuxt-link to="/" class="flex items-center gap-4">
-          <img src="/logo-nowords.png" class="w-[75px]" alt="ClockTracker" />
+          <img src="/logo-ct-sm.png" class="w-[75px] rounded-full" alt="ClockTracker" />
         </nuxt-link>
         <template v-if="user">
           <nuxt-link

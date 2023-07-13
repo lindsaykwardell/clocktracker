@@ -8,7 +8,7 @@ export default defineNuxtConfig({
       viewport: "width=device-width, initial-scale=1",
       link: [
         { rel: "stylesheet", href: "/index.css" },
-        { rel: "icon", type: "image/png", href: "/logo-nowords.png" },
+        { rel: "icon", type: "image/png", href: "/logo-ct-sm.png" },
       ],
     },
   },
