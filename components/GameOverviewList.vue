@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-wrap">
     <!-- Date, Location, Community, Script, Players, Character, Alignment, Win -->
-    <div class="w-full grid grid-cols-12 px-2 text-xl">
+    <div class="w-full grid grid-cols-12 px-2">
       <div class="col-span-3 md:col-span-2 xl:col-span-1">Character</div>
       <div class="hidden md:block md:col-span-2 xl:col-span-1 z-10">Date</div>
       <div class="col-span-6 md:col-span-2 xl:col-span-4 z-10">Script</div>
