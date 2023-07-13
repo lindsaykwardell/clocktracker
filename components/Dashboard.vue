@@ -57,7 +57,7 @@
                 >
                 <select
                   v-model="sortBy"
-                  class="block w-full border border-stone-500 rounded-md p-2 text-black"
+                  class="w-full rounded p-1 text-lg bg-stone-600"
                 >
                   <option value="date">Date</option>
                   <option value="character">Character</option>
@@ -73,7 +73,7 @@
                 >
                 <select
                   v-model="orderBy"
-                  class="block w-full border border-stone-500 rounded-md p-2 text-black"
+                  class="w-full rounded p-1 text-lg bg-stone-600"
                 >
                   <option value="asc">Ascending</option>
                   <option value="desc">Descending</option>
