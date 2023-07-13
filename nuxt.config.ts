@@ -12,4 +12,9 @@ export default defineNuxtConfig({
       ],
     },
   },
+  runtimeConfig: {
+    public: {
+      sentryDsn: process.env.SENTRY_DSN,
+    },
+  },
 });
