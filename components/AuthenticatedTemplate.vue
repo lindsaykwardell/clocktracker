@@ -1,7 +1,7 @@
 <template>
   <div class="flex relative">
     <nav
-      class="flex flex-col gap-3 pr-1 md:pr-4 pt-1 pl-1 pb-1 rounded md:rounded-none rounded-tl-none md:pb-0 fixed md:sticky z-10 top-0 md:h-screen bg-stone-900"
+      class="flex flex-col gap-3 pr-1 md:pr-4 pt-1 pl-1 pb-1 rounded md:rounded-none rounded-l-none md:pb-0 fixed md:sticky z-10 top-0 md:h-screen bg-stone-900"
       :class="{
         'h-screen': showMenu,
       }"
@@ -20,13 +20,18 @@
         </svg>
       </button>
       <section
+        class="h-full pb-3"
         :class="{
           'hidden md:flex flex-col items-center': !showMenu,
           'flex flex-col items-center': showMenu,
         }"
       >
         <nuxt-link to="/" class="flex items-center gap-4">
-          <img src="/logo-ct-sm.png" class="w-[75px] rounded-full" alt="ClockTracker" />
+          <img
+            src="/logo-ct-sm.png"
+            class="w-[75px] rounded-full"
+            alt="ClockTracker"
+          />
         </nuxt-link>
         <template v-if="user">
           <nuxt-link
@@ -101,6 +106,25 @@
             <span>Login</span>
           </button>
         </template>
+        <div class="flex-grow" />
+        <a
+          href="https://discord.gg/KwMz8ThamT"
+          class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap py-1"
+        >
+          <div>
+            <Discord />
+          </div>
+          <span class="hidden md:inline w-16">Community</span>
+        </a>
+        <a
+          href="https://ko-fi.com/clocktracker"
+          class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap py-1"
+        >
+          <div>
+            <KoFi />
+          </div>
+          <span class="hidden md:inline w-16">Donate</span>
+        </a>
       </section>
     </nav>
     <main class="flex-grow">

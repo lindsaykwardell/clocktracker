@@ -10,7 +10,7 @@
 <script setup lang="ts">
 import type { Game, Character } from "@prisma/client";
 
-const props = defineProps<{
+defineProps<{
   player: {
     username: string;
     user_id: string;
