@@ -10,6 +10,13 @@ export default defineNuxtConfig({
         { rel: "stylesheet", href: "/index.css" },
         { rel: "icon", type: "image/png", href: "/logo-ct-sm.png" },
       ],
+      script: [
+        {
+          "data-goatcounter": "https://clocktracker.goatcounter.com/count",
+          async: true,
+          src: "//gc.zgo.at/count.js",
+        },
+      ],
     },
   },
   runtimeConfig: {
