@@ -22,6 +22,9 @@
           :src="fullImageUrl(game.image_urls[0])"
           class="absolute bottom-0 w-full h-full object-cover blur-sm"
         />
+        <div class="absolute top-0 left-0 text-white md:text-lg bg-gradient-to-br from-black/75 via-black/50 to-black-0 p-1">
+          {{ formatDate(game.date) }}
+        </div>
         <div
           class="flex-grow items-center justify-center flex font-dumbledor text-3xl"
         >
