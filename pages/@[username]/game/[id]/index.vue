@@ -191,7 +191,10 @@
           </div>
         </div>
       </template>
-      <div class="pt-4 flex justify-between md:justify-end gap-4">
+      <div
+        v-if="player.data.value?.user_id === user?.id"
+        class="pt-4 flex justify-between md:justify-end gap-4"
+      >
         <a
           class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial"
           :href="`/@${route.params.username}/game/${route.params.id}/edit`"
@@ -243,6 +246,7 @@ const roles = useRoles();
 const config = useRuntimeConfig();
 const router = useRouter();
 const route = useRoute();
+const user = useSupabaseUser();
 
 const game = await useFetch<Game & { player_characters: Character[] }>(
   `/api/games/${route.params.id}`
