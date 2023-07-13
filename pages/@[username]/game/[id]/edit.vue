@@ -398,7 +398,7 @@ async function submitGame() {
       location_type: locationType.value,
       location: location.value,
       community: community.value,
-      player_count: playerCount.value,
+      player_count: playerCount.value || null,
       player_characters: characters.map((character) => ({
         name: character.name,
         alignment: character.alignment,
