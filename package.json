@@ -27,6 +27,7 @@
     "@supabase/supabase-js": "^2.26.0",
     "chart.js": "^4.3.0",
     "crypto-js": "^4.1.1",
+    "csv-parser": "^3.0.0",
     "dayjs": "^1.11.9",
     "natural-order": "^2.0.2",
     "uuid": "^9.0.0",

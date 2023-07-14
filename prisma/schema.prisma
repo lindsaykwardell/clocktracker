@@ -33,6 +33,16 @@ model Character {
   game_id   String?
 }
 
+model Script {
+  id       Int    @id
+  name     String
+  version  String
+  author   String
+  type     String
+  json_url String
+  pdf_url  String
+}
+
 enum Alignment {
   GOOD
   EVIL
@@ -54,6 +64,7 @@ model UserSettings {
   bio              String         @default("")
   location         String?
   links            ExternalLink[]
+  is_admin         Boolean        @default(false)
 }
 
 model ExternalLink {
