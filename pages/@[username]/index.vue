@@ -1,7 +1,7 @@
 <template>
   <AuthenticatedTemplate>
     <div class="w-full flex flex-col gap-8">
-      <UserHeader :player="player.data.value">
+      <UserHeader :player="player.data.value!">
         <div class="flex gap-3 justify-start w-full">
           <nuxt-link
             :to="`/@${username}`"
