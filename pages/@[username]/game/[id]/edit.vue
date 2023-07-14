@@ -154,17 +154,7 @@
           class="flex flex-col md:flex-row gap-5 border rounded border-stone-500 p-4 my-3"
         >
           <legend>Game Results</legend>
-          <label>
-            <span class="block">Final 3?</span>
-            <select
-              v-model="final3"
-              class="block w-full border border-stone-500 rounded-md p-2"
-            >
-              <option value="true">Yes</option>
-              <option value="false">No</option>
-            </select>
-          </label>
-          <label>
+          <label class="w-full md:w-[150px]">
             <span class="block">Win?</span>
             <select
               v-model="win"
