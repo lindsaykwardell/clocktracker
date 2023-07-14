@@ -26,12 +26,7 @@ export default defineNuxtConfig({
   },
   pwa: {
     registerType: "autoUpdate",
-    includeAssets: [
-      "/img/**",
-      "/logo-ct-sm.png",
-      "logo.png",
-      "apple-touch-icon.png",
-    ],
+    includeAssets: ["/img/**", "/logo-ct-sm.png", "logo.png"],
     manifest: {
       name: "ClockTracker",
       short_name: "ClockTracker",
