@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col items-center justify-center sm:flex-row flex-wrap gap-y-12">
+  <div class="flex flex-col items-center justify-center sm:flex-row flex-wrap gap-y-12 pb-4">
     <GamesOverTime :games="games" class="h-[250px] w-screen md:w-3/5" />
     <TopCharacters :games="games" class="sm:w-1/2 md:w-2/5 pl-4" />
     <WinRateByRole :games="games" class="h-[250px] w-screen md:w-1/3" />
