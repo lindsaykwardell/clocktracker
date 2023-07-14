@@ -33,6 +33,9 @@ export default defineNuxtConfig({
   },
   pwa: {
     registerType: "autoUpdate",
+    devOptions: {
+      enabled: true,
+    },
     includeAssets: ["/img/**", "/logo-ct-sm.png", "logo.png", "robots.txt"],
     manifest: {
       name: "ClockTracker",
@@ -41,25 +44,19 @@ export default defineNuxtConfig({
       theme_color: "#1C1917",
       icons: [
         {
-          src: "pwa-128.png",
+          src: "/pwa-192x192.png",
           sizes: "192x192",
           type: "image/png",
         },
         {
-          src: "pwa-512x512.png",
+          src: "/pwa-512x512.png",
           sizes: "512x512",
           type: "image/png",
         },
         {
-          src: "pwa-128.png",
+          src: "/pwa-128x128.png",
           sizes: "128x128",
           type: "image/png",
-        },
-        {
-          src: "pwa-512x512.png",
-          sizes: "512x512",
-          type: "image/png",
-          purpose: "any maskable",
         },
       ],
     },

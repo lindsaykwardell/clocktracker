@@ -1,5 +1,6 @@
 <template>
   <NuxtPage />
+  <VitePwaManifest />
 </template>
 
 <script setup lang="ts">
