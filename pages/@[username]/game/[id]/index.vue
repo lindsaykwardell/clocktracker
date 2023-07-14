@@ -74,11 +74,7 @@
                   >
                     <img
                       class="w-8 h-8"
-                      :src="
-                        roles.toImage(
-                          last_character.related || ''
-                        )
-                      "
+                      :src="roles.toImage(last_character.related || '')"
                       loading="lazy"
                     />
                   </div>
@@ -96,10 +92,22 @@
                 {{ game.data.value.script }}
               </a>
             </label>
-            <label class="flex gap-3 items-center">
+            <label
+              v-if="game.data.value.storyteller"
+              class="flex gap-3 items-center"
+            >
+              <span>Storyteller</span>
+              {{ game.data.value.storyteller }}
+            </label>
+            <label
+              v-if="game.data.value.player_count"
+              class="flex gap-3 items-center"
+            >
               <span>Players</span>
               {{ game.data.value.player_count }}
             </label>
+          </div>
+          <div class="flex flex-col md:flex-row gap-4 mt-4 justify-start">
             <label
               v-if="game.data.value.community"
               class="flex gap-3 items-center"
@@ -123,10 +131,6 @@
             class="flex flex-col sm:flex-row gap-5 border rounded border-stone-500 p-4 my-3"
           >
             <legend>Game Results</legend>
-            <label>
-              <span class="block">Final 3?</span>
-              {{ game.data.value?.final3 ? "Yes" : "No" }}
-            </label>
             <label>
               <span class="block">Win?</span>
               {{ game.data.value?.win ? "Yes" : "No" }}
@@ -331,9 +335,7 @@ async function deleteGame() {
 </script>
 
 <style scoped>
-label {
-  flex: 1 1 0%;
-}
+
 
 label span {
   @apply text-sm text-stone-500;
