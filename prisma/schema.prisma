@@ -18,10 +18,10 @@ model Game {
   community         String       @default("")
   player_count      Int?
   player_characters Character[]
-  final3            Boolean?
   win               Boolean
   notes             String
   image_urls        String[]
+  storyteller       String?
 }
 
 model Character {

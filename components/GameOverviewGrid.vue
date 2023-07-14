@@ -91,6 +91,7 @@ function formatDate(date: Date) {
 }
 
 function fullImageUrl(file: string) {
+  if (file.startsWith("http")) return file;
   return `${config.public.supabase.url}/storage/v1/object/public/game-attachments/${file}`;
 }
 </script>
