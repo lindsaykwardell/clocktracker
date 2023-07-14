@@ -100,6 +100,7 @@
     <template v-else>
       <p class="text-center text-2xl my-4 font-dumbledor">No games yet!</p>
       <nuxt-link
+        v-if="user && user.id === player.user_id"
         to="/add-game"
         class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded text-center text-xl m-auto block w-[300px] my-8"
       >
@@ -132,6 +133,8 @@ const props = defineProps<{
   } | null;
   games: (Game & { player_characters: Character[] })[];
 }>();
+
+const user = useSupabaseUser();
 
 const sortedGames = computed(() =>
   naturalOrder(
