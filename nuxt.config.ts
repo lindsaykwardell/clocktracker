@@ -36,7 +36,16 @@ export default defineNuxtConfig({
     devOptions: {
       enabled: true,
     },
-    includeAssets: ["/img/**", "/logo-ct-sm.png", "logo.png", "robots.txt"],
+    includeAssets: [
+      "/img/**",
+      "/img/role/**",
+      "/logo-ct-sm.png",
+      "logo.png",
+      "robots.txt",
+    ],
+    workbox: {
+      globPatterns: ["**/*.{js,css,html}"],
+    },
     manifest: {
       name: "ClockTracker",
       short_name: "ClockTracker",
