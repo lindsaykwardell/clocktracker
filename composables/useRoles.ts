@@ -197,6 +197,7 @@ export const useRoles = () => {
       return `/img/role/${role
         .toLowerCase()
         .replace(/ /g, "")
+        .replace(/'/g, "")
         .replace(/-/g, "")}.png`;
     },
   };
