@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h3 class="font-dumbledor text-2xl text-center">Recent Game Counts</h3>
+    <h3 class="font-dumbledor text-2xl text-center">Games Over Time</h3>
     <Line id="games-over-time" :data="chartData" :options="chartOptions" />
   </div>
 </template>
@@ -47,8 +47,6 @@ for (const game of props.games) {
   else data[month].customScript++;
 }
 
-console.log(data);
-
 const chartData = computed(() => ({
   labels: months,
   datasets: [
@@ -86,11 +84,11 @@ const chartData = computed(() => ({
 const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      display: false,
-    },
-  },
+  // plugins: {
+  //   legend: {
+  //     display: false,
+  //   },
+  // },
   scales: {
     x: {
       stacked: true,
