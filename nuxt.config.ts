@@ -42,6 +42,11 @@ export default defineNuxtConfig({
       short_name: "ClockTracker",
       description: "Record your game details from Blood on the Clocktower",
       theme_color: "#1C1917",
+      orientation: "any",
+      display_override: ["standalone"],
+      handle_links: "auto",
+      categories: ["games", "entertainment"],
+      dir: "ltr",
       icons: [
         {
           src: "/pwa-192x192.png",
@@ -52,6 +57,7 @@ export default defineNuxtConfig({
           src: "/pwa-512x512.png",
           sizes: "512x512",
           type: "image/png",
+          purpose: "any",
         },
         {
           src: "/pwa-128x128.png",
