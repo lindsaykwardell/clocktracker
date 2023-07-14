@@ -33,9 +33,6 @@ export default defineNuxtConfig({
   },
   pwa: {
     registerType: "autoUpdate",
-    devOptions: {
-      enabled: true,
-    },
     includeAssets: [
       "/img/**",
       "/img/role/**",
