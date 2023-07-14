@@ -137,7 +137,15 @@ const sortedGames = computed(() =>
   naturalOrder(
     props.games.map((game) => ({
       ...game,
-      last_character: game.player_characters[game.player_characters.length - 1],
+      last_character: game.player_characters[
+        game.player_characters.length - 1
+      ] || {
+        id: "",
+        name: "",
+        alignment: "",
+        related: null,
+        game_id: game.id,
+      },
     }))
   )
     .orderBy(orderBy.value)
@@ -176,7 +184,7 @@ onMounted(() => {
   if (lastGameView) {
     gameView.value = lastGameView as any;
   }
-  ready.value = true
+  ready.value = true;
 });
 
 watch(

@@ -310,7 +310,7 @@ function addCharacter() {
   characters.push({
     id: null,
     name: "",
-    alignment: characters[0].alignment,
+    alignment: characters[0]?.alignment || "GOOD",
     related: "",
     showRelated: false,
   });

@@ -11,14 +11,8 @@
               :value="player.data.value?.avatar || ''"
               class="border-2 shadow-xl"
               :class="{
-                'border-blue-600':
-                  game.data.value.player_characters[
-                    game.data.value.player_characters.length - 1
-                  ].alignment === 'GOOD',
-                'border-red-600':
-                  game.data.value.player_characters[
-                    game.data.value.player_characters.length - 1
-                  ].alignment === 'EVIL',
+                'border-blue-600': last_character.alignment === 'GOOD',
+                'border-red-600': last_character.alignment === 'EVIL',
               }"
             />
             <div class="flex-grow">
@@ -59,11 +53,7 @@
             </div>
             <div class="font-dumbledor text-2xl">
               <a
-                :href="`https://wiki.bloodontheclocktower.com/${
-                  game.data.value?.player_characters[
-                    game.data.value.player_characters.length - 1
-                  ].name
-                }`"
+                :href="`https://wiki.bloodontheclocktower.com/${last_character.name}`"
                 target="_blank"
                 class="hover:underline flex flex-col items-center"
               >
@@ -72,37 +62,21 @@
                 >
                   <img
                     class="w-24 h-24 object-contain"
-                    :src="
-                      roles.toImage(
-                        game.data.value.player_characters[
-                          game.data.value.player_characters.length - 1
-                        ].name
-                      )
-                    "
+                    :src="roles.toImage(last_character.name)"
                     :onerror="`this.src='/img/role/${
-                      game.data.value.player_characters[
-                        game.data.value.player_characters.length - 1
-                      ].alignment === 'GOOD'
-                        ? 'good'
-                        : 'evil'
+                      last_character.alignment === 'GOOD' ? 'good' : 'evil'
                     }.png'; this.onerror=null;`"
                     loading="lazy"
                   />
                   <div
-                    v-if="
-                      game.data.value.player_characters[
-                        game.data.value.player_characters.length - 1
-                      ].related
-                    "
+                    v-if="last_character.related"
                     class="token bg-center bg-cover absolute bottom-0 right-0 rounded-full w-12 h-12 shadow-xl border border-black flex justify-center items-center"
                   >
                     <img
                       class="w-8 h-8"
                       :src="
                         roles.toImage(
-                          game.data.value.player_characters[
-                            game.data.value.player_characters.length - 1
-                          ].related || ''
+                          last_character.related || ''
                         )
                       "
                       loading="lazy"
@@ -313,6 +287,17 @@ useHead({
     },
   ],
 });
+
+const last_character = computed(
+  () =>
+    game.data.value?.player_characters[
+      game.data.value.player_characters.length - 1
+    ] || {
+      name: "",
+      alignment: "",
+      related: "",
+    }
+);
 
 function fullImageUrl(file: string) {
   return `${config.public.supabase.url}/storage/v1/object/public/game-attachments/${file}`;
