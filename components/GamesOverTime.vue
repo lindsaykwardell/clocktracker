@@ -16,7 +16,7 @@ const props = defineProps<{
 }>();
 
 // Get past six months
-const months = Array.from(Array(6).keys())
+const months = Array.from(Array(12).keys())
   .map((i) => dayjs().subtract(i, "month").format("MMMM"))
   .reverse();
 
