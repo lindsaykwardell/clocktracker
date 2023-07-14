@@ -9,12 +9,19 @@ export default defineNuxtConfig({
       link: [
         { rel: "stylesheet", href: "/index.css" },
         { rel: "icon", type: "image/png", href: "/logo-ct-sm.png" },
+        { rel: "apple-touch-icon", href: "/logo-ct-sm.png" },
       ],
       script: [
         {
           "data-goatcounter": "https://clocktracker.goatcounter.com/count",
           async: true,
           src: "//gc.zgo.at/count.js",
+        },
+      ],
+      meta: [
+        {
+          name: "theme-color",
+          content: "#1C1917",
         },
       ],
     },
@@ -26,7 +33,7 @@ export default defineNuxtConfig({
   },
   pwa: {
     registerType: "autoUpdate",
-    includeAssets: ["/img/**", "/logo-ct-sm.png", "logo.png"],
+    includeAssets: ["/img/**", "/logo-ct-sm.png", "logo.png", "robots.txt"],
     manifest: {
       name: "ClockTracker",
       short_name: "ClockTracker",
