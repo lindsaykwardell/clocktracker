@@ -83,6 +83,7 @@ const chartData = computed(() => ({
 
 const chartOptions = computed(() => ({
   responsive: true,
+  maintainAspectRatio: false,
   scales: {
     x: {
       stacked: true,

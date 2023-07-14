@@ -13,6 +13,7 @@ const baseScripts = [
 
 export const useScripts = () => {
   return {
+    Script,
     baseScripts,
     scriptLogo: (script: Script | string) => {
       if (script === Script.TroubleBrewing) {

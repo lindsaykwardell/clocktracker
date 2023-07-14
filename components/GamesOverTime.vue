@@ -10,6 +10,7 @@ import type { Game } from "@prisma/client";
 import { Line } from "vue-chartjs";
 import dayjs from "dayjs";
 
+const { Script } = useScripts();
 const props = defineProps<{
   games: Game[];
 }>();
@@ -19,26 +20,66 @@ const months = Array.from(Array(6).keys())
   .map((i) => dayjs().subtract(i, "month").format("MMMM"))
   .reverse();
 
-const data: { [key: string]: number } = {};
+const data: {
+  [key: string]: {
+    troubleBrewing: number;
+    sectsAndViolets: number;
+    badMoonRising: number;
+    customScript: number;
+  };
+} = {};
 
 for (const game of props.games) {
   const month = dayjs(game.date).format("MMMM");
-  if (data[month]) {
-    data[month] += 1;
-  } else {
-    data[month] = 1;
+  if (!data[month]) {
+    data[month] = {
+      troubleBrewing: 0,
+      sectsAndViolets: 0,
+      badMoonRising: 0,
+      customScript: 0,
+    };
   }
+
+  if (game.script === Script.TroubleBrewing) data[month].troubleBrewing++;
+  else if (game.script === Script.SectsAndViolets)
+    data[month].sectsAndViolets++;
+  else if (game.script === Script.BadMoonRising) data[month].badMoonRising++;
+  else data[month].customScript++;
 }
+
+console.log(data);
 
 const chartData = computed(() => ({
   labels: months,
   datasets: [
     {
-      data: months.map((month) => data[month] ?? 0),
-      // backgroundColor: "blue",
+      label: "Trouble Brewing",
+      data: months.map((month) => data[month]?.troubleBrewing ?? 0),
+      backgroundColor: "red",
+      borderColor: "red",
       tension: 0.1,
-      borderColor: "rgb(75, 192, 192)",
     },
+    {
+      label: "Sects and Violets",
+      data: months.map((month) => data[month]?.sectsAndViolets ?? 0),
+      backgroundColor: "purple",
+      borderColor: "purple",
+      tension: 0.1,
+    },
+    {
+      label: "Bad Moon Rising",
+      data: months.map((month) => data[month]?.badMoonRising ?? 0),
+      backgroundColor: "yellow",
+      borderColor: "yellow",
+      tension: 0.1,
+    },
+    {
+      label: "Custom Script",
+      data: months.map((month) => data[month]?.customScript ?? 0),
+      backgroundColor: "green",
+      borderColor: "green",
+      tension: 0.1,
+    }
   ],
 }));
 
