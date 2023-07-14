@@ -15,6 +15,7 @@
     "@types/crypto-js": "^4.1.1",
     "@types/node": "^18",
     "@types/uuid": "^9.0.2",
+    "@vite-pwa/nuxt": "^0.1.0",
     "nuxt": "^3.6.1",
     "prisma": "^4.16.2"
   },
