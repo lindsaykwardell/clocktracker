@@ -147,7 +147,6 @@
             list="player_characters"
             v-model="character.related"
             class="block w-full border border-stone-500 rounded-md p-2"
-            required
           />
         </label>
       </div>
