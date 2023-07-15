@@ -9,10 +9,9 @@
             placeholder="Search for a player, then press enter"
           />
         </form>
-        <img
-          src="/img/role/investigator.png"
-          class="absolute right-2 -top-2 w-16 h-16"
-        />
+        <button @click="search" class="absolute right-2 -top-2 w-16 h-16">
+          <img src="/img/role/investigator.png" />
+        </button>
       </div>
       <UserCard
         v-for="user in users"
