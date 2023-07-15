@@ -5,7 +5,7 @@
     >
       <legend>Game Setup</legend>
       <div class="w-full flex flex-col md:flex-row gap-5">
-        <label>
+        <label class="flex-1">
           <span class="block">Date</span>
           <input
             type="date"
@@ -14,7 +14,7 @@
             required
           />
         </label>
-        <label>
+        <label class="flex-1">
           <span class="block">Script</span>
           <input
             type="text"
@@ -29,7 +29,7 @@
             </option>
           </datalist>
         </label>
-        <label>
+        <label class="flex-1">
           <span class="block">Storyteller</span>
           <input
             type="text"
@@ -39,7 +39,7 @@
           />
         </label>
       </div>
-      <label>
+      <label class="flex-1">
         <span class="block">Location Type</span>
         <select
           v-model="game.location_type"
@@ -49,7 +49,7 @@
           <option value="IN_PERSON">In Person</option>
         </select>
       </label>
-      <label v-if="game.location_type === 'IN_PERSON'">
+      <label v-if="game.location_type === 'IN_PERSON'" class="flex-1">
         <span class="block">Location</span>
         <input
           type="text"
@@ -57,7 +57,7 @@
           class="block w-full border border-stone-500 rounded-md p-2"
         />
       </label>
-      <label>
+      <label class="flex-1">
         <span class="block">Community</span>
         <input
           type="text"
@@ -65,7 +65,7 @@
           class="block w-full border border-stone-500 rounded-md p-2"
         />
       </label>
-      <label>
+      <label class="flex-1">
         <span class="block">Players</span>
         <input
           type="number"
@@ -87,7 +87,7 @@
       </datalist>
       <div
         v-for="(character, i) in game.player_characters"
-        class="w-full flex flex-col md:flex-row gap-5 items-end"
+        class="w-full flex flex-wrap md:flex-nowrap gap-5 items-end"
       >
         <button v-if="i !== 0" @click.prevent.stop="removeCharacter(i)">
           <svg
@@ -105,8 +105,10 @@
             <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
           </svg>
         </button>
-        <div v-else class="w-8"></div>
-        <label>
+        <div v-else class="hidden md:block w-8"></div>
+        <label class="flex-grow md:flex-1" :class="{
+          'w-full': i === 0,
+        }">
           <span class="block">
             <template v-if="i === 0">Initial Character</template>
             <template v-else-if="i + 1 === game.player_characters.length">
@@ -122,7 +124,7 @@
             required
           />
         </label>
-        <label>
+        <label class="w-1/3 md:w-auto flex-shrink">
           <span class="block">Alignment</span>
           <select
             v-model="character.alignment"
@@ -139,7 +141,7 @@
           <input type="checkbox" v-model="character.showRelated" />
           <span class="block">Related to...</span>
         </label>
-        <label v-else>
+        <label v-else class="flex-1">
           <span class="block"> Related Character </span>
           <input
             type="text"
@@ -337,9 +339,5 @@ select {
 
 textarea {
   @apply rounded p-1 text-lg bg-stone-600;
-}
-
-label {
-  flex: 1 1 0%;
 }
 </style>
