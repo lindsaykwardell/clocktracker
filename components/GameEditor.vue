@@ -35,7 +35,6 @@
             type="text"
             v-model="game.storyteller"
             class="block w-full border border-stone-500 rounded-md p-2"
-            required
           />
         </label>
       </div>
