@@ -6,7 +6,7 @@
           <input
             v-model="query"
             class="block w-full border border-stone-500 rounded-md p-2 text-lg bg-stone-600"
-            placeholder="Search for a player"
+            placeholder="Search for a player, then press enter"
           />
         </form>
         <img
