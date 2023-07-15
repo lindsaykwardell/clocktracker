@@ -334,10 +334,10 @@ async function removeFile(name: string) {
 input,
 select {
   height: 2.5rem;
-  @apply rounded p-1 text-lg bg-stone-600;
+  @apply  text-lg bg-stone-600;
 }
 
 textarea {
-  @apply rounded p-1 text-lg bg-stone-600;
+  @apply  text-lg bg-stone-600;
 }
 </style>

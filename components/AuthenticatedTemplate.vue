@@ -33,17 +33,22 @@
             alt="ClockTracker"
           />
         </nuxt-link>
+        <nuxt-link
+          to="/search"
+          class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap"
+        >
+          <div class="w-[50px] overflow-hidden">
+            <img src="/img/role/investigator.png" class="max-w-[125%]" alt="" />
+          </div>
+          <span class="hidden md:inline">Search</span>
+        </nuxt-link>
         <template v-if="user">
           <nuxt-link
             to="/"
             class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap"
           >
             <div class="w-[50px] overflow-hidden">
-              <img
-                src="https://wiki.bloodontheclocktower.com/images/0/0c/Icon_innkeeper.png"
-                class="max-w-[125%]"
-                alt=""
-              />
+              <img src="/img/role/innkeeper.png" class="max-w-[125%]" alt="" />
             </div>
             <span class="hidden md:inline"> My Profile </span>
           </nuxt-link>
@@ -52,11 +57,7 @@
             class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap"
           >
             <div class="w-[50px] overflow-hidden">
-              <img
-                src="https://wiki.bloodontheclocktower.com/images/f/f2/Icon_mezepheles.png"
-                class="max-w-[125%]"
-                alt=""
-              />
+              <img src="/img/role/mezepheles.png" class="max-w-[125%]" alt="" />
             </div>
             <span class="hidden md:inline">Add Game</span>
           </nuxt-link>
@@ -65,11 +66,7 @@
             class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap"
           >
             <div class="w-[50px] overflow-hidden">
-              <img
-                src="https://wiki.bloodontheclocktower.com/images/9/98/Icon_tinker.png"
-                class="max-w-[125%]"
-                alt=""
-              />
+              <img src="/img/role/tinker.png" class="max-w-[125%]" alt="" />
             </div>
             <span class="hidden md:inline">Settings</span>
           </nuxt-link>
@@ -78,11 +75,7 @@
             class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap"
           >
             <div class="w-[50px] overflow-hidden">
-              <img
-                src="https://wiki.bloodontheclocktower.com/images/c/cb/Icon_balloonist.png"
-                class="max-w-[125%]"
-                alt=""
-              />
+              <img src="/img/role/balloonist.png" class="max-w-[125%]" alt="" />
             </div>
             <span class="hidden md:inline">Sign Out</span>
           </button>
