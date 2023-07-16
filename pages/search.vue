@@ -13,11 +13,17 @@
           <img src="/img/role/investigator.png" />
         </button>
       </div>
-      <UserCard
-        v-for="user in users"
-        class="w-full flex flex-col md:flex-row"
-        :player="user"
-      />
+      <div class="py-4">
+        <div v-if="searching" class="flex justify-center gap-1">
+          <Spinner />
+          Searching...
+        </div>
+        <UserCard
+          v-for="user in users"
+          class="w-full flex flex-col md:flex-row my-4"
+          :player="user"
+        />
+      </div>
     </div>
   </AuthenticatedTemplate>
 </template>
@@ -35,8 +41,11 @@ const users = ref<
   }[]
 >([]);
 const query = ref("");
+const searching = ref(false);
 
 async function search() {
+  searching.value = true;
+  users.value = [];
   const result = await useFetch("/api/search", {
     params: {
       query: query.value,
@@ -46,5 +55,7 @@ async function search() {
   if (result.data.value) {
     users.value = result.data.value;
   }
+
+  searching.value = false;
 }
 </script>
