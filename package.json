@@ -17,11 +17,11 @@
     "@types/uuid": "^9.0.2",
     "@vite-pwa/nuxt": "^0.1.0",
     "nuxt": "^3.6.1",
-    "prisma": "^4.16.2"
+    "prisma": "^5.0.0"
   },
   "dependencies": {
     "@faker-js/faker": "^8.0.2",
-    "@prisma/client": "^4.16.2",
+    "@prisma/client": "^5.0.0",
     "@sentry/node": "^7.58.1",
     "@sentry/tracing": "^7.58.1",
     "@sentry/vue": "^7.58.1",
