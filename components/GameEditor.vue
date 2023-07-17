@@ -74,6 +74,15 @@
           max="20"
         />
       </label>
+      <label class="flex-1">
+        <span class="block">Travelers</span>
+        <input
+          type="number"
+          v-model="game.traveler_count"
+          class="block w-full border border-stone-500 rounded-md p-2"
+          min="0"
+        />
+      </label>
     </fieldset>
     <fieldset
       class="flex flex-col items-end gap-5 border rounded border-stone-500 p-4 my-3"
@@ -239,6 +248,7 @@ const props = defineProps<{
     location: string;
     community: string;
     player_count: number | null;
+    traveler_count: number | null;
     player_characters: {
       name: string;
       alignment: string;

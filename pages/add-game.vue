@@ -29,6 +29,7 @@ const game = reactive<{
   location: string;
   community: string;
   player_count: number | null;
+  traveler_count: number | null;
   player_characters: {
     name: string;
     alignment: string;
@@ -46,6 +47,7 @@ const game = reactive<{
   location: "",
   community: "",
   player_count: null,
+  traveler_count: null,
   player_characters: [
     {
       name: "",

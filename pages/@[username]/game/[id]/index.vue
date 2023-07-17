@@ -106,6 +106,13 @@
               <span>Players</span>
               {{ game.data.value.player_count }}
             </label>
+            <label
+              v-if="game.data.value.traveler_count"
+              class="flex gap-3 items-center"
+            >
+              <span>Travelers</span>
+              {{ game.data.value.traveler_count }}
+            </label>
           </div>
           <div class="flex flex-col md:flex-row gap-4 mt-4 justify-start">
             <label
@@ -335,8 +342,6 @@ async function deleteGame() {
 </script>
 
 <style scoped>
-
-
 label span {
   @apply text-sm text-stone-500;
 }

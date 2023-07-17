@@ -17,6 +17,7 @@ model Game {
   location          String
   community         String       @default("")
   player_count      Int?
+  traveler_count    Int?
   player_characters Character[]
   win               Boolean
   notes             String

@@ -44,6 +44,7 @@ const game = reactive<{
   location: string;
   community: string;
   player_count: number | null;
+  traveler_count: number | null;
   player_characters: {
     name: string;
     alignment: string;
@@ -61,6 +62,7 @@ const game = reactive<{
   location: savedGame.data.value?.location || "",
   community: savedGame.data.value?.community || "",
   player_count: savedGame.data.value?.player_count || null,
+  traveler_count: savedGame.data.value?.traveler_count || null,
   player_characters: savedGame.data.value?.player_characters.map(
     (character) => ({
       name: character.name,
