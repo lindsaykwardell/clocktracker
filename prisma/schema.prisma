@@ -8,14 +8,14 @@ datasource db {
 }
 
 model Game {
-  id                String       @id @default(uuid())
+  id                String        @id @default(uuid())
   user_id           String
-  created_at        DateTime?    @default(now()) @db.Timestamptz(6)
+  created_at        DateTime?     @default(now()) @db.Timestamptz(6)
   date              DateTime
   script            String
-  location_type     LocationType @default(ONLINE)
+  location_type     LocationType  @default(ONLINE)
   location          String
-  community         String       @default("")
+  community         String        @default("")
   player_count      Int?
   traveler_count    Int?
   player_characters Character[]
@@ -23,6 +23,7 @@ model Game {
   notes             String
   image_urls        String[]
   storyteller       String?
+  user              UserSettings? @relation(fields: [user_id], references: [user_id])
 }
 
 model Character {
@@ -66,6 +67,19 @@ model UserSettings {
   location         String?
   links            ExternalLink[]
   is_admin         Boolean        @default(false)
+  games            Game[]
+  created_at       DateTime?      @default(now()) @db.Timestamptz(6)
+  following        Following[]    @relation("Following") // people I follow
+  followers        Following[]    @relation("Follower") // people who follow me
+}
+
+model Following {
+  user         UserSettings @relation("Following", fields: [user_id], references: [user_id])
+  following    UserSettings @relation("Follower", fields: [following_id], references: [user_id])
+  user_id      String
+  following_id String
+
+  @@id([user_id, following_id])
 }
 
 model ExternalLink {

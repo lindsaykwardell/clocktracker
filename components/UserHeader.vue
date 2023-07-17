@@ -3,7 +3,7 @@
     <div
       class="flex flex-col items-center p-2 w-full md:w-3/4 lg:w-2/3 xl:w-1/2 m-auto"
     >
-      <div class="flex flex-col md:flex-row items-center gap-3 w-full">
+      <div class="flex flex-col lg:flex-row items-center gap-3 w-full">
         <Avatar
           :value="player.avatar || ''"
           class="border-2 shadow-xl flex-shrink"
@@ -32,6 +32,18 @@
             {{ player.location }}
           </div>
         </div>
+        <button
+          v-if="user && !isUser"
+          @click="follow"
+          class="flex gap-1 items-center justify-center py-1 w-[150px] rounded transition duration-150"
+          :class="{
+            'bg-blue-950 hover:bg-blue-900': !isFollowing,
+            'border border-blue-950 hover:bg-blue-950': isFollowing,
+          }"
+        >
+          <img src="/img/role/empath.png" class="w-8 h-8" />
+          {{ isFollowing ? "Following" : "Follow" }}
+        </button>
       </div>
       <hr class="border-stone-100 w-full my-4" />
       <p class="whitespace-pre-wrap text-left w-full py-4">
@@ -43,7 +55,11 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
+const user = useSupabaseUser();
+
+const followedStatusChanged = ref(false);
+
+const props = defineProps<{
   player: {
     username: string;
     user_id: string;
@@ -52,6 +68,49 @@ defineProps<{
     pronouns: string | null;
     bio: string;
     location: string | null;
+    followers: {
+      user: {
+        user_id: string;
+        username: string;
+        avatar: string | null;
+      };
+    }[];
+    following: {
+      following: {
+        user_id: string;
+        username: string;
+        avatar: string | null;
+      };
+    }[];
   };
 }>();
+
+const isUser = computed(() => user.value?.id === props.player.user_id);
+const isFollowing = computed(() => {
+  if (!user.value) return false;
+  const following = props.player.followers.find(
+    (f) => f.user.user_id === user.value?.id
+  );
+  if (following) {
+    // Display as following if "followStatusChanged" is false and following is true
+    if (!followedStatusChanged.value) return true;
+    // Display as not following if "followStatusChanged" is true and following is true
+    else return false;
+  } else {
+    // Display as not following if "followStatusChanged" is false and following is false
+    if (!followedStatusChanged.value) return false;
+    // Display as following if "followStatusChanged" is true and following is false
+    else return true;
+  }
+});
+
+async function follow() {
+  const result = await useFetch(`/api/user/${props.player.username}/follow`, {
+    method: "POST",
+  });
+
+  if (result) {
+    followedStatusChanged.value = !followedStatusChanged.value;
+  }
+}
 </script>

@@ -7,18 +7,18 @@
       <Avatar
         :value="player.avatar || ''"
         class="border-2 shadow-xl flex-shrink"
-        size="lg"
+        size="md"
       />
       <div class="flex flex-col md:flex-row items-center gap-3 w-full">
         <div class="flex-grow flex flex-col">
-          <h3 class="font-dumbledor text-2xl lg:text-3xl">
+          <h3 class="font-dumbledor text-xl">
             {{ player.display_name }}
           </h3>
-          <div class="md:text-lg text-stone-400">
+          <div class="text-stone-400">
             {{ player.username }}
             <template v-if="player.pronouns"> | {{ player.pronouns }}</template>
           </div>
-          <div class="md:text-lg text-stone-400 flex gap-2 items-center">
+          <div class="text-stone-400 flex gap-2 items-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="32"
@@ -46,7 +46,6 @@ defineProps<{
     display_name: string;
     avatar: string | null;
     pronouns: string | null;
-    bio: string;
     location: string | null;
   };
 }>();
