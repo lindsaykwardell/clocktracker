@@ -17,6 +17,19 @@ import {
   LineElement,
 } from "chart.js";
 
+const notificationStore = useNotifications();
+const user = useSupabaseUser();
+
+let stop = () => {};
+
+onMounted(() => {
+  stop = notificationStore.pollNotifications(user);
+});
+
+onUnmounted(() => {
+  stop();
+});
+
 useHead({
   titleTemplate: (titleChunk) => {
     return titleChunk ? `${titleChunk} - ClockTracker` : "ClockTracker";

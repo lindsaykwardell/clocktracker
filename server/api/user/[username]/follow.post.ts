@@ -1,5 +1,9 @@
 import type { User } from "@supabase/supabase-js";
-import { PrismaClient, UserSettings } from "@prisma/client";
+import { PrismaClient, NotificationType } from "@prisma/client";
+
+function notificationMessage(name?: string) {
+  return `${name || "Someone"} followed you!`;
+}
 
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
@@ -13,6 +17,12 @@ export default defineEventHandler(async (handler) => {
   }
 
   const prisma = new PrismaClient();
+
+  const followingUser = await prisma.userSettings.findFirst({
+    where: {
+      user_id: user.id,
+    },
+  });
 
   const existingUser = await prisma.userSettings.findFirst({
     where: {
@@ -54,6 +64,16 @@ export default defineEventHandler(async (handler) => {
       },
     });
 
+    // Delete notification if it's unread. No need to show it now.
+    await prisma.notification.deleteMany({
+      where: {
+        user_id: existingUser.user_id,
+        type: NotificationType.FOLLOW,
+        from_user_id: user.id,
+        read: false,
+      },
+    });
+
     return false;
   }
 
@@ -61,6 +81,16 @@ export default defineEventHandler(async (handler) => {
     data: {
       user_id: user.id,
       following_id: existingUser.user_id,
+    },
+  });
+
+  // Create a notification for the user that was followed.
+  await prisma.notification.create({
+    data: {
+      user_id: existingUser.user_id,
+      from_user_id: user.id,
+      type: NotificationType.FOLLOW,
+      message: notificationMessage(followingUser?.username),
     },
   });
 

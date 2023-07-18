@@ -35,7 +35,7 @@
         </nuxt-link>
         <nuxt-link
           to="/search"
-          class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap"
+          class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full"
         >
           <div class="w-[50px] overflow-hidden">
             <img src="/img/role/investigator.png" class="max-w-[125%]" alt="" />
@@ -45,7 +45,7 @@
         <template v-if="user">
           <nuxt-link
             to="/"
-            class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap"
+            class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full"
           >
             <div class="w-[50px] overflow-hidden">
               <img src="/img/role/innkeeper.png" class="max-w-[125%]" alt="" />
@@ -53,8 +53,29 @@
             <span class="hidden md:inline"> My Profile </span>
           </nuxt-link>
           <nuxt-link
+            to="/notifications"
+            class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full"
+          >
+            <div class="relative">
+              <div class="w-[50px] overflow-hidden">
+                <img
+                  src="/img/role/towncrier.png"
+                  class="max-w-[125%]"
+                  alt=""
+                />
+                <span
+                  v-if="notificationStore.unreadNotificationCount > 0"
+                  class="absolute bottom-1 right-1 text-stone-200 bg-red-800 rounded-full px-2 py-1 text-xs font-bold aspect-square"
+                >
+                  {{ notificationStore.unreadNotificationCount }}
+                </span>
+              </div>
+            </div>
+            <span class="hidden md:inline">Notifications</span>
+          </nuxt-link>
+          <nuxt-link
             to="/add-game"
-            class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap"
+            class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full"
           >
             <div class="w-[50px] overflow-hidden">
               <img src="/img/role/mezepheles.png" class="max-w-[125%]" alt="" />
@@ -63,7 +84,7 @@
           </nuxt-link>
           <nuxt-link
             to="/settings"
-            class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap"
+            class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full"
           >
             <div class="w-[50px] overflow-hidden">
               <img src="/img/role/tinker.png" class="max-w-[125%]" alt="" />
@@ -72,7 +93,7 @@
           </nuxt-link>
           <button
             @click="signOut"
-            class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap"
+            class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full"
           >
             <div class="w-[50px] overflow-hidden">
               <img src="/img/role/balloonist.png" class="max-w-[125%]" alt="" />
@@ -102,18 +123,18 @@
         <div class="flex-grow" />
         <a
           href="https://discord.gg/KwMz8ThamT"
-          class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap py-1"
+          class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
         >
-          <div>
+          <div class="w-[50px] flex justify-center">
             <Discord />
           </div>
           <span class="hidden md:inline w-16">Community</span>
         </a>
         <a
           href="https://ko-fi.com/clocktracker"
-          class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap py-1"
+          class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
         >
-          <div>
+          <div class="w-[50px] flex justify-center">
             <KoFi />
           </div>
           <span class="hidden md:inline w-16">Donate</span>
@@ -132,6 +153,7 @@ const user = useSupabaseUser();
 const router = useRouter();
 
 const showMenu = ref(false);
+const notificationStore = useNotifications();
 
 async function login() {
   await supabase.auth.signInWithOAuth({

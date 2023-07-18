@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@faker-js/faker": "^8.0.2",
+    "@pinia/nuxt": "^0.4.11",
     "@prisma/client": "^5.0.0",
     "@sentry/node": "^7.58.1",
     "@sentry/tracing": "^7.58.1",
@@ -31,6 +32,7 @@
     "csv-parser": "^3.0.0",
     "dayjs": "^1.11.9",
     "natural-order": "^2.0.2",
+    "pinia": "^2.1.4",
     "uuid": "^9.0.0",
     "vue-chartjs": "^5.2.0"
   }

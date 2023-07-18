@@ -56,21 +56,23 @@ enum LocationType {
 }
 
 model UserSettings {
-  user_id          String         @id
-  username         String         @unique
-  display_name     String
-  finished_welcome Boolean        @default(false)
-  avatar           String?
-  email            String         @default("your@address.here")
-  pronouns         String?
-  bio              String         @default("")
-  location         String?
-  links            ExternalLink[]
-  is_admin         Boolean        @default(false)
-  games            Game[]
-  created_at       DateTime?      @default(now()) @db.Timestamptz(6)
-  following        Following[]    @relation("Following") // people I follow
-  followers        Following[]    @relation("Follower") // people who follow me
+  user_id            String         @id
+  username           String         @unique
+  display_name       String
+  finished_welcome   Boolean        @default(false)
+  avatar             String?
+  email              String         @default("your@address.here")
+  pronouns           String?
+  bio                String         @default("")
+  location           String?
+  links              ExternalLink[]
+  is_admin           Boolean        @default(false)
+  games              Game[]
+  created_at         DateTime?      @default(now()) @db.Timestamptz(6)
+  following          Following[]    @relation("Following") // people I follow
+  followers          Following[]    @relation("Follower") // people who follow me
+  notifications      Notification[] @relation("Receiver")
+  sent_notifications Notification[] @relation("Sender")
 }
 
 model Following {
@@ -88,4 +90,20 @@ model ExternalLink {
   user_id      String
   service_name String
   url          String
+}
+
+model Notification {
+  id           Int              @id @default(autoincrement())
+  user         UserSettings     @relation("Receiver", fields: [user_id], references: [user_id])
+  from_user    UserSettings     @relation("Sender", fields: [from_user_id], references: [user_id])
+  user_id      String
+  from_user_id String
+  type         NotificationType
+  message      String
+  read         Boolean          @default(false)
+  created_at   DateTime?        @default(now()) @db.Timestamptz(6)
+}
+
+enum NotificationType {
+  FOLLOW
 }
