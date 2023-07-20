@@ -16,18 +16,74 @@
         </label>
         <label class="flex-1">
           <span class="block">Script</span>
-          <input
-            type="text"
-            list="scripts"
-            v-model="game.script"
-            class="block w-full border border-stone-500 rounded-md p-2"
-            required
-          />
-          <datalist id="scripts">
-            <option v-for="script in baseScripts" :value="script" :key="script">
-              {{ script }}
-            </option>
-          </datalist>
+          <div class="flex items-center gap-1">
+            <div v-if="game.script" class="flex-grow">{{ game.script }}</div>
+            <button
+              type="button"
+              @click="showScriptDialog = !showScriptDialog"
+              class="flex gap-1 bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded justify-center items-center"
+              :class="{
+                'w-full': !game.script,
+                'flex-shrink': game.script,
+              }"
+            >
+              <div class="w-[30px] overflow-hidden">
+                <img src="/img/role/investigator.png" />
+              </div>
+              <template v-if="game.script === ''">Find Script</template>
+            </button>
+          </div>
+          <Dialog v-model:visible="showScriptDialog">
+            <template #title>
+              <h2 class="text-2xl font-bold font-dumbledor">Find Script</h2>
+            </template>
+            <section class="p-4">
+              <div class="relative">
+                <form @submit.prevent="searchScripts">
+                  <input
+                    v-model="potentialScript"
+                    class="block w-full border border-stone-500 rounded-md p-2 text-lg bg-stone-600"
+                    placeholder="Search for a player, then press enter"
+                  />
+                </form>
+                <button
+                  type="button"
+                  @click="searchScripts"
+                  class="absolute right-2 -top-3 w-16 h-16"
+                >
+                  <img src="/img/role/investigator.png" />
+                </button>
+              </div>
+              <ul class="py-2">
+                <li
+                  v-for="script in scripts"
+                  class="px-1 py-2 hover:bg-stone-800"
+                >
+                  <button
+                    type="button"
+                    @click="selectScript(script)"
+                    class="w-full text-left"
+                  >
+                    {{ script.name }}
+                  </button>
+                </li>
+                <li
+                  class="px-1 py-2 hover:bg-stone-800"
+                  v-if="
+                    potentialScript && !scripts.find((script) => script.name === potentialScript)
+                  "
+                >
+                  <button
+                    type="button"
+                    @click="selectScript({ name: potentialScript, id: null })"
+                    class="w-full text-left"
+                  >
+                    {{ potentialScript }} (Use custom script)
+                  </button>
+                </li>
+              </ul>
+            </section>
+          </Dialog>
         </label>
         <label class="flex-1">
           <span class="block">Storyteller</span>
@@ -88,16 +144,11 @@
       class="flex flex-col items-end gap-5 border rounded border-stone-500 p-4 my-3"
     >
       <legend>Player Setup</legend>
-      <datalist id="player_characters">
-        <option v-for="role in roles" :value="role" :key="role">
-          {{ role }}
-        </option>
-      </datalist>
       <div
         v-for="(character, i) in game.player_characters"
         class="w-full flex flex-wrap md:flex-nowrap gap-5 items-end"
       >
-        <button v-if="i !== 0" @click.prevent.stop="removeCharacter(i)">
+        <button type="button" v-if="i !== 0" @click="removeCharacter(i)">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="32"
@@ -127,13 +178,17 @@
             </template>
             <template v-else>Additional Character</template>
           </span>
-          <input
-            type="text"
-            list="player_characters"
+          <select
             v-model="character.name"
+            @change="setInitialAlignment(character, $event)"
             class="block w-full border border-stone-500 rounded-md p-2"
             required
-          />
+          >
+            <option value="">Select a Character</option>
+            <option v-for="role in orderedRoles" :value="role.name">
+              {{ role.name }}
+            </option>
+          </select>
         </label>
         <label class="w-1/3 md:w-auto flex-shrink">
           <span class="block">Alignment</span>
@@ -154,15 +209,18 @@
         </label>
         <label v-else class="flex-1">
           <span class="block"> Related Character </span>
-          <input
-            type="text"
-            list="player_characters"
+          <select
             v-model="character.related"
             class="block w-full border border-stone-500 rounded-md p-2"
-          />
+          >
+            <option value="">Select a Character</option>
+            <option v-for="role in orderedRoles" :value="role.name">
+              {{ role.name }}
+            </option>
+          </select>
         </label>
       </div>
-      <button @click.prevent.stop="addCharacter">Add Character</button>
+      <button type="button" @click="addCharacter">Add Character</button>
     </fieldset>
     <fieldset
       class="flex flex-col md:flex-row gap-5 border rounded border-stone-500 p-4 my-3"
@@ -210,7 +268,7 @@
         <div class="flex flex-wrap gap-5">
           <div v-for="file in game.image_urls" :key="file">
             <img :src="file" class="w-64 h-64 object-cover" />
-            <button @click.prevent.stop="removeFile(file)">Remove</button>
+            <button type="button" @click="removeFile(file)">Remove</button>
           </div>
         </div>
       </div>
@@ -230,19 +288,28 @@
 </template>
 
 <script setup lang="ts">
+import type { Role } from "@prisma/client";
 import { v4 as uuid } from "uuid";
+import naturalOrder from "natural-order";
 
-const { roles } = useRoles();
-const { baseScripts } = useScripts();
+const roles = ref<Role[]>([]);
+const scripts = ref<{ id: number; name: string }[]>([]);
 
 const supabase = useSupabaseClient();
 const config = useRuntimeConfig();
+
+const showScriptDialog = ref(false);
+
+const orderedRoles = computed(() =>
+  naturalOrder(roles.value).orderBy("asc").sort(["name"])
+);
 
 const props = defineProps<{
   inFlight: boolean;
   game: {
     date: string;
     script: string;
+    script_id: number | null;
     storyteller: string;
     location_type: "ONLINE" | "IN_PERSON";
     location: string;
@@ -260,6 +327,8 @@ const props = defineProps<{
     image_urls: string[];
   };
 }>();
+
+const potentialScript = ref("");
 
 const emit = defineEmits(["submit"]);
 
@@ -319,6 +388,44 @@ async function removeFile(name: string) {
   }
 
   props.game.image_urls = props.game.image_urls.filter((file) => file !== name);
+}
+
+async function searchScripts() {
+  const result = await useFetch(`/api/script?query=${potentialScript.value}`);
+  scripts.value = result.data.value ?? [];
+}
+
+function selectScript(script: { name: string; id: number | null }) {
+  props.game.script = script.name;
+  props.game.script_id = script.id;
+  showScriptDialog.value = false;
+}
+
+watchEffect(async () => {
+  roles.value = [];
+  if (props.game.script_id) {
+    const result = await useFetch(`/api/script/${props.game.script_id}`);
+    roles.value = result.data.value?.roles ?? [];
+  } else {
+    const result = await useFetch("/api/roles");
+    roles.value = result.data.value ?? [];
+  }
+});
+
+function setInitialAlignment(
+  character: {
+    name: string;
+    alignment: string;
+    showRelated: boolean;
+    related: string;
+  },
+  event: Event
+) {
+  const roleName = (event.target as HTMLSelectElement).value;
+  const selectedRole = roles.value.find((role) => role.name === roleName);
+  if (selectedRole) {
+    character.alignment = selectedRole.initial_alignment;
+  }
 }
 </script>
 

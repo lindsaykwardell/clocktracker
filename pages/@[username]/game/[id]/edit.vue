@@ -39,6 +39,7 @@ useHead({
 const game = reactive<{
   date: string;
   script: string;
+  script_id: number | null;
   storyteller: string;
   location_type: "ONLINE" | "IN_PERSON";
   location: string;
@@ -57,6 +58,7 @@ const game = reactive<{
 }>({
   date: dayjs(savedGame.data.value?.date).format("YYYY-MM-DD"),
   script: savedGame.data.value?.script || "",
+  script_id: savedGame.data.value?.script_id || null,
   storyteller: savedGame.data.value?.storyteller || "",
   location_type: savedGame.data.value?.location_type || "ONLINE",
   location: savedGame.data.value?.location || "",

@@ -13,6 +13,7 @@ model Game {
   created_at        DateTime?     @default(now()) @db.Timestamptz(6)
   date              DateTime
   script            String
+  script_id         Int?
   location_type     LocationType  @default(ONLINE)
   location          String
   community         String        @default("")
@@ -24,6 +25,7 @@ model Game {
   image_urls        String[]
   storyteller       String?
   user              UserSettings? @relation(fields: [user_id], references: [user_id])
+  associated_script Script?       @relation(fields: [script_id], references: [id])
 }
 
 model Character {
@@ -36,18 +38,40 @@ model Character {
 }
 
 model Script {
-  id       Int    @id
-  name     String
-  version  String
-  author   String
-  type     String
-  json_url String
-  pdf_url  String
+  id                      Int       @id
+  name                    String
+  version                 String
+  author                  String
+  type                    String
+  json_url                String
+  pdf_url                 String
+  roles                   Role[]
+  characters_last_updated DateTime?
+  games                   Game[]
+}
+
+model Role {
+  id                String    @id
+  name              String
+  initial_alignment Alignment
+  token_url         String
+  type              RoleType
+  scripts           Script[]
 }
 
 enum Alignment {
   GOOD
   EVIL
+  NEUTRAL
+}
+
+enum RoleType {
+  TOWNSFOLK
+  OUTSIDER
+  MINION
+  DEMON
+  TRAVELER
+  FABLED
 }
 
 enum LocationType {

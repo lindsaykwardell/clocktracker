@@ -1,9 +1,9 @@
 import type { User } from "@supabase/supabase-js";
-import { PrismaClient, UserSettings } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
-  const body = await readBody<string>(handler);
+  const scripts = await readBody(handler);
 
   if (!user) {
     throw createError({
@@ -12,33 +12,28 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  if (!body) {
+  if (!scripts) {
     throw createError({
       status: 400,
       statusMessage: "Bad Request",
     });
   }
 
-  // parse body as CSV
-  const csv = body.split("\n").map((line) => {
-    return line.split(",");
+  // Ensure user is admin
+  const prisma = new PrismaClient();
+
+  const settings = await prisma.userSettings.findUnique({
+    where: {
+      user_id: user.id,
+    },
   });
 
-  const scripts = csv
-    .map((line) => {
-      return {
-        id: parseInt(line[0]),
-        name: line[1],
-        version: line[2],
-        author: line[3],
-        type: line[4],
-        json_url: line[5],
-        pdf_url: line[6],
-      };
-    })
-    .filter((script) => !isNaN(script.id));
-
-  const prisma = new PrismaClient();
+  if (!settings?.is_admin) {
+    throw createError({
+      status: 403,
+      statusMessage: "Forbidden",
+    });
+  }
 
   await prisma.script.deleteMany({});
   const saved = await prisma.script

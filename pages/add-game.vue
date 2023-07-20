@@ -24,6 +24,7 @@ const inFlight = ref(false);
 const game = reactive<{
   date: string;
   script: string;
+  script_id: number | null;
   storyteller: string;
   location_type: "ONLINE" | "IN_PERSON";
   location: string;
@@ -42,6 +43,7 @@ const game = reactive<{
 }>({
   date: dayjs().format("YYYY-MM-DD"),
   script: "",
+  script_id: null,
   storyteller: "",
   location_type: "ONLINE",
   location: "",
