@@ -31,10 +31,12 @@ model Game {
 model Character {
   id        Int       @id @default(autoincrement())
   name      String
+  role      Role?     @relation(fields: [role_id], references: [id])
   related   String?
   alignment Alignment
   game      Game?     @relation(fields: [game_id], references: [id])
   game_id   String?
+  role_id   String?
 }
 
 model Script {
@@ -51,12 +53,13 @@ model Script {
 }
 
 model Role {
-  id                String    @id
+  id                String      @id
   name              String
   initial_alignment Alignment
   token_url         String
   type              RoleType
   scripts           Script[]
+  character         Character[]
 }
 
 enum Alignment {
