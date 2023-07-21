@@ -29,14 +29,16 @@ model Game {
 }
 
 model Character {
-  id        Int       @id @default(autoincrement())
-  name      String
-  role      Role?     @relation(fields: [role_id], references: [id])
-  related   String?
-  alignment Alignment
-  game      Game?     @relation(fields: [game_id], references: [id])
-  game_id   String?
-  role_id   String?
+  id              Int       @id @default(autoincrement())
+  name            String
+  role            Role?     @relation(fields: [role_id], references: [id])
+  related         String?
+  alignment       Alignment
+  game            Game?     @relation(fields: [game_id], references: [id])
+  game_id         String?
+  role_id         String?
+  related_role_id String?
+  related_role    Role?     @relation("RelatedRole", fields: [related_role_id], references: [id])
 }
 
 model Script {
@@ -59,6 +61,7 @@ model Role {
   token_url         String
   type              RoleType
   scripts           Script[]
+  related_character Character[] @relation("RelatedRole")
   character         Character[]
 }
 
