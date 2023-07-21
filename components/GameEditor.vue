@@ -70,7 +70,8 @@
                 <li
                   class="px-1 py-2 hover:bg-stone-800"
                   v-if="
-                    potentialScript && !scripts.find((script) => script.name === potentialScript)
+                    potentialScript &&
+                    !scripts.find((script) => script.name === potentialScript)
                   "
                 >
                   <button
@@ -180,7 +181,7 @@
           </span>
           <select
             v-model="character.name"
-            @change="setInitialAlignment(character, $event)"
+            @change="setCharacterDetails(character, $event)"
             class="block w-full border border-stone-500 rounded-md p-2"
             required
           >
@@ -211,6 +212,7 @@
           <span class="block"> Related Character </span>
           <select
             v-model="character.related"
+            @change="setRelatedRoleDetails(character, $event)"
             class="block w-full border border-stone-500 rounded-md p-2"
           >
             <option value="">Select a Character</option>
@@ -318,9 +320,11 @@ const props = defineProps<{
     traveler_count: number | null;
     player_characters: {
       name: string;
+      role_id: string | null;
       alignment: string;
       showRelated: boolean;
       related: string;
+      related_role_id: string | null;
     }[];
     win: boolean;
     notes: string;
@@ -338,6 +342,8 @@ function addCharacter() {
     alignment: props.game.player_characters[0].alignment,
     related: "",
     showRelated: false,
+    role_id: null,
+    related_role_id: null,
   });
 }
 
@@ -412,12 +418,14 @@ watchEffect(async () => {
   }
 });
 
-function setInitialAlignment(
+function setCharacterDetails(
   character: {
     name: string;
     alignment: string;
     showRelated: boolean;
     related: string;
+    role_id: string | null;
+    related_role_id: string | null;
   },
   event: Event
 ) {
@@ -425,6 +433,25 @@ function setInitialAlignment(
   const selectedRole = roles.value.find((role) => role.name === roleName);
   if (selectedRole) {
     character.alignment = selectedRole.initial_alignment;
+    character.role_id = selectedRole.id;
+  }
+}
+
+function setRelatedRoleDetails(
+  character: {
+    name: string;
+    alignment: string;
+    showRelated: boolean;
+    related: string;
+    role_id: string | null;
+    related_role_id: string | null;
+  },
+  event: Event
+) {
+  const roleName = (event.target as HTMLSelectElement).value;
+  const selectedRole = roles.value.find((role) => role.name === roleName);
+  if (selectedRole) {
+    character.related_role_id = selectedRole.id;
   }
 }
 </script>

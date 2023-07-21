@@ -51,6 +51,8 @@ const game = reactive<{
     alignment: string;
     showRelated: boolean;
     related: string;
+    role_id: string | null;
+    related_role_id: string | null;
   }[];
   win: boolean;
   notes: string;
@@ -71,6 +73,8 @@ const game = reactive<{
       alignment: character.alignment,
       related: character.related || "",
       showRelated: !!character.related,
+      role_id: character.role_id,
+      related_role_id: character.related_role_id,
     })
   ) || [
     {
@@ -78,6 +82,8 @@ const game = reactive<{
       alignment: "GOOD",
       related: "",
       showRelated: false,
+      role_id: null,
+      related_role_id: null,
     },
   ],
   win: savedGame.data.value?.win ? true : false,
@@ -93,6 +99,8 @@ const formattedGame = computed(() => ({
     name: character.name,
     alignment: character.alignment,
     related: character.related,
+    role_id: character.role_id,
+    related_role_id: character.related_role_id,
   })),
 }));
 
