@@ -131,7 +131,9 @@ const props = defineProps<{
     bio: string;
     location: string | null;
   } | null;
-  games: (Game & { player_characters: Character[] })[];
+  games: (Game & {
+    player_characters: (Character & { role?: { token_url: string } })[];
+  })[];
 }>();
 
 const user = useSupabaseUser();

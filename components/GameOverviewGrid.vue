@@ -4,8 +4,8 @@
       v-for="game in games"
       class="w-1/2 lg:w-1/3 xl:w-1/4 border border-black"
     >
-      <a
-        :href="`/@${username}/game/${game.id}`"
+      <nuxt-link
+        :to="`/@${username}/game/${game.id}`"
         class="relative w-full bg-gradient-to-b from-purple-800 hover:from-purple-900 to-stone-900 hover:to-stone-950 flex flex-col items-center cursor-pointer rounded overflow-hidden text-black h-48 md:h-72 bg-cover bg-center"
         :class="{
           'trouble-brewing': game.script === 'Trouble Brewing',
@@ -30,28 +30,7 @@
         <div
           class="flex-grow items-center justify-center flex font-dumbledor text-3xl"
         >
-          <div
-            class="token bg-center bg-cover relative rounded-full w-36 h-36 md:w-48 md:h-48 shadow-xl border border-black flex justify-center items-center"
-          >
-            <img
-              class="w-32 h-32 md:w-40 md:h-40"
-              :src="roles.toImage(game.last_character.name)"
-              :onerror="`this.src='/img/role/${
-                game.last_character.alignment === 'GOOD' ? 'good' : 'evil'
-              }.png'; this.onerror=null;`"
-              loading="lazy"
-            />
-            <div
-              v-if="game.last_character.related"
-              class="token bg-center bg-cover absolute bottom-0 right-0 rounded-full w-12 h-12 md:w-16 md:h-16 shadow-xl border border-black flex justify-center items-center"
-            >
-              <img
-                class="md:w-12 md:h-12"
-                :src="roles.toImage(game.last_character.related || '')"
-                loading="lazy"
-              />
-            </div>
-          </div>
+          <Token :character="game.last_character" size="lg" />
         </div>
         <div class="absolute w-full top-0 left-0" />
         <img
@@ -65,7 +44,7 @@
             {{ game.script }}
           </div>
         </div>
-      </a>
+      </nuxt-link>
     </div>
   </div>
 </template>
@@ -79,7 +58,7 @@ const config = useRuntimeConfig();
 
 defineProps<{
   games: (Game & {
-    player_characters: Character[];
+    player_characters: (Character & { role?: { token_url: string } })[];
     last_character: Character;
   })[];
   readonly?: boolean;

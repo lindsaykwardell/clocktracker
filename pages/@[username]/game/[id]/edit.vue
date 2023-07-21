@@ -17,9 +17,9 @@ definePageMeta({
 });
 
 const route = useRoute();
-const savedGame = await useFetch<Game & { player_characters: Character[] }>(
-  `/api/games/${route.params.id}`
-);
+const savedGame = await useFetch<
+  Game & { player_characters: (Character & { role?: { token_url: string } })[] }
+>(`/api/games/${route.params.id}`);
 const user = useSupabaseUser();
 const router = useRouter();
 const inFlight = ref(false);

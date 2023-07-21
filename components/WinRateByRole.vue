@@ -12,7 +12,9 @@ import { Bar } from "vue-chartjs";
 const { isTownsfolk, isOutsider, isMinion, isDemon, isTraveler } = useRoles();
 
 const props = defineProps<{
-  games: (Game & { player_characters: Character[] })[];
+  games: (Game & {
+    player_characters: (Character & { role?: { token_url: string } })[];
+  })[];
 }>();
 
 const chartData = computed(() => ({

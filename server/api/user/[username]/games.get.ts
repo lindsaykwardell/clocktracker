@@ -11,22 +11,31 @@ export default defineEventHandler(async (handler) => {
   });
 
   if (!user) {
-    console.error(`User not found: ${username}`)
+    console.error(`User not found: ${username}`);
     throw createError({
       status: 404,
       statusMessage: "Not Found",
     });
   }
 
-  const games: (Game & { player_characters: Character[] })[] =
-    await prisma.game.findMany({
-      where: {
-        user_id: user?.user_id,
+  const games: (Game & {
+    player_characters: (Character & { role?: { token_url: string } })[];
+  })[] = await prisma.game.findMany({
+    where: {
+      user_id: user?.user_id,
+    },
+    include: {
+      player_characters: {
+        include: {
+          role: {
+            select: {
+              token_url: true,
+            },
+          },
+        },
       },
-      include: {
-        player_characters: true,
-      },
-    });
+    },
+  });
 
   return games;
 });

@@ -19,7 +19,9 @@
 <script setup lang="ts">
 import type { Game, Character } from "@prisma/client";
 const props = defineProps<{
-  games: (Game & { player_characters: Character[] })[];
+  games: (Game & {
+    player_characters: (Character & { role?: { token_url: string } })[];
+  })[];
 }>();
 
 // Return the top five characters

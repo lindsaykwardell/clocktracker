@@ -15,6 +15,8 @@
 import type { Game, Character } from "@prisma/client";
 
 defineProps<{
-  games: (Game & { player_characters: Character[] })[];
+  games: (Game & {
+    player_characters: (Character & { role?: { token_url: string } })[];
+  })[];
 }>();
 </script>

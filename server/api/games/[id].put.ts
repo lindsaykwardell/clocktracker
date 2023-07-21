@@ -5,7 +5,10 @@ export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
   const gameId = handler.context.params?.id;
   const body = await readBody<
-    (Game & { player_characters: Character[] }) | null
+    | (Game & {
+        player_characters: (Character & { role?: { token_url: string } })[];
+      })
+    | null
   >(handler);
 
   if (!user) {

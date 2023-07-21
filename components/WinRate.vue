@@ -10,7 +10,9 @@ import type { Game, Character } from "@prisma/client";
 import { Bar } from "vue-chartjs";
 
 const props = defineProps<{
-  games: (Game & { player_characters: Character[] })[];
+  games: (Game & {
+    player_characters: (Character & { role?: { token_url: string } })[];
+  })[];
 }>();
 
 const chartData = computed(() => ({

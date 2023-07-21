@@ -75,9 +75,11 @@ const route = useRoute();
 const username = useRoute().params.username as string;
 
 const player = await useFetch(`/api/user/${username}`);
-const games = await useFetch<(Game & { player_characters: Character[] })[]>(
-  `/api/user/${username}/games`
-);
+const games = await useFetch<
+  (Game & {
+    player_characters: (Character & { role?: { token_url: string } })[];
+  })[]
+>(`/api/user/${username}/games`);
 
 const currentTab = computed(() => {
   switch (route.query.view) {

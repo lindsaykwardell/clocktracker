@@ -17,7 +17,15 @@ export default defineEventHandler(async (handler) => {
       id: gameId,
     },
     include: {
-      player_characters: true,
+      player_characters: {
+        include: {
+          role: {
+            select: {
+              token_url: true,
+            },
+          },
+        },
+      },
     },
   });
 

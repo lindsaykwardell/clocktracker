@@ -13,8 +13,8 @@
       </div>
     </div>
     <div v-for="game in games" class="w-full border border-black">
-      <a
-        :href="`/@${username}/game/${game.id}`"
+      <nuxt-link
+        :to="`/@${username}/game/${game.id}`"
         class="relative w-full cursor-pointer overflow-hidden min-h-12 min-md:h-16 bg-cover grid grid-cols-12 bg-center items-center gap-2 p-2"
         :class="{
           'trouble-brewing': game.script === 'Trouble Brewing',
@@ -32,42 +32,7 @@
           class="absolute bottom-0 w-full h-full object-cover blur-sm"
         />
         <div class="absolute bottom-0 left-0 z-0 w-full h-full bg-black/50" />
-        <div
-          class="token bg-center bg-cover relative rounded-full w-8 h-8 md:w-12 md:h-12 shadow-xl border border-black flex justify-center items-center col-span-3 md:col-span-2 xl:col-span-1"
-        >
-          <img
-            class="md:w-12 md:h-12"
-            :src="
-              roles.toImage(
-                game.last_character.name
-              )
-            "
-            :onerror="`this.src='/img/role/${
-              game.last_character
-                .alignment === 'GOOD'
-                ? 'good'
-                : 'evil'
-            }.png'; this.onerror=null;`"
-            loading="lazy"
-          />
-          <div
-            v-if="
-              game.last_character.related
-            "
-            class="token bg-center bg-cover absolute -bottom-1 -right-1 rounded-full w-4 h-4 md:w-6 md:h-6 shadow-xl border border-black flex justify-center items-center"
-          >
-            <img
-              class=""
-              :src="
-                roles.toImage(
-                  game.last_character
-                    .related || ''
-                )
-              "
-              loading="lazy"
-            />
-          </div>
-        </div>
+        <Token :character="game.last_character" size="sm" />
         <div class="hidden md:block md:col-span-2 xl:col-span-1 z-10">
           {{ formatDate(game.date) }}
         </div>
@@ -90,7 +55,7 @@
           class="w-8 h-8 md:w-12 md:h-12 col-span-auto z-10"
           :src="game.win ? '/img/win.png' : '/img/loss.png'"
         />
-      </a>
+      </nuxt-link>
     </div>
   </div>
 </template>
@@ -104,7 +69,7 @@ const config = useRuntimeConfig();
 
 defineProps<{
   games: (Game & {
-    player_characters: Character[];
+    player_characters: (Character & { role?: { token_url: string } })[];
     last_character: Character;
   })[];
   readonly?: boolean;

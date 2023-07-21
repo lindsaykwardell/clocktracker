@@ -11,18 +11,18 @@
               :value="player.data.value?.avatar || ''"
               class="border-2 shadow-xl"
               :class="{
-                'border-blue-600': last_character.alignment === 'GOOD',
-                'border-red-600': last_character.alignment === 'EVIL',
+                'border-blue-600': last_character?.alignment === 'GOOD',
+                'border-red-600': last_character?.alignment === 'EVIL',
               }"
             />
             <div class="flex-grow">
               <h2 class="text-3xl font-dumbledor">
-                <a
+                <nuxt-link
                   class="hover:underline"
-                  :href="`/@${player.data.value?.username}`"
+                  :to="`/@${player.data.value?.username}`"
                 >
                   {{ player.data.value?.display_name }}
-                </a>
+                </nuxt-link>
               </h2>
               <div class="flex flex-col md:flex-row gap-2">
                 <div
@@ -53,32 +53,11 @@
             </div>
             <div class="font-dumbledor text-2xl">
               <a
-                :href="`https://wiki.bloodontheclocktower.com/${last_character.name}`"
+                :href="`https://wiki.bloodontheclocktower.com/${last_character?.name}`"
                 target="_blank"
                 class="hover:underline flex flex-col items-center"
               >
-                <div
-                  class="token bg-center bg-cover relative rounded-full w-32 h-32 shadow-xl border border-black flex justify-center items-center"
-                >
-                  <img
-                    class="w-24 h-24 object-contain"
-                    :src="roles.toImage(last_character.name)"
-                    :onerror="`this.src='/img/role/${
-                      last_character.alignment === 'GOOD' ? 'good' : 'evil'
-                    }.png'; this.onerror=null;`"
-                    loading="lazy"
-                  />
-                  <div
-                    v-if="last_character.related"
-                    class="token bg-center bg-cover absolute bottom-0 right-0 rounded-full w-12 h-12 shadow-xl border border-black flex justify-center items-center"
-                  >
-                    <img
-                      class="w-8 h-8"
-                      :src="roles.toImage(last_character.related || '')"
-                      loading="lazy"
-                    />
-                  </div>
-                </div>
+                <Token :character="last_character" size="md" />
               </a>
             </div>
           </div>
@@ -180,9 +159,9 @@
         v-if="player.data.value?.user_id === user?.id"
         class="pt-4 flex justify-between md:justify-end gap-4"
       >
-        <a
+        <nuxt-link
           class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial"
-          :href="`/@${route.params.username}/game/${route.params.id}/edit`"
+          :to="`/@${route.params.username}/game/${route.params.id}/edit`"
           ><svg
             xmlns="http://www.w3.org/2000/svg"
             width="32"
@@ -195,7 +174,7 @@
             />
           </svg>
           Edit
-        </a>
+        </nuxt-link>
         <button
           @click="deleteGame"
           class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial"
@@ -233,9 +212,9 @@ const router = useRouter();
 const route = useRoute();
 const user = useSupabaseUser();
 
-const game = await useFetch<Game & { player_characters: Character[] }>(
-  `/api/games/${route.params.id}`
-);
+const game = await useFetch<
+  Game & { player_characters: (Character & { role?: { token_url: string } })[] }
+>(`/api/games/${route.params.id}`);
 const player = await useFetch(`/api/user/${route.params.username}`);
 
 if (
@@ -303,11 +282,7 @@ const last_character = computed(
   () =>
     game.data.value?.player_characters[
       game.data.value.player_characters.length - 1
-    ] || {
-      name: "",
-      alignment: "",
-      related: "",
-    }
+    ]
 );
 
 function fullImageUrl(file: string) {

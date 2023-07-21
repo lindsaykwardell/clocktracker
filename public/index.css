@@ -9,7 +9,3 @@
   font-family: "Trade Gothic";
   src: url(/fonts/tradegothic.ttf);
 }
-
-.token {
-  background-image: url("/img/token-bg.png");
-}

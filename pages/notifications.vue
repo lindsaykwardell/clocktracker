@@ -15,9 +15,9 @@
             <div class="flex flex-col md:flex-row items-center gap-3 w-full">
               <div class="flex-grow flex flex-col">
                 <div class="text-stone-400">
-                  <a :href="`/@${notification.from_user.username}`">
+                  <nuxt-link :to="`/@${notification.from_user.username}`">
                     {{ notification.message }}
-                  </a>
+                  </nuxt-link>
                 </div>
               </div>
             </div>

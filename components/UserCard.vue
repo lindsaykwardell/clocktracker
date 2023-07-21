@@ -1,6 +1,6 @@
 <template>
-  <a
-    :href="`/@${player.username}`"
+  <nuxt-link
+    :to="`/@${player.username}`"
     class="bg-stone-950 hover:bg-stone-900 transition duration-150 shadow-lg"
   >
     <div class="flex items-center w-full p-2 m-auto gap-3">
@@ -35,7 +35,7 @@
         </div>
       </div>
     </div>
-  </a>
+  </nuxt-link>
 </template>
 
 <script setup lang="ts">
