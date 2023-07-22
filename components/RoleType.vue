@@ -11,22 +11,23 @@ import { Pie } from "vue-chartjs";
 
 const props = defineProps<{
   games: (Game & {
-    player_characters: (Character & { role?: { token_url: string } })[];
+    player_characters: (Character & {
+      role?: { token_url: string; type: string };
+      related_role?: { token_url: string };
+    })[];
   })[];
 }>();
-
-const { isTownsfolk, isOutsider, isMinion, isDemon, isTraveler } = useRoles();
 
 const roles = computed(() => {
   const val = { townsfolk: 0, outsider: 0, minion: 0, demon: 0, traveler: 0 };
 
   for (const game of props.games) {
     for (const character of game.player_characters) {
-      if (isTownsfolk(character.name)) val.townsfolk++;
-      if (isOutsider(character.name)) val.outsider++;
-      if (isMinion(character.name)) val.minion++;
-      if (isDemon(character.name)) val.demon++;
-      if (isTraveler(character.name)) val.traveler++;
+      if (character.role?.type === "TOWNSFOLK") val.townsfolk++;
+      if (character.role?.type === "OUTSIDER") val.outsider++;
+      if (character.role?.type === "MINION") val.minion++;
+      if (character.role?.type === "DEMON") val.demon++;
+      if (character.role?.type === "TRAVELER") val.traveler++;
     }
   }
 

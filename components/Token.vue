@@ -4,21 +4,13 @@
     class="token bg-center bg-cover relative rounded-full shadow-xl border border-black flex justify-center items-center"
     :class="tokenSize"
   >
-    <img
-      :class="imageSize"
-      :src="image"
-      loading="lazy"
-    />
+    <img :class="imageSize" :src="image" loading="lazy" />
     <div
       v-if="character.related"
       class="token bg-center bg-cover absolute bottom-0 right-0 rounded-full shadow-xl border border-black flex justify-center items-center"
       :class="relatedSize"
     >
-      <img
-        :class="relatedImageSize"
-        :src="roles.toImage(character.related || '')"
-        loading="lazy"
-      />
+      <img :class="relatedImageSize" :src="relatedImage" loading="lazy" />
     </div>
   </div>
 </template>
@@ -26,10 +18,13 @@
 <script setup lang="ts">
 import { Character } from "@prisma/client";
 
-const roles = useRoles();
-
 const props = defineProps<{
-  character: (Character & { role?: { token_url: string } }) | undefined;
+  character:
+    | (Character & {
+        role?: { token_url: string; type: string };
+        related_role?: { token_url: string };
+      })
+    | undefined;
   size: "sm" | "md" | "lg";
 }>();
 
@@ -51,7 +46,7 @@ const imageSize = computed(() => {
     case "md":
       return "md:w-20 md:h-20";
     case "lg":
-      return "w-32 h-32 md:w-40 md:`h-40";
+      return "w-32 h-32 md:w-40 md:h-40";
   }
 });
 
@@ -80,6 +75,18 @@ const relatedImageSize = computed(() => {
 const image = computed(() => {
   if (props.character?.role?.token_url) {
     return props.character.role.token_url;
+  }
+  if (props.character?.alignment === "GOOD") {
+    return "/img/role/good.png";
+  }
+  if (props.character?.alignment === "EVIL") {
+    return "/img/role/evil.png";
+  }
+});
+
+const relatedImage = computed(() => {
+  if (props.character?.related_role?.token_url) {
+    return props.character.related_role.token_url;
   }
   if (props.character?.alignment === "GOOD") {
     return "/img/role/good.png";

@@ -11,7 +11,10 @@ import { Bar } from "vue-chartjs";
 
 const props = defineProps<{
   games: (Game & {
-    player_characters: (Character & { role?: { token_url: string } })[];
+    player_characters: (Character & {
+      role?: { token_url: string; type: string };
+      related_role?: { token_url: string };
+    })[];
   })[];
 }>();
 

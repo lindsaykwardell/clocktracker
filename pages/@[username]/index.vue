@@ -77,7 +77,10 @@ const username = useRoute().params.username as string;
 const player = await useFetch(`/api/user/${username}`);
 const games = await useFetch<
   (Game & {
-    player_characters: (Character & { role?: { token_url: string } })[];
+    player_characters: (Character & {
+      role?: { token_url: string; type: string };
+      related_role?: { token_url: string };
+    })[];
   })[]
 >(`/api/user/${username}/games`);
 

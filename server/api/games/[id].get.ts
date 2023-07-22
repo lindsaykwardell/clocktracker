@@ -22,8 +22,14 @@ export default defineEventHandler(async (handler) => {
           role: {
             select: {
               token_url: true,
+              type: true,
             },
           },
+          related_role: {
+            select: {
+              token_url: true,
+            }
+          }
         },
       },
     },

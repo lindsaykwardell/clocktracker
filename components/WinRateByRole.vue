@@ -9,11 +9,12 @@
 import type { Game, Character } from "@prisma/client";
 import { Bar } from "vue-chartjs";
 
-const { isTownsfolk, isOutsider, isMinion, isDemon, isTraveler } = useRoles();
-
 const props = defineProps<{
   games: (Game & {
-    player_characters: (Character & { role?: { token_url: string } })[];
+    player_characters: (Character & {
+      role?: { token_url: string; type: string };
+      related_role?: { token_url: string };
+    })[];
   })[];
 }>();
 
@@ -24,10 +25,14 @@ const chartData = computed(() => ({
       label: "Townsfolk",
       data: [
         props.games.filter(
-          (game) => isTownsfolk(game.player_characters[0].name) && game.win
+          (game) =>
+            game.player_characters[game.player_characters.length - 1].role
+              ?.type === "TOWNSFOLK" && game.win
         ).length,
         props.games.filter(
-          (game) => isTownsfolk(game.player_characters[0].name) && !game.win
+          (game) =>
+            game.player_characters[game.player_characters.length - 1].role
+              ?.type === "TOWNSFOLK" && !game.win
         ).length,
       ],
       backgroundColor: "blue",
@@ -36,10 +41,14 @@ const chartData = computed(() => ({
       label: "Outsider",
       data: [
         props.games.filter(
-          (game) => isOutsider(game.player_characters[0].name) && game.win
+          (game) =>
+            game.player_characters[game.player_characters.length - 1].role
+              ?.type === "OUTSIDER" && game.win
         ).length,
         props.games.filter(
-          (game) => isOutsider(game.player_characters[0].name) && !game.win
+          (game) =>
+            game.player_characters[game.player_characters.length - 1].role
+              ?.type === "OUTSIDER" && !game.win
         ).length,
       ],
       backgroundColor: "lightblue",
@@ -48,10 +57,14 @@ const chartData = computed(() => ({
       label: "Minion",
       data: [
         props.games.filter(
-          (game) => isMinion(game.player_characters[0].name) && game.win
+          (game) =>
+            game.player_characters[game.player_characters.length - 1].role
+              ?.type === "MINION" && game.win
         ).length,
         props.games.filter(
-          (game) => isMinion(game.player_characters[0].name) && !game.win
+          (game) =>
+            game.player_characters[game.player_characters.length - 1].role
+              ?.type === "MINION" && !game.win
         ).length,
       ],
       backgroundColor: "pink",
@@ -60,10 +73,14 @@ const chartData = computed(() => ({
       label: "Demon",
       data: [
         props.games.filter(
-          (game) => isDemon(game.player_characters[0].name) && game.win
+          (game) =>
+            game.player_characters[game.player_characters.length - 1].role
+              ?.type === "DEMON" && game.win
         ).length,
         props.games.filter(
-          (game) => isDemon(game.player_characters[0].name) && !game.win
+          (game) =>
+            game.player_characters[game.player_characters.length - 1].role
+              ?.type === "DEMON" && !game.win
         ).length,
       ],
       backgroundColor: "red",
@@ -72,10 +89,14 @@ const chartData = computed(() => ({
       label: "Traveler",
       data: [
         props.games.filter(
-          (game) => isTraveler(game.player_characters[0].name) && game.win
+          (game) =>
+            game.player_characters[game.player_characters.length - 1].role
+              ?.type === "TRAVELER" && game.win
         ).length,
         props.games.filter(
-          (game) => isTraveler(game.player_characters[0].name) && !game.win
+          (game) =>
+            game.player_characters[game.player_characters.length - 1].role
+              ?.type === "TRAVELER" && !game.win
         ).length,
       ],
       backgroundColor: "purple",

@@ -18,9 +18,7 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  const games: (Game & {
-    player_characters: (Character & { role?: { token_url: string } })[];
-  })[] = await prisma.game.findMany({
+  const games = await prisma.game.findMany({
     where: {
       user_id: user?.user_id,
     },
@@ -28,6 +26,12 @@ export default defineEventHandler(async (handler) => {
       player_characters: {
         include: {
           role: {
+            select: {
+              token_url: true,
+              type: true,
+            },
+          },
+          related_role: {
             select: {
               token_url: true,
             },

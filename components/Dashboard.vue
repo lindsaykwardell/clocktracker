@@ -132,7 +132,10 @@ const props = defineProps<{
     location: string | null;
   } | null;
   games: (Game & {
-    player_characters: (Character & { role?: { token_url: string } })[];
+    player_characters: (Character & {
+      role?: { token_url: string; type: string };
+      related_role?: { token_url: string };
+    })[];
   })[];
 }>();
 

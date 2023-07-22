@@ -20,7 +20,10 @@
 import type { Game, Character } from "@prisma/client";
 const props = defineProps<{
   games: (Game & {
-    player_characters: (Character & { role?: { token_url: string } })[];
+    player_characters: (Character & {
+      role?: { token_url: string; type: string };
+      related_role?: { token_url: string };
+    })[];
   })[];
 }>();
 

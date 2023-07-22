@@ -206,14 +206,18 @@ import type { Game, Character } from "@prisma/client";
 import dayjs from "dayjs";
 
 const { scriptLogo } = useScripts();
-const roles = useRoles();
 const config = useRuntimeConfig();
 const router = useRouter();
 const route = useRoute();
 const user = useSupabaseUser();
 
 const game = await useFetch<
-  Game & { player_characters: (Character & { role?: { token_url: string } })[] }
+  Game & {
+    player_characters: (Character & {
+      role?: { token_url: string; type: string };
+      related_role?: { token_url: string };
+    })[];
+  }
 >(`/api/games/${route.params.id}`);
 const player = await useFetch(`/api/user/${route.params.username}`);
 

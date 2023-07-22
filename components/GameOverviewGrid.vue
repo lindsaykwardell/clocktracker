@@ -53,12 +53,14 @@
 import type { Game, Character } from "@prisma/client";
 import dayjs from "dayjs";
 
-const roles = useRoles();
 const config = useRuntimeConfig();
 
 defineProps<{
   games: (Game & {
-    player_characters: (Character & { role?: { token_url: string } })[];
+    player_characters: (Character & {
+      role?: { token_url: string; type: string };
+      related_role?: { token_url: string };
+    })[];
     last_character: Character;
   })[];
   readonly?: boolean;
