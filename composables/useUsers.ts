@@ -44,7 +44,6 @@ export const useUsers = defineStore("users", {
   },
   actions: {
     async fetchUser(username: string) {
-      console.log("fetching user", username);
       // Mark as loading if we don't have the user yet
       if (!this.users.has(username))
         this.users.set(username, { status: Status.LOADING });
