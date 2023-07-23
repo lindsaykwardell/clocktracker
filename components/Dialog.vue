@@ -51,8 +51,4 @@ watch(visible, (val) => {
 onMounted(() => {
   dialog.value.addEventListener("close", close);
 });
-
-onUnmounted(() => {
-  dialog.value.removeEventListener("close", close);
-});
 </script>

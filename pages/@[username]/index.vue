@@ -1,70 +1,64 @@
 <template>
   <AuthenticatedTemplate>
     <div class="w-full flex flex-col gap-8">
-      <UserHeader :player="player.data.value!">
-        <div class="flex justify-start w-full">
-          <nuxt-link
-            :to="`/@${username}`"
-            class="font-bold text-lg border-b-4 py-1 px-2 md:px-3 hover:bg-stone-700"
-            :class="currentTabClass('dashboard')"
-          >
-            Dashboard
-          </nuxt-link>
-          <nuxt-link
-            :to="`/@${username}?view=charts`"
-            class="font-bold text-lg border-b-4 py-1 px-2 md:px-3 hover:bg-stone-700"
-            :class="currentTabClass('charts')"
-          >
-            Charts
-          </nuxt-link>
-          <nuxt-link
-            :to="`/@${username}?view=followers`"
-            class="font-bold text-lg border-b-4 py-1 px-2 md:px-3 hover:bg-stone-700"
-            :class="currentTabClass('followers')"
-          >
-            {{ player.data.value?.followers.length }}
-            {{
-              player.data.value?.followers.length === 1
-                ? "Follower"
-                : "Followers"
-            }}
-          </nuxt-link>
-          <nuxt-link
-            :to="`/@${username}?view=following`"
-            class="font-bold text-lg border-b-4 py-1 px-2 md:px-3 hover:bg-stone-700"
-            :class="currentTabClass('following')"
-          >
-            {{ player.data.value?.following.length }} Following
-          </nuxt-link>
+      <template v-if="playerFetchStatus === Status.SUCCESS && player">
+        <UserHeader :player="player">
+          <div class="flex justify-start w-full">
+            <nuxt-link
+              :to="`/@${username}`"
+              class="font-bold text-lg border-b-4 py-1 px-2 md:px-3 hover:bg-stone-700"
+              :class="currentTabClass('dashboard')"
+            >
+              Dashboard
+            </nuxt-link>
+            <nuxt-link
+              :to="`/@${username}?view=charts`"
+              class="font-bold text-lg border-b-4 py-1 px-2 md:px-3 hover:bg-stone-700"
+              :class="currentTabClass('charts')"
+            >
+              Charts
+            </nuxt-link>
+            <nuxt-link
+              :to="`/@${username}?view=followers`"
+              class="font-bold text-lg border-b-4 py-1 px-2 md:px-3 hover:bg-stone-700"
+              :class="currentTabClass('followers')"
+            >
+              {{ player.followers.length }}
+              {{ player.followers.length === 1 ? "Follower" : "Followers" }}
+            </nuxt-link>
+            <nuxt-link
+              :to="`/@${username}?view=following`"
+              class="font-bold text-lg border-b-4 py-1 px-2 md:px-3 hover:bg-stone-700"
+              :class="currentTabClass('following')"
+            >
+              {{ player.following.length }} Following
+            </nuxt-link>
+          </div>
+        </UserHeader>
+        <UserCharts
+          v-if="currentTab === 'charts'"
+          :games="games.data.value || []"
+        />
+        <div
+          v-if="currentTab === 'followers'"
+          class="flex flex-col gap-4 w-11/12 md:3/4 lg:w-2/3 xl:w-[1000px] m-auto"
+        >
+          <UserCard
+            v-for="follower in player.followers"
+            :player="follower.user"
+          />
         </div>
-      </UserHeader>
-      <UserCharts
-        v-if="currentTab === 'charts'"
-        :games="games.data.value || []"
-      />
-      <div
-        v-if="currentTab === 'followers'"
-        class="flex flex-col gap-4 w-11/12 md:3/4 lg:w-2/3 xl:w-[1000px] m-auto"
-      >
-        <UserCard
-          v-for="follower in player.data.value?.followers"
-          :player="follower.user"
-        />
-      </div>
-      <div
-        v-if="currentTab === 'following'"
-        class="flex flex-col gap-4 w-11/12 md:3/4 lg:w-2/3 xl:w-[1000px] m-auto"
-      >
-        <UserCard
-          v-for="following in player.data.value?.following"
-          :player="following.following"
-        />
-      </div>
-      <Dashboard
-        v-else
-        :player="player.data.value"
-        :games="games.data.value || []"
-      />
+        <div
+          v-if="currentTab === 'following'"
+          class="flex flex-col gap-4 w-11/12 md:3/4 lg:w-2/3 xl:w-[1000px] m-auto"
+        >
+          <UserCard
+            v-for="following in player.following"
+            :player="following.following"
+          />
+        </div>
+        <Dashboard v-if="currentTab === 'dashboard'" :player="player" :games="games.data.value || []" />
+      </template>
     </div>
   </AuthenticatedTemplate>
 </template>
@@ -72,9 +66,23 @@
 <script setup lang="ts">
 import type { Game, Character } from "@prisma/client";
 const route = useRoute();
+const users = useUsers();
 const username = useRoute().params.username as string;
 
-const player = await useFetch(`/api/user/${username}`);
+const playerStatus = computed(() => users.getUser(username));
+const playerFetchStatus = computed(() => playerStatus.value.status);
+const player = computed(() => {
+  if (playerStatus.value.status === Status.SUCCESS) {
+    return playerStatus.value.data;
+  } else {
+    return null;
+  }
+});
+
+if (playerFetchStatus.value === Status.IDLE) {
+  await users.fetchUser(username);
+}
+
 const games = await useFetch<
   (Game & {
     player_characters: (Character & {
@@ -104,6 +112,10 @@ function currentTabClass(tab: string) {
   };
 }
 
+onMounted(async () => {
+  await users.fetchUser(username);
+});
+
 useHead({
   title: username,
   meta: [
@@ -122,7 +134,7 @@ useHead({
     },
     {
       property: "og:image",
-      content: player.data.value?.avatar || "",
+      content: player.value?.avatar || "",
     },
     {
       property: "og:url",
@@ -146,7 +158,7 @@ useHead({
     },
     {
       property: "twitter:image",
-      content: player.data.value?.avatar || "",
+      content: player.value?.avatar || "",
     },
   ],
 });
