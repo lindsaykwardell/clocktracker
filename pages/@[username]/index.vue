@@ -3,24 +3,24 @@
     <div class="w-full flex flex-col gap-8">
       <template v-if="playerFetchStatus === Status.SUCCESS && player">
         <UserHeader :player="player">
-          <div class="flex justify-start w-full">
+          <div class="flex justify-start overflow-scroll w-screen md:w-full gap-1 h-12">
             <nuxt-link
               :to="`/@${username}`"
-              class="font-bold text-lg border-b-4 py-1 px-2 md:px-3 hover:bg-stone-700"
+              class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-700"
               :class="currentTabClass('dashboard')"
             >
-              Dashboard
+              Games
             </nuxt-link>
             <nuxt-link
               :to="`/@${username}?view=charts`"
-              class="font-bold text-lg border-b-4 py-1 px-2 md:px-3 hover:bg-stone-700"
+              class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-700"
               :class="currentTabClass('charts')"
             >
               Charts
             </nuxt-link>
             <nuxt-link
               :to="`/@${username}?view=followers`"
-              class="font-bold text-lg border-b-4 py-1 px-2 md:px-3 hover:bg-stone-700"
+              class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-700"
               :class="currentTabClass('followers')"
             >
               {{ player.followers.length }}
@@ -28,7 +28,7 @@
             </nuxt-link>
             <nuxt-link
               :to="`/@${username}?view=following`"
-              class="font-bold text-lg border-b-4 py-1 px-2 md:px-3 hover:bg-stone-700"
+              class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-700"
               :class="currentTabClass('following')"
             >
               {{ player.following.length }} Following
