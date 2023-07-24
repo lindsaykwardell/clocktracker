@@ -49,6 +49,8 @@ export default defineNuxtConfig({
       "index.css",
       "/_nuxt/**.css",
       "/_nuxt/**.js",
+      `${process.env.SUPABASE_URL}/storage/v1/object/public/avatars/**`,
+      `${process.env.SUPABASE_URL}/storage/v1/object/public/game-attachments/**`,
     ],
     workbox: {
       globPatterns: ["**/*.{js,css,html}"],
