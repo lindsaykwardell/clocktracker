@@ -181,7 +181,9 @@
         </button>
       </div>
     </section>
-    <template v-else>{{ game.status }}</template>
+    <template v-else>
+      <Loading class="h-screen" />
+    </template>
   </AuthenticatedTemplate>
 </template>
 

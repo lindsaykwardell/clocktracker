@@ -109,7 +109,7 @@
     </template>
   </template>
   <template v-else>
-    {{ games.status }}
+    <Loading />
   </template>
 </template>
 

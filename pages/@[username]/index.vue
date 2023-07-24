@@ -60,7 +60,9 @@
           :games="games"
         />
       </template>
-      <template v-else>{{ playerFetchStatus }}</template>
+      <template v-else>
+        <Loading class="h-screen" />
+      </template>
     </div>
   </AuthenticatedTemplate>
 </template>
