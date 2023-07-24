@@ -130,7 +130,7 @@ useHead({
     },
     {
       property: "og:image",
-      content: player.value?.avatar || "",
+      content: `/api/user/${username}/avatar` || "",
     },
     {
       property: "og:url",
@@ -154,7 +154,7 @@ useHead({
     },
     {
       property: "twitter:image",
-      content: player.value?.avatar || "",
+      content: `/api/user/${username}/avatar` || "",
     },
   ],
 });
