@@ -210,58 +210,63 @@ watchEffect(() => {
   }
 });
 
-// useHead({
-//   title: `${player.data.value?.username} | ${game.data.value?.script}`,
-//   meta: [
-//     {
-//       hid: "description",
-//       name: "description",
-//       content: `Game of ${game.data.value?.script} played by ${
-//         player.data.value?.username
-//       } on ${dayjs(game.data.value?.date).format("MMMM D, YYYY")}.`,
-//     },
-//     {
-//       property: "og:title",
-//       content: `${player.data.value?.username} | ${game.data.value?.script}`,
-//     },
-//     {
-//       property: "og:description",
-//       content: `Game of ${game.data.value?.script} played by ${
-//         player.data.value?.username
-//       } on ${dayjs(game.data.value?.date).format("MMMM D, YYYY")}.`,
-//     },
-//     {
-//       property: "og:image",
-//       content: scriptLogo(game.data.value?.script as string),
-//     },
-//     {
-//       property: "og:url",
-//       content: route.fullPath,
-//     },
-//     {
-//       property: "twitter:card",
-//       content: "summary_large_image",
-//     },
-//     {
-//       property: "twitter:url",
-//       content: route.fullPath,
-//     },
-//     {
-//       property: "twitter:title",
-//       content: `${player.data.value?.username} | ${game.data.value?.script}`,
-//     },
-//     {
-//       property: "twitter:description",
-//       content: `Game of ${game.data.value?.script} played by ${
-//         player.data.value?.username
-//       } on ${dayjs(game.data.value?.date).format("MMMM D, YYYY")}.`,
-//     },
-//     {
-//       property: "twitter:image",
-//       content: scriptLogo(game.data.value?.script as string),
-//     },
-//   ],
-// });
+if (
+  player.value.status === Status.SUCCESS &&
+  game.value.status === Status.SUCCESS
+) {
+  useHead({
+    title: `${player.value.data.username} | ${game.value.data.script}`,
+    meta: [
+      {
+        hid: "description",
+        name: "description",
+        content: `Game of ${game.value.data.script} played by ${
+          player.value.data.username
+        } on ${dayjs(game.value.data.date).format("MMMM D, YYYY")}.`,
+      },
+      {
+        property: "og:title",
+        content: `${player.value.data.username} | ${game.value.data.script}`,
+      },
+      {
+        property: "og:description",
+        content: `Game of ${game.value.data.script} played by ${
+          player.value.data.username
+        } on ${dayjs(game.value.data.date).format("MMMM D, YYYY")}.`,
+      },
+      {
+        property: "og:image",
+        content: scriptLogo(game.value.data.script as string),
+      },
+      {
+        property: "og:url",
+        content: route.fullPath,
+      },
+      {
+        property: "twitter:card",
+        content: "summary_large_image",
+      },
+      {
+        property: "twitter:url",
+        content: route.fullPath,
+      },
+      {
+        property: "twitter:title",
+        content: `${player.value.data.username} | ${game.value.data.script}`,
+      },
+      {
+        property: "twitter:description",
+        content: `Game of ${game.value.data.script} played by ${
+          player.value.data.username
+        } on ${dayjs(game.value.data.date).format("MMMM D, YYYY")}.`,
+      },
+      {
+        property: "twitter:image",
+        content: scriptLogo(game.value.data.script as string),
+      },
+    ],
+  });
+}
 
 const last_character = computed(() => {
   if (game.value.status === Status.SUCCESS) {
