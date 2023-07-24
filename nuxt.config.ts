@@ -44,6 +44,9 @@ export default defineNuxtConfig({
       "/logo-ct-sm.png",
       "logo.png",
       "robots.txt",
+      "index.css",
+      "/_nuxt/**.css",
+      "/_nuxt/**.js",
     ],
     workbox: {
       globPatterns: ["**/*.{js,css,html}"],
