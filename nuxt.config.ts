@@ -41,6 +41,8 @@ export default defineNuxtConfig({
     includeAssets: [
       "/img/**",
       "/img/role/**",
+      "fonts/dumbledor.ttf",
+      "fonts/tradegothic.ttf",
       "/logo-ct-sm.png",
       "logo.png",
       "robots.txt",
