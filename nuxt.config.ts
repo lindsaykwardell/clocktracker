@@ -55,7 +55,7 @@ export default defineNuxtConfig({
       theme_color: "#292524",
       background_color: "#1C1917",
       orientation: "any",
-      display_override: ["standalone"],
+      display_override: ["standalone", "window-controls-overlay"],
       handle_links: "auto",
       categories: ["games", "entertainment"],
       dir: "ltr",
