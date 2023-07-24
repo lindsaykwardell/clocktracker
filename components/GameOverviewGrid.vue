@@ -21,6 +21,7 @@
           v-if="game.image_urls[0]"
           :src="fullImageUrl(game.image_urls[0])"
           class="absolute bottom-0 w-full h-full object-cover blur-sm"
+          crossorigin="anonymous"
         />
         <div
           class="absolute top-0 left-0 text-white md:text-lg bg-gradient-to-br from-black/75 via-black/50 to-black-0 p-1"

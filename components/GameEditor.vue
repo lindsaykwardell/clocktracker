@@ -269,7 +269,7 @@
         </button>
         <div class="flex flex-wrap gap-5">
           <div v-for="file in game.image_urls" :key="file">
-            <img :src="file" class="w-64 h-64 object-cover" />
+            <img crossorigin="anonymous" :src="file" class="w-64 h-64 object-cover" />
             <button type="button" @click="removeFile(file)">Remove</button>
           </div>
         </div>

@@ -30,6 +30,7 @@
           v-if="game.image_urls[0]"
           :src="fullImageUrl(game.image_urls[0])"
           class="absolute bottom-0 w-full h-full object-cover blur-sm"
+          crossorigin="anonymous"
         />
         <div class="absolute bottom-0 left-0 z-0 w-full h-full bg-black/50" />
         <Token :character="game.last_character" size="sm" />

@@ -7,6 +7,7 @@
       'w-12 md:w-16 aspect-square': size === 'sm',
       'w-32 md:w-40 aspect-square	': size === 'lg',
     }"
+    crossorigin="anonymous"
   />
 </template>
 

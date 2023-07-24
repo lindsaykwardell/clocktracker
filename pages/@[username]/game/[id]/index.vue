@@ -132,6 +132,7 @@
                 <img
                   :src="fullImageUrl(file)"
                   class="w-full sm:w-1/2 md:w-64 md:h-64 object-cover shadow-lg"
+                  crossorigin="anonymous"
                 />
               </a>
             </div>
