@@ -71,12 +71,9 @@ export default defineNuxtConfig({
         // Cache the API requests to the ClockTracker API
         {
           urlPattern: ({ url }) => url.pathname.startsWith("/api/"),
-          handler: "NetworkFirst",
+          handler: "StaleWhileRevalidate",
           options: {
             cacheName: "clocktracker-api-cache",
-            expiration: {
-              maxAgeSeconds: 60 * 60 * 24 * 365, // <== 365 days
-            },
             cacheableResponse: {
               statuses: [0, 200],
             },
