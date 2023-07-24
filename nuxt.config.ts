@@ -49,11 +49,25 @@ export default defineNuxtConfig({
       "index.css",
       "/_nuxt/**.css",
       "/_nuxt/**.js",
-      `${process.env.SUPABASE_URL}/storage/v1/object/public/avatars/**`,
-      `${process.env.SUPABASE_URL}/storage/v1/object/public/game-attachments/**`,
     ],
     workbox: {
       globPatterns: ["**/*.{js,css,html}"],
+      runtimeCaching: [
+        {
+          urlPattern: /^https:\/\/[a-z]*\.supabase\.co\/storage\/v1\/object\/public.*/i,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'supabase-cache',
+            expiration: {
+              maxEntries: 10,
+              maxAgeSeconds: 60 * 60 * 24 * 14 // <== 14 days
+            },
+            cacheableResponse: {
+              statuses: [0, 200]
+            }
+          }
+        }
+      ],
     },
     manifest: {
       name: "ClockTracker",
