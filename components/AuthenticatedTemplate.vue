@@ -1,7 +1,7 @@
 <template>
   <div class="flex relative">
     <nav
-      class="flex flex-col gap-3 pr-1 md:pr-4 pt-1 pl-1 pb-1 rounded md:rounded-none rounded-l-none md:pb-0 fixed md:sticky z-10 top-0 md:h-screen bg-stone-900 md:w-auto"
+      class="flex flex-col gap-3 pr-1 md:pr-4 pt-1 pl-1 pb-1 rounded md:rounded-none rounded-l-none md:pb-0 fixed md:sticky top-0 md:h-screen bg-stone-900 md:w-auto z-50"
       :class="{
         'h-screen w-screen': showMenu,
       }"
