@@ -70,7 +70,7 @@ export default defineNuxtConfig({
         },
         // Cache the API requests to the ClockTracker API
         {
-          urlPattern: /^https:\/\/www\.clocktracker\.app\/.*/i,
+          urlPattern: /^https:\/\/www\.clocktracker\.app\/api\/.*/i,
           handler: "NetworkFirst",
           options: {
             cacheName: "clocktracker-api-cache",
