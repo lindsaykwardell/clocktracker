@@ -197,9 +197,11 @@ const route = useRoute();
 const user = useSupabaseUser();
 const users = useUsers();
 const games = useGames();
+const username = route.params.username as string;
+const gameId = route.params.id as string;
 
-const game = computed(() => games.getGame(route.params.id as string));
-const player = computed(() => users.getUser(route.params.username as string));
+const game = computed(() => games.getGame(gameId));
+const player = computed(() => users.getUser(username));
 
 watchEffect(() => {
   if (
@@ -210,63 +212,66 @@ watchEffect(() => {
   }
 });
 
-if (
-  player.value.status === Status.SUCCESS &&
-  game.value.status === Status.SUCCESS
-) {
-  useHead({
-    title: `${player.value.data.username} | ${game.value.data.script}`,
-    meta: [
-      {
-        hid: "description",
-        name: "description",
-        content: `Game of ${game.value.data.script} played by ${
-          player.value.data.username
-        } on ${dayjs(game.value.data.date).format("MMMM D, YYYY")}.`,
-      },
-      {
-        property: "og:title",
-        content: `${player.value.data.username} | ${game.value.data.script}`,
-      },
-      {
-        property: "og:description",
-        content: `Game of ${game.value.data.script} played by ${
-          player.value.data.username
-        } on ${dayjs(game.value.data.date).format("MMMM D, YYYY")}.`,
-      },
-      {
-        property: "og:image",
-        content: scriptLogo(game.value.data.script as string),
-      },
-      {
-        property: "og:url",
-        content: route.fullPath,
-      },
-      {
-        property: "twitter:card",
-        content: "summary_large_image",
-      },
-      {
-        property: "twitter:url",
-        content: route.fullPath,
-      },
-      {
-        property: "twitter:title",
-        content: `${player.value.data.username} | ${game.value.data.script}`,
-      },
-      {
-        property: "twitter:description",
-        content: `Game of ${game.value.data.script} played by ${
-          player.value.data.username
-        } on ${dayjs(game.value.data.date).format("MMMM D, YYYY")}.`,
-      },
-      {
-        property: "twitter:image",
-        content: scriptLogo(game.value.data.script as string),
-      },
-    ],
-  });
-}
+const gameMetadata = await useFetch(`/api/games/${gameId}/minimal`);
+
+useHead({
+  title: `${username} | ${gameMetadata.data.value!.script}`,
+  meta: [
+    {
+      hid: "description",
+      name: "description",
+      content: `Game of ${
+        gameMetadata.data.value!.script
+      } played by ${username} on ${dayjs(gameMetadata.data.value!.date).format(
+        "MMMM D, YYYY"
+      )}.`,
+    },
+    {
+      property: "og:title",
+      content: `${username} | ${gameMetadata.data.value!.script}`,
+    },
+    {
+      property: "og:description",
+      content: `Game of ${
+        gameMetadata.data.value!.script
+      } played by ${username} on ${dayjs(gameMetadata.data.value!.date).format(
+        "MMMM D, YYYY"
+      )}.`,
+    },
+    {
+      property: "og:image",
+      content: scriptLogo(gameMetadata.data.value!.script as string),
+    },
+    {
+      property: "og:url",
+      content: route.fullPath,
+    },
+    {
+      property: "twitter:card",
+      content: "summary_large_image",
+    },
+    {
+      property: "twitter:url",
+      content: route.fullPath,
+    },
+    {
+      property: "twitter:title",
+      content: `${username} | ${gameMetadata.data.value!.script}`,
+    },
+    {
+      property: "twitter:description",
+      content: `Game of ${
+        gameMetadata.data.value!.script
+      } played by ${username} on ${dayjs(gameMetadata.data.value!.date).format(
+        "MMMM D, YYYY"
+      )}.`,
+    },
+    {
+      property: "twitter:image",
+      content: scriptLogo(gameMetadata.data.value!.script as string),
+    },
+  ],
+});
 
 const last_character = computed(() => {
   if (game.value.status === Status.SUCCESS) {
