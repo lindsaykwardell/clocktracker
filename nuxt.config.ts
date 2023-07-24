@@ -54,19 +54,34 @@ export default defineNuxtConfig({
       globPatterns: ["**/*.{js,css,html}"],
       runtimeCaching: [
         {
-          urlPattern: /^https:\/\/[a-z]*\.supabase\.co\/storage\/v1\/object\/public.*/i,
-          handler: 'CacheFirst',
+          urlPattern:
+            /^https:\/\/[a-z]*\.supabase\.co\/storage\/v1\/object\/public.*/i,
+          handler: "CacheFirst",
           options: {
-            cacheName: 'supabase-cache',
+            cacheName: "supabase-cache",
             expiration: {
               maxEntries: 10,
-              maxAgeSeconds: 60 * 60 * 24 * 365 // <== 365 days
+              maxAgeSeconds: 60 * 60 * 24 * 365, // <== 365 days
             },
             cacheableResponse: {
-              statuses: [0, 200]
-            }
-          }
-        }
+              statuses: [0, 200],
+            },
+          },
+        },
+        // Cache the API requests to the ClockTracker API
+        {
+          urlPattern: /^https:\/\/www\.clocktracker\.app\/.*/i,
+          handler: "NetworkFirst",
+          options: {
+            cacheName: "clocktracker-api-cache",
+            expiration: {
+              maxAgeSeconds: 60 * 60 * 24 * 365, // <== 365 days
+            },
+            cacheableResponse: {
+              statuses: [0, 200],
+            },
+          },
+        },
       ],
     },
     manifest: {
