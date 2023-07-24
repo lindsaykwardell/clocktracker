@@ -1,9 +1,9 @@
 <template>
   <div class="flex relative">
     <nav
-      class="flex flex-col gap-3 pr-1 md:pr-4 pt-1 pl-1 pb-1 rounded md:rounded-none rounded-l-none md:pb-0 fixed md:sticky z-10 top-0 md:h-screen bg-stone-900"
+      class="flex flex-col gap-3 pr-1 md:pr-4 pt-1 pl-1 pb-1 rounded md:rounded-none rounded-l-none md:pb-0 fixed md:sticky z-10 top-0 md:h-screen bg-stone-900 md:w-auto"
       :class="{
-        'h-screen': showMenu,
+        'h-screen w-screen': showMenu,
       }"
     >
       <button @click="showMenu = !showMenu" class="md:hidden">
@@ -40,7 +40,7 @@
           <div class="w-[50px] overflow-hidden">
             <img src="/img/role/investigator.png" class="max-w-[125%]" alt="" />
           </div>
-          <span class="hidden md:inline">Search</span>
+          <span class="">Search</span>
         </nuxt-link>
         <template v-if="user">
           <nuxt-link
@@ -50,7 +50,7 @@
             <div class="w-[50px] overflow-hidden">
               <img src="/img/role/innkeeper.png" class="max-w-[125%]" alt="" />
             </div>
-            <span class="hidden md:inline"> My Profile </span>
+            <span class=""> My Profile </span>
           </nuxt-link>
           <nuxt-link
             to="/notifications"
@@ -71,7 +71,7 @@
                 </span>
               </div>
             </div>
-            <span class="hidden md:inline">Notifications</span>
+            <span class="">Notifications</span>
           </nuxt-link>
           <nuxt-link
             to="/add-game"
@@ -80,7 +80,7 @@
             <div class="w-[50px] overflow-hidden">
               <img src="/img/role/mezepheles.png" class="max-w-[125%]" alt="" />
             </div>
-            <span class="hidden md:inline">Add Game</span>
+            <span class="">Add Game</span>
           </nuxt-link>
           <nuxt-link
             to="/settings"
@@ -89,7 +89,7 @@
             <div class="w-[50px] overflow-hidden">
               <img src="/img/role/tinker.png" class="max-w-[125%]" alt="" />
             </div>
-            <span class="hidden md:inline">Settings</span>
+            <span class="">Settings</span>
           </nuxt-link>
           <button
             @click="signOut"
@@ -98,7 +98,7 @@
             <div class="w-[50px] overflow-hidden">
               <img src="/img/role/balloonist.png" class="max-w-[125%]" alt="" />
             </div>
-            <span class="hidden md:inline">Sign Out</span>
+            <span class="">Sign Out</span>
           </button>
         </template>
         <template v-else>
@@ -128,7 +128,7 @@
           <div class="w-[50px] flex justify-center">
             <Discord />
           </div>
-          <span class="hidden md:inline w-16">Community</span>
+          <span class="w-16">Community</span>
         </a>
         <a
           href="https://ko-fi.com/clocktracker"
@@ -137,7 +137,7 @@
           <div class="w-[50px] flex justify-center">
             <KoFi />
           </div>
-          <span class="hidden md:inline w-16">Donate</span>
+          <span class="w-16">Donate</span>
         </a>
       </section>
     </nav>

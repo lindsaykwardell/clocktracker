@@ -1,6 +1,6 @@
 <template>
-  <template v-if="player && ready">
-    <template v-if="games.length">
+  <template v-if="player && games.status === Status.SUCCESS && ready">
+    <template v-if="games.data.length">
       <section class="w-full flex flex-col md:flex-row gap-8 pb-20 md:pb-0">
         <div class="w-full flex flex-col gap-4">
           <div class="flex flex-col md:flex-row gap-3 px-4">
@@ -108,10 +108,14 @@
       </nuxt-link>
     </template>
   </template>
+  <template v-else>
+    {{ games.status }}
+  </template>
 </template>
 
 <script setup lang="ts">
-import type { Game, Character } from "@prisma/client";
+import { FetchStatus } from "composables/useFetchStatus";
+import { GameRecord } from "composables/useGames";
 import naturalOrder from "natural-order";
 
 const ready = ref(false);
@@ -131,19 +135,17 @@ const props = defineProps<{
     bio: string;
     location: string | null;
   } | null;
-  games: (Game & {
-    player_characters: (Character & {
-      role?: { token_url: string; type: string };
-      related_role?: { token_url: string };
-    })[];
-  })[];
+  games: FetchStatus<GameRecord[]>;
 }>();
 
 const user = useSupabaseUser();
 
-const sortedGames = computed(() =>
-  naturalOrder(
-    props.games.map((game) => ({
+const sortedGames = computed(() => {
+  if (props.games.status !== Status.SUCCESS) {
+    return [];
+  }
+  return naturalOrder(
+    props.games.data.map((game) => ({
       ...game,
       last_character: game.player_characters[
         game.player_characters.length - 1
@@ -176,8 +178,8 @@ const sortedGames = computed(() =>
             return [];
         }
       })()
-    )
-);
+    );
+});
 
 onMounted(() => {
   const lastSortBy = localStorage.getItem("lastSortBy");

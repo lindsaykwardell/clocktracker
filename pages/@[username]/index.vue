@@ -35,10 +35,7 @@
             </nuxt-link>
           </div>
         </UserHeader>
-        <UserCharts
-          v-if="currentTab === 'charts'"
-          :games="games.data.value || []"
-        />
+        <UserCharts v-if="currentTab === 'charts'" :games="games" />
         <div
           v-if="currentTab === 'followers'"
           class="flex flex-col gap-4 w-11/12 md:3/4 lg:w-2/3 xl:w-[1000px] m-auto"
@@ -57,16 +54,21 @@
             :player="following.following"
           />
         </div>
-        <Dashboard v-if="currentTab === 'dashboard'" :player="player" :games="games.data.value || []" />
+        <Dashboard
+          v-if="currentTab === 'dashboard'"
+          :player="player"
+          :games="games"
+        />
       </template>
+      <template v-else>{{ playerFetchStatus }}</template>
     </div>
   </AuthenticatedTemplate>
 </template>
 
 <script setup lang="ts">
-import type { Game, Character } from "@prisma/client";
 const route = useRoute();
 const users = useUsers();
+const gameStore = useGames();
 const username = useRoute().params.username as string;
 
 const playerStatus = computed(() => users.getUser(username));
@@ -79,18 +81,9 @@ const player = computed(() => {
   }
 });
 
-if (playerFetchStatus.value === Status.IDLE) {
-  await users.fetchUser(username);
-}
-
-const games = await useFetch<
-  (Game & {
-    player_characters: (Character & {
-      role?: { token_url: string; type: string };
-      related_role?: { token_url: string };
-    })[];
-  })[]
->(`/api/user/${username}/games`);
+const games = computed(() => {
+  return gameStore.getByPlayer(username);
+});
 
 const currentTab = computed(() => {
   switch (route.query.view) {
@@ -112,8 +105,9 @@ function currentTabClass(tab: string) {
   };
 }
 
-onMounted(async () => {
-  await users.fetchUser(username);
+onMounted(() => {
+  users.fetchUser(username);
+  gameStore.fetchPlayerGames(username);
 });
 
 useHead({

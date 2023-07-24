@@ -1,14 +1,14 @@
 <template>
   <AuthenticatedTemplate>
     <section
-      v-if="game.data.value"
+      v-if="game.status === Status.SUCCESS && player.status === Status.SUCCESS"
       class="bg-gradient-to-b from-stone-100 to-stone-300 text-black w-full lg:w-4/5 m-auto md:my-4 rounded shadow-lg p-4"
     >
       <div class="flex flex-col-reverse md:flex-row items-center">
         <div class="flex-grow flex flex-col w-full">
           <div class="flex flex-col md:flex-row gap-4 items-center">
             <Avatar
-              :value="player.data.value?.avatar || ''"
+              :value="player.data.avatar || ''"
               class="border-2 shadow-xl"
               :class="{
                 'border-blue-600': last_character?.alignment === 'GOOD',
@@ -19,14 +19,14 @@
               <h2 class="text-3xl font-dumbledor">
                 <nuxt-link
                   class="hover:underline"
-                  :to="`/@${player.data.value?.username}`"
+                  :to="`/@${player.data.username}`"
                 >
-                  {{ player.data.value?.display_name }}
+                  {{ player.data.display_name }}
                 </nuxt-link>
               </h2>
               <div class="flex flex-col md:flex-row gap-2">
                 <div
-                  v-for="(character, i) in game.data.value.player_characters"
+                  v-for="(character, i) in game.data.player_characters"
                   class="font-dumbledor text-xl font-bold bottom-[20px]"
                   :class="{
                     'text-blue-800': character.alignment === 'GOOD',
@@ -37,18 +37,16 @@
                   <template v-if="character.related">
                     ({{ character.related }})
                   </template>
-                  <template
-                    v-if="i !== game.data.value.player_characters.length - 1"
-                  >
+                  <template v-if="i !== game.data.player_characters.length - 1">
                     ➡
                   </template>
                 </div>
               </div>
               <time
-                :datetime="dayjs(game.data.value.date).toISOString()"
+                :datetime="dayjs(game.data.date).toISOString()"
                 class="text-sm"
               >
-                {{ dayjs(game.data.value.date).format("MMMM D, YYYY") }}
+                {{ dayjs(game.data.date).format("MMMM D, YYYY") }}
               </time>
             </div>
             <div class="font-dumbledor text-2xl">
@@ -64,53 +62,40 @@
           <div class="flex flex-col md:flex-row gap-4 mt-4">
             <label class="flex gap-3 items-center">
               <span>Script</span>
-              <a
-                class="hover:underline"
-                :href="scriptLink(game.data.value.script)"
-              >
-                {{ game.data.value.script }}
+              <a class="hover:underline" :href="scriptLink(game.data.script)">
+                {{ game.data.script }}
               </a>
             </label>
-            <label
-              v-if="game.data.value.storyteller"
-              class="flex gap-3 items-center"
-            >
+            <label v-if="game.data.storyteller" class="flex gap-3 items-center">
               <span>Storyteller</span>
-              {{ game.data.value.storyteller }}
+              {{ game.data.storyteller }}
             </label>
             <label
-              v-if="game.data.value.player_count"
+              v-if="game.data.player_count"
               class="flex gap-3 items-center"
             >
               <span>Players</span>
-              {{ game.data.value.player_count }}
+              {{ game.data.player_count }}
             </label>
             <label
-              v-if="game.data.value.traveler_count"
+              v-if="game.data.traveler_count"
               class="flex gap-3 items-center"
             >
               <span>Travelers</span>
-              {{ game.data.value.traveler_count }}
+              {{ game.data.traveler_count }}
             </label>
           </div>
           <div class="flex flex-col md:flex-row gap-4 mt-4 justify-start">
-            <label
-              v-if="game.data.value.community"
-              class="flex gap-3 items-center"
-            >
+            <label v-if="game.data.community" class="flex gap-3 items-center">
               <span>Community</span>
-              {{ game.data.value.community }}
+              {{ game.data.community }}
             </label>
             <label class="flex gap-3 items-center">
               <span>Location</span>
               {{
-                game.data.value.location_type === "IN_PERSON"
-                  ? "In Person"
-                  : "Online"
+                game.data.location_type === "IN_PERSON" ? "In Person" : "Online"
               }}
-              {{
-                game.data.value.location ? ` (${game.data.value.location})` : ""
-              }}
+              {{ game.data.location ? ` (${game.data.location})` : "" }}
             </label>
           </div>
           <fieldset
@@ -119,28 +104,26 @@
             <legend>Game Results</legend>
             <label>
               <span class="block">Win?</span>
-              {{ game.data.value?.win ? "Yes" : "No" }}
+              {{ game.data?.win ? "Yes" : "No" }}
             </label>
           </fieldset>
         </div>
         <img
-          :src="scriptLogo(game.data.value.script)"
+          :src="scriptLogo(game.data.script)"
           class="w-48 md:w-64 h-48 md:h-64"
         />
       </div>
-      <template
-        v-if="game.data.value.notes || game.data.value.image_urls.length"
-      >
+      <template v-if="game.data.notes || game.data.image_urls.length">
         <h3 class="font-dumbledor text-2xl">Notes and Images</h3>
         <p
-          v-if="game.data.value.notes"
+          v-if="game.data.notes"
           class="bg-stone-100 p-4 shadow-lg my-3 whitespace-pre-wrap"
         >
-          {{ game.data.value?.notes }}
+          {{ game.data.notes }}
         </p>
         <div class="flex flex-col gap-5">
           <div class="flex flex-wrap gap-5">
-            <div v-for="file in game.data.value?.image_urls" :key="file">
+            <div v-for="file in game.data.image_urls" :key="file">
               <a
                 :href="fullImageUrl(file)"
                 target="_blank"
@@ -156,7 +139,7 @@
         </div>
       </template>
       <div
-        v-if="player.data.value?.user_id === user?.id"
+        v-if="player.data.user_id === user?.id"
         class="pt-4 flex justify-between md:justify-end gap-4"
       >
         <nuxt-link
@@ -198,11 +181,11 @@
         </button>
       </div>
     </section>
+    <template v-else>{{ game.status }}</template>
   </AuthenticatedTemplate>
 </template>
 
 <script setup lang="ts">
-import type { Game, Character } from "@prisma/client";
 import dayjs from "dayjs";
 
 const { scriptLogo } = useScripts();
@@ -210,84 +193,81 @@ const config = useRuntimeConfig();
 const router = useRouter();
 const route = useRoute();
 const user = useSupabaseUser();
+const users = useUsers();
+const games = useGames();
 
-const game = await useFetch<
-  Game & {
-    player_characters: (Character & {
-      role?: { token_url: string; type: string };
-      related_role?: { token_url: string };
-    })[];
+const game = computed(() => games.getGame(route.params.id as string));
+const player = computed(() => users.getUser(route.params.username as string));
+
+watchEffect(() => {
+  if (
+    game.value.status === Status.ERROR ||
+    player.value.status === Status.ERROR
+  ) {
+    router.push("/404");
   }
->(`/api/games/${route.params.id}`);
-const player = await useFetch(`/api/user/${route.params.username}`);
-
-if (
-  game.error.value?.statusCode === 404 ||
-  player.error.value?.statusCode === 404
-) {
-  console.error(game.error.value, player.error.value);
-  router.push("/404");
-}
-
-useHead({
-  title: `${player.data.value?.username} | ${game.data.value?.script}`,
-  meta: [
-    {
-      hid: "description",
-      name: "description",
-      content: `Game of ${game.data.value?.script} played by ${
-        player.data.value?.username
-      } on ${dayjs(game.data.value?.date).format("MMMM D, YYYY")}.`,
-    },
-    {
-      property: "og:title",
-      content: `${player.data.value?.username} | ${game.data.value?.script}`,
-    },
-    {
-      property: "og:description",
-      content: `Game of ${game.data.value?.script} played by ${
-        player.data.value?.username
-      } on ${dayjs(game.data.value?.date).format("MMMM D, YYYY")}.`,
-    },
-    {
-      property: "og:image",
-      content: scriptLogo(game.data.value?.script as string),
-    },
-    {
-      property: "og:url",
-      content: route.fullPath,
-    },
-    {
-      property: "twitter:card",
-      content: "summary_large_image",
-    },
-    {
-      property: "twitter:url",
-      content: route.fullPath,
-    },
-    {
-      property: "twitter:title",
-      content: `${player.data.value?.username} | ${game.data.value?.script}`,
-    },
-    {
-      property: "twitter:description",
-      content: `Game of ${game.data.value?.script} played by ${
-        player.data.value?.username
-      } on ${dayjs(game.data.value?.date).format("MMMM D, YYYY")}.`,
-    },
-    {
-      property: "twitter:image",
-      content: scriptLogo(game.data.value?.script as string),
-    },
-  ],
 });
 
-const last_character = computed(
-  () =>
-    game.data.value?.player_characters[
-      game.data.value.player_characters.length - 1
-    ]
-);
+// useHead({
+//   title: `${player.data.value?.username} | ${game.data.value?.script}`,
+//   meta: [
+//     {
+//       hid: "description",
+//       name: "description",
+//       content: `Game of ${game.data.value?.script} played by ${
+//         player.data.value?.username
+//       } on ${dayjs(game.data.value?.date).format("MMMM D, YYYY")}.`,
+//     },
+//     {
+//       property: "og:title",
+//       content: `${player.data.value?.username} | ${game.data.value?.script}`,
+//     },
+//     {
+//       property: "og:description",
+//       content: `Game of ${game.data.value?.script} played by ${
+//         player.data.value?.username
+//       } on ${dayjs(game.data.value?.date).format("MMMM D, YYYY")}.`,
+//     },
+//     {
+//       property: "og:image",
+//       content: scriptLogo(game.data.value?.script as string),
+//     },
+//     {
+//       property: "og:url",
+//       content: route.fullPath,
+//     },
+//     {
+//       property: "twitter:card",
+//       content: "summary_large_image",
+//     },
+//     {
+//       property: "twitter:url",
+//       content: route.fullPath,
+//     },
+//     {
+//       property: "twitter:title",
+//       content: `${player.data.value?.username} | ${game.data.value?.script}`,
+//     },
+//     {
+//       property: "twitter:description",
+//       content: `Game of ${game.data.value?.script} played by ${
+//         player.data.value?.username
+//       } on ${dayjs(game.data.value?.date).format("MMMM D, YYYY")}.`,
+//     },
+//     {
+//       property: "twitter:image",
+//       content: scriptLogo(game.data.value?.script as string),
+//     },
+//   ],
+// });
+
+const last_character = computed(() => {
+  if (game.value.status === Status.SUCCESS) {
+    return game.value.data.player_characters[
+      game.value.data.player_characters.length - 1
+    ];
+  }
+});
 
 function fullImageUrl(file: string) {
   if (file.startsWith("http")) return file;
@@ -318,6 +298,11 @@ async function deleteGame() {
     router.push(`/@${route.params.username}`);
   }
 }
+
+onMounted(() => {
+  users.fetchUser(route.params.username as string);
+  games.fetchGame(route.params.id as string);
+});
 </script>
 
 <style scoped>
