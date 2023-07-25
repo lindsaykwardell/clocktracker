@@ -100,6 +100,13 @@ export default defineNuxtConfig({
       "index.css",
       "/_nuxt/**.css",
       "/_nuxt/**.js",
+      "launch-640x1136.png",
+      "launch-750x1294.png",
+      "launch-1242x2148.png",
+      "launch-1125x2436.png",
+      "launch-1536x2048.png",
+      "launch-1668x2224.png",
+      "launch-2048x2732.png",
     ],
     workbox: {
       globPatterns: ["**/*.{js,css,html}"],
