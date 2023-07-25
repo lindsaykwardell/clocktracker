@@ -10,6 +10,17 @@ export type GameRecord = Game & {
   last_character: Character;
 };
 
+export type RecentGameRecord = GameRecord & {
+  user: {
+    user_id: string;
+    username: string;
+    display_name: string;
+    avatar: string | null;
+    pronouns: string | null;
+    location: string | null;
+  };
+};
+
 export const useGames = defineStore("games", {
   state: () => ({
     games: new Map<string, FetchStatus<GameRecord>>(),
@@ -76,6 +87,18 @@ export const useGames = defineStore("games", {
           data: game,
         });
       }
+    },
+    async fetchRecent() {
+      const games = await $fetch<RecentGameRecord[]>(`/api/games/recent`);
+
+      for (const game of games) {
+        this.games.set(game.id, {
+          status: Status.SUCCESS,
+          data: game,
+        });
+      }
+
+      return games;
     },
   },
 });

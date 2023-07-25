@@ -1,7 +1,7 @@
 <template>
   <div class="flex relative">
     <nav
-      class="flex flex-col gap-3 pr-1 md:pr-4 pt-1 pl-1 pb-1 rounded md:rounded-none rounded-l-none md:pb-0 fixed md:sticky top-0 md:h-screen bg-stone-900 md:w-auto z-50"
+      class="flex flex-col gap-3 p-2 rounded md:rounded-none rounded-l-none md:pb-0 fixed md:sticky top-0 md:h-screen bg-stone-900 md:w-auto z-50"
       :class="{
         'h-screen w-screen': showMenu,
       }"
@@ -32,6 +32,15 @@
             class="w-[75px] rounded-full"
             alt="ClockTracker"
           />
+        </nuxt-link>
+        <nuxt-link
+          to="/recent"
+          class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full"
+        >
+          <div class="w-[50px] overflow-hidden">
+            <img src="/img/role/clockmaker.png" class="max-w-[125%]" alt="" />
+          </div>
+          <span class="">Recent Games</span>
         </nuxt-link>
         <nuxt-link
           to="/search"
@@ -103,7 +112,7 @@
         </template>
         <template v-else>
           <button
-            class="text-center bg-[#5865F2] hover:bg-[#4752C4] transition duration-150 text-white font-bold py-1 px-2 rounded flex justify-center gap-4 items-center"
+            class="text-center bg-[#5865F2] hover:bg-[#4752C4] transition duration-150 text-white font-bold py-1 px-2 rounded flex justify-center gap-4 items-center w-full"
             @click="login"
           >
             <svg

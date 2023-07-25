@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="character"
-    class="token bg-center bg-cover relative rounded-full shadow-xl border border-black flex justify-center items-center"
+    class="token bg-center bg-cover relative rounded-full shadow-xl border border-black flex justify-center items-center aspect-square"
     :class="tokenSize"
   >
     <img :class="imageSize" :src="image" loading="lazy" />
