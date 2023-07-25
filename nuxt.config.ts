@@ -15,6 +15,7 @@ export default defineNuxtConfig({
         { rel: "stylesheet", href: "/index.css" },
         { rel: "icon", type: "image/png", href: "/logo-ct-sm.png" },
         { rel: "apple-touch-icon", href: "/logo-ct-sm.png" },
+        { rel: "apple-touch-startup-image", href: "/logo-ct-sm.png" },
       ],
       script: [
         {
@@ -27,6 +28,14 @@ export default defineNuxtConfig({
         {
           name: "theme-color",
           content: "#1C1917",
+        },
+        {
+          name: "apple-mobile-web-app-title",
+          content: "ClockTracker",
+        },
+        {
+          name: "apple-mobile-web-app-capable",
+          content: "yes",
         },
       ],
     },
