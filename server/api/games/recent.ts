@@ -12,7 +12,7 @@ export default defineEventHandler(async (handler) => {
         include: {
           following: {
             select: {
-              user_id: true,
+              following_id: true,
             },
           },
         },
@@ -25,7 +25,7 @@ export default defineEventHandler(async (handler) => {
     const followingUserIds = await prisma.userSettings.findMany({
       where: {
         user_id: {
-          in: user.following.map((f) => f.user_id),
+          in: user.following.map((f) => f.following_id),
         },
       },
       select: {
@@ -41,9 +41,14 @@ export default defineEventHandler(async (handler) => {
       ? {
           user_id: {
             in: following,
+            not: user_id,
           },
         }
-      : undefined,
+      : {
+          user_id: {
+            not: user_id,
+          },
+        },
     include: {
       player_characters: {
         include: {
