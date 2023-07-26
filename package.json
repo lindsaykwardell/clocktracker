@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "build": "nuxt build",
-    "dev": "nuxt dev",
+    "dev": "supabase start && netlify dev -c 'nuxt dev'",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
@@ -16,11 +16,14 @@
     "@types/node": "^18",
     "@types/uuid": "^9.0.2",
     "@vite-pwa/nuxt": "^0.1.0",
+    "netlify": "^13.1.10",
     "nuxt": "^3.6.1",
-    "prisma": "^5.0.0"
+    "prisma": "^5.0.0",
+    "supabase": "^1.82.2"
   },
   "dependencies": {
     "@faker-js/faker": "^8.0.2",
+    "@netlify/functions": "^1.6.0",
     "@pinia/nuxt": "^0.4.11",
     "@prisma/client": "^5.0.0",
     "@sentry/node": "^7.58.1",
