@@ -1,6 +1,8 @@
 import type { User } from "@supabase/supabase-js";
 import { PrismaClient, NotificationType } from "@prisma/client";
 
+const prisma = new PrismaClient();
+
 function notificationMessage(name?: string) {
   return `${name || "Someone"} followed you!`;
 }
@@ -15,8 +17,6 @@ export default defineEventHandler(async (handler) => {
       statusMessage: "Unauthorized",
     });
   }
-
-  const prisma = new PrismaClient();
 
   const followingUser = await prisma.userSettings.findFirst({
     where: {

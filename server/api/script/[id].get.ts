@@ -2,10 +2,11 @@ import { PrismaClient, RoleType } from "@prisma/client";
 // @ts-ignore
 import dayjs from "dayjs";
 
+const prisma = new PrismaClient();
+
 export default defineEventHandler(async (handler) => {
   const id = parseInt(handler.context.params?.id as string, 10);
 
-  const prisma = new PrismaClient();
   const script = await prisma.script.findUnique({
     where: {
       id,

@@ -1,6 +1,8 @@
 import type { User } from "@supabase/supabase-js";
 import { PrismaClient } from "@prisma/client";
 
+const prisma = new PrismaClient();
+
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
   const gameId = handler.context.params?.id;
@@ -19,7 +21,6 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  const prisma = new PrismaClient();
   const game = await prisma.game.findUnique({
     where: {
       id: gameId,

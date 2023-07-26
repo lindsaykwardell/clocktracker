@@ -1,9 +1,9 @@
 import { PrismaClient } from "@prisma/client";
 
+const prisma = new PrismaClient();
+
 export default defineEventHandler(async (handler) => {
   const { query } = getQuery(handler) as { query: string };
-
-  const prisma = new PrismaClient();
 
   // Don't query if it's too small
   if (query.length < 3) {

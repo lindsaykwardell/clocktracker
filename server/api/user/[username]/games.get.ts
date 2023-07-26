@@ -1,9 +1,10 @@
 import { PrismaClient, Game, Character } from "@prisma/client";
 
+const prisma = new PrismaClient();
+
 export default defineEventHandler(async (handler) => {
   const username = handler.context.params?.username as string;
 
-  const prisma = new PrismaClient();
   const user = await prisma.userSettings.findUnique({
     where: {
       username,
