@@ -26,6 +26,30 @@ model Game {
   storyteller       String?
   user              UserSettings? @relation(fields: [user_id], references: [user_id])
   associated_script Script?       @relation(fields: [script_id], references: [id])
+  grimoire          Grimoire[]
+  grimoire_id       Int?          @unique
+}
+
+model Grimoire {
+  id         Int      @id @default(autoincrement())
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  tokens     Token[]
+  game       Game?    @relation(fields: [game_id], references: [id])
+  game_id    String?
+}
+
+model Token {
+  id              Int       @id @default(autoincrement())
+  role            Role      @relation(fields: [role_id], references: [id])
+  role_id         String
+  related_role    Role?     @relation("RelatedToken", fields: [related_role_id], references: [id])
+  related_role_id String?
+  alignment       Alignment
+  is_dead         Boolean   @default(false)
+  order           Int
+  created_at      DateTime  @default(now()) @db.Timestamptz(6)
+  grimoire        Grimoire? @relation(fields: [grimoire_id], references: [id])
+  grimoire_id     Int?
 }
 
 model Character {
@@ -63,6 +87,8 @@ model Role {
   scripts           Script[]
   related_character Character[] @relation("RelatedRole")
   character         Character[]
+  tokens            Token[]
+  related_tokens    Token[]     @relation("RelatedToken")
 }
 
 enum Alignment {

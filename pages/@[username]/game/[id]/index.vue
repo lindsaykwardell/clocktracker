@@ -139,6 +139,11 @@
           </div>
         </div>
       </template>
+      <Grimoire
+        v-if="game.data.grimoire[0]"
+        :tokens="game.data.grimoire[0].tokens"
+        readonly
+      />
       <div
         v-if="player.data.user_id === user?.id"
         class="pt-4 flex justify-between md:justify-end gap-4"

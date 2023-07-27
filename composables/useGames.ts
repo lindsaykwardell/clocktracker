@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { FetchStatus } from "./useFetchStatus";
-import type { Game, Character } from "@prisma/client";
+import type { Game, Character, Grimoire, Token } from "@prisma/client";
 
 export type GameRecord = Game & {
   player_characters: (Character & {
@@ -8,6 +8,12 @@ export type GameRecord = Game & {
     related_role?: { token_url: string };
   })[];
   last_character: Character;
+  grimoire: (Grimoire & {
+    tokens: (Token & {
+      role?: { token_url: string; type: string };
+      related_role?: { token_url: string };
+    })[];
+  })[];
 };
 
 export type RecentGameRecord = GameRecord & {

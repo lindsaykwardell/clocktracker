@@ -42,6 +42,17 @@ const game = reactive<{
   win: boolean;
   notes: string;
   image_urls: string[];
+  grimoire: {
+    tokens: {
+      alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
+      order: number;
+      is_dead: boolean;
+      role_id?: string;
+      role?: { token_url: string; type: string };
+      related_role_id?: string;
+      related_role?: { token_url: string };
+    }[];
+  }[];
 }>({
   date: dayjs().format("YYYY-MM-DD"),
   script: "",
@@ -65,6 +76,11 @@ const game = reactive<{
   win: false,
   notes: "",
   image_urls: [],
+  grimoire: [
+    {
+      tokens: [],
+    },
+  ],
 });
 
 const formattedGame = computed(() => ({

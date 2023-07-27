@@ -1,5 +1,5 @@
 import type { User } from "@supabase/supabase-js";
-import { PrismaClient, Game, Character } from "@prisma/client";
+import { PrismaClient, Game, Character, Token, Grimoire } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -8,6 +8,7 @@ export default defineEventHandler(async (handler) => {
   const body = await readBody<
     | (Game & {
         player_characters: (Character & { role?: { token_url: string } })[];
+        grimoire: Partial<Grimoire & { tokens: Partial<Token>[] }>[];
       })
     | null
   >(handler);
@@ -33,6 +34,22 @@ export default defineEventHandler(async (handler) => {
       user_id: user.id,
       player_characters: {
         create: [...body.player_characters],
+      },
+      grimoire: {
+        create: [
+          ...body.grimoire.map((g) => ({
+            ...g,
+            tokens: {
+              create: g.tokens?.map((token, index) => ({
+                role_id: token.role_id,
+                related_role_id: token.related_role_id,
+                alignment: token.alignment || Alignment.GOOD,
+                is_dead: token.is_dead || false,
+                order: token.order || index,
+              })),
+            },
+          })),
+        ],
       },
     },
   });

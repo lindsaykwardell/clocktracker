@@ -76,6 +76,16 @@ export default defineEventHandler(async (handler) => {
           location: true,
         },
       },
+      grimoire: {
+        include: {
+          tokens: {
+            include: {
+              role: true,
+              related_role: true,
+            },
+          },
+        },
+      },
     },
     take: 20,
     orderBy: {

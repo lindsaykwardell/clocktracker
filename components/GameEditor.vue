@@ -249,6 +249,22 @@
         </label>
       </fieldset>
     </fieldset>
+    <fieldset class="block border rounded border-stone-500 p-4 my-3">
+      <legend>Grimoire</legend>
+      <details>
+        <summary class="cursor-pointer">Edit Grimoire</summary>
+        <div
+          v-if="game.grimoire[0].tokens.length > 2"
+          class="w-screen md:w-auto overflow-scroll"
+        >
+          <Grimoire
+            v-for="grimoire in game.grimoire"
+            :tokens="grimoire.tokens"
+            :availableRoles="orderedRoles"
+          />
+        </div>
+      </details>
+    </fieldset>
     <fieldset class="border rounded border-stone-500 p-4 my-3">
       <legend>Notes</legend>
       <textarea
@@ -269,7 +285,11 @@
         </button>
         <div class="flex flex-wrap gap-5">
           <div v-for="file in game.image_urls" :key="file">
-            <img crossorigin="anonymous" :src="file" class="w-64 h-64 object-cover" />
+            <img
+              crossorigin="anonymous"
+              :src="file"
+              class="w-64 h-64 object-cover"
+            />
             <button type="button" @click="removeFile(file)">Remove</button>
           </div>
         </div>
@@ -329,6 +349,17 @@ const props = defineProps<{
     win: boolean;
     notes: string;
     image_urls: string[];
+    grimoire: {
+      tokens: {
+        alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
+        order: number;
+        is_dead: boolean;
+        role_id?: string;
+        role?: { token_url: string; type: string };
+        related_role_id?: string;
+        related_role?: { token_url: string };
+      }[];
+    }[];
   };
 }>();
 
@@ -454,6 +485,27 @@ function setRelatedRoleDetails(
     character.related_role_id = selectedRole.id;
   }
 }
+
+watchEffect(() => {
+  props.game.grimoire.forEach((grimoire) => {
+    while (
+      (props.game.player_count || 0) > grimoire.tokens.length &&
+      grimoire.tokens.length < 20
+    ) {
+      grimoire.tokens.push({
+        alignment: undefined,
+        is_dead: false,
+        order: grimoire.tokens.length,
+        role_id: undefined,
+        related_role_id: undefined,
+      });
+    }
+
+    while ((props.game.player_count || 0) < grimoire.tokens.length) {
+      grimoire.tokens.pop();
+    }
+  });
+});
 </script>
 
 <style scoped>

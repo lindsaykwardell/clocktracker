@@ -8,7 +8,8 @@
 </template>
 
 <script setup lang="ts">
-import type { Game, Character } from "@prisma/client";
+import type { Game, Character, Grimoire, Token } from "@prisma/client";
+import { GameRecord } from "composables/useGames";
 import dayjs from "dayjs";
 import { v4 as uuid } from "uuid";
 
@@ -17,14 +18,7 @@ definePageMeta({
 });
 
 const route = useRoute();
-const savedGame = await useFetch<
-  Game & {
-    player_characters: (Character & {
-      role?: { token_url: string; type: string };
-      related_role?: { token_url: string };
-    })[];
-  }
->(`/api/games/${route.params.id}`);
+const savedGame = await useFetch<GameRecord>(`/api/games/${route.params.id}`);
 const user = useSupabaseUser();
 const router = useRouter();
 const inFlight = ref(false);
@@ -62,6 +56,17 @@ const game = reactive<{
   win: boolean;
   notes: string;
   image_urls: string[];
+  grimoire: {
+    tokens: {
+      alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
+      order: number;
+      is_dead: boolean;
+      role_id?: string;
+      related_role_id?: string;
+      role?: { token_url: string; type: string };
+      related_role?: { token_url: string };
+    }[];
+  }[];
 }>({
   date: dayjs(savedGame.data.value?.date).format("YYYY-MM-DD"),
   script: savedGame.data.value?.script || "",
@@ -94,6 +99,21 @@ const game = reactive<{
   win: savedGame.data.value?.win ? true : false,
   notes: savedGame.data.value?.notes || "",
   image_urls: savedGame.data.value?.image_urls || [],
+  grimoire: savedGame.data.value?.grimoire.map((grim) => ({
+    tokens: grim.tokens.map((token) => ({
+      alignment: token.alignment,
+      order: token.order,
+      is_dead: token.is_dead,
+      role_id: token.role_id,
+      role: token.role,
+      related_role_id: token.related_role_id || undefined,
+      related_role: token.related_role,
+    })),
+  })) || [
+    {
+      tokens: [],
+    },
+  ],
 });
 
 const formattedGame = computed(() => ({

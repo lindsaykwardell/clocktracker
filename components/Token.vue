@@ -4,26 +4,25 @@
     class="token bg-center bg-cover relative rounded-full shadow-xl border border-black flex justify-center items-center aspect-square"
     :class="tokenSize"
   >
-    <img :class="imageSize" :src="image" loading="lazy" />
+    <img v-if="image" :class="imageSize" :src="image" loading="lazy" />
     <div
-      v-if="character.related"
+      v-if="character.related_role"
       class="token bg-center bg-cover absolute bottom-0 right-0 rounded-full shadow-xl border border-black flex justify-center items-center"
       :class="relatedSize"
     >
-      <img :class="relatedImageSize" :src="relatedImage" loading="lazy" />
+      <img v-if="relatedImage" :class="relatedImageSize" :src="relatedImage" loading="lazy" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { Character } from "@prisma/client";
-
 const props = defineProps<{
   character:
-    | (Character & {
+    | {
+        alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
         role?: { token_url: string; type: string };
         related_role?: { token_url: string };
-      })
+      }
     | undefined;
   size: "sm" | "md" | "lg";
 }>();
