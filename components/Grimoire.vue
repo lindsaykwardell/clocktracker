@@ -12,7 +12,7 @@
           class="cursor-pointer"
         />
         <label class="m-auto block text-center">
-          <input type="checkbox" v-model="token.is_dead" /> Dead?
+          <input type="checkbox" v-model="token.is_dead" :readonly="readonly" /> Dead?
         </label>
       </div>
     </div>
@@ -56,7 +56,7 @@ const props = defineProps<{
     name: string;
     initial_alignment: Alignment;
   }[];
-  readonly: boolean;
+  readonly?: boolean;
 }>();
 
 const showRoleSelectionDialog = ref(false);
