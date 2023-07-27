@@ -99,21 +99,23 @@ const game = reactive<{
   win: savedGame.data.value?.win ? true : false,
   notes: savedGame.data.value?.notes || "",
   image_urls: savedGame.data.value?.image_urls || [],
-  grimoire: savedGame.data.value?.grimoire.map((grim) => ({
-    tokens: grim.tokens.map((token) => ({
-      alignment: token.alignment,
-      order: token.order,
-      is_dead: token.is_dead,
-      role_id: token.role_id,
-      role: token.role,
-      related_role_id: token.related_role_id || undefined,
-      related_role: token.related_role,
-    })),
-  })) || [
-    {
-      tokens: [],
-    },
-  ],
+  grimoire: savedGame.data.value?.grimoire.length
+    ? savedGame.data.value?.grimoire.map((grim) => ({
+        tokens: grim.tokens?.map((token) => ({
+          alignment: token.alignment,
+          order: token.order,
+          is_dead: token.is_dead,
+          role_id: token.role_id,
+          role: token.role,
+          related_role_id: token.related_role_id || undefined,
+          related_role: token.related_role,
+        })),
+      }))
+    : [
+        {
+          tokens: [],
+        },
+      ],
 });
 
 const formattedGame = computed(() => ({
