@@ -52,8 +52,8 @@
         class="aspect-video w-96 object-cover"
       />
       <p class="text-lg w-11-12 md:w-1/2">
-        You can also add notes about the game, and upload images to remember
-        your favorite moments.
+        You can also add notes about the game, upload images to remember
+        your favorite moments, and record a full grimoire of the game.
       </p>
     </section>
     <section
