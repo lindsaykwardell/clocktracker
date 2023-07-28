@@ -9,7 +9,7 @@
     }"
   >
     <div class="flex justify-between items-center">
-      <div class="p-4">
+      <div class="p-4 w-full">
         <slot name="title" />
       </div>
       <div class="flex-grow" />

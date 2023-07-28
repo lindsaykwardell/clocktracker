@@ -29,10 +29,20 @@
   </div>
   <Dialog v-model:visible="showRoleSelectionDialog" size="lg">
     <template #title>
-      <h2 class="text-2xl font-bold font-dumbledor">Select a Role</h2>
+      <div class="flex flex-col md:flex-row w-full">
+        <h2 class="flex-grow text-2xl font-bold font-dumbledor">
+          Select a Role
+        </h2>
+        <input
+          v-model="roleFilter"
+          type="text"
+          placeholder="Filter roles"
+          class="p-2 mt-2 border border-gray-300 rounded-md text-black"
+        />
+      </div>
     </template>
     <div class="flex flex-wrap justify-around gap-3 p-4">
-      <div v-for="role in availableRoles" class="flex flex-col items-center">
+      <div v-for="role in filteredAvailableRoles" class="flex flex-col items-center">
         <Token
           @click="selectRoleForToken(role)"
           :character="formatRoleAsCharacter(role)"
@@ -69,8 +79,23 @@ const props = defineProps<{
   readonly?: boolean;
 }>();
 
+const roleFilter = ref("");
 const showRoleSelectionDialog = ref(false);
 let focusedToken: Token | null = null;
+
+const filteredAvailableRoles = computed(() => {
+  if (!props.availableRoles) return [];
+  return props.availableRoles.filter((role) =>
+    role.name.toLowerCase().includes(roleFilter.value.toLowerCase())
+  );
+});
+
+watch(
+  () => showRoleSelectionDialog,
+  () => {
+    roleFilter.value = "";
+  }
+);
 
 function openRoleSelectionDialog(token: Token) {
   focusedToken = token;
