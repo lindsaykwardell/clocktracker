@@ -269,9 +269,20 @@
         </label>
       </fieldset>
     </fieldset>
-    <fieldset class="block border rounded border-stone-500 p-4 my-3">
+    <fieldset
+      class="block border rounded border-stone-500 p-4 my-3 bg-center bg-cover"
+      :class="{
+        'trouble-brewing': game.script === 'Trouble Brewing',
+        'sects-and-violets': game.script === 'Sects and Violets',
+        'bad-moon-rising': game.script === 'Bad Moon Rising',
+        'custom-script':
+          ['Trouble Brewing', 'Sects and Violets', 'Bad Moon Rising'].indexOf(
+            game.script
+          ) === -1,
+      }"
+    >
       <legend>Grimoire</legend>
-      <details>
+      <details :open="game.grimoire[0].tokens.some((token) => token.role)">
         <summary class="cursor-pointer">Edit Grimoire</summary>
         <div
           v-if="game.grimoire[0].tokens.length > 2"
@@ -553,5 +564,21 @@ select {
 
 textarea {
   @apply text-lg bg-stone-600;
+}
+
+.trouble-brewing {
+  background-image: url("/img/trouble-brewing-bg.webp");
+}
+
+.sects-and-violets {
+  background-image: url("/img/sects-and-violets-bg.webp");
+}
+
+.bad-moon-rising {
+  background-image: url("/img/bad-moon-rising-bg.webp");
+}
+
+.custom-script {
+  background-image: url("/img/custom-script-bg.webp");
 }
 </style>
