@@ -4,14 +4,17 @@
       v-for="(token, i) in tokens"
       :style="i - has_mid >= 0 ? `--i: ${i}` : ''"
     >
-      <div class="token-slot">
+      <div class="token-slot relative">
+        <div v-if="token.is_dead" class="absolute top-0 left-0 z-10 flex justify-center w-full">
+          <img src="/img/shroud.png" class="w-12" />
+        </div>
         <Token
           @click="openRoleSelectionDialog(token)"
           :character="token"
           size="md"
           class="cursor-pointer"
         />
-        <label class="m-auto block text-center">
+        <label v-if="!readonly" class="m-auto block text-center">
           <input type="checkbox" v-model="token.is_dead" :readonly="readonly" /> Dead?
         </label>
       </div>
