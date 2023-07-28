@@ -18,8 +18,10 @@ useHead({
   title: "Add Game",
 });
 
+const users = useUsers();
 const router = useRouter();
 const inFlight = ref(false);
+const userSettings = await useFetch("/api/settings");
 
 const game = reactive<{
   date: string;
@@ -99,7 +101,7 @@ const formattedGame = computed(() => ({
 async function submitGame() {
   inFlight.value = true;
 
-  const { error } = await useFetch("/api/games", {
+  const { data, error } = await useFetch("/api/games", {
     method: "POST",
     body: JSON.stringify(formattedGame.value),
   });
@@ -108,7 +110,7 @@ async function submitGame() {
     inFlight.value = false;
     console.error(error.value);
   } else {
-    router.push("/");
+    router.push(`/@${userSettings.data.value?.username}/game/${data.value?.id}`);
   }
 }
 </script>

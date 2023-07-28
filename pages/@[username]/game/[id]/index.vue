@@ -140,6 +140,10 @@
         </div>
       </template>
       <div
+        v-if="
+          game.data.grimoire[0] &&
+          game.data.grimoire[0].tokens.some((token) => token.role)
+        "
         class="w-screen md:w-full overflow-scroll bg-center bg-cover py-6"
         :class="{
           'trouble-brewing': game.data.script === 'Trouble Brewing',
@@ -151,14 +155,7 @@
             ) === -1,
         }"
       >
-        <Grimoire
-          v-if="
-            game.data.grimoire[0] &&
-            game.data.grimoire[0].tokens.some((token) => token.role)
-          "
-          :tokens="game.data.grimoire[0].tokens"
-          readonly
-        />
+        <Grimoire :tokens="game.data.grimoire[0].tokens" readonly />
       </div>
       <div
         v-if="player.data.user_id === user?.id"

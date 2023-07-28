@@ -8,16 +8,15 @@
 </template>
 
 <script setup lang="ts">
-import type { Game, Character, Grimoire, Token } from "@prisma/client";
 import { GameRecord } from "composables/useGames";
 import dayjs from "dayjs";
-import { v4 as uuid } from "uuid";
 
 definePageMeta({
   middleware: ["auth"],
 });
 
 const route = useRoute();
+const username = route.params.username as string;
 const savedGame = await useFetch<GameRecord>(`/api/games/${route.params.id}`);
 const user = useSupabaseUser();
 const router = useRouter();
@@ -146,7 +145,7 @@ async function submitGame() {
     inFlight.value = false;
     console.error(result.statusText);
   } else {
-    router.push("/");
+    router.push(`/@${username}/game/${savedGame.data.value?.id}`);
   }
 }
 </script>
