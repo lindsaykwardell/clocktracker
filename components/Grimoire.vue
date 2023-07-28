@@ -8,22 +8,30 @@
       :style="i - has_mid >= 0 ? `--i: ${i}` : ''"
     >
       <div class="token-slot relative">
-        <div
+        <button
           v-if="token.is_dead"
+          @click="!readonly ? (token.is_dead = false) : null"
           class="absolute top-0 left-0 z-10 flex justify-center w-full"
+          :class="{
+            'cursor-default': readonly,
+          }"
         >
           <img src="/img/shroud.png" class="w-12" />
-        </div>
+        </button>
+        <button
+          type="button"
+          @click="token.is_dead = true"
+          v-if="!token.is_dead && !readonly"
+          class="absolute top-0 left-0 z-10 flex justify-center w-full opacity-0 hover:opacity-50 transition-opacity duration-200"
+        >
+          <img src="/img/shroud.png" class="w-12" />
+        </button>
         <Token
-          @click="openRoleSelectionDialog(token)"
+          @click="!readonly ? openRoleSelectionDialog(token) : null"
           :character="token"
           size="md"
-          class="cursor-pointer"
+          :class="{ 'cursor-pointer': !readonly }"
         />
-        <label v-if="!readonly" class="m-auto block text-center">
-          <input type="checkbox" v-model="token.is_dead" :readonly="readonly" />
-          Dead?
-        </label>
       </div>
     </div>
   </div>
@@ -42,7 +50,10 @@
       </div>
     </template>
     <div class="flex flex-wrap justify-around gap-3 p-4">
-      <div v-for="role in filteredAvailableRoles" class="flex flex-col items-center">
+      <div
+        v-for="role in filteredAvailableRoles"
+        class="flex flex-col items-center"
+      >
         <Token
           @click="selectRoleForToken(role)"
           :character="formatRoleAsCharacter(role)"
