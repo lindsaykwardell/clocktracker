@@ -367,6 +367,14 @@ const potentialScript = ref("");
 
 const emit = defineEmits(["submit"]);
 
+onMounted(async () => {
+  const baseScripts = await $fetch("/api/script?author=The Pandemonium Institute")
+
+  scripts.value = baseScripts ?? [];
+
+  console.log(scripts.value)
+})
+
 function addCharacter() {
   props.game.player_characters.push({
     name: "",

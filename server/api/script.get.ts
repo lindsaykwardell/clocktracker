@@ -3,7 +3,7 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export default defineEventHandler(async (handler) => {
-  const { query } = getQuery(handler) as { query: string };
+  const { query, author } = getQuery(handler) as { query: string, author: string };
 
   return await prisma.script.findMany({
     where: {
@@ -11,6 +11,10 @@ export default defineEventHandler(async (handler) => {
         contains: query,
         mode: "insensitive",
       },
+      author: {
+        contains: author,
+        mode: "insensitive",
+      }
     },
     orderBy: {
       name: "asc",
