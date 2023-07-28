@@ -140,7 +140,7 @@
         </div>
       </template>
       <div
-        class="w-11/12 md:w-full overflow-scroll bg-center bg-cover py-6 m-auto"
+        class="w-screen md:w-full overflow-scroll bg-center bg-cover py-6"
         :class="{
           'trouble-brewing': game.data.script === 'Trouble Brewing',
           'sects-and-violets': game.data.script === 'Sects and Violets',
