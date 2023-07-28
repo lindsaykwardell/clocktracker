@@ -1,11 +1,17 @@
 <template>
-  <div class="container m-auto" :style="`--m: ${m}; --tan: ${+tan.toFixed(2)}`">
+  <div
+    class="container m-auto"
+    :style="`--m: ${m}; --tan: ${+tan.toFixed(2)}; --offset: ${offset}`"
+  >
     <div
       v-for="(token, i) in tokens"
       :style="i - has_mid >= 0 ? `--i: ${i}` : ''"
     >
       <div class="token-slot relative">
-        <div v-if="token.is_dead" class="absolute top-0 left-0 z-10 flex justify-center w-full">
+        <div
+          v-if="token.is_dead"
+          class="absolute top-0 left-0 z-10 flex justify-center w-full"
+        >
           <img src="/img/shroud.png" class="w-12" />
         </div>
         <Token
@@ -15,7 +21,8 @@
           class="cursor-pointer"
         />
         <label v-if="!readonly" class="m-auto block text-center">
-          <input type="checkbox" v-model="token.is_dead" :readonly="readonly" /> Dead?
+          <input type="checkbox" v-model="token.is_dead" :readonly="readonly" />
+          Dead?
         </label>
       </div>
     </div>
@@ -109,6 +116,11 @@ const m = computed(
 const tan = computed(() =>
   Math.tan(Math.PI / m.value)
 ); /* tangent of half the base angle */
+const offset = computed(() => {
+  const extra = 0.25 * (m.value - 5);
+
+  return 1.25 + extra;
+});
 </script>
 
 <style scoped>
@@ -131,7 +143,7 @@ const tan = computed(() =>
   margin: calc(-0.5 * var(--d));
   width: var(--d);
   height: var(--d);
-  --az: calc(var(--i) * 1turn / var(--m));
+  --az: calc((var(--i) - var(--offset)) * 1turn / var(--m));
   transform: rotate(var(--az)) translate(var(--r)) rotate(calc(-1 * var(--az)));
 }
 
