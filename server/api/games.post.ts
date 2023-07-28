@@ -1,5 +1,12 @@
 import type { User } from "@supabase/supabase-js";
-import { PrismaClient, Game, Character, Token, Grimoire } from "@prisma/client";
+import {
+  PrismaClient,
+  Game,
+  Character,
+  Token,
+  Grimoire,
+  Alignment,
+} from "@prisma/client";
 
 const prisma = new PrismaClient();
 
