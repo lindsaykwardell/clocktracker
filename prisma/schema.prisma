@@ -40,8 +40,8 @@ model Grimoire {
 
 model Token {
   id              Int       @id @default(autoincrement())
-  role            Role      @relation(fields: [role_id], references: [id])
-  role_id         String
+  role            Role?     @relation(fields: [role_id], references: [id])
+  role_id         String?
   related_role    Role?     @relation("RelatedToken", fields: [related_role_id], references: [id])
   related_role_id String?
   alignment       Alignment

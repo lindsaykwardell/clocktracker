@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "build": "nuxt build",
-    "dev": "supabase stop && supabase start && netlify dev -c 'nuxt dev'",
+    "dev": "netlify dev -c 'nuxt dev'",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
