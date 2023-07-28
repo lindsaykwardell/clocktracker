@@ -2,9 +2,9 @@
   <AuthenticatedTemplate>
     <section
       v-if="game.status === Status.SUCCESS && player.status === Status.SUCCESS"
-      class="flex flex-col gap-4 bg-gradient-to-b from-stone-100 to-stone-300 text-black w-full lg:w-4/5 m-auto md:my-4 rounded shadow-lg p-4"
+      class="flex flex-col gap-4 bg-gradient-to-b from-stone-100 to-stone-300 text-black w-full lg:w-4/5 m-auto md:my-4 rounded shadow-lg"
     >
-      <div class="flex flex-col-reverse md:flex-row items-center">
+      <div class="flex flex-col-reverse md:flex-row items-center px-4 pt-4">
         <div class="flex-grow flex flex-col w-full">
           <div class="flex flex-col md:flex-row gap-4 items-center">
             <Avatar
@@ -113,7 +113,7 @@
           class="w-48 md:w-64 h-48 md:h-64"
         />
       </div>
-      <template v-if="game.data.notes || game.data.image_urls.length">
+      <div v-if="game.data.notes || game.data.image_urls.length" class="px-4">
         <h3 class="font-dumbledor text-2xl">Notes and Images</h3>
         <p
           v-if="game.data.notes"
@@ -138,7 +138,7 @@
             </div>
           </div>
         </div>
-      </template>
+      </div>
       <div
         v-if="
           game.data.grimoire[0] &&
@@ -159,7 +159,7 @@
       </div>
       <div
         v-if="player.data.user_id === user?.id"
-        class="pt-4 flex justify-between md:justify-end gap-4"
+        class="p-4 flex justify-between md:justify-end gap-4"
       >
         <nuxt-link
           class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial"
