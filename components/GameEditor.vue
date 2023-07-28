@@ -30,20 +30,40 @@
               <div class="w-[30px] overflow-hidden">
                 <img src="/img/role/investigator.png" />
               </div>
-              <template v-if="game.script === ''">Find Script</template>
+              <template v-if="game.script === ''">Select Script</template>
             </button>
           </div>
           <Dialog v-model:visible="showScriptDialog">
             <template #title>
-              <h2 class="text-2xl font-bold font-dumbledor">Find Script</h2>
+              <h2 class="text-2xl font-bold font-dumbledor">Select Script</h2>
             </template>
             <section class="p-4">
+              <div class="flex justify-around gap-8 pb-4">
+                <button
+                  class="flex-1 w-1 hover:bg-stone-800 rounded-lg hover:shadow-xl"
+                  @click.prevent="selectScript(troubleBrewing!)"
+                >
+                  <img src="/img/trouble_brewing.png" />
+                </button>
+                <button
+                  class="flex-1 w-1 hover:bg-stone-800 rounded-lg hover:shadow-xl"
+                  @click.prevent="selectScript(badMoonRising!)"
+                >
+                  <img src="/img/bad_moon_rising.png" />
+                </button>
+                <button
+                  class="flex-1 w-1 hover:bg-stone-800 rounded-lg hover:shadow-xl"
+                  @click.prevent="selectScript(sectsAndViolets!)"
+                >
+                  <img src="/img/sects_and_violets.png" />
+                </button>
+              </div>
               <div class="relative">
                 <form @submit.prevent="searchScripts">
                   <input
                     v-model="potentialScript"
                     class="block w-full border border-stone-500 rounded-md p-2 text-lg bg-stone-600"
-                    placeholder="Search for a player, then press enter"
+                    placeholder="Search for a script"
                   />
                 </form>
                 <button
@@ -316,6 +336,12 @@ import naturalOrder from "natural-order";
 
 const roles = ref<Role[]>([]);
 const scripts = ref<{ id: number; name: string }[]>([]);
+const baseScripts = ref<{ id: number; name: string }[]>([]);
+
+const baseScriptData = await $fetch(
+  "/api/script?author=The Pandemonium Institute"
+);
+baseScripts.value = baseScriptData ?? [];
 
 const supabase = useSupabaseClient();
 const config = useRuntimeConfig();
@@ -367,13 +393,15 @@ const potentialScript = ref("");
 
 const emit = defineEmits(["submit"]);
 
-onMounted(async () => {
-  const baseScripts = await $fetch("/api/script?author=The Pandemonium Institute")
-
-  scripts.value = baseScripts ?? [];
-
-  console.log(scripts.value)
-})
+const troubleBrewing = computed(() =>
+  baseScripts.value.find((script) => script.name === "Trouble Brewing")
+);
+const sectsAndViolets = computed(() =>
+  baseScripts.value.find((script) => script.name === "Sects and Violets")
+);
+const badMoonRising = computed(() =>
+  baseScripts.value.find((script) => script.name === "Bad Moon Rising")
+);
 
 function addCharacter() {
   props.game.player_characters.push({
