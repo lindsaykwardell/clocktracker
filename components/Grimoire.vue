@@ -9,20 +9,12 @@
     >
       <div class="token-slot relative">
         <button
-          v-if="token.is_dead"
-          @click="!readonly ? (token.is_dead = false) : null"
+          @click.prevent="!readonly ? (token.is_dead = !token.is_dead) : null"
           class="absolute top-0 left-0 z-10 flex justify-center w-full"
           :class="{
             'cursor-default': readonly,
+            'opacity-0 hover:opacity-50 transition-opacity duration-200': !readonly && !token.is_dead,
           }"
-        >
-          <img src="/img/shroud.png" class="w-8 md:w-10" />
-        </button>
-        <button
-          type="button"
-          @click="token.is_dead = true"
-          v-if="!token.is_dead && !readonly"
-          class="absolute top-0 left-0 z-10 flex justify-center w-full opacity-0 hover:opacity-50 transition-opacity duration-200"
         >
           <img src="/img/shroud.png" class="w-8 md:w-10" />
         </button>
