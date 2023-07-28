@@ -2,7 +2,7 @@
   <AuthenticatedTemplate>
     <section
       v-if="game.status === Status.SUCCESS && player.status === Status.SUCCESS"
-      class="bg-gradient-to-b from-stone-100 to-stone-300 text-black w-full lg:w-4/5 m-auto md:my-4 rounded shadow-lg p-4"
+      class="flex flex-col gap-4 bg-gradient-to-b from-stone-100 to-stone-300 text-black w-full lg:w-4/5 m-auto md:my-4 rounded shadow-lg p-4"
     >
       <div class="flex flex-col-reverse md:flex-row items-center">
         <div class="flex-grow flex flex-col w-full">
@@ -140,7 +140,7 @@
         </div>
       </template>
       <div
-        class="w-screen md:w-full overflow-scroll bg-center bg-cover"
+        class="w-screen md:w-full overflow-scroll bg-center bg-cover py-6"
         :class="{
           'trouble-brewing': game.data.script === 'Trouble Brewing',
           'sects-and-violets': game.data.script === 'Sects and Violets',
