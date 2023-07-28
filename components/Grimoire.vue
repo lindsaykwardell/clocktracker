@@ -16,7 +16,7 @@
             'cursor-default': readonly,
           }"
         >
-          <img src="/img/shroud.png" class="w-12" />
+          <img src="/img/shroud.png" class="w-10" />
         </button>
         <button
           type="button"
@@ -24,7 +24,7 @@
           v-if="!token.is_dead && !readonly"
           class="absolute top-0 left-0 z-10 flex justify-center w-full opacity-0 hover:opacity-50 transition-opacity duration-200"
         >
-          <img src="/img/shroud.png" class="w-12" />
+          <img src="/img/shroud.png" class="w-10" />
         </button>
         <Token
           @click="!readonly ? openRoleSelectionDialog(token) : null"
