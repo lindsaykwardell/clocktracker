@@ -9,10 +9,10 @@
         class="relative w-full bg-gradient-to-b from-purple-800 hover:from-purple-900 to-stone-900 hover:to-stone-950 flex flex-col items-center cursor-pointer rounded overflow-hidden text-black h-48 md:h-72 bg-cover bg-center"
         :class="{
           'trouble-brewing': game.script === 'Trouble Brewing',
-          'sects-and-violets': game.script === 'Sects & Violets',
+          'sects-and-violets': game.script === 'Sects and Violets',
           'bad-moon-rising': game.script === 'Bad Moon Rising',
           'custom-script':
-            ['Trouble Brewing', 'Sects & Violets', 'Bad Moon Rising'].indexOf(
+            ['Trouble Brewing', 'Sects and Violets', 'Bad Moon Rising'].indexOf(
               game.script
             ) === -1,
         }"

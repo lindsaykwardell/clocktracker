@@ -139,11 +139,27 @@
           </div>
         </div>
       </template>
-      <Grimoire
-        v-if="game.data.grimoire[0]"
-        :tokens="game.data.grimoire[0].tokens"
-        readonly
-      />
+      <div
+        class="w-screen md:w-full overflow-scroll bg-center bg-cover"
+        :class="{
+          'trouble-brewing': game.data.script === 'Trouble Brewing',
+          'sects-and-violets': game.data.script === 'Sects and Violets',
+          'bad-moon-rising': game.data.script === 'Bad Moon Rising',
+          'custom-script':
+            ['Trouble Brewing', 'Sects and Violets', 'Bad Moon Rising'].indexOf(
+              game.data.script
+            ) === -1,
+        }"
+      >
+        <Grimoire
+          v-if="
+            game.data.grimoire[0] &&
+            game.data.grimoire[0].tokens.some((token) => token.role)
+          "
+          :tokens="game.data.grimoire[0].tokens"
+          readonly
+        />
+      </div>
       <div
         v-if="player.data.user_id === user?.id"
         class="pt-4 flex justify-between md:justify-end gap-4"
@@ -297,7 +313,7 @@ function scriptLink(script: string) {
     return "https://wiki.bloodontheclocktower.com/Trouble_Brewing";
   if (script === "Bad Moon Rising")
     return "https://wiki.bloodontheclocktower.com/Bad_Moon_Rising";
-  if (script === "Sects & Violets")
+  if (script === "Sects and Violets")
     return "https://wiki.bloodontheclocktower.com/Sects_%26_Violets";
   else {
     return `https://botc-scripts.azurewebsites.net/?search=${script.replace(
@@ -326,5 +342,21 @@ onMounted(() => {
 <style scoped>
 label span {
   @apply text-sm text-stone-500;
+}
+
+.trouble-brewing {
+  background-image: url("/img/trouble-brewing-bg.webp");
+}
+
+.sects-and-violets {
+  background-image: url("/img/sects-and-violets-bg.webp");
+}
+
+.bad-moon-rising {
+  background-image: url("/img/bad-moon-rising-bg.webp");
+}
+
+.custom-script {
+  background-image: url("/img/custom-script-bg.webp");
 }
 </style>

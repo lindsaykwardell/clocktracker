@@ -18,10 +18,10 @@
         class="relative w-full cursor-pointer overflow-hidden min-h-12 min-md:h-16 bg-cover grid grid-cols-12 bg-center items-center gap-2 p-2"
         :class="{
           'trouble-brewing': game.script === 'Trouble Brewing',
-          'sects-and-violets': game.script === 'Sects & Violets',
+          'sects-and-violets': game.script === 'Sects and Violets',
           'bad-moon-rising': game.script === 'Bad Moon Rising',
           'custom-script':
-            ['Trouble Brewing', 'Sects & Violets', 'Bad Moon Rising'].indexOf(
+            ['Trouble Brewing', 'Sects and Violets', 'Bad Moon Rising'].indexOf(
               game.script
             ) === -1,
         }"

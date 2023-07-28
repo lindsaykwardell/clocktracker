@@ -4,10 +4,10 @@
     class="shadow-lg bg-cover bg-center relative"
     :class="{
       'trouble-brewing': game.script === 'Trouble Brewing',
-      'sects-and-violets': game.script === 'Sects & Violets',
+      'sects-and-violets': game.script === 'Sects and Violets',
       'bad-moon-rising': game.script === 'Bad Moon Rising',
       'custom-script':
-        ['Trouble Brewing', 'Sects & Violets', 'Bad Moon Rising'].indexOf(
+        ['Trouble Brewing', 'Sects and Violets', 'Bad Moon Rising'].indexOf(
           game.script
         ) === -1,
     }"

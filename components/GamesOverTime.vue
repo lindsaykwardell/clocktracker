@@ -41,7 +41,7 @@ for (const game of props.games) {
   }
 
   if (game.script === Script.TroubleBrewing) data[month].troubleBrewing++;
-  else if (game.script === Script.SectsAndViolets || game.script === "Sects & Violets")
+  else if (game.script === Script.SectsAndViolets)
     data[month].sectsAndViolets++;
   else if (game.script === Script.BadMoonRising) data[month].badMoonRising++;
   else data[month].customScript++;

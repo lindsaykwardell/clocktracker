@@ -293,6 +293,7 @@ const fabled = [
   "Storm Catcher",
   "Bootlegger",
   "Gardener",
+  "Ferryman",
 ];
 
 const handler = schedule("@daily", myHandler);
