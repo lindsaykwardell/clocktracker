@@ -3,14 +3,21 @@
     v-if="character"
     class="token bg-center bg-cover relative rounded-full shadow-xl border border-black flex justify-center items-center aspect-square"
     :class="tokenSize"
+    @click="emit('clickRole')"
   >
     <img v-if="image" :class="imageSize" :src="image" loading="lazy" />
     <div
       v-if="character.related_role"
       class="token bg-center bg-cover absolute bottom-0 right-0 rounded-full shadow-xl border border-black flex justify-center items-center"
       :class="relatedSize"
+      @click.stop="emit('clickRelated')"
     >
-      <img v-if="relatedImage" :class="relatedImageSize" :src="relatedImage" loading="lazy" />
+      <img
+        v-if="relatedImage"
+        :class="relatedImageSize"
+        :src="relatedImage"
+        loading="lazy"
+      />
     </div>
   </div>
 </template>
@@ -26,6 +33,8 @@ const props = defineProps<{
     | undefined;
   size: "sm" | "md" | "lg";
 }>();
+
+const emit = defineEmits(["clickRelated", "clickRole"]);
 
 const tokenSize = computed(() => {
   switch (props.size) {

@@ -60,8 +60,8 @@ const game = reactive<{
       alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
       order: number;
       is_dead: boolean;
-      role_id?: string;
-      related_role_id?: string;
+      role_id: string | null;
+      related_role_id: string | null;
       role?: { token_url: string; type: string };
       related_role?: { token_url: string };
     }[];
@@ -106,8 +106,10 @@ const game = reactive<{
           is_dead: token.is_dead,
           role_id: token.role_id,
           role: token.role,
-          related_role_id: token.related_role_id || undefined,
-          related_role: token.related_role,
+          related_role_id: token.related_role_id,
+          related_role:
+            token.related_role ||
+            (token.role ? { token_url: "/1x1.png" } : undefined),
         })),
       }))
     : [

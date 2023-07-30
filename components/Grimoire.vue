@@ -14,13 +14,17 @@
           :class="{
             'cursor-default': readonly,
             'opacity-0': !token.is_dead,
-            'hover:opacity-50 transition hover:-translate-y-2': !readonly && !token.is_dead,
+            'hover:opacity-50 transition hover:-translate-y-2':
+              !readonly && !token.is_dead,
           }"
         >
           <img src="/img/shroud.png" class="w-8 md:w-10" />
         </button>
         <Token
-          @click="!readonly ? openRoleSelectionDialog(token) : null"
+          @clickRole="!readonly ? openRoleSelectionDialog(token, 'role') : null"
+          @clickRelated="
+            !readonly ? openRoleSelectionDialog(token, 'related_role') : null
+          "
           :character="token"
           size="md"
           :class="{ 'cursor-pointer': !readonly }"
@@ -87,6 +91,7 @@ const props = defineProps<{
 const roleFilter = ref("");
 const showRoleSelectionDialog = ref(false);
 let focusedToken: Token | null = null;
+const tokenMode = ref<"role" | "related_role">("role");
 
 const filteredAvailableRoles = computed(() => {
   if (!props.availableRoles) return [];
@@ -102,8 +107,9 @@ watch(
   }
 );
 
-function openRoleSelectionDialog(token: Token) {
+function openRoleSelectionDialog(token: Token, mode: "role" | "related_role") {
   focusedToken = token;
+  tokenMode.value = mode;
   showRoleSelectionDialog.value = true;
 }
 
@@ -115,12 +121,22 @@ function selectRoleForToken(role: {
   initial_alignment: Alignment;
 }) {
   if (focusedToken) {
-    focusedToken.role = {
-      token_url: role.token_url,
-      type: role.type,
-    };
-    focusedToken.role_id = role.id;
-    focusedToken.alignment = role.initial_alignment;
+    if (tokenMode.value === "role") {
+      focusedToken.role = {
+        token_url: role.token_url,
+        type: role.type,
+      };
+      focusedToken.role_id = role.id;
+      focusedToken.alignment = role.initial_alignment;
+      focusedToken.related_role = {
+        token_url: "/1x1.png",
+      };
+    } else {
+      focusedToken.related_role = {
+        token_url: role.token_url,
+      };
+      focusedToken.related_role_id = role.id;
+    }
   }
   showRoleSelectionDialog.value = false;
 }
