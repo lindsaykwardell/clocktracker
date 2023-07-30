@@ -144,7 +144,7 @@
           game.data.grimoire[0] &&
           game.data.grimoire[0].tokens.some((token) => token.role)
         "
-        class="w-screen md:w-full overflow-scroll bg-center bg-cover py-6"
+        class="w-screen md:w-full overflow-scroll bg-center bg-cover py-6 relative text-white"
         :class="{
           'trouble-brewing': game.data.script === 'Trouble Brewing',
           'sects-and-violets': game.data.script === 'Sects and Violets',
@@ -155,7 +155,33 @@
             ) === -1,
         }"
       >
-        <Grimoire :tokens="game.data.grimoire[0].tokens" readonly />
+        <button
+          type="button"
+          @click="grimPage -= 1"
+          v-if="grimPage !== 0"
+          class="h-full absolute top-0 left-1 flex items-center font-dumbledor"
+        >
+          {{ "<" }} Previous page
+        </button>
+        <button
+          v-if="grimPage !== game.data.grimoire.length - 1"
+          type="button"
+          @click="grimPage += 1"
+          class="h-full absolute top-0 right-1 flex items-center font-dumbledor"
+        >
+          {{
+            grimPage === game.data.grimoire.length - 1
+              ? "Add page"
+              : "Next page"
+          }}
+          {{ ">" }}
+        </button>
+        <Grimoire :tokens="game.data.grimoire[grimPage].tokens" readonly />
+        <div
+          class="absolute bottom-0 w-full text-center bg-gradient-to-b from-transparent via-stone-800 to-stone-800"
+        >
+          Page {{ grimPage + 1 }} of {{ game.data.grimoire.length }}
+        </div>
       </div>
       <div
         v-if="player.data.user_id === user?.id"
@@ -221,6 +247,9 @@ const gameId = route.params.id as string;
 
 const game = computed(() => games.getGame(gameId));
 const player = computed(() => users.getUser(username));
+const grimPage = ref(
+  game.value.status === Status.SUCCESS ? game.value.data.grimoire.length - 1 : 0
+);
 
 watchEffect(() => {
   if (
@@ -230,6 +259,12 @@ watchEffect(() => {
     router.push("/404");
   }
 });
+
+watchEffect(() => {
+  if (game.value.status === Status.SUCCESS) {
+    grimPage.value = game.value.data.grimoire.length - 1;
+  }
+})
 
 const gameMetadata = await useFetch(`/api/games/${gameId}/minimal`);
 

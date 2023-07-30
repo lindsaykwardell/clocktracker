@@ -277,7 +277,7 @@
         <summary class="cursor-pointer">Edit Grimoire</summary>
         <div
           v-if="game.grimoire[0].tokens.length > 2"
-          class="w-screen md:w-auto overflow-scroll py-2"
+          class="w-screen md:w-auto overflow-scroll pt-3 relative"
           :class="{
             'trouble-brewing': game.script === 'Trouble Brewing',
             'sects-and-violets': game.script === 'Sects and Violets',
@@ -290,11 +290,54 @@
               ].indexOf(game.script) === -1,
           }"
         >
+          <button
+            v-if="game.grimoire.length > 1"
+            @click.prevent="deletePage"
+            class="absolute top-1 right-1 bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial z-10"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="32"
+              height="32"
+              viewBox="0 0 512 512"
+            >
+              <path
+                d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
+                fill="currentColor"
+              />
+              <path d="M249 160h14v241h-14z" fill="currentColor" />
+              <path d="M320 160h-14.6l-10.7 241h14.6z" fill="currentColor" />
+              <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
+            </svg>
+            Delete page
+          </button>
+          <button
+            type="button"
+            @click="pageBackward"
+            v-if="grimPage !== 0"
+            class="h-full absolute top-0 left-1 flex items-center font-dumbledor"
+          >
+            {{ "<" }} Previous page
+          </button>
+          <button
+            type="button"
+            @click="pageForward"
+            class="h-full absolute top-0 right-1 flex items-center font-dumbledor"
+          >
+            {{
+              grimPage === game.grimoire.length - 1 ? "Add page" : "Next page"
+            }}
+            {{ ">" }}
+          </button>
           <Grimoire
-            v-for="grimoire in game.grimoire"
-            :tokens="grimoire.tokens"
+            :tokens="game.grimoire[grimPage].tokens"
             :availableRoles="orderedRoles"
           />
+          <div
+            class="text-center bg-gradient-to-b from-transparent via-stone-800 to-stone-800"
+          >
+            Page {{ grimPage + 1 }} of {{ game.grimoire.length }}
+          </div>
         </div>
       </details>
     </fieldset>
@@ -393,15 +436,16 @@ const props = defineProps<{
         alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
         order: number;
         is_dead: boolean;
-        role_id?: string;
+        role_id: string | null;
         role?: { token_url: string; type: string };
-        related_role_id?: string;
+        related_role_id: string | null;
         related_role?: { token_url: string };
       }[];
     }[];
   };
 }>();
 
+const grimPage = ref(props.game.grimoire.length - 1);
 const potentialScript = ref("");
 
 const emit = defineEmits(["submit"]);
@@ -545,8 +589,8 @@ watchEffect(() => {
         alignment: undefined,
         is_dead: false,
         order: grimoire.tokens.length,
-        role_id: undefined,
-        related_role_id: undefined,
+        role_id: null,
+        related_role_id: null,
       });
     }
 
@@ -555,6 +599,31 @@ watchEffect(() => {
     }
   });
 });
+
+function pageForward() {
+  const nextPage = grimPage.value + 1;
+  if (nextPage < props.game.grimoire.length) {
+    grimPage.value = nextPage;
+  } else {
+    props.game.grimoire[nextPage] = {
+      tokens: JSON.parse(JSON.stringify(props.game.grimoire[grimPage.value]))
+        .tokens,
+    };
+    grimPage.value = nextPage;
+  }
+}
+
+function pageBackward() {
+  const previousPage = grimPage.value - 1;
+  if (previousPage >= 0) {
+    grimPage.value = previousPage;
+  }
+}
+
+function deletePage() {
+  props.game.grimoire.splice(grimPage.value, 1);
+  grimPage.value = Math.max(0, grimPage.value - 1);
+}
 </script>
 
 <style scoped>

@@ -66,8 +66,9 @@ type Token = {
   alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
   order: number;
   is_dead: boolean;
-  role_id?: string;
+  role_id: string | null;
   role?: { token_url: string; type: string };
+  related_role_id: string | null;
   related_role?: { token_url: string };
 };
 
