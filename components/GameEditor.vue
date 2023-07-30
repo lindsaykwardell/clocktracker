@@ -447,7 +447,11 @@ const props = defineProps<{
         order: number;
         is_dead: boolean;
         role_id: string | null;
-        role?: { token_url: string; type: string };
+        role?: {
+          token_url: string;
+          type: string;
+          initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+        };
         related_role_id: string | null;
         related_role?: { token_url: string };
       }[];

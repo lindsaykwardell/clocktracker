@@ -25,9 +25,11 @@
           @clickRelated="
             !readonly ? openRoleSelectionDialog(token, 'related_role') : null
           "
+          @clickAlignment="toggleAlignment(token)"
           :character="token"
           size="md"
           :class="{ 'cursor-pointer': !readonly }"
+          :alwaysShowAlignment="!readonly && !!token.role"
         />
       </div>
     </div>
@@ -71,7 +73,11 @@ type Token = {
   order: number;
   is_dead: boolean;
   role_id: string | null;
-  role?: { token_url: string; type: string };
+  role?: {
+    token_url: string;
+    type: string;
+    initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+  };
   related_role_id: string | null;
   related_role?: { token_url: string };
 };
@@ -124,6 +130,7 @@ function selectRoleForToken(role: {
     if (tokenMode.value === "role") {
       focusedToken.role = {
         token_url: role.token_url,
+        initial_alignment: role.initial_alignment,
         type: role.type,
       };
       focusedToken.role_id = role.id;
@@ -152,6 +159,12 @@ function formatRoleAsCharacter(role: {
     alignment: role.initial_alignment,
     role,
   };
+}
+
+function toggleAlignment(token: Token) {
+  if (token.role) {
+    token.alignment = token.alignment === "GOOD" ? "EVIL" : "GOOD";
+  }
 }
 
 const tokenCount = computed(() => props.tokens.length);

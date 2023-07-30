@@ -10,7 +10,11 @@ export type GameRecord = Game & {
   last_character: Character;
   grimoire: (Grimoire & {
     tokens: (Token & {
-      role?: { token_url: string; type: string };
+      role?: {
+        token_url: string;
+        type: string;
+        initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+      };
       related_role?: { token_url: string };
     })[];
   })[];

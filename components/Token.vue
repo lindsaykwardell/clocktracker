@@ -7,6 +7,17 @@
   >
     <img v-if="image" :class="imageSize" :src="image" loading="lazy" />
     <div
+      v-if="
+        character.alignment !== character.role?.initial_alignment ||
+        alwaysShowAlignment
+      "
+      class="token bg-center bg-cover absolute bottom-0 left-0 rounded-full shadow-xl border border-black flex justify-center items-center"
+      :class="relatedSize"
+      @click.stop="emit('clickAlignment')"
+    >
+      <img :class="relatedImageSize" :src="alignmentImage" loading="lazy" />
+    </div>
+    <div
       v-if="character.related_role"
       class="token bg-center bg-cover absolute bottom-0 right-0 rounded-full shadow-xl border border-black flex justify-center items-center"
       :class="relatedSize"
@@ -27,14 +38,19 @@ const props = defineProps<{
   character:
     | {
         alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
-        role?: { token_url: string; type: string };
+        role?: {
+          token_url: string;
+          type: string;
+          initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+        };
         related_role?: { token_url: string };
       }
     | undefined;
   size: "sm" | "md" | "lg";
+  alwaysShowAlignment?: boolean;
 }>();
 
-const emit = defineEmits(["clickRelated", "clickRole"]);
+const emit = defineEmits(["clickRelated", "clickRole", "clickAlignment"]);
 
 const tokenSize = computed(() => {
   switch (props.size) {
@@ -96,6 +112,15 @@ const relatedImage = computed(() => {
   if (props.character?.related_role?.token_url) {
     return props.character.related_role.token_url;
   }
+  if (props.character?.alignment === "GOOD") {
+    return "/img/role/good.png";
+  }
+  if (props.character?.alignment === "EVIL") {
+    return "/img/role/evil.png";
+  }
+});
+
+const alignmentImage = computed(() => {
   if (props.character?.alignment === "GOOD") {
     return "/img/role/good.png";
   }

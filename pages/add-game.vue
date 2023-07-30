@@ -18,7 +18,6 @@ useHead({
   title: "Add Game",
 });
 
-const users = useUsers();
 const router = useRouter();
 const inFlight = ref(false);
 const userSettings = await useFetch("/api/settings");
@@ -49,9 +48,13 @@ const game = reactive<{
       alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
       order: number;
       is_dead: boolean;
-      role_id?: string;
-      role?: { token_url: string; type: string };
-      related_role_id?: string;
+      role_id: string | null;
+      role?: {
+        token_url: string;
+        type: string;
+        initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+      };
+      related_role_id: string | null;
       related_role?: { token_url: string };
     }[];
   }[];
@@ -110,7 +113,9 @@ async function submitGame() {
     inFlight.value = false;
     console.error(error.value);
   } else {
-    router.push(`/@${userSettings.data.value?.username}/game/${data.value?.id}`);
+    router.push(
+      `/@${userSettings.data.value?.username}/game/${data.value?.id}`
+    );
   }
 }
 </script>
