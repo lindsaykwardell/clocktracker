@@ -277,7 +277,7 @@
         <summary class="cursor-pointer">Edit Grimoire</summary>
         <div
           v-if="game.grimoire[0].tokens.length > 2"
-          class="w-screen md:w-auto overflow-scroll pt-3 relative"
+          class="pt-3 relative"
           :class="{
             'trouble-brewing': game.script === 'Trouble Brewing',
             'sects-and-violets': game.script === 'Sects and Violets',
@@ -293,7 +293,7 @@
           <button
             v-if="game.grimoire.length > 1"
             @click.prevent="deletePage"
-            class="absolute top-1 right-1 bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial z-10"
+            class="absolute bottom-1 right-1 bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial z-10"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -309,30 +309,40 @@
               <path d="M320 160h-14.6l-10.7 241h14.6z" fill="currentColor" />
               <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
             </svg>
-            Delete page
+            <span class="hidden md:inline">Delete page</span>
           </button>
           <button
             type="button"
             @click="pageBackward"
             v-if="grimPage !== 0"
-            class="h-full absolute top-0 left-1 flex items-center font-dumbledor"
+            class="md:h-full absolute top-0 left-1 flex items-center font-dumbledor"
           >
-            {{ "<" }} Previous page
+            <span
+              class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded"
+            >
+              {{ "<" }} Previous page
+            </span>
           </button>
           <button
             type="button"
             @click="pageForward"
-            class="h-full absolute top-0 right-1 flex items-center font-dumbledor"
+            class="md:h-full absolute top-0 right-1 flex items-center font-dumbledor"
           >
-            {{
-              grimPage === game.grimoire.length - 1 ? "Add page" : "Next page"
-            }}
-            {{ ">" }}
+            <span
+              class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded"
+            >
+              {{
+                grimPage === game.grimoire.length - 1 ? "Add page" : "Next page"
+              }}
+              {{ ">" }}
+            </span>
           </button>
-          <Grimoire
-            :tokens="game.grimoire[grimPage].tokens"
-            :availableRoles="orderedRoles"
-          />
+          <div class="w-screen md:w-auto overflow-scroll">
+            <Grimoire
+              :tokens="game.grimoire[grimPage].tokens"
+              :availableRoles="orderedRoles"
+            />
+          </div>
           <div
             class="text-center bg-gradient-to-b from-transparent via-stone-800 to-stone-800"
           >

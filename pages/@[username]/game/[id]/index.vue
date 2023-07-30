@@ -144,7 +144,7 @@
           game.data.grimoire[0] &&
           game.data.grimoire[0].tokens.some((token) => token.role)
         "
-        class="w-screen md:w-full overflow-scroll bg-center bg-cover py-6 relative text-white"
+        class="bg-center bg-cover py-6 relative text-white"
         :class="{
           'trouble-brewing': game.data.script === 'Trouble Brewing',
           'sects-and-violets': game.data.script === 'Sects and Violets',
@@ -159,24 +159,30 @@
           type="button"
           @click="grimPage -= 1"
           v-if="grimPage !== 0"
-          class="h-full absolute top-0 left-1 flex items-center font-dumbledor"
+          class="md:h-full absolute top-0 left-1 flex items-center font-dumbledor"
         >
-          {{ "<" }} Previous page
+          <span
+            class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded"
+          >
+            {{ "<" }} Previous page
+          </span>
         </button>
         <button
           v-if="grimPage !== game.data.grimoire.length - 1"
           type="button"
           @click="grimPage += 1"
-          class="h-full absolute top-0 right-1 flex items-center font-dumbledor"
+          class="md:h-full absolute top-0 right-1 flex items-center font-dumbledor"
         >
-          {{
-            grimPage === game.data.grimoire.length - 1
-              ? "Add page"
-              : "Next page"
-          }}
-          {{ ">" }}
+          <span
+            class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded"
+          >
+            Next page
+            {{ ">" }}
+          </span>
         </button>
-        <Grimoire :tokens="game.data.grimoire[grimPage].tokens" readonly />
+        <div class="w-screen md:w-full overflow-scroll">
+          <Grimoire :tokens="game.data.grimoire[grimPage].tokens" readonly />
+        </div>
         <div
           class="absolute bottom-0 w-full text-center bg-gradient-to-b from-transparent via-stone-800 to-stone-800"
         >
@@ -264,7 +270,7 @@ watchEffect(() => {
   if (game.value.status === Status.SUCCESS) {
     grimPage.value = game.value.data.grimoire.length - 1;
   }
-})
+});
 
 const gameMetadata = await useFetch(`/api/games/${gameId}/minimal`);
 
