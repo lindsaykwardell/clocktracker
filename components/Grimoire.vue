@@ -13,8 +13,8 @@
           class="absolute top-0 left-0 z-10 flex justify-center w-full duration-200"
           :class="{
             'cursor-default': readonly,
-            'opacity-0 hover:opacity-50 transition': !readonly && !token.is_dead,
-            'hover:-translate-y-2': !readonly,
+            'opacity-0': !token.is_dead,
+            'hover:opacity-50 transition hover:-translate-y-2': !readonly && !token.is_dead,
           }"
         >
           <img src="/img/shroud.png" class="w-8 md:w-10" />
