@@ -1,7 +1,7 @@
 <template>
   <div class="container m-auto">
     <div v-for="token in tokens">
-      <div class="token-slot relative">
+      <div class="token-slot relative flex flex-col items-center">
         <button
           @click.prevent="!readonly ? (token.is_dead = !token.is_dead) : null"
           class="absolute top-0 left-0 z-10 flex justify-center w-full duration-200"
@@ -24,6 +24,13 @@
           size="md"
           :class="{ 'cursor-pointer': !readonly }"
           :alwaysShowAlignment="!readonly && !!token.role"
+        />
+        <input
+          v-if="!readonly || token.player_name"
+          v-model="token.player_name"
+          type="text"
+          class="w-28 bg-stone-600 rounded p-1 border-2 border-stone-500 text-center"
+          :readonly="readonly"
         />
       </div>
     </div>
@@ -74,6 +81,7 @@ type Token = {
   };
   related_role_id: string | null;
   related_role?: { token_url: string };
+  player_name: string;
 };
 
 const props = defineProps<{
@@ -171,7 +179,7 @@ function toggleAlignment(token: Token) {
   --r: calc(
     0.5 * (1 + var(--rel)) * var(--d) / tan(pi / var(--m))
   ); /* circle radius */
-  --s: calc(2 * var(--r) + var(--d)); /* container size */
+  --s: calc(2 * var(--r) + var(--d) + 75px); /* container size */
   position: relative;
   width: var(--s);
   height: var(--s);

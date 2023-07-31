@@ -51,6 +51,7 @@ model Token {
   created_at      DateTime  @default(now()) @db.Timestamptz(6)
   grimoire        Grimoire? @relation(fields: [grimoire_id], references: [id])
   grimoire_id     Int?
+  player_name     String    @default("")
 }
 
 model Character {

@@ -69,6 +69,7 @@ const game = reactive<{
         initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
       };
       related_role?: { token_url: string };
+      player_name: string;
     }[];
   }[];
 }>({
@@ -116,6 +117,7 @@ const game = reactive<{
           related_role:
             token.related_role ||
             (token.role ? { token_url: "/1x1.png" } : undefined),
+          player_name: token.player_name,
         })),
       }))
     : [

@@ -89,6 +89,7 @@ export default defineEventHandler(async (handler) => {
                 alignment: token.alignment || Alignment.GOOD,
                 is_dead: token.is_dead || false,
                 order: token.order || index,
+                player_name: token.player_name || "",
               })),
             },
           })),

@@ -466,6 +466,7 @@ const props = defineProps<{
         };
         related_role_id: string | null;
         related_role?: { token_url: string };
+        player_name: string;
       }[];
     }[];
   };
@@ -617,6 +618,7 @@ watchEffect(() => {
         order: grimoire.tokens.length,
         role_id: null,
         related_role_id: null,
+        player_name: "",
       });
     }
 
