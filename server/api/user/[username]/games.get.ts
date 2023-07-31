@@ -30,6 +30,7 @@ export default defineEventHandler(async (handler) => {
             select: {
               token_url: true,
               type: true,
+              initial_alignment: true,
             },
           },
           related_role: {
