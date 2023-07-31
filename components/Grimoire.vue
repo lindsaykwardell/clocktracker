@@ -1,12 +1,6 @@
 <template>
-  <div
-    class="container m-auto"
-    :style="`--m: ${m}; --tan: ${+tan.toFixed(2)}; --offset: ${offset}`"
-  >
-    <div
-      v-for="(token, i) in tokens"
-      :style="i - has_mid >= 0 ? `--i: ${i}` : ''"
-    >
+  <div class="container m-auto">
+    <div v-for="token in tokens">
       <div class="token-slot relative">
         <button
           @click.prevent="!readonly ? (token.is_dead = !token.is_dead) : null"
@@ -166,20 +160,6 @@ function toggleAlignment(token: Token) {
     token.alignment = token.alignment === "GOOD" ? "EVIL" : "GOOD";
   }
 }
-
-const tokenCount = computed(() => props.tokens.length);
-const has_mid = 0; /* 0 if there's no item in the middle, 1 otherwise */
-const m = computed(
-  () => tokenCount.value - has_mid
-); /* how many are ON the circle */
-const tan = computed(() =>
-  Math.tan(Math.PI / m.value)
-); /* tangent of half the base angle */
-const offset = computed(() => {
-  const extra = 0.25 * (m.value - 5);
-
-  return 1.25 + extra;
-});
 </script>
 
 <style scoped>
@@ -188,7 +168,9 @@ const offset = computed(() => {
   --rel: calc(
     8 / (var(--m) * 2)
   ); /* how much extra space we want between images, 1 = one image size */
-  --r: calc(0.5 * (1 + var(--rel)) * var(--d) / var(--tan)); /* circle radius */
+  --r: calc(
+    0.5 * (1 + var(--rel)) * var(--d) / tan(pi / var(--m))
+  ); /* circle radius */
   --s: calc(2 * var(--r) + var(--d)); /* container size */
   position: relative;
   width: var(--s);
@@ -200,6 +182,7 @@ const offset = computed(() => {
   top: 50%;
   left: 50%;
   margin: calc(-0.5 * var(--d));
+  --offset: calc(1.25 + (0.25 * (var(--m) - 5)));
   /* width: var(--d);
   height: var(--d); */
   --az: calc((var(--i) - var(--offset)) * 1turn / var(--m));
@@ -208,5 +191,165 @@ const offset = computed(() => {
 
 img {
   max-width: 100%;
+}
+
+.container:has(:nth-child(1)) {
+  --m: 1;
+}
+
+.container:has(:nth-child(2)) {
+  --m: 2;
+}
+
+.container:has(:nth-child(3)) {
+  --m: 3;
+}
+
+.container:has(:nth-child(4)) {
+  --m: 4;
+}
+
+.container:has(:nth-child(5)) {
+  --m: 5;
+}
+
+.container:has(:nth-child(6)) {
+  --m: 6;
+}
+
+.container:has(:nth-child(7)) {
+  --m: 7;
+}
+
+.container:has(:nth-child(8)) {
+  --m: 8;
+}
+
+.container:has(:nth-child(9)) {
+  --m: 9;
+}
+
+.container:has(:nth-child(10)) {
+  --m: 10;
+}
+
+.container:has(:nth-child(11)) {
+  --m: 11;
+}
+
+.container:has(:nth-child(12)) {
+  --m: 12;
+}
+
+.container:has(:nth-child(13)) {
+  --m: 13;
+}
+
+.container:has(:nth-child(14)) {
+  --m: 14;
+}
+
+.container:has(:nth-child(15)) {
+  --m: 15;
+}
+
+.container:has(:nth-child(16)) {
+  --m: 16;
+}
+
+.container:has(:nth-child(17)) {
+  --m: 17;
+}
+
+.container:has(:nth-child(18)) {
+  --m: 18;
+}
+
+.container:has(:nth-child(19)) {
+  --m: 19;
+}
+
+.container:has(:nth-child(20)) {
+  --m: 20;
+}
+
+.container > div:nth-child(1) {
+  --i: 0;
+}
+
+.container > div:nth-child(2) {
+  --i: 1;
+}
+
+.container > div:nth-child(3) {
+  --i: 2;
+}
+
+.container > div:nth-child(4) {
+  --i: 3;
+}
+
+.container > div:nth-child(5) {
+  --i: 4;
+}
+
+.container > div:nth-child(6) {
+  --i: 5;
+}
+
+.container > div:nth-child(7) {
+  --i: 6;
+}
+
+.container > div:nth-child(8) {
+  --i: 7;
+}
+
+.container > div:nth-child(9) {
+  --i: 8;
+}
+
+.container > div:nth-child(10) {
+  --i: 9;
+}
+
+.container > div:nth-child(11) {
+  --i: 10;
+}
+
+.container > div:nth-child(12) {
+  --i: 11;
+}
+
+.container > div:nth-child(13) {
+  --i: 12;
+}
+
+.container > div:nth-child(14) {
+  --i: 13;
+}
+
+.container > div:nth-child(15) {
+  --i: 14;
+}
+
+.container > div:nth-child(16) {
+  --i: 15;
+}
+
+.container > div:nth-child(17) {
+  --i: 16;
+}
+
+.container > div:nth-child(18) {
+  --i: 17;
+}
+
+.container > div:nth-child(19) {
+  --i: 18;
+}
+
+.container > div:nth-child(20) {
+  --i: 19;
 }
 </style>

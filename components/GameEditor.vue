@@ -288,7 +288,7 @@
         <summary class="cursor-pointer">Edit Grimoire</summary>
         <div
           v-if="game.grimoire[0].tokens.length > 2"
-          class="pt-3 relative"
+          class="pt-3 relative bg-center bg-cover"
           :class="{
             'trouble-brewing': game.script === 'Trouble Brewing',
             'sects-and-violets': game.script === 'Sects and Violets',
