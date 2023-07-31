@@ -36,7 +36,15 @@
         <div class="absolute w-full top-0 left-0" />
         <img
           class="absolute top-2 right-2 w-8 h-8 md:w-12 md:h-12"
-          :src="game.win ? '/img/win.png' : '/img/loss.png'"
+          :src="
+            game.is_storyteller
+              ? game.win
+                ? '/img/role/good.png'
+                : '/img/role/evil.png'
+              : game.win
+              ? '/img/win.png'
+              : '/img/loss.png'
+          "
         />
         <div class="absolute bottom-0 left-0 w-full">
           <div

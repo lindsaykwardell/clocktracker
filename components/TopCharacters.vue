@@ -31,7 +31,8 @@ const props = defineProps<{
 const characters = computed(() => {
   const allPlayedCharacters = props.games
     .map((game) => game.player_characters)
-    .flat();
+    .flat()
+    .filter((character) => character.name !== "Storyteller");
 
   const characterCounts = allPlayedCharacters.reduce((acc, character) => {
     if (acc[character.name]) {

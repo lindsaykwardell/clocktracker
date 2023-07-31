@@ -26,6 +26,12 @@
               </h2>
               <div class="flex flex-col md:flex-row gap-2">
                 <div
+                  v-if="game.data.is_storyteller"
+                  class="font-dumbledor text-xl font-bold bottom-[20px]"
+                >
+                  Storyteller
+                </div>
+                <div
                   v-for="(character, i) in game.data.player_characters"
                   class="font-dumbledor text-xl font-bold bottom-[20px]"
                   :class="{
@@ -104,7 +110,12 @@
             <legend>Game Results</legend>
             <label>
               <span class="block">Win?</span>
-              {{ game.data?.win ? "Yes" : "No" }}
+              <template v-if="game.data.is_storyteller">
+                {{ game.data?.win ? "Good wins" : "Evil wins" }}
+              </template>
+              <template v-else>
+                {{ game.data?.win ? "Yes" : "No" }}
+              </template>
             </label>
           </fieldset>
         </div>
@@ -335,6 +346,17 @@ useHead({
 
 const last_character = computed(() => {
   if (game.value.status === Status.SUCCESS) {
+    if (game.value.data.is_storyteller) {
+      return {
+        name: "Storyteller",
+        alignment: "NEUTRAL",
+        role: {
+          token_url: "/img/role/storyteller.png",
+          initial_alignment: "NEUTRAL",
+        },
+      };
+    }
+
     return game.value.data.player_characters[
       game.value.data.player_characters.length - 1
     ];

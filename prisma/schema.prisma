@@ -28,6 +28,7 @@ model Game {
   associated_script Script?       @relation(fields: [script_id], references: [id])
   grimoire          Grimoire[]
   grimoire_id       Int?          @unique
+  is_storyteller    Boolean       @default(false)
 }
 
 model Grimoire {

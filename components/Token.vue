@@ -8,7 +8,8 @@
     <img v-if="image" :class="imageSize" :src="image" loading="lazy" />
     <div
       v-if="
-        character.alignment !== character.role?.initial_alignment ||
+        (character.role &&
+          character.alignment !== character.role?.initial_alignment) ||
         alwaysShowAlignment
       "
       class="token bg-center bg-cover absolute bottom-0 left-0 rounded-full shadow-xl border border-black flex justify-center items-center"
@@ -40,7 +41,6 @@ const props = defineProps<{
         alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
         role?: {
           token_url: string;
-          type: string;
           initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
         };
         related_role?: { token_url: string };

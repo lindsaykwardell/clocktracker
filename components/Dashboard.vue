@@ -147,15 +147,22 @@ const sortedGames = computed(() => {
   return naturalOrder(
     props.games.data.map((game) => ({
       ...game,
-      last_character: game.player_characters[
-        game.player_characters.length - 1
-      ] || {
-        id: "",
-        name: "",
-        alignment: "",
-        related: null,
-        game_id: game.id,
-      },
+      last_character: game.is_storyteller
+        ? {
+            name: "Storyteller",
+            alignment: "NEUTRAL",
+            role: {
+              token_url: "/img/role/storyteller.png",
+              initial_alignment: "NEUTRAL",
+            },
+          }
+        : game.player_characters[game.player_characters.length - 1] || {
+            id: "",
+            name: "",
+            alignment: "",
+            related: null,
+            game_id: game.id,
+          },
     }))
   )
     .orderBy(orderBy.value)

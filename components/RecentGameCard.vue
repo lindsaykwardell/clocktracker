@@ -40,7 +40,15 @@
         <div>
           <img
             class="w-8 h-8 md:w-12 md:h-12 col-span-auto z-10"
-            :src="game.win ? '/img/win.png' : '/img/loss.png'"
+            :src="
+              game.is_storyteller
+                ? game.win
+                  ? '/img/role/good.png'
+                  : '/img/role/evil.png'
+                : game.win
+                ? '/img/win.png'
+                : '/img/loss.png'
+            "
           />
         </div>
       </div>

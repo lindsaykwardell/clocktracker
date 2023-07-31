@@ -27,6 +27,7 @@ const game = reactive<{
   script: string;
   script_id: number | null;
   storyteller: string;
+  is_storyteller: boolean;
   location_type: "ONLINE" | "IN_PERSON";
   location: string;
   community: string;
@@ -63,6 +64,7 @@ const game = reactive<{
   script: "",
   script_id: null,
   storyteller: "",
+  is_storyteller: false,
   location_type: "ONLINE",
   location: "",
   community: "",

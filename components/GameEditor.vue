@@ -21,7 +21,7 @@
             <button
               type="button"
               @click="showScriptDialog = !showScriptDialog"
-              class="flex gap-1 bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded justify-center items-center"
+              class="flex gap-1 bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-1 px-4 rounded justify-center items-center"
               :class="{
                 'w-full': !game.script,
                 'flex-shrink': game.script,
@@ -106,13 +106,17 @@
             </section>
           </Dialog>
         </label>
-        <label class="flex-1">
+        <label v-if="!game.is_storyteller" class="flex-1">
           <span class="block">Storyteller</span>
           <input
             type="text"
             v-model="game.storyteller"
             class="block w-full border border-stone-500 rounded-md p-2"
           />
+        </label>
+        <label class="flex whitespace-nowrap items-center gap-2">
+          <input type="checkbox" v-model="game.is_storyteller" />
+          <span class="block">I was the Storyteller</span>
         </label>
       </div>
       <label class="flex-1">
@@ -162,6 +166,7 @@
       </label>
     </fieldset>
     <fieldset
+      v-if="!game.is_storyteller"
       class="flex flex-col items-end gap-5 border rounded border-stone-500 p-4 my-3"
     >
       <legend>Player Setup</legend>
@@ -256,7 +261,10 @@
             :value="true"
             class="block w-full border border-stone-500 rounded-md p-2"
           />
-          <span class="block">Win</span>
+          <span class="block whitespace-nowrap">
+            <template v-if="game.is_storyteller">Good wins</template>
+            <template v-else>Win</template>
+          </span>
         </label>
         <label class="flex gap-2 items-center">
           <input
@@ -265,7 +273,10 @@
             :value="false"
             class="block w-full border border-stone-500 rounded-md p-2"
           />
-          <span class="block">Loss</span>
+          <span class="block whitespace-nowrap">
+            <template v-if="game.is_storyteller">Evil wins</template>
+            <template v-else>Loss</template>
+          </span>
         </label>
       </fieldset>
     </fieldset>
@@ -425,6 +436,7 @@ const props = defineProps<{
     script: string;
     script_id: number | null;
     storyteller: string;
+    is_storyteller: boolean;
     location_type: "ONLINE" | "IN_PERSON";
     location: string;
     community: string;
