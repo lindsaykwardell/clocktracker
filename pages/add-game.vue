@@ -35,11 +35,16 @@ const game = reactive<{
   traveler_count: number | null;
   player_characters: {
     name: string;
-    alignment: string;
+    role_id: string | null;
+    alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
     showRelated: boolean;
     related: string;
-    role_id: string | null;
     related_role_id: string | null;
+    role?: {
+      token_url: string;
+      initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+    };
+    related_role?: { token_url: string };
   }[];
   win: boolean;
   notes: string;
@@ -79,6 +84,13 @@ const game = reactive<{
       showRelated: false,
       role_id: null,
       related_role_id: null,
+      role: {
+        token_url: "/1x1.png",
+        initial_alignment: "NEUTRAL",
+      },
+      related_role: {
+        token_url: "/1x1.png",
+      },
     },
   ],
   win: false,

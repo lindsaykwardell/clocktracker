@@ -167,14 +167,19 @@
     </fieldset>
     <fieldset
       v-if="!game.is_storyteller"
-      class="flex flex-col items-end gap-5 border rounded border-stone-500 p-4 my-3"
+      class="flex justify-center md:justify-normal flex-wrap gap-5 border rounded border-stone-500 p-4 my-3"
     >
-      <legend>Player Setup</legend>
+      <legend>Player Roles</legend>
       <div
         v-for="(character, i) in game.player_characters"
-        class="w-full flex flex-wrap md:flex-nowrap gap-5 items-end"
+        class="relative border border-stone-600 rounded p-4 flex justify-center items-center aspect-square"
       >
-        <button type="button" v-if="i !== 0" @click="removeCharacter(i)">
+        <button
+          type="button"
+          v-if="i !== 0"
+          @click="removeCharacter(i)"
+          class="absolute top-1 right-1"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="32"
@@ -190,64 +195,51 @@
             <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
           </svg>
         </button>
-        <div v-else class="hidden md:block w-8"></div>
-        <label
-          class="flex-grow md:flex-1"
-          :class="{
-            'w-full': i === 0,
-          }"
-        >
-          <span class="block">
-            <template v-if="i === 0">Initial Character</template>
-            <template v-else-if="i + 1 === game.player_characters.length">
-              End Character
-            </template>
-            <template v-else>Additional Character</template>
-          </span>
-          <select
-            v-model="character.name"
-            @change="setCharacterDetails(character, $event)"
-            class="block w-full border border-stone-500 rounded-md p-2"
-            required
-          >
-            <option value="">Select a Character</option>
-            <option v-for="role in orderedRoles" :value="role.name">
-              {{ role.name }}
-            </option>
-          </select>
-        </label>
-        <label class="w-1/3 md:w-auto flex-shrink">
-          <span class="block">Alignment</span>
-          <select
-            v-model="character.alignment"
-            class="block w-full border border-stone-500 rounded-md p-2"
-          >
-            <option value="GOOD">Good</option>
-            <option value="EVIL">Evil</option>
-          </select>
-        </label>
-        <label
-          v-if="character.showRelated === false"
-          class="flex-shrink flex items-center gap-2"
-        >
-          <input type="checkbox" v-model="character.showRelated" />
-          <span class="block">Related to...</span>
-        </label>
-        <label v-else class="flex-1">
-          <span class="block"> Related Character </span>
-          <select
-            v-model="character.related"
-            @change="setRelatedRoleDetails(character, $event)"
-            class="block w-full border border-stone-500 rounded-md p-2"
-          >
-            <option value="">Select a Character</option>
-            <option v-for="role in orderedRoles" :value="role.name">
-              {{ role.name }}
-            </option>
-          </select>
-        </label>
+        <Token
+          :character="character"
+          alwaysShowAlignment
+          size="lg"
+          class="cursor-pointer"
+          @clickRole="openRoleSelectionDialog(character, 'role')"
+          @clickRelated="openRoleSelectionDialog(character, 'related_role')"
+          @clickAlignment="toggleAlignment(character)"
+        />
       </div>
-      <button type="button" @click="addCharacter">Add Character</button>
+      <div
+        class="border border-stone-600 rounded p-4 flex justify-center items-center aspect-square"
+      >
+        <Token outline size="lg" class="font-dumbledor">
+          <button type="button" @click="addCharacter" class="w-full h-full">
+            Add Character
+          </button>
+        </Token>
+      </div>
+      <Dialog v-model:visible="showRoleSelectionDialog" size="lg">
+        <template #title>
+          <div class="flex flex-col md:flex-row w-full">
+            <h2 class="flex-grow text-2xl font-bold font-dumbledor">
+              Select a Role
+            </h2>
+            <input
+              v-model="roleFilter"
+              type="text"
+              placeholder="Filter roles"
+              class="p-2 mt-2 border border-gray-300 rounded-md"
+            />
+          </div>
+        </template>
+        <div class="flex flex-wrap justify-around gap-3 p-4">
+          <div v-for="role in filteredRoles" class="flex flex-col items-center">
+            <Token
+              @click="selectRoleForToken(role)"
+              :character="formatRoleAsCharacter(role)"
+              size="md"
+              class="cursor-pointer"
+            />
+            {{ role.name }}
+          </div>
+        </div>
+      </Dialog>
     </fieldset>
     <fieldset
       class="flex flex-col md:flex-row gap-5 border rounded border-stone-500 p-4 my-3"
@@ -407,13 +399,36 @@
 </template>
 
 <script setup lang="ts">
-import type { Role } from "@prisma/client";
+import type { Alignment, Role, RoleType } from "@prisma/client";
 import { v4 as uuid } from "uuid";
 import naturalOrder from "natural-order";
+
+type Character = {
+  name: string;
+  role_id: string | null;
+  alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
+  showRelated: boolean;
+  related: string;
+  related_role_id: string | null;
+  role?: {
+    token_url: string;
+    initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+  };
+  related_role?: { token_url: string };
+};
 
 const roles = ref<Role[]>([]);
 const scripts = ref<{ id: number; name: string }[]>([]);
 const baseScripts = ref<{ id: number; name: string }[]>([]);
+const tokenMode = ref<"role" | "related_role">("role");
+
+let focusedToken: Character | null = null;
+
+const filteredRoles = computed(() => {
+  return roles.value.filter((role) =>
+    role.name.toLowerCase().includes(roleFilter.value.toLowerCase())
+  );
+});
 
 const baseScriptData = await $fetch(
   "/api/script?author=The Pandemonium Institute"
@@ -428,6 +443,9 @@ const showScriptDialog = ref(false);
 const orderedRoles = computed(() =>
   naturalOrder(roles.value).orderBy("asc").sort(["name"])
 );
+
+const roleFilter = ref("");
+const showRoleSelectionDialog = ref(false);
 
 const props = defineProps<{
   inFlight: boolean;
@@ -445,10 +463,15 @@ const props = defineProps<{
     player_characters: {
       name: string;
       role_id: string | null;
-      alignment: string;
+      alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
       showRelated: boolean;
       related: string;
       related_role_id: string | null;
+      role?: {
+        token_url: string;
+        initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+      };
+      related_role?: { token_url: string };
     }[];
     win: boolean;
     notes: string;
@@ -495,6 +518,13 @@ function addCharacter() {
     showRelated: false,
     role_id: null,
     related_role_id: null,
+    role: {
+      token_url: "/1x1.png",
+      initial_alignment: "NEUTRAL",
+    },
+    related_role: {
+      token_url: "/1x1.png",
+    },
   });
 }
 
@@ -569,41 +599,62 @@ watchEffect(async () => {
   }
 });
 
-function setCharacterDetails(
-  character: {
-    name: string;
-    alignment: string;
-    showRelated: boolean;
-    related: string;
-    role_id: string | null;
-    related_role_id: string | null;
-  },
-  event: Event
+function openRoleSelectionDialog(
+  token: Character,
+  mode: "role" | "related_role"
 ) {
-  const roleName = (event.target as HTMLSelectElement).value;
-  const selectedRole = roles.value.find((role) => role.name === roleName);
-  if (selectedRole) {
-    character.alignment = selectedRole.initial_alignment;
-    character.role_id = selectedRole.id;
+  focusedToken = token;
+  tokenMode.value = mode;
+  showRoleSelectionDialog.value = true;
+}
+
+function toggleAlignment(token: Character) {
+  if (token.role) {
+    token.alignment = token.alignment === "GOOD" ? "EVIL" : "GOOD";
   }
 }
 
-function setRelatedRoleDetails(
-  character: {
-    name: string;
-    alignment: string;
-    showRelated: boolean;
-    related: string;
-    role_id: string | null;
-    related_role_id: string | null;
-  },
-  event: Event
-) {
-  const roleName = (event.target as HTMLSelectElement).value;
-  const selectedRole = roles.value.find((role) => role.name === roleName);
-  if (selectedRole) {
-    character.related_role_id = selectedRole.id;
+function selectRoleForToken(role: {
+  type: RoleType;
+  id: string;
+  token_url: string;
+  name: string;
+  initial_alignment: Alignment;
+}) {
+  if (focusedToken) {
+    if (tokenMode.value === "role") {
+      focusedToken.role = {
+        token_url: role.token_url,
+        initial_alignment: role.initial_alignment,
+      };
+      focusedToken.role_id = role.id;
+      focusedToken.alignment = role.initial_alignment;
+      focusedToken.related_role = {
+        token_url: "/1x1.png",
+      };
+      focusedToken.name = role.name;
+    } else {
+      focusedToken.related_role = {
+        token_url: role.token_url,
+      };
+      focusedToken.related_role_id = role.id;
+      focusedToken.related = role.name;
+    }
   }
+  showRoleSelectionDialog.value = false;
+}
+
+function formatRoleAsCharacter(role: {
+  type: RoleType;
+  id: string;
+  token_url: string;
+  name: string;
+  initial_alignment: Alignment;
+}) {
+  return {
+    alignment: role.initial_alignment,
+    role,
+  };
 }
 
 watchEffect(() => {

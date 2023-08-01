@@ -1,14 +1,13 @@
 <template>
   <div
-    v-if="character"
-    class="token bg-center bg-cover relative rounded-full shadow-xl border border-black flex justify-center items-center aspect-square"
-    :class="tokenSize"
+    class="bg-center bg-cover relative rounded-full shadow-xl border flex justify-center items-center aspect-square"
+    :class="tokenClass"
     @click="emit('clickRole')"
   >
     <img v-if="image" :class="imageSize" :src="image" loading="lazy" />
     <div
       v-if="
-        (character.role &&
+        (character?.role &&
           character.alignment !== character.role?.initial_alignment) ||
         alwaysShowAlignment
       "
@@ -18,8 +17,9 @@
     >
       <img :class="relatedImageSize" :src="alignmentImage" loading="lazy" />
     </div>
+    <slot />
     <div
-      v-if="character.related_role"
+      v-if="character?.related_role"
       class="token bg-center bg-cover absolute bottom-0 right-0 rounded-full shadow-xl border border-black flex justify-center items-center"
       :class="relatedSize"
       @click.stop="emit('clickRelated')"
@@ -36,7 +36,7 @@
 
 <script setup lang="ts">
 const props = defineProps<{
-  character:
+  character?:
     | {
         alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
         role?: {
@@ -46,21 +46,36 @@ const props = defineProps<{
         related_role?: { token_url: string };
       }
     | undefined;
-  size: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg";
   alwaysShowAlignment?: boolean;
+  outline?: boolean;
 }>();
 
 const emit = defineEmits(["clickRelated", "clickRole", "clickAlignment"]);
 
-const tokenSize = computed(() => {
+const tokenClass = computed(() => {
+  let classes = "";
   switch (props.size) {
     case "sm":
-      return "w-8 h-8 md:w-12 md:h-12";
+      classes += "w-8 h-8 md:w-12 md:h-12";
+      break;
     case "md":
-      return "w-20 h-20 md:w-28 md:h-28";
+      classes += "w-20 h-20 md:w-28 md:h-28";
+      break;
     case "lg":
-      return "w-36 h-36 md:w-48 md:h-48";
+      classes += "w-36 h-36 md:w-48 md:h-48";
+      break;
   }
+
+  if (props.character) {
+    classes += " token border-black";
+  }
+
+  if (props.outline) {
+    classes += " border-dashed border-stone-100";
+  }
+
+  return classes;
 });
 
 const imageSize = computed(() => {

@@ -4,7 +4,11 @@ import type { Game, Character, Grimoire, Token } from "@prisma/client";
 
 export type GameRecord = Game & {
   player_characters: (Character & {
-    role?: { token_url: string; type: string };
+    role?: {
+      token_url: string;
+      type: string;
+      initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+    };
     related_role?: { token_url: string };
   })[];
   last_character: Character;

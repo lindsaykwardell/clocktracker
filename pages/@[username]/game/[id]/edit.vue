@@ -47,11 +47,16 @@ const game = reactive<{
   traveler_count: number | null;
   player_characters: {
     name: string;
-    alignment: string;
+    role_id: string | null;
+    alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
     showRelated: boolean;
     related: string;
-    role_id: string | null;
     related_role_id: string | null;
+    role?: {
+      token_url: string;
+      initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+    };
+    related_role?: { token_url: string };
   }[];
   win: boolean;
   notes: string;
@@ -62,12 +67,12 @@ const game = reactive<{
       order: number;
       is_dead: boolean;
       role_id: string | null;
-      related_role_id: string | null;
       role?: {
         token_url: string;
         type: string;
         initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
       };
+      related_role_id: string | null;
       related_role?: { token_url: string };
       player_name: string;
     }[];
@@ -91,6 +96,10 @@ const game = reactive<{
       showRelated: !!character.related,
       role_id: character.role_id,
       related_role_id: character.related_role_id,
+      role: character.role,
+      related_role: character.related_role || {
+        token_url: "/1x1.png",
+      },
     })
   ) || [
     {
