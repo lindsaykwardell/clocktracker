@@ -34,7 +34,6 @@
         <input
           v-model="pronouns"
           class="block w-full border border-stone-500 rounded-md p-2"
-          required
         />
       </label>
       <label class="block w-[300px]">
@@ -42,7 +41,6 @@
         <input
           v-model="location"
           class="block w-full border border-stone-500 rounded-md p-2"
-          required
         />
       </label>
       <button

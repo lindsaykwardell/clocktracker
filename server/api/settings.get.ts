@@ -30,17 +30,198 @@ export default defineEventHandler(async (handler) => {
     })
   )?.username;
 
+  // If the username does not exist, use the full name from the user metadata.
+  // Otherwise, generate a random username based on roles.
+
+  const randomRole =
+    roles[Math.floor(Math.random() * roles.length)] || "Traveler";
+
+  const username = existingUsername
+    ? faker.internet.userName(randomRole)
+    : user.user_metadata.full_name;
+
   const newSettings = await prisma.userSettings.create({
     data: {
       user_id: user.id,
-      username: existingUsername
-        ? faker.internet.userName()
-        : user.user_metadata.full_name,
-      display_name: user.user_metadata.full_name,
-      avatar: user.user_metadata.avatar_url,
+      username,
+      display_name:
+        user.user_metadata.full_name ||
+        faker.internet.displayName(faker.word.adjective(), randomRole),
+      avatar: user.user_metadata.avatar_url || "/img/default.png",
       email: user.email,
     },
   });
 
   return newSettings;
 });
+
+const townsfolk = [
+  "Alchemist",
+  "Amnesiac",
+  "Artist",
+  "Atheist",
+  "Balloonist",
+  "Bounty Hunter",
+  "Cannibal",
+  "Chambermaid",
+  "Chef",
+  "Choirboy",
+  "Clockmaker",
+  "Courtier",
+  "Cult Leader",
+  "Dreamer",
+  "Empath",
+  "Engineer",
+  "Exorcist",
+  "Farmer",
+  "Fisherman",
+  "Flowergirl",
+  "Fool",
+  "Fortune Teller",
+  "Gambler",
+  "General",
+  "Gossip",
+  "Grandmother",
+  "High Priestess",
+  "Huntsman",
+  "Innkeeper",
+  "Investigator",
+  "Juggler",
+  "King",
+  "Knight",
+  "Librarian",
+  "Lycanthrope",
+  "Magician",
+  "Mathematician",
+  "Mayor",
+  "Minstrel",
+  "Monk",
+  "Nightwatchman",
+  "Noble",
+  "Oracle",
+  "Pacifist",
+  "Philosopher",
+  "Pixie",
+  "Poppy Grower",
+  "Preacher",
+  "Professor",
+  "Ravenkeeper",
+  "Sage",
+  "Sailor",
+  "Savant",
+  "Seamstress",
+  "Slayer",
+  "Snake Charmer",
+  "Soldier",
+  "Steward",
+  "Tea Lady",
+  "Town Crier",
+  "Undertaker",
+  "Virgin",
+  "Washerwoman",
+];
+
+const outsiders = [
+  "Acrobat",
+  "Barber",
+  "Butler",
+  "Damsel",
+  "Drunk",
+  "Golem",
+  "Goon",
+  "Heretic",
+  "Klutz",
+  "Lunatic",
+  "Moonchild",
+  "Mutant",
+  "Politician",
+  "Puzzlemaster",
+  "Recluse",
+  "Saint",
+  "Snitch",
+  "Sweetheart",
+  "Tinker",
+];
+
+const minions = [
+  "Assassin",
+  "Baron",
+  "Boomdandy",
+  "Cerenovus",
+  "Devil's Advocate",
+  "Evil Twin",
+  "Fearmonger",
+  "Goblin",
+  "Godfather",
+  "Marionette",
+  "Mastermind",
+  "Mezepheles",
+  "Organ Grinder",
+  "Pit-Hag",
+  "Poisoner",
+  "Psychopath",
+  "Scarlet Woman",
+  "Spy",
+  "Vizier",
+  "Widow",
+  "Witch",
+  "Harpy",
+];
+
+const demons = [
+  "Al-Hadikhia",
+  "Fang Gu",
+  "Imp",
+  "Legion",
+  "Leviathan",
+  "Lil' Monsta",
+  "Lleech",
+  "No Dashii",
+  "Po",
+  "Pukka",
+  "Riot",
+  "Shabaloth",
+  "Vigormortis",
+  "Vortox",
+  "Zombuul",
+];
+
+const travelers = [
+  "Scapegoat",
+  "Gunslinger",
+  "Beggar",
+  "Bureaucrat",
+  "Thief",
+  "Butcher",
+  "Bone Collector",
+  "Harlot",
+  "Barista",
+  "Deviant",
+  "Apprentice",
+  "Matron",
+  "Voudon",
+  "Judge",
+  "Bishop",
+  "Gangster",
+];
+
+const fabled = [
+  "Doomsayer",
+  "Angel",
+  "Buddhist",
+  "Hell's Librarian",
+  "Revolutionary",
+  "Fiddler",
+  "Toymaker",
+  "Fibbin",
+  "Duchess",
+  "Sentinel",
+  "Spirit of Ivory",
+  "Djinn",
+  "Storm Catcher",
+  "Bootlegger",
+  "Gardener",
+  "Ferryman",
+];
+
+const roles = [...townsfolk, ...outsiders, ...minions, ...demons, ...travelers];
