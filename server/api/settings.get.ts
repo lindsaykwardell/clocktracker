@@ -22,13 +22,15 @@ export default defineEventHandler(async (handler) => {
 
   if (settings) return settings;
 
-  const existingUsername = (
-    await prisma.userSettings.findFirst({
-      where: {
-        username: user.user_metadata.full_name,
-      },
-    })
-  )?.username;
+  const existingUsername = user.user_metadata.full_name
+    ? (
+        await prisma.userSettings.findFirst({
+          where: {
+            username: user.user_metadata.full_name,
+          },
+        })
+      )?.username
+    : null;
 
   // If the username does not exist, use the full name from the user metadata.
   // Otherwise, generate a random username based on roles.
@@ -38,8 +40,8 @@ export default defineEventHandler(async (handler) => {
   const adjective = faker.word.adjective();
 
   const username = existingUsername
-    ? faker.internet.userName({ firstName: adjective, lastName: randomRole})
-    : user.user_metadata.full_name;
+    ? user.user_metadata.full_name
+    : faker.internet.userName({ firstName: adjective, lastName: randomRole });
 
   const newSettings = await prisma.userSettings.create({
     data: {
