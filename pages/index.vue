@@ -4,14 +4,25 @@
       class="w-full flex flex-col items-center justify-center gap-12 py-12 bg-gradient-to-b from-stone-800 via-stone-800 to-stone-950"
     >
       <img src="/logo.png" class="w-2/3 sm:w-[400px]" alt="ClockTracker" />
-      <button
-        class="text-center text-lg w-[300px] bg-[#5865F2] hover:bg-[#4752C4] transition duration-150 text-white font-bold py-2 px-4 rounded flex justify-center gap-4 items-center"
-        @click="login"
+      <div class="flex flex-col gap-2">
+        <button
+          class="text-center text-lg w-[300px] bg-[#5865F2] hover:bg-[#4752C4] transition duration-150 text-white font-bold py-2 px-4 rounded flex justify-center gap-4 items-center"
+          @click="login"
+        >
+          <Discord />
+          <span>Login with Discord</span>
+        </button>
+        <nuxt-link
+          to="/login"
+          class="text-center text-lg w-[300px] bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex justify-center gap-4 items-center"
+        >
+          <Email />
+          <span>Login with Email</span>
+        </nuxt-link>
+      </div>
+      <h1
+        class="text-xl sm:text-2xl md:text-4xl font-bold font-dumbledor text-center"
       >
-        <Discord />
-        <span>Login with Discord</span>
-      </button>
-      <h1 class="text-xl sm:text-2xl md:text-4xl font-bold font-dumbledor text-center">
         Tell Your Clocktower Story
       </h1>
       <section
@@ -30,8 +41,8 @@
         <img src="/img/home-grid.png" class="aspect-video w-96 object-cover" />
         <p class="text-lg w-11-12 md:w-1/2">
           Record your games and share them with your friends. See what games you
-          have played over time, and remember the best experiences you've had with
-          your friends.
+          have played over time, and remember the best experiences you've had
+          with your friends.
         </p>
       </section>
       <section
@@ -39,9 +50,9 @@
       >
         <img src="/img/home-games.png" class="aspect-video w-96 object-cover" />
         <p class="text-lg w-11-12 md:w-1/2">
-          Share your games with your friends, and see what games they have played!
-          Record your roles throughout the game, which script was played, and
-          other details.
+          Share your games with your friends, and see what games they have
+          played! Record your roles throughout the game, which script was
+          played, and other details.
         </p>
       </section>
       <section
@@ -52,8 +63,8 @@
           class="aspect-video w-96 object-cover"
         />
         <p class="text-lg w-11-12 md:w-1/2">
-          You can also add notes about the game, upload images to remember
-          your favorite moments, and record a full grimoire of the game.
+          You can also add notes about the game, upload images to remember your
+          favorite moments, and record a full grimoire of the game.
         </p>
       </section>
       <section
@@ -61,8 +72,8 @@
       >
         <img src="/img/home-stats.png" class="aspect-video w-96 object-cover" />
         <p class="text-lg w-11-12 md:w-1/2">
-          Don’t let the data define you, use it and improve your game. Track what
-          scripts and roles you play, and see how you perform over time.
+          Don’t let the data define you, use it and improve your game. Track
+          what scripts and roles you play, and see how you perform over time.
         </p>
       </section>
       <section
@@ -78,20 +89,31 @@
           recently to bring back to your own games.
         </p>
       </section>
-      <h1 class="text-xl sm:text-2xl md:text-4xl font-bold font-dumbledor text-center">
+      <h1
+        class="text-xl sm:text-2xl md:text-4xl font-bold font-dumbledor text-center"
+      >
         What will your story be?
       </h1>
-      <button
-        class="text-center text-lg w-[300px] bg-[#5865F2] hover:bg-[#4752C4] transition duration-150 text-white font-bold py-2 px-4 rounded flex justify-center gap-4 items-center"
-        @click="login"
-      >
-        <Discord />
-        <span>Login with Discord</span>
-      </button>
+      <div class="flex flex-col gap-2">
+        <button
+          class="text-center text-lg w-[300px] bg-[#5865F2] hover:bg-[#4752C4] transition duration-150 text-white font-bold py-2 px-4 rounded flex justify-center gap-4 items-center"
+          @click="login"
+        >
+          <Discord />
+          <span>Login with Discord</span>
+        </button>
+        <nuxt-link
+          to="/login"
+          class="text-center text-lg w-[300px] bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex justify-center gap-4 items-center"
+        >
+          <Email />
+          <span>Login with Email</span>
+        </nuxt-link>
+      </div>
     </main>
     <footer class="pb-4 text-center text-stone-500 bg-stone-950">
-      This project is not affiliated with The Pandemonium Institute. All roles are
-      the property of Steven Medway and The Pandemonium Institute.
+      This project is not affiliated with The Pandemonium Institute. All roles
+      are the property of Steven Medway and The Pandemonium Institute.
     </footer>
   </template>
 </template>
