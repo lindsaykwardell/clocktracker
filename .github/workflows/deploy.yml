@@ -1,8 +1,8 @@
-name: test-pr
+name: deploy
 
 on:
-  pull_request:
-    branches: [main]
+  schedule:
+    - cron: "0 0 * * *"
 
 jobs:
   test:
@@ -38,3 +38,17 @@ jobs:
           DATABASE_URL: "postgresql://postgres:postgres@localhost:54322/postgres?connection_limit=1"
           SUPABASE_URL: "http://localhost:54321"
           SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0"
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Merge main -> deploy
+        uses: devmasx/merge-branch@master
+        with:
+          type: now
+          from_branch: main
+          target_branch: deploy
+          github_token: ${{ github.token }}
