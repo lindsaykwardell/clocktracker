@@ -5,14 +5,27 @@
     <form @submit.prevent="login" class="flex flex-col gap-2">
       <label>
         <span class="block">Email</span>
-        <input class="text-black p-1 rounded w-48" required type="email" v-model="email" placeholder="Email" />
+        <input
+          class="text-black p-1 rounded w-48"
+          required
+          type="email"
+          v-model="email"
+          placeholder="Email"
+        />
       </label>
       <label>
         <span class="block">Password</span>
-        <input class="text-black p-1 rounded w-48" required type="password" v-model="password" placeholder="Password" />
+        <input
+          class="text-black p-1 rounded w-48"
+          required
+          type="password"
+          v-model="password"
+          placeholder="Password"
+        />
       </label>
       <button type="submit">Login</button>
       <button type="button" @click="register">Register</button>
+      <span class="text-red-500">Error: {{ errorMessage }}</span>
     </form>
   </div>
 </template>
@@ -25,19 +38,21 @@ definePageMeta({
 const supabase = useSupabaseClient();
 const router = useRouter();
 
-const email = ref("")
-const password = ref("")
+const email = ref("");
+const password = ref("");
+const errorMessage = ref();
 
 async function login() {
   const { data, error } = await supabase.auth.signInWithPassword({
     email: email.value,
     password: password.value,
-  })
+  });
 
   if (error) {
-    console.error(error)
+    console.error(error);
+    errorMessage.value = error.message;
   } else {
-    router.push("/welcome")
+    router.push("/welcome");
   }
 }
 
@@ -45,12 +60,13 @@ async function register() {
   const { data, error } = await supabase.auth.signUp({
     email: email.value,
     password: password.value,
-  })
+  });
 
   if (error) {
-    console.error(error)
+    console.error(error);
+    errorMessage.value = error.message;
   } else {
-    router.push("/welcome")
+    router.push("/welcome");
   }
 }
 </script>
