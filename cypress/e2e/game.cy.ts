@@ -1,21 +1,18 @@
 import { faker } from "@faker-js/faker";
 
-describe("basic functionality", () => {
+describe("games", () => {
   let email: string;
   let password: string;
   before(() => {
     email = faker.internet.email();
     password = faker.internet.password();
-  });
 
-  it("registers a new user", () => {
     // @ts-ignore
     cy.register(email, password);
-  });
-  it("logs in as the new user", () => {
     // @ts-ignore
-    cy.login(email, password);
+    cy.logout();
   });
+
   it("can add a new game", () => {
     const storyteller = faker.person.firstName();
 

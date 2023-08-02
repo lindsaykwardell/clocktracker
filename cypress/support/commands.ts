@@ -53,3 +53,8 @@ Cypress.Commands.add("login", (email: string, password: string) => {
   cy.findByLabelText("Password").type(password);
   cy.findByRole("button", { name: "Login" }).click();
 });
+
+// @ts-ignore
+Cypress.Commands.add("logout", () => {
+  cy.findByRole("button", { name: "Sign Out" }).click();
+});
