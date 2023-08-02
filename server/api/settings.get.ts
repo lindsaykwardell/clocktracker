@@ -38,7 +38,7 @@ export default defineEventHandler(async (handler) => {
   const adjective = faker.word.adjective();
 
   const username = existingUsername
-    ? faker.internet.userName(adjective, randomRole)
+    ? faker.internet.userName({ firstName: adjective, lastName: randomRole})
     : user.user_metadata.full_name;
 
   const newSettings = await prisma.userSettings.create({
