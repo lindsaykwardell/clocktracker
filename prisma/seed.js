@@ -2,8 +2,7 @@ const axios = require("axios");
 const cheerio = require("cheerio");
 const { PrismaClient, Alignment, RoleType } = require("@prisma/client");
 
-const url =
-  "https://botc-scripts.azurewebsites.net/?search=&script_type=&include=&exclude=&edition=&author=The+Pandemonium+Institute";
+const url = "https://botc-scripts.azurewebsites.net";
 const prisma = new PrismaClient();
 
 async function main() {
@@ -15,7 +14,10 @@ async function main() {
 
   async function parsePage() {
     console.log(`Parsing page...`);
-    const response = await axios.get(url);
+    const response = await axios.get(
+      url +
+        "?search=&script_type=&include=&exclude=&edition=&author=The+Pandemonium+Institute"
+    );
     const $ = cheerio.load(response.data);
     // Iterate over the table rows
     $("table tbody tr").each((index, element) => {
@@ -64,6 +66,9 @@ async function main() {
     });
   }
 
+  const savedScripts = await prisma.script.findMany();
+  console.log(`Found ${savedScripts.length} scripts saved.`);
+
   const roles = [
     ...townsfolk.map((role) =>
       toRole(role, RoleType.TOWNSFOLK, Alignment.GOOD)
@@ -86,6 +91,9 @@ async function main() {
       create: role,
     });
   }
+
+  const savedRoles = await prisma.role.findMany();
+  console.log(`Found ${savedRoles.length} roles saved.`);
 
   console.log("Done!");
 }
