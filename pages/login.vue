@@ -2,7 +2,7 @@
   <div class="flex flex-col items-center gap-2 m-auto py-4">
     <img src="/logo.png" class="w-48" />
     <h1>Sign in</h1>
-    <form @submit.prevent="login" class="flex flex-col gap-2">
+    <form @submit.prevent="login" class="flex flex-col items-center gap-2">
       <label>
         <span class="block">Email</span>
         <input
@@ -25,7 +25,10 @@
       </label>
       <button type="submit">Login</button>
       <button type="button" @click="register">Register</button>
-      <span class="text-red-500">Error: {{ errorMessage }}</span>
+      <span class="text-red-500">{{ errorMessage }}</span>
+      <template v-if="errorMessage">
+        <span class="text-red-500">Email: {{ email }}</span>
+      </template>
     </form>
   </div>
 </template>
