@@ -8,13 +8,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    env:
-      DATABASE_URL: "postgresql://postgres:postgres@localhost:54322/postgres?connection_limit=1"
-      SUPABASE_URL: "http://localhost:54321"
-      SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0"
-      SUPABASE_AUTH_DISCORD_CLIENT_ID: "123"
-      SUPABASE_AUTH_DISCORD_CLIENT_SECRET: "123"
-
     steps:
       - uses: supabase/setup-cli@v1
       - uses: actions/checkout@v2
@@ -26,7 +19,16 @@ jobs:
         run: npm install
       - name: Start Supabase
         run: supabase start
+        env:
+          SUPABASE_AUTH_DISCORD_CLIENT_ID: "123"
+          SUPABASE_AUTH_DISCORD_CLIENT_SECRET: "123"
       - name: Build app
         run: npm run build
       - name: Run tests
         run: npm test
+        env:
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:54322/postgres?connection_limit=1"
+          SUPABASE_URL: "http://localhost:54321"
+          SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0"
+          SUPABASE_AUTH_DISCORD_CLIENT_ID: "123"
+          SUPABASE_AUTH_DISCORD_CLIENT_SECRET: "123"
