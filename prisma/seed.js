@@ -1,28 +1,21 @@
-import axios from "axios";
-import cheerio from "cheerio";
-import { PrismaClient, Alignment, RoleType } from "@prisma/client";
+const axios = require("axios");
+const cheerio = require("cheerio");
+const { PrismaClient, Alignment, RoleType } = require("@prisma/client");
 
-const url = "https://botc-scripts.azurewebsites.net/?search=&script_type=&include=&exclude=&edition=&author=The+Pandemonium+Institute";
+const url =
+  "https://botc-scripts.azurewebsites.net/?search=&script_type=&include=&exclude=&edition=&author=The+Pandemonium+Institute";
 const prisma = new PrismaClient();
 
 async function main() {
-  const scriptList: {
-    id: number;
-    name: string;
-    version: string;
-    author: string;
-    type: string;
-    json_url: string;
-    pdf_url: string;
-  }[] = [];
+  const scriptList = [];
 
-  function fullUrl(href: string) {
+  function fullUrl(href) {
     return url + href;
   }
 
-  async function parsePage(page: number) {
-    console.log(`Parsing page ${page}...`);
-    const response = await axios.get(url + "?page=" + page);
+  async function parsePage() {
+    console.log(`Parsing page...`);
+    const response = await axios.get(url);
     const $ = cheerio.load(response.data);
     // Iterate over the table rows
     $("table tbody tr").each((index, element) => {
@@ -57,14 +50,7 @@ async function main() {
   }
 
   console.log("Starting...");
-  const response = await axios.get(url + "?page=1");
-  console.log("Getting count...");
-  const $ = cheerio.load(response.data);
-  const lastPage = parseInt($("ul.pagination li:nth-last-child(2) a").text());
-  console.log(`Found ${lastPage} pages.`);
-  for (let i = 1; i <= lastPage; i++) {
-    await parsePage(i);
-  }
+  await parsePage();
 
   // Upsert all the scripts
   console.log("Upserting scripts...");
@@ -104,7 +90,7 @@ async function main() {
   console.log("Done!");
 }
 
-function toRole(name: string, type: RoleType, alignment: Alignment) {
+function toRole(name, type, alignment) {
   return {
     id: name.toLowerCase().replace(/ /g, "_").replace(/'/g, ""),
     name,
@@ -289,10 +275,10 @@ const fabled = [
 
 main()
   .then(async () => {
-    await prisma.$disconnect()
+    await prisma.$disconnect();
   })
   .catch(async (e) => {
-    console.error(e)
-    await prisma.$disconnect()
-    process.exit(1)
-  })
+    console.error(e);
+    await prisma.$disconnect();
+    process.exit(1);
+  });
