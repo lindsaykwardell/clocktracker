@@ -28,6 +28,10 @@ jobs:
         run: npx prisma migrate deploy
         env:
           DATABASE_URL: "postgresql://postgres:postgres@localhost:54322/postgres?connection_limit=1"
+      - name: Seed database
+        run: npx prisma db seed
+        env:
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:54322/postgres?connection_limit=1"
       - name: Run tests
         run: npm test
         env:
