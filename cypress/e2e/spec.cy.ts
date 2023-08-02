@@ -1,9 +1,13 @@
 import { faker } from "@faker-js/faker";
 
-const email = faker.internet.email();
-const password = faker.internet.password();
+describe("basic functionality", () => {
+  let email: string;
+  let password: string;
+  before(() => {
+    email = faker.internet.email();
+    password = faker.internet.password();
+  });
 
-describe("template spec", () => {
   it("registers a new user", () => {
     // @ts-ignore
     cy.register(email, password);

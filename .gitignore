@@ -24,3 +24,5 @@ logs
 
 # Local Netlify folder
 .netlify
+
+cypress/videos
