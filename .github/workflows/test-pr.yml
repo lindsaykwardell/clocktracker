@@ -1,0 +1,29 @@
+name: test-pr
+
+on:
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: supabase/setup-cli@v1
+      - uses: actions/checkout@v2
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+      - name: Install dependencies
+        run: npm install
+      - name: Start Supabase
+        run: supabase start
+      - name: Build app
+        run: npm run build
+      - name: Run tests
+        run: npm test
+        env:
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:54322/postgres?connection_limit=1"
+          SUPABASE_URL: "http://localhost:54321"
+          SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0"
