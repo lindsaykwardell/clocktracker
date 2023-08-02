@@ -3,9 +3,9 @@
   "private": true,
   "scripts": {
     "build": "nuxt build",
-    "dev": "netlify dev -c 'nuxt dev'",
-    "test:open": "start-server-and-test dev http://localhost:8888 cy:open",
-    "test": "start-server-and-test dev http://localhost:8888 cy:run",
+    "dev": "nuxt dev",
+    "test:open": "start-server-and-test dev http://localhost:3000 cy:open",
+    "test": "start-server-and-test dev http://localhost:3000 cy:run",
     "cy:open": "cypress open",
     "cy:run": "cypress run",
     "generate": "nuxt generate",
