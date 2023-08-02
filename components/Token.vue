@@ -3,8 +3,9 @@
     class="bg-center bg-cover relative rounded-full shadow-xl border flex justify-center items-center aspect-square"
     :class="tokenClass"
     @click="emit('clickRole')"
+    :data-role-id="character?.role?.id"
   >
-    <img v-if="image" :class="imageSize" :src="image" loading="lazy" />
+    <img v-if="image" :class="imageSize" :src="image" loading="lazy" :alt="character?.role?.id"  />
     <div
       v-if="
         (character?.role &&
@@ -20,7 +21,7 @@
     <slot />
     <div
       v-if="character?.related_role"
-      class="token bg-center bg-cover absolute bottom-0 right-0 rounded-full shadow-xl border border-black flex justify-center items-center"
+      class="token related bg-center bg-cover absolute bottom-0 right-0 rounded-full shadow-xl border border-black flex justify-center items-center"
       :class="relatedSize"
       @click.stop="emit('clickRelated')"
     >
@@ -40,6 +41,7 @@ const props = defineProps<{
     | {
         alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
         role?: {
+          id: string;
           token_url: string;
           initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
         };

@@ -35,9 +35,10 @@ export default defineEventHandler(async (handler) => {
 
   const randomRole =
     roles[Math.floor(Math.random() * roles.length)] || "Traveler";
+  const adjective = faker.word.adjective();
 
   const username = existingUsername
-    ? faker.internet.userName(randomRole)
+    ? faker.internet.userName(adjective, randomRole)
     : user.user_metadata.full_name;
 
   const newSettings = await prisma.userSettings.create({
@@ -46,7 +47,10 @@ export default defineEventHandler(async (handler) => {
       username,
       display_name:
         user.user_metadata.full_name ||
-        faker.internet.displayName(faker.word.adjective(), randomRole),
+        adjective.charAt(0).toUpperCase() +
+          adjective.slice(1) +
+          " " +
+          randomRole,
       avatar: user.user_metadata.avatar_url || "/img/default.png",
       email: user.email,
     },

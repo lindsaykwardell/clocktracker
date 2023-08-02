@@ -43,19 +43,19 @@
                   class="flex-1 w-1 hover:bg-stone-800 rounded-lg hover:shadow-xl"
                   @click.prevent="selectScript(troubleBrewing!)"
                 >
-                  <img src="/img/trouble_brewing.png" />
+                  <img src="/img/trouble_brewing.png" alt="Trouble Brewing" />
                 </button>
                 <button
                   class="flex-1 w-1 hover:bg-stone-800 rounded-lg hover:shadow-xl"
                   @click.prevent="selectScript(badMoonRising!)"
                 >
-                  <img src="/img/bad_moon_rising.png" />
+                  <img src="/img/bad_moon_rising.png" alt="Bad Moon Rising" />
                 </button>
                 <button
                   class="flex-1 w-1 hover:bg-stone-800 rounded-lg hover:shadow-xl"
                   @click.prevent="selectScript(sectsAndViolets!)"
                 >
-                  <img src="/img/sects_and_violets.png" />
+                  <img src="/img/sects_and_violets.png" alt="Sects and Violets" />
                 </button>
               </div>
               <div class="relative">
@@ -526,6 +526,11 @@ function addCharacter() {
       token_url: "/1x1.png",
     },
   });
+
+  openRoleSelectionDialog(
+    props.game.player_characters[props.game.player_characters.length - 1],
+    "role"
+  );
 }
 
 function removeCharacter(i: number) {
