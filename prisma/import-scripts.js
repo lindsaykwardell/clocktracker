@@ -1,31 +1,18 @@
-import type { Handler, HandlerEvent, HandlerContext } from "@netlify/functions";
-import { schedule } from "@netlify/functions";
-import axios from "axios";
-import cheerio from "cheerio";
-import { PrismaClient, Alignment, RoleType } from "@prisma/client";
+const axios = require("axios");
+const cheerio = require("cheerio");
+const { PrismaClient, Alignment, RoleType } = require("@prisma/client");
 
 const url = "https://botc-scripts.azurewebsites.net";
 const prisma = new PrismaClient();
 
-const myHandler: Handler = async (
-  event: HandlerEvent,
-  context: HandlerContext
-) => {
-  const scriptList: {
-    id: number;
-    name: string;
-    version: string;
-    author: string;
-    type: string;
-    json_url: string;
-    pdf_url: string;
-  }[] = [];
+async function main() {
+  const scriptList = [];
 
-  function fullUrl(href: string) {
+  function fullUrl(href) {
     return url + href;
   }
 
-  async function parsePage(page: number) {
+  async function parsePage(page) {
     console.log(`Parsing page ${page}...`);
     const response = await axios.get(url + "?page=" + page);
     const $ = cheerio.load(response.data);
@@ -107,13 +94,9 @@ const myHandler: Handler = async (
   }
 
   console.log("Done!");
+}
 
-  return {
-    statusCode: 200,
-  };
-};
-
-function toRole(name: string, type: RoleType, alignment: Alignment) {
+function toRole(name, type, alignment) {
   return {
     id: name.toLowerCase().replace(/ /g, "_").replace(/'/g, ""),
     name,
@@ -296,6 +279,12 @@ const fabled = [
   "Ferryman",
 ];
 
-const handler = schedule("@daily", myHandler);
-
-export { handler };
+main()
+  .then(async () => {
+    await prisma.$disconnect();
+  })
+  .catch(async (e) => {
+    console.error(e);
+    await prisma.$disconnect();
+    process.exit(1);
+  });

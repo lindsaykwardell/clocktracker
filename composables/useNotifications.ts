@@ -14,20 +14,18 @@ export const useNotifications = defineStore("notifications", {
     },
   },
   actions: {
-    async fetchNotifications(user: Ref<User | null>) {
-      if (!user.value) return;
-      const notifications = await useFetch("/api/notifications");
+    async fetchNotifications() {
+      const notifications = await $fetch("/api/notifications");
 
-      this.notifications = notifications.data.value as (Notification & {
+      this.notifications = notifications as (Notification & {
         from_user: { username: string; display_name: string; avatar: string };
       })[];
     },
-    pollNotifications(user: Ref<User | null>) {
-      this.fetchNotifications(user);
-      // Every five minutes, call fetchNotifications
+    pollNotifications() {
+      // Every ten seconds, call fetchNotifications
       // Return a stop function that can be called to stop polling
       const interval = setInterval(() => {
-        this.fetchNotifications(user);
+        this.fetchNotifications();
       }, 10000);
 
       return () => {

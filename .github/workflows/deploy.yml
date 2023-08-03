@@ -45,10 +45,24 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+      - name: Install dependencies
+        run: npm install
+      - name: Run migrations
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      - name: Update scripts and roles
+        run: node prisma/import-scripts.js
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
       - name: Merge main -> deploy
         uses: devmasx/merge-branch@master
         with:
           type: now
           from_branch: main
           target_branch: deploy
-          github_token: ${{ github.token }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}

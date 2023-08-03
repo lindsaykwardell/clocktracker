@@ -75,6 +75,7 @@
                 <span
                   v-if="notificationStore.unreadNotificationCount > 0"
                   class="absolute bottom-1 right-1 text-stone-200 bg-red-800 rounded-full px-2 py-1 text-xs font-bold aspect-square"
+                  aria-label="Unread notifications"
                 >
                   {{ notificationStore.unreadNotificationCount }}
                 </span>
