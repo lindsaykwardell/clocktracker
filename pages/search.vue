@@ -9,7 +9,11 @@
             placeholder="Search for a player, then press enter"
           />
         </form>
-        <button @click="search" class="absolute right-2 -top-2 w-16 h-16">
+        <button
+          @click="search"
+          class="absolute right-2 -top-2 w-16 h-16"
+          aria-label="Search"
+        >
           <img src="/img/role/investigator.png" />
         </button>
       </div>
