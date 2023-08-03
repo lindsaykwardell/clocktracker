@@ -3,9 +3,15 @@
     class="bg-center bg-cover relative rounded-full shadow-xl border flex justify-center items-center aspect-square"
     :class="tokenClass"
     @click="emit('clickRole')"
-    :data-role-id="character?.role?.id"
   >
-    <img v-if="image" :class="imageSize" :src="image" loading="lazy" :alt="character?.role?.id"  />
+    <img
+      v-if="image"
+      class="token-image"
+      :class="imageSize"
+      :src="image"
+      loading="lazy"
+      :alt="character?.name || character?.role?.name || 'Unknown'"
+    />
     <div
       v-if="
         (character?.role &&
@@ -27,9 +33,11 @@
     >
       <img
         v-if="relatedImage"
+        class="related-token-image"
         :class="relatedImageSize"
         :src="relatedImage"
         loading="lazy"
+        :alt="character?.related || character.related_role?.name || 'Unknown'"
       />
     </div>
   </div>
@@ -40,12 +48,14 @@ const props = defineProps<{
   character?:
     | {
         alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
+        name?: string;
+        related?: string;
         role?: {
-          id: string;
           token_url: string;
           initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+          name?: string;
         };
-        related_role?: { token_url: string };
+        related_role?: { token_url: string; name?: string };
       }
     | undefined;
   size?: "sm" | "md" | "lg";

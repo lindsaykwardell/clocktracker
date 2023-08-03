@@ -1,9 +1,11 @@
 <template>
-  <div class="container m-auto">
+  <div id="grimoire" class="container m-auto">
     <div v-for="token in tokens">
-      <div class="token-slot relative flex flex-col items-center">
+      <div class="token-seat relative flex flex-col items-center">
         <button
-          @click.prevent="!readonly ? (token.is_dead = !token.is_dead) : null"
+          type="button"
+          @click.prevent="token.is_dead = !token.is_dead"
+          :disabled="readonly"
           class="absolute top-0 left-0 z-10 flex justify-center w-full duration-200"
           :class="{
             'cursor-default': readonly,
@@ -35,35 +37,12 @@
       </div>
     </div>
   </div>
-  <Dialog v-model:visible="showRoleSelectionDialog" size="lg">
-    <template #title>
-      <div class="flex flex-col md:flex-row w-full">
-        <h2 class="flex-grow text-2xl font-bold font-dumbledor">
-          Select a Role
-        </h2>
-        <input
-          v-model="roleFilter"
-          type="text"
-          placeholder="Filter roles"
-          class="p-2 mt-2 border border-gray-300 rounded-md text-black"
-        />
-      </div>
-    </template>
-    <div class="flex flex-wrap justify-around gap-3 p-4">
-      <div
-        v-for="role in filteredAvailableRoles"
-        class="flex flex-col items-center"
-      >
-        <Token
-          @click="selectRoleForToken(role)"
-          :character="formatRoleAsCharacter(role)"
-          size="md"
-          class="cursor-pointer"
-        />
-        {{ role.name }}
-      </div>
-    </div>
-  </Dialog>
+  <TokenDialog
+    v-if="availableRoles"
+    v-model:visible="showRoleSelectionDialog"
+    :availableRoles="availableRoles"
+    @selectRole="selectRoleForToken"
+  />
 </template>
 
 <script setup lang="ts">
@@ -78,9 +57,10 @@ type Token = {
     token_url: string;
     type: string;
     initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+    name?: string;
   };
   related_role_id: string | null;
-  related_role?: { token_url: string };
+  related_role?: { token_url: string; name?: string };
   player_name: string;
 };
 
@@ -96,24 +76,9 @@ const props = defineProps<{
   readonly?: boolean;
 }>();
 
-const roleFilter = ref("");
 const showRoleSelectionDialog = ref(false);
 let focusedToken: Token | null = null;
 const tokenMode = ref<"role" | "related_role">("role");
-
-const filteredAvailableRoles = computed(() => {
-  if (!props.availableRoles) return [];
-  return props.availableRoles.filter((role) =>
-    role.name.toLowerCase().includes(roleFilter.value.toLowerCase())
-  );
-});
-
-watch(
-  () => showRoleSelectionDialog,
-  () => {
-    roleFilter.value = "";
-  }
-);
 
 function openRoleSelectionDialog(token: Token, mode: "role" | "related_role") {
   focusedToken = token;
@@ -134,11 +99,13 @@ function selectRoleForToken(role: {
         token_url: role.token_url,
         initial_alignment: role.initial_alignment,
         type: role.type,
+        name: role.name,
       };
       focusedToken.role_id = role.id;
       focusedToken.alignment = role.initial_alignment;
       focusedToken.related_role = {
         token_url: "/1x1.png",
+        name: role.name,
       };
     } else {
       focusedToken.related_role = {
@@ -185,7 +152,7 @@ function toggleAlignment(token: Token) {
   height: var(--s);
 }
 
-.container div.token-slot {
+.container div.token-seat {
   position: absolute;
   top: 50%;
   left: 50%;
