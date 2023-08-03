@@ -55,7 +55,10 @@
                   class="flex-1 w-1 hover:bg-stone-800 rounded-lg hover:shadow-xl"
                   @click.prevent="selectScript(sectsAndViolets!)"
                 >
-                  <img src="/img/sects_and_violets.png" alt="Sects and Violets" />
+                  <img
+                    src="/img/sects_and_violets.png"
+                    alt="Sects and Violets"
+                  />
                 </button>
               </div>
               <div class="relative">
@@ -214,32 +217,11 @@
           </button>
         </Token>
       </div>
-      <Dialog v-model:visible="showRoleSelectionDialog" size="lg">
-        <template #title>
-          <div class="flex flex-col md:flex-row w-full">
-            <h2 class="flex-grow text-2xl font-bold font-dumbledor">
-              Select a Role
-            </h2>
-            <input
-              v-model="roleFilter"
-              type="text"
-              placeholder="Filter roles"
-              class="p-2 mt-2 border border-gray-300 rounded-md"
-            />
-          </div>
-        </template>
-        <div class="flex flex-wrap justify-around gap-3 p-4">
-          <div v-for="role in filteredRoles" class="flex flex-col items-center">
-            <Token
-              @click="selectRoleForToken(role)"
-              :character="formatRoleAsCharacter(role)"
-              size="md"
-              class="cursor-pointer"
-            />
-            {{ role.name }}
-          </div>
-        </div>
-      </Dialog>
+      <TokenDialog
+        v-model:visible="showRoleSelectionDialog"
+        :availableRoles="roles"
+        @selectRole="selectRoleForToken"
+      />
     </fieldset>
     <fieldset
       class="flex flex-col md:flex-row gap-5 border rounded border-stone-500 p-4 my-3"
@@ -424,12 +406,6 @@ const tokenMode = ref<"role" | "related_role">("role");
 
 let focusedToken: Character | null = null;
 
-const filteredRoles = computed(() => {
-  return roles.value.filter((role) =>
-    role.name.toLowerCase().includes(roleFilter.value.toLowerCase())
-  );
-});
-
 const baseScriptData = await $fetch(
   "/api/script?author=The Pandemonium Institute"
 );
@@ -444,7 +420,6 @@ const orderedRoles = computed(() =>
   naturalOrder(roles.value).orderBy("asc").sort(["name"])
 );
 
-const roleFilter = ref("");
 const showRoleSelectionDialog = ref(false);
 
 const props = defineProps<{
@@ -647,19 +622,6 @@ function selectRoleForToken(role: {
     }
   }
   showRoleSelectionDialog.value = false;
-}
-
-function formatRoleAsCharacter(role: {
-  type: RoleType;
-  id: string;
-  token_url: string;
-  name: string;
-  initial_alignment: Alignment;
-}) {
-  return {
-    alignment: role.initial_alignment,
-    role,
-  };
 }
 
 watchEffect(() => {
