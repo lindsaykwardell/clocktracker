@@ -146,7 +146,7 @@ describe("games", () => {
       cy.findByText("Save Game").click();
 
       cy.get("#grimoire").should("not.exist");
-    })
+    });
 
     it("allows setting a role for a grimoire seat", () => {
       // @ts-ignore
@@ -171,7 +171,7 @@ describe("games", () => {
     });
 
     it("saves a name for the grimoire seat", () => {
-      const playerName = faker.person.firstName()
+      const playerName = faker.person.firstName();
 
       // @ts-ignore
       cy.login(email, password);
@@ -183,9 +183,13 @@ describe("games", () => {
       cy.findByText("Edit Grimoire").click();
       cy.get("#grimoire .token").first().click({ force: true });
       cy.findByText("Spy").click();
-      cy.get("#grimoire .token-seat input").first().type(playerName);
+      cy.get("#grimoire .token-seat input")
+        .first()
+        .type(playerName, { force: true });
       cy.findByText("Save Game").click();
-      cy.get("#grimoire .token-seat input").first().should("have.value", playerName);
+      cy.get("#grimoire .token-seat input")
+        .first()
+        .should("have.value", playerName);
     });
   });
 });
