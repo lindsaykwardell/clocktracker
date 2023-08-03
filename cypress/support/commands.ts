@@ -34,7 +34,7 @@ Cypress.Commands.add("register", (email: string, password: string) => {
   const location = faker.location.city();
 
   cy.visit("/");
-  cy.wait(1000)
+  cy.wait(1000);
   cy.findAllByText("Login with Email").first().click();
   cy.findByLabelText("Email").type(email);
   cy.findByLabelText("Password").type(password);
@@ -47,7 +47,7 @@ Cypress.Commands.add("register", (email: string, password: string) => {
 // @ts-ignore
 Cypress.Commands.add("login", (email: string, password: string) => {
   cy.visit("/");
-  cy.wait(1000)
+  cy.wait(1000);
   cy.findAllByText("Login with Email").first().click();
   cy.findByLabelText("Email").type(email);
   cy.findByLabelText("Password").type(password);
@@ -57,4 +57,5 @@ Cypress.Commands.add("login", (email: string, password: string) => {
 // @ts-ignore
 Cypress.Commands.add("logout", () => {
   cy.findByRole("button", { name: "Sign Out" }).click();
+  cy.visit("/");
 });
