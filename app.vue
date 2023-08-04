@@ -17,6 +17,18 @@ import {
   LineElement,
 } from "chart.js";
 
+const friends = useFriends();
+
+onMounted(() => {
+  friends.fetchFriends();
+  friends.fetchRequests();
+
+  setInterval(() => {
+    friends.fetchRequests();
+    // five minutes
+  }, 1000 * 60 * 5);
+});
+
 useHead({
   titleTemplate: (titleChunk) => {
     return titleChunk ? `${titleChunk} - ClockTracker` : "ClockTracker";

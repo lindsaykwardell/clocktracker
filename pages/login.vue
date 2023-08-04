@@ -55,6 +55,7 @@ definePageMeta({
 
 const supabase = useSupabaseClient();
 const router = useRouter();
+const friends = useFriends();
 
 const email = ref("");
 const password = ref("");
@@ -70,6 +71,8 @@ async function login() {
     console.error(error);
     errorMessage.value = error.message;
   } else {
+    friends.fetchFriends();
+    friends.fetchRequests();
     router.push("/welcome");
   }
 }
@@ -84,6 +87,8 @@ async function register() {
     console.error(error);
     errorMessage.value = error.message;
   } else {
+    friends.fetchFriends();
+    friends.fetchRequests();
     router.push("/welcome");
   }
 }
