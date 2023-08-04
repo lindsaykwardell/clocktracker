@@ -98,7 +98,7 @@ export const useFriends = defineStore("friends", {
     },
     async sendRequest(user_id: string) {
       console.log("sendRequest", user_id);
-      const request = await $fetch("/api/friends/requests", {
+      const request = await $fetch<FriendRequest>("/api/friends/requests", {
         method: "POST",
         body: JSON.stringify({ user_id }),
       });
