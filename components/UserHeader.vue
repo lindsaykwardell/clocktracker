@@ -34,7 +34,7 @@
             <span>{{ player.location }}</span>
           </div>
         </div>
-        <button
+        <!-- <button
           v-if="user && !isUser"
           @click="follow"
           class="flex gap-1 items-center justify-center py-1 w-[150px] rounded transition duration-150"
@@ -45,7 +45,7 @@
         >
           <img src="/img/role/empath.png" class="w-8 h-8" />
           {{ isFollowing ? "Following" : "Follow" }}
-        </button>
+        </button> -->
       </div>
       <hr class="border-stone-100 w-full my-4" />
       <p class="whitespace-pre-wrap text-left w-full py-4">
@@ -70,49 +70,8 @@ const props = defineProps<{
     pronouns: string | null;
     bio: string;
     location: string | null;
-    followers: {
-      user: {
-        user_id: string;
-        username: string;
-        avatar: string | null;
-      };
-    }[];
-    following: {
-      following: {
-        user_id: string;
-        username: string;
-        avatar: string | null;
-      };
-    }[];
   };
 }>();
 
 const isUser = computed(() => user.value?.id === props.player.user_id);
-const isFollowing = computed(() => {
-  if (!user.value) return false;
-  const following = props.player.followers.find(
-    (f) => f.user.user_id === user.value?.id
-  );
-  if (following) {
-    // Display as following if "followStatusChanged" is false and following is true
-    if (!followedStatusChanged.value) return true;
-    // Display as not following if "followStatusChanged" is true and following is true
-    else return false;
-  } else {
-    // Display as not following if "followStatusChanged" is false and following is false
-    if (!followedStatusChanged.value) return false;
-    // Display as following if "followStatusChanged" is true and following is false
-    else return true;
-  }
-});
-
-async function follow() {
-  const result = await useFetch(`/api/user/${props.player.username}/follow`, {
-    method: "POST",
-  });
-
-  if (result) {
-    followedStatusChanged.value = !followedStatusChanged.value;
-  }
-}
 </script>
