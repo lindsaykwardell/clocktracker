@@ -43,6 +43,8 @@
         <span class="text-red-500">Email: {{ email }}</span>
       </template>
     </form>
+    <hr class="border border-stone-100 w-full max-w-[500px]" />
+    <LoginWithDiscord />
   </div>
 </template>
 
