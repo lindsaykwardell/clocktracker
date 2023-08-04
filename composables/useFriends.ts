@@ -11,6 +11,13 @@ type Friend = {
   location: string | null;
 };
 
+export enum FriendStatus {
+  FRIENDS,
+  REQUEST_SENT,
+  REQUEST_RECEIVED,
+  NOT_FRIENDS,
+}
+
 export const useFriends = defineStore("friends", {
   state: () => ({
     friends: { status: Status.IDLE } as FetchStatus<Friend[]>,
@@ -22,14 +29,41 @@ export const useFriends = defineStore("friends", {
 
       return this.friends.data;
     },
+    getFriendStatus(): (user_id: string) => FriendStatus {
+      return (user_id: string): FriendStatus => {
+        if (
+          this.friends.status === Status.SUCCESS &&
+          this.requests.status === Status.SUCCESS
+        ) {
+          const friend = this.friends.data.find(
+            (friend) => friend.user_id === user_id
+          );
+          const request = this.requests.data.find(
+            (request) => request.user_id === user_id
+          );
+
+          if (friend) return FriendStatus.FRIENDS;
+          if (request?.user_id === user_id) return FriendStatus.REQUEST_SENT;
+          if (request?.from_user_id === user_id)
+            return FriendStatus.REQUEST_RECEIVED;
+        }
+
+        return FriendStatus.NOT_FRIENDS;
+      };
+    },
     getRequestCount(): number {
+      const user = useSupabaseUser();
+      const user_id = user.value?.id;
       if (this.requests.status !== Status.SUCCESS) return 0;
 
-      return this.requests.data.length;
+      return this.requests.data.filter((req) => req.user_id === user_id).length;
     },
   },
   actions: {
     async fetchFriends() {
+      const user = useSupabaseUser();
+      if (!user.value) return;
+
       // Mark as loading if we don't have the user yet
       if (this.friends.status === Status.IDLE)
         this.friends = { status: Status.LOADING };
@@ -42,6 +76,54 @@ export const useFriends = defineStore("friends", {
         status: Status.SUCCESS,
         data: friends.map(({ friend }) => friend),
       };
+    },
+    async fetchRequests() {
+      const user = useSupabaseUser();
+      if (!user.value) return;
+      // Mark as loading if we don't have the user yet
+      if (this.requests.status === Status.IDLE)
+        this.requests = { status: Status.LOADING };
+
+      // Fetch the user
+      const requests = await $fetch("/api/friends/requests");
+
+      // Otherwise, mark as success
+      this.requests = {
+        status: Status.SUCCESS,
+        data: requests.map((request) => ({
+          ...request,
+          created_at: request.created_at ? new Date(request.created_at) : null,
+        })),
+      };
+    },
+    async sendRequest(user_id: string) {
+      console.log("sendRequest", user_id);
+      const request = await $fetch("/api/friends/requests", {
+        method: "POST",
+        body: JSON.stringify({ user_id }),
+      });
+
+      if (this.requests.status === Status.SUCCESS) {
+        this.requests.data.push({
+          ...request,
+          created_at: request.created_at ? new Date(request.created_at) : null,
+        });
+      }
+
+      return request;
+    },
+    async cancelRequest(user_id: string) {
+      console.log("cancelRequest", user_id);
+      await $fetch("/api/friends/requests", {
+        method: "POST",
+        body: JSON.stringify({ user_id }),
+      });
+
+      if (this.requests.status === Status.SUCCESS) {
+        this.requests.data = this.requests.data.filter(
+          (req) => req.user_id !== user_id
+        );
+      }
     },
   },
 });

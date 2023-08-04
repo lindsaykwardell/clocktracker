@@ -153,6 +153,8 @@ model FriendRequest {
   from_user_id String
   accepted     Boolean      @default(false)
   created_at   DateTime?    @default(now()) @db.Timestamptz(6)
+
+  @@unique([user_id, from_user_id])
 }
 
 model Friend {

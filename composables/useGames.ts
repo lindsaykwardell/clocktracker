@@ -102,17 +102,5 @@ export const useGames = defineStore("games", {
         });
       }
     },
-    async fetchRecent() {
-      const games = await $fetch<RecentGameRecord[]>(`/api/games/recent`);
-
-      for (const game of games) {
-        this.games.set(game.id, {
-          status: Status.SUCCESS,
-          data: game,
-        });
-      }
-
-      return games;
-    },
   },
 });
