@@ -38,9 +38,7 @@ export const useFriends = defineStore("friends", {
           const friend = this.friends.data.find(
             (friend) => friend.user_id === user_id
           );
-          const request = this.requests.data.find(
-            (request) => request.user_id === user_id
-          );
+          const request = this.getFriendRequest(user_id);
 
           if (friend) return FriendStatus.FRIENDS;
           if (request?.user_id === user_id) return FriendStatus.REQUEST_SENT;
@@ -49,6 +47,16 @@ export const useFriends = defineStore("friends", {
         }
 
         return FriendStatus.NOT_FRIENDS;
+      };
+    },
+    getFriendRequest(): (user_id: string) => FriendRequest | undefined {
+      return (user_id: string): FriendRequest | undefined => {
+        if (this.requests.status !== Status.SUCCESS) return undefined;
+
+        return this.requests.data.find(
+          (request) =>
+            request.user_id === user_id || request.from_user_id === user_id
+        );
       };
     },
     getRequestCount(): number {
@@ -122,6 +130,49 @@ export const useFriends = defineStore("friends", {
       if (this.requests.status === Status.SUCCESS) {
         this.requests.data = this.requests.data.filter(
           (req) => req.user_id !== user_id
+        );
+      }
+    },
+    async acceptRequest(request_id: number) {
+      console.log("acceptRequest", request_id);
+      const friend = await $fetch<Friend>(
+        "/api/friends/requests/" + request_id + "/accept",
+        {
+          method: "POST",
+        }
+      );
+
+      if (this.requests.status === Status.SUCCESS) {
+        this.requests.data = this.requests.data.filter(
+          (req) => req.id !== request_id
+        );
+      }
+
+      if (this.friends.status === Status.SUCCESS) {
+        this.friends.data.push(friend);
+      }
+    },
+    async declineRequest(request_id: number) {
+      console.log("declineRequest", request_id);
+      await $fetch("/api/friends/requests/" + request_id + "/decline", {
+        method: "POST",
+      });
+
+      if (this.requests.status === Status.SUCCESS) {
+        this.requests.data = this.requests.data.filter(
+          (req) => req.id !== request_id
+        );
+      }
+    },
+    async unfriend(username: string) {
+      console.log("unfriend", username);
+      await $fetch("/api/user/" + username + "/unfriend", {
+        method: "POST",
+      });
+
+      if (this.friends.status === Status.SUCCESS) {
+        this.friends.data = this.friends.data.filter(
+          (friend) => friend.username !== username
         );
       }
     },

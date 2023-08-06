@@ -23,6 +23,7 @@ export default defineEventHandler(async (handler) => {
           user_id: user.id,
         },
       ],
+      accepted: false
     },
     orderBy: {
       created_at: "desc",

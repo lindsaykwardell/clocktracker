@@ -82,7 +82,7 @@ const friendButtonText = computed(() => {
     case FriendStatus.NOT_FRIENDS:
       return "Add Friend";
   }
-})
+});
 
 const friendButtonClass = computed(() => {
   switch (friends.getFriendStatus(props.player.user_id)) {
@@ -95,19 +95,20 @@ const friendButtonClass = computed(() => {
     case FriendStatus.NOT_FRIENDS:
       return "bg-blue-950 hover:bg-blue-900";
   }
-})
+});
 
 function alterFriendshipStatus() {
+  const friendRequest = friends.getFriendRequest(props.player.user_id);
   switch (friends.getFriendStatus(props.player.user_id)) {
-    // case FriendStatus.FRIENDS:
-    //   friends.unfriend(props.player.user_id);
-    //   break;
+    case FriendStatus.FRIENDS:
+      friends.unfriend(props.player.username);
+      break;
     case FriendStatus.REQUEST_SENT:
       friends.cancelRequest(props.player.user_id);
       break;
-    // case FriendStatus.REQUEST_RECEIVED:
-    //   friends.acceptRequest(props.player.user_id);
-    //   break;
+    case FriendStatus.REQUEST_RECEIVED:
+      if (friendRequest) friends.acceptRequest(friendRequest.id);
+      break;
     case FriendStatus.NOT_FRIENDS:
       friends.sendRequest(props.player.user_id);
       break;
