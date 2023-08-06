@@ -23,11 +23,25 @@ export default defineEventHandler(async (handler) => {
           user_id: user.id,
         },
       ],
-      accepted: false
+      accepted: false,
+    },
+    include: {
+      from_user: {
+        select: {
+          user_id: true,
+          username: true,
+        },
+      },
+      user: {
+        select: {
+          user_id: true,
+          username: true,
+        },
+      },
     },
     orderBy: {
       created_at: "desc",
-    }
+    },
   });
 
   return requests;

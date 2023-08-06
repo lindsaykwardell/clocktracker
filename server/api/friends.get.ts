@@ -22,10 +22,6 @@ export default defineEventHandler(async (handler) => {
         select: {
           user_id: true,
           username: true,
-          avatar: true,
-          display_name: true,
-          pronouns: true,
-          location: true,
         },
       },
     },

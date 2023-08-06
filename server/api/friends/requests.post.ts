@@ -44,6 +44,20 @@ export default defineEventHandler(async (handler) => {
         from_user_id: user.id,
         user_id: body.user_id,
       },
+      include: {
+        from_user: {
+          select: {
+            user_id: true,
+            username: true,
+          },
+        },
+        user: {
+          select: {
+            user_id: true,
+            username: true,
+          },
+        },
+      },
     });
 
     return request;

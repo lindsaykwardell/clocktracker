@@ -25,8 +25,8 @@ onMounted(() => {
 
   setInterval(() => {
     friends.fetchRequests();
-    // five minutes
-  }, 1000 * 60 * 5);
+    // one minute
+  }, 1000 * 60);
 });
 
 useHead({
