@@ -5,10 +5,11 @@ import { FriendRequest } from "@prisma/client";
 type Friend = {
   user_id: string;
   username: string;
-  avatar: string | null;
-  display_name: string;
-  pronouns: string | null;
-  location: string | null;
+};
+
+type PendingFriendRequest = FriendRequest & {
+  from_user: Friend;
+  user: Friend;
 };
 
 export enum FriendStatus {
@@ -21,7 +22,7 @@ export enum FriendStatus {
 export const useFriends = defineStore("friends", {
   state: () => ({
     friends: { status: Status.IDLE } as FetchStatus<Friend[]>,
-    requests: { status: Status.IDLE } as FetchStatus<FriendRequest[]>,
+    requests: { status: Status.IDLE } as FetchStatus<PendingFriendRequest[]>,
   }),
   getters: {
     getFriends(): Friend[] {
@@ -49,8 +50,13 @@ export const useFriends = defineStore("friends", {
         return FriendStatus.NOT_FRIENDS;
       };
     },
-    getFriendRequest(): (user_id: string) => FriendRequest | undefined {
-      return (user_id: string): FriendRequest | undefined => {
+    getFriendRequests(): PendingFriendRequest[] {
+      if (this.requests.status !== Status.SUCCESS) return [];
+
+      return this.requests.data;
+    },
+    getFriendRequest(): (user_id: string) => PendingFriendRequest | undefined {
+      return (user_id: string): PendingFriendRequest | undefined => {
         if (this.requests.status !== Status.SUCCESS) return undefined;
 
         return this.requests.data.find(
@@ -106,10 +112,13 @@ export const useFriends = defineStore("friends", {
     },
     async sendRequest(user_id: string) {
       console.log("sendRequest", user_id);
-      const request = await $fetch<FriendRequest>("/api/friends/requests", {
-        method: "POST",
-        body: JSON.stringify({ user_id }),
-      });
+      const request = await $fetch<PendingFriendRequest>(
+        "/api/friends/requests",
+        {
+          method: "POST",
+          body: JSON.stringify({ user_id }),
+        }
+      );
 
       if (this.requests.status === Status.SUCCESS) {
         this.requests.data.push({
@@ -148,9 +157,7 @@ export const useFriends = defineStore("friends", {
         );
       }
 
-      if (this.friends.status === Status.SUCCESS) {
-        this.friends.data.push(friend);
-      }
+      this.fetchFriends();
     },
     async declineRequest(request_id: number) {
       console.log("declineRequest", request_id);
