@@ -33,36 +33,19 @@ export default defineEventHandler(async (handler) => {
         {
           from_user_id: body.user_id,
           user_id: user.id,
-        }
+        },
       ],
       accepted: false,
     },
   });
 
   if (existingRequest) {
-    return existingRequest;
-  } else {
-    const request = await prisma.friendRequest.create({
-      data: {
-        from_user_id: user.id,
-        user_id: body.user_id,
-      },
-      include: {
-        from_user: {
-          select: {
-            user_id: true,
-            username: true,
-          },
-        },
-        user: {
-          select: {
-            user_id: true,
-            username: true,
-          },
-        },
+    await prisma.friendRequest.delete({
+      where: {
+        id: existingRequest.id,
       },
     });
-
-    return request;
   }
+
+  return true;
 });

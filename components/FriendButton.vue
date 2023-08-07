@@ -1,12 +1,24 @@
 <template>
-  <button
-    @click.prevent="alterFriendshipStatus"
-    class="whitespace-nowrap flex gap-1 items-center justify-center py-1 w-[150px] rounded transition duration-150"
-    :class="friendButtonClass"
-  >
-    <img src="/img/role/empath.png" class="w-8 h-8" />
-    <span>{{ friendButtonText }}</span>
-  </button>
+  <div class="flex flex-col gap-2">
+    <button
+      @click.prevent="alterFriendshipStatus"
+      class="whitespace-nowrap flex gap-1 items-center justify-center py-1 w-[150px] rounded transition duration-150"
+      :class="friendButtonClass"
+    >
+      <img src="/img/role/empath.png" class="w-8 h-8" />
+      <span :aria-label="friendButtonText"></span>
+    </button>
+    <button
+      v-if="
+        friends.getFriendStatus(props.user_id) === FriendStatus.REQUEST_RECEIVED
+      "
+      @click.prevent="rejectFriendship"
+      class="whitespace-nowrap flex gap-1 items-center justify-center py-1 w-[150px] rounded transition duration-150 border border-red-900 hover:border-red-950 hover:bg-red-950"
+    >
+      <img src="/img/role/empath.png" class="w-8 h-8" />
+      <span>Delete</span>
+    </button>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -15,12 +27,12 @@ const friends = useFriends();
 const props = defineProps<{
   user_id: string;
   username: string;
-}>()
+}>();
 
 const friendButtonText = computed(() => {
   switch (friends.getFriendStatus(props.user_id)) {
     case FriendStatus.FRIENDS:
-      return "Unfriend";
+      return "Friends";
     case FriendStatus.REQUEST_SENT:
       return "Cancel";
     case FriendStatus.REQUEST_RECEIVED:
@@ -33,13 +45,13 @@ const friendButtonText = computed(() => {
 const friendButtonClass = computed(() => {
   switch (friends.getFriendStatus(props.user_id)) {
     case FriendStatus.FRIENDS:
-      return "bg-blue-950 hover:bg-blue-900";
+      return "friends bg-blue-950 hover:bg-transparent border border-transparent hover:border-red-950";
     case FriendStatus.REQUEST_SENT:
-      return "bg-blue-950 hover:bg-blue-900";
+      return "request-sent bg-blue-950 hover:bg-blue-900";
     case FriendStatus.REQUEST_RECEIVED:
-      return "bg-blue-950 hover:bg-blue-900";
+      return "request-received bg-blue-950 hover:bg-blue-900";
     case FriendStatus.NOT_FRIENDS:
-      return "bg-blue-950 hover:bg-blue-900";
+      return "not-friends bg-blue-950 hover:bg-blue-900";
   }
 });
 
@@ -47,7 +59,9 @@ function alterFriendshipStatus() {
   const friendRequest = friends.getFriendRequest(props.user_id);
   switch (friends.getFriendStatus(props.user_id)) {
     case FriendStatus.FRIENDS:
-      friends.unfriend(props.username);
+      if (confirm(`Are you sure you want to unfriend ${props.username}?`)) {
+        friends.unfriend(props.username);
+      }
       break;
     case FriendStatus.REQUEST_SENT:
       friends.cancelRequest(props.user_id);
@@ -60,4 +74,30 @@ function alterFriendshipStatus() {
       break;
   }
 }
+
+function rejectFriendship() {
+  friends.cancelRequest(props.user_id);
+}
 </script>
+
+<style scoped>
+div button.not-friends:first-child span:before {
+  content: "Add Friend";
+}
+
+div button.request-sent:first-child span:before {
+  content: "Cancel";
+}
+
+div button.request-received:first-child span:before {
+  content: "Accept";
+}
+
+div button.friends:first-child span:before {
+  content: "Friends";
+}
+
+div button.friends:first-child:hover span:before {
+  content: "Unfriend";
+}
+</style>

@@ -10,24 +10,28 @@
             : request.user.username
         "
       >
-        <FriendButton
-          :username="
-            request.user_id === user?.id
-              ? request.from_user.username
-              : request.user.username
-          "
-          :user_id="
-            request.user_id === user?.id
-              ? request.from_user.user_id
-              : request.user.user_id
-          "
-        />
+        <div class="p-2">
+          <FriendButton
+            :username="
+              request.user_id === user?.id
+                ? request.from_user.username
+                : request.user.username
+            "
+            :user_id="
+              request.user_id === user?.id
+                ? request.from_user.user_id
+                : request.user.user_id
+            "
+          />
+        </div>
       </UserCard>
     </template>
     <p class="text-center text-2xl my-4 font-dumbledor">Friends</p>
     <UserCard v-for="friend in friends.getFriends" :username="friend.username">
-      <FriendButton :username="friend.username" :user_id="friend.user_id"
-    /></UserCard>
+      <div class="p-2">
+        <FriendButton :username="friend.username" :user_id="friend.user_id" />
+      </div>
+    </UserCard>
   </AuthenticatedTemplate>
 </template>
 

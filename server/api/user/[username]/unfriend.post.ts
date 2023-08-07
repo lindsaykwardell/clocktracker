@@ -42,5 +42,20 @@ export default defineEventHandler(async (handler) => {
     },
   });
 
+  await prisma.friendRequest.deleteMany({
+    where: {
+      OR: [
+        {
+          from_user_id: user.id,
+          user_id: otherUser.user_id,
+        },
+        {
+          from_user_id: otherUser.user_id,
+          user_id: user.id,
+        },
+      ],
+    }
+  })
+
   return true;
 });
