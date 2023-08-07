@@ -31,7 +31,7 @@
         <div
           class="flex-grow items-center justify-center flex font-dumbledor text-3xl"
         >
-          <Token :character="game.last_character" size="lg" />
+          <Token :character="gamesStore.getLastCharater(game.id)" size="lg" />
         </div>
         <div class="absolute w-full top-0 left-0" />
         <img
@@ -59,19 +59,14 @@
 </template>
 
 <script setup lang="ts">
-import type { Game, Character } from "@prisma/client";
+import { GameRecord } from "composables/useGames";
 import dayjs from "dayjs";
+const gamesStore = useGames();
 
 const config = useRuntimeConfig();
 
 defineProps<{
-  games: (Game & {
-    player_characters: (Character & {
-      role?: { token_url: string; type: string };
-      related_role?: { token_url: string };
-    })[];
-    last_character: Character;
-  })[];
+  games: GameRecord[];
   readonly?: boolean;
   username: string;
 }>();
