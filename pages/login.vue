@@ -43,6 +43,8 @@
         <span class="text-red-500">Email: {{ email }}</span>
       </template>
     </form>
+    <hr class="border border-stone-100 w-full max-w-[500px]" />
+    <LoginWithDiscord />
   </div>
 </template>
 
@@ -53,6 +55,7 @@ definePageMeta({
 
 const supabase = useSupabaseClient();
 const router = useRouter();
+const friends = useFriends();
 
 const email = ref("");
 const password = ref("");
@@ -68,6 +71,8 @@ async function login() {
     console.error(error);
     errorMessage.value = error.message;
   } else {
+    friends.fetchFriends();
+    friends.fetchRequests();
     router.push("/welcome");
   }
 }
@@ -82,6 +87,8 @@ async function register() {
     console.error(error);
     errorMessage.value = error.message;
   } else {
+    friends.fetchFriends();
+    friends.fetchRequests();
     router.push("/welcome");
   }
 }

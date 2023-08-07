@@ -9,26 +9,6 @@ export type User = {
   avatar: string | null;
   pronouns: string | null;
   bio: string;
-  followers: {
-    user: {
-      user_id: string;
-      username: string;
-      avatar: string | null;
-      display_name: string;
-      pronouns: string | null;
-      location: string | null;
-    };
-  }[];
-  following: {
-    following: {
-      user_id: string;
-      username: string;
-      avatar: string | null;
-      display_name: string;
-      pronouns: string | null;
-      location: string | null;
-    };
-  }[];
 };
 
 export const useUsers = defineStore("users", {
