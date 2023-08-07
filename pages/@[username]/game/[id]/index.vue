@@ -364,8 +364,9 @@ const last_character = computed(() => {
 });
 
 function fullImageUrl(file: string) {
-  if (file.startsWith("http")) return file;
-  return `${config.public.supabase.url}/storage/v1/object/public/game-attachments/${file}`;
+  const transformations = "?width=500&height=500";
+  if (file.startsWith("http")) return file + transformations;
+  return `${config.public.supabase.url}/storage/v1/object/public/game-attachments/${file}${transformations}`;
 }
 
 function scriptLink(script: string) {
