@@ -25,15 +25,9 @@
       </UserCard>
     </template>
     <p class="text-center text-2xl my-4 font-dumbledor">Friends</p>
-    <div class="flex flex-wrap gap-4 w-full">
-      <UserCard
-        v-for="friend in friends.getFriends"
-        :username="friend.username"
-        class="w-full md:w-1/2"
-      >
-        <FriendButton :username="friend.username" :user_id="friend.user_id"
-      /></UserCard>
-    </div>
+    <UserCard v-for="friend in friends.getFriends" :username="friend.username">
+      <FriendButton :username="friend.username" :user_id="friend.user_id"
+    /></UserCard>
   </AuthenticatedTemplate>
 </template>
 

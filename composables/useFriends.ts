@@ -101,6 +101,14 @@ export const useFriends = defineStore("friends", {
       // Fetch the user
       const requests = await $fetch("/api/friends/requests");
 
+      // If the requests are different from last time, check to see if we have any new friends.
+      if (
+        this.requests.status === Status.SUCCESS &&
+        requests.length !== this.requests.data.length
+      ) {
+        this.fetchFriends();
+      }
+
       // Otherwise, mark as success
       this.requests = {
         status: Status.SUCCESS,
