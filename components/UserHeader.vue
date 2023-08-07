@@ -19,7 +19,7 @@
               | <span>{{ player.pronouns }}</span>
             </template>
           </div>
-          <div class="md:text-lg text-stone-400 flex gap-2 items-center">
+          <div v-if="player.location" class="md:text-lg text-stone-400 flex gap-2 items-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="32"
@@ -36,7 +36,7 @@
         </div>
         <FriendButton v-if="user && !isUser" :username="player.username" :user_id="player.user_id" />
       </div>
-      <hr class="border-stone-100 w-full my-4" />
+      <hr v-if="player.bio" class="border-stone-100 w-full my-4" />
       <p class="whitespace-pre-wrap text-left w-full py-4">
         {{ player.bio }}
       </p>

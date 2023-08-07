@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { FetchStatus } from "./useFetchStatus";
+import { PrivacySetting } from "@prisma/client";
 
 export type User = {
   location: string | null;
@@ -9,6 +10,7 @@ export type User = {
   avatar: string | null;
   pronouns: string | null;
   bio: string;
+  privacy: PrivacySetting;
 };
 
 export const useUsers = defineStore("users", {
