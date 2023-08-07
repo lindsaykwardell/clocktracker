@@ -49,7 +49,7 @@ const props = defineProps<{
     | {
         alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
         name?: string;
-        related?: string;
+        related?: string | null;
         role?: {
           token_url: string;
           initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
