@@ -140,13 +140,14 @@ export const useFriends = defineStore("friends", {
     async cancelRequest(user_id: string) {
       console.log("cancelRequest", user_id);
       await $fetch("/api/friends/requests", {
-        method: "POST",
+        method: "DELETE",
         body: JSON.stringify({ user_id }),
       });
 
       if (this.requests.status === Status.SUCCESS) {
+        const friendRequest = this.getFriendRequest(user_id);
         this.requests.data = this.requests.data.filter(
-          (req) => req.user_id !== user_id
+          (req) => req.id !== friendRequest?.id
         );
       }
     },
