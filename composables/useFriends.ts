@@ -119,7 +119,6 @@ export const useFriends = defineStore("friends", {
       };
     },
     async sendRequest(user_id: string) {
-      console.log("sendRequest", user_id);
       const request = await $fetch<PendingFriendRequest>(
         "/api/friends/requests",
         {
@@ -138,7 +137,6 @@ export const useFriends = defineStore("friends", {
       return request;
     },
     async cancelRequest(user_id: string) {
-      console.log("cancelRequest", user_id);
       await $fetch("/api/friends/requests", {
         method: "DELETE",
         body: JSON.stringify({ user_id }),
@@ -152,7 +150,6 @@ export const useFriends = defineStore("friends", {
       }
     },
     async acceptRequest(request_id: number) {
-      console.log("acceptRequest", request_id);
       const friend = await $fetch<Friend>(
         "/api/friends/requests/" + request_id + "/accept",
         {
@@ -169,7 +166,6 @@ export const useFriends = defineStore("friends", {
       this.fetchFriends();
     },
     async declineRequest(request_id: number) {
-      console.log("declineRequest", request_id);
       await $fetch("/api/friends/requests/" + request_id + "/decline", {
         method: "POST",
       });
@@ -181,7 +177,6 @@ export const useFriends = defineStore("friends", {
       }
     },
     async unfriend(username: string) {
-      console.log("unfriend", username);
       await $fetch("/api/user/" + username + "/unfriend", {
         method: "POST",
       });

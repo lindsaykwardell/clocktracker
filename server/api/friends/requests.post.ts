@@ -7,8 +7,6 @@ export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
   const body = await readBody(handler);
 
-  console.log("body", body);
-
   if (!user) {
     throw createError({
       status: 401,
