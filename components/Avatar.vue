@@ -1,6 +1,6 @@
 <template>
   <img
-    :src="value"
+    :src="avatarUrl"
     class="rounded-full object-cover shadow-lg border border-black"
     :class="{
       'w-16 md:w-24 aspect-square': !size || size === 'md',
@@ -12,8 +12,10 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
+const props = defineProps<{
   value?: string;
   size?: "sm" | "md" | "lg";
 }>();
+
+const avatarUrl = computed(() => `${props.value}?width=500&height=500`)
 </script>
