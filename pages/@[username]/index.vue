@@ -3,7 +3,9 @@
     <div class="w-full flex flex-col gap-8">
       <template v-if="playerFetchStatus === Status.SUCCESS && player">
         <UserHeader :player="player">
-          <div class="flex justify-start overflow-scroll w-screen md:w-full gap-1 h-12">
+          <div
+            class="flex justify-start overflow-scroll w-screen md:w-full gap-1 h-12"
+          >
             <nuxt-link
               :to="`/@${username}`"
               class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-700"
@@ -18,42 +20,9 @@
             >
               Charts
             </nuxt-link>
-            <nuxt-link
-              :to="`/@${username}?view=followers`"
-              class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-700"
-              :class="currentTabClass('followers')"
-            >
-              {{ player.followers.length }}
-              {{ player.followers.length === 1 ? "Follower" : "Followers" }}
-            </nuxt-link>
-            <nuxt-link
-              :to="`/@${username}?view=following`"
-              class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-700"
-              :class="currentTabClass('following')"
-            >
-              {{ player.following.length }} Following
-            </nuxt-link>
           </div>
         </UserHeader>
         <UserCharts v-if="currentTab === 'charts'" :games="games" />
-        <div
-          v-if="currentTab === 'followers'"
-          class="flex flex-col gap-4 w-11/12 md:3/4 lg:w-2/3 xl:w-[1000px] m-auto"
-        >
-          <UserCard
-            v-for="follower in player.followers"
-            :player="follower.user"
-          />
-        </div>
-        <div
-          v-if="currentTab === 'following'"
-          class="flex flex-col gap-4 w-11/12 md:3/4 lg:w-2/3 xl:w-[1000px] m-auto"
-        >
-          <UserCard
-            v-for="following in player.following"
-            :player="following.following"
-          />
-        </div>
         <Dashboard
           v-if="currentTab === 'dashboard'"
           :player="player"
@@ -91,10 +60,6 @@ const currentTab = computed(() => {
   switch (route.query.view) {
     case "charts":
       return "charts";
-    case "followers":
-      return "followers";
-    case "following":
-      return "following";
     default:
       return "dashboard";
   }

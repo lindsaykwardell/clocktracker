@@ -17,16 +17,16 @@ import {
   LineElement,
 } from "chart.js";
 
-const notificationStore = useNotifications();
+const friends = useFriends();
 
-let stop = () => {};
+onMounted(() => {
+  friends.fetchFriends();
+  friends.fetchRequests();
 
-onMounted(async () => {
-  stop = notificationStore.pollNotifications();
-});
-
-onUnmounted(() => {
-  stop();
+  setInterval(() => {
+    friends.fetchRequests();
+    // one minute
+  }, 1000 * 60);
 });
 
 useHead({

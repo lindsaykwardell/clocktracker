@@ -25,7 +25,7 @@
         <UserCard
           v-for="user in users"
           class="w-full flex flex-col md:flex-row my-4"
-          :player="user"
+          :username="user.username"
         />
       </div>
     </div>
