@@ -59,3 +59,18 @@ Cypress.Commands.add("logout", () => {
   cy.findByRole("link", { name: "Logout" }).click();
   cy.visit("/");
 });
+
+// @ts-ignore
+Cypress.Commands.add("createGame", () => {
+  cy.findAllByText("Select Script").first().click();
+  cy.findByAltText("Trouble Brewing").click();
+  cy.findByLabelText("Storyteller").type(faker.person.firstName());
+  cy.findByLabelText("Community").type("Cypress");
+  cy.findByLabelText("Players").type(
+    (Math.floor(Math.random() * 10) + 5).toString()
+  );
+  cy.get(".token").first().click();
+  cy.findByText("Chef").first().click();
+  cy.get("textarea").type(faker.lorem.paragraph());
+  cy.findByText("Save Game").click();
+});
