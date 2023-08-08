@@ -74,7 +74,6 @@ export const useGames = defineStore("games", {
     },
     getLastCharater(): (gameId: string) => FullCharacter {
       return (gameId: string) => {
-        console.log(gameId);
         const dummyCharacter: FullCharacter = {
           id: 0,
           name: "",
