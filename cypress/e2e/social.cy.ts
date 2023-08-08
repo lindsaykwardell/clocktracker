@@ -49,80 +49,124 @@ describe("social features", () => {
     cy.findByText(user1.displayName).should("exist");
   });
 
-  it("allows sending a friend request", () => {
-    // @ts-ignore
-    cy.login(user1.email, user1.password);
+  describe("friend requests", () => {
+    it("allows sending a friend request", () => {
+      // @ts-ignore
+      cy.login(user1.email, user1.password);
 
-    cy.get("a[href='/search']").click();
-    cy.get("input").type(user2.displayName);
-    cy.findByRole("button", { name: "Search" }).click();
-    cy.findByText(user2.displayName).click();
-    cy.findByRole("button", { name: "Add Friend" }).click();
-    cy.findByRole("button", { name: "Cancel" }).should("exist");
+      cy.get("a[href='/search']").click();
+      cy.get("input").type(user2.displayName);
+      cy.findByRole("button", { name: "Search" }).click();
+      cy.findByText(user2.displayName).click();
+      cy.findByRole("button", { name: "Add Friend" }).click();
+      cy.findByRole("button", { name: "Cancel" }).should("exist");
+    });
+
+    it("allows receiving a friend request", () => {
+      // @ts-ignore
+      cy.login(user2.email, user2.password);
+
+      cy.findByText("Friends").click();
+      cy.findByText(user1.displayName).should("exist");
+      cy.findByRole("button", { name: "Accept" }).should("exist");
+      // cy.findByText("Reject").should("exist");
+    });
+
+    it("allows accepting a friend request", () => {
+      // @ts-ignore
+      cy.login(user2.email, user2.password);
+
+      cy.findByText("Friends").click();
+      cy.findByText(user1.displayName).should("exist");
+      cy.findByRole("button", { name: "Accept" }).click();
+      cy.findByRole("button", { name: "Friends" }).should("exist");
+    });
+
+    it("allows unfriending a friend", () => {
+      // @ts-ignore
+      cy.login(user2.email, user2.password);
+
+      cy.findByText("Friends").click();
+      cy.findByRole("button", { name: "Friends" }).click();
+      cy.on("window:confirm", () => true);
+      cy.findByText(user1.displayName).should("not.exist");
+    });
+
+    it("allows rejecting a friend request", () => {
+      // @ts-ignore
+      cy.login(user1.email, user1.password);
+
+      cy.get("a[href='/search']").click();
+      cy.get("input").type(user2.displayName);
+      cy.findByRole("button", { name: "Search" }).click();
+      cy.findByText(user2.displayName).click();
+      cy.findByRole("button", { name: "Add Friend" }).click();
+      // @ts-ignore
+      cy.logout();
+
+      // @ts-ignore
+      cy.login(user2.email, user2.password);
+
+      cy.findByText("Friends").click();
+      cy.findByText(user1.displayName).should("exist");
+      cy.findByRole("button", { name: "Delete" }).click();
+      cy.findByRole("button", { name: "Friends" }).should("not.exist");
+      cy.findByText(user1.displayName).should("not.exist");
+    });
+
+    it("allows cancelling a sent friend request", () => {
+      // @ts-ignore
+      cy.login(user1.email, user1.password);
+
+      cy.get("a[href='/search']").click();
+      cy.get("input").type(user2.displayName);
+      cy.findByRole("button", { name: "Search" }).click();
+      cy.findByText(user2.displayName).click();
+      cy.findByRole("button", { name: "Add Friend" }).click();
+      cy.findByRole("button", { name: "Cancel" }).click();
+      cy.findByRole("button", { name: "Add Friend" }).should("exist");
+    });
   });
 
-  it("allows receiving a friend request", () => {
-    // @ts-ignore
-    cy.login(user2.email, user2.password);
+  describe("privacy", () => {
+    it("allows setting a user's privacy", () => {
+      // @ts-ignore
+      cy.login(user1.email, user1.password);
 
-    cy.findByText("Friends").click();
-    cy.findByText(user1.displayName).should("exist");
-    cy.findByRole("button", { name: "Accept" }).should("exist");
-    // cy.findByText("Reject").should("exist");
+      cy.findByRole("link", { name: "Settings" }).click();
+      // Click on a select dropdown labeled "Privacy" and select "Private"
+      cy.findByLabelText("Privacy Setting").select("Private");
+      cy.findByRole("button", { name: "Save Settings" }).click();
+      cy.findByRole("link", { name: "Settings" }).click();
+      cy.findByLabelText("Privacy Setting").should("have.value", "PRIVATE");
+    });
+
+    it("hides a private user's games from non-friend users", () => {
+      // @ts-ignore
+      cy.login(user1.email, user1.password);
+
+      cy.findByRole("link", { name: "Settings" }).click();
+      // Click on a select dropdown labeled "Privacy" and select "Private"
+      cy.findByLabelText("Privacy Setting").select("Private");
+      cy.findByRole("button", { name: "Save Settings" }).click();
+      cy.findByRole("link", { name: "Settings" }).click();
+      cy.findByLabelText("Privacy Setting").should("have.value", "PRIVATE");
+
+      cy.findByRole("link", { name: "Add Game" }).click();
+      // @ts-ignore
+      cy.createGame();
+
+      // @ts-ignore
+      cy.logout();
+
+      // @ts-ignore
+      cy.login(user2.email, user2.password);
+      cy.findByRole("link", { name: "Search" }).click();
+      cy.get("input").type(user1.displayName);
+      cy.findByRole("button", { name: "Search" }).click();
+      cy.findByText(user1.displayName).click();
+      cy.findByText("This account is private").should("exist");
+      cy.get(".token").should("not.exist");
+    })
   });
-
-  it("allows accepting a friend request", () => {
-    // @ts-ignore
-    cy.login(user2.email, user2.password);
-
-    cy.findByText("Friends").click();
-    cy.findByText(user1.displayName).should("exist");
-    cy.findByRole("button", { name: "Accept" }).click();
-    cy.findByRole("button", { name: "Friends" }).should("exist");
-  });
-
-  it("allows unfriending a friend", () => {
-    // @ts-ignore
-    cy.login(user2.email, user2.password);
-
-    cy.findByText("Friends").click();
-    cy.findByRole("button", { name: "Friends" }).click();
-    cy.on('window:confirm', () => true);
-    cy.findByText(user1.displayName).should("not.exist");
-  });
-
-  it("allows rejecting a friend request", () => {
-    // @ts-ignore
-    cy.login(user1.email, user1.password);
-
-    cy.get("a[href='/search']").click();
-    cy.get("input").type(user2.displayName);
-    cy.findByRole("button", { name: "Search" }).click();
-    cy.findByText(user2.displayName).click();
-    cy.findByRole("button", { name: "Add Friend" }).click();
-    // @ts-ignore
-    cy.logout();
-
-    // @ts-ignore
-    cy.login(user2.email, user2.password);
-
-    cy.findByText("Friends").click();
-    cy.findByText(user1.displayName).should("exist");
-    cy.findByRole("button", { name: "Delete" }).click();
-    cy.findByRole("button", { name: "Friends" }).should("not.exist");
-    cy.findByText(user1.displayName).should("not.exist");
-  });
-
-  it("allows cancelling a sent friend request", () => {
-    // @ts-ignore
-    cy.login(user1.email, user1.password);
-
-    cy.get("a[href='/search']").click();
-    cy.get("input").type(user2.displayName);
-    cy.findByRole("button", { name: "Search" }).click();
-    cy.findByText(user2.displayName).click();
-    cy.findByRole("button", { name: "Add Friend" }).click();
-    cy.findByRole("button", { name: "Cancel" }).click();
-    cy.findByRole("button", { name: "Add Friend" }).should("exist");
-  })
 });
