@@ -156,6 +156,7 @@ describe("social features", () => {
       // @ts-ignore
       cy.createGame();
 
+      cy.url().should("include", "/game/");
       // @ts-ignore
       cy.logout();
 
@@ -168,5 +169,35 @@ describe("social features", () => {
       cy.findByText("This account is private").should("exist");
       cy.get(".token").should("not.exist");
     })
+
+    it("shows a private user's games to friend users", () => {
+      // @ts-ignore
+      cy.login(user1.email, user1.password);
+
+      cy.findByRole("link", { name: "Settings" }).click();
+      // Click on a select dropdown labeled "Privacy" and select "Private"
+      cy.findByLabelText("Privacy Setting").select("Private");
+      cy.findByRole("button", { name: "Save Settings" }).click();
+      cy.findByRole("link", { name: "Settings" }).click();
+      cy.findByLabelText("Privacy Setting").should("have.value", "PRIVATE");
+      cy.findByRole("link", { name: "Search" }).click();
+      cy.get("input").type(user2.displayName);
+      cy.findByRole("button", { name: "Search" }).click();
+      cy.findByText(user2.displayName).click();
+      cy.findByRole("button", { name: "Add Friend" }).click();
+
+      cy.findByRole("button", { name: "Cancel" }).should("exist");
+
+      // @ts-ignore
+      cy.logout();
+      // @ts-ignore
+      cy.login(user2.email, user2.password);
+      cy.findByText("Friends").click();
+      cy.findByRole("button", { name: "Accept" }).click();
+      cy.findByRole("button", { name: "Friends" }).should("exist");
+      cy.findByText(user1.displayName).click();
+      cy.findByText("This account is private").should("not.exist");
+      cy.findByAltText("Chef").should("exist");
+    });
   });
 });
