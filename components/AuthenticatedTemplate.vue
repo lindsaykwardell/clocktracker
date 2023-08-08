@@ -61,7 +61,7 @@
           <span class="w-16">Community</span>
         </a>
         <a
-          href="https://ko-fi.com/clocktracker"
+          href="https://ko-fi.com/pdxbotc"
           class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
         >
           <div class="w-[50px] flex justify-center">
