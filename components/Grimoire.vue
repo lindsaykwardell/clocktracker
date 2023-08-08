@@ -1,6 +1,6 @@
 <template>
   <div id="grimoire" class="container m-auto">
-    <div v-for="token in tokens">
+    <div v-for="token in orderedTokens">
       <div class="token-seat relative flex flex-col items-center">
         <button
           type="button"
@@ -75,6 +75,10 @@ const props = defineProps<{
   }[];
   readonly?: boolean;
 }>();
+
+const orderedTokens = computed(() =>
+  props.tokens.sort((a, b) => a.order - b.order)
+);
 
 const showRoleSelectionDialog = ref(false);
 let focusedToken: Token | null = null;
