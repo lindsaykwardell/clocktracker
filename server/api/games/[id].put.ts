@@ -86,7 +86,7 @@ export default defineEventHandler(async (handler) => {
               create: g.tokens?.map((token, index) => ({
                 role_id: token.role_id,
                 related_role_id: token.related_role_id,
-                alignment: token.alignment || Alignment.GOOD,
+                alignment: token.alignment || Alignment.NEUTRAL,
                 is_dead: token.is_dead || false,
                 order: token.order || index,
                 player_name: token.player_name || "",
