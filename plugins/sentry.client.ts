@@ -1,6 +1,7 @@
 // plugins/sentry.client.ts
 import * as Sentry from "@sentry/vue";
 import { BrowserTracing } from "@sentry/browser";
+import LogRocket from 'logrocket';
 
 export default defineNuxtPlugin((nuxtApp) => {
   const { vueApp } = nuxtApp;
@@ -34,6 +35,8 @@ export default defineNuxtPlugin((nuxtApp) => {
       return event;
     },
   });
+
+  LogRocket.init('pmde9l/clocktracker');
 
   vueApp.mixin(
     Sentry.createTracingMixins({
