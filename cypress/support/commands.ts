@@ -56,6 +56,6 @@ Cypress.Commands.add("login", (email: string, password: string) => {
 
 // @ts-ignore
 Cypress.Commands.add("logout", () => {
-  cy.findByRole("button", { name: "Sign Out" }).click();
+  cy.findByRole("link", { name: "Logout" }).click();
   cy.visit("/");
 });

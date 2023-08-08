@@ -345,27 +345,13 @@ useHead({
 });
 
 const last_character = computed(() => {
-  if (game.value.status === Status.SUCCESS) {
-    if (game.value.data.is_storyteller) {
-      return {
-        name: "Storyteller",
-        alignment: "NEUTRAL",
-        role: {
-          token_url: "/img/role/storyteller.png",
-          initial_alignment: "NEUTRAL",
-        },
-      };
-    }
-
-    return game.value.data.player_characters[
-      game.value.data.player_characters.length - 1
-    ];
-  }
+  return games.getLastCharater(gameId);
 });
 
 function fullImageUrl(file: string) {
-  if (file.startsWith("http")) return file;
-  return `${config.public.supabase.url}/storage/v1/object/public/game-attachments/${file}`;
+  const transformations = "?width=500&height=500";
+  if (file.startsWith("http")) return file + transformations;
+  return `${config.public.supabase.url}/storage/v1/object/public/game-attachments/${file}${transformations}`;
 }
 
 function scriptLink(script: string) {

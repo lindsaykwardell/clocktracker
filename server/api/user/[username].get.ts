@@ -9,36 +9,6 @@ export default defineEventHandler(async (handler) => {
     where: {
       username,
     },
-    include: {
-      followers: {
-        select: {
-          user: {
-            select: {
-              user_id: true,
-              username: true,
-              avatar: true,
-              display_name: true,
-              pronouns: true,
-              location: true,
-            },
-          },
-        },
-      },
-      following: {
-        select: {
-          following: {
-            select: {
-              user_id: true,
-              username: true,
-              avatar: true,
-              display_name: true,
-              pronouns: true,
-              location: true,
-            },
-          },
-        },
-      },
-    },
   });
 
   if (!user) {
@@ -57,7 +27,5 @@ export default defineEventHandler(async (handler) => {
     pronouns: user.pronouns,
     bio: user.bio,
     location: user.location,
-    followers: user.followers,
-    following: user.following,
   };
 });

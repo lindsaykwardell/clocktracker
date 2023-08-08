@@ -33,7 +33,7 @@
           crossorigin="anonymous"
         />
         <div class="absolute bottom-0 left-0 z-0 w-full h-full bg-black/50" />
-        <Token :character="game.last_character" size="sm" />
+        <Token :character="gamesStore.getLastCharater(game.id)" size="sm" />
         <div class="hidden md:block md:col-span-2 xl:col-span-1 z-10">
           {{ formatDate(game.date) }}
         </div>
@@ -70,19 +70,14 @@
 </template>
 
 <script setup lang="ts">
-import type { Game, Character } from "@prisma/client";
+import { GameRecord } from "composables/useGames";
 import dayjs from "dayjs";
 
 const config = useRuntimeConfig();
+const gamesStore = useGames();
 
 defineProps<{
-  games: (Game & {
-    player_characters: (Character & {
-      role?: { token_url: string; type: string };
-      related_role?: { token_url: string };
-    })[];
-    last_character: Character;
-  })[];
+  games: GameRecord[];
   readonly?: boolean;
   username: string;
 }>();
@@ -92,8 +87,9 @@ function formatDate(date: Date) {
 }
 
 function fullImageUrl(file: string) {
-  if (file.startsWith("http")) return file;
-  return `${config.public.supabase.url}/storage/v1/object/public/game-attachments/${file}`;
+  const transformations = "?width=500&height=100";
+  if (file.startsWith("http")) return file + transformations;
+  return `${config.public.supabase.url}/storage/v1/object/public/game-attachments/${file}${transformations}`;
 }
 </script>
 

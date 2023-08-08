@@ -114,23 +114,56 @@ enum LocationType {
 }
 
 model UserSettings {
-  user_id            String         @id
-  username           String         @unique
-  display_name       String
-  finished_welcome   Boolean        @default(false)
-  avatar             String?
-  email              String         @default("your@address.here")
-  pronouns           String?
-  bio                String         @default("")
-  location           String?
-  links              ExternalLink[]
-  is_admin           Boolean        @default(false)
-  games              Game[]
-  created_at         DateTime?      @default(now()) @db.Timestamptz(6)
-  following          Following[]    @relation("Following") // people I follow
-  followers          Following[]    @relation("Follower") // people who follow me
-  notifications      Notification[] @relation("Receiver")
-  sent_notifications Notification[] @relation("Sender")
+  user_id              String          @id
+  username             String          @unique
+  display_name         String
+  finished_welcome     Boolean         @default(false)
+  avatar               String?
+  email                String          @default("your@address.here")
+  pronouns             String?
+  bio                  String          @default("")
+  location             String?
+  links                ExternalLink[]
+  is_admin             Boolean         @default(false)
+  games                Game[]
+  created_at           DateTime?       @default(now()) @db.Timestamptz(6)
+  following            Following[]     @relation("Following") // people I follow
+  followers            Following[]     @relation("Follower") // people who follow me
+  notifications        Notification[]  @relation("Receiver")
+  sent_notifications   Notification[]  @relation("Sender")
+  privacy              PrivacySetting  @default(PUBLIC)
+  friend_requests      FriendRequest[] @relation("Receiver")
+  sent_friend_requests FriendRequest[] @relation("Sender")
+  friends              Friend[]        @relation("Friend")
+  friend_of            Friend[]        @relation("FriendOf")
+}
+
+enum PrivacySetting {
+  PUBLIC
+  PRIVATE
+  FRIENDS_ONLY
+  PERSONAL
+}
+
+model FriendRequest {
+  id           Int          @id @default(autoincrement())
+  user         UserSettings @relation("Receiver", fields: [user_id], references: [user_id])
+  from_user    UserSettings @relation("Sender", fields: [from_user_id], references: [user_id])
+  user_id      String
+  from_user_id String
+  accepted     Boolean      @default(false)
+  created_at   DateTime?    @default(now()) @db.Timestamptz(6)
+
+  @@unique([user_id, from_user_id])
+}
+
+model Friend {
+  id         Int          @id @default(autoincrement())
+  user       UserSettings @relation("FriendOf", fields: [user_id], references: [user_id])
+  friend     UserSettings @relation("Friend", fields: [friend_id], references: [user_id])
+  user_id    String
+  friend_id  String
+  created_at DateTime?    @default(now()) @db.Timestamptz(6)
 }
 
 model Following {

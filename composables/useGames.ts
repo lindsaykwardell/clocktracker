@@ -2,16 +2,17 @@ import { defineStore } from "pinia";
 import { FetchStatus } from "./useFetchStatus";
 import type { Game, Character, Grimoire, Token } from "@prisma/client";
 
+export type FullCharacter = Character & {
+  role?: {
+    token_url: string;
+    type: string;
+    initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+  };
+  related_role?: { token_url: string };
+};
+
 export type GameRecord = Game & {
-  player_characters: (Character & {
-    role?: {
-      token_url: string;
-      type: string;
-      initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
-    };
-    related_role?: { token_url: string };
-  })[];
-  last_character: Character;
+  player_characters: FullCharacter[];
   grimoire: (Grimoire & {
     tokens: (Token & {
       role?: {
@@ -71,6 +72,40 @@ export const useGames = defineStore("games", {
         return { status: Status.SUCCESS, data: games };
       };
     },
+    getLastCharater(): (gameId: string) => FullCharacter {
+      return (gameId: string) => {
+        console.log(gameId);
+        const dummyCharacter: FullCharacter = {
+          id: 0,
+          name: "",
+          alignment: "NEUTRAL",
+          related: null,
+          game_id: gameId,
+          role_id: null,
+          related_role_id: null,
+        };
+
+        const game = this.games.get(gameId);
+        if (!game || game.status !== Status.SUCCESS) return dummyCharacter;
+
+        if (game.data.is_storyteller) {
+          return {
+            ...dummyCharacter,
+            name: "STORYTELLER",
+            role: {
+              token_url: "/img/role/storyteller.png",
+              initial_alignment: "NEUTRAL",
+              type: "STORYTELLER",
+            },
+          };
+        }
+
+        const characters = game.data.player_characters;
+        if (characters.length === 0) return dummyCharacter;
+
+        return characters[characters.length - 1];
+      };
+    },
   },
   actions: {
     async fetchGame(gameId: string) {
@@ -101,18 +136,6 @@ export const useGames = defineStore("games", {
           data: game,
         });
       }
-    },
-    async fetchRecent() {
-      const games = await $fetch<RecentGameRecord[]>(`/api/games/recent`);
-
-      for (const game of games) {
-        this.games.set(game.id, {
-          status: Status.SUCCESS,
-          data: game,
-        });
-      }
-
-      return games;
     },
   },
 });

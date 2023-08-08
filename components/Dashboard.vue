@@ -144,27 +144,7 @@ const sortedGames = computed(() => {
   if (props.games.status !== Status.SUCCESS) {
     return [];
   }
-  return naturalOrder(
-    props.games.data.map((game) => ({
-      ...game,
-      last_character: game.is_storyteller
-        ? {
-            name: "Storyteller",
-            alignment: "NEUTRAL",
-            role: {
-              token_url: "/img/role/storyteller.png",
-              initial_alignment: "NEUTRAL",
-            },
-          }
-        : game.player_characters[game.player_characters.length - 1] || {
-            id: "",
-            name: "",
-            alignment: "",
-            related: null,
-            game_id: game.id,
-          },
-    }))
-  )
+  return naturalOrder(props.games.data)
     .orderBy(orderBy.value)
     .sort(
       (() => {
@@ -172,7 +152,7 @@ const sortedGames = computed(() => {
           case "date":
             return ["date", "created_at"];
           case "character":
-            return ["last_character.name"];
+            return []; // TODO implement sorting by last character
           case "script":
             return ["script"];
           case "location":

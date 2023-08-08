@@ -49,43 +49,80 @@ describe("social features", () => {
     cy.findByText(user1.displayName).should("exist");
   });
 
-  it("allows following a user", () => {
+  it("allows sending a friend request", () => {
+    // @ts-ignore
+    cy.login(user1.email, user1.password);
+
+    cy.get("a[href='/search']").click();
+    cy.get("input").type(user2.displayName);
+    cy.findByRole("button", { name: "Search" }).click();
+    cy.findByText(user2.displayName).click();
+    cy.findByRole("button", { name: "Add Friend" }).click();
+    cy.findByRole("button", { name: "Cancel" }).should("exist");
+  });
+
+  it("allows receiving a friend request", () => {
     // @ts-ignore
     cy.login(user2.email, user2.password);
 
-    cy.get("a[href='/search']").click();
-    cy.get("input").type(user1.displayName);
-    cy.findByRole("button", { name: "Search" }).click();
-    cy.findByText(user1.displayName).click();
-    cy.findByRole("button", { name: "Follow" }).click();
-    cy.findByRole("button", { name: "Following" }).should("exist");
-
-    // Following count should be updated
-    cy.findByRole("link", { name: "My Profile" }).click();
-    cy.findByText("1 Following").click();
+    cy.findByText("Friends").click();
     cy.findByText(user1.displayName).should("exist");
-  })
+    cy.findByRole("button", { name: "Accept" }).should("exist");
+    // cy.findByText("Reject").should("exist");
+  });
 
-  it("allows seeing who follows you", () => {
+  it("allows accepting a friend request", () => {
+    // @ts-ignore
+    cy.login(user2.email, user2.password);
+
+    cy.findByText("Friends").click();
+    cy.findByText(user1.displayName).should("exist");
+    cy.findByRole("button", { name: "Accept" }).click();
+    cy.findByRole("button", { name: "Friends" }).should("exist");
+  });
+
+  it("allows unfriending a friend", () => {
+    // @ts-ignore
+    cy.login(user2.email, user2.password);
+
+    cy.findByText("Friends").click();
+    cy.findByRole("button", { name: "Friends" }).click();
+    cy.on('window:confirm', () => true);
+    cy.findByText(user1.displayName).should("not.exist");
+  });
+
+  it("allows rejecting a friend request", () => {
     // @ts-ignore
     cy.login(user1.email, user1.password);
 
-    cy.findByText("1 Follower").click();
-    cy.findByText(user2.displayName).should("exist");
-  })
+    cy.get("a[href='/search']").click();
+    cy.get("input").type(user2.displayName);
+    cy.findByRole("button", { name: "Search" }).click();
+    cy.findByText(user2.displayName).click();
+    cy.findByRole("button", { name: "Add Friend" }).click();
+    // @ts-ignore
+    cy.logout();
 
-  it("sends a notification when someone is following you", () => {
+    // @ts-ignore
+    cy.login(user2.email, user2.password);
+
+    cy.findByText("Friends").click();
+    cy.findByText(user1.displayName).should("exist");
+    cy.findByRole("button", { name: "Delete" }).click();
+    cy.findByRole("button", { name: "Friends" }).should("not.exist");
+    cy.findByText(user1.displayName).should("not.exist");
+  });
+
+  it("allows cancelling a sent friend request", () => {
     // @ts-ignore
     cy.login(user1.email, user1.password);
 
-    cy.wait(10000)
-    cy.get("[aria-label='Unread notifications']").should("exist");
-    cy.get("[aria-label='Unread notifications']").then(($el) => {
-      const count = $el.text();
-      expect(count).to.equal("1");
-    });
-    cy.findByText("Notifications").click();
-    cy.findByText(`${user2.username} followed you!`).should("exist");
-    cy.get("[aria-label='Unread notifications']").should("not.exist");
+    cy.get("a[href='/search']").click();
+    cy.get("input").type(user2.displayName);
+    cy.findByRole("button", { name: "Search" }).click();
+    cy.findByText(user2.displayName).click();
+    cy.findByRole("button", { name: "Add Friend" }).click();
+    cy.findByRole("button", { name: "Cancel" }).click();
+    cy.findByRole("button", { name: "Add Friend" }).should("exist");
   })
 });
