@@ -126,12 +126,12 @@
       </div>
       <div v-if="game.data.notes || game.data.image_urls.length" class="px-4">
         <h3 class="font-dumbledor text-2xl">Notes and Images</h3>
-        <p
+        <div
           v-if="game.data.notes"
-          class="bg-stone-100 p-4 shadow-lg my-3 whitespace-pre-wrap"
+          class="notes bg-stone-100 p-4 shadow-lg my-3"
         >
-          {{ game.data.notes }}
-        </p>
+          <VueMarkdown :source="game.data.notes" />
+        </div>
         <div class="flex flex-col gap-5">
           <div class="flex flex-wrap gap-5">
             <div v-for="file in game.data.image_urls" :key="file">
@@ -251,6 +251,7 @@
 
 <script setup lang="ts">
 import dayjs from "dayjs";
+import VueMarkdown from "vue-markdown-render";
 
 const { scriptLogo } = useScripts();
 const config = useRuntimeConfig();
@@ -404,5 +405,77 @@ label span {
 
 .custom-script {
   background-image: url("/img/custom-script-bg.webp");
+}
+</style>
+
+<style>
+.notes {
+  h1 {
+    @apply text-3xl font-dumbledor;
+  }
+  h2 {
+    @apply text-2xl font-dumbledor;
+  }
+  h3 {
+    @apply text-xl font-dumbledor;
+  }
+  h4 {
+    @apply text-lg font-dumbledor;
+  }
+  h5 {
+    @apply text-base font-dumbledor;
+  }
+  h6 {
+    @apply text-sm font-dumbledor;
+  }
+
+  ul {
+    @apply list-disc list-inside;
+  }
+  ol {
+    @apply list-decimal list-inside;
+  }
+  li {
+    @apply my-1;
+  }
+  li ul,
+  li ol {
+    @apply ml-4;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply my-4;
+  }
+
+  p,
+  ul,
+  ol,
+  table,
+  pre,
+  img {
+    @apply my-2;
+  }
+
+  table {
+    @apply w-full;
+    th {
+      @apply bg-stone-300 font-bold;
+    }
+    tr {
+      @apply border-b border-stone-300;
+    }
+    tr:nth-child(even) {
+      @apply bg-stone-200;
+    }
+    td {
+      @apply p-1;
+    }
+  }
+  a {
+    @apply text-blue-600 hover:underline;
+  }
+  hr {
+    @apply my-4 border-stone-300;
+  }
 }
 </style>
