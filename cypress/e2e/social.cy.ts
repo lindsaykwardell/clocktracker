@@ -44,7 +44,7 @@ describe("social features", () => {
     cy.login(user2.email, user2.password);
 
     cy.get("a[href='/search']").click();
-    cy.get("input").type(user1.displayName);
+    cy.get("input[type='search']").type(user1.displayName);
     cy.findByRole("button", { name: "Search" }).click();
     cy.findByText(user1.displayName).should("exist");
   });
@@ -55,7 +55,7 @@ describe("social features", () => {
       cy.login(user1.email, user1.password);
 
       cy.get("a[href='/search']").click();
-      cy.get("input").type(user2.displayName);
+      cy.get("input[type='search']").type(user2.displayName);
       cy.findByRole("button", { name: "Search" }).click();
       cy.findByText(user2.displayName).click();
       cy.findByRole("button", { name: "Add Friend" }).click();
@@ -97,7 +97,7 @@ describe("social features", () => {
       cy.login(user1.email, user1.password);
 
       cy.get("a[href='/search']").click();
-      cy.get("input").type(user2.displayName);
+      cy.get("input[type='search']").type(user2.displayName);
       cy.findByRole("button", { name: "Search" }).click();
       cy.findByText(user2.displayName).click();
       cy.findByRole("button", { name: "Add Friend" }).click();
@@ -119,7 +119,7 @@ describe("social features", () => {
       cy.login(user1.email, user1.password);
 
       cy.get("a[href='/search']").click();
-      cy.get("input").type(user2.displayName);
+      cy.get("input[type='search']").type(user2.displayName);
       cy.findByRole("button", { name: "Search" }).click();
       cy.findByText(user2.displayName).click();
       cy.findByRole("button", { name: "Add Friend" }).click();
@@ -163,12 +163,12 @@ describe("social features", () => {
       // @ts-ignore
       cy.login(user2.email, user2.password);
       cy.findByRole("link", { name: "Search" }).click();
-      cy.get("input").type(user1.displayName);
+      cy.get("input[type='search']").type(user1.displayName);
       cy.findByRole("button", { name: "Search" }).click();
       cy.findByText(user1.displayName).click();
       cy.findByText("This account is private").should("exist");
       cy.get(".token").should("not.exist");
-    })
+    });
 
     it("shows a private user's games to friend users", () => {
       // @ts-ignore
@@ -181,7 +181,7 @@ describe("social features", () => {
       cy.findByRole("link", { name: "Settings" }).click();
       cy.findByLabelText("Privacy Setting").should("have.value", "PRIVATE");
       cy.findByRole("link", { name: "Search" }).click();
-      cy.get("input").type(user2.displayName);
+      cy.get("input[type='search']").type(user2.displayName);
       cy.findByRole("button", { name: "Search" }).click();
       cy.findByText(user2.displayName).click();
       cy.findByRole("button", { name: "Add Friend" }).click();
