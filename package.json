@@ -39,10 +39,12 @@
     "chart.js": "^4.3.0",
     "cheerio": "^1.0.0-rc.12",
     "dayjs": "^1.11.9",
+    "logrocket": "^5.0.1",
     "natural-order": "^2.0.2",
     "pinia": "^2.1.4",
     "uuid": "^9.0.0",
-    "vue-chartjs": "^5.2.0"
+    "vue-chartjs": "^5.2.0",
+    "vue-markdown-render": "^2.0.1"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
