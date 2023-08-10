@@ -62,6 +62,8 @@ Cypress.Commands.add("logout", () => {
 
 // @ts-ignore
 Cypress.Commands.add("createGame", () => {
+  cy.findByRole("link", { name: "Add Game" }).click();
+  cy.url().should("include", "/add-game");
   cy.findAllByText("Select Script").first().click();
   cy.findByAltText("Trouble Brewing").click();
   cy.findByLabelText("Storyteller").type(faker.person.firstName());
@@ -73,4 +75,5 @@ Cypress.Commands.add("createGame", () => {
   cy.findByText("Chef").first().click();
   cy.get("textarea").type(faker.lorem.paragraph());
   cy.findByText("Save Game").click();
+  cy.url().should("include", "/game/")
 });
