@@ -31,7 +31,6 @@
           <input
             v-model="pronouns"
             class="block w-full border border-stone-500 rounded-md p-2"
-            required
           />
         </label>
         <label class="block w-[300px]">
@@ -39,7 +38,6 @@
           <input
             v-model="location"
             class="block w-full border border-stone-500 rounded-md p-2"
-            required
           />
         </label>
         <label class="block w-[300px]">
@@ -49,6 +47,16 @@
             class="block w-full border border-stone-500 rounded-md p-2 text-black"
             rows="5"
           ></textarea>
+        </label>
+        <label class="block w-[300px]">
+          <span class="block">Privacy Setting</span>
+          <select
+            v-model="privacy"
+            class="block w-full border border-stone-500 rounded-md p-2 text-black"
+          >
+            <option :value="PrivacySetting.PUBLIC">Public</option>
+            <option :value="PrivacySetting.PRIVATE">Private</option>
+          </select>
         </label>
         <button
           type="submit"
@@ -68,6 +76,7 @@
 </template>
 
 <script setup lang="ts">
+import { PrivacySetting } from "@prisma/client";
 import { v4 as uuid } from "uuid";
 
 definePageMeta({
@@ -88,6 +97,7 @@ const displayName = ref(settings.data.value?.display_name);
 const pronouns = ref(settings.data.value?.pronouns);
 const location = ref(settings.data.value?.location);
 const bio = ref(settings.data.value?.bio);
+const privacy = ref(settings.data.value?.privacy);
 
 function selectAvatar() {
   const input = document.createElement("input");
@@ -131,6 +141,7 @@ async function saveSettings() {
       finished_welcome: true,
       avatar: avatar.value,
       bio: bio.value,
+      privacy: privacy.value,
     }),
   });
 

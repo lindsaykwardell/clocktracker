@@ -56,6 +56,8 @@ const player = computed(() => {
 });
 
 onMounted(() => {
-  users.fetchUser(props.username);
+  if (player.value.status !== Status.SUCCESS) {
+    users.fetchUser(props.username);
+  }
 });
 </script>

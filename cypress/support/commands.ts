@@ -35,7 +35,7 @@ Cypress.Commands.add("register", (email: string, password: string) => {
 
   cy.visit("/");
   cy.wait(1000);
-  cy.findAllByText("Login with Email").first().click();
+  cy.findAllByText("Login").first().click();
   cy.findByLabelText("Email").type(email);
   cy.findByLabelText("Password").type(password);
   cy.findByRole("button", { name: "Register" }).click();
@@ -48,7 +48,7 @@ Cypress.Commands.add("register", (email: string, password: string) => {
 Cypress.Commands.add("login", (email: string, password: string) => {
   cy.visit("/");
   cy.wait(1000);
-  cy.findAllByText("Login with Email").first().click();
+  cy.findAllByText("Login").first().click();
   cy.findByLabelText("Email").type(email);
   cy.findByLabelText("Password").type(password);
   cy.findByRole("button", { name: "Login" }).click();
@@ -58,4 +58,22 @@ Cypress.Commands.add("login", (email: string, password: string) => {
 Cypress.Commands.add("logout", () => {
   cy.findByRole("link", { name: "Logout" }).click();
   cy.visit("/");
+});
+
+// @ts-ignore
+Cypress.Commands.add("createGame", () => {
+  cy.findByRole("link", { name: "Add Game" }).click();
+  cy.url().should("include", "/add-game");
+  cy.findAllByText("Select Script").first().click();
+  cy.findByAltText("Trouble Brewing").click();
+  cy.findByLabelText("Storyteller").type(faker.person.firstName());
+  cy.findByLabelText("Community").type("Cypress");
+  cy.findByLabelText("Players").type(
+    (Math.floor(Math.random() * 10) + 5).toString()
+  );
+  cy.get(".token").first().click();
+  cy.findByText("Chef").first().click();
+  cy.get("textarea").type(faker.lorem.paragraph());
+  cy.findByText("Save Game").click();
+  cy.url().should("include", "/game/")
 });
