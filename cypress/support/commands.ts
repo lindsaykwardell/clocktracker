@@ -35,7 +35,7 @@ Cypress.Commands.add("register", (email: string, password: string) => {
 
   cy.visit("/");
   cy.wait(1000);
-  cy.findAllByText("Login with Email").first().click();
+  cy.findAllByText("Login").first().click();
   cy.findByLabelText("Email").type(email);
   cy.findByLabelText("Password").type(password);
   cy.findByRole("button", { name: "Register" }).click();
@@ -48,7 +48,7 @@ Cypress.Commands.add("register", (email: string, password: string) => {
 Cypress.Commands.add("login", (email: string, password: string) => {
   cy.visit("/");
   cy.wait(1000);
-  cy.findAllByText("Login with Email").first().click();
+  cy.findAllByText("Login").first().click();
   cy.findByLabelText("Email").type(email);
   cy.findByLabelText("Password").type(password);
   cy.findByRole("button", { name: "Login" }).click();

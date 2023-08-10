@@ -5,14 +5,14 @@
     >
       <img src="/logo.png" class="w-2/3 sm:w-[400px]" alt="ClockTracker" />
       <div class="flex flex-col gap-2">
-        <LoginWithDiscord />
         <nuxt-link
           to="/login"
           class="text-center text-lg w-[300px] bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex justify-center gap-4 items-center"
         >
           <Email />
-          <span>Login with Email</span>
+          <span>Login</span>
         </nuxt-link>
+        <LoginWithDiscord />
       </div>
       <h1
         class="text-xl sm:text-2xl md:text-4xl font-bold font-dumbledor text-center"
@@ -89,14 +89,14 @@
         What will your story be?
       </h1>
       <div class="flex flex-col gap-2">
-        <LoginWithDiscord />
         <nuxt-link
           to="/login"
           class="text-center text-lg w-[300px] bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex justify-center gap-4 items-center"
         >
           <Email />
-          <span>Login with Email</span>
+          <span>Login</span>
         </nuxt-link>
+        <LoginWithDiscord />
       </div>
     </main>
     <footer class="pb-4 text-center text-stone-500 bg-stone-950">
