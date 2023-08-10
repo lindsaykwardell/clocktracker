@@ -286,6 +286,10 @@ watchEffect(() => {
 
 const gameMetadata = await useFetch(`/api/games/${gameId}/minimal`);
 
+if (gameMetadata.error.value) {
+  throw gameMetadata.error.value;
+}
+
 useHead({
   title: `${username} | ${gameMetadata.data.value!.script}`,
   meta: [

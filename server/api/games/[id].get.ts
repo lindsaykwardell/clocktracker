@@ -1,9 +1,10 @@
 import type { User } from "@supabase/supabase-js";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, PrivacySetting } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 export default defineEventHandler(async (handler) => {
+  const signedInUser = handler.context.user as User | null;
   const gameId = handler.context.params?.id;
 
   if (!gameId) {
@@ -16,6 +17,32 @@ export default defineEventHandler(async (handler) => {
   const game = await prisma.game.findUnique({
     where: {
       id: gameId,
+      user: !signedInUser
+        ? { privacy: PrivacySetting.PUBLIC }
+        : {
+            OR: [
+              {
+                privacy: PrivacySetting.PUBLIC,
+              },
+              {
+                privacy: PrivacySetting.PRIVATE,
+                AND: {
+                  OR: [
+                    {
+                      user_id: signedInUser.id,
+                    },
+                    {
+                      friends: {
+                        some: {
+                          user_id: signedInUser.id,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
     },
     include: {
       player_characters: {

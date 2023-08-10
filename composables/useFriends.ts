@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { FetchStatus } from "./useFetchStatus";
 import { FriendRequest } from "@prisma/client";
+import { User } from "./useUsers";
 
 type Friend = {
   user_id: string;
@@ -21,11 +22,11 @@ export enum FriendStatus {
 
 export const useFriends = defineStore("friends", {
   state: () => ({
-    friends: { status: Status.IDLE } as FetchStatus<Friend[]>,
+    friends: { status: Status.IDLE } as FetchStatus<User[]>,
     requests: { status: Status.IDLE } as FetchStatus<PendingFriendRequest[]>,
   }),
   getters: {
-    getFriends(): Friend[] {
+    getFriends(): User[] {
       if (this.friends.status !== Status.SUCCESS) return [];
 
       return this.friends.data;
@@ -76,6 +77,7 @@ export const useFriends = defineStore("friends", {
   actions: {
     async fetchFriends() {
       const user = useSupabaseUser();
+      const users = useUsers();
       if (!user.value) return;
 
       // Mark as loading if we don't have the user yet
@@ -90,6 +92,9 @@ export const useFriends = defineStore("friends", {
         status: Status.SUCCESS,
         data: friends.map(({ friend }) => friend),
       };
+      this.friends.data.forEach((friend) => {
+        users.storeUser(friend);
+      });
     },
     async fetchRequests() {
       const user = useSupabaseUser();
