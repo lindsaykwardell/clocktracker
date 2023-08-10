@@ -45,7 +45,7 @@ const friendButtonText = computed(() => {
 const friendButtonClass = computed(() => {
   switch (friends.getFriendStatus(props.user_id)) {
     case FriendStatus.FRIENDS:
-      return "friends bg-blue-950 hover:bg-transparent border border-transparent hover:border-red-950";
+      return "friends bg-green-950 hover:bg-transparent border border-transparent hover:border-red-950";
     case FriendStatus.REQUEST_SENT:
       return "request-sent bg-blue-950 hover:bg-blue-900";
     case FriendStatus.REQUEST_RECEIVED:

@@ -40,10 +40,10 @@ export const useUsers = defineStore("users", {
       // }
 
       // Otherwise, mark as success
-      this.users.set(username, {
-        status: Status.SUCCESS,
-        data: user,
-      });
+      this.storeUser(user);
+    },
+    storeUser(user: User) {
+      this.users.set(user.username, { status: Status.SUCCESS, data: user });
     },
   },
 });
