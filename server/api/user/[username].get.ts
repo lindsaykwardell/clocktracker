@@ -27,5 +27,6 @@ export default defineEventHandler(async (handler) => {
     pronouns: user.pronouns,
     bio: user.bio,
     location: user.location,
+    privacy: user.privacy,
   };
 });

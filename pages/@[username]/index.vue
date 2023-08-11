@@ -4,6 +4,11 @@
       <template v-if="playerFetchStatus === Status.SUCCESS && player">
         <UserHeader :player="player">
           <div
+            v-if="
+              player.privacy === PrivacySetting.PUBLIC ||
+              player.user_id === user?.id ||
+              friends.getFriendStatus(player.user_id) === FriendStatus.FRIENDS
+            "
             class="flex justify-start overflow-scroll w-screen md:w-full gap-1 h-12"
           >
             <nuxt-link
@@ -22,12 +27,25 @@
             </nuxt-link>
           </div>
         </UserHeader>
-        <UserCharts v-if="currentTab === 'charts'" :games="games" />
-        <Dashboard
-          v-if="currentTab === 'dashboard'"
-          :player="player"
-          :games="games"
-        />
+        <template
+          v-if="
+            player.privacy === PrivacySetting.PUBLIC ||
+            player.user_id === user?.id ||
+            friends.getFriendStatus(player.user_id) === FriendStatus.FRIENDS
+          "
+        >
+          <UserCharts v-if="currentTab === 'charts'" :games="games" />
+          <Dashboard
+            v-if="currentTab === 'dashboard'"
+            :player="player"
+            :games="games"
+          />
+        </template>
+        <template v-else>
+          <p class="text-center text-2xl my-4 font-dumbledor">
+            This account is private
+          </p>
+        </template>
       </template>
       <template v-else>
         <Loading class="h-screen" />
@@ -37,10 +55,14 @@
 </template>
 
 <script setup lang="ts">
+import { PrivacySetting } from "@prisma/client";
+
 const route = useRoute();
 const users = useUsers();
+const friends = useFriends();
 const gameStore = useGames();
 const username = useRoute().params.username as string;
+const user = useSupabaseUser();
 
 const playerStatus = computed(() => users.getUser(username));
 const playerFetchStatus = computed(() => playerStatus.value.status);
