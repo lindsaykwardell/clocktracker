@@ -75,6 +75,7 @@ const game = reactive<{
       related_role_id: string | null;
       related_role?: { token_url: string };
       player_name: string;
+      player_id?: string | null;
     }[];
   }[];
 }>({
@@ -127,6 +128,7 @@ const game = reactive<{
             token.related_role ||
             (token.role ? { token_url: "/1x1.png" } : undefined),
           player_name: token.player_name,
+          player_id: token.player_id
         })),
       }))
     : [

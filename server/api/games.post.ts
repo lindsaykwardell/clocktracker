@@ -54,6 +54,7 @@ export default defineEventHandler(async (handler) => {
                 is_dead: token.is_dead || false,
                 order: token.order || index,
                 player_name: token.player_name || "",
+                player_id: token.player_id,
               })),
             },
           })),

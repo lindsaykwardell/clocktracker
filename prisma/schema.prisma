@@ -40,18 +40,20 @@ model Grimoire {
 }
 
 model Token {
-  id              Int       @id @default(autoincrement())
-  role            Role?     @relation(fields: [role_id], references: [id])
+  id              Int           @id @default(autoincrement())
+  role            Role?         @relation(fields: [role_id], references: [id])
   role_id         String?
-  related_role    Role?     @relation("RelatedToken", fields: [related_role_id], references: [id])
+  related_role    Role?         @relation("RelatedToken", fields: [related_role_id], references: [id])
   related_role_id String?
   alignment       Alignment
-  is_dead         Boolean   @default(false)
+  is_dead         Boolean       @default(false)
   order           Int
-  created_at      DateTime  @default(now()) @db.Timestamptz(6)
-  grimoire        Grimoire? @relation(fields: [grimoire_id], references: [id])
+  created_at      DateTime      @default(now()) @db.Timestamptz(6)
+  grimoire        Grimoire?     @relation(fields: [grimoire_id], references: [id])
   grimoire_id     Int?
-  player_name     String    @default("")
+  player_name     String        @default("")
+  player          UserSettings? @relation(fields: [player_id], references: [user_id])
+  player_id       String?
 }
 
 model Character {
@@ -136,6 +138,7 @@ model UserSettings {
   sent_friend_requests FriendRequest[] @relation("Sender")
   friends              Friend[]        @relation("Friend")
   friend_of            Friend[]        @relation("FriendOf")
+  token                Token[]
 }
 
 enum PrivacySetting {

@@ -23,6 +23,24 @@ export const useUsers = defineStore("users", {
         return this.users.get(username) || { status: Status.IDLE };
       };
     },
+    getUserById(): (user_id: string) => FetchStatus<User> {
+      return (user_id: string) => {
+        for (const user of this.users.values()) {
+          if (user.status === Status.SUCCESS && user.data.user_id === user_id)
+            return user;
+        }
+
+        return { status: Status.IDLE };
+      };
+    },
+    getMe(): User | undefined {
+      const user = useSupabaseUser();
+      if (!user.value) return undefined;
+
+      const me = this.getUserById(user.value.id);
+      if (me.status !== Status.SUCCESS) return undefined;
+      return me.data;
+    },
   },
   actions: {
     async fetchUser(username: string) {
@@ -45,5 +63,10 @@ export const useUsers = defineStore("users", {
     storeUser(user: User) {
       this.users.set(user.username, { status: Status.SUCCESS, data: user });
     },
+    async fetchMe() {
+      const me = await $fetch("/api/settings");
+
+      this.storeUser(me);
+    }
   },
 });

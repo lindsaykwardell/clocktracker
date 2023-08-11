@@ -18,8 +18,10 @@ import {
 } from "chart.js";
 
 const friends = useFriends();
+const users = useUsers();
 
 onMounted(() => {
+  users.fetchMe();
   friends.fetchFriends();
   friends.fetchRequests();
 
