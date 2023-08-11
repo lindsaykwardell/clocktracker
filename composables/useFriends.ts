@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { FetchStatus } from "./useFetchStatus";
 import { FriendRequest } from "@prisma/client";
 import { User } from "./useUsers";
+import naturalOrder from "natural-order";
 
 type Friend = {
   user_id: string;
@@ -29,7 +30,7 @@ export const useFriends = defineStore("friends", {
     getFriends(): User[] {
       if (this.friends.status !== Status.SUCCESS) return [];
 
-      return this.friends.data;
+      return naturalOrder(this.friends.data).orderBy("desc").sort(["username"]);
     },
     getFriendStatus(): (user_id: string) => FriendStatus {
       return (user_id: string): FriendStatus => {
@@ -73,6 +74,15 @@ export const useFriends = defineStore("friends", {
 
       return this.requests.data.filter((req) => req.user_id === user_id).length;
     },
+    getFriendByUsername(): (username: string) => User | undefined {
+      return (username: string): User | undefined => {
+        if (this.friends.status !== Status.SUCCESS) return undefined;
+
+        return this.friends.data.find(
+          (friend) => friend.username === username
+        );
+      };
+    }
   },
   actions: {
     async fetchFriends() {

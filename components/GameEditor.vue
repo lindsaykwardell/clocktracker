@@ -465,6 +465,7 @@ const props = defineProps<{
         related_role_id: string | null;
         related_role?: { token_url: string };
         player_name: string;
+        player_id?: string | null;
       }[];
     }[];
   };
