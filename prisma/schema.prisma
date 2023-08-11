@@ -8,27 +8,31 @@ datasource db {
 }
 
 model Game {
-  id                String        @id @default(uuid())
-  user_id           String
-  created_at        DateTime?     @default(now()) @db.Timestamptz(6)
-  date              DateTime
-  script            String
-  script_id         Int?
-  location_type     LocationType  @default(ONLINE)
-  location          String
-  community         String        @default("")
-  player_count      Int?
-  traveler_count    Int?
-  player_characters Character[]
-  win               Boolean
-  notes             String
-  image_urls        String[]
-  storyteller       String?
-  user              UserSettings? @relation(fields: [user_id], references: [user_id])
-  associated_script Script?       @relation(fields: [script_id], references: [id])
-  grimoire          Grimoire[]
-  grimoire_id       Int?          @unique
-  is_storyteller    Boolean       @default(false)
+  id                    String        @id @default(uuid())
+  user_id               String
+  created_at            DateTime?     @default(now()) @db.Timestamptz(6)
+  date                  DateTime
+  script                String
+  script_id             Int?
+  location_type         LocationType  @default(ONLINE)
+  location              String
+  community             String        @default("")
+  player_count          Int?
+  traveler_count        Int?
+  player_characters     Character[]
+  win                   Boolean
+  notes                 String
+  image_urls            String[]
+  storyteller           String?
+  user                  UserSettings? @relation(fields: [user_id], references: [user_id])
+  associated_script     Script?       @relation(fields: [script_id], references: [id])
+  grimoire              Grimoire[]
+  grimoire_id           Int?          @unique
+  is_storyteller        Boolean       @default(false)
+  is_grimoire_protected Boolean       @default(false)
+  parent_game           Game?         @relation("AssociatedGame", fields: [parent_game_id], references: [id])
+  parent_game_id    String?
+  child_games           Game[]        @relation("AssociatedGame")
 }
 
 model Grimoire {
