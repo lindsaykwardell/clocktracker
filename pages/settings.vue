@@ -76,7 +76,6 @@
 </template>
 
 <script setup lang="ts">
-import { PrivacySetting } from "@prisma/client";
 import { v4 as uuid } from "uuid";
 
 definePageMeta({
