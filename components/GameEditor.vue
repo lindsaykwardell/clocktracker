@@ -453,6 +453,7 @@ const props = defineProps<{
     image_urls: string[];
     grimoire: {
       tokens: {
+        id?: number;
         alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
         order: number;
         is_dead: boolean;
@@ -489,7 +490,7 @@ const badMoonRising = computed(() =>
 function addCharacter() {
   props.game.player_characters.push({
     name: "",
-    alignment: props.game.player_characters[0].alignment,
+    alignment: props.game.player_characters[0]?.alignment || "GOOD",
     related: "",
     showRelated: false,
     role_id: null,
@@ -637,6 +638,7 @@ watchEffect(() => {
       grimoire.tokens.length < 20
     ) {
       grimoire.tokens.push({
+        id: undefined,
         alignment: undefined,
         is_dead: false,
         order: grimoire.tokens.length,

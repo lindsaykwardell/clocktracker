@@ -1,5 +1,12 @@
 import type { User } from "@supabase/supabase-js";
-import { PrismaClient, Game, Character, Grimoire, Token } from "@prisma/client";
+import {
+  PrismaClient,
+  Game,
+  Character,
+  Grimoire,
+  Token,
+  Alignment,
+} from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -60,12 +67,6 @@ export default defineEventHandler(async (handler) => {
     },
   });
 
-  await prisma.grimoire.deleteMany({
-    where: {
-      game_id: gameId,
-    },
-  });
-
   // update the game
   const game = await prisma.game.update({
     where: {
@@ -79,21 +80,76 @@ export default defineEventHandler(async (handler) => {
         create: [...body.player_characters],
       },
       grimoire: {
+        deleteMany: {
+          id: {
+            notIn: body.grimoire.filter((g) => !!g.id).map((g) => g.id!),
+          },
+        },
         create: [
-          ...body.grimoire.map((g) => ({
-            ...g,
-            tokens: {
-              create: g.tokens?.map((token, index) => ({
-                role_id: token.role_id,
-                related_role_id: token.related_role_id,
-                alignment: token.alignment || Alignment.NEUTRAL,
-                is_dead: token.is_dead || false,
-                order: token.order || index,
-                player_name: token.player_name || "",
-                player_id: token.player_id,
-              })),
-            },
-          })),
+          ...body.grimoire
+            .filter((g) => !g.id)
+            .map((g) => ({
+              ...g,
+              tokens: {
+                create: g.tokens?.map((token, index) => ({
+                  role_id: token.role_id,
+                  related_role_id: token.related_role_id,
+                  alignment: token.alignment || Alignment.NEUTRAL,
+                  is_dead: token.is_dead || false,
+                  order: token.order || index,
+                  player_name: token.player_name || "",
+                  player_id: token.player_id,
+                })),
+              },
+            })),
+        ],
+        update: [
+          ...body.grimoire
+            .filter((g) => g.id)
+            .map((g) => ({
+              where: {
+                id: g.id,
+              },
+              data: {
+                ...g,
+                tokens: {
+                  deleteMany: {
+                    id: {
+                      notIn: g.tokens
+                        ?.filter((token) => !!token.id)
+                        .map((token) => token.id!),
+                    },
+                  },
+                  create: g.tokens
+                    ?.filter((token) => !token.id)
+                    .map((token, index) => ({
+                      role_id: token.role_id,
+                      related_role_id: token.related_role_id,
+                      alignment: token.alignment || Alignment.NEUTRAL,
+                      is_dead: token.is_dead || false,
+                      order: token.order || index,
+                      player_name: token.player_name || "",
+                      player_id: token.player_id,
+                    })),
+                  update: g.tokens
+                    ?.filter((token) => token.id)
+                    .map((token, index) => ({
+                      where: {
+                        id: token.id,
+                      },
+                      data: {
+                        role_id: token.role_id,
+                        related_role_id: token.related_role_id,
+                        alignment: token.alignment || Alignment.NEUTRAL,
+                        is_dead: token.is_dead || false,
+                        order: token.order || index,
+                        player_name: token.player_name || "",
+                        player_id: token.player_id,
+                      },
+                    })),
+                },
+              },
+            })),
         ],
       },
     },
