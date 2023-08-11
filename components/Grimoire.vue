@@ -39,7 +39,7 @@
         <a
           v-else-if="token.player_id"
           :href="`/${token.player_name}`"
-          class="bg-stone-600 rounded p-1 border-2 border-stone-500 text-center text-ellipsis max-w-[150px] overflow-hidden whitespace-nowrap hover:bg-blue-800 hover:border-blue-700"
+          class="bg-green-800 rounded p-1 border-2 border-green-700 text-center text-ellipsis max-w-[150px] overflow-hidden whitespace-nowrap hover:bg-blue-800 hover:border-blue-700 transition duration-150 hover:underline"
         >
           {{ token.player_name }}
         </a>
