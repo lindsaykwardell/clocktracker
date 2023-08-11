@@ -1,6 +1,12 @@
 import { defineStore } from "pinia";
 import { FetchStatus } from "./useFetchStatus";
-import { PrivacySetting } from "@prisma/client";
+
+export enum PrivacySetting {
+  PUBLIC = "PUBLIC",
+  PRIVATE = "PRIVATE",
+  FRIENDS_ONLY = "FRIENDS_ONLY",
+  PERSONAL = "PERSONAL",
+}
 
 export type User = {
   location: string | null;
@@ -49,7 +55,7 @@ export const useUsers = defineStore("users", {
         this.users.set(username, { status: Status.LOADING });
 
       // Fetch the user
-      const user = await $fetch(`/api/user/${username}`);
+      const user = await $fetch<User>(`/api/user/${username}`);
 
       // // If we got an error, mark as error
       // if (user.error.value) {
@@ -64,9 +70,11 @@ export const useUsers = defineStore("users", {
       this.users.set(user.username, { status: Status.SUCCESS, data: user });
     },
     async fetchMe() {
-      const me = await $fetch("/api/settings");
+      const user = useSupabaseUser();
+      if (!user.value) return;        
+      const me = await $fetch<User>("/api/settings");
 
       this.storeUser(me);
-    }
+    },
   },
 });

@@ -24,6 +24,10 @@ jobs:
           SUPABASE_AUTH_DISCORD_SECRET: "123"
       - name: Build app
         run: npm run build
+        env:
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:54322/postgres?connection_limit=1"
+          SUPABASE_URL: "http://localhost:54321"
+          SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0"
       - name: Run migrations
         run: npx prisma migrate deploy
         env:
