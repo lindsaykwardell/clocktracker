@@ -55,8 +55,6 @@
 </template>
 
 <script setup lang="ts">
-import { PrivacySetting } from "@prisma/client";
-
 const route = useRoute();
 const users = useUsers();
 const friends = useFriends();
