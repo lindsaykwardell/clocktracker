@@ -80,6 +80,7 @@ const game = reactive<{
       player_id?: string | null;
     }[];
   }[];
+  is_grimoire_protected: boolean;
 }>({
   date: dayjs(savedGame.data.value?.date).format("YYYY-MM-DD"),
   script: savedGame.data.value?.script || "",
@@ -141,6 +142,7 @@ const game = reactive<{
           tokens: [],
         },
       ],
+  is_grimoire_protected: savedGame.data.value?.is_grimoire_protected || false,
 });
 
 const formattedGame = computed(() => ({
