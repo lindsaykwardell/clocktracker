@@ -88,9 +88,20 @@ type Token = {
 
 const friends = useFriends();
 const users = useUsers();
+const user = useSupabaseUser();
+
+const me = computed(() => {
+  const meStatus = users.getUserById(user.value?.id);
+
+  if (meStatus.status === Status.SUCCESS) {
+    return meStatus.data;
+  } else {
+    return undefined;
+  }
+});
 
 const potentiallyTaggedPlayers = computed(() => {
-  return [users.getMe, ...friends.getFriends].filter(
+  return [me.value, ...friends.getFriends].filter(
     (player) =>
       !player ||
       !props.tokens.find((token) => token.player_id === player.user_id)

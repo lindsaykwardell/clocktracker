@@ -67,35 +67,32 @@ export const useFriends = defineStore("friends", {
         );
       };
     },
-    getRequestCount(): number {
-      const user = useSupabaseUser();
-      const user_id = user.value?.id;
-      if (this.requests.status !== Status.SUCCESS) return 0;
+    getRequestCount(): (user_id?: string) => number {
+      return (user_id) => {
+        if (this.requests.status !== Status.SUCCESS) return 0;
 
-      return this.requests.data.filter((req) => req.user_id === user_id).length;
+        return this.requests.data.filter((req) => req.user_id === user_id)
+          .length;
+      };
     },
     getFriendByUsername(): (username: string) => User | undefined {
       return (username: string): User | undefined => {
         if (this.friends.status !== Status.SUCCESS) return undefined;
 
-        return this.friends.data.find(
-          (friend) => friend.username === username
-        );
+        return this.friends.data.find((friend) => friend.username === username);
       };
-    }
+    },
   },
   actions: {
     async fetchFriends() {
-      const user = useSupabaseUser();
       const users = useUsers();
-      if (!user.value) return;
 
       // Mark as loading if we don't have the user yet
       if (this.friends.status === Status.IDLE)
         this.friends = { status: Status.LOADING };
 
       // Fetch the user
-      const friends = await $fetch("/api/friends");
+      const friends = await $fetch<{ friend: User }[]>("/api/friends");
 
       // Otherwise, mark as success
       this.friends = {
@@ -107,8 +104,6 @@ export const useFriends = defineStore("friends", {
       });
     },
     async fetchRequests() {
-      const user = useSupabaseUser();
-      if (!user.value) return;
       // Mark as loading if we don't have the user yet
       if (this.requests.status === Status.IDLE)
         this.requests = { status: Status.LOADING };
