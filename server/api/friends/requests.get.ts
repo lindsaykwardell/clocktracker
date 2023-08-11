@@ -7,10 +7,7 @@ export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
 
   if (!user) {
-    throw createError({
-      status: 401,
-      statusMessage: "Unauthorized",
-    });
+    return [];
   }
 
   const requests = await prisma.friendRequest.findMany({

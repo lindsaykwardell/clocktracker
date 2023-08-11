@@ -62,13 +62,11 @@
                 </button>
               </div>
               <div class="relative">
-                <form @submit.prevent="searchScripts">
-                  <input
-                    v-model="potentialScript"
-                    class="block w-full border border-stone-500 rounded-md p-2 text-lg bg-stone-600"
-                    placeholder="Search for a script"
-                  />
-                </form>
+                <input
+                  v-model="potentialScript"
+                  class="block w-full border border-stone-500 rounded-md p-2 text-lg bg-stone-600"
+                  placeholder="Search for a script"
+                />
                 <button
                   type="button"
                   @click="searchScripts"
@@ -384,6 +382,7 @@
 import type { Alignment, Role, RoleType } from "@prisma/client";
 import { v4 as uuid } from "uuid";
 import naturalOrder from "natural-order";
+import { watchDebounced } from "@vueuse/core";
 
 type Character = {
   name: string;
@@ -415,6 +414,7 @@ const supabase = useSupabaseClient();
 const config = useRuntimeConfig();
 
 const showScriptDialog = ref(false);
+const fetchingScripts = ref(false);
 
 const orderedRoles = computed(() =>
   naturalOrder(roles.value).orderBy("asc").sort(["name"])
@@ -559,6 +559,11 @@ async function removeFile(name: string) {
 }
 
 async function searchScripts() {
+  if (potentialScript.value === "") {
+    scripts.value = [];
+    return;
+  }
+
   const result = await useFetch(`/api/script?query=${potentialScript.value}`);
   scripts.value = result.data.value ?? [];
 }
@@ -671,6 +676,8 @@ function deletePage() {
   props.game.grimoire.splice(grimPage.value, 1);
   grimPage.value = Math.max(0, grimPage.value - 1);
 }
+
+watchDebounced(potentialScript, searchScripts, { debounce: 500 });
 </script>
 
 <style scoped>

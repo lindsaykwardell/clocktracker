@@ -19,9 +19,10 @@ import {
 
 const friends = useFriends();
 const users = useUsers();
+const user = useSupabaseUser();
 
 onMounted(() => {
-  users.fetchMe();
+  users.fetchMe(user.value?.id);
   friends.fetchFriends();
   friends.fetchRequests();
 

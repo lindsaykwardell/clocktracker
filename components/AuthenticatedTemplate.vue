@@ -39,7 +39,7 @@
           <NavLink
             to="/friends"
             icon="eviltwin"
-            :notificationCount="friends.getRequestCount"
+            :notificationCount="friends.getRequestCount(user.id)"
           >
             Friends
           </NavLink>

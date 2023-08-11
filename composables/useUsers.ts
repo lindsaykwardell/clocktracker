@@ -29,8 +29,8 @@ export const useUsers = defineStore("users", {
         return this.users.get(username) || { status: Status.IDLE };
       };
     },
-    getUserById(): (user_id: string) => FetchStatus<User> {
-      return (user_id: string) => {
+    getUserById(): (user_id?: string) => FetchStatus<User> {
+      return (user_id?: string) => {
         for (const user of this.users.values()) {
           if (user.status === Status.SUCCESS && user.data.user_id === user_id)
             return user;
@@ -38,14 +38,6 @@ export const useUsers = defineStore("users", {
 
         return { status: Status.IDLE };
       };
-    },
-    getMe(): User | undefined {
-      const user = useSupabaseUser();
-      if (!user.value) return undefined;
-
-      const me = this.getUserById(user.value.id);
-      if (me.status !== Status.SUCCESS) return undefined;
-      return me.data;
     },
   },
   actions: {
@@ -57,21 +49,14 @@ export const useUsers = defineStore("users", {
       // Fetch the user
       const user = await $fetch<User>(`/api/user/${username}`);
 
-      // // If we got an error, mark as error
-      // if (user.error.value) {
-      //   this.users.set(username, { status: Status.ERROR, error: user.error });
-      //   return;
-      // }
-
       // Otherwise, mark as success
       this.storeUser(user);
     },
     storeUser(user: User) {
       this.users.set(user.username, { status: Status.SUCCESS, data: user });
     },
-    async fetchMe() {
-      const user = useSupabaseUser();
-      if (!user.value) return;        
+    async fetchMe(user_id?: string) {
+      if (!user_id) return;
       const me = await $fetch<User>("/api/settings");
 
       this.storeUser(me);
