@@ -62,7 +62,9 @@ const game = reactive<{
   notes: string;
   image_urls: string[];
   grimoire: {
+    id: number;
     tokens: {
+      id: number;
       alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
       order: number;
       is_dead: boolean;
@@ -75,8 +77,10 @@ const game = reactive<{
       related_role_id: string | null;
       related_role?: { token_url: string };
       player_name: string;
+      player_id?: string | null;
     }[];
   }[];
+  is_grimoire_protected: boolean;
 }>({
   date: dayjs(savedGame.data.value?.date).format("YYYY-MM-DD"),
   script: savedGame.data.value?.script || "",
@@ -116,7 +120,9 @@ const game = reactive<{
   image_urls: savedGame.data.value?.image_urls || [],
   grimoire: savedGame.data.value?.grimoire.length
     ? savedGame.data.value?.grimoire.map((grim) => ({
+        id: grim.id,
         tokens: grim.tokens?.map((token) => ({
+          id: token.id,
           alignment: token.alignment,
           order: token.order,
           is_dead: token.is_dead,
@@ -127,13 +133,16 @@ const game = reactive<{
             token.related_role ||
             (token.role ? { token_url: "/1x1.png" } : undefined),
           player_name: token.player_name,
+          player_id: token.player_id,
         })),
       }))
     : [
         {
+          id: 0,
           tokens: [],
         },
       ],
+  is_grimoire_protected: savedGame.data.value?.is_grimoire_protected || false,
 });
 
 const formattedGame = computed(() => ({

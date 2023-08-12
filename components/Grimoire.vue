@@ -1,5 +1,5 @@
 <template>
-  <div id="grimoire" class="container m-auto">
+  <div id="grimoire" class="m-auto">
     <div v-for="token in orderedTokens">
       <div class="token-seat relative flex flex-col items-center">
         <button
@@ -28,15 +28,36 @@
           :alwaysShowAlignment="!readonly && !!token.role"
         />
         <input
-          v-if="!readonly || token.player_name"
+          v-if="!readonly"
           v-model="token.player_name"
+          @input="checkIfPlayerNameIsFriend(token)"
           type="text"
           class="w-28 bg-stone-600 rounded p-1 border-2 border-stone-500 text-center"
           :readonly="readonly"
+          list="friends"
         />
+        <a
+          v-else-if="token.player_id"
+          :href="`/${token.player_name}`"
+          class="bg-green-800 rounded p-1 border-2 border-green-700 text-center text-ellipsis max-w-[150px] overflow-hidden whitespace-nowrap hover:bg-blue-800 hover:border-blue-700 transition duration-150 hover:underline"
+        >
+          {{ token.player_name }}
+        </a>
+        <span
+          v-else-if="token.player_name"
+          class="bg-stone-600 rounded p-1 border-2 border-stone-500 text-center text-ellipsis max-w-[150px] overflow-hidden whitespace-nowrap"
+        >
+          {{ token.player_name }}
+        </span>
       </div>
     </div>
   </div>
+  <datalist id="friends">
+    <option
+      v-for="friend in potentiallyTaggedPlayers"
+      :value="`@${friend?.username}`"
+    />
+  </datalist>
   <TokenDialog
     v-if="availableRoles"
     v-model:visible="showRoleSelectionDialog"
@@ -62,7 +83,30 @@ type Token = {
   related_role_id: string | null;
   related_role?: { token_url: string; name?: string };
   player_name: string;
+  player_id?: string | null;
 };
+
+const friends = useFriends();
+const users = useUsers();
+const user = useSupabaseUser();
+
+const me = computed(() => {
+  const meStatus = users.getUserById(user.value?.id);
+
+  if (meStatus.status === Status.SUCCESS) {
+    return meStatus.data;
+  } else {
+    return undefined;
+  }
+});
+
+const potentiallyTaggedPlayers = computed(() => {
+  return [me.value, ...friends.getFriends].filter(
+    (player) =>
+      !player ||
+      !props.tokens.find((token) => token.player_id === player.user_id)
+  );
+});
 
 const props = defineProps<{
   tokens: Token[];
@@ -121,28 +165,28 @@ function selectRoleForToken(role: {
   showRoleSelectionDialog.value = false;
 }
 
-function formatRoleAsCharacter(role: {
-  type: RoleType;
-  id: string;
-  token_url: string;
-  name: string;
-  initial_alignment: Alignment;
-}) {
-  return {
-    alignment: role.initial_alignment,
-    role,
-  };
-}
-
 function toggleAlignment(token: Token) {
   if (token.role) {
     token.alignment = token.alignment === "GOOD" ? "EVIL" : "GOOD";
   }
 }
+
+function checkIfPlayerNameIsFriend(token: Token) {
+  if (token.player_name.startsWith("@")) {
+    const player = potentiallyTaggedPlayers.value.find(
+      (player) => player?.username === token.player_name.slice(1)
+    );
+    if (player) {
+      token.player_id = player.user_id;
+    } else {
+      token.player_id = undefined;
+    }
+  }
+}
 </script>
 
 <style scoped>
-.container {
+#grimoire {
   --d: 7rem; /* image size */
   --rel: calc(
     8 / (var(--m) * 2)
@@ -156,7 +200,7 @@ function toggleAlignment(token: Token) {
   height: var(--s);
 }
 
-.container div.token-seat {
+#grimoire div.token-seat {
   position: absolute;
   top: 50%;
   left: 50%;
