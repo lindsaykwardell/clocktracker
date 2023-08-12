@@ -27,7 +27,7 @@ import "@testing-library/cypress/add-commands";
 import { faker } from "@faker-js/faker";
 
 // @ts-ignore
-Cypress.Commands.add("register", (email: string, password: string) => {
+Cypress.Commands.add("register", (email: string, password: string, username?: string) => {
   const pronounOptions = ["he/him", "she/her", "they/them"];
   const pronouns =
     pronounOptions[Math.floor(Math.random() * pronounOptions.length)];
@@ -39,6 +39,9 @@ Cypress.Commands.add("register", (email: string, password: string) => {
   cy.findByLabelText("Email").type(email);
   cy.findByLabelText("Password").type(password);
   cy.findByRole("button", { name: "Register" }).click();
+  if (username) {
+    cy.findByLabelText("Username").clear().type(username);
+  }
   cy.findByLabelText("Pronouns").type(pronouns);
   cy.findByLabelText("Location").type(location);
   cy.findByRole("button", { name: "Save Settings" }).click();
