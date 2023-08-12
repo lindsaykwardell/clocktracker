@@ -62,6 +62,11 @@ export default defineEventHandler(async (handler) => {
       },
     },
     include: {
+      user: {
+        select: {
+          username: true,
+        },
+      },
       player_characters: true,
       grimoire: {
         include: {
@@ -77,7 +82,8 @@ export default defineEventHandler(async (handler) => {
   });
 
   const parentGameLastAlignment =
-    newGame.player_characters[newGame.player_characters.length - 1].alignment;
+    newGame.player_characters[newGame.player_characters.length - 1]
+      ?.alignment || Alignment.NEUTRAL;
 
   const taggedPlayers = new Set(
     newGame.grimoire.flatMap((g) => g.tokens?.map((t) => t.player_id))
@@ -119,19 +125,37 @@ export default defineEventHandler(async (handler) => {
     const lastAlignment =
       player_characters[player_characters.length - 1].alignment;
 
+    const win = (() => {
+      if (parentGameLastAlignment === Alignment.NEUTRAL) {
+        if (lastAlignment === Alignment.GOOD) {
+          return newGame.win;
+        } else {
+          return !newGame.win;
+        }
+      }
+
+      if (lastAlignment === parentGameLastAlignment) {
+        return newGame.win;
+      } else {
+        return !newGame.win;
+      }
+    })();
+
     await prisma.game.create({
       data: {
         ...body,
+        is_storyteller: false,
+        storyteller:
+          newGame.is_storyteller && newGame.user
+            ? `@${newGame.user.username}`
+            : "",
         date: new Date(body.date),
         user_id: id,
         player_characters: {
           create: [...player_characters],
         },
         notes: "",
-        win:
-          lastAlignment === parentGameLastAlignment
-            ? newGame.win
-            : !newGame.win,
+        win,
         // map the already created grimoires to the new game
         grimoire: {
           connect: newGame.grimoire.map((g) => ({ id: g.id })),

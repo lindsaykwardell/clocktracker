@@ -82,6 +82,13 @@ export const useFriends = defineStore("friends", {
         return this.friends.data.find((friend) => friend.username === username);
       };
     },
+    isFriend(): (username: string) => boolean {
+      return (username: string): boolean => {
+        if (this.friends.status !== Status.SUCCESS) return false;
+
+        return this.friends.data.some((friend) => friend.username === username);
+      };
+    }
   },
   actions: {
     async fetchFriends() {
