@@ -276,7 +276,7 @@
           <button
             v-if="!game.is_grimoire_protected && game.grimoire.length > 1"
             @click.prevent="deletePage"
-            class="absolute bottom-1 right-1 bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial z-10"
+            class="absolute top-1 right-1 bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial z-10"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -298,7 +298,7 @@
             type="button"
             @click="pageBackward"
             v-if="grimPage !== 0"
-            class="md:h-full absolute top-0 left-1 flex items-center font-dumbledor"
+            class="absolute bottom-0 left-1 flex items-center font-dumbledor"
           >
             <span
               class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded"
@@ -309,7 +309,7 @@
           <button
             type="button"
             @click="pageForward"
-            class="md:h-full absolute top-0 right-1 flex items-center font-dumbledor"
+            class="absolute bottom-0 right-1 flex items-center font-dumbledor"
           >
             <span
               v-if="!game.is_grimoire_protected || grimPage < game.grimoire.length - 1"
