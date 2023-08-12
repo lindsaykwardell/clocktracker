@@ -18,8 +18,11 @@ import {
 } from "chart.js";
 
 const friends = useFriends();
+const users = useUsers();
+const user = useSupabaseUser();
 
 onMounted(() => {
+  users.fetchMe(user.value?.id);
   friends.fetchFriends();
   friends.fetchRequests();
 

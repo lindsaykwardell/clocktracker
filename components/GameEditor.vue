@@ -62,13 +62,11 @@
                 </button>
               </div>
               <div class="relative">
-                <form @submit.prevent="searchScripts">
-                  <input
-                    v-model="potentialScript"
-                    class="block w-full border border-stone-500 rounded-md p-2 text-lg bg-stone-600"
-                    placeholder="Search for a script"
-                  />
-                </form>
+                <input
+                  v-model="potentialScript"
+                  class="block w-full border border-stone-500 rounded-md p-2 text-lg bg-stone-600"
+                  placeholder="Search for a script"
+                />
                 <button
                   type="button"
                   @click="searchScripts"
@@ -276,7 +274,7 @@
           }"
         >
           <button
-            v-if="game.grimoire.length > 1"
+            v-if="!game.is_grimoire_protected && game.grimoire.length > 1"
             @click.prevent="deletePage"
             class="absolute bottom-1 right-1 bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial z-10"
           >
@@ -314,6 +312,7 @@
             class="md:h-full absolute top-0 right-1 flex items-center font-dumbledor"
           >
             <span
+              v-if="!game.is_grimoire_protected || grimPage < game.grimoire.length - 1"
               class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded"
             >
               {{
@@ -326,6 +325,7 @@
             <Grimoire
               :tokens="game.grimoire[grimPage].tokens"
               :availableRoles="orderedRoles"
+              :readonly="game.is_grimoire_protected"
             />
           </div>
           <div
@@ -384,6 +384,7 @@
 import type { Alignment, Role, RoleType } from "@prisma/client";
 import { v4 as uuid } from "uuid";
 import naturalOrder from "natural-order";
+import { watchDebounced } from "@vueuse/core";
 
 type Character = {
   name: string;
@@ -415,6 +416,7 @@ const supabase = useSupabaseClient();
 const config = useRuntimeConfig();
 
 const showScriptDialog = ref(false);
+const fetchingScripts = ref(false);
 
 const orderedRoles = computed(() =>
   naturalOrder(roles.value).orderBy("asc").sort(["name"])
@@ -453,6 +455,7 @@ const props = defineProps<{
     image_urls: string[];
     grimoire: {
       tokens: {
+        id?: number;
         alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
         order: number;
         is_dead: boolean;
@@ -465,8 +468,10 @@ const props = defineProps<{
         related_role_id: string | null;
         related_role?: { token_url: string };
         player_name: string;
+        player_id?: string | null;
       }[];
     }[];
+    is_grimoire_protected?: boolean;
   };
 }>();
 
@@ -488,7 +493,7 @@ const badMoonRising = computed(() =>
 function addCharacter() {
   props.game.player_characters.push({
     name: "",
-    alignment: props.game.player_characters[0].alignment,
+    alignment: props.game.player_characters[0]?.alignment || "GOOD",
     related: "",
     showRelated: false,
     role_id: null,
@@ -558,6 +563,11 @@ async function removeFile(name: string) {
 }
 
 async function searchScripts() {
+  if (potentialScript.value === "") {
+    scripts.value = [];
+    return;
+  }
+
   const result = await useFetch(`/api/script?query=${potentialScript.value}`);
   scripts.value = result.data.value ?? [];
 }
@@ -631,6 +641,7 @@ watchEffect(() => {
       grimoire.tokens.length < 20
     ) {
       grimoire.tokens.push({
+        id: undefined,
         alignment: undefined,
         is_dead: false,
         order: grimoire.tokens.length,
@@ -670,6 +681,8 @@ function deletePage() {
   props.game.grimoire.splice(grimPage.value, 1);
   grimPage.value = Math.max(0, grimPage.value - 1);
 }
+
+watchDebounced(potentialScript, searchScripts, { debounce: 500 });
 </script>
 
 <style scoped>
