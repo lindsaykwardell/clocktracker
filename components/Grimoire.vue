@@ -1,5 +1,5 @@
 <template>
-  <div id="grimoire" class="container m-auto">
+  <div id="grimoire" class="m-auto">
     <div v-for="token in orderedTokens">
       <div class="token-seat relative flex flex-col items-center">
         <button
@@ -186,7 +186,7 @@ function checkIfPlayerNameIsFriend(token: Token) {
 </script>
 
 <style scoped>
-.container {
+#grimoire {
   --d: 7rem; /* image size */
   --rel: calc(
     8 / (var(--m) * 2)
@@ -200,7 +200,7 @@ function checkIfPlayerNameIsFriend(token: Token) {
   height: var(--s);
 }
 
-.container div.token-seat {
+#grimoire div.token-seat {
   position: absolute;
   top: 50%;
   left: 50%;
