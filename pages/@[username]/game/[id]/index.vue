@@ -170,7 +170,7 @@
           type="button"
           @click="grimPage -= 1"
           v-if="grimPage !== 0"
-          class="md:h-full absolute top-0 left-1 flex items-center font-dumbledor"
+          class="absolute bottom-0 left-1 flex items-center font-dumbledor z-10"
         >
           <span
             class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded"
@@ -182,7 +182,7 @@
           v-if="grimPage !== game.data.grimoire.length - 1"
           type="button"
           @click="grimPage += 1"
-          class="md:h-full absolute top-0 right-1 flex items-center font-dumbledor"
+          class="absolute bottom-0 right-1 flex items-center font-dumbledor z-10"
         >
           <span
             class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded"
