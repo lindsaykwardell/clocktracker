@@ -74,7 +74,16 @@
             </label>
             <label v-if="game.data.storyteller" class="flex gap-3 items-center">
               <span>Storyteller</span>
-              {{ game.data.storyteller }}
+              <a
+                v-if="
+                  isStorytellerAFriend && game.data.storyteller.includes('@')
+                "
+                class="hover:underline text-blue-800 hover:text-blue-700"
+                :href="`/${game.data.storyteller}`"
+              >
+                {{ game.data.storyteller }}
+              </a>
+              <template v-else>{{ game.data.storyteller }}</template>
             </label>
             <label
               v-if="game.data.player_count"
@@ -170,7 +179,7 @@
           type="button"
           @click="grimPage -= 1"
           v-if="grimPage !== 0"
-          class="md:h-full absolute top-0 left-1 flex items-center font-dumbledor"
+          class="absolute bottom-0 left-1 flex items-center font-dumbledor z-10"
         >
           <span
             class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded"
@@ -182,7 +191,7 @@
           v-if="grimPage !== game.data.grimoire.length - 1"
           type="button"
           @click="grimPage += 1"
-          class="md:h-full absolute top-0 right-1 flex items-center font-dumbledor"
+          class="absolute bottom-0 right-1 flex items-center font-dumbledor z-10"
         >
           <span
             class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded"
@@ -260,6 +269,7 @@ const route = useRoute();
 const user = useSupabaseUser();
 const users = useUsers();
 const games = useGames();
+const friends = useFriends();
 const username = route.params.username as string;
 const gameId = route.params.id as string;
 
@@ -353,6 +363,23 @@ const last_character = computed(() => {
   return games.getLastCharater(gameId);
 });
 
+const isStorytellerAFriend = computed(() => {
+  if (game.value.status !== Status.SUCCESS) return false;
+
+  if (friends.isFriend(game.value.data.storyteller?.replace("@", "") || "")) {
+    return true;
+  };
+
+  const storytellerUser = users.getUser(game.value.data.storyteller?.replace("@", "") || "");
+
+  // If it's me, I'm a friend of myself.
+  if (storytellerUser.status === Status.SUCCESS && storytellerUser.data.user_id === user.value?.id) {
+    return true;
+  }
+
+  return false;
+});
+
 function fullImageUrl(file: string) {
   const transformations = "?width=500&height=500";
   if (file.startsWith("http")) return file + transformations;
@@ -387,6 +414,10 @@ async function deleteGame() {
 onMounted(() => {
   users.fetchUser(route.params.username as string);
   games.fetchGame(route.params.id as string);
+
+  if (friends.friends.status !== Status.SUCCESS) {
+    friends.fetchFriends();
+  }
 });
 </script>
 
@@ -447,7 +478,12 @@ label span {
     @apply ml-4;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply my-4;
   }
 

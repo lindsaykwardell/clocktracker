@@ -3,12 +3,20 @@ import { faker } from "@faker-js/faker";
 describe("games", () => {
   let email: string;
   let password: string;
+  let displayName: string;
+  let username: string;
   before(() => {
     email = faker.internet.email();
     password = faker.internet.password();
 
     // @ts-ignore
     cy.register(email, password);
+    cy.get("h3").then(($h3) => {
+      displayName = $h3.text();
+    });
+    cy.get("h4").then(($h4) => {
+      username = $h4.text();
+    });
     // @ts-ignore
     cy.logout();
   });
@@ -190,6 +198,47 @@ describe("games", () => {
       cy.get("#grimoire .token-seat input")
         .first()
         .should("have.value", playerName);
+    });
+
+    it("allows tagging a friend in a grimoire seat", () => {
+      const user2 = {
+        email: faker.internet.email(),
+        password: faker.internet.password(),
+        username: faker.internet.userName(),
+        displayName: "",
+      };
+
+      // @ts-ignore
+      cy.register(user2.email, user2.password, user2.username);
+
+      cy.findByRole("link", { name: "Search" }).click();
+      cy.get("input[type='search']").type(displayName);
+      cy.findByRole("button", { name: "Search" }).click();
+      cy.findByText(displayName).click();
+      cy.findByRole("button", { name: "Add Friend" }).click();
+      cy.findByRole("button", { name: "Cancel" }).should("exist");
+      // @ts-ignore
+      cy.logout();
+
+      // @ts-ignore
+      cy.login(email, password);
+      cy.findByText("Friends").click();
+      cy.findByRole("button", { name: "Accept" }).click();
+      cy.findByRole("button", { name: "Friends" }).should("exist");
+
+      cy.findByText("Add Game").click();
+      cy.findAllByText("Select Script").first().click();
+      cy.findByAltText("Trouble Brewing").click();
+      cy.findByLabelText("Players").type("5");
+      cy.findByText("Edit Grimoire").click();
+      cy.get("#grimoire .token").first().click({ force: true });
+      cy.findByText("Spy").click();
+      cy.get("#grimoire .token-seat input")
+        .first()
+        .type("@" + user2.username, { force: true });
+      cy.findByText("Save Game").click();
+      cy.url().should("include", "/game/");
+      cy.findByRole("link", { name: "@" + user2.username }).should("exist");
     });
   });
 });
