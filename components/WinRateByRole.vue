@@ -18,18 +18,22 @@ const props = defineProps<{
   })[];
 }>();
 
+const games = computed(() =>
+  props.games.filter((game) => !game.ignore_for_stats)
+);
+
 const chartData = computed(() => ({
   labels: ["Yes", "No"],
   datasets: [
     {
       label: "Townsfolk",
       data: [
-        props.games.filter(
+        games.value.filter(
           (game) =>
             game.player_characters[game.player_characters.length - 1].role
               ?.type === "TOWNSFOLK" && game.win
         ).length,
-        props.games.filter(
+        games.value.filter(
           (game) =>
             game.player_characters[game.player_characters.length - 1].role
               ?.type === "TOWNSFOLK" && !game.win
@@ -40,12 +44,12 @@ const chartData = computed(() => ({
     {
       label: "Outsider",
       data: [
-        props.games.filter(
+        games.value.filter(
           (game) =>
             game.player_characters[game.player_characters.length - 1].role
               ?.type === "OUTSIDER" && game.win
         ).length,
-        props.games.filter(
+        games.value.filter(
           (game) =>
             game.player_characters[game.player_characters.length - 1].role
               ?.type === "OUTSIDER" && !game.win
@@ -56,12 +60,12 @@ const chartData = computed(() => ({
     {
       label: "Minion",
       data: [
-        props.games.filter(
+        games.value.filter(
           (game) =>
             game.player_characters[game.player_characters.length - 1].role
               ?.type === "MINION" && game.win
         ).length,
-        props.games.filter(
+        games.value.filter(
           (game) =>
             game.player_characters[game.player_characters.length - 1].role
               ?.type === "MINION" && !game.win
@@ -72,12 +76,12 @@ const chartData = computed(() => ({
     {
       label: "Demon",
       data: [
-        props.games.filter(
+        games.value.filter(
           (game) =>
             game.player_characters[game.player_characters.length - 1].role
               ?.type === "DEMON" && game.win
         ).length,
-        props.games.filter(
+        games.value.filter(
           (game) =>
             game.player_characters[game.player_characters.length - 1].role
               ?.type === "DEMON" && !game.win
@@ -88,12 +92,12 @@ const chartData = computed(() => ({
     {
       label: "Traveler",
       data: [
-        props.games.filter(
+        games.value.filter(
           (game) =>
             game.player_characters[game.player_characters.length - 1].role
               ?.type === "TRAVELER" && game.win
         ).length,
-        props.games.filter(
+        games.value.filter(
           (game) =>
             game.player_characters[game.player_characters.length - 1].role
               ?.type === "TRAVELER" && !game.win
