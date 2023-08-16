@@ -30,9 +30,8 @@ const props = defineProps<{
 // Return the top five characters
 const characters = computed(() => {
   const allPlayedCharacters = props.games
-    .map((game) => game.player_characters)
-    .flat()
-    .filter((character) => character.name !== "Storyteller");
+    .flatMap((game) => game.player_characters)
+    .filter((character) => character.name && character.name !== "Storyteller");
 
   const characterCounts = allPlayedCharacters.reduce((acc, character) => {
     if (acc[character.name]) {
