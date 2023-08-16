@@ -29,7 +29,7 @@ const data: {
   };
 } = {};
 
-for (const game of props.games) {
+for (const game of props.games.filter(game => !game.ignore_for_stats)) {
   const month = dayjs(game.date).format("MMMM");
   if (!data[month]) {
     data[month] = {

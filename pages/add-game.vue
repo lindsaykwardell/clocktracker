@@ -65,6 +65,7 @@ const game = reactive<{
       player_name: string;
     }[];
   }[];
+  ignore_for_stats: boolean;
 }>({
   date: dayjs().format("YYYY-MM-DD"),
   script: "",
@@ -101,6 +102,7 @@ const game = reactive<{
       tokens: [],
     },
   ],
+  ignore_for_stats: false,
 });
 
 const formattedGame = computed(() => ({
