@@ -14,22 +14,32 @@
         />
       </div>
     </template>
-    <div v-if="show" class="flex flex-wrap justify-around gap-3 p-4">
-      <button
-        type="button"
-        v-for="role in filteredRoles"
-        class="flex flex-col items-center"
-        @click="emit('selectRole', role)"
-      >
-        <Token :character="formatRoleAsCharacter(role)" size="md" />
-        <span>{{ role.name }}</span>
-      </button>
+    <div v-if="show">
+      <div v-for="roleGroup in roleGroups">
+        <template v-if="roleGroup.roles.length">
+          <h3 class="mt-4 mb-2 mx-4 text-xl font-bold font-dumbledor">
+            {{ roleGroup.name }}
+          </h3>
+          <div class="flex flex-wrap justify-around gap-3 p-4">
+            <button
+              type="button"
+              v-for="role in roleGroup.roles"
+              class="flex flex-col items-center"
+              @click="emit('selectRole', role)"
+            >
+              <Token :character="formatRoleAsCharacter(role)" size="md" />
+              <span>{{ role.name }}</span>
+            </button>
+          </div>
+        </template>
+      </div>
     </div>
   </Dialog>
 </template>
 
 <script setup lang="ts">
 import { Alignment, RoleType } from "@prisma/client";
+import naturalOrder from "natural-order";
 
 const props = defineProps<{
   availableRoles: {
@@ -44,6 +54,7 @@ const props = defineProps<{
 
 const emit = defineEmits(["update:visible", "selectRole"]);
 
+const travelerRoles = await $fetch("/api/roles/traveler");
 const roleFilter = ref("");
 const show = computed({
   get: () => props.visible,
@@ -51,9 +62,63 @@ const show = computed({
 });
 
 const filteredRoles = computed(() => {
-  return props.availableRoles.filter((role) =>
-    role.name.toLowerCase().includes(roleFilter.value.toLowerCase())
-  );
+  return naturalOrder(
+    [
+      ...props.availableRoles.filter(
+        (role) => role.type !== "FABLED" && role.type !== "TRAVELER"
+      ),
+      ...travelerRoles,
+    ].filter((role) =>
+      role.name.toLowerCase().includes(roleFilter.value.toLowerCase())
+    )
+  )
+    .orderBy("asc")
+    .sort(["name"]);
+});
+
+const townsfolk = computed(() => {
+  return filteredRoles.value.filter((role) => role.type === "TOWNSFOLK");
+});
+
+const outsiders = computed(() => {
+  return filteredRoles.value.filter((role) => role.type === "OUTSIDER");
+});
+
+const minions = computed(() => {
+  return filteredRoles.value.filter((role) => role.type === "MINION");
+});
+
+const demons = computed(() => {
+  return filteredRoles.value.filter((role) => role.type === "DEMON");
+});
+
+const travelers = computed(() => {
+  return filteredRoles.value.filter((role) => role.type === "TRAVELER");
+});
+
+const roleGroups = computed(() => {
+  return [
+    {
+      name: "Townsfolk",
+      roles: townsfolk.value,
+    },
+    {
+      name: "Outsiders",
+      roles: outsiders.value,
+    },
+    {
+      name: "Minions",
+      roles: minions.value,
+    },
+    {
+      name: "Demons",
+      roles: demons.value,
+    },
+    {
+      name: "Travelers",
+      roles: travelers.value,
+    },
+  ];
 });
 
 function formatRoleAsCharacter(role: {
@@ -73,5 +138,5 @@ watchEffect(() => {
   if (show.value) {
     roleFilter.value = "";
   }
-})
+});
 </script>
