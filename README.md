@@ -1,6 +1,6 @@
-# Nuxt 3 Minimal Starter
+# ClockTracker
 
-Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+ClockTracker is a web application for recording games of Blood on the Clocktower. It is a platform where players can save details about their games, see their statistics, and share them with friends.
 
 ## Setup
 
@@ -59,5 +59,3 @@ pnpm run preview
 # yarn
 yarn preview
 ```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
