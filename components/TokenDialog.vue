@@ -44,6 +44,7 @@ const props = defineProps<{
 
 const emit = defineEmits(["update:visible", "selectRole"]);
 
+const travelerRoles = await $fetch("/api/roles/traveler");
 const roleFilter = ref("");
 const show = computed({
   get: () => props.visible,
@@ -51,7 +52,12 @@ const show = computed({
 });
 
 const filteredRoles = computed(() => {
-  return props.availableRoles.filter((role) =>
+  return [
+    ...props.availableRoles.filter(
+      (role) => role.type !== "FABLED" && role.type !== "TRAVELER"
+    ),
+    ...travelerRoles,
+  ].filter((role) =>
     role.name.toLowerCase().includes(roleFilter.value.toLowerCase())
   );
 });
@@ -73,5 +79,5 @@ watchEffect(() => {
   if (show.value) {
     roleFilter.value = "";
   }
-})
+});
 </script>
