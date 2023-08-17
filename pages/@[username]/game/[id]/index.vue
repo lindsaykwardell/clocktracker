@@ -4,7 +4,9 @@
       v-if="game.status === Status.SUCCESS && player.status === Status.SUCCESS"
       class="flex flex-col gap-4 bg-gradient-to-b from-stone-100 to-stone-300 text-black w-full lg:w-4/5 m-auto md:my-4 rounded shadow-lg"
     >
-      <div class="flex flex-col-reverse md:flex-row items-center px-4 pt-4">
+      <div
+        class="flex flex-col-reverse md:flex-row items-center md:items-start px-4 pt-4"
+      >
         <div class="flex-grow flex flex-col w-full">
           <div class="flex flex-col md:flex-row gap-4 items-center">
             <Avatar
@@ -112,12 +114,7 @@
               }}
               {{ game.data.location ? ` (${game.data.location})` : "" }}
             </label>
-          </div>
-          <fieldset
-            class="flex flex-col sm:flex-row gap-5 border rounded border-stone-500 p-4 my-3"
-          >
-            <legend>Game Results</legend>
-            <label>
+            <label class="flex gap-3 items-center">
               <span class="block">Win?</span>
               <template v-if="game.data.is_storyteller">
                 {{ game.data?.win ? "Good wins" : "Evil wins" }}
@@ -126,7 +123,15 @@
                 {{ game.data?.win ? "Yes" : "No" }}
               </template>
             </label>
-          </fieldset>
+          </div>
+          <div class="flex flex-wrap gap-2 mt-4">
+            <span
+              v-for="tag in game.data.tags"
+              class="bg-stone-300 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
+            >
+              <span>{{ tag }}</span>
+            </span>
+          </div>
         </div>
         <img
           :src="scriptLogo(game.data.script)"
@@ -368,12 +373,17 @@ const isStorytellerAFriend = computed(() => {
 
   if (friends.isFriend(game.value.data.storyteller?.replace("@", "") || "")) {
     return true;
-  };
+  }
 
-  const storytellerUser = users.getUser(game.value.data.storyteller?.replace("@", "") || "");
+  const storytellerUser = users.getUser(
+    game.value.data.storyteller?.replace("@", "") || ""
+  );
 
   // If it's me, I'm a friend of myself.
-  if (storytellerUser.status === Status.SUCCESS && storytellerUser.data.user_id === user.value?.id) {
+  if (
+    storytellerUser.status === Status.SUCCESS &&
+    storytellerUser.data.user_id === user.value?.id
+  ) {
     return true;
   }
 

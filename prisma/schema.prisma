@@ -34,6 +34,7 @@ model Game {
   parent_game_id        String?
   child_games           Game[]        @relation("AssociatedGame")
   ignore_for_stats      Boolean       @default(false)
+  tags                  String[]
 }
 
 model Grimoire {
