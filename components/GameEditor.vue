@@ -350,7 +350,25 @@
         v-model="game.notes"
         class="block w-full border border-stone-500 rounded-md p-2"
         rows="5"
-      ></textarea>
+      />
+      <label class="block py-2">
+        <span class="block">Add Tag</span>
+        <input
+          type="text"
+          v-model="tagsInput"
+          class="block w-full border border-stone-500 rounded-md p-2"
+          @keydown.enter.prevent="addTag"
+        />
+      </label>
+      <div class="flex flex-wrap gap-2">
+        <button
+          v-for="(tag, index) in game.tags"
+          class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
+          @click.prevent="game.tags.splice(index, 1)"
+        >
+          {{ tag }}
+        </button>
+      </div>
     </fieldset>
     <fieldset class="border rounded border-stone-500 p-4 my-3">
       <legend>Images</legend>
@@ -484,11 +502,13 @@ const props = defineProps<{
     }[];
     is_grimoire_protected?: boolean;
     ignore_for_stats: boolean;
+    tags: string[];
   };
 }>();
 
 const grimPage = ref(props.game.grimoire.length - 1);
 const potentialScript = ref("");
+const tagsInput = ref("");
 
 const emit = defineEmits(["submit"]);
 
@@ -524,6 +544,13 @@ function addCharacter() {
     props.game.player_characters[props.game.player_characters.length - 1],
     "role"
   );
+}
+
+function addTag() {
+  if (tagsInput.value) {
+    props.game.tags.push(tagsInput.value);
+    tagsInput.value = "";
+  }
 }
 
 function removeCharacter(i: number) {
