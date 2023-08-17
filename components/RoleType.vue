@@ -21,7 +21,7 @@ const props = defineProps<{
 const roles = computed(() => {
   const val = { townsfolk: 0, outsider: 0, minion: 0, demon: 0, traveler: 0 };
 
-  for (const game of props.games) {
+  for (const game of props.games.filter(game => !game.ignore_for_stats)) {
     for (const character of game.player_characters) {
       if (character.role?.type === "TOWNSFOLK") val.townsfolk++;
       if (character.role?.type === "OUTSIDER") val.outsider++;
