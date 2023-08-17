@@ -240,5 +240,67 @@ describe("games", () => {
       cy.url().should("include", "/game/");
       cy.findByRole("link", { name: "@" + user2.username }).should("exist");
     });
+
+    describe("tagging yourself", () => {
+      it("allows tagging yourself", () => {
+        // @ts-ignore
+        cy.login(email, password);
+
+        cy.findByText("Add Game").click();
+        cy.findAllByText("Select Script").first().click();
+        cy.findByAltText("Trouble Brewing").click();
+        cy.findByLabelText("Players").type("5");
+        cy.findByText("Edit Grimoire").click();
+        cy.get("#grimoire .token").first().click({ force: true });
+        cy.findByText("Spy").click();
+        cy.get("#grimoire .token-seat input")
+          .first()
+          .type("@" + username, { force: true });
+        cy.findByText("Save Game").click();
+        cy.url().should("include", "/game/");
+        cy.findByRole("link", { name: "@" + username }).should("exist");
+      });
+
+      it("inserts your selected role when you tag yourself", () => {
+        // @ts-ignore
+        cy.login(email, password);
+
+        cy.findByText("Add Game").click();
+        cy.findAllByText("Select Script").first().click();
+        cy.findByAltText("Trouble Brewing").click();
+        cy.findByLabelText("Players").type("5");
+        cy.get(".token").first().click();
+        cy.findByText("Butler").first().click();
+        cy.findByText("Edit Grimoire").click();
+        cy.get("#grimoire .token-seat input")
+          .first()
+          .type("@" + username, { force: true });
+        cy.get("#grimoire .token .token-image")
+          .first()
+          .should("have.attr", "alt", "Butler");
+      });
+
+      it("syncs what is chosen in the grimoire to your player tokens", () => {
+        // @ts-ignore
+        cy.login(email, password);
+
+        cy.findByText("Add Game").click();
+        cy.findAllByText("Select Script").first().click();
+        cy.findByAltText("Trouble Brewing").click();
+        cy.findByLabelText("Players").type("5");
+        cy.findByText("Edit Grimoire").click();
+        cy.get("#grimoire .token").first().click({ force: true });
+        cy.findByText("Butler").click();
+        cy.get("#grimoire .token-seat input")
+          .first()
+          .type("@" + username, { force: true });
+        cy.get(".token-image").first().should("have.attr", "alt", "Butler");
+
+        cy.findByRole("button", { name: "Add page >" }).click({ force: true });
+        cy.get("#grimoire .token").first().click({ force: true });
+        cy.findByText("Drunk").click();
+        cy.get(".token-image").eq(1).should("have.attr", "alt", "Drunk");
+      });
+    });
   });
 });

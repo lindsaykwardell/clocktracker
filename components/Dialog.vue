@@ -8,20 +8,22 @@
       'w-11/12 md:w-2/3 lg:w-3/4 xl:w-[900px]': size === 'lg',
     }"
   >
-    <div class="flex justify-between items-center">
-      <div class="p-4 w-full">
-        <slot name="title" />
+    <template v-if="visible">
+      <div class="flex justify-between items-center">
+        <div class="p-4 w-full">
+          <slot name="title" />
+        </div>
+        <div class="flex-grow" />
+        <button
+          type="button"
+          class="p-4 hover:bg-stone-800"
+          @click="emit('update:visible', false)"
+        >
+          Ⅹ
+        </button>
       </div>
-      <div class="flex-grow" />
-      <button
-        type="button"
-        class="p-4 hover:bg-stone-800"
-        @click="emit('update:visible', false)"
-      >
-        Ⅹ
-      </button>
-    </div>
-    <slot />
+      <slot />
+    </template>
   </dialog>
 </template>
 

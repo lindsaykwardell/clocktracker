@@ -18,7 +18,7 @@
           character.alignment !== character.role?.initial_alignment) ||
         alwaysShowAlignment
       "
-      class="token bg-center bg-cover absolute bottom-0 left-0 rounded-full shadow-xl border border-black flex justify-center items-center"
+      class="token bg-center bg-cover absolute bottom-0 -left-3 rounded-full shadow-xl border border-black flex justify-center items-center"
       :class="relatedSize"
       @click.stop="emit('clickAlignment')"
     >
@@ -27,7 +27,7 @@
     <slot />
     <div
       v-if="character?.related_role"
-      class="token related bg-center bg-cover absolute bottom-0 right-0 rounded-full shadow-xl border border-black flex justify-center items-center"
+      class="token related bg-center bg-cover absolute bottom-0 -right-3 rounded-full shadow-xl border border-black flex justify-center items-center"
       :class="relatedSize"
       @click.stop="emit('clickRelated')"
     >
