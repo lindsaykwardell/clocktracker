@@ -6,6 +6,7 @@
     "dev": "nuxt dev",
     "test:open": "start-server-and-test dev http://localhost:3000 cy:open",
     "test": "start-server-and-test preview http://localhost:3000 cy:run",
+    "test:fresh": "npm run build && npm test",
     "cy:open": "cypress open",
     "cy:run": "cypress run",
     "generate": "nuxt generate",
