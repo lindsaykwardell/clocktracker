@@ -263,7 +263,7 @@
       <details :open="game.grimoire[0].tokens.some((token) => token.role)">
         <summary class="cursor-pointer">Edit Grimoire</summary>
         <div
-          v-if="game.grimoire[0].tokens.length > 2"
+          xv-if="game.grimoire[0].tokens.length > 2"
           class="pt-3 relative bg-center bg-cover"
           :class="{
             'trouble-brewing': game.script === 'Trouble Brewing',
@@ -316,7 +316,10 @@
             class="absolute bottom-0 right-1 flex items-center font-dumbledor"
           >
             <span
-              v-if="!game.is_grimoire_protected || grimPage < game.grimoire.length - 1"
+              v-if="
+                !game.is_grimoire_protected ||
+                grimPage < game.grimoire.length - 1
+              "
               class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded"
             >
               {{
@@ -330,6 +333,7 @@
               :tokens="game.grimoire[grimPage].tokens"
               :availableRoles="orderedRoles"
               :readonly="game.is_grimoire_protected"
+              @selectedMe="applyMyRoleToGrimoire"
             />
           </div>
           <div
@@ -418,6 +422,7 @@ baseScripts.value = baseScriptData ?? [];
 
 const supabase = useSupabaseClient();
 const config = useRuntimeConfig();
+const user = useSupabaseUser();
 
 const showScriptDialog = ref(false);
 const fetchingScripts = ref(false);
@@ -450,6 +455,7 @@ const props = defineProps<{
       related_role_id: string | null;
       role?: {
         token_url: string;
+        type: string;
         initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
       };
       related_role?: { token_url: string };
@@ -468,9 +474,10 @@ const props = defineProps<{
           token_url: string;
           type: string;
           initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+          name?: string;
         };
         related_role_id: string | null;
-        related_role?: { token_url: string };
+        related_role?: { token_url: string; name?: string };
         player_name: string;
         player_id?: string | null;
       }[];
@@ -505,6 +512,7 @@ function addCharacter() {
     related_role_id: null,
     role: {
       token_url: "/1x1.png",
+      type: "",
       initial_alignment: "NEUTRAL",
     },
     related_role: {
@@ -688,6 +696,125 @@ function deletePage() {
 }
 
 watchDebounced(potentialScript, searchScripts, { debounce: 500 });
+
+watch(
+  props.game.grimoire,
+  (value) => {
+    const newTokens = value[grimPage.value].tokens;
+
+    const myCharacters: {
+      name: string;
+      role_id: string | null;
+      alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
+      showRelated: boolean;
+      related: string;
+      related_role_id: string | null;
+      role?: {
+        token_url: string;
+        type: string;
+        initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+      };
+      related_role?: { token_url: string };
+    }[] = [];
+
+    value.forEach((page, i) => {
+      page.tokens.forEach((token, j) => {
+        if (!!token.player_id && token.player_id === user.value?.id) {
+          if (token.role_id) {
+            // See if the role is already in the player_character list
+            const existingCharacter = myCharacters.find(
+              (character) =>
+                character.role_id === token.role_id &&
+                character.alignment === token.alignment
+            );
+
+            // If it's not there, let's add it!
+            if (!existingCharacter) {
+              myCharacters.push({
+                name: token.role?.name ?? "",
+                alignment: token.alignment,
+                related: token.related_role?.name ?? "",
+                showRelated: !!token.related_role_id,
+                role_id: token.role_id,
+                related_role_id: token.related_role_id,
+                role: {
+                  token_url: token.role?.token_url ?? "/1x1.png",
+                  type: token.role?.type ?? "",
+                  initial_alignment: token.role?.initial_alignment ?? "NEUTRAL",
+                },
+                related_role: {
+                  token_url: token.related_role?.token_url ?? "/1x1.png",
+                },
+              });
+            }
+          }
+        }
+
+        if (i <= grimPage.value) return;
+
+        token.is_dead = newTokens[j].is_dead;
+        token.player_id = newTokens[j].player_id;
+        token.player_name = newTokens[j].player_name;
+
+        if (!token.role_id) {
+          token.role = newTokens[j].role;
+          token.role_id = newTokens[j].role_id;
+          token.related_role = newTokens[j].related_role;
+          token.related_role_id = newTokens[j].related_role_id;
+          token.alignment = newTokens[j].alignment;
+        }
+
+        if (token.role_id && !token.related_role_id) {
+          token.related_role = newTokens[j].related_role;
+          token.related_role_id = newTokens[j].related_role_id;
+        }
+      });
+    });
+
+    if (myCharacters.length > 0) {
+      props.game.player_characters = myCharacters;
+    }
+  },
+  { deep: true }
+);
+
+function applyMyRoleToGrimoire() {
+  props.game.grimoire.forEach((page) => {
+    page.tokens.forEach((token) => {
+      if (!(!!token.player_id && token.player_id === user.value?.id)) return;
+
+      const playerRole = props.game.player_characters[0].role;
+      const relatedRole = props.game.player_characters[0].related_role;
+
+      if (!token.role_id) {
+        token.role = playerRole
+          ? {
+              token_url: playerRole.token_url,
+              type: playerRole.type,
+              initial_alignment: playerRole.initial_alignment,
+            }
+          : undefined;
+        token.role_id = props.game.player_characters[0].role_id;
+        token.related_role = relatedRole
+          ? {
+              token_url: relatedRole.token_url,
+            }
+          : undefined;
+        token.related_role_id = props.game.player_characters[0].related_role_id;
+        token.alignment = props.game.player_characters[0].alignment;
+      }
+
+      if (!token.related_role_id) {
+        token.related_role = relatedRole
+          ? {
+              token_url: relatedRole.token_url,
+            }
+          : undefined;
+        token.related_role_id = props.game.player_characters[0].related_role_id;
+      }
+    });
+  });
+}
 </script>
 
 <style scoped>

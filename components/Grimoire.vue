@@ -120,6 +120,8 @@ const props = defineProps<{
   readonly?: boolean;
 }>();
 
+const emit = defineEmits(["selectedMe"])
+
 const orderedTokens = computed(() =>
   props.tokens.sort((a, b) => a.order - b.order)
 );
@@ -155,6 +157,7 @@ function selectRoleForToken(role: {
         token_url: "/1x1.png",
         name: role.name,
       };
+      focusedToken.related_role_id = null;
     } else {
       focusedToken.related_role = {
         token_url: role.token_url,
@@ -178,6 +181,10 @@ function checkIfPlayerNameIsFriend(token: Token) {
     );
     if (player) {
       token.player_id = player.user_id;
+
+      if (player.user_id === me.value?.user_id) {
+        emit("selectedMe", player.user_id);
+      }
     } else {
       token.player_id = undefined;
     }
