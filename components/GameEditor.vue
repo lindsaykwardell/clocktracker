@@ -250,6 +250,10 @@
             <template v-else>Loss</template>
           </span>
         </label>
+        <label class="flex gap-2 items-center">
+          <input type="checkbox" v-model="game.ignore_for_stats" />
+          <span class="block whitespace-nowrap">Ignore for stats</span>
+        </label>
       </fieldset>
     </fieldset>
     <fieldset
@@ -472,6 +476,7 @@ const props = defineProps<{
       }[];
     }[];
     is_grimoire_protected?: boolean;
+    ignore_for_stats: boolean;
   };
 }>();
 
