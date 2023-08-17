@@ -791,6 +791,7 @@ function applyMyRoleToGrimoire() {
           ? {
               token_url: playerRole.token_url,
               type: playerRole.type,
+              name: props.game.player_characters[0].name,
               initial_alignment: playerRole.initial_alignment,
             }
           : undefined;
