@@ -359,6 +359,7 @@
           class="block w-full border border-stone-500 rounded-md p-2"
           @keydown.enter.prevent="addTag"
           list="tags"
+          placeholder="Enter a tag, then press enter"
         />
         <datalist id="tags">
           <option v-for="tag in myTags.filter(tag => !game.tags.includes(tag))" :value="tag" />
