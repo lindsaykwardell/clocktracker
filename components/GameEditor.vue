@@ -362,7 +362,10 @@
           placeholder="Enter a tag, then press enter"
         />
         <datalist id="tags">
-          <option v-for="tag in myTags.filter(tag => !game.tags.includes(tag))" :value="tag" />
+          <option
+            v-for="tag in myTags.filter((tag) => !game.tags.includes(tag))"
+            :value="tag"
+          />
         </datalist>
       </label>
       <div class="flex flex-wrap gap-2">
