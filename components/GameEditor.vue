@@ -358,7 +358,11 @@
           v-model="tagsInput"
           class="block w-full border border-stone-500 rounded-md p-2"
           @keydown.enter.prevent="addTag"
+          list="tags"
         />
+        <datalist id="tags">
+          <option v-for="tag in myTags.filter(tag => !game.tags.includes(tag))" :value="tag" />
+        </datalist>
       </label>
       <div class="flex flex-wrap gap-2">
         <button
@@ -441,9 +445,18 @@ baseScripts.value = baseScriptData ?? [];
 const supabase = useSupabaseClient();
 const config = useRuntimeConfig();
 const user = useSupabaseUser();
+const users = useUsers();
+const games = useGames();
+
+const me = computed(() => users.getUserById(user.value?.id));
+const myTags = computed(() => {
+  if (me.value.status === Status.SUCCESS) {
+    return games.getTagsByPlayer(me.value.data.username);
+  }
+  return [];
+});
 
 const showScriptDialog = ref(false);
-const fetchingScripts = ref(false);
 
 const orderedRoles = computed(() =>
   naturalOrder(roles.value).orderBy("asc").sort(["name"])

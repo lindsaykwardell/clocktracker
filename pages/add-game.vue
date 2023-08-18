@@ -42,6 +42,8 @@ const game = reactive<{
     related_role_id: string | null;
     role?: {
       token_url: string;
+      name: string;
+      type: string;
       initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
     };
     related_role?: { token_url: string };
@@ -88,6 +90,8 @@ const game = reactive<{
       related_role_id: null,
       role: {
         token_url: "/1x1.png",
+        name: "",
+        type: "",
         initial_alignment: "NEUTRAL",
       },
       related_role: {

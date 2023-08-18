@@ -72,6 +72,21 @@ export const useGames = defineStore("games", {
         return { status: Status.SUCCESS, data: games };
       };
     },
+    getTagsByPlayer(): (username: string) => string[] {
+      return (username: string) => {
+        const games = this.getByPlayer(username);
+        if (games.status !== Status.SUCCESS) return [];
+
+        const tags = new Set<string>();
+        for (const game of games.data) {
+          for (const tag of game.tags) {
+            tags.add(tag);
+          }
+        }
+
+        return Array.from(tags);
+      };
+    },
     getLastCharater(): (gameId: string) => FullCharacter {
       return (gameId: string) => {
         const dummyCharacter: FullCharacter = {
