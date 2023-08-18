@@ -5,9 +5,9 @@
         <div class="w-full flex flex-col gap-4">
           <div class="flex flex-col md:flex-row gap-3 px-4">
             <label class="flex gap-2 items-center">
-              <span class="block whitespace-nowrap w-20 md:w-auto"
-                >Sort By</span
-              >
+              <span class="block whitespace-nowrap w-20 md:w-auto">
+                Sort By
+              </span>
               <select
                 v-model="sortBy"
                 class="w-full rounded p-1 text-lg bg-stone-600"
@@ -30,6 +30,30 @@
                 <option value="desc">Descending</option>
               </select>
             </label>
+            <label class="flex gap-2 items-center">
+              <span class="block whitespace-nowrap w-20 md:w-auto">Tags</span>
+              <select
+                v-model="selectedTag"
+                class="w-full rounded p-1 text-lg bg-stone-600"
+              >
+                <option :value="null">Filter by tag</option>
+                <option
+                  v-for="tag in myTags.filter(
+                    (tag) => !selectedTags.includes(tag)
+                  )"
+                  :key="tag"
+                >
+                  {{ tag }}
+                </option>
+              </select>
+            </label>
+            <button
+              v-for="(tag, index) in selectedTags"
+              class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
+              @click.prevent="selectedTags.splice(index, 1)"
+            >
+              {{ tag }}
+            </button>
             <div class="flex-grow"></div>
             <div class="flex gap-2 items-center">
               <button
@@ -93,6 +117,7 @@
               :games="sortedGames"
               :username="player.username"
             />
+            <p v-if="!sortedGames.length" class="text-center text-2xl my-4 font-dumbledor">No games match!</p>
           </div>
         </div>
       </section>
@@ -118,12 +143,40 @@ import { FetchStatus } from "composables/useFetchStatus";
 import { GameRecord } from "composables/useGames";
 import naturalOrder from "natural-order";
 
+const user = useSupabaseUser();
+const users = useUsers();
+const allGames = useGames();
+
+const me = computed(() => {
+  if (user.value) {
+    return users.getUserById(user.value.id);
+  }
+  return null;
+});
+
+const myTags = computed(() => {
+  if (me.value?.status === Status.SUCCESS) {
+    return allGames.getTagsByPlayer(me.value.data.username);
+  } else {
+    return [];
+  }
+});
+
 const ready = ref(false);
 const gameView = ref<"grid" | "table">("grid");
 const sortBy = ref<
   "character" | "date" | "script" | "location" | "community" | "players"
 >("date");
 const orderBy = ref<"asc" | "desc">("desc");
+const selectedTag = ref<string | null>(null);
+const selectedTags = ref<string[]>([]);
+
+watchEffect(() => {
+  if (selectedTag.value) {
+    selectedTags.value.push(selectedTag.value);
+    selectedTag.value = null;
+  }
+});
 
 const props = defineProps<{
   player: {
@@ -137,8 +190,6 @@ const props = defineProps<{
   } | null;
   games: FetchStatus<GameRecord[]>;
 }>();
-
-const user = useSupabaseUser();
 
 const sortedGames = computed(() => {
   if (props.games.status !== Status.SUCCESS) {
@@ -165,6 +216,11 @@ const sortedGames = computed(() => {
             return [];
         }
       })()
+    )
+    .filter(
+      (game) =>
+        !selectedTags.value.length ||
+        selectedTags.value.every((tag) => game.tags.includes(tag))
     );
 });
 
@@ -172,6 +228,7 @@ onMounted(() => {
   const lastSortBy = localStorage.getItem("lastSortBy");
   const lastOrderBy = localStorage.getItem("lastOrderBy");
   const lastGameView = localStorage.getItem("lastGameView");
+  const lastSelectedTags = localStorage.getItem("lastSelectedTags");
   if (lastSortBy) {
     sortBy.value = lastSortBy as any;
   }
@@ -180,6 +237,9 @@ onMounted(() => {
   }
   if (lastGameView) {
     gameView.value = lastGameView as any;
+  }
+  if (lastSelectedTags) {
+    selectedTags.value = JSON.parse(lastSelectedTags);
   }
   ready.value = true;
 });
@@ -190,7 +250,6 @@ watch(
     localStorage.setItem("lastSortBy", value);
   }
 );
-
 watch(
   () => orderBy.value,
   (value) => {
@@ -202,5 +261,12 @@ watch(
   (value) => {
     localStorage.setItem("lastGameView", value);
   }
+);
+watch(
+  () => selectedTags.value,
+  (value) => {
+    localStorage.setItem("lastSelectedTags", JSON.stringify(value));
+  },
+  { deep: true }
 );
 </script>
