@@ -47,13 +47,15 @@
                 </option>
               </select>
             </label>
-            <button
-              v-for="(tag, index) in selectedTags"
-              class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
-              @click.prevent="selectedTags.splice(index, 1)"
-            >
-              {{ tag }}
-            </button>
+            <div class="flex flex-wrap gap-2">
+              <button
+                v-for="(tag, index) in selectedTags"
+                class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
+                @click.prevent="selectedTags.splice(index, 1)"
+              >
+                {{ tag }}
+              </button>
+            </div>
             <div class="flex-grow"></div>
             <div class="flex gap-2 items-center">
               <button
@@ -117,7 +119,12 @@
               :games="sortedGames"
               :username="player.username"
             />
-            <p v-if="!sortedGames.length" class="text-center text-2xl my-4 font-dumbledor">No games match!</p>
+            <p
+              v-if="!sortedGames.length"
+              class="text-center text-2xl my-4 font-dumbledor"
+            >
+              No games match!
+            </p>
           </div>
         </div>
       </section>
