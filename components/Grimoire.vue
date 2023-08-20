@@ -32,14 +32,14 @@
           v-model="token.player_name"
           @input="checkIfPlayerNameIsFriend(token)"
           type="text"
-          class="w-28 bg-stone-600 rounded p-1 border-2 border-stone-500 text-center"
+          class="w-28 bg-stone-600 rounded p-1 border-2 border-stone-500 text-center text-xs md:text-sm"
           :readonly="readonly"
           list="friends"
         />
         <a
           v-else-if="token.player_id"
           :href="`/${token.player_name}`"
-          class="bg-green-800 rounded p-1 border-2 border-green-700 text-center text-ellipsis max-w-[150px] overflow-hidden whitespace-nowrap hover:bg-blue-800 hover:border-blue-700 transition duration-150 hover:underline"
+          class="bg-green-800 rounded p-1 border-2 border-green-700 text-center text-ellipsis text-xs md:text-sm max-w-[5rem] md:max-w-[7rem] overflow-hidden whitespace-nowrap hover:bg-blue-800 hover:border-blue-700 transition duration-150 hover:underline"
         >
           {{ token.player_name }}
         </a>
@@ -120,7 +120,7 @@ const props = defineProps<{
   readonly?: boolean;
 }>();
 
-const emit = defineEmits(["selectedMe"])
+const emit = defineEmits(["selectedMe"]);
 
 const orderedTokens = computed(() =>
   props.tokens.sort((a, b) => a.order - b.order)
@@ -194,7 +194,7 @@ function checkIfPlayerNameIsFriend(token: Token) {
 
 <style scoped>
 .container {
-  --d: 7rem; /* image size */
+  --d: 7rem;
   --rel: calc(
     8 / (var(--m) * 2)
   ); /* how much extra space we want between images, 1 = one image size */
@@ -205,6 +205,10 @@ function checkIfPlayerNameIsFriend(token: Token) {
   position: relative;
   width: var(--s);
   height: var(--s);
+
+  @media (max-width: 768px) {
+    --d: 5rem;
+  }
 }
 
 .container div.token-seat {
