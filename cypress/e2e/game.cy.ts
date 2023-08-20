@@ -136,7 +136,6 @@ describe("games", () => {
       cy.findAllByText("Select Script").first().click();
       cy.findByAltText("Trouble Brewing").click();
       cy.findByLabelText("Players").type("5");
-      cy.findByText("Edit Grimoire").click();
       cy.get("#grimoire .token").should("have.length", 5);
 
       cy.findByLabelText("Players").clear().type("7");
@@ -164,7 +163,6 @@ describe("games", () => {
       cy.findAllByText("Select Script").first().click();
       cy.findByAltText("Trouble Brewing").click();
       cy.findByLabelText("Players").type("5");
-      cy.findByText("Edit Grimoire").click();
       cy.get("#grimoire .token").first().click({ force: true });
       cy.findByText("Spy").click();
       cy.get("#grimoire .token .token-image")
@@ -188,7 +186,6 @@ describe("games", () => {
       cy.findAllByText("Select Script").first().click();
       cy.findByAltText("Trouble Brewing").click();
       cy.findByLabelText("Players").type("5");
-      cy.findByText("Edit Grimoire").click();
       cy.get("#grimoire .token").first().click({ force: true });
       cy.findByText("Spy").click();
       cy.get("#grimoire .token-seat input")
@@ -230,7 +227,6 @@ describe("games", () => {
       cy.findAllByText("Select Script").first().click();
       cy.findByAltText("Trouble Brewing").click();
       cy.findByLabelText("Players").type("5");
-      cy.findByText("Edit Grimoire").click();
       cy.get("#grimoire .token").first().click({ force: true });
       cy.findByText("Spy").click();
       cy.get("#grimoire .token-seat input")
@@ -250,7 +246,6 @@ describe("games", () => {
         cy.findAllByText("Select Script").first().click();
         cy.findByAltText("Trouble Brewing").click();
         cy.findByLabelText("Players").type("5");
-        cy.findByText("Edit Grimoire").click();
         cy.get("#grimoire .token").first().click({ force: true });
         cy.findByText("Spy").click();
         cy.get("#grimoire .token-seat input")
@@ -271,7 +266,6 @@ describe("games", () => {
         cy.findByLabelText("Players").type("5");
         cy.get(".token").first().click();
         cy.findByText("Butler").first().click();
-        cy.findByText("Edit Grimoire").click();
         cy.get("#grimoire .token-seat input")
           .first()
           .type("@" + username, { force: true });
@@ -288,7 +282,6 @@ describe("games", () => {
         cy.findAllByText("Select Script").first().click();
         cy.findByAltText("Trouble Brewing").click();
         cy.findByLabelText("Players").type("5");
-        cy.findByText("Edit Grimoire").click();
         cy.get("#grimoire .token").first().click({ force: true });
         cy.findByText("Butler").click();
         cy.get("#grimoire .token-seat input")
