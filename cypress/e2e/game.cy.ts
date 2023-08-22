@@ -200,7 +200,7 @@ describe("games", () => {
         .should("have.value", playerName);
     });
 
-    it("allows tagging a friend in a grimoire seat", () => {
+    describe("tagging friends", () => {
       const user2 = {
         email: faker.internet.email(),
         password: faker.internet.password(),
@@ -208,37 +208,81 @@ describe("games", () => {
         displayName: "",
       };
 
-      // @ts-ignore
-      cy.register(user2.email, user2.password, user2.username);
+      before(() => {
+        // @ts-ignore
+        cy.register(user2.email, user2.password, user2.username);
 
-      cy.findByRole("link", { name: "Search" }).click();
-      cy.get("input[type='search']").type(displayName);
-      cy.findByRole("button", { name: "Search" }).click();
-      cy.findByText(displayName).click();
-      cy.findByRole("button", { name: "Add Friend" }).click();
-      cy.findByRole("button", { name: "Cancel" }).should("exist");
-      // @ts-ignore
-      cy.logout();
+        cy.findByRole("link", { name: "Search" }).click();
+        cy.get("input[type='search']").type(displayName);
+        cy.findByRole("button", { name: "Search" }).click();
+        cy.findByText(displayName).click();
+        cy.findByRole("button", { name: "Add Friend" }).click();
+        cy.findByRole("button", { name: "Cancel" }).should("exist");
+        // @ts-ignore
+        cy.logout();
 
-      // @ts-ignore
-      cy.login(email, password);
-      cy.findByText("Friends").click();
-      cy.findByRole("button", { name: "Accept" }).click();
-      cy.findByRole("button", { name: "Friends" }).should("exist");
+        // @ts-ignore
+        cy.login(email, password);
+        cy.findByText("Friends").click();
+        cy.findByRole("button", { name: "Accept" }).click();
+        cy.findByRole("button", { name: "Friends" }).should("exist");
+        // @ts-ignore
+        cy.logout();
+      });
 
-      cy.findByText("Add Game").click();
-      cy.findAllByText("Select Script").first().click();
-      cy.findByAltText("Trouble Brewing").click();
-      cy.findByLabelText("Players").type("5");
-      cy.findByText("Edit Grimoire").click();
-      cy.get("#grimoire .token").first().click({ force: true });
-      cy.findByText("Spy").click();
-      cy.get("#grimoire .token-seat input")
-        .first()
-        .type("@" + user2.username, { force: true });
-      cy.findByText("Save Game").click();
-      cy.url().should("include", "/game/");
-      cy.findByRole("link", { name: "@" + user2.username }).should("exist");
+      it("allows tagging a friend in a grimoire seat", () => {
+        // @ts-ignore
+        cy.login(email, password);
+
+        cy.findByText("Add Game").click();
+        cy.findAllByText("Select Script").first().click();
+        cy.findByAltText("Trouble Brewing").click();
+        cy.findByLabelText("Players").type("5");
+        cy.findByText("Edit Grimoire").click();
+        cy.get("#grimoire .token").first().click({ force: true });
+        cy.findByText("Chef").click();
+        cy.get("#grimoire .token-seat input")
+          .first()
+          .type("@" + user2.username, { force: true });
+        cy.findByText("Save Game").click();
+        cy.url().should("include", "/game/");
+        cy.findByRole("link", { name: "@" + user2.username }).should("exist");
+      });
+
+      it("creates a pending copy of the game for the tagged friend", () => {
+        // @ts-ignore
+        cy.login(email, password);
+
+        cy.findByText("Add Game").click();
+        cy.findAllByText("Select Script").first().click();
+        cy.findByAltText("Trouble Brewing").click();
+        cy.findByLabelText("Players").type("5");
+        cy.findByText("Edit Grimoire").click();
+        cy.get("#grimoire .token").first().click({ force: true });
+        cy.findByText("Investigator").click();
+        cy.get("#grimoire .token-seat input")
+          .first()
+          .type("@" + user2.username, { force: true });
+        cy.findByText("Save Game").click();
+        cy.url().should("include", "/game/");
+        
+        // @ts-ignore
+        cy.logout();
+
+        // @ts-ignore
+        cy.login(user2.email, user2.password);
+        cy.findByText("Tagged").click();
+        cy.findByAltText("Investigator").should("exist");
+        cy.findByAltText("Investigator").click();
+        cy.findByRole("button", { name: "Add game to my Profile" }).should(
+          "exist"
+        );
+
+        cy.findByRole("button", { name: "Add game to my Profile" }).click();
+        cy.findByRole("button", { name: "Add game to my Profile" }).should(
+          "not.exist"
+        );
+      });
     });
 
     describe("tagging yourself", () => {

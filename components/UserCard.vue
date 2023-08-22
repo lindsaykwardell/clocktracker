@@ -15,11 +15,11 @@
           <h3 class="font-dumbledor text-xl">
             {{ player.data.display_name }}
           </h3>
-          <div class="text-stone-400">
-            {{ player.data.username }}
-            <template v-if="player.data.pronouns">
-              | <span>{{ player.data.pronouns }}</span>
-            </template>
+          <div class="text-stone-400 flex">
+            <span>{{ player.data.username }}</span>
+            <span v-if="player.data.pronouns">
+              | {{ player.data.pronouns }}
+            </span>
           </div>
           <div class="text-stone-400 flex gap-2 items-center">
             <svg
