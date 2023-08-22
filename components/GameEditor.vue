@@ -257,13 +257,13 @@
       </fieldset>
     </fieldset>
     <fieldset
+      v-if="game.grimoire[0].tokens.length > 2"
       class="block border rounded border-stone-500 p-4 my-3 bg-center bg-cover"
     >
       <legend>Grimoire</legend>
       <details :open="game.grimoire[0].tokens.some((token) => token.role)">
         <summary class="cursor-pointer">Edit Grimoire</summary>
         <div
-          xv-if="game.grimoire[0].tokens.length > 2"
           class="pt-3 relative bg-center bg-cover"
           :class="{
             'trouble-brewing': game.script === 'Trouble Brewing',

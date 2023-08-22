@@ -222,6 +222,7 @@ export default defineEventHandler(async (handler) => {
           },
           is_grimoire_protected: true,
           parent_game_id: game.id,
+          waiting_for_confirmation: true,
         },
       });
     } else {
