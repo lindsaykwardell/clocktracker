@@ -154,6 +154,7 @@ export default defineEventHandler(async (handler) => {
       },
     },
     include: {
+      player_characters: true,
       grimoire: {
         include: {
           tokens: {
@@ -169,6 +170,10 @@ export default defineEventHandler(async (handler) => {
   });
 
   if (!game.parent_game_id) {
+    const parentGameLastAlignment =
+      game.player_characters[game.player_characters.length - 1]?.alignment ||
+      Alignment.NEUTRAL;
+
     const taggedPlayers = new Set(
       game.grimoire.flatMap((g) => g.tokens?.map((t) => t.player_id))
     );
@@ -209,6 +214,25 @@ export default defineEventHandler(async (handler) => {
       const childGame = game.child_games?.find((g) => g.user_id === id);
 
       if (!childGame) {
+        const lastAlignment =
+          player_characters[player_characters.length - 1].alignment;
+
+        const win = (() => {
+          if (parentGameLastAlignment === Alignment.NEUTRAL) {
+            if (lastAlignment === Alignment.GOOD) {
+              return game.win;
+            } else {
+              return !game.win;
+            }
+          }
+
+          if (lastAlignment === parentGameLastAlignment) {
+            return game.win;
+          } else {
+            return !game.win;
+          }
+        })();
+
         await prisma.game.create({
           data: {
             ...body,
@@ -224,6 +248,7 @@ export default defineEventHandler(async (handler) => {
             is_grimoire_protected: true,
             parent_game_id: game.id,
             waiting_for_confirmation: true,
+            win,
           },
         });
       } else {
