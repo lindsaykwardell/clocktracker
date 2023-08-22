@@ -33,7 +33,7 @@
               >
                 {{ pendingGames.data.length }}
               </span>
-              Tagged
+              <span>Tagged</span>
             </nuxt-link>
             <nuxt-link
               :to="`/@${username}?view=charts`"
