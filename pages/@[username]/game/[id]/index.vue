@@ -218,6 +218,13 @@
         v-if="player.data.user_id === user?.id"
         class="p-4 flex justify-between md:justify-end gap-4"
       >
+        <button
+          v-if="game.data.waiting_for_confirmation"
+          @click="confirmGame"
+          class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial"
+        >
+          Add game to my Profile
+        </button>
         <nuxt-link
           class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial"
           :to="`/@${route.params.username}/game/${route.params.id}/edit`"
@@ -237,7 +244,6 @@
         <button
           @click="deleteGame"
           class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial"
-          :href="`/@${route.params.username}/game/${route.params.id}/edit`"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -264,6 +270,7 @@
 </template>
 
 <script setup lang="ts">
+import { GameRecord } from "composables/useGames";
 import dayjs from "dayjs";
 import VueMarkdown from "vue-markdown-render";
 
@@ -418,6 +425,16 @@ async function deleteGame() {
     }).then((res) => res.json());
 
     router.push(`/@${route.params.username}`);
+  }
+}
+
+async function confirmGame() {
+  if (confirm("Are you sure you want to add this game to your profile?")) {
+    const result = await $fetch<GameRecord>(`/api/games/${gameId}/confirm`, {
+      method: "POST",
+    });
+
+    games.games.set(gameId, { status: Status.SUCCESS, data: result });
   }
 }
 
