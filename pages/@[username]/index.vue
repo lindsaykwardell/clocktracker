@@ -9,7 +9,7 @@
               player.user_id === user?.id ||
               friends.getFriendStatus(player.user_id) === FriendStatus.FRIENDS
             "
-            class="flex justify-start overflow-scroll w-screen md:w-full gap-1 h-12"
+            class="flex justify-start w-screen md:w-full gap-1 h-12"
           >
             <nuxt-link
               :to="`/@${username}`"
@@ -17,6 +17,23 @@
               :class="currentTabClass('dashboard')"
             >
               Games
+            </nuxt-link>
+            <nuxt-link
+              v-if="
+                pendingGames.status === Status.SUCCESS &&
+                pendingGames.data.length
+              "
+              :to="`/@${username}?view=pending`"
+              class="relative font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-700"
+              :class="currentTabClass('pending')"
+            >
+              <span
+                class="text-stone-200 bg-red-800 rounded-full px-2 py-1 text-xs font-bold aspect-square"
+                aria-label="Unread notifications"
+              >
+                {{ pendingGames.data.length }}
+              </span>
+              Tagged
             </nuxt-link>
             <nuxt-link
               :to="`/@${username}?view=charts`"
@@ -39,6 +56,11 @@
             v-if="currentTab === 'dashboard'"
             :player="player"
             :games="games"
+          />
+          <Dashboard
+            v-if="currentTab === 'pending'"
+            :player="player"
+            :games="pendingGames"
           />
         </template>
         <template v-else>
@@ -76,10 +98,16 @@ const games = computed(() => {
   return gameStore.getByPlayer(username);
 });
 
+const pendingGames = computed(() => {
+  return gameStore.getPendingByPlayer(username);
+});
+
 const currentTab = computed(() => {
   switch (route.query.view) {
     case "charts":
       return "charts";
+    case "pending":
+      return "pending";
     default:
       return "dashboard";
   }
