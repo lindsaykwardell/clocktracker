@@ -169,7 +169,7 @@
           game.data.grimoire[0] &&
           game.data.grimoire[0].tokens.some((token) => token.role)
         "
-        class="bg-center bg-cover py-6 relative text-white"
+        class="bg-center bg-cover relative text-white"
         :class="{
           'trouble-brewing': game.data.script === 'Trouble Brewing',
           'sects-and-violets': game.data.script === 'Sects and Violets',
