@@ -9,7 +9,7 @@
         >
           <option :value="null">Filter by tag</option>
           <option
-            v-for="tag in myTags.filter((tag) => !selectedTags.includes(tag))"
+            v-for="tag in allTags.filter((tag) => !selectedTags.includes(tag))"
             :key="tag"
           >
             {{ tag }}
@@ -44,6 +44,11 @@
           class="h-[250px] w-screen md:w-1/3"
         />
         <RoleType :games="filteredGames" class="h-[250px] w-screen md:w-1/3" />
+        <Chart
+          v-for="chart in allCharts"
+          :games="filteredGames"
+          :options="chart"
+        />
       </template>
     </div>
     <!-- Hack, I'm sorry future me -->
@@ -57,22 +62,27 @@ import { GameRecord } from "composables/useGames";
 
 const props = defineProps<{
   games: FetchStatus<GameRecord[]>;
+  username: string;
 }>();
 
-const user = useSupabaseUser();
 const users = useUsers();
 const allGames = useGames();
 
-const me = computed(() => {
-  if (user.value) {
-    return users.getUserById(user.value.id);
-  }
-  return null;
+const user = computed(() => {
+  return users.getUser(props.username);
 });
 
-const myTags = computed(() => {
-  if (me.value?.status === Status.SUCCESS) {
-    return allGames.getTagsByPlayer(me.value.data.username);
+const allTags = computed(() => {
+  if (user.value?.status === Status.SUCCESS) {
+    return allGames.getTagsByPlayer(user.value.data.username);
+  } else {
+    return [];
+  }
+});
+
+const allCharts = computed(() => {
+  if (user.value?.status === Status.SUCCESS) {
+    return user.value.data.charts;
   } else {
     return [];
   }
