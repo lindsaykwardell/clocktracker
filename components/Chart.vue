@@ -1,5 +1,6 @@
 <template>
-  <div>
+  <div class="chart-container">
+    <div class="text-xl font-dumbledor text-center">{{ options.title }}</div>
     <Bar
       v-if="options.type === 'bar'"
       :data="chartData"
@@ -30,13 +31,19 @@ const { Script, isBaseScript } = useScripts();
 const props = defineProps<{
   games: GameRecord[];
   options: {
+    title: string;
     type: string;
     pivot: "role" | "alignment" | "script" | "game_size" | "win" | null;
     data_field: "role" | "alignment" | "script" | "game_size" | "win";
     includeTags: string[];
     excludeTags: string[];
+    width: number;
+    height: number;
   };
 }>();
+
+const width = computed(() => (props.options.width || 250) + "px");
+const height = computed(() => (props.options.height || 250) + "px");
 
 const labels = computed(() => {
   if (props.options.data_field === "role") {
@@ -64,7 +71,7 @@ const datasets = computed(() => {
     (game) =>
       !game.ignore_for_stats &&
       !game.is_storyteller &&
-      props.options.includeTags.every((tag) => game.tags.includes(tag)) && 
+      props.options.includeTags.every((tag) => game.tags.includes(tag)) &&
       props.options.excludeTags.every((tag) => !game.tags.includes(tag))
   );
 
@@ -493,3 +500,10 @@ const chartOptions = computed(() => ({
   },
 }));
 </script>
+
+<style scoped>
+.chart-container {
+  width: v-bind(width);
+  height: v-bind(height);
+}
+</style>
