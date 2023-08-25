@@ -25,6 +25,12 @@
           {{ tag }}
         </button>
       </div>
+      <nuxt-link
+        to="/charts/editor"
+        class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
+      >
+        Add Chart
+      </nuxt-link>
     </div>
     <div
       class="flex flex-col items-center justify-center sm:flex-row flex-wrap gap-y-12"
@@ -48,6 +54,8 @@
           v-for="chart in allCharts"
           :games="filteredGames"
           :options="chart"
+          showControls
+          @deleteChart="deleteChart"
         />
       </template>
     </div>
@@ -109,6 +117,16 @@ const filteredGames = computed(() => {
       selectedTags.value.every((tag) => game.tags.includes(tag))
   );
 });
+
+async function deleteChart(chartId: number) {
+  if (confirm("Are you sure you want to delete this chart?")) {
+    await $fetch(`/api/charts/${chartId}`, {
+      method: "DELETE",
+    });
+
+    users.fetchUser(props.username);
+  }
+}
 
 onMounted(() => {
   const lastSelectedTags = localStorage.getItem("lastSelectedTags");

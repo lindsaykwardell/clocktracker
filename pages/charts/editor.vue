@@ -135,6 +135,12 @@ const games = useGames();
 const users = useUsers();
 const user = useSupabaseUser();
 const router = useRouter();
+const route = useRoute();
+
+const chartId = computed(() => {
+  return route.query.chart_id as string | undefined;
+});
+const loadedChart = ref(false);
 
 const me = computed(() => {
   return users.getUserById(user.value?.id);
@@ -192,13 +198,41 @@ watchEffect(() => {
 });
 
 async function saveChart() {
-  await $fetch("/api/charts", {
-    method: "POST",
-    body: JSON.stringify(options),
-  });
+  if (loadedChart.value) {
+    await $fetch(`/api/charts/${chartId.value}`, {
+      method: "PUT",
+      body: JSON.stringify(options),
+    });
+  } else {
+    await $fetch("/api/charts", {
+      method: "POST",
+      body: JSON.stringify(options),
+    });
+  }
 
-  router.push(`/`);
+  if (me.value.status === Status.SUCCESS) {
+    router.push(`/@${me.value.data.username}?view=charts`);
+  } else {
+    router.push("/");
+  }
 }
+
+onMounted(async () => {
+  if (chartId.value) {
+    const chart = await $fetch(`/api/charts/${chartId.value}`);
+    if (!chart) return;
+
+    options.title = chart.title;
+    options.type = chart.type;
+    options.pivot = chart.pivot;
+    options.data = chart.data;
+    options.include_tags = chart.include_tags;
+    options.exclude_tags = chart.exclude_tags;
+    options.width = chart.width;
+    options.height = chart.height;
+    loadedChart.value = true;
+  }
+});
 </script>
 
 <style scoped>
