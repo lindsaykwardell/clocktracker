@@ -2,17 +2,17 @@
   <div class="chart-container">
     <div class="text-xl font-dumbledor text-center">{{ options.title }}</div>
     <Bar
-      v-if="options.type === 'bar'"
+      v-if="options.type === 'BAR'"
       :data="chartData"
       :options="chartOptions"
     />
     <Pie
-      v-if="options.type === 'pie'"
+      v-if="options.type === 'PIE'"
       :data="chartData"
       :options="chartOptions"
     />
     <PolarArea
-      v-if="options.type === 'polar'"
+      v-if="options.type === 'POLAR_AREA'"
       :data="chartData"
       :options="chartOptions"
     />
@@ -33,10 +33,10 @@ const props = defineProps<{
   options: {
     title: string;
     type: string;
-    pivot: "role" | "alignment" | "script" | "game_size" | "win" | null;
-    data_field: "role" | "alignment" | "script" | "game_size" | "win";
-    includeTags: string[];
-    excludeTags: string[];
+    pivot: "ROLE" | "ALIGNMENT" | "SCRIPT" | "GAME_SIZE" | "WIN" | null;
+    data: "ROLE" | "ALIGNMENT" | "SCRIPT" | "GAME_SIZE" | "WIN";
+    include_tags: string[];
+    exclude_tags: string[];
     width: number;
     height: number;
   };
@@ -46,20 +46,20 @@ const width = computed(() => (props.options.width || 250) + "px");
 const height = computed(() => (props.options.height || 250) + "px");
 
 const labels = computed(() => {
-  if (props.options.data_field === "role") {
+  if (props.options.data === "ROLE") {
     return ["Townsfolk", "Outsider", "Minion", "Demon"];
-  } else if (props.options.data_field === "alignment") {
+  } else if (props.options.data === "ALIGNMENT") {
     return ["Good", "Evil"];
-  } else if (props.options.data_field === "script") {
+  } else if (props.options.data === "SCRIPT") {
     return [
       "Trouble Brewing",
       "Bad Moon Rising",
       "Sects and Violets",
       "Custom Script",
     ];
-  } else if (props.options.data_field === "game_size") {
+  } else if (props.options.data === "GAME_SIZE") {
     return ["Teensey", "1 Minion", "2 Minions", "3 Minions"];
-  } else if (props.options.data_field === "win") {
+  } else if (props.options.data === "WIN") {
     return ["Yes", "No"];
   } else {
     return [];
@@ -71,11 +71,11 @@ const datasets = computed(() => {
     (game) =>
       !game.ignore_for_stats &&
       !game.is_storyteller &&
-      props.options.includeTags.every((tag) => game.tags.includes(tag)) &&
-      props.options.excludeTags.every((tag) => !game.tags.includes(tag))
+      props.options.include_tags.every((tag) => game.tags.includes(tag)) &&
+      props.options.exclude_tags.every((tag) => !game.tags.includes(tag))
   );
 
-  if (props.options.data_field === "role") {
+  if (props.options.data === "ROLE") {
     return (
       getPivot(
         games,
@@ -127,7 +127,7 @@ const datasets = computed(() => {
         },
       ]
     );
-  } else if (props.options.data_field === "alignment") {
+  } else if (props.options.data === "ALIGNMENT") {
     return (
       getPivot(
         games,
@@ -161,7 +161,7 @@ const datasets = computed(() => {
         },
       ]
     );
-  } else if (props.options.data_field === "script") {
+  } else if (props.options.data === "SCRIPT") {
     return (
       getPivot(
         games,
@@ -191,7 +191,7 @@ const datasets = computed(() => {
         },
       ]
     );
-  } else if (props.options.data_field === "game_size") {
+  } else if (props.options.data === "GAME_SIZE") {
     return (
       getPivot(
         games,
@@ -237,7 +237,7 @@ const datasets = computed(() => {
         },
       ]
     );
-  } else if (props.options.data_field === "win") {
+  } else if (props.options.data === "WIN") {
     return (
       getPivot(
         games,
@@ -266,7 +266,7 @@ function getPivot(
   validators: ((game: GameRecord) => boolean)[],
   mixColors: ((color: string) => string)[]
 ) {
-  if (props.options.pivot === "role") {
+  if (props.options.pivot === "ROLE") {
     return [
       {
         label: "Townsfolk",
@@ -317,7 +317,7 @@ function getPivot(
         backgroundColor: mixColors.map((mixColor) => mixColor("#FF0000")),
       },
     ];
-  } else if (props.options.pivot === "alignment") {
+  } else if (props.options.pivot === "ALIGNMENT") {
     return [
       {
         label: "Good",
@@ -344,7 +344,7 @@ function getPivot(
         backgroundColor: mixColors.map((mixColor) => mixColor("#FF0000")),
       },
     ];
-  } else if (props.options.pivot === "script") {
+  } else if (props.options.pivot === "SCRIPT") {
     return [
       {
         label: "Trouble Brewing",
@@ -387,7 +387,7 @@ function getPivot(
         backgroundColor: mixColors.map((mixColor) => mixColor("#008000")),
       },
     ];
-  } else if (props.options.pivot === "game_size") {
+  } else if (props.options.pivot === "GAME_SIZE") {
     return [
       {
         label: "Teensey",
@@ -443,7 +443,7 @@ function getPivot(
         backgroundColor: mixColors.map((mixColor) => mixColor("#FF0000")),
       },
     ];
-  } else if (props.options.pivot === "win") {
+  } else if (props.options.pivot === "WIN") {
     return [
       {
         label: "Yes",

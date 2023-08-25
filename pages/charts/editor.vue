@@ -11,6 +11,7 @@
           v-model="options.title"
         />
         <button
+          @click="saveChart"
           class="bg-green-700 hover:bg-green-800 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
         >
           Save
@@ -23,23 +24,23 @@
             class="block border w-full border-stone-500 rounded-md p-2"
             v-model="options.type"
           >
-            <option value="list">List</option>
-            <option value="bar">Bar</option>
-            <option value="pie">Pie</option>
-            <option value="polar">Polar Area</option>
+            <option value="LIST">List</option>
+            <option value="BAR">Bar</option>
+            <option value="PIE">Pie</option>
+            <option value="POLAR_AREA">Polar Area</option>
           </select>
         </label>
         <label class="flex-1 flex items-center gap-1">
           Data Field
           <select
             class="block border w-full border-stone-500 rounded-md p-2"
-            v-model="options.data_field"
+            v-model="options.data"
           >
-            <option value="alignment">Alignment</option>
-            <option value="game_size">Game Size</option>
-            <option value="role">Role</option>
-            <option value="script">Script</option>
-            <option value="win">Win</option>
+            <option value="ALIGNMENT">Alignment</option>
+            <option value="GAME_SIZE">Game Size</option>
+            <option value="ROLE">Role</option>
+            <option value="SCRIPT">Script</option>
+            <option value="WIN">Win</option>
           </select>
         </label>
         <!-- refactor the below radio buttons into a select dropdown -->
@@ -50,11 +51,11 @@
             v-model="options.pivot"
           >
             <option :value="null">Do not pivot</option>
-            <option value="alignment">Alignment</option>
-            <option value="game_size">Game Size</option>
-            <option value="role">Role</option>
-            <option value="script">Script</option>
-            <option value="win">Win</option>
+            <option value="ALIGNMENT">Alignment</option>
+            <option value="GAME_SIZE">Game Size</option>
+            <option value="ROLE">Role</option>
+            <option value="SCRIPT">Script</option>
+            <option value="WIN">Win</option>
           </select>
         </label>
         <label class="flex-1 flex items-center gap-1">
@@ -83,8 +84,8 @@
             <option
               v-for="tag in myTags.filter(
                 (tag) =>
-                  !options.includeTags.includes(tag) &&
-                  !options.excludeTags.includes(tag)
+                  !options.include_tags.includes(tag) &&
+                  !options.exclude_tags.includes(tag)
               )"
             >
               {{ tag }}
@@ -92,9 +93,9 @@
           </select>
           <div class="flex flex-wrap gap-2">
             <button
-              v-for="(tag, index) in options.includeTags"
+              v-for="(tag, index) in options.include_tags"
               class="bg-blue-600 hover:bg-blue-700 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
-              @click.prevent="options.includeTags.splice(index, 1)"
+              @click.prevent="options.include_tags.splice(index, 1)"
             >
               {{ tag }}
             </button>
@@ -106,8 +107,8 @@
             <option
               v-for="tag in myTags.filter(
                 (tag) =>
-                  !options.includeTags.includes(tag) &&
-                  !options.excludeTags.includes(tag)
+                  !options.include_tags.includes(tag) &&
+                  !options.exclude_tags.includes(tag)
               )"
             >
               {{ tag }}
@@ -115,9 +116,9 @@
           </select>
           <div class="flex flex-wrap gap-2">
             <button
-              v-for="(tag, index) in options.excludeTags"
+              v-for="(tag, index) in options.exclude_tags"
               class="bg-red-600 hover:bg-red-700 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
-              @click.prevent="options.excludeTags.splice(index, 1)"
+              @click.prevent="options.exclude_tags.splice(index, 1)"
             >
               {{ tag }}
             </button>
@@ -133,6 +134,7 @@
 const games = useGames();
 const users = useUsers();
 const user = useSupabaseUser();
+const router = useRouter();
 
 const me = computed(() => {
   return users.getUserById(user.value?.id);
@@ -155,19 +157,19 @@ const myTags = computed(() => {
 const options = reactive<{
   title: string;
   type: string;
-  pivot: "role" | "alignment" | "script" | "game_size" | "win" | null;
-  data_field: "role" | "alignment" | "script" | "game_size" | "win";
-  includeTags: string[];
-  excludeTags: string[];
+  pivot: "ROLE" | "ALIGNMENT" | "SCRIPT" | "GAME_SIZE" | "WIN" | null;
+  data: "ROLE" | "ALIGNMENT" | "SCRIPT" | "GAME_SIZE" | "WIN";
+  include_tags: string[];
+  exclude_tags: string[];
   width: number;
   height: number;
 }>({
   title: "My Games",
-  type: "bar",
+  type: "BAR",
   pivot: null,
-  data_field: "win",
-  includeTags: [],
-  excludeTags: [],
+  data: "WIN",
+  include_tags: [],
+  exclude_tags: [],
   width: 500,
   height: 500,
 });
@@ -177,17 +179,26 @@ const selectedExcludeTag = ref<string | null>(null);
 
 watchEffect(() => {
   if (selectedIncludeTag.value) {
-    options.includeTags.push(selectedIncludeTag.value);
+    options.include_tags.push(selectedIncludeTag.value);
     selectedIncludeTag.value = null;
   }
 });
 
 watchEffect(() => {
   if (selectedExcludeTag.value) {
-    options.excludeTags.push(selectedExcludeTag.value);
+    options.exclude_tags.push(selectedExcludeTag.value);
     selectedExcludeTag.value = null;
   }
 });
+
+async function saveChart() {
+  await $fetch("/api/charts", {
+    method: "POST",
+    body: JSON.stringify(options),
+  });
+
+  router.push(`/`);
+}
 </script>
 
 <style scoped>

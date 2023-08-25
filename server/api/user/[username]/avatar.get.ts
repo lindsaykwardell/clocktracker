@@ -1,5 +1,4 @@
-import { PrismaClient, Game, Character } from "@prisma/client";
-import { navigateTo } from "nuxt/app";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
