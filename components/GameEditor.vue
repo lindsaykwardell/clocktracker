@@ -796,7 +796,7 @@ watch(
 
         if (i <= grimPage.value) return;
 
-        token.is_dead = newTokens[j].is_dead;
+        token.is_dead = token.is_dead || newTokens[j].is_dead;
         token.player_id = newTokens[j].player_id;
         token.player_name = newTokens[j].player_name;
 
