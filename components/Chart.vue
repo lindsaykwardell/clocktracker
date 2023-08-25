@@ -33,6 +33,8 @@ const props = defineProps<{
     type: string;
     pivot: "role" | "alignment" | "script" | "game_size" | "win" | null;
     data_field: "role" | "alignment" | "script" | "game_size" | "win";
+    includeTags: string[];
+    excludeTags: string[];
   };
 }>();
 
@@ -59,7 +61,11 @@ const labels = computed(() => {
 
 const datasets = computed(() => {
   const games = props.games.filter(
-    (game) => !game.ignore_for_stats && !game.is_storyteller
+    (game) =>
+      !game.ignore_for_stats &&
+      !game.is_storyteller &&
+      props.options.includeTags.every((tag) => game.tags.includes(tag)) && 
+      props.options.excludeTags.every((tag) => !game.tags.includes(tag))
   );
 
   if (props.options.data_field === "role") {
