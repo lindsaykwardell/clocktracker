@@ -36,6 +36,48 @@
             <option value="win">Win</option>
           </select>
         </label>
+        <select v-model="selectedIncludeTag" class="">
+          <option :value="null">Include Tag</option>
+          <option
+            v-for="tag in myTags.filter(
+              (tag) =>
+                !options.includeTags.includes(tag) &&
+                !options.excludeTags.includes(tag)
+            )"
+          >
+            {{ tag }}
+          </option>
+        </select>
+        <div class="flex flex-wrap gap-2">
+          <button
+            v-for="(tag, index) in options.includeTags"
+            class="bg-blue-600 hover:bg-blue-700 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
+            @click.prevent="options.includeTags.splice(index, 1)"
+          >
+            {{ tag }}
+          </button>
+        </div>
+        <select v-model="selectedExcludeTag" class="">
+          <option :value="null">Exclude Tag</option>
+          <option
+            v-for="tag in myTags.filter(
+              (tag) =>
+                !options.includeTags.includes(tag) &&
+                !options.excludeTags.includes(tag)
+            )"
+          >
+            {{ tag }}
+          </option>
+        </select>
+        <div class="flex flex-wrap gap-2">
+          <button
+            v-for="(tag, index) in options.excludeTags"
+            class="bg-red-600 hover:bg-red-700 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
+            @click.prevent="options.excludeTags.splice(index, 1)"
+          >
+            {{ tag }}
+          </button>
+        </div>
       </div>
       <Chart
         class="w-[500px] h-[500px] flex justify-center py-6 m-auto"
@@ -51,22 +93,53 @@ const games = useGames();
 const users = useUsers();
 const user = useSupabaseUser();
 
+const me = computed(() => {
+  return users.getUserById(user.value?.id);
+});
+
 const myGames = computed(() => {
-  const me = users.getUserById(user.value?.id);
+  if (me.value?.status !== Status.SUCCESS) return me.value;
 
-  if (me.status !== Status.SUCCESS) return me;
+  return games.getByPlayer(me.value.data.username);
+});
 
-  return games.getByPlayer(me.data.username);
+const myTags = computed(() => {
+  if (me.value?.status === Status.SUCCESS) {
+    return games.getTagsByPlayer(me.value.data.username);
+  } else {
+    return [];
+  }
 });
 
 const options = reactive<{
   type: string;
   pivot: "role" | "alignment" | "script" | "game_size" | "win" | null;
   data_field: "role" | "alignment" | "script" | "game_size" | "win";
+  includeTags: string[];
+  excludeTags: string[];
 }>({
   type: "bar",
   pivot: null,
   data_field: "win",
+  includeTags: [],
+  excludeTags: [],
+});
+
+const selectedIncludeTag = ref<string | null>(null);
+const selectedExcludeTag = ref<string | null>(null);
+
+watchEffect(() => {
+  if (selectedIncludeTag.value) {
+    options.includeTags.push(selectedIncludeTag.value);
+    selectedIncludeTag.value = null;
+  }
+});
+
+watchEffect(() => {
+  if (selectedExcludeTag.value) {
+    options.excludeTags.push(selectedExcludeTag.value);
+    selectedExcludeTag.value = null;
+  }
 });
 </script>
 
