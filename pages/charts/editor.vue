@@ -5,75 +5,35 @@
     </template>
     <template v-else>
       <div class="flex gap-2">
-        <select v-model="options.type">
-          <!-- List, Bar, Pie, Line-->
-          <option value="list">List</option>
-          <option value="bar">Bar</option>
-          <option value="pie">Pie</option>
-          <option value="polar">Polar Area</option>
-        </select>
         <label>
-          <input
-            v-model="options.pivot"
-            :value="null"
-            type="radio"
-            name="pivot"
-          />
-          Do Not Split
-        </label>
-        <label>
-          <input
-            v-model="options.pivot"
-            value="role"
-            type="radio"
-            name="pivot"
-          />
-          Split By Role
-        </label>
-        <label>
-          <input
-            v-model="options.pivot"
-            value="alignment"
-            type="radio"
-            name="pivot"
-          />
-          Split By Alignment
-        </label>
-        <label>
-          <input
-            v-model="options.pivot"
-            value="script"
-            type="radio"
-            name="pivot"
-          />
-          Split By Script
-        </label>
-        <label>
-          <input
-            v-model="options.pivot"
-            value="game_size"
-            type="radio"
-            name="pivot"
-          />
-          Split By Game Size
-        </label>
-        <label>
-          <input
-            v-model="options.pivot"
-            value="win"
-            type="radio"
-            name="pivot"
-          />
-          Split By Win
+          Chart Type
+          <select v-model="options.type">
+            <option value="list">List</option>
+            <option value="bar">Bar</option>
+            <option value="pie">Pie</option>
+            <option value="polar">Polar Area</option>
+          </select>
         </label>
         <label>
           Data Field
           <select v-model="options.data_field">
-            <option value="win">Win</option>
-            <option value="role">Role</option>
             <option value="alignment">Alignment</option>
-            <option value="script">Script</option>
             <option value="game_size">Game Size</option>
+            <option value="role">Role</option>
+            <option value="script">Script</option>
+            <option value="win">Win</option>
+          </select>
+        </label>
+        <!-- refactor the below radio buttons into a select dropdown -->
+        <label>
+          Pivot
+          <select v-model="options.pivot">
+            <option :value="null">Do not pivot</option>
+            <option value="alignment">Alignment</option>
+            <option value="game_size">Game Size</option>
+            <option value="role">Role</option>
+            <option value="script">Script</option>
+            <option value="win">Win</option>
           </select>
         </label>
       </div>

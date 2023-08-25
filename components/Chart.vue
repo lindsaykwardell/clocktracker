@@ -36,26 +36,26 @@ const props = defineProps<{
   };
 }>();
 
-function getLabels(type: string) {
-  if (type === "role") {
+const labels = computed(() => {
+  if (props.options.data_field === "role") {
     return ["Townsfolk", "Outsider", "Minion", "Demon"];
-  } else if (type === "alignment") {
+  } else if (props.options.data_field === "alignment") {
     return ["Good", "Evil"];
-  } else if (type === "script") {
+  } else if (props.options.data_field === "script") {
     return [
       "Trouble Brewing",
       "Bad Moon Rising",
       "Sects and Violets",
       "Custom Script",
     ];
-  } else if (type === "game_size") {
+  } else if (props.options.data_field === "game_size") {
     return ["Teensey", "1 Minion", "2 Minions", "3 Minions"];
-  } else if (type === "win") {
+  } else if (props.options.data_field === "win") {
     return ["Yes", "No"];
   } else {
     return [];
   }
-}
+});
 
 const datasets = computed(() => {
   const games = props.games.filter(
@@ -455,11 +455,8 @@ function getPivot(
 }
 
 const chartData = computed(() => ({
-  labels: getLabels(props.options.data_field),
-  datasets: datasets.value.map((dataset) => ({
-    ...dataset,
-    backgroundColor: dataset.backgroundColor,
-  })),
+  labels: labels.value,
+  datasets: datasets.value,
 }));
 
 const chartOptions = computed(() => ({
