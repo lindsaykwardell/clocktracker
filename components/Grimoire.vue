@@ -188,6 +188,8 @@ function checkIfPlayerNameIsFriend(token: Token) {
     } else {
       token.player_id = undefined;
     }
+  } else {
+    token.player_id = undefined;
   }
 }
 </script>
