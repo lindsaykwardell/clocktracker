@@ -9,6 +9,17 @@ export default defineEventHandler(async (handler) => {
     where: {
       username,
     },
+    select: {
+      user_id: true,
+      username: true,
+      display_name: true,
+      avatar: true,
+      pronouns: true,
+      bio: true,
+      location: true,
+      privacy: true,
+      charts: true,
+    },
   });
 
   if (!user) {
@@ -19,14 +30,5 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  return {
-    user_id: user.user_id,
-    username: user.username,
-    display_name: user.display_name,
-    avatar: user.avatar,
-    pronouns: user.pronouns,
-    bio: user.bio,
-    location: user.location,
-    privacy: user.privacy,
-  };
+  return user;
 });

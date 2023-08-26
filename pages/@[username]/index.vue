@@ -51,7 +51,7 @@
             friends.getFriendStatus(player.user_id) === FriendStatus.FRIENDS
           "
         >
-          <UserCharts v-if="currentTab === 'charts'" :games="games" />
+          <UserCharts v-if="currentTab === 'charts'" :games="games" :username="username" />
           <Dashboard
             v-if="currentTab === 'dashboard'"
             :player="player"

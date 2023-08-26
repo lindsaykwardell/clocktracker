@@ -9,7 +9,7 @@
         >
           <option :value="null">Filter by tag</option>
           <option
-            v-for="tag in myTags.filter((tag) => !selectedTags.includes(tag))"
+            v-for="tag in allTags.filter((tag) => !selectedTags.includes(tag))"
             :key="tag"
           >
             {{ tag }}
@@ -25,6 +25,12 @@
           {{ tag }}
         </button>
       </div>
+      <nuxt-link
+        to="/charts/editor"
+        class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
+      >
+        Add Chart
+      </nuxt-link>
     </div>
     <div
       class="flex flex-col items-center justify-center sm:flex-row flex-wrap gap-y-12"
@@ -44,6 +50,13 @@
           class="h-[250px] w-screen md:w-1/3"
         />
         <RoleType :games="filteredGames" class="h-[250px] w-screen md:w-1/3" />
+        <Chart
+          v-for="chart in allCharts"
+          :games="filteredGames"
+          :options="chart"
+          showControls
+          @deleteChart="deleteChart"
+        />
       </template>
     </div>
     <!-- Hack, I'm sorry future me -->
@@ -57,22 +70,27 @@ import { GameRecord } from "composables/useGames";
 
 const props = defineProps<{
   games: FetchStatus<GameRecord[]>;
+  username: string;
 }>();
 
-const user = useSupabaseUser();
 const users = useUsers();
 const allGames = useGames();
 
-const me = computed(() => {
-  if (user.value) {
-    return users.getUserById(user.value.id);
-  }
-  return null;
+const user = computed(() => {
+  return users.getUser(props.username);
 });
 
-const myTags = computed(() => {
-  if (me.value?.status === Status.SUCCESS) {
-    return allGames.getTagsByPlayer(me.value.data.username);
+const allTags = computed(() => {
+  if (user.value?.status === Status.SUCCESS) {
+    return allGames.getTagsByPlayer(user.value.data.username);
+  } else {
+    return [];
+  }
+});
+
+const allCharts = computed(() => {
+  if (user.value?.status === Status.SUCCESS) {
+    return user.value.data.charts;
   } else {
     return [];
   }
@@ -99,6 +117,16 @@ const filteredGames = computed(() => {
       selectedTags.value.every((tag) => game.tags.includes(tag))
   );
 });
+
+async function deleteChart(chartId: number) {
+  if (confirm("Are you sure you want to delete this chart?")) {
+    await $fetch(`/api/charts/${chartId}`, {
+      method: "DELETE",
+    });
+
+    users.fetchUser(props.username);
+  }
+}
 
 onMounted(() => {
   const lastSelectedTags = localStorage.getItem("lastSelectedTags");

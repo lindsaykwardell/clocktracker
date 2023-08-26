@@ -15,6 +15,9 @@ import {
   ArcElement,
   PointElement,
   LineElement,
+  Colors,
+  PolarAreaController,
+  RadialLinearScale,
 } from "chart.js";
 
 const friends = useFriends();
@@ -44,10 +47,13 @@ ChartJS.register(
   Legend,
   BarElement,
   CategoryScale,
+  RadialLinearScale,
   LinearScale,
   ArcElement,
   PointElement,
-  LineElement
+  LineElement,
+  PolarAreaController,
+  Colors
 );
 </script>
 

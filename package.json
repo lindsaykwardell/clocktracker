@@ -40,6 +40,7 @@
     "axios": "^1.4.0",
     "chart.js": "^4.3.0",
     "cheerio": "^1.0.0-rc.12",
+    "colord": "^2.9.3",
     "dayjs": "^1.11.9",
     "logrocket": "^5.0.1",
     "natural-order": "^2.0.2",

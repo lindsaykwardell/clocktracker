@@ -10,7 +10,7 @@ export default defineEventHandler(async (handler) => {
     return [];
   }
 
-  const users = await prisma.userSettings.findMany({
+  return prisma.userSettings.findMany({
     where: {
       OR: [
         {
@@ -27,15 +27,15 @@ export default defineEventHandler(async (handler) => {
         },
       ],
     },
+    select: {
+      user_id: true,
+      username: true,
+      display_name: true,
+      avatar: true,
+      pronouns: true,
+      bio: true,
+      location: true,
+      charts: true,
+    },
   });
-
-  return users.map((user) => ({
-    user_id: user.user_id,
-    username: user.username,
-    display_name: user.display_name,
-    avatar: user.avatar,
-    pronouns: user.pronouns,
-    bio: user.bio,
-    location: user.location,
-  }));
 });
