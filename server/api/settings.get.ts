@@ -18,6 +18,9 @@ export default defineEventHandler(async (handler) => {
     where: {
       user_id: user.id,
     },
+    include: {
+      charts: true,
+    },
   });
 
   if (settings) return settings;
@@ -55,6 +58,9 @@ export default defineEventHandler(async (handler) => {
           randomRole,
       avatar: user.user_metadata.avatar_url || "/img/default.png",
       email: user.email,
+    },
+    include: {
+      charts: true,
     },
   });
 

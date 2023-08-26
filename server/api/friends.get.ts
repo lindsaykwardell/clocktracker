@@ -25,6 +25,7 @@ export default defineEventHandler(async (handler) => {
           bio: true,
           location: true,
           privacy: true,
+          charts: true,
         },
       },
     },
