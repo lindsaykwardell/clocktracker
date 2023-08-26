@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { FetchStatus } from "./useFetchStatus";
+import { Chart } from "@prisma/client";
 
 export enum PrivacySetting {
   PUBLIC = "PUBLIC",
@@ -17,6 +18,7 @@ export type User = {
   pronouns: string | null;
   bio: string;
   privacy: PrivacySetting;
+  charts: Chart[];
 };
 
 export const useUsers = defineStore("users", {
