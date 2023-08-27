@@ -20,6 +20,7 @@
             </nuxt-link>
             <nuxt-link
               v-if="
+                me?.username === username &&
                 pendingGames.status === Status.SUCCESS &&
                 pendingGames.data.length
               "
@@ -29,7 +30,6 @@
             >
               <span
                 class="text-stone-200 bg-red-800 rounded-full px-2 py-1 text-xs font-bold aspect-square"
-                aria-label="Unread notifications"
               >
                 {{ pendingGames.data.length }}
               </span>
@@ -51,7 +51,11 @@
             friends.getFriendStatus(player.user_id) === FriendStatus.FRIENDS
           "
         >
-          <UserCharts v-if="currentTab === 'charts'" :games="games" :username="username" />
+          <UserCharts
+            v-if="currentTab === 'charts'"
+            :games="games"
+            :username="username"
+          />
           <Dashboard
             v-if="currentTab === 'dashboard'"
             :player="player"
@@ -83,6 +87,18 @@ const friends = useFriends();
 const gameStore = useGames();
 const username = useRoute().params.username as string;
 const user = useSupabaseUser();
+
+const me = computed(() => {
+  if (!user.value) return null;
+
+  const u = users.getUserById(user.value.id);
+
+  if (u.status === Status.SUCCESS) {
+    return u.data;
+  } else {
+    return null;
+  }
+})
 
 const playerStatus = computed(() => users.getUser(username));
 const playerFetchStatus = computed(() => playerStatus.value.status);
