@@ -70,7 +70,7 @@
           <div class="flex flex-col md:flex-row gap-4 mt-4">
             <label class="flex gap-3 items-center">
               <span>Script</span>
-              <a class="hover:underline" :href="scriptLink(game.data.script)">
+              <a class="hover:underline text-blue-800 hover:text-blue-700" :href="scriptLink(game.data)">
                 {{ game.data.script }}
               </a>
             </label>
@@ -403,19 +403,17 @@ function fullImageUrl(file: string) {
   return `${config.public.supabase.url}/storage/v1/object/public/game-attachments/${file}${transformations}`;
 }
 
-function scriptLink(script: string) {
-  if (script === "Trouble Brewing")
-    return "https://wiki.bloodontheclocktower.com/Trouble_Brewing";
-  if (script === "Bad Moon Rising")
-    return "https://wiki.bloodontheclocktower.com/Bad_Moon_Rising";
-  if (script === "Sects and Violets")
-    return "https://wiki.bloodontheclocktower.com/Sects_%26_Violets";
-  else {
-    return `https://botc-scripts.azurewebsites.net/?search=${script.replace(
-      / /g,
-      "+"
-    )}&script_type=&include=&exclude=&edition=&author=`;
-  }
+function scriptLink(game: GameRecord) {
+  if (game.script === "Trouble Brewing") return "/scripts/133";
+  if (game.script === "Bad Moon Rising") return "/scripts/135";
+  if (game.script === "Sects and Violets") return "/scripts/134";
+
+  if (game.script_id) return `/scripts/${game.script_id}`;
+
+  return `https://botc-scripts.azurewebsites.net/?search=${game.script.replace(
+    / /g,
+    "+"
+  )}&script_type=&include=&exclude=&edition=&author=`;
 }
 
 async function deleteGame() {
