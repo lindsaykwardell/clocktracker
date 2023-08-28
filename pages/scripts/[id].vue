@@ -17,7 +17,9 @@
                 {{ script.name }}
               </h2>
               <div class="flex flex-col md:flex-row gap-2">
-                <div class="font-dumbledor text-lg font-bold bottom-[20px] text-stone-500">
+                <div
+                  class="font-dumbledor text-lg font-bold bottom-[20px] text-stone-500"
+                >
                   By {{ script.author }}
                 </div>
               </div>
@@ -49,7 +51,7 @@
           />
           <hr class="border-stone-400 w-full" />
           <a
-            :href="`https://botc-scripts.azurewebsites.net/script/${scriptId}/${script.version}/`"
+            :href="scriptLink"
             class="flex items-center gap-2 hover:underline hover:text-blue-600 justify-end"
           >
             Website
@@ -292,4 +294,16 @@ function formatRoleAsCharacter(role: {
     role,
   };
 }
+
+const scriptLink = computed(() => {
+  if (script.name === "Trouble Brewing")
+    return "https://wiki.bloodontheclocktower.com/Trouble_Brewing";
+  if (script.name === "Bad Moon Rising")
+    return "https://wiki.bloodontheclocktower.com/Bad_Moon_Rising";
+  if (script.name === "Sects and Violets")
+    return "https://wiki.bloodontheclocktower.com/Sects_%26_Violets";
+  else {
+    return `https://botc-scripts.azurewebsites.net/script/${scriptId}/${script.version}/`;
+  }
+});
 </script>
