@@ -18,7 +18,6 @@ export default defineEventHandler(async (handler) => {
             mode: "insensitive",
           },
         },
-
     include: {
       roles: {
         where: {
