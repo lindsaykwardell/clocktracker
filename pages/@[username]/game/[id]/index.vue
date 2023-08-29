@@ -70,7 +70,10 @@
           <div class="flex flex-col md:flex-row gap-4 mt-4">
             <label class="flex gap-3 items-center">
               <span>Script</span>
-              <a class="hover:underline text-blue-800 hover:text-blue-700" :href="scriptLink(game.data)">
+              <a
+                class="hover:underline text-blue-800 hover:text-blue-700"
+                :href="scriptLink(game.data)"
+              >
                 {{ game.data.script }}
               </a>
             </label>
@@ -404,9 +407,7 @@ function fullImageUrl(file: string) {
 }
 
 function scriptLink(game: GameRecord) {
-  if (game.script === "Trouble Brewing") return "/scripts/133";
-  if (game.script === "Bad Moon Rising") return "/scripts/135";
-  if (game.script === "Sects and Violets") return "/scripts/134";
+  if (game.script === "Sects & Violets") return "/scripts/Sects and Violets";
 
   if (game.script_id) return `/scripts/${game.script}`;
 
