@@ -30,12 +30,12 @@ const chartData = computed(() => ({
       data: [
         games.value.filter(
           (game) =>
-            game.player_characters[game.player_characters.length - 1].role
+            game.player_characters[game.player_characters.length - 1]?.role
               ?.type === "TOWNSFOLK" && game.win
         ).length,
         games.value.filter(
           (game) =>
-            game.player_characters[game.player_characters.length - 1].role
+            game.player_characters[game.player_characters.length - 1]?.role
               ?.type === "TOWNSFOLK" && !game.win
         ).length,
       ],
@@ -46,12 +46,12 @@ const chartData = computed(() => ({
       data: [
         games.value.filter(
           (game) =>
-            game.player_characters[game.player_characters.length - 1].role
+            game.player_characters[game.player_characters.length - 1]?.role
               ?.type === "OUTSIDER" && game.win
         ).length,
         games.value.filter(
           (game) =>
-            game.player_characters[game.player_characters.length - 1].role
+            game.player_characters[game.player_characters.length - 1]?.role
               ?.type === "OUTSIDER" && !game.win
         ).length,
       ],
@@ -62,12 +62,12 @@ const chartData = computed(() => ({
       data: [
         games.value.filter(
           (game) =>
-            game.player_characters[game.player_characters.length - 1].role
+            game.player_characters[game.player_characters.length - 1]?.role
               ?.type === "MINION" && game.win
         ).length,
         games.value.filter(
           (game) =>
-            game.player_characters[game.player_characters.length - 1].role
+            game.player_characters[game.player_characters.length - 1]?.role
               ?.type === "MINION" && !game.win
         ).length,
       ],
@@ -78,12 +78,12 @@ const chartData = computed(() => ({
       data: [
         games.value.filter(
           (game) =>
-            game.player_characters[game.player_characters.length - 1].role
+            game.player_characters[game.player_characters.length - 1]?.role
               ?.type === "DEMON" && game.win
         ).length,
         games.value.filter(
           (game) =>
-            game.player_characters[game.player_characters.length - 1].role
+            game.player_characters[game.player_characters.length - 1]?.role
               ?.type === "DEMON" && !game.win
         ).length,
       ],
@@ -94,12 +94,12 @@ const chartData = computed(() => ({
       data: [
         games.value.filter(
           (game) =>
-            game.player_characters[game.player_characters.length - 1].role
+            game.player_characters[game.player_characters.length - 1]?.role
               ?.type === "TRAVELER" && game.win
         ).length,
         games.value.filter(
           (game) =>
-            game.player_characters[game.player_characters.length - 1].role
+            game.player_characters[game.player_characters.length - 1]?.role
               ?.type === "TRAVELER" && !game.win
         ).length,
       ],
