@@ -1,11 +1,8 @@
 <template>
   <div class="flex flex-wrap">
-    <div
-      v-for="game in games"
-      class="w-1/2 lg:w-1/3 xl:w-1/4 border border-black"
-    >
+    <div v-for="game in games" class="border border-black" :class="cardWidth">
       <nuxt-link
-        :to="`/@${username}/game/${game.id}`"
+        :to="`/@${game.user.username}/game/${game.id}`"
         class="relative w-full bg-gradient-to-b from-purple-800 hover:from-purple-900 to-stone-900 hover:to-stone-950 flex flex-col items-center cursor-pointer rounded overflow-hidden text-black h-48 md:h-72 bg-cover bg-center"
         :class="{
           'trouble-brewing': game.script === 'Trouble Brewing',
@@ -65,10 +62,10 @@ const gamesStore = useGames();
 
 const config = useRuntimeConfig();
 
-defineProps<{
+const props = defineProps<{
   games: GameRecord[];
   readonly?: boolean;
-  username: string;
+  cardWidth?: string;
 }>();
 
 function formatDate(date: Date) {
@@ -80,6 +77,8 @@ function fullImageUrl(file: string) {
   if (file.startsWith("http")) return file + transformations;
   return `${config.public.supabase.url}/storage/v1/object/public/game-attachments/${file}${transformations}`;
 }
+
+const cardWidth = computed(() => props.cardWidth || "w-1/2 lg:w-1/3 xl:w-1/4");
 </script>
 
 <style scoped>
