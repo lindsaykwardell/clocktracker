@@ -8,7 +8,7 @@ export default defineEventHandler(async (handler) => {
   const id_or_name = handler.context.params?.id as string;
 
   const script = await prisma.script.findFirst({
-    where: isNaN(+id_or_name)
+    where: !isNaN(+id_or_name)
       ? {
           id: +id_or_name,
         }
