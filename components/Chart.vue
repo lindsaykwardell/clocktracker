@@ -95,7 +95,7 @@ const labels = computed(() => {
       "Custom Script",
     ];
   } else if (props.options.data === "GAME_SIZE") {
-    return ["Teensey", "1 Minion", "2 Minions", "3 Minions"];
+    return ["Teensy", "1 Minion", "2 Minions", "3 Minions"];
   } else if (props.options.data === "WIN") {
     return ["Yes", "No"];
   } else {
@@ -427,7 +427,7 @@ function getPivot(
   } else if (props.options.pivot === "GAME_SIZE") {
     return [
       {
-        label: "Teensey",
+        label: "Teensy",
         data: validators.map(
           (validator) =>
             games.filter(
