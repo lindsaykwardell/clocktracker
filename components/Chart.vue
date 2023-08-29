@@ -118,16 +118,16 @@ const datasets = computed(() => {
         games,
         [
           (game) =>
-            game.player_characters[game.player_characters.length - 1].role
+            game.player_characters[game.player_characters.length - 1]?.role
               ?.type === "TOWNSFOLK",
           (game) =>
-            game.player_characters[game.player_characters.length - 1].role
+            game.player_characters[game.player_characters.length - 1]?.role
               ?.type === "OUTSIDER",
           (game) =>
-            game.player_characters[game.player_characters.length - 1].role
+            game.player_characters[game.player_characters.length - 1]?.role
               ?.type === "MINION",
           (game) =>
-            game.player_characters[game.player_characters.length - 1].role
+            game.player_characters[game.player_characters.length - 1]?.role
               ?.type === "DEMON",
         ],
         [
@@ -141,22 +141,22 @@ const datasets = computed(() => {
           data: [
             games.filter(
               (game) =>
-                game.player_characters[game.player_characters.length - 1].role
+                game.player_characters[game.player_characters.length - 1]?.role
                   ?.type === "TOWNSFOLK"
             ).length,
             games.filter(
               (game) =>
-                game.player_characters[game.player_characters.length - 1].role
+                game.player_characters[game.player_characters.length - 1]?.role
                   ?.type === "OUTSIDER"
             ).length,
             games.filter(
               (game) =>
-                game.player_characters[game.player_characters.length - 1].role
+                game.player_characters[game.player_characters.length - 1]?.role
                   ?.type === "MINION"
             ).length,
             games.filter(
               (game) =>
-                game.player_characters[game.player_characters.length - 1].role
+                game.player_characters[game.player_characters.length - 1]?.role
                   ?.type === "DEMON"
             ).length,
           ],
@@ -171,10 +171,10 @@ const datasets = computed(() => {
         [
           (game) =>
             game.player_characters[game.player_characters.length - 1]
-              .alignment === "GOOD",
+              ?.alignment === "GOOD",
           (game) =>
             game.player_characters[game.player_characters.length - 1]
-              .alignment === "EVIL",
+              ?.alignment === "EVIL",
         ],
         [
           (c) => colord(c).mix(colord("#0000FF"), 0.15).toHex(),
@@ -186,12 +186,12 @@ const datasets = computed(() => {
             games.filter(
               (game) =>
                 game.player_characters[game.player_characters.length - 1]
-                  .alignment === "GOOD"
+                  ?.alignment === "GOOD"
             ).length,
             games.filter(
               (game) =>
                 game.player_characters[game.player_characters.length - 1]
-                  .alignment === "EVIL"
+                  ?.alignment === "EVIL"
             ).length,
           ],
           backgroundColor: ["#0000FF", "#FF0000"],
@@ -311,7 +311,7 @@ function getPivot(
           (validator, index) =>
             games.filter(
               (game) =>
-                game.player_characters[game.player_characters.length - 1].role
+                game.player_characters[game.player_characters.length - 1]?.role
                   ?.type === "TOWNSFOLK" && validator(game)
             ).length
         ),
@@ -323,7 +323,7 @@ function getPivot(
           (validator) =>
             games.filter(
               (game) =>
-                game.player_characters[game.player_characters.length - 1].role
+                game.player_characters[game.player_characters.length - 1]?.role
                   ?.type === "OUTSIDER" && validator(game)
             ).length
         ),
@@ -335,7 +335,7 @@ function getPivot(
           (validator) =>
             games.filter(
               (game) =>
-                game.player_characters[game.player_characters.length - 1].role
+                game.player_characters[game.player_characters.length - 1]?.role
                   ?.type === "MINION" && validator(game)
             ).length
         ),
@@ -347,7 +347,7 @@ function getPivot(
           (validator) =>
             games.filter(
               (game) =>
-                game.player_characters[game.player_characters.length - 1].role
+                game.player_characters[game.player_characters.length - 1]?.role
                   ?.type === "DEMON" && validator(game)
             ).length
         ),
@@ -363,7 +363,7 @@ function getPivot(
             games.filter(
               (game) =>
                 game.player_characters[game.player_characters.length - 1]
-                  .alignment === "GOOD" && validator(game)
+                  ?.alignment === "GOOD" && validator(game)
             ).length
         ),
         backgroundColor: mixColors.map((mixColor) => mixColor("#0000FF")),
@@ -375,7 +375,7 @@ function getPivot(
             games.filter(
               (game) =>
                 game.player_characters[game.player_characters.length - 1]
-                  .alignment === "EVIL" && validator(game)
+                  ?.alignment === "EVIL" && validator(game)
             ).length
         ),
         backgroundColor: mixColors.map((mixColor) => mixColor("#FF0000")),
