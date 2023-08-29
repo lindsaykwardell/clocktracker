@@ -143,6 +143,7 @@
         </div>
       </div>
     </section>
+    <GameOverviewGrid :games="recentGames" readonly />
   </AuthenticatedTemplate>
 </template>
 
@@ -152,6 +153,7 @@ import { Line, Pie } from "vue-chartjs";
 
 const route = useRoute();
 const { scriptLogo } = useScripts();
+const allGames = useGames();
 
 const scriptId = route.params.id as string;
 
@@ -170,6 +172,8 @@ const scriptStats = await $fetch<{
   };
   games_by_month: Record<string, number>;
 }>("/api/script/" + scriptId + "/stats");
+
+const recentGames = await allGames.fetchRecentGamesForScript(+scriptId);
 
 const averageGamesPlayed = computed(() =>
   Math.round(
