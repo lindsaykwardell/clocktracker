@@ -48,6 +48,11 @@ export default defineEventHandler(async (handler) => {
       user_id: user?.user_id,
     },
     include: {
+      user: {
+        select: {
+          username: true,
+        },
+      },
       player_characters: {
         include: {
           role: {
