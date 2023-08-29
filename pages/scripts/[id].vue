@@ -142,12 +142,8 @@
           </ul>
         </div>
       </div>
-      <GameOverviewGrid
-        :games="recentGames"
-        readonly
-        cardWidth="w-1/2 xl:w-1/3"
-      />
     </section>
+    <GameOverviewGrid :games="recentGames" readonly />
   </AuthenticatedTemplate>
 </template>
 
