@@ -9,13 +9,13 @@ export default defineEventHandler(async (handler) => {
   let { script, compared_to_role, game_size } = getQuery(handler) as {
     script?: string;
     compared_to_role?: string | string[];
-    game_size?: "teensey" | "small" | "medium" | "large";
+    game_size?: "teensy" | "small" | "medium" | "large";
   };
 
   let game_size_query = {};
 
   switch (game_size) {
-    case "teensey":
+    case "teensy":
       game_size_query = {
         player_count: {
           lte: 6,
