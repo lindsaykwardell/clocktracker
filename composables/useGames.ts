@@ -13,6 +13,9 @@ export type FullCharacter = Character & {
 
 export type GameRecord = Game & {
   player_characters: FullCharacter[];
+  user: {
+    username: string;
+  };
   grimoire: (Grimoire & {
     tokens: (Token & {
       role?: {
@@ -175,6 +178,20 @@ export const useGames = defineStore("games", {
           data: game,
         });
       }
+    },
+    async fetchRecentGamesForScript(scriptId: number) {
+      const games = await $fetch<RecentGameRecord[]>(
+        `/api/script/${scriptId}/recent`
+      );
+
+      for (const game of games) {
+        this.games.set(game.id, {
+          status: Status.SUCCESS,
+          data: game,
+        });
+      }
+
+      return games;
     },
   },
 });
