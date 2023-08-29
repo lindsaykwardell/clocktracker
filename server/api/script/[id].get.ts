@@ -5,11 +5,21 @@ import dayjs from "dayjs";
 const prisma = new PrismaClient();
 
 export default defineEventHandler(async (handler) => {
-  const id = parseInt(handler.context.params?.id as string, 10);
+  const id_or_name = handler.context.params?.id as string;
 
-  const script = await prisma.script.findUnique({
+  const script = await prisma.script.findFirst({
     where: {
-      id,
+      OR: [
+        // {
+        //   id: +id_or_name,
+        // },
+        {
+          name: {
+            equals: decodeURIComponent(id_or_name),
+            mode: "insensitive",
+          },
+        },
+      ],
     },
     include: {
       roles: {
@@ -23,7 +33,7 @@ export default defineEventHandler(async (handler) => {
   });
 
   if (!script) {
-    console.error(`Script not found: ${id}`);
+    console.error(`Script not found: ${id_or_name}`);
     throw createError({
       status: 404,
       statusMessage: "Not Found",
@@ -41,7 +51,7 @@ export default defineEventHandler(async (handler) => {
 
     const updated = await prisma.script.update({
       where: {
-        id,
+        id: script.id,
       },
       data: {
         roles: {

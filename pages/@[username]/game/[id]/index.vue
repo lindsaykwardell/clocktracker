@@ -408,7 +408,7 @@ function scriptLink(game: GameRecord) {
   if (game.script === "Bad Moon Rising") return "/scripts/135";
   if (game.script === "Sects and Violets") return "/scripts/134";
 
-  if (game.script_id) return `/scripts/${game.script_id}`;
+  if (game.script_id) return `/scripts/${game.script}`;
 
   return `https://botc-scripts.azurewebsites.net/?search=${game.script.replace(
     / /g,
