@@ -1,10 +1,6 @@
 <template>
   <div class="flex flex-wrap">
-    <div
-      v-for="game in games"
-      class="border border-black"
-      :class="cardWidth"
-    >
+    <div v-for="game in games" class="border border-black" :class="cardWidth">
       <nuxt-link
         :to="`/@${game.user.username}/game/${game.id}`"
         class="relative w-full bg-gradient-to-b from-purple-800 hover:from-purple-900 to-stone-900 hover:to-stone-950 flex flex-col items-center cursor-pointer rounded overflow-hidden text-black h-48 md:h-72 bg-cover bg-center"
@@ -82,7 +78,7 @@ function fullImageUrl(file: string) {
   return `${config.public.supabase.url}/storage/v1/object/public/game-attachments/${file}${transformations}`;
 }
 
-const cardWidth = computed(() => props.cardWidth || "w-full w-1/2 lg:w-1/3 xl:w-1/4");
+const cardWidth = computed(() => props.cardWidth || "w-1/2 lg:w-1/3 xl:w-1/4");
 </script>
 
 <style scoped>

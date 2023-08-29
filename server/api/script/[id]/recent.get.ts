@@ -47,7 +47,7 @@ export default defineEventHandler(async (handler) => {
         },
       },
     },
-    take: 10,
+    take: 12,
     orderBy: {
       date: "desc",
     },
