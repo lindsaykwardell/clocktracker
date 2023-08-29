@@ -58,16 +58,6 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  // delete removed characters
-  await prisma.character.deleteMany({
-    where: {
-      id: {
-        in: existingGame.player_characters.map((character) => character.id),
-      },
-    },
-  });
-
-  // update the game
   const game = await prisma.game.update({
     where: {
       id: gameId,
@@ -77,6 +67,11 @@ export default defineEventHandler(async (handler) => {
       date: new Date(body.date),
       user_id: user.id,
       player_characters: {
+        deleteMany: {
+          id: {
+            in: existingGame.player_characters.map((character) => character.id),
+          },
+        },
         create: [...body.player_characters],
       },
       grimoire: {
@@ -89,7 +84,6 @@ export default defineEventHandler(async (handler) => {
           ...body.grimoire
             .filter((g) => !g.id)
             .map((g) => ({
-              ...g,
               tokens: {
                 create: g.tokens?.map((token, index) => ({
                   role_id: token.role_id,
