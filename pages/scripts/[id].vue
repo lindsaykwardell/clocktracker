@@ -155,10 +155,10 @@ const route = useRoute();
 const { scriptLogo } = useScripts();
 const allGames = useGames();
 
-const scriptId = route.params.id as string;
+const scriptIdOrName = route.params.id as string;
 
 const script = await $fetch<Script & { roles: Role[] }>(
-  "/api/script/" + scriptId
+  "/api/script/" + scriptIdOrName
 );
 
 const scriptStats = await $fetch<{
@@ -171,9 +171,9 @@ const scriptStats = await $fetch<{
     pct: number;
   };
   games_by_month: Record<string, number>;
-}>("/api/script/" + scriptId + "/stats");
+}>("/api/script/" + script.id + "/stats");
 
-const recentGames = await allGames.fetchRecentGamesForScript(+scriptId);
+const recentGames = await allGames.fetchRecentGamesForScript(script.id);
 
 const averageGamesPlayed = computed(() =>
   Math.round(
@@ -307,7 +307,7 @@ const scriptLink = computed(() => {
   if (script.name === "Sects and Violets")
     return "https://wiki.bloodontheclocktower.com/Sects_%26_Violets";
   else {
-    return `https://botc-scripts.azurewebsites.net/script/${scriptId}/${script.version}/`;
+    return `https://botc-scripts.azurewebsites.net/script/${script.id}/${script.version}/`;
   }
 });
 </script>

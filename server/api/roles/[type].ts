@@ -11,7 +11,17 @@ export default defineEventHandler(async (handler) => {
 
   const roles = await prisma.role.findMany({
     where: {
-      type,
+      OR: [
+        {
+          type,
+        },
+        {
+          name: {
+            equals: typeString,
+            mode: "insensitive",
+          }
+        }
+      ]
     },
   });
 
@@ -21,6 +31,10 @@ export default defineEventHandler(async (handler) => {
       status: 404,
       statusMessage: "Not Found",
     });
+  }
+
+  if (roles.length === 1) {
+    return roles[0];
   }
 
   return roles;
