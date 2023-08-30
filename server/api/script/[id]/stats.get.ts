@@ -7,16 +7,21 @@ const prisma = new PrismaClient();
 
 export default defineEventHandler(async (handler) => {
   const script_id = +handler.context.params!.id;
-  const script_name = await prisma.script
-    .findFirst({
-      where: {
-        id: +script_id!,
-      },
-      select: {
-        name: true,
-      },
-    })
-    .then((script) => script?.name);
+  const script = await prisma.script.findFirst({
+    where: {
+      id: script_id,
+    },
+    include: {
+      roles: true,
+    },
+  });
+
+  if (!script) {
+    throw createError({
+      status: 404,
+      message: "Script not found",
+    });
+  }
 
   const games = await prisma.game.findMany({
     where: {
@@ -25,7 +30,7 @@ export default defineEventHandler(async (handler) => {
           OR: [
             {
               script: {
-                equals: script_name,
+                equals: script.name,
                 mode: "insensitive",
               },
             },
@@ -44,6 +49,7 @@ export default defineEventHandler(async (handler) => {
         },
         {
           parent_game_id: null,
+          ignore_for_stats: false,
         },
       ],
     },
@@ -125,27 +131,6 @@ export default defineEventHandler(async (handler) => {
     { total: 0, win: 0 }
   );
 
-  const most_common_scripts = Object.fromEntries(
-    naturalOrder(
-      Object.entries(
-        games
-          .filter((game) => !!game.script)
-          .map((game) => ({
-            script: game.script,
-            script_id: game.script_id as number,
-            win: game.win,
-          }))
-          .reduce((acc, script) => {
-            const formatted_script = script.script;
-            acc[formatted_script] = (acc[formatted_script] || 0) + 1;
-            return acc;
-          }, {} as Record<string, number>)
-      )
-    )
-      .orderBy("desc")
-      .sort(["1"])
-  );
-
   // Get the count of games played over the past 12 months
   const months = Array.from(Array(12).keys())
     .map((i) => dayjs().subtract(i, "month").format("MMMM"))
@@ -162,6 +147,44 @@ export default defineEventHandler(async (handler) => {
     games_by_month[month] = games_by_month[month] + 1;
   });
 
+  // Ge the win rate for each role on the script.
+  const role_win_rates = script.roles.reduce((acc, role) => {
+    const win_count = games.reduce(
+      (acc, game) => {
+        let win = acc.win;
+
+        if (game.is_storyteller) {
+          const character = game.grimoire[game.grimoire.length - 1].tokens.find(
+            (token) => token.role_id === role?.id
+          );
+
+          if (!character) return acc;
+
+          if (game.win && character.alignment === Alignment.GOOD) {
+            win++;
+          } else if (!game.win && character.alignment === Alignment.EVIL) {
+            win++;
+          }
+        } else {
+          const character =
+            game.player_characters[game.player_characters.length - 1];
+
+          if (!character || character.role_id !== role.id) return acc;
+
+          win = game.win ? win + 1 : win;
+        }
+
+        return { total: acc.total + 1, win };
+      },
+      { total: 0, win: 0 }
+    );
+
+    return {
+      ...acc,
+      [role.id]: { ...win_count, loss: win_count.total - win_count.win },
+    };
+  }, {} as Record<string, { total: number; win: number; loss: number }>);
+
   return {
     count: games.length,
     most_common_roles,
@@ -172,6 +195,7 @@ export default defineEventHandler(async (handler) => {
       pct: +((good_win_count.win / good_win_count.total) * 100).toFixed(2),
     },
     games_by_month,
+    role_win_rates,
     // scripts: most_common_scripts,
     // most_common_scripts,
   };
