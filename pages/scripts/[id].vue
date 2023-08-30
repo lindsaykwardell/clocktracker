@@ -25,7 +25,7 @@
               </div>
             </div>
           </div>
-          <div v-for="roleGroup in roleGroups">
+          <div v-for="roleGroup in roleGroups" class="break-inside-avoid">
             <template v-if="roleGroup.roles.length">
               <h3 class="mt-4 mb-2 mx-4 text-xl font-bold font-dumbledor">
                 {{ roleGroup.name }}
@@ -39,7 +39,7 @@
                 >
                   <div class="relative">
                     <div
-                      class="token-chart absolute w-24 h-24 md:w-32 md:h-32 -left-2 -top-2 transition duration-200 ease-in-out"
+                      class="token-chart absolute w-24 h-24 md:w-32 md:h-32 -left-2 -top-2 transition duration-200 ease-in-out print:hidden"
                     >
                       <Pie
                         :data="roleWinRateData(role)"
@@ -54,15 +54,15 @@
             </template>
           </div>
         </div>
-        <div class="flex flex-col gap-1">
+        <div class="flex flex-col gap-1 print:w-full">
           <img
             :src="scriptLogo(script.name)"
             class="hidden md:block w-48 md:w-64 h-48 md:h-64 m-auto"
           />
-          <hr class="border-stone-400 w-full" />
+          <hr class="border-stone-400 w-full print:hidden" />
           <a
             :href="scriptLink"
-            class="flex items-center gap-2 hover:underline hover:text-blue-600 justify-end"
+            class="flex items-center gap-2 hover:underline hover:text-blue-600 justify-end print:hidden"
           >
             Website
             <svg
@@ -79,7 +79,7 @@
           </a>
           <a
             :href="script.json_url"
-            class="flex items-center gap-2 hover:underline hover:text-blue-600 justify-end"
+            class="flex items-center gap-2 hover:underline hover:text-blue-600 justify-end print:hidden"
           >
             Download JSON
             <svg
@@ -96,7 +96,7 @@
           </a>
           <a
             :href="script.pdf_url"
-            class="flex items-center gap-2 hover:underline hover:text-blue-600 justify-end"
+            class="flex items-center gap-2 hover:underline hover:text-blue-600 justify-end print:hidden"
           >
             Download PDF
             <svg
@@ -131,29 +131,42 @@
             Good wins {{ scriptStats.win_loss.pct }}% of games
           </div>
           <hr class="border-stone-400 w-full" />
-          <h3 class="font-dumbledor text-xl text-center">Top Roles</h3>
-          <ul>
-            <li
-              v-for="role in Object.entries(scriptStats.most_common_roles)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 10)"
-              class="flex justify-between"
-            >
-              <span
-                ><a
-                  :href="`https://wiki.bloodontheclocktower.com/${role[0]}`"
-                  target="_blank"
-                  class="hover:underline"
-                  >{{ role[0] }}</a
-                ></span
+          <div class="break-inside-avoid">
+            <h3 class="font-dumbledor text-xl text-center">Role Frequency</h3>
+            <table class="w-full">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Total</th>
+                  <th>Wins</th>
+                  <th>Win %</th>
+                </tr>
+              </thead>
+              <tr
+                v-for="role in Object.entries(
+                  scriptStats.most_common_roles
+                ).filter((role) => script.roles.find((r) => r.name === role[0]))"
               >
-              <span>{{ role[1] }}</span>
-            </li>
-          </ul>
+                <td>
+                  <a
+                    :href="`https://wiki.bloodontheclocktower.com/${role[0]}`"
+                    target="_blank"
+                    class="hover:underline"
+                    >{{ role[0] }}</a
+                  >
+                </td>
+                <td class="text-right">{{ role[1] }}</td>
+                <td class="text-right">{{ winCountByRoleName(role[0]) }}</td>
+                <td class="text-right">
+                  {{ winPercentageByRoleName(role[0]) }}%
+                </td>
+              </tr>
+            </table>
+          </div>
         </div>
       </div>
     </section>
-    <GameOverviewGrid :games="recentGames" readonly />
+    <GameOverviewGrid :games="recentGames" readonly class="print:hidden" />
   </AuthenticatedTemplate>
 </template>
 
@@ -392,6 +405,30 @@ function formatRoleAsCharacter(role: {
     alignment: role.initial_alignment,
     role,
   };
+}
+
+function winCountByRoleName(name: string) {
+  const role = script.roles.find((role) => role.name === name);
+
+  if (!role) return 0;
+
+  const roleStats = scriptStats.role_win_rates[role.id];
+
+  if (!roleStats) return 0;
+
+  return roleStats.win;
+}
+
+function winPercentageByRoleName(name: string) {
+  const role = script.roles.find((role) => role.name === name);
+
+  if (!role) return 0;
+
+  const roleStats = scriptStats.role_win_rates[role.id];
+
+  if (!roleStats) return 0;
+
+  return Math.round(+((roleStats.win / roleStats.total) * 100));
 }
 
 const scriptLink = computed(() => {
