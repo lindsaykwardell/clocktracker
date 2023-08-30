@@ -52,18 +52,36 @@
         <div class="hidden md:block md:col-span-1 z-10">
           {{ game.player_count }}
         </div>
-        <img
-          class="w-8 h-8 md:w-12 md:h-12 col-span-auto z-10"
-          :src="
-            game.is_storyteller
-              ? game.win
-                ? '/img/role/good.png'
-                : '/img/role/evil.png'
-              : game.win
-              ? '/img/win.png'
-              : '/img/loss.png'
-          "
-        />
+        <div class="flex gap-1">
+          <img
+            class="w-8 h-8 md:w-12 md:h-12 col-span-auto z-10"
+            :src="
+              game.is_storyteller
+                ? game.win
+                  ? '/img/role/good.png'
+                  : '/img/role/evil.png'
+                : game.win
+                ? '/img/win.png'
+                : '/img/loss.png'
+            "
+          />
+          <nuxt-link
+            v-if="!readonly"
+            class="text-white font-bold px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial z-10"
+            :to="`/@${game.user.username}/game/${game.id}/edit`"
+            ><svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="32"
+              height="32"
+              viewBox="0 0 32 32"
+            >
+              <path
+                fill="currentColor"
+                d="M2 26h28v2H2zM25.4 9c.8-.8.8-2 0-2.8l-3.6-3.6c-.8-.8-2-.8-2.8 0l-15 15V24h6.4l15-15zm-5-5L24 7.6l-3 3L17.4 7l3-3zM6 22v-3.6l10-10l3.6 3.6l-10 10H6z"
+              />
+            </svg>
+          </nuxt-link>
+        </div>
       </nuxt-link>
     </div>
   </div>
