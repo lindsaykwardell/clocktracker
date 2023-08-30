@@ -38,6 +38,8 @@
       >
         Register
       </button>
+      <button @click.prevent="sendResetPassword" class="hover:underline text-stone-400 text-sm">Forgot Password?</button>
+      <span v-if="resetPasswordSent" class="text-green-500">An email has been sent to reset your password</span>
       <span class="text-red-500">{{ errorMessage }}</span>
     </form>
     <hr class="border border-stone-100 w-full max-w-[500px]" />
@@ -57,6 +59,7 @@ const friends = useFriends();
 const email = ref("");
 const password = ref("");
 const errorMessage = ref();
+const resetPasswordSent = ref(false);
 
 async function login() {
   const { data, error } = await supabase.auth.signInWithPassword({
@@ -87,6 +90,19 @@ async function register() {
     friends.fetchFriends();
     friends.fetchRequests();
     router.push("/welcome");
+  }
+}
+
+async function sendResetPassword() {
+  const { error } = await supabase.auth.resetPasswordForEmail(email.value, {
+    redirectTo: `${window.location.origin}/settings`,
+  });
+
+  if (error) {
+    console.error(error);
+    errorMessage.value = error.message;
+  } else {
+    resetPasswordSent.value = true;
   }
 }
 </script>
