@@ -87,31 +87,6 @@ export default defineEventHandler(async (handler) => {
     },
   });
 
-  const most_common_roles = Object.fromEntries(
-    naturalOrder(
-      Object.entries(
-        games
-          .flatMap((game): string[] => {
-            if (game.is_storyteller) {
-              return game.grimoire[game.grimoire.length - 1].tokens
-                .filter((token) => !!token.role)
-                .map((token) => token.role!.name);
-            } else {
-              return game.player_characters
-                .filter((character) => !!character.name)
-                .map((character) => character.name);
-            }
-          })
-          .reduce((acc, role) => {
-            acc[role] = (acc[role] || 0) + 1;
-            return acc;
-          }, {} as Record<string, number>)
-      )
-    )
-      .orderBy("desc")
-      .sort(["1"])
-  );
-
   const good_win_count = games.reduce(
     (acc, game) => {
       let win = acc.win;
@@ -155,7 +130,9 @@ export default defineEventHandler(async (handler) => {
 
         if (game.is_storyteller) {
           const character = game.grimoire[game.grimoire.length - 1].tokens.find(
-            (token) => token.role_id === role?.id
+            (token) =>
+              token.role_id === role.id ||
+              (token.role && token.role.name === role.name)
           );
 
           if (!character) return acc;
@@ -169,7 +146,11 @@ export default defineEventHandler(async (handler) => {
           const character =
             game.player_characters[game.player_characters.length - 1];
 
-          if (!character || character.role_id !== role.id) return acc;
+          if (
+            !character ||
+            !(character.role_id === role.id || character.name === role.name)
+          )
+            return acc;
 
           win = game.win ? win + 1 : win;
         }
@@ -187,7 +168,6 @@ export default defineEventHandler(async (handler) => {
 
   return {
     count: games.length,
-    most_common_roles,
     win_loss: {
       total: good_win_count.total,
       win: good_win_count.win,
