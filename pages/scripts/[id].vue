@@ -143,22 +143,27 @@
                 </tr>
               </thead>
               <tr
-                v-for="role in Object.entries(
-                  scriptStats.most_common_roles
-                ).filter((role) => script.roles.find((r) => r.name === role[0]))"
+                v-for="role in Object.entries(scriptStats.role_win_rates)
+                  .filter((role) => script.roles.find((r) => r.id === role[0]))
+                  .sort((a, b) => b[1].total - a[1].total)"
               >
                 <td>
                   <a
                     :href="`https://wiki.bloodontheclocktower.com/${role[0]}`"
                     target="_blank"
                     class="hover:underline"
-                    >{{ role[0] }}</a
                   >
+                    {{ script.roles.find((r) => r.id === role[0])!.name }}
+                  </a>
                 </td>
-                <td class="text-right">{{ role[1] }}</td>
-                <td class="text-right">{{ winCountByRoleName(role[0]) }}</td>
+                <td class="text-right">{{ role[1].total }}</td>
+                <td class="text-right">{{ role[1].win }}</td>
                 <td class="text-right">
-                  {{ winPercentageByRoleName(role[0]) }}%
+                  {{
+                    role[1].total
+                      ? Math.round((role[1].win / role[1].total) * 100)
+                      : 0
+                  }}%
                 </td>
               </tr>
             </table>
@@ -234,7 +239,6 @@ useHead({
 
 const scriptStats = await $fetch<{
   count: number;
-  most_common_roles: Record<string, number>;
   win_loss: {
     total: number;
     win: number;
@@ -405,34 +409,6 @@ function formatRoleAsCharacter(role: {
     alignment: role.initial_alignment,
     role,
   };
-}
-
-function winCountByRoleName(name: string) {
-  const role = script.roles.find((role) => role.name === name);
-
-  if (!role) return 0;
-
-  const roleStats = scriptStats.role_win_rates[role.id];
-
-  if (!roleStats) return 0;
-
-  return roleStats.win;
-}
-
-function winPercentageByRoleName(name: string) {
-  const role = script.roles.find((role) => role.name === name);
-
-  if (!role) return 0;
-
-  const roleStats = scriptStats.role_win_rates[role.id];
-
-  if (!roleStats) return 0;
-
-  const result = Math.round(+((roleStats.win / roleStats.total) * 100));
-
-  if (isNaN(result)) return 0;
-
-  return result
 }
 
 const scriptLink = computed(() => {
