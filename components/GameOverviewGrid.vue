@@ -1,9 +1,13 @@
 <template>
   <div class="flex flex-wrap">
-    <div v-for="game in games" class="border border-black" :class="cardWidth">
+    <div
+      v-for="game in games"
+      class="border border-black relative"
+      :class="cardWidth"
+    >
       <nuxt-link
         :to="`/@${game.user.username}/game/${game.id}`"
-        class="relative w-full bg-gradient-to-b from-purple-800 hover:from-purple-900 to-stone-900 hover:to-stone-950 flex flex-col items-center cursor-pointer rounded overflow-hidden text-black h-48 md:h-72 bg-cover bg-center"
+        class="w-full bg-stone-900 flex flex-col items-center cursor-pointer rounded overflow-hidden text-black h-48 md:h-72 bg-cover bg-center"
         :class="{
           'trouble-brewing': game.script === 'Trouble Brewing',
           'sects-and-violets': game.script === 'Sects and Violets',
@@ -43,14 +47,30 @@
               : '/img/loss.png'
           "
         />
-        <div class="absolute bottom-0 left-0 w-full">
-          <div
-            class="font-gothic text-white md:text-lg bg-gradient-to-tr from-black/75 via-black/50 to-black-25 p-1"
-          >
-            {{ game.script }}
-          </div>
-        </div>
       </nuxt-link>
+      <div class="absolute bottom-0 left-0 w-full flex justify-between bg-gradient-to-tr from-black/75 via-black/25 to-black/75">
+        <div
+          class="font-gothic text-white md:text-lg p-1"
+        >
+          {{ game.script }}
+        </div>
+        <nuxt-link
+          v-if="!readonly"
+          class="text-white font-bold px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial"
+          :to="`/@${game.user.username}/game/${game.id}/edit`"
+          ><svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 32 32"
+          >
+            <path
+              fill="currentColor"
+              d="M2 26h28v2H2zM25.4 9c.8-.8.8-2 0-2.8l-3.6-3.6c-.8-.8-2-.8-2.8 0l-15 15V24h6.4l15-15zm-5-5L24 7.6l-3 3L17.4 7l3-3zM6 22v-3.6l10-10l3.6 3.6l-10 10H6z"
+            />
+          </svg>
+        </nuxt-link>
+      </div>
     </div>
   </div>
 </template>
