@@ -428,7 +428,11 @@ function winPercentageByRoleName(name: string) {
 
   if (!roleStats) return 0;
 
-  return Math.round(+((roleStats.win / roleStats.total) * 100));
+  const result = Math.round(+((roleStats.win / roleStats.total) * 100));
+
+  if (isNaN(result)) return 0;
+
+  return result
 }
 
 const scriptLink = computed(() => {
