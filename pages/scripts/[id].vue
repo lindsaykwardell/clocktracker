@@ -35,9 +35,19 @@
                   v-for="role in roleGroup.roles"
                   :href="`https://wiki.bloodontheclocktower.com/${role.name}`"
                   target="_blank"
-                  class="hover:underline flex flex-col items-center"
+                  class="token-wrapper hover:underline flex flex-col items-center gap-2"
                 >
-                  <Token :character="formatRoleAsCharacter(role)" size="md" />
+                  <div class="relative">
+                    <div
+                      class="token-chart absolute w-24 h-24 md:w-32 md:h-32 -left-2 -top-2 transition duration-200 ease-in-out"
+                    >
+                      <Pie
+                        :data="roleWinRateData(role)"
+                        :options="roleWinRateOptions"
+                      />
+                    </div>
+                    <Token :character="formatRoleAsCharacter(role)" size="md" />
+                  </div>
                   <span>{{ role.name }}</span>
                 </a>
               </div>
@@ -149,6 +159,7 @@
 
 <script setup lang="ts">
 import type { Script, Role, RoleType, Alignment } from "@prisma/client";
+import { ChartOptions } from "chart.js";
 import { Line, Pie } from "vue-chartjs";
 
 const route = useRoute();
@@ -171,6 +182,14 @@ const scriptStats = await $fetch<{
     pct: number;
   };
   games_by_month: Record<string, number>;
+  role_win_rates: Record<
+    string,
+    {
+      total: number;
+      win: number;
+      loss: number;
+    }
+  >;
 }>("/api/script/" + script.id + "/stats");
 
 const recentGames = await allGames.fetchRecentGamesForScript(script.id);
@@ -286,6 +305,35 @@ const winRatioOptions = computed(() => ({
   },
 }));
 
+const roleWinRateOptions = computed<ChartOptions>(() => ({
+  responsive: true,
+  maintainAspectRatio: true,
+  plugins: {
+    tooltip: {
+      enabled: false,
+    },
+    legend: {
+      display: false,
+    },
+  },
+}));
+
+function roleWinRateData(role: Role) {
+  const roleStats = scriptStats.role_win_rates[role.id];
+
+  return {
+    labels: ["Win", "Loss"],
+    datasets: roleStats
+      ? [
+          {
+            data: [roleStats.win, roleStats.loss],
+            backgroundColor: ["blue", "red"],
+          },
+        ]
+      : [],
+  };
+}
+
 function formatRoleAsCharacter(role: {
   type: RoleType;
   id: string;
@@ -311,3 +359,17 @@ const scriptLink = computed(() => {
   }
 });
 </script>
+
+<style scoped>
+.token-wrapper {
+  .token-chart {
+    @apply opacity-40;
+  }
+
+  &:hover {
+    .token-chart {
+      @apply opacity-100;
+    }
+  }
+}
+</style>
