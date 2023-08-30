@@ -72,6 +72,52 @@
         <span class="text-red-600">{{ errorMessage }}</span>
       </form>
     </section>
+    <!-- Password update form -->
+    <section
+      class="w-full flex flex-col items-center justify-center gap-12 py-4"
+    >
+      <h2 class="font-dumbledor text-4xl text-center">Update Password</h2>
+      <form
+        class="flex flex-col gap-4 items-center"
+        @submit.prevent="updatePassword"
+      >
+        <label class="block w-[300px]">
+          <span class="block">New Password</span>
+          <input
+            v-model="newPassword"
+            type="password"
+            class="block w-full border border-stone-500 rounded-md p-2"
+            required
+          />
+        </label>
+        <label class="block w-[300px]">
+          <span class="block">Verify New Password</span>
+          <input
+            v-model="verifyNewPassword"
+            type="password"
+            class="block w-full border border-stone-500 rounded-md p-2"
+            required
+            :pattern="verifyPasswordRegex"
+            title="Passwords must match"
+          />
+        </label>
+        <button
+          type="submit"
+          class="w-full bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
+          :disabled="passwordInFlight"
+        >
+          <template v-if="passwordInFlight">
+            <Spinner />
+            Saving...
+          </template>
+          <template v-else>Update Password</template>
+        </button>
+        <span class="text-red-600"> {{ passwordErrorMessage }}</span>
+        <span v-if="passwordSavedSuccessfully" class="text-green-600">
+          Password updated successfully!
+        </span>
+      </form>
+    </section>
   </AuthenticatedTemplate>
 </template>
 
@@ -86,6 +132,10 @@ const router = useRouter();
 const inFlight = ref(false);
 const errorMessage = ref<string>();
 
+const passwordInFlight = ref(false);
+const passwordErrorMessage = ref<string>();
+const passwordSavedSuccessfully = ref(false);
+
 const supabase = useSupabaseClient();
 const settings = await useFetch("/api/settings");
 const config = useRuntimeConfig();
@@ -97,6 +147,9 @@ const pronouns = ref(settings.data.value?.pronouns);
 const location = ref(settings.data.value?.location);
 const bio = ref(settings.data.value?.bio);
 const privacy = ref(settings.data.value?.privacy);
+
+const newPassword = ref("");
+const verifyNewPassword = ref("");
 
 function selectAvatar() {
   const input = document.createElement("input");
@@ -152,6 +205,46 @@ async function saveSettings() {
   }
 
   router.push("/");
+}
+
+watch(
+  newPassword,
+  () => {
+    passwordErrorMessage.value = "";
+    passwordSavedSuccessfully.value = false;
+  },
+  { immediate: true }
+);
+
+watch(
+  verifyNewPassword,
+  () => {
+    passwordErrorMessage.value = "";
+    passwordSavedSuccessfully.value = false;
+  },
+  { immediate: true }
+);
+
+const verifyPasswordRegex = computed(() =>
+  newPassword.value.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&")
+);
+
+async function updatePassword() {
+  passwordInFlight.value = true;
+
+  const result = await supabase.auth.updateUser({
+    password: newPassword.value,
+  });
+
+  if (result.error) {
+    console.error(result.error);
+    passwordErrorMessage.value = result.error.message;
+    passwordInFlight.value = false;
+    return;
+  } else {
+    passwordInFlight.value = false;
+    passwordSavedSuccessfully.value = true;
+  }
 }
 </script>
 
