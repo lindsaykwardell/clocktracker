@@ -172,6 +172,53 @@ const script = await $fetch<Script & { roles: Role[] }>(
   "/api/script/" + scriptIdOrName
 );
 
+useHead({
+  title: script.name,
+  meta: [
+    {
+      hid: "description",
+      name: "description",
+      content: `View stats and recent games for ${script.name}.`,
+    },
+    {
+      property: "og:title",
+      content: script.name,
+    },
+    {
+      property: "og:description",
+      content: `View stats and recent games for ${script.name}.`,
+    },
+    {
+      property: "og:image",
+      content: scriptLogo(script.name),
+    },
+    {
+      property: "og:url",
+      content: route.fullPath,
+    },
+    {
+      property: "twitter:card",
+      content: "summary_large_image",
+    },
+    {
+      property: "twitter:url",
+      content: route.fullPath,
+    },
+    {
+      property: "twitter:title",
+      content: script.name,
+    },
+    {
+      property: "twitter:description",
+      content: `View stats and recent games for ${script.name}.`,
+    },
+    {
+      property: "twitter:image",
+      content: scriptLogo(script.name),
+    },
+  ],
+});
+
 const scriptStats = await $fetch<{
   count: number;
   most_common_roles: Record<string, number>;
