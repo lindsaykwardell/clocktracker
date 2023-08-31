@@ -259,6 +259,67 @@ export default defineEventHandler(async (handler) => {
         });
       }
     }
+
+    if (game.storyteller?.includes("@")) {
+      // Verify that it's a friend
+      const friend = await prisma.userSettings.findUnique({
+        where: {
+          username: game.storyteller.replace("@", ""),
+          friends: {
+            some: {
+              user_id: user.id,
+            },
+          },
+        },
+      });
+
+      if (friend !== null) {
+        const childGame = game.child_games?.find(
+          (g) => g.user_id === friend.user_id
+        );
+
+        if (!childGame) {
+          const win = (() => {
+            console.log(parentGameLastAlignment, game.win);
+            if (parentGameLastAlignment === Alignment.GOOD) {
+              return game.win;
+            } else {
+              return !game.win;
+            }
+          })();
+
+          await prisma.game.create({
+            data: {
+              ...body,
+              is_storyteller: true,
+              date: new Date(body.date),
+              user_id: friend.user_id,
+              player_characters: {},
+              notes: "",
+              win,
+              grimoire: {
+                connect: game.grimoire.map((g) => ({ id: g.id })),
+              },
+              is_grimoire_protected: true,
+              parent_game_id: game.id,
+              waiting_for_confirmation: true,
+              tags: [],
+            },
+          });
+        } else {
+          await prisma.game.update({
+            where: {
+              id: childGame.id,
+            },
+            data: {
+              grimoire: {
+                connect: game.grimoire.map((g) => ({ id: g.id })),
+              },
+            },
+          });
+        }
+      }
+    }
   }
 
   return game;
