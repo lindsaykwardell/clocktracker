@@ -144,6 +144,8 @@ model UserSettings {
   friend_of            Friend[]        @relation("FriendOf")
   token                Token[]
   charts               Chart[]
+  bgg_username         String?
+  bgg_cookies          String[]
 }
 
 enum PrivacySetting {
