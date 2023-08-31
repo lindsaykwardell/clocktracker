@@ -113,7 +113,14 @@
             type="text"
             v-model="game.storyteller"
             class="block w-full border border-stone-500 rounded-md p-2"
+            list="friends"
           />
+          <datalist id="friends">
+            <option
+              v-for="friend in friends.getFriends"
+              :value="`@${friend?.username}`"
+            />
+          </datalist>
         </label>
         <label class="flex whitespace-nowrap items-center gap-2">
           <input type="checkbox" v-model="game.is_storyteller" />
@@ -451,6 +458,7 @@ const config = useRuntimeConfig();
 const user = useSupabaseUser();
 const users = useUsers();
 const games = useGames();
+const friends = useFriends();
 
 const me = computed(() => users.getUserById(user.value?.id));
 const myTags = computed(() => {
