@@ -113,11 +113,13 @@
               v-if="gameView === 'grid'"
               :games="sortedGames"
               :username="player.username"
+              :readonly="!myPage"
             />
             <GameOverviewList
               v-if="gameView === 'table'"
               :games="sortedGames"
               :username="player.username"
+              :readonly="!myPage"
             />
             <p
               v-if="!sortedGames.length"
@@ -160,6 +162,14 @@ const me = computed(() => {
   }
   return null;
 });
+
+const myPage = computed(() => {
+  if (me.value?.status === Status.SUCCESS) {
+    return me.value.data.username === props.player?.username;
+  } else {
+    return false;
+  }
+})
 
 const myTags = computed(() => {
   if (me.value?.status === Status.SUCCESS) {
