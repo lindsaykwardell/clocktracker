@@ -58,7 +58,8 @@ definePageMeta({
 });
 
 const settings = await useFetch("/api/settings");
-
+const users = useUsers();
+const user = useSupabaseUser();
 const bgg_username = ref(settings.data.value?.bgg_username);
 
 const username = ref("");
@@ -80,6 +81,8 @@ async function connectBoardGameGeek() {
     bgg_username.value = username.value;
     username.value = "";
     password.value = "";
+
+    users.fetchMe(user.value?.id);
   } catch {
     inFlight.value = false;
   }
@@ -94,6 +97,8 @@ async function disconnectBoardGameGeek() {
 
     inFlight.value = false;
     bgg_username.value = null;
+
+    users.fetchMe(user.value?.id);
   } catch {
     inFlight.value = false;
   }
