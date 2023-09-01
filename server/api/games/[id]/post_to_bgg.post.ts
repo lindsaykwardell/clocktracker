@@ -9,6 +9,7 @@ const prisma = new PrismaClient();
 export default defineEventHandler(async (handler) => {
   const user = handler.context.user as User | null;
   const gameId = handler.context.params?.id as string;
+  const body = await readBody<{ anonymize: boolean }>(handler);
 
   if (!user) {
     throw createError({
@@ -17,11 +18,19 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
+  if (!body) {
+    throw createError({
+      status: 400,
+      statusMessage: "Bad Request",
+    });
+  }
+
   const userSettings = await prisma.userSettings.findUnique({
     where: {
       user_id: user.id,
     },
     select: {
+      display_name: true,
       bgg_cookies: true,
       bgg_username: true,
       privacy: true,
@@ -113,6 +122,13 @@ export default defineEventHandler(async (handler) => {
       win: false,
       color: "Storyteller",
     });
+  } else if (game.is_storyteller) {
+    players.push({
+      username: userSettings.bgg_username,
+      name: userSettings.display_name,
+      win: false,
+      color: "Storyteller",
+    });
   }
 
   const parentGameLastAlignment =
@@ -149,6 +165,13 @@ export default defineEventHandler(async (handler) => {
     }
   }
 
+  if (body.anonymize) {
+    // Reduce the player name to the first letter of their name
+    for (const player of players) {
+      player.name = player.name.replace("@", "")[0] + ".";
+    }
+  }
+
   const playResponse = await axios.post<{
     playid: string;
   }>(
@@ -162,7 +185,7 @@ ${game.notes}
       length: 60,
       twitter: "false",
       minutes: 60,
-      location,
+      location: body.anonymize ? location[0] + "." : location,
       objectid: "240980",
       hours: 0,
       quantity: "1",
