@@ -5,7 +5,7 @@
       class="flex flex-col gap-4 bg-gradient-to-b from-stone-100 to-stone-300 text-black w-full lg:w-4/5 m-auto md:my-4 rounded shadow-lg"
     >
       <div
-        class="flex flex-col-reverse md:flex-row items-center md:items-start px-4 pt-4"
+        class="metadata flex flex-col-reverse md:flex-row items-center md:items-start px-4 pt-4"
       >
         <div class="flex-grow flex flex-col w-full">
           <div class="flex flex-col md:flex-row gap-4 items-center">
@@ -128,6 +128,28 @@
             </label>
           </div>
           <div class="flex flex-wrap gap-2 mt-4">
+            <a
+              v-if="game.data.bgg_id"
+              class="flex gap-1 items-center hover:underline text-blue-800 hover:text-blue-700"
+              target="_blank"
+              :href="`https://boardgamegeek.com/play/details/${game.data.bgg_id}`"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                class="text-[#ff5100]"
+              >
+                <path
+                  fill="currentColor"
+                  d="m19.7 4.44l-2.38.64L19.65 0L4.53 5.56l.83 6.67l-1.4 1.34L8.12 24l8.85-3.26l3.07-7.22l-1.32-1.27l.98-7.81Z"
+                />
+              </svg>
+              BoardGameGeek
+            </a>
+          </div>
+          <div class="flex flex-wrap gap-2 mt-4">
             <span
               v-for="tag in game.data.tags"
               class="bg-stone-300 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
@@ -221,6 +243,25 @@
         v-if="player.data.user_id === user?.id"
         class="p-4 flex justify-between md:justify-end gap-4"
       >
+        <template v-if="canPostToBGG">
+          <label v-if="!game.data.bgg_id" class="flex gap-2 items-center">
+            <span class="text-black">Anonymize</span>
+            <input v-model="anonymize" type="checkbox" class="ml-2" />
+          </label>
+          <button
+            class="bg-[#3f3a60] transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial"
+            @click="postToBGG"
+            :disabled="bggInFlight"
+          >
+            <img
+              src="/img/bgg.png"
+              class="w-8 h-8"
+              :class="{ 'animate-spin': bggInFlight }"
+            />
+            <span v-if="game.data.bgg_id">Delete from BGG</span>
+            <span v-else>Post to BGG</span>
+          </button>
+        </template>
         <button
           v-if="game.data.waiting_for_confirmation"
           @click="confirmGame"
@@ -287,12 +328,21 @@ const games = useGames();
 const friends = useFriends();
 const username = route.params.username as string;
 const gameId = route.params.id as string;
+const bggInFlight = ref(false);
 
 const game = computed(() => games.getGame(gameId));
 const player = computed(() => users.getUser(username));
 const grimPage = ref(
   game.value.status === Status.SUCCESS ? game.value.data.grimoire.length - 1 : 0
 );
+
+const canPostToBGG = computed(() => {
+  const me = users.getUserById(user.value?.id || "");
+
+  if (me.status !== Status.SUCCESS) return false;
+
+  return !!me.data.bgg_username;
+});
 
 watchEffect(() => {
   if (
@@ -437,6 +487,38 @@ async function confirmGame() {
   }
 }
 
+const anonymize = ref(false);
+
+watchEffect(() => {
+  const me = users.getUserById(user.value?.id);
+
+  if (me.status === Status.SUCCESS) {
+    anonymize.value = me.data.privacy === PrivacySetting.PRIVATE;
+  }
+});
+
+async function postToBGG() {
+  if (game.value.status !== Status.SUCCESS) return;
+
+  bggInFlight.value = true;
+
+  if (game.value.data.bgg_id) {
+    await $fetch(`/api/games/${gameId}/post_to_bgg`, {
+      method: "DELETE",
+    });
+  } else {
+    await $fetch(`/api/games/${gameId}/post_to_bgg`, {
+      method: "POST",
+      body: JSON.stringify({
+        anonymize: anonymize.value,
+      }),
+    });
+  }
+
+  await games.fetchGame(gameId);
+  bggInFlight.value = false;
+}
+
 onMounted(() => {
   users.fetchUser(route.params.username as string);
   games.fetchGame(route.params.id as string);
@@ -448,7 +530,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-label span {
+.metadata label span {
   @apply text-sm text-stone-500;
 }
 

@@ -36,7 +36,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     },
   });
 
-  LogRocket.init('pmde9l/clocktracker');
+  // LogRocket.init('pmde9l/clocktracker');
 
   vueApp.mixin(
     Sentry.createTracingMixins({

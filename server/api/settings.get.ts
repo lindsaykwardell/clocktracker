@@ -18,8 +18,18 @@ export default defineEventHandler(async (handler) => {
     where: {
       user_id: user.id,
     },
-    include: {
+    select: {
+      user_id: true,
+      username: true,
+      display_name: true,
+      avatar: true,
+      finished_welcome: true,
+      pronouns: true,
+      bio: true,
+      location: true,
+      privacy: true,
       charts: true,
+      bgg_username: true,
     },
   });
 
@@ -59,8 +69,18 @@ export default defineEventHandler(async (handler) => {
       avatar: user.user_metadata.avatar_url || "/img/default.png",
       email: user.email,
     },
-    include: {
+    select: {
+      user_id: true,
+      username: true,
+      display_name: true,
+      avatar: true,
+      finished_welcome: true,
+      pronouns: true,
+      bio: true,
+      location: true,
+      privacy: true,
       charts: true,
+      bgg_username: true,
     },
   });
 
