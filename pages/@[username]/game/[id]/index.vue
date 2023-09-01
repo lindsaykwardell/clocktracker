@@ -5,7 +5,7 @@
       class="flex flex-col gap-4 bg-gradient-to-b from-stone-100 to-stone-300 text-black w-full lg:w-4/5 m-auto md:my-4 rounded shadow-lg"
     >
       <div
-        class="flex flex-col-reverse md:flex-row items-center md:items-start px-4 pt-4"
+        class="metadata flex flex-col-reverse md:flex-row items-center md:items-start px-4 pt-4"
       >
         <div class="flex-grow flex flex-col w-full">
           <div class="flex flex-col md:flex-row gap-4 items-center">
@@ -221,20 +221,25 @@
         v-if="player.data.user_id === user?.id"
         class="p-4 flex justify-between md:justify-end gap-4"
       >
-        <button
-          v-if="canPostToBGG"
-          class="bg-[#3f3a60] transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial"
-          @click="postToBGG"
-          :disabled="bggInFlight"
-        >
-          <img
-            src="/img/bgg.png"
-            class="w-8 h-8"
-            :class="{ 'animate-spin': bggInFlight }"
-          />
-          <span v-if="game.data.bgg_id">Delete from BGG</span>
-          <span v-else>Post to BGG</span>
-        </button>
+        <template v-if="canPostToBGG">
+          <label v-if="!game.data.bgg_id" class="flex gap-2 items-center">
+            <span class="text-black">Anonymize</span>
+            <input v-model="anonymize" type="checkbox" class="ml-2" />
+          </label>
+          <button
+            class="bg-[#3f3a60] transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial"
+            @click="postToBGG"
+            :disabled="bggInFlight"
+          >
+            <img
+              src="/img/bgg.png"
+              class="w-8 h-8"
+              :class="{ 'animate-spin': bggInFlight }"
+            />
+            <span v-if="game.data.bgg_id">Delete from BGG</span>
+            <span v-else>Post to BGG</span>
+          </button>
+        </template>
         <button
           v-if="game.data.waiting_for_confirmation"
           @click="confirmGame"
@@ -460,6 +465,16 @@ async function confirmGame() {
   }
 }
 
+const anonymize = ref(false);
+
+watchEffect(() => {
+  const me = users.getUserById(user.value?.id);
+
+  if (me.status === Status.SUCCESS) {
+    anonymize.value = me.data.privacy === PrivacySetting.PRIVATE;
+  }
+});
+
 async function postToBGG() {
   if (game.value.status !== Status.SUCCESS) return;
 
@@ -472,6 +487,9 @@ async function postToBGG() {
   } else {
     await $fetch(`/api/games/${gameId}/post_to_bgg`, {
       method: "POST",
+      body: JSON.stringify({
+        anonymize: anonymize.value,
+      }),
     });
   }
 
@@ -490,7 +508,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-label span {
+.metadata label span {
   @apply text-sm text-stone-500;
 }
 
