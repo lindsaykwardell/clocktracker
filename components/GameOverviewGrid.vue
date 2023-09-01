@@ -48,11 +48,20 @@
           "
         />
       </nuxt-link>
-      <div class="absolute bottom-0 left-0 w-full flex justify-between bg-gradient-to-tr from-black/75 via-black/25 to-black/75">
-        <div
-          class="font-gothic text-white md:text-lg p-1"
-        >
-          {{ game.script }}
+      <div
+        class="absolute bottom-0 left-0 w-full flex justify-between bg-gradient-to-tr from-black/75 via-black/25 to-black/75"
+      >
+        <div class="flex-grow flex gap-1">
+          <a
+            v-if="game.bgg_id"
+            :href="`https://boardgamegeek.com/play/details/${game.bgg_id}`"
+            class="w-12 md:w-8"
+          >
+            <img src="/img/bgg.png" class="w-8 h-8 aspect-square" />
+          </a>
+          <div class="font-gothic text-white md:text-lg p-1">
+            {{ game.script }}
+          </div>
         </div>
         <nuxt-link
           v-if="!readonly"
