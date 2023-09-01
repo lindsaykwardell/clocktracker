@@ -54,6 +54,7 @@
         <div class="flex-grow flex gap-1">
           <a
             v-if="game.bgg_id"
+            target="_blank"
             :href="`https://boardgamegeek.com/play/details/${game.bgg_id}`"
             class="w-12 md:w-8"
           >

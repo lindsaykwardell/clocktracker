@@ -33,6 +33,7 @@
           <td class="w-12">
             <a
               v-if="game.bgg_id"
+              target="_blank"
               :href="`https://boardgamegeek.com/play/details/${game.bgg_id}`"
             >
               <img src="/img/bgg.png" class="w-8 md:w-12" />
