@@ -222,6 +222,19 @@
         class="p-4 flex justify-between md:justify-end gap-4"
       >
         <button
+          class="bg-[#3f3a60] transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial"
+          @click="postToBGG"
+          :disabled="bggInFlight"
+        >
+          <img
+            src="/img/bgg.png"
+            class="w-8 h-8"
+            :class="{ 'animate-spin': bggInFlight }"
+          />
+          <span v-if="game.data.bgg_id">Delete from BGG</span>
+          <span v-else>Post to BGG</span>
+        </button>
+        <button
           v-if="game.data.waiting_for_confirmation"
           @click="confirmGame"
           class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial"
@@ -287,6 +300,7 @@ const games = useGames();
 const friends = useFriends();
 const username = route.params.username as string;
 const gameId = route.params.id as string;
+const bggInFlight = ref(false);
 
 const game = computed(() => games.getGame(gameId));
 const player = computed(() => users.getUser(username));
@@ -435,6 +449,25 @@ async function confirmGame() {
 
     games.games.set(gameId, { status: Status.SUCCESS, data: result });
   }
+}
+
+async function postToBGG() {
+  if (game.value.status !== Status.SUCCESS) return;
+
+  bggInFlight.value = true;
+
+  if (game.value.data.bgg_id) {
+    await $fetch(`/api/games/${gameId}/post_to_bgg`, {
+      method: "DELETE",
+    });
+  } else {
+    await $fetch(`/api/games/${gameId}/post_to_bgg`, {
+      method: "POST",
+    });
+  }
+
+  await games.fetchGame(gameId);
+  bggInFlight.value = false;
 }
 
 onMounted(() => {

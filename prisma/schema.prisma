@@ -9,6 +9,7 @@ datasource db {
 
 model Game {
   id                       String        @id @default(uuid())
+  bgg_id                   Int?          @unique
   user_id                  String
   created_at               DateTime?     @default(now()) @db.Timestamptz(6)
   date                     DateTime
