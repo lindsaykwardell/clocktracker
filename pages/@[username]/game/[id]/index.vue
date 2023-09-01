@@ -222,6 +222,7 @@
         class="p-4 flex justify-between md:justify-end gap-4"
       >
         <button
+          v-if="canPostToBGG"
           class="bg-[#3f3a60] transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial"
           @click="postToBGG"
           :disabled="bggInFlight"
@@ -307,6 +308,14 @@ const player = computed(() => users.getUser(username));
 const grimPage = ref(
   game.value.status === Status.SUCCESS ? game.value.data.grimoire.length - 1 : 0
 );
+
+const canPostToBGG = computed(() => {
+  const me = users.getUserById(user.value?.id || "");
+
+  if (me.status !== Status.SUCCESS) return false;
+
+  return !!me.data.bgg_username;
+});
 
 watchEffect(() => {
   if (

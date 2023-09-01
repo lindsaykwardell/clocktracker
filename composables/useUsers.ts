@@ -19,6 +19,7 @@ export type User = {
   bio: string;
   privacy: PrivacySetting;
   charts: Chart[];
+  bgg_username: string | null;
 };
 
 export const useUsers = defineStore("users", {
