@@ -11,15 +11,15 @@
         </p>
         <div class="flex gap-4">
           <div v-if="!bgg_username" class="flex flex-col gap-2">
-            <label class="block w-full xl:w-3/4">
-              <span class="block">BoardGameGeek Username</span>
+            <label class="block w-full">
+              <span class="block">Username</span>
               <input
                 v-model="username"
                 class="block w-full border border-stone-500 rounded-md p-2"
                 required
               />
             </label>
-            <label class="block w-full xl:w-3/4">
+            <label class="block w-full">
               <span class="block">Password</span>
               <input
                 v-model="password"
