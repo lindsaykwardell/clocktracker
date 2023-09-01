@@ -7,6 +7,9 @@ import {
   Grimoire,
   Alignment,
 } from "@prisma/client";
+// @ts-ignore
+import dayjs from "dayjs";
+import axios from "axios";
 
 const prisma = new PrismaClient();
 
@@ -183,7 +186,6 @@ export default defineEventHandler(async (handler) => {
 
     if (friend !== null) {
       const win = (() => {
-        console.log(parentGameLastAlignment, newGame.win)
         if (parentGameLastAlignment === Alignment.GOOD) {
           return newGame.win;
         } else {

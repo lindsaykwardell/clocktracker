@@ -36,6 +36,7 @@ export default defineEventHandler(async (handler) => {
       bio: true,
       location: true,
       charts: true,
+      bgg_username: true,
     },
   });
 });
