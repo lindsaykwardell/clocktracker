@@ -13,9 +13,9 @@
 
 <script setup lang="ts">
 const props = defineProps<{
-  value?: string;
+  value?: string | null;
   size?: "sm" | "md" | "lg";
 }>();
 
-const avatarUrl = computed(() => `${props.value}?width=500&height=500`)
+const avatarUrl = computed(() => `${props.value ?? "/img/default.png"}?width=500&height=500`)
 </script>
