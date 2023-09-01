@@ -115,6 +115,32 @@ export const useGames = defineStore("games", {
         return Array.from(tags);
       };
     },
+    getCommunitiesByPlayer(): (username: string) => string[] {
+      return (username: string) => {
+        const games = this.getByPlayer(username);
+        if (games.status !== Status.SUCCESS) return [];
+
+        const communities = new Set<string>();
+        for (const game of games.data) {
+          communities.add(game.community);
+        }
+
+        return Array.from(communities);
+      };
+    },
+    getLocationsByPlayer(): (username: string) => string[] {
+      return (username: string) => {
+        const games = this.getByPlayer(username);
+        if (games.status !== Status.SUCCESS) return [];
+
+        const locations = new Set<string>();
+        for (const game of games.data) {
+          locations.add(game.location);
+        }
+        
+        return Array.from(locations);
+      };
+    },
     getLastCharater(): (gameId: string) => FullCharacter {
       return (gameId: string) => {
         const dummyCharacter: FullCharacter = {
