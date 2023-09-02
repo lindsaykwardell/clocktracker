@@ -7,6 +7,9 @@ import {
   Grimoire,
   Alignment,
 } from "@prisma/client";
+// @ts-ignore
+import dayjs from "dayjs";
+import axios from "axios";
 
 const prisma = new PrismaClient();
 
@@ -163,8 +166,52 @@ export default defineEventHandler(async (handler) => {
         is_grimoire_protected: true,
         parent_game_id: newGame.id,
         waiting_for_confirmation: true,
+        tags: [],
       },
     });
+  }
+
+  if (newGame.storyteller?.includes("@")) {
+    // Verify that it's a friend
+    const friend = await prisma.userSettings.findUnique({
+      where: {
+        username: newGame.storyteller.replace("@", ""),
+        friends: {
+          some: {
+            user_id: user.id,
+          },
+        },
+      },
+    });
+
+    if (friend !== null) {
+      const win = (() => {
+        if (parentGameLastAlignment === Alignment.GOOD) {
+          return newGame.win;
+        } else {
+          return !newGame.win;
+        }
+      })();
+
+      await prisma.game.create({
+        data: {
+          ...body,
+          is_storyteller: true,
+          date: new Date(body.date),
+          user_id: friend.user_id,
+          player_characters: {},
+          notes: "",
+          win,
+          grimoire: {
+            connect: newGame.grimoire.map((g) => ({ id: g.id })),
+          },
+          is_grimoire_protected: true,
+          parent_game_id: newGame.id,
+          waiting_for_confirmation: true,
+          tags: [],
+        },
+      });
+    }
   }
 
   return newGame;

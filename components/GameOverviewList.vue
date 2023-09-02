@@ -1,89 +1,90 @@
 <template>
   <div class="flex flex-wrap">
-    <!-- Date, Location, Community, Script, Players, Character, Alignment, Win -->
-    <div class="w-full grid grid-cols-12 px-2">
-      <div class="col-span-3 md:col-span-2 xl:col-span-1">Character</div>
-      <div class="hidden md:block md:col-span-2 xl:col-span-1 z-10">Date</div>
-      <div class="col-span-6 md:col-span-2 xl:col-span-4 z-10">Script</div>
-      <div class="hidden md:block md:col-span-2 z-10">Location</div>
-      <div class="hidden md:block md:col-span-2 z-10">Community</div>
-      <div class="hidden md:block md:col-span-1 z-10">Players</div>
-      <div class="col-span-2 md:col-span-1 z-10 text-right md:text-left">
-        Win/Loss
-      </div>
-    </div>
-    <div v-for="game in games" class="w-full border border-black">
-      <nuxt-link
-        :to="`/@${username}/game/${game.id}`"
-        class="relative w-full cursor-pointer overflow-hidden min-h-12 min-md:h-16 bg-cover grid grid-cols-12 bg-center items-center gap-2 p-2"
-        :class="{
-          'trouble-brewing': game.script === 'Trouble Brewing',
-          'sects-and-violets': game.script === 'Sects and Violets',
-          'bad-moon-rising': game.script === 'Bad Moon Rising',
-          'custom-script':
-            ['Trouble Brewing', 'Sects and Violets', 'Bad Moon Rising'].indexOf(
-              game.script
-            ) === -1,
-        }"
-      >
-        <img
-          v-if="game.image_urls[0]"
-          :src="fullImageUrl(game.image_urls[0])"
-          class="absolute bottom-0 w-full h-full object-cover blur-sm"
-          crossorigin="anonymous"
-        />
-        <div class="absolute bottom-0 left-0 z-0 w-full h-full bg-black/50" />
-        <Token :character="gamesStore.getLastCharater(game.id)" size="sm" />
-        <div class="hidden md:block md:col-span-2 xl:col-span-1 z-10">
-          {{ formatDate(game.date) }}
-        </div>
-        <div class="col-span-8 md:col-span-2 xl:col-span-4 z-10">
-          {{ game.script }}
-        </div>
-        <div class="hidden md:block md:col-span-2 z-10">
-          <template v-if="game.location_type === 'IN_PERSON'">
-            {{ game.location || "In Person" }}
-          </template>
-          <template v-else> Online </template>
-        </div>
-        <div class="hidden md:block md:col-span-2 z-10">
-          {{ game.community }}
-        </div>
-        <div class="hidden md:block md:col-span-1 z-10">
-          {{ game.player_count }}
-        </div>
-        <div class="flex gap-1">
-          <img
-            class="w-8 h-8 md:w-12 md:h-12 col-span-auto z-10"
-            :src="
-              game.is_storyteller
-                ? game.win
-                  ? '/img/role/good.png'
-                  : '/img/role/evil.png'
-                : game.win
-                ? '/img/win.png'
-                : '/img/loss.png'
-            "
-          />
-          <nuxt-link
-            v-if="!readonly"
-            class="text-white font-bold px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial z-10"
-            :to="`/@${game.user.username}/game/${game.id}/edit`"
-            ><svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="32"
-              height="32"
-              viewBox="0 0 32 32"
+    <table class="w-full">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Character</th>
+          <th class="hidden md:table-cell">Date</th>
+          <th>Script</th>
+          <th class="hidden md:table-cell">Location</th>
+          <th class="hidden md:table-cell">Community</th>
+          <th class="hidden md:table-cell">Players</th>
+          <th>Win/Loss</th>
+        </tr>
+      </thead>
+      <tbody>
+        <nuxt-link
+          v-for="game in games"
+          :to="`/@${username}/game/${game.id}`"
+          class="table-row cursor-pointer bg-cover bg-center"
+          :class="{
+            'trouble-brewing': game.script === 'Trouble Brewing',
+            'sects-and-violets': game.script === 'Sects and Violets',
+            'bad-moon-rising': game.script === 'Bad Moon Rising',
+            'custom-script':
+              [
+                'Trouble Brewing',
+                'Sects and Violets',
+                'Bad Moon Rising',
+              ].indexOf(game.script) === -1,
+          }"
+        >
+          <td class="w-12">
+            <a
+              v-if="game.bgg_id"
+              target="_blank"
+              :href="`https://boardgamegeek.com/play/details/${game.bgg_id}`"
             >
-              <path
-                fill="currentColor"
-                d="M2 26h28v2H2zM25.4 9c.8-.8.8-2 0-2.8l-3.6-3.6c-.8-.8-2-.8-2.8 0l-15 15V24h6.4l15-15zm-5-5L24 7.6l-3 3L17.4 7l3-3zM6 22v-3.6l10-10l3.6 3.6l-10 10H6z"
-              />
-            </svg>
-          </nuxt-link>
-        </div>
-      </nuxt-link>
-    </div>
+              <img src="/img/bgg.png" class="w-8 md:w-12" />
+            </a>
+          </td>
+          <td>
+            <Token :character="gamesStore.getLastCharater(game.id)" size="sm" />
+          </td>
+          <td class="hidden md:table-cell">{{ formatDate(game.date) }}</td>
+          <td>{{ game.script }}</td>
+          <td class="hidden md:table-cell">
+            <template v-if="game.location_type === 'IN_PERSON'">
+              {{ game.location || "In Person" }}
+            </template>
+            <template v-else> Online </template>
+          </td>
+          <td class="hidden md:table-cell">{{ game.community }}</td>
+          <td class="hidden md:table-cell">{{ game.player_count }}</td>
+          <td class="flex gap-1">
+            <img
+              class="w-8 h-8 md:w-12 md:h-12 col-span-auto z-10"
+              :src="
+                game.is_storyteller
+                  ? game.win
+                    ? '/img/role/good.png'
+                    : '/img/role/evil.png'
+                  : game.win
+                  ? '/img/win.png'
+                  : '/img/loss.png'
+              "
+            />
+            <nuxt-link
+              v-if="!readonly"
+              class="text-white font-bold px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial z-10"
+              :to="`/@${game.user.username}/game/${game.id}/edit`"
+              ><svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 32 32"
+              >
+                <path
+                  fill="currentColor"
+                  d="M2 26h28v2H2zM25.4 9c.8-.8.8-2 0-2.8l-3.6-3.6c-.8-.8-2-.8-2.8 0l-15 15V24h6.4l15-15zm-5-5L24 7.6l-3 3L17.4 7l3-3zM6 22v-3.6l10-10l3.6 3.6l-10 10H6z"
+                />
+              </svg>
+            </nuxt-link>
+          </td>
+        </nuxt-link>
+      </tbody>
+    </table>
   </div>
 </template>
 
@@ -91,7 +92,6 @@
 import { GameRecord } from "composables/useGames";
 import dayjs from "dayjs";
 
-const config = useRuntimeConfig();
 const gamesStore = useGames();
 
 defineProps<{
@@ -103,12 +103,6 @@ defineProps<{
 function formatDate(date: Date) {
   return dayjs(date).format("M/D/YYYY");
 }
-
-function fullImageUrl(file: string) {
-  const transformations = "?width=500&height=100";
-  if (file.startsWith("http")) return file + transformations;
-  return `${config.public.supabase.url}/storage/v1/object/public/game-attachments/${file}${transformations}`;
-}
 </script>
 
 <style scoped>
@@ -117,18 +111,49 @@ th {
 }
 
 .trouble-brewing {
-  background-image: url("/img/trouble-brewing-bg.webp");
+  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+    url("/img/trouble-brewing-bg.webp");
+
+  &:hover {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
+      url("/img/trouble-brewing-bg.webp");
+  }
 }
 
 .sects-and-violets {
-  background-image: url("/img/sects-and-violets-bg.webp");
+  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+    url("/img/sects-and-violets-bg.webp");
+
+  &:hover {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
+      url("/img/sects-and-violets-bg.webp");
+  }
 }
 
 .bad-moon-rising {
-  background-image: url("/img/bad-moon-rising-bg.webp");
+  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+    url("/img/bad-moon-rising-bg.webp");
+
+  &:hover {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
+      url("/img/bad-moon-rising-bg.webp");
+  }
 }
 
 .custom-script {
-  background-image: url("/img/custom-script-bg.webp");
+  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+    url("/img/custom-script-bg.webp");
+
+  &:hover {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
+      url("/img/custom-script-bg.webp");
+  }
+}
+
+td {
+  @apply h-12 md:h-16 p-2;
+  vertical-align: middle;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 </style>
