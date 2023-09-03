@@ -8,8 +8,8 @@
 </template>
 
 <script setup lang="ts">
-import { GameRecord } from "composables/useGames";
 import dayjs from "dayjs";
+import { GameRecord } from "~/composables/useGames";
 
 definePageMeta({
   middleware: ["auth"],
@@ -165,19 +165,16 @@ const formattedGame = computed(() => ({
 async function submitGame() {
   inFlight.value = true;
 
-  const result: Response = await fetch(
-    `/api/games/${savedGame.data.value?.id}`,
-    {
+  try {
+    const response = await $fetch(`/api/games/${savedGame.data.value?.id}`, {
       method: "PUT",
       body: JSON.stringify(formattedGame.value),
-    }
-  );
+    });
 
-  if (!result.ok) {
-    inFlight.value = false;
-    console.error(result.statusText);
-  } else {
     router.push(`/@${username}/game/${savedGame.data.value?.id}`);
+  } catch (err) {
+    inFlight.value = false;
+    console.error(err);
   }
 }
 </script>
