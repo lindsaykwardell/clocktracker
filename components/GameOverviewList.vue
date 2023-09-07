@@ -89,8 +89,7 @@
 </template>
 
 <script setup lang="ts">
-import { GameRecord } from "composables/useGames";
-import dayjs from "dayjs";
+import { GameRecord } from "~/composables/useGames";
 
 const gamesStore = useGames();
 
@@ -101,7 +100,7 @@ defineProps<{
 }>();
 
 function formatDate(date: Date) {
-  return dayjs(date).format("M/D/YYYY");
+  return new Intl.DateTimeFormat(navigator.language).format(new Date(date));
 }
 </script>
 
