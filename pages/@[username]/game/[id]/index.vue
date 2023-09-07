@@ -54,7 +54,7 @@
                 :datetime="dayjs(game.data.date).toISOString()"
                 class="text-sm"
               >
-                {{ dayjs(game.data.date).format("MMMM D, YYYY") }}
+                {{ formatDate(game.data.date) }}
               </time>
             </div>
             <div class="font-dumbledor text-2xl">
@@ -314,7 +314,7 @@
 </template>
 
 <script setup lang="ts">
-import { GameRecord } from "composables/useGames";
+import { GameRecord } from "~/composables/useGames";
 import dayjs from "dayjs";
 import VueMarkdown from "vue-markdown-render";
 
@@ -517,6 +517,12 @@ async function postToBGG() {
 
   await games.fetchGame(gameId);
   bggInFlight.value = false;
+}
+
+function formatDate(date: Date) {
+  return new Intl.DateTimeFormat(navigator.language, {
+    dateStyle: "long",
+  }).format(new Date(date));
 }
 
 onMounted(() => {
