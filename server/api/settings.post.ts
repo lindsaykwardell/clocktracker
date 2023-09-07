@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
-  const body = await readBody<UserSettings | null>(handler);
+  const body = await readBody<Partial<UserSettings> | null>(handler);
 
   if (!user) {
     throw createError({
@@ -21,29 +21,29 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  const existingUser = await prisma.userSettings.findFirst({
-    where: {
-      username: body.username,
-    },
-  });
+  console.log(body);
 
-  if (existingUser && existingUser.user_id !== user.id) {
-    throw createError({
-      status: 409,
-      statusMessage: "Username already exists",
+  if (body.username) {
+    const existingUser = await prisma.userSettings.findFirst({
+      where: {
+        username: body.username,
+      },
     });
+
+    if (existingUser && existingUser.user_id !== user.id) {
+      throw createError({
+        status: 409,
+        statusMessage: "Username already exists",
+      });
+    }
   }
 
-  const settings = await prisma.userSettings.upsert({
+  const settings = await prisma.userSettings.update({
     where: {
       user_id: user.id,
     },
-    update: {
+    data: {
       ...body,
-    },
-    create: {
-      ...body,
-      user_id: user.id,
     },
   });
 
