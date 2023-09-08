@@ -86,8 +86,7 @@
 </template>
 
 <script setup lang="ts">
-import { GameRecord } from "composables/useGames";
-import dayjs from "dayjs";
+import { GameRecord } from "~/composables/useGames";
 const gamesStore = useGames();
 
 const config = useRuntimeConfig();
@@ -99,7 +98,7 @@ const props = defineProps<{
 }>();
 
 function formatDate(date: Date) {
-  return dayjs(date).format("MM/DD/YYYY");
+  return new Intl.DateTimeFormat(navigator.language).format(new Date(date));
 }
 
 function fullImageUrl(file: string) {
