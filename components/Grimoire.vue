@@ -34,7 +34,7 @@
           type="text"
           class="w-28 bg-stone-600 rounded p-1 border-2 border-stone-500 text-center text-xs md:text-sm"
           :readonly="readonly"
-          list="friends"
+          list="grimoire-friends"
         />
         <a
           v-else-if="token.player_id"
@@ -52,7 +52,7 @@
       </div>
     </div>
   </div>
-  <datalist id="friends">
+  <datalist id="grimoire-friends">
     <option
       v-for="friend in potentiallyTaggedPlayers"
       :value="`@${friend?.username}`"
