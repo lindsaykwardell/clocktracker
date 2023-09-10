@@ -1,7 +1,7 @@
 <template>
   <dialog
     ref="dialog"
-    class="bg-stone-900 shadow-xl border border-stone-700 rounded-lg text-white p-0"
+    class="bg-stone-900 shadow-xl border border-stone-700 rounded-lg text-white p-0 relative"
     :class="{
       'w-11/12 md:w-1/3 lg:w-1/4 xl:w-[500px]': size === 'sm',
       'w-11/12 md:w-1/2 lg:w-1/2 xl:w-[750px]': size === 'md',
@@ -9,7 +9,7 @@
     }"
   >
     <template v-if="visible">
-      <div class="flex justify-between items-center">
+      <div class="flex justify-between items-center sticky top-0 bg-stone-900 z-10">
         <div class="p-4 w-full">
           <slot name="title" />
         </div>
