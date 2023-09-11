@@ -15,10 +15,13 @@ const props = defineProps<{
   games: Game[];
 }>();
 
-// Get past six months
 const months = Array.from(Array(12).keys())
   .map((i) => dayjs().subtract(i, "month").format("MMMM"))
   .reverse();
+
+const validMonths = Array.from(Array(12).keys()).map((i) =>
+  dayjs().subtract(i, "month").format("YYYY MMMM")
+);
 
 const data = computed(() => {
   const data: {
@@ -30,7 +33,11 @@ const data = computed(() => {
     };
   } = {};
 
-  for (const game of props.games.filter((game) => !game.ignore_for_stats)) {
+  for (const game of props.games.filter(
+    (game) =>
+      !game.ignore_for_stats &&
+      validMonths.includes(dayjs(game.date).format("YYYY MMMM"))
+  )) {
     const month = dayjs(game.date).format("MMMM");
     if (!data[month]) {
       data[month] = {
