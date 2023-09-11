@@ -32,6 +32,8 @@ describe("user settings", () => {
     cy.findByLabelText("Location").clear().type(location);
     cy.findByLabelText("Bio").clear().type(about);
     cy.findByRole("button", { name: "Save Settings" }).click();
+    cy.findByText("Profile updated successfully!").should("exist");
+    cy.findByRole("link", { name: "My Profile"}).click();
     cy.findByText(pronouns).should("exist");
     cy.findByText(location).should("exist");
     cy.findByText(about).should("exist");
