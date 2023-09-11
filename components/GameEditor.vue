@@ -143,7 +143,14 @@
           type="text"
           v-model="game.location"
           class="block w-full border border-stone-500 rounded-md p-2"
+          list="locations"
         />
+        <datalist id="locations">
+          <option
+            v-for="location in myLocations"
+            :value="location"
+          ></option>
+        </datalist>
       </label>
       <label class="flex-1">
         <span class="block">Community</span>
@@ -151,7 +158,14 @@
           type="text"
           v-model="game.community"
           class="block w-full border border-stone-500 rounded-md p-2"
+          list="communities"
         />
+        <datalist id="communities">
+          <option
+            v-for="community in myCommunities"
+            :value="community"
+          ></option>
+        </datalist>
       </label>
       <label class="flex-1">
         <span class="block">Players</span>
@@ -464,6 +478,20 @@ const me = computed(() => users.getUserById(user.value?.id));
 const myTags = computed(() => {
   if (me.value.status === Status.SUCCESS) {
     return games.getTagsByPlayer(me.value.data.username);
+  }
+  return [];
+});
+
+const myCommunities = computed(() => {
+  if (me.value.status === Status.SUCCESS) {
+    return games.getCommunitiesByPlayer(me.value.data.username);
+  }
+  return [];
+});
+
+const myLocations = computed(() => {
+  if (me.value.status === Status.SUCCESS) {
+    return games.getLocationsByPlayer(me.value.data.username);
   }
   return [];
 });
