@@ -280,7 +280,6 @@ export default defineEventHandler(async (handler) => {
 
         if (!childGame) {
           const win = (() => {
-            console.log(parentGameLastAlignment, game.win);
             if (parentGameLastAlignment === Alignment.GOOD) {
               return game.win;
             } else {
