@@ -179,6 +179,7 @@
 import type { Script, Role, RoleType, Alignment } from "@prisma/client";
 import { ChartOptions } from "chart.js";
 import { Line, Pie } from "vue-chartjs";
+import { RecentGameRecord } from "~/composables/useGames";
 
 const route = useRoute();
 const { scriptLogo } = useScripts();
@@ -256,7 +257,7 @@ const scriptStats = await $fetch<{
   >;
 }>("/api/script/" + script.id + "/stats");
 
-const recentGames = await allGames.fetchRecentGamesForScript(script.id);
+const recentGames = ref<RecentGameRecord[]>([])
 
 const averageGamesPlayed = computed(() =>
   Math.round(
@@ -422,6 +423,10 @@ const scriptLink = computed(() => {
     return `https://botc-scripts.azurewebsites.net/script/${script.id}/${script.version}/`;
   }
 });
+
+onMounted(async () => {
+  recentGames.value = await allGames.fetchRecentGamesForScript(script.id);
+})
 </script>
 
 <style scoped>
