@@ -161,8 +161,7 @@ describe("social features", () => {
       // Click on a select dropdown labeled "Privacy" and select "Private"
       cy.findByLabelText("Privacy Setting").select("Private");
       cy.findByRole("button", { name: "Save Settings" }).click();
-      cy.url().should("include", `@${user1.username}`);
-      cy.findByRole("link", { name: "Settings" }).click();
+      cy.findByText("Profile updated successfully!").should("exist");
       cy.findByLabelText("Privacy Setting").should("have.value", "PRIVATE");
     });
 
