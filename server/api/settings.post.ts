@@ -21,8 +21,6 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  console.log(body);
-
   if (body.username) {
     const existingUser = await prisma.userSettings.findFirst({
       where: {
