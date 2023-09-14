@@ -20,6 +20,7 @@ export type User = {
   privacy: PrivacySetting;
   charts: Chart[];
   bgg_username: string | null;
+  enable_bgstats: boolean;
 };
 
 export const useUsers = defineStore("users", {

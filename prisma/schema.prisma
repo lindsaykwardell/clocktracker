@@ -147,6 +147,7 @@ model UserSettings {
   charts               Chart[]
   bgg_username         String?
   bgg_cookies          String[]
+  enable_bgstats       Boolean         @default(false)
 }
 
 enum PrivacySetting {
