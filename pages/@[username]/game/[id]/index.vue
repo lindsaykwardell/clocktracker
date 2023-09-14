@@ -362,11 +362,9 @@ const canPostToBGStats = computed(() => {
 
   const parser = new UAParser(navigator.userAgent);
 
-  console.log(me)
-
   return (
-    me.data.enable_bgstats //&&
-    // ["mobile", "tablet"].includes(parser.getDevice().type!)
+    me.data.enable_bgstats &&
+    ["mobile", "tablet"].includes(parser.getDevice().type!)
   );
 });
 
