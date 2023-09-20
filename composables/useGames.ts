@@ -22,6 +22,7 @@ export type GameRecord = Game & {
         token_url: string;
         type: string;
         initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+        name: string;
       };
       related_role?: { token_url: string };
     })[];
