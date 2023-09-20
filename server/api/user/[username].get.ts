@@ -1,13 +1,51 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, PrivacySetting } from "@prisma/client";
+import { User } from "@supabase/supabase-js";
 
 const prisma = new PrismaClient();
 
 export default defineEventHandler(async (handler) => {
+  const me: User | null = handler.context.user;
   const username = handler.context.params?.username as string;
+
+  const isMe = me ?
+    (
+      await prisma.userSettings.findUnique({
+        where: {
+          user_id: me?.id || "",
+        },
+        select: {
+          username: true,
+        },
+      })
+    )?.username === username : false;
+
+  if (isMe) {
+    sendRedirect(handler, "/api/settings");
+  }
 
   const user = await prisma.userSettings.findUnique({
     where: {
       username,
+      OR: [
+        {
+          privacy: PrivacySetting.PUBLIC,
+        },
+        {
+          privacy: PrivacySetting.PRIVATE,
+        },
+        {
+          privacy: PrivacySetting.FRIENDS_ONLY,
+          friends: {
+            some: {
+              user_id: me?.id || "",
+            },
+          },
+        },
+        {
+          privacy: PrivacySetting.PERSONAL,
+          user_id: me?.id || "",
+        },
+      ],
     },
     select: {
       user_id: true,
@@ -19,8 +57,6 @@ export default defineEventHandler(async (handler) => {
       location: true,
       privacy: true,
       charts: true,
-      bgg_username: true,
-      enable_bgstats: true,
     },
   });
 
