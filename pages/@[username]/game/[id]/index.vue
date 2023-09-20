@@ -262,10 +262,9 @@
             <span v-else>Post to BGG</span>
           </button>
         </template>
-        {{ device }}
         <a
           v-if="canPostToBGStats"
-          :href="bgstatsLink"
+          :href="bgStatsLink"
           class="bg-[#333333] transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial"
         >
           <img src="/img/bgstats.png" class="w-8 h-8" />
@@ -326,8 +325,6 @@
 import { GameRecord } from "~/composables/useGames";
 import dayjs from "dayjs";
 import VueMarkdown from "vue-markdown-render";
-import { Alignment } from "@prisma/client";
-import UAParser from "ua-parser-js";
 
 const { scriptLogo } = useScripts();
 const config = useRuntimeConfig();
@@ -347,31 +344,14 @@ const grimPage = ref(
   game.value.status === Status.SUCCESS ? game.value.data.grimoire.length - 1 : 0
 );
 
+const { canPostToBGStats, link: bgStatsLink } = useBGStats(game);
+
 const canPostToBGG = computed(() => {
   const me = users.getUserById(user.value?.id || "");
 
   if (me.status !== Status.SUCCESS) return false;
 
   return !!me.data.bgg_username;
-});
-
-const canPostToBGStats = computed(() => {
-  const me = users.getUserById(user.value?.id || "");
-
-  if (me.status !== Status.SUCCESS) return false;
-
-  const parser = new UAParser(navigator.userAgent);
-
-  return (
-    me.data.enable_bgstats &&
-    ["mobile", "tablet"].includes(parser.getDevice().type!)
-  );
-});
-
-const device = computed(() => {
-  const parser = new UAParser(navigator.userAgent);
-
-  return parser.getDevice().type || "";
 });
 
 watchEffect(() => {
@@ -548,71 +528,6 @@ async function postToBGG() {
   await games.fetchGame(gameId);
   bggInFlight.value = false;
 }
-
-const bgstatsLink = computed(() => {
-  if (game.value.status !== Status.SUCCESS) return "#";
-  const useGrimoire =
-    game.value.data.grimoire[0] &&
-    game.value.data.grimoire[0].tokens.some((token) => token.role);
-
-  const parentGameLastAlignment =
-    game.value.data.player_characters[
-      game.value.data.player_characters.length - 1
-    ]?.alignment || Alignment.NEUTRAL;
-
-  const data = {
-    sourceName: "ClockTracker",
-    location: game.value.data.location || game.value.data.location_type,
-    game: {
-      bggId: 240980,
-      highestWins: false,
-      name: "Blood on the Clocktower",
-      noPoints: true,
-      sourceGameid: game.value.data.id,
-    },
-    board: game.value.data.script,
-    playDate: dayjs(game.value.data.date).format("yyyy-MM-dd HH:mm:ss"),
-    players: useGrimoire
-      ? game.value.data.grimoire[game.value.data.grimoire.length - 1].tokens
-          .filter((token) => token.player_name)
-          .map((token) => ({
-            name: token.player_name,
-            role: token.role?.type,
-            sourcePlayerId: token.player_name,
-            winner: (() => {
-              if (game.value.status !== Status.SUCCESS) return false;
-
-              if (parentGameLastAlignment === Alignment.NEUTRAL) {
-                if (token.alignment === Alignment.GOOD) {
-                  return game.value.data.win;
-                } else {
-                  return !game.value.data.win;
-                }
-              }
-
-              if (token.alignment === parentGameLastAlignment) {
-                return game.value.data.win;
-              } else {
-                return !game.value.data.win;
-              }
-            })(),
-          }))
-      : [
-          {
-            name: username,
-            role: game.value.data.player_characters[
-              game.value.data.player_characters.length - 1
-            ].name,
-            sourcePlayerId: username,
-            win: game.value.data.win,
-          },
-        ],
-  };
-
-  return `bgstats://app.bgstatsapp.com/createPlay.html?data=${encodeURIComponent(
-    JSON.stringify(data)
-  )}`;
-});
 
 function formatDate(date: Date) {
   return new Intl.DateTimeFormat(navigator.language, {
