@@ -20,6 +20,7 @@ export default defineEventHandler(async (handler) => {
       privacy: true,
       charts: true,
       bgg_username: true,
+      enable_bgstats: true,
     },
   });
 
