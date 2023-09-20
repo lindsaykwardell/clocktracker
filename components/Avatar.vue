@@ -3,9 +3,9 @@
     :src="avatarUrl"
     class="rounded-full object-cover shadow-lg border border-black"
     :class="{
-      'w-16 md:w-24 aspect-square': !size || size === 'md',
-      'w-12 md:w-16 aspect-square': size === 'sm',
-      'w-32 md:w-40 aspect-square	': size === 'lg',
+      'w-16 md:w-24 h-16 md:h-24 aspect-square': !size || size === 'md',
+      'w-12 md:w-16 h-12 md:h-16 aspect-square': size === 'sm',
+      'w-32 md:w-40 h-32 md:h-40 aspect-square	': size === 'lg',
     }"
     crossorigin="anonymous"
   />

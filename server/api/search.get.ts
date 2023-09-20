@@ -1,8 +1,10 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, PrivacySetting } from "@prisma/client";
+import { User } from "@supabase/supabase-js";
 
 const prisma = new PrismaClient();
 
 export default defineEventHandler(async (handler) => {
+  const me: User | null = handler.context.user;
   const { query } = getQuery(handler) as { query: string };
 
   // Don't query if it's too small
@@ -12,18 +14,44 @@ export default defineEventHandler(async (handler) => {
 
   return prisma.userSettings.findMany({
     where: {
-      OR: [
+      AND: [
         {
-          username: {
-            contains: query,
-            mode: "insensitive",
-          },
+          OR: [
+            {
+              privacy: PrivacySetting.PUBLIC,
+            },
+            {
+              privacy: PrivacySetting.PRIVATE,
+            },
+            {
+              privacy: PrivacySetting.FRIENDS_ONLY,
+              OR: [
+                {
+                  friends: {
+                    some: {
+                      friend_id: me?.id || "",
+                    },
+                  },
+                },
+              ],
+            },
+          ],
         },
         {
-          display_name: {
-            contains: query,
-            mode: "insensitive",
-          },
+          OR: [
+            {
+              username: {
+                contains: query,
+                mode: "insensitive",
+              },
+            },
+            {
+              display_name: {
+                contains: query,
+                mode: "insensitive",
+              },
+            },
+          ],
         },
       ],
     },
@@ -36,7 +64,6 @@ export default defineEventHandler(async (handler) => {
       bio: true,
       location: true,
       charts: true,
-      bgg_username: true,
     },
   });
 });

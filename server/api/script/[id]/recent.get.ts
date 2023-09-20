@@ -8,9 +8,7 @@ export default defineEventHandler(async (handler) => {
   return prisma.game.findMany({
     where: {
       user: {
-        privacy: {
-          equals: PrivacySetting.PUBLIC,
-        },
+        privacy: PrivacySetting.PUBLIC,
       },
       script_id,
     },
@@ -18,7 +16,7 @@ export default defineEventHandler(async (handler) => {
       user: {
         select: {
           username: true,
-        }
+        },
       },
       player_characters: {
         include: {
