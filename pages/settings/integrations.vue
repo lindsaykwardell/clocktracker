@@ -48,6 +48,14 @@
           </div>
         </div>
       </div>
+      <div class="text-left w-full">
+        <h3 class="text-2xl">BGStats</h3>
+        <p class="text-stone-500">Enable logging games to BGStats.</p>
+        <label class="flex gap-4 pt-4">
+          <input v-model="enable_bgstats" type="checkbox" />
+          <span>Enable BGStats</span>
+        </label>
+      </div>
     </section>
   </SettingsTemplate>
 </template>
@@ -61,6 +69,7 @@ const settings = await useFetch("/api/settings");
 const users = useUsers();
 const user = useSupabaseUser();
 const bgg_username = ref(settings.data.value?.bgg_username);
+const enable_bgstats = ref(settings.data.value?.enable_bgstats);
 
 const username = ref("");
 const password = ref("");
@@ -103,6 +112,15 @@ async function disconnectBoardGameGeek() {
     inFlight.value = false;
   }
 }
+
+watch(enable_bgstats, async (value) => {
+  await $fetch("/api/settings", {
+    method: "POST",
+    body: JSON.stringify({
+      enable_bgstats: value,
+    }),
+  });
+});
 </script>
 
 <style scoped>
