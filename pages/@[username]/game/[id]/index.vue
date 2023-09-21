@@ -240,8 +240,8 @@
         </div>
       </div>
       <div
-        v-if="player.data.user_id === user?.id"
-        class="p-4 flex justify-between md:justify-end gap-4"
+        xv-if="player.data.user_id === user?.id"
+        class="p-4 flex flex-col md:flex-row justify-between md:justify-end gap-4"
       >
         <template v-if="canPostToBGG">
           <label v-if="!game.data.bgg_id" class="flex gap-2 items-center">
@@ -262,6 +262,14 @@
             <span v-else>Post to BGG</span>
           </button>
         </template>
+        <a
+          v-if="canPostToBGStats"
+          :href="bgStatsLink"
+          class="bg-[#333333] transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial"
+        >
+          <img src="/img/bgstats.png" class="w-8 h-8" />
+          Post to BGStats
+        </a>
         <button
           v-if="game.data.waiting_for_confirmation"
           @click="confirmGame"
@@ -335,6 +343,8 @@ const player = computed(() => users.getUser(username));
 const grimPage = ref(
   game.value.status === Status.SUCCESS ? game.value.data.grimoire.length - 1 : 0
 );
+
+const { canPostToBGStats, link: bgStatsLink } = useBGStats(game);
 
 const canPostToBGG = computed(() => {
   const me = users.getUserById(user.value?.id || "");
