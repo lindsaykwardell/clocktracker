@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 export default defineEventHandler(async (handler) => {
   const gameId = handler.context.params?.id;
-  const signedInUser = handler.context.user as User | null;
+  const me: User | null = handler.context.user;
 
   if (!gameId) {
     throw createError({
@@ -17,32 +17,63 @@ export default defineEventHandler(async (handler) => {
   const game = await prisma.game.findUnique({
     where: {
       id: gameId,
-      user: !signedInUser
-        ? { privacy: PrivacySetting.PUBLIC }
-        : {
+      user: {
+        OR: [
+          {
+            privacy: PrivacySetting.PUBLIC,
+          },
+          {
+            privacy: PrivacySetting.PRIVATE,
             OR: [
               {
-                privacy: PrivacySetting.PUBLIC,
+                user_id: me?.id || "",
               },
               {
-                privacy: PrivacySetting.PRIVATE,
-                AND: {
-                  OR: [
-                    {
-                      user_id: signedInUser.id,
-                    },
-                    {
-                      friends: {
-                        some: {
-                          user_id: signedInUser.id,
-                        },
-                      },
-                    },
-                  ],
+                friends: {
+                  some: {
+                    user_id: me?.id || "",
+                  },
                 },
               },
             ],
           },
+          {
+            privacy: PrivacySetting.FRIENDS_ONLY,
+            OR: [
+              {
+                friends: {
+                  some: {
+                    user_id: me?.id || "",
+                  },
+                },
+              },
+              {
+                sent_friend_requests: {
+                  some: {
+                    user_id: me?.id || "",
+                    accepted: false,
+                  },
+                },
+              },
+              {
+                friend_requests: {
+                  some: {
+                    from_user_id: me?.id || "",
+                    accepted: false,
+                  },
+                },
+              },
+              {
+                user_id: me?.id || "",
+              },
+            ],
+          },
+          {
+            privacy: PrivacySetting.PERSONAL,
+            user_id: me?.id || "",
+          },
+        ],
+      },
     },
     select: {
       date: true,

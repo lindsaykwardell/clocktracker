@@ -54,6 +54,7 @@
           >
             <option :value="PrivacySetting.PUBLIC">Public</option>
             <option :value="PrivacySetting.PRIVATE">Private</option>
+            <option :value="PrivacySetting.FRIENDS_ONLY">Visible to friends only</option>
           </select>
         </label>
         <button
