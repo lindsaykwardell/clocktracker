@@ -61,6 +61,12 @@ describe("social features", () => {
     cy.logout();
   });
 
+  afterEach(() => {
+    cy.visit("/")
+    // @ts-ignore
+    cy.logout();
+  })
+
   it("allows searching for a user", () => {
     // @ts-ignore
     cy.login(user2.email, user2.password);
@@ -165,39 +171,145 @@ describe("social features", () => {
       cy.findByLabelText("Privacy Setting").should("have.value", "PRIVATE");
     });
 
-    it("hides a private user's profile from non-friend users", () => {
-      // @ts-ignore
-      cy.login(user2.email, user2.password);
+    describe("private", () => {
+      before(() => {
+        // @ts-ignore
+        cy.login(user1.email, user1.password);
 
-      cy.findByRole("link", { name: "Search" }).click();
-      cy.get("input[type='search']").type(user1.displayName);
-      cy.findByRole("button", { name: "Search" }).click();
-      cy.findByText(user1.displayName).click();
-      cy.findByText("This account is private").should("exist");
-      cy.get(".token").should("not.exist");
+        cy.findByRole("link", { name: "Settings" }).click();
+        // Click on a select dropdown labeled "Privacy" and select "Private"
+        cy.findByLabelText("Privacy Setting").select("Private");
+        cy.findByRole("button", { name: "Save Settings" }).click();
+        cy.findByText("Profile updated successfully!").should("exist");
+        cy.findByLabelText("Privacy Setting").should("have.value", "PRIVATE");
+        
+        // @ts-ignore
+        cy.logout();
+      });
+
+      it("displays a user's profile as private", () => {
+        // @ts-ignore
+        cy.login(user2.email, user2.password);
+
+        cy.findByRole("link", { name: "Search" }).click();
+        cy.get("input[type='search']").type(user1.displayName);
+        cy.findByRole("button", { name: "Search" }).click();
+        cy.findByText(user1.displayName).click();
+        cy.findByText("This account is private").should("exist");
+        cy.get(".token").should("not.exist");
+      });
+
+      it("shows a private user's games to friend users", () => {
+        // @ts-ignore
+        cy.login(user1.email, user1.password);
+
+        cy.findByRole("link", { name: "Search" }).click();
+        cy.get("input[type='search']").type(user2.displayName);
+        cy.findByRole("button", { name: "Search" }).click();
+        cy.findByText(user2.displayName).click();
+        cy.findByRole("button", { name: "Add Friend" }).click();
+        cy.findByRole("button", { name: "Cancel" }).should("exist");
+        // @ts-ignore
+        cy.logout();
+
+        // @ts-ignore
+        cy.login(user2.email, user2.password);
+        cy.findByText("Friends").click();
+        cy.findByRole("button", { name: "Accept" }).click();
+        cy.findByRole("button", { name: "Friends" }).should("exist");
+        cy.findByText(user1.displayName).click();
+        cy.findByText("This account is private").should("not.exist");
+        cy.findByAltText("Chef").should("exist");
+      });
+
+      after(() => {
+        // @ts-ignore
+        cy.login(user1.email, user1.password);
+
+        cy.findByRole("link", { name: "Search" }).click();
+        cy.get("input[type='search']").type(user2.displayName);
+        cy.findByRole("button", { name: "Search" }).click();
+        cy.findByText(user2.displayName).click();
+        cy.findByRole("button", { name: "Friends" }).click();
+        cy.on("window:confirm", () => true);
+        cy.findByRole("button", { name: "Add Friend" }).should("exist");
+
+        // @ts-ignore
+        cy.logout();
+      });
     });
 
-    it("shows a private user's profile to friend users", () => {
-      // @ts-ignore
-      cy.login(user1.email, user1.password);
+    describe("friends only", () => {
+      before(() => {
+        // @ts-ignore
+        cy.login(user1.email, user1.password);
 
-      cy.findByRole("link", { name: "Search" }).click();
-      cy.get("input[type='search']").type(user2.displayName);
-      cy.findByRole("button", { name: "Search" }).click();
-      cy.findByText(user2.displayName).click();
-      cy.findByRole("button", { name: "Add Friend" }).click();
-      cy.findByRole("button", { name: "Cancel" }).should("exist");
-      // @ts-ignore
-      cy.logout();
+        cy.findByRole("link", { name: "Settings" }).click();
+        // Click on a select dropdown labeled "Privacy" and select "Private"
+        cy.findByLabelText("Privacy Setting").select("Visible to friends only");
+        cy.findByRole("button", { name: "Save Settings" }).click();
+        cy.findByText("Profile updated successfully!").should("exist");
+        cy.findByLabelText("Privacy Setting").should(
+          "have.value",
+          "FRIENDS_ONLY"
+        );
 
-      // @ts-ignore
-      cy.login(user2.email, user2.password);
-      cy.findByText("Friends").click();
-      cy.findByRole("button", { name: "Accept" }).click();
-      cy.findByRole("button", { name: "Friends" }).should("exist");
-      cy.findByText(user1.displayName).click();
-      cy.findByText("This account is private").should("not.exist");
-      cy.findByAltText("Chef").should("exist");
+        // @ts-ignore
+        cy.logout();
+      });
+
+      it("hides a friend only user's profile from non-friend users", () => {
+        // @ts-ignore
+        cy.login(user2.email, user2.password);
+
+        cy.findByRole("link", { name: "Search" }).click();
+        cy.get("input[type='search']").type(user1.displayName);
+        cy.findByRole("button", { name: "Search" }).click();
+        cy.findByText(user1.displayName).should("not.exist");
+
+        // Attempt to go to the user's profile directly
+        cy.visit(`/@${user1.username}`);
+        // Should receive a 404
+        cy.findByText("404").should("exist");
+      });
+
+      it("shows a friend only user's profile to friend users", () => {
+        // @ts-ignore
+        cy.login(user1.email, user1.password);
+
+        cy.findByRole("link", { name: "Search" }).click();
+        cy.get("input[type='search']").type(user2.displayName);
+        cy.findByRole("button", { name: "Search" }).click();
+        cy.findByText(user2.displayName).click();
+        cy.findByRole("button", { name: "Add Friend" }).click();
+        cy.findByRole("button", { name: "Cancel" }).should("exist");
+        // @ts-ignore
+        cy.logout();
+
+        // @ts-ignore
+        cy.login(user2.email, user2.password);
+        cy.findByText("Friends").click();
+        cy.findByRole("button", { name: "Accept" }).click();
+        cy.findByRole("button", { name: "Friends" }).should("exist");
+        cy.findByText(user1.displayName).click();
+        cy.findByAltText("Chef").should("exist");
+      });
+
+      after(() => {
+        // @ts-ignore
+        cy.login(user1.email, user1.password);
+
+        cy.findByRole("link", { name: "Search" }).click();
+        cy.get("input[type='search']").type(user2.displayName);
+        cy.findByRole("button", { name: "Search" }).click();
+        cy.findByText(user2.displayName).click();
+        cy.findByRole("button", { name: "Friends" }).click();
+        cy.on("window:confirm", () => true);
+        cy.findByRole("button", { name: "Add Friend" }).should("exist");
+
+        // @ts-ignore
+        cy.logout();
+      });
     });
   });
 });

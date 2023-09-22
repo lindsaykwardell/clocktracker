@@ -21,6 +21,12 @@ describe("games", () => {
     cy.logout();
   });
 
+  afterEach(() => {
+    cy.visit("/")
+    // @ts-ignore
+    cy.logout();
+  })
+
   it("can add a new game", () => {
     const storyteller = faker.person.firstName();
 

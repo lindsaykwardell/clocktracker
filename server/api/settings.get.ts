@@ -40,7 +40,10 @@ export default defineEventHandler(async (handler) => {
     ? (
         await prisma.userSettings.findFirst({
           where: {
-            username: user.user_metadata.full_name,
+            username: {
+              equals: user.user_metadata.full_name,
+              mode: "insensitive",
+            },
           },
         })
       )?.username
