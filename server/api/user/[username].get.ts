@@ -1,23 +1,26 @@
 import { PrismaClient, PrivacySetting } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  log: ["query"],
+});
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
   const username = handler.context.params?.username as string;
 
-  const isMe = me ?
-    (
-      await prisma.userSettings.findUnique({
-        where: {
-          user_id: me?.id || "",
-        },
-        select: {
-          username: true,
-        },
-      })
-    )?.username === username : false;
+  const isMe = me
+    ? (
+        await prisma.userSettings.findUnique({
+          where: {
+            user_id: me?.id || "",
+          },
+          select: {
+            username: true,
+          },
+        })
+      )?.username === username
+    : false;
 
   if (isMe) {
     sendRedirect(handler, "/api/settings");
@@ -35,11 +38,37 @@ export default defineEventHandler(async (handler) => {
         },
         {
           privacy: PrivacySetting.FRIENDS_ONLY,
-          friends: {
-            some: {
-              user_id: me?.id || "",
+          OR: [
+            {
+              friends: {
+                some: {
+                  user_id: me?.id || "",
+                },
+              },
             },
-          },
+            {
+              sent_friend_requests: {
+                some: {
+                  user_id: me?.id || "",
+                  from_user: {
+                    username,
+                  },
+                  accepted: false,
+                },
+              },
+            },
+            {
+              friend_requests: {
+                some: {
+                  from_user_id: me?.id || "",
+                  user: {
+                    username,
+                  },
+                  accepted: false,
+                },
+              },
+            },
+          ],
         },
         {
           privacy: PrivacySetting.PERSONAL,

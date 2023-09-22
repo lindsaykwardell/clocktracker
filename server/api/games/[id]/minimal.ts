@@ -48,6 +48,22 @@ export default defineEventHandler(async (handler) => {
                 },
               },
               {
+                sent_friend_requests: {
+                  some: {
+                    user_id: me?.id || "",
+                    accepted: false,
+                  },
+                },
+              },
+              {
+                friend_requests: {
+                  some: {
+                    from_user_id: me?.id || "",
+                    accepted: false,
+                  },
+                },
+              },
+              {
                 user_id: me?.id || "",
               },
             ],
