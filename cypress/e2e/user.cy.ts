@@ -8,6 +8,12 @@ describe("user settings", () => {
     password = faker.internet.password();
   });
 
+  afterEach(() => {
+    cy.visit("/")
+    // @ts-ignore
+    cy.logout();
+  })
+
   it("registers a new user", () => {
     // @ts-ignore
     cy.register(email, password);
