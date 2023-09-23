@@ -98,7 +98,7 @@ const me = computed(() => {
   } else {
     return null;
   }
-})
+});
 
 const playerStatus = computed(() => users.getUser(username));
 const playerFetchStatus = computed(() => playerStatus.value.status);
@@ -137,7 +137,13 @@ function currentTabClass(tab: string) {
 }
 
 onMounted(() => {
-  users.fetchUser(username);
+  users.fetchUser(username).catch((err) => {
+    showError({
+      statusCode: 404,
+      message: `User ${username} not found`,
+      fatal: true,
+    });
+  });
   gameStore.fetchPlayerGames(username);
 });
 

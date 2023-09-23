@@ -4,7 +4,7 @@ import { PrismaClient, PrivacySetting } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export default defineEventHandler(async (handler) => {
-  const signedInUser = handler.context.user as User | null;
+  const me: User | null = handler.context.user;
   const gameId = handler.context.params?.id;
 
   if (!gameId) {
@@ -17,38 +17,53 @@ export default defineEventHandler(async (handler) => {
   const game = await prisma.game.findUnique({
     where: {
       id: gameId,
-      user: !signedInUser
-        ? { privacy: PrivacySetting.PUBLIC }
-        : {
+      user: {
+        OR: [
+          {
+            privacy: PrivacySetting.PUBLIC,
+          },
+          {
+            privacy: PrivacySetting.PRIVATE,
             OR: [
               {
-                privacy: PrivacySetting.PUBLIC,
+                user_id: me?.id || "",
               },
               {
-                privacy: PrivacySetting.PRIVATE,
-                AND: {
-                  OR: [
-                    {
-                      user_id: signedInUser.id,
-                    },
-                    {
-                      friends: {
-                        some: {
-                          user_id: signedInUser.id,
-                        },
-                      },
-                    },
-                  ],
+                friends: {
+                  some: {
+                    user_id: me?.id || "",
+                  },
                 },
               },
             ],
           },
+          {
+            privacy: PrivacySetting.FRIENDS_ONLY,
+            OR: [
+              {
+                friends: {
+                  some: {
+                    user_id: me?.id || "",
+                  },
+                },
+              },
+              {
+                user_id: me?.id || "",
+              },
+            ],
+          },
+          {
+            privacy: PrivacySetting.PERSONAL,
+            user_id: me?.id || "",
+          },
+        ],
+      },
     },
     include: {
       user: {
         select: {
-          username: true
-        }
+          username: true,
+        },
       },
       player_characters: {
         include: {
@@ -77,7 +92,7 @@ export default defineEventHandler(async (handler) => {
         },
         orderBy: {
           id: "asc",
-        }
+        },
       },
     },
   });
