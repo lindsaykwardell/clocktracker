@@ -135,7 +135,7 @@ export default defineEventHandler(async (handler) => {
     game.player_characters[game.player_characters.length - 1]?.alignment ||
     Alignment.NEUTRAL;
 
-  for (const token of game.grimoire.flatMap((g) => g.tokens || [])) {
+  for (const token of game.grimoire[game.grimoire.length - 1].tokens) {
     if (token.player_name) {
       players.push({
         username: null,
@@ -165,10 +165,16 @@ export default defineEventHandler(async (handler) => {
     }
   }
 
+  // Remove @ sign
+  for (const player of players) {
+    player.name = player.name.replace("@", "");
+  }
+
+  // Anonymize the players if the user has that setting enabled
   if (body.anonymize) {
     // Reduce the player name to the first letter of their name
     for (const player of players) {
-      player.name = player.name.replace("@", "")[0] + ".";
+      player.name = player.name[0] + ".";
     }
   }
 
