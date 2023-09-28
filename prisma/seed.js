@@ -676,6 +676,7 @@ const townsfolk = [
   "Undertaker",
   "Virgin",
   "Washerwoman",
+  "Shugenja",
 ];
 
 const outsiders = [
