@@ -1,7 +1,7 @@
 <template>
   <dialog
     ref="dialog"
-    class="bg-stone-900 shadow-xl border border-stone-700 rounded-lg text-white p-0 relative"
+    class="bg-stone-900 shadow-xl border border-stone-700 rounded-lg text-white p-0 fixed"
     :class="{
       'w-11/12 md:w-1/3 lg:w-1/4 xl:w-[500px]': size === 'sm',
       'w-11/12 md:w-1/2 lg:w-1/2 xl:w-[750px]': size === 'md',
