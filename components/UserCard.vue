@@ -18,7 +18,7 @@
           <div class="text-stone-400 flex">
             <span>{{ player.data.username }}</span>
             <span v-if="player.data.pronouns">
-              | {{ player.data.pronouns }}
+              &nbsp;({{ player.data.pronouns }})
             </span>
           </div>
           <div class="text-stone-400 flex gap-2 items-center">
