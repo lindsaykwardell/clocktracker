@@ -142,6 +142,26 @@ export const useGames = defineStore("games", {
         return Array.from(locations);
       };
     },
+    getPreviouslyTaggedByPlayer(): (username?: string) => string[] {
+      return (username?: string) => {
+        if (!username) return [];
+        const games = this.getByPlayer(username);
+        if (games.status !== Status.SUCCESS) return [];
+
+        const playerNames = new Set<string>();
+        for (const game of games.data) {
+          for (const grimoire of game.grimoire) {
+            for (const token of grimoire.tokens) {
+              if (token.player_name && !token.player_name.startsWith("@")) {
+                playerNames.add(token.player_name);
+              }
+            }
+          }
+        }
+
+        return Array.from(playerNames);
+      }
+    },
     getLastCharater(): (gameId: string) => FullCharacter {
       return (gameId: string) => {
         const dummyCharacter: FullCharacter = {
