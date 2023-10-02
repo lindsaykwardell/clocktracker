@@ -27,6 +27,12 @@ export type GameRecord = Game & {
       related_role?: { token_url: string };
     })[];
   })[];
+  parent_game?: {
+    user: {
+      username: string;
+      display_name: string;
+    };
+  };
 };
 
 export type RecentGameRecord = GameRecord & {
@@ -138,7 +144,7 @@ export const useGames = defineStore("games", {
         for (const game of games.data) {
           locations.add(game.location);
         }
-        
+
         return Array.from(locations);
       };
     },
