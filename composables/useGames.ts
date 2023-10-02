@@ -138,7 +138,7 @@ export const useGames = defineStore("games", {
         for (const game of games.data) {
           locations.add(game.location);
         }
-        
+
         return Array.from(locations);
       };
     },
@@ -191,19 +191,30 @@ export const useGames = defineStore("games", {
         data: game,
       });
     },
-    async fetchPlayerGames(userId: string) {
-      if (!this.players.has(userId))
-        this.players.set(userId, { status: Status.LOADING });
+    async fetchPlayerGames(username: string) {
+      if (!this.players.has(username))
+        this.players.set(username, { status: Status.LOADING });
 
-      const games = await $fetch<GameRecord[]>(`/api/user/${userId}/games`);
+      const games = await $fetch<GameRecord[]>(`/api/user/${username}/games`);
 
-      this.players.set(userId, { status: Status.SUCCESS, data: true });
+      this.players.set(username, { status: Status.SUCCESS, data: true });
 
       for (const game of games) {
         this.games.set(game.id, {
           status: Status.SUCCESS,
           data: game,
         });
+      }
+
+      const allGames = this.getByPlayer(username);
+      if (allGames.status === Status.SUCCESS) {
+        for (const game of allGames.data) {
+          // If the game is in the new data, don't worry
+          if (games.map(g => g.id).includes(game.id)) continue;
+
+          // Purge the game if it's not in the new data
+          this.games.delete(game.id);  
+        }
       }
     },
     async fetchRecentGamesForScript(scriptId: number) {
