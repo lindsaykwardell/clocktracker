@@ -296,7 +296,7 @@
           }"
         >
           <button
-            v-if="!game.is_grimoire_protected && game.grimoire.length > 1"
+            v-if="game.grimoire.length > 1"
             @click.prevent="deletePage"
             class="absolute top-1 right-1 bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial z-10"
           >
@@ -334,10 +334,7 @@
             class="absolute bottom-0 right-1 flex items-center font-dumbledor"
           >
             <span
-              v-if="
-                !game.is_grimoire_protected ||
-                grimPage < game.grimoire.length - 1
-              "
+              v-if="grimPage <= game.grimoire.length - 1"
               class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded"
             >
               {{
@@ -350,7 +347,6 @@
             <Grimoire
               :tokens="game.grimoire[grimPage].tokens"
               :availableRoles="orderedRoles"
-              :readonly="game.is_grimoire_protected"
               @selectedMe="applyMyRoleToGrimoire"
             />
           </div>
