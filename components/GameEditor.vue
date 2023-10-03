@@ -146,10 +146,7 @@
           list="locations"
         />
         <datalist id="locations">
-          <option
-            v-for="location in myLocations"
-            :value="location"
-          ></option>
+          <option v-for="location in myLocations" :value="location"></option>
         </datalist>
       </label>
       <label class="flex-1">
@@ -730,7 +727,8 @@ function selectRoleForToken(role: {
 watchEffect(() => {
   props.game.grimoire.forEach((grimoire) => {
     while (
-      (props.game.player_count || 0) > grimoire.tokens.length &&
+      (props.game.player_count || 0) + (props.game.traveler_count || 0) >
+        grimoire.tokens.length &&
       grimoire.tokens.length < 20
     ) {
       grimoire.tokens.push({
@@ -744,7 +742,10 @@ watchEffect(() => {
       });
     }
 
-    while ((props.game.player_count || 0) < grimoire.tokens.length) {
+    while (
+      (props.game.player_count || 0) + (props.game.traveler_count || 0) <
+      grimoire.tokens.length
+    ) {
       grimoire.tokens.pop();
     }
   });
