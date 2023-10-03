@@ -29,6 +29,9 @@ export default defineEventHandler(async (handler) => {
   }
 
   if (body.username) {
+    // Make sure that there are no spaces in the username.
+    body.username = body.username.replaceAll(" ", "");
+
     const existingUser = await prisma.userSettings.findFirst({
       where: {
         username: {
@@ -44,8 +47,6 @@ export default defineEventHandler(async (handler) => {
         statusMessage: "Username already exists",
       });
     }
-
-    body.username = body.username.replaceAll(" ", "");
   }
 
   const settings = await prisma.userSettings.update({
