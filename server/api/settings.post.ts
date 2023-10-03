@@ -21,6 +21,13 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
+  if (!body.username) {
+    throw createError({
+      status: 409,
+      statusMessage: "Username is required",
+    });
+  }
+
   if (body.username) {
     const existingUser = await prisma.userSettings.findFirst({
       where: {
