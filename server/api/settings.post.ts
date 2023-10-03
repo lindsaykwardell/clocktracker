@@ -31,7 +31,10 @@ export default defineEventHandler(async (handler) => {
   if (body.username) {
     const existingUser = await prisma.userSettings.findFirst({
       where: {
-        username: body.username,
+        username: {
+          equals: body.username,
+          mode: "insensitive",
+        },
       },
     });
 
@@ -41,6 +44,8 @@ export default defineEventHandler(async (handler) => {
         statusMessage: "Username already exists",
       });
     }
+
+    body.username = body.username.replaceAll(" ", "");
   }
 
   const settings = await prisma.userSettings.update({
