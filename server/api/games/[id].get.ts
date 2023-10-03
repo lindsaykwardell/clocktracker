@@ -94,6 +94,16 @@ export default defineEventHandler(async (handler) => {
           id: "asc",
         },
       },
+      parent_game: {
+        select: {
+          user: {
+            select: {
+              username: true,
+              display_name: true,
+            },
+          },
+        },
+      },
     },
   });
 
