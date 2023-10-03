@@ -12,8 +12,7 @@
           <span class="block">Username</span>
           <input
             v-model="username"
-            class="block w-full border border-stone-500 rounded-md p-2 bg-stone-300"
-            readonly
+            class="block w-full border border-stone-500 rounded-md p-2"
           />
         </label>
         <label class="block w-full xl:w-3/4">
@@ -54,7 +53,9 @@
           >
             <option :value="PrivacySetting.PUBLIC">Public</option>
             <option :value="PrivacySetting.PRIVATE">Private</option>
-            <option :value="PrivacySetting.FRIENDS_ONLY">Visible to friends only</option>
+            <option :value="PrivacySetting.FRIENDS_ONLY">
+              Visible to friends only
+            </option>
           </select>
         </label>
         <button
@@ -68,7 +69,7 @@
           </template>
           <template v-else>Save Settings</template>
         </button>
-        <span class="text-red-600">{{ errorMessage }}</span>
+        <span v-if="errorMessage" class="text-red-600">{{ errorMessage }}</span>
         <span v-if="savedSuccessfully" class="text-green-600">
           Profile updated successfully!
         </span>
@@ -97,9 +98,12 @@ const location = ref(settings.data.value?.location);
 const bio = ref(settings.data.value?.bio);
 const privacy = ref(settings.data.value?.privacy);
 
+watchEffect(() => (username.value = username.value?.replaceAll(" ", "")));
+
 async function saveSettings() {
   inFlight.value = true;
   savedSuccessfully.value = false;
+  errorMessage.value = "";
 
   const { error } = await useFetch("/api/settings", {
     method: "POST",
