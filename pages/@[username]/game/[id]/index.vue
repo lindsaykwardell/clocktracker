@@ -243,7 +243,7 @@
           <Grimoire :tokens="game.data.grimoire[grimPage].tokens" readonly />
         </div>
         <div
-          class="absolute bottom-0 w-full text-center bg-gradient-to-b from-transparent via-stone-800 to-stone-800"
+          class="text-center bg-gradient-to-b from-transparent via-stone-800 to-stone-800"
         >
           Page {{ grimPage + 1 }} of {{ game.data.grimoire.length }}
         </div>
