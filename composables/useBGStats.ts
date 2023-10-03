@@ -30,23 +30,25 @@ export const useBGStats = (g: ComputedRef<FetchStatus<GameRecord>>) => {
 
     const data = {
       sourceName: "ClockTracker",
+      sourcePlayId: game.id,
       location: game.location || game.location_type,
+      comments: game.notes,
       game: {
         bggId: 240980,
         highestWins: false,
         name: "Blood on the Clocktower",
         noPoints: true,
-        sourceGameid: game.id,
+        sourceGameid: 240980,
       },
       board: game.script,
       playDate: dayjs(game.date).format("YYYY-MM-DD HH:mm:ss"),
-      players: useGrimoire
+      players: (useGrimoire
         ? [
             ...game.grimoire[game.grimoire.length - 1].tokens
               .filter((token) => token.player_name)
               .map((token) => ({
                 name: token.player_name.replace("@", ""),
-                role: token.role?.name,
+                role: `${token.alignment} - ${token.role?.name}`,
                 sourcePlayerId: token.player_name,
                 winner: (() => {
                   if (parentGameLastAlignment === "NEUTRAL") {
@@ -64,28 +66,36 @@ export const useBGStats = (g: ComputedRef<FetchStatus<GameRecord>>) => {
                   }
                 })(),
               })),
-            {
-              name: game.is_storyteller
-                ? game.user.username
-                : game.storyteller?.replace("@", "") || "",
-              role: "Storyteller",
-              sourcePlayerId: game.is_storyteller
-                ? game.user.username
-                : game.storyteller?.replace("@", "") || "",
-              winner: true,
-            },
+            game.is_storyteller || game.storyteller?.length
+              ? {
+                  name: game.is_storyteller
+                    ? game.user.username
+                    : game.storyteller?.replace("@", "") || "",
+                  role: "Storyteller",
+                  sourcePlayerId: game.is_storyteller
+                    ? game.user.username
+                    : game.storyteller?.replace("@", "") || "",
+                  winner: true,
+                }
+              : undefined,
           ]
         : [
             {
               name: game.user.username,
               role: game.is_storyteller
                 ? "Storyteller"
-                : game.player_characters[game.player_characters.length - 1]
-                    .name,
+                : `${
+                    game.player_characters[game.player_characters.length - 1]
+                      .alignment
+                  } - ${
+                    game.player_characters[game.player_characters.length - 1]
+                      .name
+                  }`,
               sourcePlayerId: game.user.username,
               winner: game.win,
             },
-          ],
+          ]
+      ).filter((p) => !!p),
     };
 
     return data;

@@ -126,6 +126,15 @@
                 {{ game.data?.win ? "Yes" : "No" }}
               </template>
             </label>
+            <label v-if="game.data.parent_game" class="flex gap-3 items-center">
+              <span class="block">Tagged By</span>
+              <nuxt-link
+                class="hover:underline text-blue-800 hover:text-blue-700"
+                :to="`/@${game.data.parent_game.user.username}`"
+              >
+                {{ game.data.parent_game.user.display_name }}
+              </nuxt-link>
+            </label>
           </div>
           <div class="flex flex-wrap gap-2 mt-4">
             <a
@@ -479,9 +488,9 @@ function scriptLink(game: GameRecord) {
 
 async function deleteGame() {
   if (confirm("Are you sure you want to delete this game?")) {
-    const result = await fetch(`/api/games/${route.params.id}`, {
+    const result = await $fetch(`/api/games/${route.params.id}`, {
       method: "delete",
-    }).then((res) => res.json());
+    });
 
     router.push(`/@${route.params.username}`);
   }
