@@ -479,9 +479,9 @@ function scriptLink(game: GameRecord) {
 
 async function deleteGame() {
   if (confirm("Are you sure you want to delete this game?")) {
-    const result = await fetch(`/api/games/${route.params.id}`, {
+    const result = await $fetch(`/api/games/${route.params.id}`, {
       method: "delete",
-    }).then((res) => res.json());
+    });
 
     router.push(`/@${route.params.username}`);
   }
