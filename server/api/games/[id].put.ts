@@ -160,67 +160,135 @@ export default defineEventHandler(async (handler) => {
         },
       },
       child_games: true,
+      parent_game: {
+        include: {
+          child_games: true,
+        },
+      },
     },
   });
 
-  if (!game.parent_game_id) {
-    const parentGameLastAlignment =
-      game.player_characters[game.player_characters.length - 1]?.alignment ||
-      Alignment.NEUTRAL;
+  const related_games = [game.parent_game, ...game.child_games].filter(
+    (g) => !!g
+  );
 
-    const taggedPlayers = new Set(
-      game.grimoire.flatMap((g) => g.tokens?.map((t) => t.player_id))
-    );
+  const parentGameLastAlignment =
+    game.player_characters[game.player_characters.length - 1]?.alignment ||
+    Alignment.NEUTRAL;
 
-    for (const id of taggedPlayers) {
-      if (!id || id === user.id) continue;
+  const taggedPlayers = new Set(
+    game.grimoire.flatMap((g) => g.tokens?.map((t) => t.player_id))
+  );
 
-      // Reduce grimoire to find all tokens that have this player_id
-      const player_characters = game.grimoire.reduce((acc, g) => {
-        const tokens = g.tokens?.filter((t) => t.player_id === id);
-        if (tokens) {
-          for (const token of tokens) {
-            // Don't add the token if it's identical to the last token
-            // in the player_characters array
+  for (const id of taggedPlayers) {
+    if (!id || id === user.id) continue;
 
-            const lastToken = acc[acc.length - 1];
-            if (
-              lastToken &&
-              lastToken.role_id === token.role_id &&
-              lastToken.related_role_id === token.related_role_id
-            ) {
-              continue;
-            }
+    // Reduce grimoire to find all tokens that have this player_id
+    const player_characters = game.grimoire.reduce((acc, g) => {
+      const tokens = g.tokens?.filter((t) => t.player_id === id);
+      if (tokens) {
+        for (const token of tokens) {
+          // Don't add the token if it's identical to the last token
+          // in the player_characters array
 
-            acc.push({
-              name: token.role?.name || "",
-              alignment: token.alignment,
-              related: token.related_role?.name || "",
-              role_id: token.role_id,
-              related_role_id: token.related_role_id,
-            });
+          const lastToken = acc[acc.length - 1];
+          if (
+            lastToken &&
+            lastToken.role_id === token.role_id &&
+            lastToken.related_role_id === token.related_role_id
+          ) {
+            continue;
+          }
+
+          acc.push({
+            name: token.role?.name || "",
+            alignment: token.alignment,
+            related: token.related_role?.name || "",
+            role_id: token.role_id,
+            related_role_id: token.related_role_id,
+          });
+        }
+      }
+
+      return acc;
+    }, [] as { name: string; alignment: Alignment; related: string; role_id: string | null; related_role_id: string | null }[]);
+
+    const relatedGame = related_games?.find((g) => g!.user_id === id);
+
+    if (!relatedGame) {
+      const lastAlignment =
+        player_characters[player_characters.length - 1].alignment;
+
+      const win = (() => {
+        if (parentGameLastAlignment === Alignment.NEUTRAL) {
+          if (lastAlignment === Alignment.GOOD) {
+            return game.win;
+          } else {
+            return !game.win;
           }
         }
 
-        return acc;
-      }, [] as { name: string; alignment: Alignment; related: string; role_id: string | null; related_role_id: string | null }[]);
+        if (lastAlignment === parentGameLastAlignment) {
+          return game.win;
+        } else {
+          return !game.win;
+        }
+      })();
 
-      const childGame = game.child_games?.find((g) => g.user_id === id);
+      await prisma.game.create({
+        data: {
+          ...body,
+          date: new Date(body.date),
+          user_id: id,
+          player_characters: {
+            create: [...player_characters],
+          },
+          // map the already created grimoires to the new game
+          grimoire: {
+            connect: game.grimoire.map((g) => ({ id: g.id })),
+          },
+          is_grimoire_protected: true,
+          parent_game_id: game.id,
+          waiting_for_confirmation: true,
+          is_storyteller: false,
+          win,
+        },
+      });
+    } else {
+      await prisma.game.update({
+        where: {
+          id: relatedGame.id,
+        },
+        data: {
+          grimoire: {
+            connect: game.grimoire.map((g) => ({ id: g.id })),
+          },
+        },
+      });
+    }
+  }
+
+  if (game.storyteller?.includes("@")) {
+    // Verify that it's a friend
+    const friend = await prisma.userSettings.findUnique({
+      where: {
+        username: game.storyteller.replace("@", ""),
+        friends: {
+          some: {
+            user_id: user.id,
+          },
+        },
+      },
+    });
+
+    if (friend !== null) {
+      const childGame = game.child_games?.find(
+        (g) => g.user_id === friend.user_id
+      );
 
       if (!childGame) {
-        const lastAlignment =
-          player_characters[player_characters.length - 1].alignment;
-
         const win = (() => {
-          if (parentGameLastAlignment === Alignment.NEUTRAL) {
-            if (lastAlignment === Alignment.GOOD) {
-              return game.win;
-            } else {
-              return !game.win;
-            }
-          }
-
-          if (lastAlignment === parentGameLastAlignment) {
+          if (parentGameLastAlignment === Alignment.GOOD) {
             return game.win;
           } else {
             return !game.win;
@@ -230,20 +298,19 @@ export default defineEventHandler(async (handler) => {
         await prisma.game.create({
           data: {
             ...body,
+            is_storyteller: true,
             date: new Date(body.date),
-            user_id: id,
-            player_characters: {
-              create: [...player_characters],
-            },
-            // map the already created grimoires to the new game
+            user_id: friend.user_id,
+            player_characters: {},
+            notes: "",
+            win,
             grimoire: {
               connect: game.grimoire.map((g) => ({ id: g.id })),
             },
             is_grimoire_protected: true,
             parent_game_id: game.id,
             waiting_for_confirmation: true,
-            is_storyteller: false,
-            win,
+            tags: [],
           },
         });
       } else {
@@ -257,66 +324,6 @@ export default defineEventHandler(async (handler) => {
             },
           },
         });
-      }
-    }
-
-    if (game.storyteller?.includes("@")) {
-      // Verify that it's a friend
-      const friend = await prisma.userSettings.findUnique({
-        where: {
-          username: game.storyteller.replace("@", ""),
-          friends: {
-            some: {
-              user_id: user.id,
-            },
-          },
-        },
-      });
-
-      if (friend !== null) {
-        const childGame = game.child_games?.find(
-          (g) => g.user_id === friend.user_id
-        );
-
-        if (!childGame) {
-          const win = (() => {
-            if (parentGameLastAlignment === Alignment.GOOD) {
-              return game.win;
-            } else {
-              return !game.win;
-            }
-          })();
-
-          await prisma.game.create({
-            data: {
-              ...body,
-              is_storyteller: true,
-              date: new Date(body.date),
-              user_id: friend.user_id,
-              player_characters: {},
-              notes: "",
-              win,
-              grimoire: {
-                connect: game.grimoire.map((g) => ({ id: g.id })),
-              },
-              is_grimoire_protected: true,
-              parent_game_id: game.id,
-              waiting_for_confirmation: true,
-              tags: [],
-            },
-          });
-        } else {
-          await prisma.game.update({
-            where: {
-              id: childGame.id,
-            },
-            data: {
-              grimoire: {
-                connect: game.grimoire.map((g) => ({ id: g.id })),
-              },
-            },
-          });
-        }
       }
     }
   }
