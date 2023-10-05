@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, PrivacySetting } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
 import naturalOrder from "natural-order";
 
@@ -11,11 +11,41 @@ export default defineEventHandler(async (handler) => {
     return [];
   }
 
-  // Get all friends of the user's friends
-  // 1. Get all friends of the user
-  // 2. Get all friends of the user's friends
-  // 3. Filter out the user's friends and the user
-  // 4. Order recommendations based on frequency
+  const requests = await prisma.friendRequest.findMany({
+    where: {
+      OR: [
+        {
+          from_user_id: user.id,
+        },
+        {
+          user_id: user.id,
+        },
+      ],
+      accepted: false,
+    },
+    include: {
+      from_user: {
+        select: {
+          user_id: true,
+          username: true,
+        },
+      },
+      user: {
+        select: {
+          user_id: true,
+          username: true,
+        },
+      },
+    },
+    orderBy: {
+      created_at: "desc",
+    },
+  });
+
+  const requestIds = requests.flatMap((request) => [
+    request.user_id,
+    request.from_user_id,
+  ]);
 
   const friendsWithFriends = await prisma.friend.findMany({
     where: {
@@ -54,7 +84,10 @@ export default defineEventHandler(async (handler) => {
         f.user_id !== user.id &&
         !friendsWithFriends.find(
           (friend) => friend.friend.user_id === f.user_id
-        )
+        ) &&
+        (f.privacy === PrivacySetting.PUBLIC ||
+          f.privacy === PrivacySetting.PRIVATE) &&
+        !requestIds.includes(f.user_id)
     );
 
   const recommendations = friendsOfFriends.reduce((acc, friend) => {
@@ -71,5 +104,6 @@ export default defineEventHandler(async (handler) => {
 
   return naturalOrder(recommendations)
     .orderBy(["desc", "asc"])
-    .sort(["frequency", "display_name"]).splice(0, 6);
+    .sort(["frequency", "display_name"])
+    .slice(0, 10);
 });
