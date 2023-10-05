@@ -26,6 +26,7 @@ model Game {
   notes                    String
   image_urls               String[]
   storyteller              String?
+  co_storytellers          String[]
   user                     UserSettings? @relation(fields: [user_id], references: [user_id])
   associated_script        Script?       @relation(fields: [script_id], references: [id])
   grimoire                 Grimoire[]
