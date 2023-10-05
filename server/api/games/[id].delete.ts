@@ -35,9 +35,13 @@ export default defineEventHandler(async (handler) => {
   }
 
   // delete the game
-  await prisma.game.delete({
+  await prisma.game.update({
     where: {
       id: gameId,
+    },
+    data: {
+      deleted: true,
+      deleted_date: new Date(),
     },
   });
 

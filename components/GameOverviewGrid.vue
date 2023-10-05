@@ -5,7 +5,9 @@
       class="border border-black relative"
       :class="cardWidth"
     >
-      <nuxt-link
+      <component
+        :is="componentIs"
+        @click="handleCardClick(game)"
         :to="`/@${game.user.username}/game/${game.id}`"
         class="w-full bg-stone-900 flex flex-col items-center cursor-pointer rounded overflow-hidden text-black h-48 md:h-72 bg-cover bg-center"
         :class="{
@@ -47,7 +49,7 @@
               : '/img/loss.png'
           "
         />
-      </nuxt-link>
+      </component>
       <div
         class="absolute bottom-0 left-0 w-full flex justify-between bg-gradient-to-tr from-black/75 via-black/25 to-black/75"
       >
@@ -95,7 +97,13 @@ const props = defineProps<{
   games: GameRecord[];
   readonly?: boolean;
   cardWidth?: string;
+  onCardClick?: (game: GameRecord) => void;
 }>();
+
+const componentIs = computed(() => {
+  if (!props.games.length) return "div";
+  return props.onCardClick ? "button" : defineNuxtLink({});
+});
 
 function formatDate(date: Date) {
   return new Intl.DateTimeFormat(navigator.language).format(new Date(date));
@@ -108,6 +116,10 @@ function fullImageUrl(file: string) {
 }
 
 const cardWidth = computed(() => props.cardWidth || "w-1/2 lg:w-1/3 xl:w-1/4");
+
+function handleCardClick(game: GameRecord) {
+  if (props.onCardClick) props.onCardClick(game);
+}
 </script>
 
 <style scoped>
