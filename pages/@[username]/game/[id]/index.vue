@@ -286,6 +286,13 @@
         >
           Add game to my Profile
         </button>
+        <button
+          v-if="similarGames.length > 0"
+          @click="showSimilarGamesDialog = true"
+          class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial"
+        >
+          Merge with similar game
+        </button>
         <nuxt-link
           class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial"
           :to="`/@${route.params.username}/game/${route.params.id}/edit`"
@@ -323,6 +330,17 @@
           Delete
         </button>
       </div>
+      <Dialog v-model:visible="showSimilarGamesDialog" size="lg">
+        <template #title>
+          <h2 class="text-2xl font-dumbledor">Similar Games</h2>
+        </template>
+        <GameOverviewGrid
+          :games="similarGames"
+          readonly
+          cardWidth="w-1/2 lg:w-1/3"
+          :onCardClick="confirmMergeGame"
+        />
+      </Dialog>
     </section>
     <template v-else>
       <Loading class="h-screen" />
@@ -352,6 +370,8 @@ const player = computed(() => users.getUser(username));
 const grimPage = ref(
   game.value.status === Status.SUCCESS ? game.value.data.grimoire.length - 1 : 0
 );
+const similarGames = computed(() => games.getSimilarGames(gameId));
+const showSimilarGamesDialog = ref(false);
 
 const { canPostToBGStats, link: bgStatsLink } = useBGStats(game);
 
@@ -492,6 +512,8 @@ async function deleteGame() {
       method: "delete",
     });
 
+    games.games.delete(gameId);
+
     router.push(`/@${route.params.username}`);
   }
 }
@@ -503,6 +525,19 @@ async function confirmGame() {
     });
 
     games.games.set(gameId, { status: Status.SUCCESS, data: result });
+  }
+}
+
+async function confirmMergeGame(game: GameRecord) {
+  if (confirm("Are you sure you want to merge these games?")) {
+    const result = await $fetch<GameRecord>(`/api/games/${gameId}/merge`, {
+      method: "POST",
+      body: game
+    });
+
+    games.games.delete(gameId);
+
+    router.push(`/@${route.params.username}/game/${result.id}`);
   }
 }
 
@@ -546,7 +581,15 @@ function formatDate(date: Date) {
 
 onMounted(() => {
   users.fetchUser(route.params.username as string);
-  games.fetchGame(route.params.id as string);
+  games.fetchGame(route.params.id as string).then(() => {
+    if (
+      game.value.status === Status.SUCCESS &&
+      game.value.data.parent_game_id &&
+      game.value.data.waiting_for_confirmation
+    ) {
+      games.fetchSimilarGames(game.value.data.id);
+    }
+  });
 
   if (friends.friends.status !== Status.SUCCESS) {
     friends.fetchFriends();

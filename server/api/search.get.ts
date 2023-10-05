@@ -37,13 +37,13 @@ export default defineEventHandler(async (handler) => {
           OR: [
             {
               username: {
-                contains: query,
+                search: query,
                 mode: "insensitive",
               },
             },
             {
               display_name: {
-                contains: query,
+                search: query,
                 mode: "insensitive",
               },
             },
