@@ -48,6 +48,7 @@ export default defineEventHandler(async (handler) => {
     where: {
       id: gameId,
       user_id: user.id,
+      deleted: false,
     },
     include: {
       user: {

@@ -38,6 +38,8 @@ model Game {
   ignore_for_stats         Boolean       @default(false)
   tags                     String[]
   waiting_for_confirmation Boolean       @default(false)
+  deleted                  Boolean       @default(false)
+  deleted_date             DateTime?
 }
 
 model Grimoire {
