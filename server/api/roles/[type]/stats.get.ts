@@ -72,6 +72,7 @@ export default defineEventHandler(async (handler) => {
 
   const games = await prisma.game.findMany({
     where: {
+      deleted: false,
       AND: [
         {
           parent_game_id: null,

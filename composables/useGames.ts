@@ -50,11 +50,26 @@ export const useGames = defineStore("games", {
   state: () => ({
     games: new Map<string, FetchStatus<GameRecord>>(),
     players: new Map<string, FetchStatus<boolean>>(),
+    similar: new Map<string, FetchStatus<string[]>>(),
   }),
   getters: {
     getGame(): (gameId: string) => FetchStatus<GameRecord> {
       return (gameId: string) => {
         return this.games.get(gameId) || { status: Status.IDLE };
+      };
+    },
+    getSimilarGames(): (gameId: string) => GameRecord[] {
+      return (gameId: string) => {
+        const similar = this.similar.get(gameId);
+        if (!similar || similar.status !== Status.SUCCESS) return [];
+
+        return similar.data
+          .map((gameId) => {
+            const game = this.games.get(gameId);
+            if (!game || game.status !== Status.SUCCESS) return null;
+            return game.data;
+          })
+          .filter((g) => !!g) as GameRecord[];
       };
     },
     getByPlayer(): (username: string) => FetchStatus<GameRecord[]> {
@@ -166,7 +181,7 @@ export const useGames = defineStore("games", {
         }
 
         return Array.from(playerNames);
-      }
+      };
     },
     getLastCharater(): (gameId: string) => FullCharacter {
       return (gameId: string) => {
@@ -236,10 +251,10 @@ export const useGames = defineStore("games", {
       if (allGames.status === Status.SUCCESS) {
         for (const game of allGames.data) {
           // If the game is in the new data, don't worry
-          if (games.map(g => g.id).includes(game.id)) continue;
+          if (games.map((g) => g.id).includes(game.id)) continue;
 
           // Purge the game if it's not in the new data
-          this.games.delete(game.id);  
+          this.games.delete(game.id);
         }
       }
     },
@@ -256,6 +271,26 @@ export const useGames = defineStore("games", {
       }
 
       return games;
+    },
+    async fetchSimilarGames(gameId: string) {
+      if (!this.similar.has(gameId))
+        this.similar.set(gameId, { status: Status.LOADING });
+
+      const similar = await $fetch<GameRecord[]>(
+        `/api/games/${gameId}/similar`
+      );
+
+      this.similar.set(gameId, {
+        status: Status.SUCCESS,
+        data: similar.map((g) => g.id),
+      });
+
+      for (const game of similar) {
+        this.games.set(game.id, {
+          status: Status.SUCCESS,
+          data: game,
+        });
+      }
     },
   },
 });

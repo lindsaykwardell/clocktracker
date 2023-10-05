@@ -17,6 +17,7 @@ export default defineEventHandler(async (handler) => {
   const game = await prisma.game.findUnique({
     where: {
       id: gameId,
+      deleted: false,
       user: {
         OR: [
           {
@@ -104,23 +105,22 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  const player_names: string = [
+  const player_names: string[] = [
     ...new Set(
       game.grimoire.flatMap(({ tokens }) =>
         tokens.map((token) => token.player_name)
       )
     ),
-  ].join(" | ");
+  ];
 
   const similar_games = await prisma.game.findMany({
     where: {
       id: {
         not: gameId,
       },
+      deleted: false,
       user_id: me.id,
       date: game.date,
-      player_count: game.player_count,
-      traveler_count: game.traveler_count,
       parent_game_id: null,
       OR: [
         {
@@ -153,7 +153,7 @@ export default defineEventHandler(async (handler) => {
               tokens: {
                 some: {
                   player_name: {
-                    search: player_names,
+                    in: player_names,
                     mode: "insensitive",
                   },
                 },
@@ -161,7 +161,77 @@ export default defineEventHandler(async (handler) => {
             },
           },
         },
+        {
+          AND: {
+            OR: [
+              {
+                player_count: game.player_count,
+              },
+              {
+                player_count: null,
+              },
+            ],
+          },
+        },
+        {
+          AND: {
+            OR: [
+              {
+                traveler_count: game.traveler_count,
+              },
+              {
+                traveler_count: null,
+              },
+            ],
+          },
+        },
       ],
+    },
+    include: {
+      user: {
+        select: {
+          username: true,
+        },
+      },
+      player_characters: {
+        include: {
+          role: {
+            select: {
+              token_url: true,
+              type: true,
+              initial_alignment: true,
+            },
+          },
+          related_role: {
+            select: {
+              token_url: true,
+            },
+          },
+        },
+      },
+      grimoire: {
+        include: {
+          tokens: {
+            include: {
+              role: true,
+              related_role: true,
+            },
+          },
+        },
+        orderBy: {
+          id: "asc",
+        },
+      },
+      parent_game: {
+        select: {
+          user: {
+            select: {
+              username: true,
+              display_name: true,
+            },
+          },
+        },
+      },
     },
   });
 
