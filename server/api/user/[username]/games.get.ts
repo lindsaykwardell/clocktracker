@@ -66,7 +66,7 @@ export default defineEventHandler(async (handler) => {
               {
                 user_id: me?.id || "",
               },
-            ]
+            ],
           },
           {
             privacy: PrivacySetting.PERSONAL,
@@ -103,6 +103,16 @@ export default defineEventHandler(async (handler) => {
             include: {
               role: true,
               related_role: true,
+            },
+          },
+        },
+      },
+      parent_game: {
+        select: {
+          user: {
+            select: {
+              username: true,
+              display_name: true,
             },
           },
         },

@@ -21,10 +21,23 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
+  if (!body.username) {
+    throw createError({
+      status: 409,
+      statusMessage: "Username is required",
+    });
+  }
+
   if (body.username) {
+    // Make sure that there are no spaces in the username.
+    body.username = body.username.replaceAll(" ", "");
+
     const existingUser = await prisma.userSettings.findFirst({
       where: {
-        username: body.username,
+        username: {
+          equals: body.username,
+          mode: "insensitive",
+        },
       },
     });
 
