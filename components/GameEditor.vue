@@ -108,25 +108,54 @@
             </section>
           </Dialog>
         </label>
-        <label v-if="!game.is_storyteller" class="flex-1">
-          <span class="block">Storyteller</span>
-          <input
-            type="text"
-            v-model="game.storyteller"
-            class="block w-full border border-stone-500 rounded-md p-2"
-            list="storyteller-friends"
+        <datalist id="storyteller-friends">
+          <option
+            v-for="friend in friends.getFriends"
+            :value="`@${friend?.username}`"
           />
-          <datalist id="storyteller-friends">
-            <option
-              v-for="friend in friends.getFriends"
-              :value="`@${friend?.username}`"
+        </datalist>
+        <div class="flex-1 flex flex-col justify-start">
+          <label>
+            <span class="block">Storyteller</span>
+            <input
+              type="text"
+              v-model="game.storyteller"
+              class="block w-full border border-stone-500 rounded-md p-2"
+              :class="{
+                'bg-stone-800': game.is_storyteller,
+              }"
+              list="storyteller-friends"
+              :disabled="game.is_storyteller"
             />
-          </datalist>
-        </label>
-        <label class="flex whitespace-nowrap items-center gap-2">
-          <input type="checkbox" v-model="game.is_storyteller" />
-          <span class="block">I was the Storyteller</span>
-        </label>
+          </label>
+          <label class="flex whitespace-nowrap items-center gap-2">
+            <input type="checkbox" v-model="game.is_storyteller" />
+            <span class="block">I was the Storyteller</span>
+          </label>
+        </div>
+        <div class="flex-1 flex flex-col gap-1 justify-center">
+          <div v-for="(st, index) in game.co_storytellers" class="flex gap-2">
+            <input
+              type="text"
+              v-model="game.co_storytellers[index]"
+              class="co-storyteller block w-full border border-stone-500 rounded-md p-1"
+              list="storyteller-friends"
+            />
+            <button
+              type="button"
+              @click="game.co_storytellers.splice(index, 1)"
+            >
+              X
+            </button>
+          </div>
+          <button
+            type="button"
+            @click="game.co_storytellers.push('')"
+            class="w-full"
+          >
+            Add Co-Storyteller
+          </button>
+        </div>
       </div>
       <label class="flex-1">
         <span class="block">Location Type</span>
@@ -542,6 +571,7 @@ const props = defineProps<{
     script: string;
     script_id: number | null;
     storyteller: string;
+    co_storytellers: string[];
     is_storyteller: boolean;
     location_type: "ONLINE" | "IN_PERSON";
     location: string;
@@ -938,6 +968,15 @@ input,
 select {
   height: 2.5rem;
   @apply text-lg bg-stone-600;
+
+  &:disabled {
+    @apply bg-stone-700;
+  }
+
+  &.co-storyteller {
+    height: 2rem;
+    @apply text-base;
+  }
 }
 
 textarea {
