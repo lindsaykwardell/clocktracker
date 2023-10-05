@@ -77,18 +77,24 @@
                 {{ game.data.script }}
               </a>
             </label>
-            <label v-if="game.data.storyteller" class="flex gap-3 items-center">
-              <span>Storyteller</span>
-              <a
-                v-if="
-                  isStorytellerAFriend && game.data.storyteller.includes('@')
-                "
-                class="hover:underline text-blue-800 hover:text-blue-700"
-                :href="`/${game.data.storyteller}`"
-              >
-                {{ game.data.storyteller }}
-              </a>
-              <template v-else>{{ game.data.storyteller }}</template>
+            <label v-if="storytellers.length" class="flex gap-3 items-center">
+              <span>Storyteller{{ storytellers.length === 1 ? '' : 's' }}</span>
+              <div>
+                <template v-for="storyteller, index in storytellers">
+                  <a
+                    v-if="
+                      isStorytellerAFriend(storyteller) &&
+                      storyteller.includes('@')
+                    "
+                    class="hover:underline text-blue-800 hover:text-blue-700"
+                    :href="`/${storyteller}`"
+                  >
+                    {{ storyteller }}
+                  </a>
+                  <template v-else>{{ storyteller }}</template>
+                  <template v-if="index !== storytellers.length - 1">, </template>
+                </template>
+              </div>
             </label>
             <label
               v-if="game.data.player_count"
@@ -467,16 +473,12 @@ const last_character = computed(() => {
   return games.getLastCharater(gameId);
 });
 
-const isStorytellerAFriend = computed(() => {
-  if (game.value.status !== Status.SUCCESS) return false;
-
-  if (friends.isFriend(game.value.data.storyteller?.replace("@", "") || "")) {
+function isStorytellerAFriend(storyteller: string) {
+  if (friends.isFriend(storyteller.replace("@", "") || "")) {
     return true;
   }
 
-  const storytellerUser = users.getUser(
-    game.value.data.storyteller?.replace("@", "") || ""
-  );
+  const storytellerUser = users.getUser(storyteller.replace("@", "") || "");
 
   // If it's me, I'm a friend of myself.
   if (
@@ -487,6 +489,20 @@ const isStorytellerAFriend = computed(() => {
   }
 
   return false;
+}
+
+const storytellers = computed(() => {
+  if (game.value.status !== Status.SUCCESS) return [];
+
+  const storytellerList = [];
+
+  if (game.value.data.is_storyteller) {
+    storytellerList.push(`@${username}`);
+  } else if (game.value.data.storyteller) {
+    storytellerList.push(game.value.data.storyteller);
+  }
+
+  return [...storytellerList, ...game.value.data.co_storytellers];
 });
 
 function fullImageUrl(file: string) {
@@ -532,7 +548,7 @@ async function confirmMergeGame(game: GameRecord) {
   if (confirm("Are you sure you want to merge these games?")) {
     const result = await $fetch<GameRecord>(`/api/games/${gameId}/merge`, {
       method: "POST",
-      body: game
+      body: game,
     });
 
     games.games.delete(gameId);
