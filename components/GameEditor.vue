@@ -20,6 +20,7 @@
             <div v-if="game.script" class="flex-grow">{{ game.script }}</div>
             <button
               type="button"
+              id="select-script"
               @click="showScriptDialog = !showScriptDialog"
               class="flex gap-1 bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-1 px-4 rounded justify-center items-center"
               :class="{
@@ -146,10 +147,7 @@
           list="locations"
         />
         <datalist id="locations">
-          <option
-            v-for="location in myLocations"
-            :value="location"
-          ></option>
+          <option v-for="location in myLocations" :value="location"></option>
         </datalist>
       </label>
       <label class="flex-1">
@@ -171,6 +169,7 @@
         <span class="block">Players</span>
         <input
           type="number"
+          id="player-count"
           v-model="game.player_count"
           class="block w-full border border-stone-500 rounded-md p-2"
           min="5"
@@ -225,6 +224,8 @@
           @clickRole="openRoleSelectionDialog(character, 'role')"
           @clickRelated="openRoleSelectionDialog(character, 'related_role')"
           @clickAlignment="toggleAlignment(character)"
+          id="player-role"
+          relatedId="related-player-role"
         />
       </div>
       <div
@@ -243,6 +244,7 @@
       />
     </fieldset>
     <fieldset
+      id="game-results"
       class="flex flex-col md:flex-row gap-5 border rounded border-stone-500 p-4 my-3"
     >
       <legend>Game Results</legend>
@@ -299,7 +301,7 @@
           }"
         >
           <button
-            v-if="!game.is_grimoire_protected && game.grimoire.length > 1"
+            v-if="game.grimoire.length > 1"
             @click.prevent="deletePage"
             class="absolute top-1 right-1 bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial z-10"
           >
@@ -337,10 +339,7 @@
             class="absolute bottom-0 right-1 flex items-center font-dumbledor"
           >
             <span
-              v-if="
-                !game.is_grimoire_protected ||
-                grimPage < game.grimoire.length - 1
-              "
+              v-if="grimPage <= game.grimoire.length - 1"
               class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded"
             >
               {{
@@ -353,7 +352,6 @@
             <Grimoire
               :tokens="game.grimoire[grimPage].tokens"
               :availableRoles="orderedRoles"
-              :readonly="game.is_grimoire_protected"
               @selectedMe="applyMyRoleToGrimoire"
             />
           </div>
@@ -423,6 +421,7 @@
     </fieldset>
     <button
       type="submit"
+      id="save-game"
       class="w-full bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
       :disabled="inFlight"
     >
@@ -433,6 +432,7 @@
       <template v-else>Save Game</template>
     </button>
   </form>
+  <Tour :steps="tour" tourKey="game-editor" />
 </template>
 
 <script setup lang="ts">
@@ -440,6 +440,37 @@ import type { Alignment, Role, RoleType } from "@prisma/client";
 import { v4 as uuid } from "uuid";
 import naturalOrder from "natural-order";
 import { watchDebounced } from "@vueuse/core";
+import { Step, Placement } from "~/composables/useStep";
+
+const tour: Step[] = [
+  {
+    target: "#select-script",
+    content: "Select a script to use for this game.",
+  },
+  {
+    target: "#player-count",
+    content: "Enter the number of players in the game.",
+  },
+  {
+    target: "#player-role",
+    content: "Select your character role in the game.",
+  },
+  {
+    target: "#related-player-role",
+    content:
+      "If your role is related to another (such as Drunk), you can enter a related role here.",
+  },
+  {
+    target: "#game-results",
+    content: "Select whether you won or lost the game.",
+    placement: Placement.TOP_START,
+  },
+  {
+    target: "#save-game",
+    content:
+      "When you've finished entering the game details, you're ready to save!",
+  },
+];
 
 type Character = {
   name: string;
@@ -730,7 +761,8 @@ function selectRoleForToken(role: {
 watchEffect(() => {
   props.game.grimoire.forEach((grimoire) => {
     while (
-      (props.game.player_count || 0) > grimoire.tokens.length &&
+      (props.game.player_count || 0) + (props.game.traveler_count || 0) >
+        grimoire.tokens.length &&
       grimoire.tokens.length < 20
     ) {
       grimoire.tokens.push({
@@ -744,7 +776,10 @@ watchEffect(() => {
       });
     }
 
-    while ((props.game.player_count || 0) < grimoire.tokens.length) {
+    while (
+      (props.game.player_count || 0) + (props.game.traveler_count || 0) <
+      grimoire.tokens.length
+    ) {
       grimoire.tokens.pop();
     }
   });

@@ -51,7 +51,9 @@
         >
           <option :value="PrivacySetting.PUBLIC">Public</option>
           <option :value="PrivacySetting.PRIVATE">Private</option>
-          <option :value="PrivacySetting.FRIENDS_ONLY">Visible to friends only</option>
+          <option :value="PrivacySetting.FRIENDS_ONLY">
+            Visible to friends only
+          </option>
         </select>
       </label>
       <button
@@ -99,6 +101,8 @@ const displayName = ref(settings.data.value?.display_name);
 const pronouns = ref(settings.data.value?.pronouns);
 const location = ref(settings.data.value?.location);
 const privacy = ref(settings.data.value?.privacy);
+
+watchEffect(() => (username.value = username.value?.replaceAll(" ", "")));
 
 function selectAvatar() {
   const input = document.createElement("input");

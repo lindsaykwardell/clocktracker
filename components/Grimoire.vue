@@ -57,6 +57,7 @@
       v-for="friend in potentiallyTaggedPlayers"
       :value="`@${friend?.username}`"
     />
+    <option v-for="friend in previouslyTaggedPlayers" :value="friend" />
   </datalist>
   <TokenDialog
     v-if="availableRoles"
@@ -89,6 +90,7 @@ type Token = {
 const friends = useFriends();
 const users = useUsers();
 const user = useSupabaseUser();
+const games = useGames();
 
 const me = computed(() => {
   const meStatus = users.getUserById(user.value?.id);
@@ -106,6 +108,10 @@ const potentiallyTaggedPlayers = computed(() => {
       !player ||
       !props.tokens.find((token) => token.player_id === player.user_id)
   );
+});
+
+const previouslyTaggedPlayers = computed(() => {
+  return games.getPreviouslyTaggedByPlayer(me.value?.username);
 });
 
 const props = defineProps<{
@@ -155,12 +161,12 @@ function selectRoleForToken(role: {
       focusedToken.alignment = role.initial_alignment;
       focusedToken.related_role = {
         token_url: "/1x1.png",
-        name: role.name,
       };
       focusedToken.related_role_id = null;
     } else {
       focusedToken.related_role = {
         token_url: role.token_url,
+        name: role.name,
       };
       focusedToken.related_role_id = role.id;
     }
