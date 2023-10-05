@@ -27,6 +27,7 @@
     <slot />
     <div
       v-if="character?.related_role"
+      :id="relatedId"
       class="token related bg-center bg-cover absolute bottom-0 -right-3 rounded-full shadow-xl border border-black flex justify-center items-center"
       :class="relatedSize"
       @click.stop="emit('clickRelated')"
@@ -61,6 +62,7 @@ const props = defineProps<{
   size?: "sm" | "md" | "lg";
   alwaysShowAlignment?: boolean;
   outline?: boolean;
+  relatedId?: string;
 }>();
 
 const emit = defineEmits(["clickRelated", "clickRole", "clickAlignment"]);
