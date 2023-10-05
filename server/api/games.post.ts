@@ -171,46 +171,50 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  if (newGame.storyteller?.includes("@")) {
-    // Verify that it's a friend
-    const friend = await prisma.userSettings.findUnique({
-      where: {
-        username: newGame.storyteller.replace("@", ""),
-        friends: {
-          some: {
-            user_id: user.id,
-          },
-        },
-      },
-    });
+  const storytellers = [newGame.storyteller, ...newGame.co_storytellers];
 
-    if (friend !== null) {
-      const win = (() => {
-        if (parentGameLastAlignment === Alignment.GOOD) {
-          return newGame.win;
-        } else {
-          return !newGame.win;
-        }
-      })();
-
-      await prisma.game.create({
-        data: {
-          ...body,
-          is_storyteller: true,
-          date: new Date(body.date),
-          user_id: friend.user_id,
-          player_characters: {},
-          notes: "",
-          win,
-          grimoire: {
-            connect: newGame.grimoire.map((g) => ({ id: g.id })),
+  for (const storyteller of storytellers) {
+    if (storyteller?.includes("@")) {
+      // Verify that it's a friend
+      const friend = await prisma.userSettings.findUnique({
+        where: {
+          username: storyteller.replace("@", ""),
+          friends: {
+            some: {
+              user_id: user.id,
+            },
           },
-          is_grimoire_protected: true,
-          parent_game_id: newGame.id,
-          waiting_for_confirmation: true,
-          tags: [],
         },
       });
+
+      if (friend !== null) {
+        const win = (() => {
+          if (parentGameLastAlignment === Alignment.GOOD) {
+            return newGame.win;
+          } else {
+            return !newGame.win;
+          }
+        })();
+
+        await prisma.game.create({
+          data: {
+            ...body,
+            is_storyteller: true,
+            date: new Date(body.date),
+            user_id: friend.user_id,
+            player_characters: {},
+            notes: "",
+            win,
+            grimoire: {
+              connect: newGame.grimoire.map((g) => ({ id: g.id })),
+            },
+            is_grimoire_protected: true,
+            parent_game_id: newGame.id,
+            waiting_for_confirmation: true,
+            tags: [],
+          },
+        });
+      }
     }
   }
 
