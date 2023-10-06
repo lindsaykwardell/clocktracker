@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
 }
 
 datasource db {
@@ -25,6 +26,7 @@ model Game {
   notes                    String
   image_urls               String[]
   storyteller              String?
+  co_storytellers          String[]
   user                     UserSettings? @relation(fields: [user_id], references: [user_id])
   associated_script        Script?       @relation(fields: [script_id], references: [id])
   grimoire                 Grimoire[]
@@ -37,6 +39,8 @@ model Game {
   ignore_for_stats         Boolean       @default(false)
   tags                     String[]
   waiting_for_confirmation Boolean       @default(false)
+  deleted                  Boolean       @default(false)
+  deleted_date             DateTime?
 }
 
 model Grimoire {
