@@ -21,6 +21,7 @@
     "@types/node": "^18",
     "@types/ua-parser-js": "^0.7.37",
     "@types/uuid": "^9.0.2",
+    "@types/vue-select": "^3.16.4",
     "@vite-pwa/nuxt": "^0.1.0",
     "cypress": "^12.17.3",
     "nuxt": "^3.6.1",
@@ -51,7 +52,8 @@
     "ua-parser-js": "^1.0.36",
     "uuid": "^9.0.0",
     "vue-chartjs": "^5.2.0",
-    "vue-markdown-render": "^2.0.1"
+    "vue-markdown-render": "^2.0.1",
+    "vue-select": "^4.0.0-beta.6"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
