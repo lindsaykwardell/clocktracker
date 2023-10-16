@@ -27,15 +27,36 @@
           :class="{ 'cursor-pointer': !readonly }"
           :alwaysShowAlignment="!readonly && !!token.role"
         />
-        <input
-          v-if="!readonly"
-          v-model="token.player_name"
-          @input="checkIfPlayerNameIsFriend(token)"
-          type="text"
-          class="w-28 bg-stone-600 rounded p-1 border-2 border-stone-500 text-center text-xs md:text-sm"
-          :readonly="readonly"
-          list="grimoire-friends"
-        />
+        <div v-if="!readonly" class="relative z-50">
+          <v-select
+            class="w-28 bg-stone-900 rounded p-1 text-center text-xs md:text-sm"
+            :options="filteredTaggedPlayers"
+            taggable
+            :reduce="(option) => option.username"
+            v-model="token.player_name"
+            label="username"
+          >
+            <template #option="option">
+              <div class="flex items-center z-20">
+                <img
+                  v-if="option?.avatar"
+                  :src="option.avatar"
+                  class="w-6 h-6 rounded-full aspect-square mr-2"
+                />
+                <span v-if="option?.username" class="text-sm">
+                  {{ option.username }}
+                </span>
+              </div>
+            </template>
+            <template v-slot:no-options="{ search, searching }">
+              <template v-if="searching">
+                <!-- No results found for <em>{{ search }}</em
+                >. -->
+              </template>
+              <em v-else style="opacity: 0.5">Enter player name</em>
+            </template>
+          </v-select>
+        </div>
         <a
           v-else-if="token.player_id"
           :href="`/${token.player_name}`"
@@ -52,13 +73,6 @@
       </div>
     </div>
   </div>
-  <datalist id="grimoire-friends">
-    <option
-      v-for="friend in potentiallyTaggedPlayers"
-      :value="`@${friend?.username}`"
-    />
-    <option v-for="friend in previouslyTaggedPlayers" :value="friend" />
-  </datalist>
   <TokenDialog
     v-if="availableRoles"
     v-model:visible="showRoleSelectionDialog"
@@ -103,7 +117,14 @@ const me = computed(() => {
 });
 
 const potentiallyTaggedPlayers = computed(() => {
-  return [me.value, ...friends.getFriends].filter(
+  return [me.value, ...friends.getFriends].map((player) => ({
+    ...player,
+    username: `@${player?.username}`,
+  }));
+});
+
+const filteredTaggedPlayers = computed(() => {
+  return potentiallyTaggedPlayers.value.filter(
     (player) =>
       !player ||
       !props.tokens.find((token) => token.player_id === player.user_id)
@@ -180,22 +201,40 @@ function toggleAlignment(token: Token) {
   }
 }
 
+// watch the tokens, and when it changes check if each of them is a friend
+watch(
+  () => props.tokens,
+  (tokens) => {
+    tokens.forEach((token) => {
+      checkIfPlayerNameIsFriend(token);
+    });
+  },
+  { immediate: true, deep: true }
+);
+
 function checkIfPlayerNameIsFriend(token: Token) {
+  console.log(token.player_name);
+  if (token.player_name === null || token.player_name === undefined) {
+    token.player_name = "";
+  }
+
   if (token.player_name.startsWith("@")) {
     const player = potentiallyTaggedPlayers.value.find(
-      (player) => player?.username === token.player_name.slice(1)
+      (player) => player?.username.slice(1) === token.player_name.slice(1)
     );
     if (player) {
-      token.player_id = player.user_id;
-
-      if (player.user_id === me.value?.user_id) {
-        emit("selectedMe", player.user_id);
+      if (token.player_id !== player.user_id) {
+        token.player_id = player.user_id;
       }
     } else {
-      token.player_id = undefined;
+      if (token.player_id) {
+        token.player_id = undefined;
+      }
     }
   } else {
-    token.player_id = undefined;
+    if (token.player_id) {
+      token.player_id = undefined;
+    }
   }
 }
 </script>
@@ -211,6 +250,7 @@ function checkIfPlayerNameIsFriend(token: Token) {
   ); /* circle radius */
   --s: calc(2 * var(--r) + var(--d) + 75px); /* container size */
   position: relative;
+  z-index: 10;
   width: var(--s);
   height: var(--s);
 
