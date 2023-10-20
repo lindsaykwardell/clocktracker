@@ -1,6 +1,6 @@
 <template>
   <div
-    class="bg-center bg-cover relative rounded-full shadow-xl border flex justify-center items-center aspect-square"
+    class="bg-center bg-cover relative rounded-full shadow-xl border flex justify-center items-center aspect-square z-10"
     :class="tokenClass"
     @click="emit('clickRole')"
   >
@@ -18,7 +18,7 @@
           character.alignment !== character.role?.initial_alignment) ||
         alwaysShowAlignment
       "
-      class="token bg-center bg-cover absolute bottom-0 -left-3 rounded-full shadow-xl border border-black flex justify-center items-center"
+      class="token bg-center bg-cover absolute bottom-0 -left-3 rounded-full shadow-xl border border-black flex justify-center items-center z-10"
       :class="relatedSize"
       @click.stop="emit('clickAlignment')"
     >
@@ -28,7 +28,7 @@
     <div
       v-if="character?.related_role"
       :id="relatedId"
-      class="token related bg-center bg-cover absolute bottom-0 -right-3 rounded-full shadow-xl border border-black flex justify-center items-center"
+      class="token related bg-center bg-cover absolute bottom-0 -right-3 rounded-full shadow-xl border border-black flex justify-center items-center z-10"
       :class="relatedSize"
       @click.stop="emit('clickRelated')"
     >
