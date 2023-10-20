@@ -1,7 +1,12 @@
 <template>
   <div id="grimoire" class="container m-auto" :style="`--m: ${tokens.length}`">
     <div v-for="(token, index) in orderedTokens" :style="`--i: ${index}`">
-      <div class="token-seat relative flex flex-col items-center">
+      <div
+        class="token-seat relative flex flex-col"
+        :class="{
+          'z-50': token.order === focusedToken?.order,
+        }"
+      >
         <button
           type="button"
           @click.prevent="token.is_dead = !token.is_dead"
@@ -27,15 +32,15 @@
           :class="{ 'cursor-pointer': !readonly }"
           :alwaysShowAlignment="!readonly && !!token.role"
         />
-        <input
-          v-if="!readonly"
-          v-model="token.player_name"
-          @input="checkIfPlayerNameIsFriend(token)"
-          type="text"
-          class="w-28 bg-stone-600 rounded p-1 border-2 border-stone-500 text-center text-xs md:text-sm"
-          :readonly="readonly"
-          list="grimoire-friends"
-        />
+        <div v-if="!readonly" class="relative z-50">
+          <ClientOnly>
+            <GrimoireTaggedUserInput
+              :users="filteredTaggablePlayers"
+              @inputFocused="focusedToken = token"
+              v-model:value="token.player_name"
+            />
+          </ClientOnly>
+        </div>
         <a
           v-else-if="token.player_id"
           :href="`/${token.player_name}`"
@@ -52,13 +57,6 @@
       </div>
     </div>
   </div>
-  <datalist id="grimoire-friends">
-    <option
-      v-for="friend in potentiallyTaggedPlayers"
-      :value="`@${friend?.username}`"
-    />
-    <option v-for="friend in previouslyTaggedPlayers" :value="friend" />
-  </datalist>
   <TokenDialog
     v-if="availableRoles"
     v-model:visible="showRoleSelectionDialog"
@@ -103,15 +101,36 @@ const me = computed(() => {
 });
 
 const potentiallyTaggedPlayers = computed(() => {
-  return [me.value, ...friends.getFriends].filter(
+  return [me.value, ...friends.getFriends].map((player) => ({
+    ...player,
+    username: `@${player?.username}`,
+  }));
+});
+
+const filteredTaggablePlayers = computed(() => {
+  return allTaggablePlayers.value.filter(
     (player) =>
       !player ||
-      !props.tokens.find((token) => token.player_id === player.user_id)
+      !props.tokens.find((token) => token.player_name === player.username)
   );
 });
 
 const previouslyTaggedPlayers = computed(() => {
-  return games.getPreviouslyTaggedByPlayer(me.value?.username);
+  return games
+    .getPreviouslyTaggedByPlayer(me.value?.username)
+    .map((player) => ({
+      username: player,
+      display_name: "",
+      user_id: null,
+      avatar: "/img/default.png",
+    }));
+});
+
+const allTaggablePlayers = computed(() => {
+  return [
+    ...potentiallyTaggedPlayers.value,
+    ...previouslyTaggedPlayers.value,
+  ].filter((player) => player);
 });
 
 const props = defineProps<{
@@ -133,11 +152,11 @@ const orderedTokens = computed(() =>
 );
 
 const showRoleSelectionDialog = ref(false);
-let focusedToken: Token | null = null;
+const focusedToken = ref<Token | null>(null);
 const tokenMode = ref<"role" | "related_role">("role");
 
 function openRoleSelectionDialog(token: Token, mode: "role" | "related_role") {
-  focusedToken = token;
+  focusedToken.value = token;
   tokenMode.value = mode;
   showRoleSelectionDialog.value = true;
 }
@@ -149,26 +168,26 @@ function selectRoleForToken(role: {
   name: string;
   initial_alignment: Alignment;
 }) {
-  if (focusedToken) {
+  if (focusedToken.value) {
     if (tokenMode.value === "role") {
-      focusedToken.role = {
+      focusedToken.value.role = {
         token_url: role.token_url,
         initial_alignment: role.initial_alignment,
         type: role.type,
         name: role.name,
       };
-      focusedToken.role_id = role.id;
-      focusedToken.alignment = role.initial_alignment;
-      focusedToken.related_role = {
+      focusedToken.value.role_id = role.id;
+      focusedToken.value.alignment = role.initial_alignment;
+      focusedToken.value.related_role = {
         token_url: "/1x1.png",
       };
-      focusedToken.related_role_id = null;
+      focusedToken.value.related_role_id = null;
     } else {
-      focusedToken.related_role = {
+      focusedToken.value.related_role = {
         token_url: role.token_url,
         name: role.name,
       };
-      focusedToken.related_role_id = role.id;
+      focusedToken.value.related_role_id = role.id;
     }
   }
   showRoleSelectionDialog.value = false;
@@ -180,22 +199,39 @@ function toggleAlignment(token: Token) {
   }
 }
 
+// watch the tokens, and when it changes check if each of them is a friend
+watch(
+  () => props.tokens,
+  (tokens) => {
+    tokens.forEach((token) => {
+      checkIfPlayerNameIsFriend(token);
+    });
+  },
+  { immediate: true, deep: true }
+);
+
 function checkIfPlayerNameIsFriend(token: Token) {
+  if (token.player_name === null || token.player_name === undefined) {
+    token.player_name = "";
+  }
+
   if (token.player_name.startsWith("@")) {
     const player = potentiallyTaggedPlayers.value.find(
-      (player) => player?.username === token.player_name.slice(1)
+      (player) => player?.username.slice(1) === token.player_name.slice(1)
     );
     if (player) {
-      token.player_id = player.user_id;
-
-      if (player.user_id === me.value?.user_id) {
-        emit("selectedMe", player.user_id);
+      if (token.player_id !== player.user_id) {
+        token.player_id = player.user_id;
       }
     } else {
-      token.player_id = undefined;
+      if (token.player_id) {
+        token.player_id = undefined;
+      }
     }
   } else {
-    token.player_id = undefined;
+    if (token.player_id) {
+      token.player_id = undefined;
+    }
   }
 }
 </script>
@@ -211,6 +247,7 @@ function checkIfPlayerNameIsFriend(token: Token) {
   ); /* circle radius */
   --s: calc(2 * var(--r) + var(--d) + 75px); /* container size */
   position: relative;
+  z-index: 10;
   width: var(--s);
   height: var(--s);
 
