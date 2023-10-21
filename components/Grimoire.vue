@@ -111,7 +111,8 @@ const filteredTaggablePlayers = computed(() => {
   return allTaggablePlayers.value.filter(
     (player) =>
       !player ||
-      !props.tokens.find((token) => token.player_name === player.username)
+      (!props.tokens.find((token) => token.player_name === player.username) &&
+        !props.excludePlayers?.includes(player.username))
   );
 });
 
@@ -143,6 +144,7 @@ const props = defineProps<{
     initial_alignment: Alignment;
   }[];
   readonly?: boolean;
+  excludePlayers?: string[];
 }>();
 
 const emit = defineEmits(["selectedMe"]);
