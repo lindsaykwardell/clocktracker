@@ -19,7 +19,6 @@ import {
   PolarAreaController,
   RadialLinearScale,
 } from "chart.js";
-import "vue-select/dist/vue-select.css";
 
 const friends = useFriends();
 const users = useUsers();
