@@ -117,15 +117,10 @@
         <div class="flex-1 flex flex-col justify-start">
           <label>
             <span class="block">Storyteller</span>
-            <input
-              type="text"
-              v-model="game.storyteller"
-              class="block w-full border border-stone-500 rounded-md p-2"
-              :class="{
-                'bg-stone-800': game.is_storyteller,
-              }"
-              list="storyteller-friends"
-              :disabled="game.is_storyteller"
+            <TaggedUserInput
+              v-model:value="game.storyteller"
+              :users="potentialStorytellers"
+              inputClass="w-full border border-stone-500 rounded-md p-2 h-[2.5rem] text-lg bg-stone-600 disabled:bg-stone-700"
             />
           </label>
           <label class="flex whitespace-nowrap items-center gap-2">
@@ -135,11 +130,10 @@
         </div>
         <div class="flex-1 flex flex-col gap-1 justify-center">
           <div v-for="(st, index) in game.co_storytellers" class="flex gap-2">
-            <input
-              type="text"
-              v-model="game.co_storytellers[index]"
-              class="co-storyteller block w-full border border-stone-500 rounded-md p-1"
-              list="storyteller-friends"
+            <TaggedUserInput
+              v-model:value="game.co_storytellers[index]"
+              :users="potentialStorytellers"
+              inputClass="w-full border border-stone-500 rounded-md p-2 h-[2.5rem] text-lg bg-stone-600 disabled:bg-stone-700"
             />
             <button
               type="button"
@@ -381,6 +375,7 @@
             <Grimoire
               :tokens="game.grimoire[grimPage].tokens"
               :availableRoles="orderedRoles"
+              :excludePlayers="storytellerNames"
               @selectedMe="applyMyRoleToGrimoire"
             />
           </div>
@@ -515,6 +510,13 @@ type Character = {
   related_role?: { token_url: string };
 };
 
+const supabase = useSupabaseClient();
+const config = useRuntimeConfig();
+const user = useSupabaseUser();
+const users = useUsers();
+const games = useGames();
+const friends = useFriends();
+
 const roles = ref<Role[]>([]);
 const scripts = ref<{ id: number; name: string }[]>([]);
 const baseScripts = ref<{ id: number; name: string }[]>([]);
@@ -526,13 +528,6 @@ const baseScriptData = await $fetch(
   "/api/script?author=The Pandemonium Institute"
 );
 baseScripts.value = baseScriptData ?? [];
-
-const supabase = useSupabaseClient();
-const config = useRuntimeConfig();
-const user = useSupabaseUser();
-const users = useUsers();
-const games = useGames();
-const friends = useFriends();
 
 const me = computed(() => users.getUserById(user.value?.id));
 const myTags = computed(() => {
@@ -554,6 +549,27 @@ const myLocations = computed(() => {
     return games.getLocationsByPlayer(me.value.data.username);
   }
   return [];
+});
+
+const potentialStorytellers = computed(() => {
+  if (me.value.status === Status.SUCCESS) {
+    return friends.getFriends
+      .map((f) => ({ ...f, username: `@${f.username}` }))
+      .filter(
+        (friend) =>
+          // friend is not the storyteller, not a co-storyteller, and not found in the grimoire
+          friend.username !== props.game.storyteller &&
+          !props.game.co_storytellers.includes(friend.username) &&
+          !props.game.grimoire.find((grim) =>
+            grim.tokens.find((token) => token.player_name === friend.username)
+          )
+      );
+  }
+  return [];
+});
+
+const storytellerNames = computed(() => {
+  return [props.game.storyteller, ...props.game.co_storytellers];
 });
 
 const showScriptDialog = ref(false);

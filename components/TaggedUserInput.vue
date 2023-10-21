@@ -1,19 +1,20 @@
 <template>
-  <div>
+  <div class="relative">
     <Combobox v-model="value">
       <ComboboxInput
         @focus="emit('inputFocused')"
         @change="value = $event.target.value"
-        class="w-20 md:w-28 bg-stone-600 rounded p-1 border-2 border-stone-500 text-center text-xs md:text-sm"
+        :class="inputClass"
       />
       <ComboboxOptions
-        class="text-sm bg-stone-900 border border-stone-500 relative max-h-[150px] overflow-scroll"
+        v-if="filteredPeople.length > 0"
+        class="absolute text-sm bg-stone-900 border border-stone-500 max-h-[150px] min-w-[200px] w-full overflow-y-scroll overflow-x-hidden"
         :class="{
-          'transform -translate-y-full bottom-8': renderListOnTop,
+          'bottom-8': renderListOnTop,
         }"
       >
         <ComboboxOption
-          class="cursor-pointer hover:bg-stone-700 p-1 flex gap-2"
+          class="cursor-pointer p-1 flex gap-2 overflow-ellipsis whitespace-nowrap"
           v-for="person in filteredPeople"
           :value="person.username"
         >
@@ -43,6 +44,7 @@ const props = defineProps<{
   users: User[];
   value: string;
   renderListOnTop?: boolean;
+  inputClass?: string;
 }>();
 
 const emit = defineEmits(["inputFocused", "update:value"]);
@@ -71,3 +73,9 @@ const filteredPeople = computed(() =>
     .sort(["display_name", "username"])
 );
 </script>
+
+<style>
+[data-headlessui-state="active"] {
+  @apply bg-stone-700;
+}
+</style>
