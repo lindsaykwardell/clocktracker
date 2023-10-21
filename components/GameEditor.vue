@@ -117,15 +117,10 @@
         <div class="flex-1 flex flex-col justify-start">
           <label>
             <span class="block">Storyteller</span>
-            <input
-              type="text"
-              v-model="game.storyteller"
-              class="block w-full border border-stone-500 rounded-md p-2"
-              :class="{
-                'bg-stone-800': game.is_storyteller,
-              }"
-              list="storyteller-friends"
-              :disabled="game.is_storyteller"
+            <TaggedUserInput
+              v-model:value="game.storyteller"
+              :users="friends.getFriends.map(f => ({...f, username: `@${f.username}`}))"
+              inputClass="w-full border border-stone-500 rounded-md p-2 h-[2.5rem] text-lg bg-stone-600 disabled:bg-stone-700"
             />
           </label>
           <label class="flex whitespace-nowrap items-center gap-2">

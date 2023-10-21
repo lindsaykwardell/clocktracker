@@ -3,6 +3,7 @@
     <TaggedUserInput
       :users="users"
       :renderListOnTop="renderListOnTop"
+      inputClass="w-20 md:w-28 bg-stone-600 rounded p-1 border-2 border-stone-500 text-center text-xs md:text-sm"
       v-model:value="value"
       @inputFocused="emit('inputFocused')"
     />
