@@ -1,5 +1,6 @@
 import type { User } from "@supabase/supabase-js";
 import { PrismaClient, PrivacySetting } from "@prisma/client";
+import { anonymizeGame, GameRecord } from "~/server/utils/anonymizeGame";
 
 const prisma = new PrismaClient();
 
@@ -98,18 +99,6 @@ export default defineEventHandler(async (handler) => {
         {
           user: {
             privacy: PrivacySetting.FRIENDS_ONLY,
-            OR: [
-              {
-                friends: {
-                  some: {
-                    user_id: me?.id || "",
-                  },
-                },
-              },
-              {
-                user_id: me?.id || "",
-              },
-            ],
           },
           privacy: PrivacySetting.PUBLIC,
         },
@@ -118,18 +107,6 @@ export default defineEventHandler(async (handler) => {
         {
           user: {
             privacy: PrivacySetting.FRIENDS_ONLY,
-            OR: [
-              {
-                friends: {
-                  some: {
-                    user_id: me?.id || "",
-                  },
-                },
-              },
-              {
-                user_id: me?.id || "",
-              },
-            ],
           },
           privacy: PrivacySetting.PRIVATE,
         },
@@ -210,5 +187,5 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  return game;
+  return anonymizeGame(game as GameRecord, me);
 });
