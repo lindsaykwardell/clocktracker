@@ -7,6 +7,22 @@ export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
   const username = handler.context.params?.username as string;
 
+  if (username === "anonymous") {
+    // Return an anonymous user
+
+    const randomName = generateName();
+    return {
+      username: "anonymous",
+      display_name: randomName.display_name,
+      avatar: "/img/default.png",
+      pronouns: "they/them",
+      bio: "This user is anonymous.",
+      location: "Unknown",
+      privacy: PrivacySetting.PUBLIC,
+      charts: [],
+    };
+  }
+
   const isMe = me
     ? (
         await prisma.userSettings.findUnique({

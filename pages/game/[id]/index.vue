@@ -411,6 +411,9 @@ watchEffect(() => {
 
 watchEffect(() => {
   if (game.value.status === Status.SUCCESS) {
+    if (player.value.status !== Status.SUCCESS) {
+      users.fetchUser(game.value.data.user.username);
+    }
     grimPage.value = game.value.data.grimoire.length - 1;
   }
 });
@@ -607,7 +610,6 @@ function formatDate(date: Date) {
 }
 
 onMounted(() => {
-  users.fetchUser(route.params.username as string);
   games.fetchGame(route.params.id as string).then(() => {
     if (
       game.value.status === Status.SUCCESS &&

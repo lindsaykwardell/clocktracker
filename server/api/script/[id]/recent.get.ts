@@ -1,22 +1,30 @@
 import { PrismaClient, PrivacySetting } from "@prisma/client";
+import { GameRecord } from "~/server/utils/anonymizeGame";
 
 const prisma = new PrismaClient();
 
 export default defineEventHandler(async (handler) => {
   const script_id = +handler.context.params!.id;
 
-  return prisma.game.findMany({
+  const games = await prisma.game.findMany({
     where: {
-      user: {
-        privacy: PrivacySetting.PUBLIC,
-      },
-      privacy: PrivacySetting.PUBLIC,
+      OR: [
+        {
+          user: {
+            privacy: PrivacySetting.PUBLIC,
+          },
+        },
+        {
+          privacy: PrivacySetting.PUBLIC,
+        },
+      ],
       script_id,
       parent_game_id: null,
     },
     include: {
       user: {
         select: {
+          privacy: true,
           username: true,
         },
       },
@@ -52,4 +60,11 @@ export default defineEventHandler(async (handler) => {
       date: "desc",
     },
   });
+
+  const returnGames: GameRecord[] = [];
+  for (const game of games) {
+    returnGames.push(await anonymizeGame(game as GameRecord, null));
+  }
+
+  return returnGames;
 });
