@@ -78,9 +78,9 @@
               </a>
             </label>
             <label v-if="storytellers.length" class="flex gap-3 items-center">
-              <span>Storyteller{{ storytellers.length === 1 ? '' : 's' }}</span>
+              <span>Storyteller{{ storytellers.length === 1 ? "" : "s" }}</span>
               <div>
-                <template v-for="storyteller, index in storytellers">
+                <template v-for="(storyteller, index) in storytellers">
                   <a
                     v-if="
                       isStorytellerAFriend(storyteller) &&
@@ -92,7 +92,9 @@
                     {{ storyteller }}
                   </a>
                   <template v-else>{{ storyteller }}</template>
-                  <template v-if="index !== storytellers.length - 1">, </template>
+                  <template v-if="index !== storytellers.length - 1"
+                    >,
+                  </template>
                 </template>
               </div>
             </label>
@@ -394,7 +396,11 @@ watchEffect(() => {
     game.value.status === Status.ERROR ||
     player.value.status === Status.ERROR
   ) {
-    router.push("/404");
+    showError({
+      statusCode: 404,
+      message: `Game not found`,
+      fatal: true,
+    });
   }
 });
 

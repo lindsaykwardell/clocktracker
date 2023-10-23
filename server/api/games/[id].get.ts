@@ -98,6 +98,18 @@ export default defineEventHandler(async (handler) => {
         {
           user: {
             privacy: PrivacySetting.FRIENDS_ONLY,
+            OR: [
+              {
+                friends: {
+                  some: {
+                    user_id: me?.id || "",
+                  },
+                },
+              },
+              {
+                user_id: me?.id || "",
+              },
+            ],
           },
           privacy: PrivacySetting.PUBLIC,
         },
@@ -106,6 +118,18 @@ export default defineEventHandler(async (handler) => {
         {
           user: {
             privacy: PrivacySetting.FRIENDS_ONLY,
+            OR: [
+              {
+                friends: {
+                  some: {
+                    user_id: me?.id || "",
+                  },
+                },
+              },
+              {
+                user_id: me?.id || "",
+              },
+            ],
           },
           privacy: PrivacySetting.PRIVATE,
         },
