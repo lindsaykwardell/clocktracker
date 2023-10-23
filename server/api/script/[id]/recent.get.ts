@@ -10,7 +10,9 @@ export default defineEventHandler(async (handler) => {
       user: {
         privacy: PrivacySetting.PUBLIC,
       },
+      privacy: PrivacySetting.PUBLIC,
       script_id,
+      parent_game_id: null,
     },
     include: {
       user: {
