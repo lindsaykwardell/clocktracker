@@ -142,7 +142,7 @@ async function submitGame() {
     console.error(error.value);
   } else {
     router.push(
-      `/@${userSettings.data.value?.username}/game/${data.value?.id}`
+      `/game/${data.value?.id}`
     );
   }
 }

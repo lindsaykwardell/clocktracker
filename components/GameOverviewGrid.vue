@@ -8,7 +8,7 @@
       <component
         :is="componentIs"
         @click="handleCardClick(game)"
-        :to="`/@${game.user.username}/game/${game.id}`"
+        :to="`/game/${game.id}`"
         class="w-full bg-stone-900 flex flex-col items-center cursor-pointer rounded overflow-hidden text-black h-48 md:h-72 bg-cover bg-center"
         :class="{
           'trouble-brewing': game.script === 'Trouble Brewing',
@@ -69,7 +69,7 @@
         <nuxt-link
           v-if="!readonly"
           class="text-white font-bold px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial"
-          :to="`/@${game.user.username}/game/${game.id}/edit`"
+          :to="`/game/${game.id}/edit`"
           ><svg
             xmlns="http://www.w3.org/2000/svg"
             width="32"

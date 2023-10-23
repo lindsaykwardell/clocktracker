@@ -17,7 +17,6 @@ definePageMeta({
 });
 
 const route = useRoute();
-const username = route.params.username as string;
 const savedGame = await useFetch<GameRecord>(`/api/games/${route.params.id}`);
 const user = useSupabaseUser();
 const router = useRouter();
@@ -176,7 +175,7 @@ async function submitGame() {
       body: JSON.stringify(formattedGame.value),
     });
 
-    router.push(`/@${username}/game/${savedGame.data.value?.id}`);
+    router.push(`/game/${savedGame.data.value?.id}`);
   } catch (err) {
     inFlight.value = false;
     console.error(err);
