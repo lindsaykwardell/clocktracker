@@ -1,5 +1,6 @@
 import type { User } from "@supabase/supabase-js";
 import { PrismaClient, PrivacySetting } from "@prisma/client";
+import { anonymizeGame, GameRecord } from "~/server/utils/anonymizeGame";
 
 const prisma = new PrismaClient();
 
@@ -18,17 +19,28 @@ export default defineEventHandler(async (handler) => {
     where: {
       id: gameId,
       deleted: false,
-      user: {
-        OR: [
-          {
+      OR: [
+        // PUBLIC PROFILE
+        // PUBLIC GAME
+        {
+          user: {
             privacy: PrivacySetting.PUBLIC,
           },
-          {
-            privacy: PrivacySetting.PRIVATE,
+          privacy: PrivacySetting.PUBLIC,
+        },
+        // PRIVATE GAME
+        // Direct links are allowed, so we aren't performing any checks on the user
+        {
+          user: {
+            privacy: PrivacySetting.PUBLIC,
+          },
+          privacy: PrivacySetting.PRIVATE,
+        },
+        // FRIENDS ONLY GAME
+        {
+          user: {
+            privacy: PrivacySetting.PUBLIC,
             OR: [
-              {
-                user_id: me?.id || "",
-              },
               {
                 friends: {
                   some: {
@@ -36,9 +48,71 @@ export default defineEventHandler(async (handler) => {
                   },
                 },
               },
+              {
+                user_id: me?.id || "",
+              },
             ],
           },
-          {
+          privacy: PrivacySetting.FRIENDS_ONLY,
+        },
+        // PRIVATE PROFILE
+        // PUBLIC GAME
+        // No filtering done here, because the game is public.
+        // We'll need to anonymize the user's profile, though.
+        {
+          user: {
+            privacy: PrivacySetting.PRIVATE,
+          },
+          privacy: PrivacySetting.PUBLIC,
+        },
+        // PRIVATE GAME
+        // Direct links are allowed, so we aren't performing any checks on the user
+        {
+          user: {
+            privacy: PrivacySetting.PRIVATE,
+          },
+          privacy: PrivacySetting.PRIVATE,
+        },
+        // FRIENDS ONLY GAME
+        {
+          user: {
+            privacy: PrivacySetting.PRIVATE,
+            OR: [
+              {
+                friends: {
+                  some: {
+                    user_id: me?.id || "",
+                  },
+                },
+              },
+              {
+                user_id: me?.id || "",
+              },
+            ],
+          },
+          privacy: PrivacySetting.FRIENDS_ONLY,
+        },
+        // FRIENDS ONLY PROFILE
+        // PUBLIC GAME
+        // No filtering done here, because the game is public.
+        // We'll need to anonymize the user's profile, though.
+        {
+          user: {
+            privacy: PrivacySetting.FRIENDS_ONLY,
+          },
+          privacy: PrivacySetting.PUBLIC,
+        },
+        // PRIVATE GAME
+        // Direct links are allowed, so we aren't performing any checks on the user
+        {
+          user: {
+            privacy: PrivacySetting.FRIENDS_ONLY,
+          },
+          privacy: PrivacySetting.PRIVATE,
+        },
+        // FRIENDS ONLY GAME
+        {
+          user: {
             privacy: PrivacySetting.FRIENDS_ONLY,
             OR: [
               {
@@ -53,16 +127,14 @@ export default defineEventHandler(async (handler) => {
               },
             ],
           },
-          {
-            privacy: PrivacySetting.PERSONAL,
-            user_id: me?.id || "",
-          },
-        ],
-      },
+          privacy: PrivacySetting.FRIENDS_ONLY,
+        },
+      ],
     },
     include: {
       user: {
         select: {
+          privacy: true,
           username: true,
         },
       },
@@ -115,5 +187,5 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  return game;
+  return anonymizeGame(game as GameRecord, me);
 });

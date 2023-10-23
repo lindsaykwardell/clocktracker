@@ -50,11 +50,13 @@ export const useUsers = defineStore("users", {
       if (!this.users.has(username))
         this.users.set(username, { status: Status.LOADING });
 
-      // Fetch the user
-      const user = await $fetch<User>(`/api/user/${username}`);
+      try {
+        const user = await $fetch<User>(`/api/user/${username}`);
 
-      // Otherwise, mark as success
-      this.storeUser(user);
+        this.storeUser(user);
+      } catch (err) {
+        this.users.set(username, { status: Status.ERROR, error: err });
+      }
     },
     storeUser(user: User) {
       this.users.set(user.username, { status: Status.SUCCESS, data: user });

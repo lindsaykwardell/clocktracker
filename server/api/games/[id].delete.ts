@@ -24,6 +24,7 @@ export default defineEventHandler(async (handler) => {
   const game = await prisma.game.findUnique({
     where: {
       id: gameId,
+      user_id: user.id,
     },
   });
 
