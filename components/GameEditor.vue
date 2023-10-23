@@ -152,6 +152,17 @@
         </div>
       </div>
       <label class="flex-1">
+        <span class="block">Privacy</span>
+        <select
+          v-model="game.privacy"
+          class="block w-full border border-stone-500 rounded-md p-2"
+        >
+          <option value="PUBLIC">Public</option>
+          <option value="PRIVATE">Private</option>
+          <option value="FRIENDS_ONLY">Friends Only</option>
+        </select>
+      </label>
+      <label class="flex-1">
         <span class="block">Location Type</span>
         <select
           v-model="game.location_type"
@@ -460,7 +471,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Alignment, Role, RoleType } from "@prisma/client";
+import type { Alignment, PrivacySetting, Role, RoleType } from "@prisma/client";
 import { v4 as uuid } from "uuid";
 import naturalOrder from "natural-order";
 import { watchDebounced } from "@vueuse/core";
@@ -633,6 +644,7 @@ const props = defineProps<{
     is_grimoire_protected?: boolean;
     ignore_for_stats: boolean;
     tags: string[];
+    privacy: PrivacySetting;
   };
 }>();
 
