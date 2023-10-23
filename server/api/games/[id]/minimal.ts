@@ -133,6 +133,11 @@ export default defineEventHandler(async (handler) => {
     select: {
       date: true,
       script: true,
+      user: {
+        select: {
+          display_name: true,
+        },
+      },
     },
   });
 
