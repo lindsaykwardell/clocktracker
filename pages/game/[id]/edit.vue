@@ -10,7 +10,6 @@
 <script setup lang="ts">
 import dayjs from "dayjs";
 import { GameRecord } from "~/composables/useGames";
-import { PrivacySetting } from "@prisma/client";
 
 definePageMeta({
   middleware: ["auth"],
@@ -84,7 +83,7 @@ const game = reactive<{
   is_grimoire_protected: boolean;
   ignore_for_stats: boolean;
   tags: string[];
-  privacy: PrivacySetting;
+  privacy: string;
 }>({
   date: dayjs(savedGame.data.value?.date).format("YYYY-MM-DD"),
   script: savedGame.data.value?.script || "",
@@ -150,7 +149,7 @@ const game = reactive<{
   is_grimoire_protected: savedGame.data.value?.is_grimoire_protected || false,
   ignore_for_stats: savedGame.data.value?.ignore_for_stats || false,
   tags: savedGame.data.value?.tags || [],
-  privacy: savedGame.data.value?.privacy || PrivacySetting.PUBLIC,
+  privacy: savedGame.data.value?.privacy || "PUBLIC",
 });
 
 const formattedGame = computed(() => ({
