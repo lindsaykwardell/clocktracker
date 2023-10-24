@@ -10,13 +10,13 @@
 <script setup lang="ts">
 import dayjs from "dayjs";
 import { GameRecord } from "~/composables/useGames";
+import { PrivacySetting } from "@prisma/client";
 
 definePageMeta({
   middleware: ["auth"],
 });
 
 const route = useRoute();
-const username = route.params.username as string;
 const savedGame = await useFetch<GameRecord>(`/api/games/${route.params.id}`);
 const user = useSupabaseUser();
 const router = useRouter();
@@ -84,6 +84,7 @@ const game = reactive<{
   is_grimoire_protected: boolean;
   ignore_for_stats: boolean;
   tags: string[];
+  privacy: PrivacySetting;
 }>({
   date: dayjs(savedGame.data.value?.date).format("YYYY-MM-DD"),
   script: savedGame.data.value?.script || "",
@@ -149,6 +150,7 @@ const game = reactive<{
   is_grimoire_protected: savedGame.data.value?.is_grimoire_protected || false,
   ignore_for_stats: savedGame.data.value?.ignore_for_stats || false,
   tags: savedGame.data.value?.tags || [],
+  privacy: savedGame.data.value?.privacy || PrivacySetting.PUBLIC,
 });
 
 const formattedGame = computed(() => ({
@@ -173,7 +175,7 @@ async function submitGame() {
       body: JSON.stringify(formattedGame.value),
     });
 
-    router.push(`/@${username}/game/${savedGame.data.value?.id}`);
+    router.push(`/game/${savedGame.data.value?.id}`);
   } catch (err) {
     inFlight.value = false;
     console.error(err);

@@ -223,14 +223,19 @@ export const useGames = defineStore("games", {
       if (!this.games.has(gameId))
         this.games.set(gameId, { status: Status.LOADING });
 
-      // Fetch the user
-      const game = await $fetch<GameRecord>(`/api/games/${gameId}`);
+      try {
+        const game = await $fetch<GameRecord>(`/api/games/${gameId}`);
 
-      // Otherwise, mark as success
-      this.games.set(gameId, {
-        status: Status.SUCCESS,
-        data: game,
-      });
+        this.games.set(gameId, {
+          status: Status.SUCCESS,
+          data: game,
+        });
+      } catch (err) {
+        this.games.set(gameId, {
+          status: Status.ERROR,
+          error: err,
+        });
+      }
     },
     async fetchPlayerGames(username: string) {
       if (!this.players.has(username))

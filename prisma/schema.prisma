@@ -41,6 +41,7 @@ model Game {
   waiting_for_confirmation Boolean       @default(false)
   deleted                  Boolean       @default(false)
   deleted_date             DateTime?
+  privacy                  PrivacySetting @default(PUBLIC)
 }
 
 model Grimoire {
