@@ -8,7 +8,6 @@
 </template>
 
 <script setup lang="ts">
-import { PrivacySetting } from "@prisma/client";
 import dayjs from "dayjs";
 
 definePageMeta({
@@ -71,7 +70,7 @@ const game = reactive<{
   }[];
   ignore_for_stats: boolean;
   tags: string[];
-  privacy: PrivacySetting;
+  privacy: string;
 }>({
   date: dayjs().format("YYYY-MM-DD"),
   script: "",
@@ -113,7 +112,7 @@ const game = reactive<{
   ],
   ignore_for_stats: false,
   tags: [],
-  privacy: userSettings.data.value?.privacy || PrivacySetting.PUBLIC,
+  privacy: userSettings.data.value?.privacy || "PUBLIC",
 });
 
 const formattedGame = computed(() => ({
