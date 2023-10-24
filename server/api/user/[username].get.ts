@@ -100,6 +100,14 @@ export default defineEventHandler(async (handler) => {
       location: true,
       privacy: true,
       charts: true,
+      communities: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          description: true,
+        },
+      },
     },
   });
 
