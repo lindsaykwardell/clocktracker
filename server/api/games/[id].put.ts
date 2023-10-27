@@ -168,9 +168,12 @@ export default defineEventHandler(async (handler) => {
     },
   });
 
-  const related_games = [game.parent_game, ...game.child_games].filter(
-    (g) => !!g
-  );
+  const related_games = [...game.child_games];
+
+  if (game.parent_game) {
+    related_games.push(game.parent_game);
+    related_games.push(...game.parent_game.child_games);
+  }
 
   const parentGameLastAlignment =
     game.player_characters[game.player_characters.length - 1]?.alignment ||
