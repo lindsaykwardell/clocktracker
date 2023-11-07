@@ -12,18 +12,37 @@
               </h3>
             </div>
             <button
-              class="whitespace-nowrap flex gap-1 items-center justify-center py-1 w-[150px] rounded transition duration-150 bg-blue-950 hover:bg-blue-900"
+              class="whitespace-nowrap flex gap-1 items-center justify-center py-1 w-[150px] rounded transition duration-150 hover:bg-blue-900"
+              :class="{
+                'bg-blue-950': !isMember,
+                'border border-blue-950 text-blue-700 hover:text-white':
+                  isMember,
+              }"
             >
-              Join Community
+              <template v-if="isMember"> Leave Community </template>
+              <template v-else> Join Community </template>
             </button>
           </div>
           <hr class="border-stone-100 w-full my-4" />
           <p class="whitespace-pre-wrap text-left w-full py-4">
             {{ community.data.description }}
           </p>
-          <slot />
         </div>
       </div>
+      <template v-if="recentGames.status === Status.SUCCESS">
+        <GameOverviewGrid
+          v-if="recentGames.data.length > 0"
+          :games="recentGames.data"
+          cardWidth="w-1/2 lg:w-1/3"
+          readonly
+        />
+        <template v-else>
+          <p class="text-center">No games have been played yet.</p>
+        </template>
+      </template>
+      <template v-else>
+        <LoadingSpinner />
+      </template>
     </template>
     <template v-else>
       <div class="flex justify-center items-center h-screen">
@@ -34,14 +53,32 @@
 </template>
 
 <script setup lang="ts">
+import naturalOrder from "natural-order";
+
 const route = useRoute();
 const communities = useCommunities();
+const games = useGames();
+const user = useSupabaseUser();
 
-const community = computed(() =>
-  communities.getCommunity(route.params.slug as string)
-);
+const slug = route.params.slug as string;
+
+const community = computed(() => communities.getCommunity(slug));
+const isMember = computed(() => communities.isMember(slug, user.value?.id));
+const recentGames = computed(() => {
+  const communityGames = games.getByCommunity(slug);
+  if (communityGames.status !== Status.SUCCESS) return communityGames;
+  return {
+    ...communityGames,
+    data: naturalOrder(
+      communityGames.data.filter((g) => !g.parent_game_id).slice(0, 6)
+    )
+      .orderBy("desc")
+      .sort(["date"]),
+  };
+});
 
 onMounted(() => {
-  communities.fetchCommunity(route.params.slug as string);
-})
+  communities.fetchCommunity(slug);
+  games.fetchCommunityGames(slug);
+});
 </script>

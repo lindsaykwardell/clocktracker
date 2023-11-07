@@ -23,6 +23,16 @@ export const useCommunities = defineStore("communities", {
         return this.communities.get(slug) || { status: Status.IDLE };
       };
     },
+    isMember(): (slug: string, user_id: string | undefined) => boolean {
+      return (slug: string, user_id: string | undefined) => {
+        const community = this.getCommunity(slug);
+        if (community.status !== Status.SUCCESS) return false;
+
+        return community.data?.members.some(
+          (member) => member.user_id === user_id
+        );
+      };
+    },
   },
   actions: {
     async fetchCommunity(slug: string) {
