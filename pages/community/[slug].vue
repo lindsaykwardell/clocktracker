@@ -5,7 +5,7 @@
         <div
           class="flex flex-col items-center p-2 w-full md:w-3/4 lg:w-2/3 xl:w-1/2 m-auto"
         >
-          <div class="flex flex-col lg:flex-row items-center gap-3 w-full">
+          <div class="flex flex-col items-center gap-3 w-full">
             <div class="flex-grow flex flex-col items-center md:items-start">
               <h3 class="font-dumbledor text-2xl lg:text-3xl">
                 {{ community.data.name }}
@@ -40,4 +40,8 @@ const communities = useCommunities();
 const community = computed(() =>
   communities.getCommunity(route.params.slug as string)
 );
+
+onMounted(() => {
+  communities.fetchCommunity(route.params.slug as string);
+})
 </script>
