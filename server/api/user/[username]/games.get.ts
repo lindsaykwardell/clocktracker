@@ -1,5 +1,6 @@
 import { PrismaClient, PrivacySetting } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
+import { GameRecord } from "~/server/utils/anonymizeGame";
 
 const prisma = new PrismaClient();
 
@@ -242,5 +243,11 @@ export default defineEventHandler(async (handler) => {
     },
   });
 
-  return games;
+  const anonymizedGames: GameRecord[] = [];
+
+  for (const game of games) {
+    anonymizedGames.push(await anonymizeGame(game as GameRecord, me));
+  }
+
+  return anonymizedGames;
 });

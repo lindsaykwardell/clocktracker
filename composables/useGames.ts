@@ -97,6 +97,23 @@ export const useGames = defineStore("games", {
         return { status: Status.SUCCESS, data: games };
       };
     },
+    getByCommunity(): (slug: string) => FetchStatus<GameRecord[]> {
+      return (slug: string) => {
+        const communities = useCommunities();
+        const community = communities.getCommunity(slug);
+        if (community.status !== Status.SUCCESS) return community;
+
+        const games: GameRecord[] = [];
+        for (const user of community.data.members) {
+          const userGames = this.getByPlayer(user.username);
+          if (userGames.status === Status.SUCCESS) {
+            games.push(...userGames.data);
+          }
+        }
+
+        return { status: Status.SUCCESS, data: games }
+      }
+    },
     getPendingByPlayer(): (username: string) => FetchStatus<GameRecord[]> {
       return (username: string) => {
         const users = useUsers();
@@ -291,6 +308,16 @@ export const useGames = defineStore("games", {
       });
 
       for (const game of similar) {
+        this.games.set(game.id, {
+          status: Status.SUCCESS,
+          data: game,
+        });
+      }
+    },
+    async fetchCommunityGames(slug: string) {
+      const games = await $fetch<GameRecord[]>(`/api/games/community/${slug}`);
+
+      for (const game of games) {
         this.games.set(game.id, {
           status: Status.SUCCESS,
           data: game,
