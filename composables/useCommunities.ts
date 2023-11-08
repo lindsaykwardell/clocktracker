@@ -11,6 +11,17 @@ export type Community = {
   admins: {
     user_id: string;
   }[];
+  posts: {
+    id: string;
+    content: string;
+    created_at: string | null;
+    user: {
+      user_id: string;
+      username: string;
+      display_name: string;
+      avatar: string | null;
+    };
+  }[];
 };
 
 export const useCommunities = defineStore("communities", {
@@ -52,6 +63,21 @@ export const useCommunities = defineStore("communities", {
           status: Status.ERROR,
           error: (err as any).statusMessage,
         });
+      }
+    },
+    async submitPost(slug: string, content: string) {
+      try {
+        const post = await $fetch(`/api/community/${slug}/post`, {
+          method: "POST",
+          body: JSON.stringify({ content }),
+        });
+
+        const community = this.communities.get(slug);
+        if (community?.status === Status.SUCCESS) {
+          community.data?.posts.unshift(post);
+        }
+      } catch (err) {
+        console.error(err);
       }
     },
   },

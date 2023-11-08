@@ -33,7 +33,7 @@
         <GameOverviewGrid
           v-if="recentGames.data.length > 0"
           :games="recentGames.data"
-          cardWidth="w-1/2 lg:w-1/3"
+          cardWidth="w-1/2 lg:w-1/4"
           readonly
         />
         <template v-else>
@@ -43,6 +43,28 @@
       <template v-else>
         <LoadingSpinner />
       </template>
+      <div class="max-w-[800px] m-auto flex flex-col gap-3 mt-8">
+        <div v-if="isMember" class="bg-stone-900 p-4">
+          <label>
+            Add to the conversation
+            <form @submit.prevent="submitPost">
+              <ExpandingTextarea
+                class="block w-full border border-stone-500 rounded-md p-2 text-lg bg-stone-600"
+                v-model="message"
+              />
+              <button
+                type="submit"
+                class="rounded transition duration-150 bg-blue-800 hover:bg-blue-900 text-white px-4 py-2 mt-2"
+              >
+                Send
+              </button>
+            </form>
+          </label>
+        </div>
+        <div v-for="post in community.data.posts">
+          {{ post.content }}
+        </div>
+      </div>
     </template>
     <template v-else>
       <div class="flex justify-center items-center h-screen">
@@ -56,11 +78,12 @@
 import naturalOrder from "natural-order";
 
 const route = useRoute();
+const slug = route.params.slug as string;
 const communities = useCommunities();
 const games = useGames();
 const user = useSupabaseUser();
 
-const slug = route.params.slug as string;
+const message = ref("");
 
 const community = computed(() => communities.getCommunity(slug));
 const isMember = computed(() => communities.isMember(slug, user.value?.id));
@@ -70,12 +93,20 @@ const recentGames = computed(() => {
   return {
     ...communityGames,
     data: naturalOrder(
-      communityGames.data.filter((g) => !g.parent_game_id).slice(0, 6)
+      communityGames.data.filter((g) => !g.parent_game_id).slice(0, 4)
     )
       .orderBy("desc")
       .sort(["date"]),
   };
 });
+
+async function submitPost() {
+  await communities.submitPost(slug, message.value);
+
+  console.log("submitted post")
+
+  message.value = "";
+}
 
 onMounted(() => {
   communities.fetchCommunity(slug);
