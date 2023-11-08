@@ -32,6 +32,21 @@ export default defineEventHandler(async (handler) => {
           user_id: true,
         },
       },
+      posts: {
+        select: {
+          id: true,
+          content: true,
+          created_at: true,
+          user: {
+            select: {
+              user_id: true,
+              username: true,
+              display_name: true,
+              avatar: true,
+            },
+          },
+        },
+      },
     },
   });
 

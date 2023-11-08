@@ -155,6 +155,7 @@ model UserSettings {
   enable_bgstats       Boolean         @default(false)
   communities          Community[]     @relation("CommunityMember")
   community_admin      Community[]     @relation("CommunityAdmin")
+  community_posts      CommunityPost[]
 }
 
 enum PrivacySetting {
@@ -231,13 +232,26 @@ enum DataField {
 }
 
 model Community {
-  id           Int            @id @default(autoincrement())
+  id           Int             @id @default(autoincrement())
   name         String
-  slug         String         @unique
+  slug         String          @unique
   description  String
-  members      UserSettings[] @relation("CommunityMember")
-  admins       UserSettings[] @relation("CommunityAdmin")
-  created_at   DateTime?      @default(now()) @db.Timestamptz(6)
-  deleted      Boolean        @default(false)
+  members      UserSettings[]  @relation("CommunityMember")
+  admins       UserSettings[]  @relation("CommunityAdmin")
+  created_at   DateTime?       @default(now()) @db.Timestamptz(6)
+  deleted      Boolean         @default(false)
+  deleted_date DateTime?
+  posts        CommunityPost[]
+}
+
+model CommunityPost {
+  id           String       @id @default(uuid())
+  community    Community    @relation(fields: [community_id], references: [id])
+  community_id Int
+  user         UserSettings @relation(fields: [user_id], references: [user_id])
+  user_id      String
+  content      String
+  created_at   DateTime?    @default(now()) @db.Timestamptz(6)
+  deleted      Boolean      @default(false)
   deleted_date DateTime?
 }
