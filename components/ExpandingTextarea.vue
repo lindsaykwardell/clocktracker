@@ -21,6 +21,10 @@ watch(input, () => {
   value.value = input.value;
 });
 
+watch(value, () => {
+  if (input.value !== value.value) input.value = value.value;
+});
+
 onMounted(() => {
   input.value = value.value;
 });
