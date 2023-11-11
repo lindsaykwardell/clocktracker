@@ -45,6 +45,41 @@ export default defineEventHandler(async (handler) => {
               avatar: true,
             },
           },
+          replies: {
+            select: {
+              id: true,
+              content: true,
+              created_at: true,
+              user: {
+                select: {
+                  user_id: true,
+                  username: true,
+                  display_name: true,
+                  avatar: true,
+                },
+              },
+            },
+            where: {
+              deleted: false,
+            },
+            orderBy: {
+              created_at: "asc",
+            },
+          },
+          _count: {
+            select: {
+              replies: true,
+            },
+          },
+        },
+        orderBy: {
+          created_at: "desc",
+        },
+        where: {
+          deleted: false,
+          reply_to_id: {
+            equals: null,
+          },
         },
       },
     },

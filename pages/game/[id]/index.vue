@@ -257,7 +257,7 @@
         </div>
       </div>
       <div
-        xv-if="player.data.user_id === user?.id"
+        v-if="player.data.user_id === user?.id"
         class="p-4 flex flex-col md:flex-row justify-between md:justify-end gap-4"
       >
         <template v-if="canPostToBGG">

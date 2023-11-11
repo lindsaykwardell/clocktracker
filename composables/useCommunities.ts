@@ -12,6 +12,20 @@ export type CommunityPost = {
     display_name: string;
     avatar: string | null;
   };
+  replies: {
+    id: string;
+    content: string;
+    created_at: string;
+    user: {
+      user_id: string;
+      username: string;
+      display_name: string;
+      avatar: string | null;
+    };
+  }[];
+  _count: {
+    replies: number;
+  };
 };
 
 export type Community = {
@@ -77,6 +91,41 @@ export const useCommunities = defineStore("communities", {
         const community = this.communities.get(slug);
         if (community?.status === Status.SUCCESS) {
           community.data?.posts.unshift(post);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    },
+    async submitReply(slug: string, reply_to_id: string, content: string) {
+      try {
+        const reply = await $fetch(`/api/community/${slug}/post/`, {
+          method: "POST",
+          body: JSON.stringify({ content, reply_to_id }),
+        });
+
+        const community = this.communities.get(slug);
+        if (community?.status === Status.SUCCESS) {
+          const post = community.data.posts.find((p) => p.id === reply_to_id);
+          if (post) {
+            post._count.replies++;
+            post.replies.push(reply);
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    },
+    async deletePost(slug: string, post_id: string) {
+      try {
+        await $fetch(`/api/community/${slug}/post/${post_id}`, {
+          method: "DELETE",
+        });
+
+        const community = this.communities.get(slug);
+        if (community?.status === Status.SUCCESS) {
+          community.data.posts = community.data?.posts.filter(
+            (post) => post.id !== post_id
+          );
         }
       } catch (err) {
         console.error(err);
