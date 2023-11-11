@@ -6,7 +6,9 @@ const prisma = new PrismaClient();
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
   const slug = handler.context.params!.slug;
-  const body = await readBody<{ content: string } | null>(handler);
+  const body = await readBody<{ content: string; reply_to_id?: string } | null>(
+    handler
+  );
 
   if (!me) {
     throw createError({
@@ -42,7 +44,7 @@ export default defineEventHandler(async (handler) => {
 
   const post = await prisma.communityPost.create({
     data: {
-      content: body.content,
+      ...body,
       community_id: community.id,
       user_id: me.id,
     },
@@ -56,6 +58,26 @@ export default defineEventHandler(async (handler) => {
           username: true,
           display_name: true,
           avatar: true,
+        },
+      },
+      replies: {
+        select: {
+          id: true,
+          content: true,
+          created_at: true,
+          user: {
+            select: {
+              user_id: true,
+              username: true,
+              display_name: true,
+              avatar: true,
+            },
+          },
+        },
+      },
+      _count: {
+        select: {
+          replies: true,
         },
       },
     },

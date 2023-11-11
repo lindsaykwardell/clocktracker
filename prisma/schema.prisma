@@ -245,13 +245,16 @@ model Community {
 }
 
 model CommunityPost {
-  id           String       @id @default(uuid())
-  community    Community    @relation(fields: [community_id], references: [id])
+  id           String          @id @default(uuid())
+  community    Community       @relation(fields: [community_id], references: [id])
   community_id Int
-  user         UserSettings @relation(fields: [user_id], references: [user_id])
+  user         UserSettings    @relation(fields: [user_id], references: [user_id])
   user_id      String
   content      String
-  created_at   DateTime     @default(now()) @db.Timestamptz(6)
-  deleted      Boolean      @default(false)
+  created_at   DateTime        @default(now()) @db.Timestamptz(6)
+  deleted      Boolean         @default(false)
   deleted_date DateTime?
+  reply_to     CommunityPost?  @relation("Reply", fields: [reply_to_id], references: [id])
+  reply_to_id  String?
+  replies      CommunityPost[] @relation("Reply")
 }

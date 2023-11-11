@@ -61,7 +61,13 @@
             </form>
           </label>
         </div>
-        <PostOrReply v-for="post in community.data.posts" :post="post" />
+        <CommunityPost
+          v-for="post in community.data.posts"
+          :post="post"
+          :isMember="isMember"
+          @delete="deletePost"
+          @reply="submitReply"
+        />
       </div>
     </template>
     <template v-else>
@@ -102,6 +108,14 @@ async function submitPost() {
   await communities.submitPost(slug, message.value);
 
   message.value = "";
+}
+
+async function submitReply(content: { content: string; parent_id: string }) {
+  await communities.submitReply(slug, content.parent_id, content.content);
+}
+
+async function deletePost(postId: string) {
+  await communities.deletePost(slug, postId);
 }
 
 onMounted(() => {
