@@ -251,7 +251,7 @@ model CommunityPost {
   user         UserSettings @relation(fields: [user_id], references: [user_id])
   user_id      String
   content      String
-  created_at   DateTime?    @default(now()) @db.Timestamptz(6)
+  created_at   DateTime     @default(now()) @db.Timestamptz(6)
   deleted      Boolean      @default(false)
   deleted_date DateTime?
 }

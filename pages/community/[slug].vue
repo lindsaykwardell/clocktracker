@@ -61,9 +61,7 @@
             </form>
           </label>
         </div>
-        <div v-for="post in community.data.posts">
-          {{ post.content }}
-        </div>
+        <PostOrReply v-for="post in community.data.posts" :post="post" />
       </div>
     </template>
     <template v-else>
@@ -102,8 +100,6 @@ const recentGames = computed(() => {
 
 async function submitPost() {
   await communities.submitPost(slug, message.value);
-
-  console.log("submitted post")
 
   message.value = "";
 }

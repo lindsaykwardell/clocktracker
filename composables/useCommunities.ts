@@ -2,6 +2,18 @@ import { defineStore } from "pinia";
 import { FetchStatus } from "./useFetchStatus";
 import { User } from "./useUsers";
 
+export type CommunityPost = {
+  id: string;
+  content: string;
+  created_at: string;
+  user: {
+    user_id: string;
+    username: string;
+    display_name: string;
+    avatar: string | null;
+  };
+};
+
 export type Community = {
   id: string;
   name: string;
@@ -11,17 +23,7 @@ export type Community = {
   admins: {
     user_id: string;
   }[];
-  posts: {
-    id: string;
-    content: string;
-    created_at: string | null;
-    user: {
-      user_id: string;
-      username: string;
-      display_name: string;
-      avatar: string | null;
-    };
-  }[];
+  posts: CommunityPost[];
 };
 
 export const useCommunities = defineStore("communities", {
