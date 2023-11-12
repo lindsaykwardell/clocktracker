@@ -60,6 +60,16 @@ export const useCommunities = defineStore("communities", {
         );
       };
     },
+    isModerator(): (slug: string, user_id: string | undefined) => boolean {
+      return (slug: string, user_id: string | undefined) => {
+        const community = this.getCommunity(slug);
+        if (community.status !== Status.SUCCESS) return false;
+
+        return community.data?.admins.some(
+          (admin) => admin.user_id === user_id
+        );
+      };
+    },
   },
   actions: {
     async fetchCommunity(slug: string) {
@@ -126,6 +136,9 @@ export const useCommunities = defineStore("communities", {
           community.data.posts = community.data?.posts.filter(
             (post) => post.id !== post_id
           );
+          community.data.posts.forEach((post) => {
+            post.replies = post.replies.filter((reply) => reply.id !== post_id);
+          });
         }
       } catch (err) {
         console.error(err);

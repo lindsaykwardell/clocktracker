@@ -17,7 +17,7 @@
         </div>
       </div>
       <div>
-        <button @click="deletePost">
+        <button v-if="isMe(post.user.user_id) || isModerator" @click="deletePost(post.id)">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="32"
@@ -81,7 +81,7 @@
             </div>
           </div>
           <div>
-            <button>
+            <button v-if="isMe(reply.user.user_id) || isModerator" @click="deletePost(reply.id)">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="32"
@@ -130,9 +130,12 @@
 import { CommunityPost } from "~/composables/useCommunities";
 import VueMarkdown from "vue-markdown-render";
 
+const user = useSupabaseUser();
+
 const props = defineProps<{
   post: CommunityPost;
   isMember: boolean;
+  isModerator: boolean;
 }>();
 
 const emit = defineEmits(["delete", "reply"]);
@@ -145,6 +148,10 @@ function formatDate(date: string) {
     dateStyle: "medium",
     timeStyle: "medium",
   }).format(new Date(date));
+}
+
+function isMe(id: string) {
+  return user.value?.id === id;
 }
 
 function toggleReply() {
@@ -162,9 +169,9 @@ function submitReply() {
   showReply.value = false;
 }
 
-function deletePost() {
+function deletePost(post_id: string) {
   if (confirm("Are you sure you want to delete this post?")) {
-    emit("delete", props.post.id);
+    emit("delete", post_id);
   }
 }
 </script>
