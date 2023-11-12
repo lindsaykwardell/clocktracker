@@ -25,10 +25,23 @@ export default defineEventHandler(async (handler) => {
   const post = await prisma.communityPost.findUnique({
     where: {
       id: post_id,
-      user_id: user.id,
       community: {
         slug: community_slug,
       },
+      OR: [
+        {
+          user_id: user.id,
+        },
+        {
+          community: {
+            admins: {
+              some: {
+                user_id: user.id,
+              },
+            },
+          },
+        },
+      ],
     },
   });
 

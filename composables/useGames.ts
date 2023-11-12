@@ -105,14 +105,18 @@ export const useGames = defineStore("games", {
 
         const games: GameRecord[] = [];
         for (const user of community.data.members) {
-          const userGames = this.getByPlayer(user.username);
-          if (userGames.status === Status.SUCCESS) {
-            games.push(...userGames.data);
+          for (const [_, gameStatus] of this.games) {
+            if (gameStatus.status === Status.SUCCESS) {
+              const game = gameStatus.data;
+              if (game.user_id === user.user_id) {
+                games.push(game);
+              }
+            }
           }
         }
 
-        return { status: Status.SUCCESS, data: games }
-      }
+        return { status: Status.SUCCESS, data: games };
+      };
     },
     getPendingByPlayer(): (username: string) => FetchStatus<GameRecord[]> {
       return (username: string) => {

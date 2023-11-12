@@ -65,6 +65,7 @@
           v-for="post in community.data.posts"
           :post="post"
           :isMember="isMember"
+          :isModerator="isModerator"
           @delete="deletePost"
           @reply="submitReply"
         />
@@ -91,6 +92,7 @@ const message = ref("");
 
 const community = computed(() => communities.getCommunity(slug));
 const isMember = computed(() => communities.isMember(slug, user.value?.id));
+const isModerator = computed(() => communities.isModerator(slug, user.value?.id));
 const recentGames = computed(() => {
   const communityGames = games.getByCommunity(slug);
   if (communityGames.status !== Status.SUCCESS) return communityGames;
