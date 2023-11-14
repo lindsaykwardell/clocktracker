@@ -9,18 +9,22 @@
     }"
   >
     <template v-if="visible">
-      <div class="flex justify-between items-center sticky top-0 bg-stone-900 z-10">
+      <div
+        class="flex justify-between items-top sticky top-0 bg-stone-900 z-10"
+      >
         <div class="p-4 w-full">
           <slot name="title" />
         </div>
         <div class="flex-grow" />
-        <button
-          type="button"
-          class="p-4 hover:bg-stone-800"
-          @click="emit('update:visible', false)"
-        >
-          Ⅹ
-        </button>
+        <div>
+          <button
+            type="button"
+            class="p-4 hover:bg-stone-800"
+            @click="emit('update:visible', false)"
+          >
+            Ⅹ
+          </button>
+        </div>
       </div>
       <slot />
     </template>
