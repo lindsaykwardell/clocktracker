@@ -28,6 +28,18 @@
             {{ community.data.description }}
           </p>
         </div>
+        <div class="flex flex-wrap w-11/12 m-auto pb-2">
+          <nuxt-link
+            v-for="member in community.data.members"
+            :to="`/@${member.username}`"
+          >
+            <Avatar
+              :value="member.avatar"
+              :size="community.data.members.length > 50 ? 'xs' : 'sm'"
+              class="border-stone-800"
+            />
+          </nuxt-link>
+        </div>
       </div>
       <template v-if="recentGames.status === Status.SUCCESS">
         <GameOverviewGrid
@@ -41,7 +53,7 @@
         </template>
       </template>
       <template v-else>
-        <LoadingSpinner />
+        <Loading />
       </template>
       <div class="max-w-[800px] m-auto flex flex-col gap-3 mt-8">
         <div v-if="isMember" class="bg-stone-900 p-4">
@@ -73,7 +85,7 @@
     </template>
     <template v-else>
       <div class="flex justify-center items-center h-screen">
-        <LoadingSpinner />
+        <Loading />
       </div>
     </template>
   </AuthenticatedTemplate>
@@ -92,7 +104,9 @@ const message = ref("");
 
 const community = computed(() => communities.getCommunity(slug));
 const isMember = computed(() => communities.isMember(slug, user.value?.id));
-const isModerator = computed(() => communities.isModerator(slug, user.value?.id));
+const isModerator = computed(() =>
+  communities.isModerator(slug, user.value?.id)
+);
 const recentGames = computed(() => {
   const communityGames = games.getByCommunity(slug);
   if (communityGames.status !== Status.SUCCESS) return communityGames;

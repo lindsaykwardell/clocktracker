@@ -1,6 +1,6 @@
 <template>
   <div
-    class="shadow p-3 rounded my-4 bg-gray-200 dark:bg-stone-900 dark:text-stone-300 text-sm"
+    class="shadow p-3 rounded my-1 bg-gray-200 dark:bg-stone-900 dark:text-stone-300 text-sm"
   >
     <div class="flex items-start">
       <div class="flex flex-grow flex-wrap items-center gap-4 md:h-12">
