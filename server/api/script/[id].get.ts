@@ -44,7 +44,23 @@ export default defineEventHandler(async (handler) => {
   ) {
     const roleIds: { id: string }[] = (
       await fetch(script.json_url).then((res) => res.json())
-    ).filter((role: { id: string }) => role.id !== "_meta");
+    )
+      .filter((role: { id: string }) => role.id !== "_meta")
+      .map((role: { id: string }) => ({ id: role.id.toLowerCase() }));
+
+    // filter out roles that we don't have in the database
+    const existingRoles = await prisma.role.findMany({
+      where: {
+        id: {
+          in: roleIds.map((role) => role.id),
+        },
+      },
+    });
+
+    const existingRoleIds = existingRoles.map((role) => role.id);
+    const knownRoles = roleIds.filter((role) =>
+      existingRoleIds.includes(role.id)
+    );
 
     const updated = await prisma.script.update({
       where: {
@@ -52,7 +68,7 @@ export default defineEventHandler(async (handler) => {
       },
       data: {
         roles: {
-          connect: roleIds,
+          connect: knownRoles,
         },
         characters_last_updated: new Date(),
       },
