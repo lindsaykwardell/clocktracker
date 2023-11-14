@@ -68,7 +68,11 @@ export default defineEventHandler(async (handler) => {
           },
           _count: {
             select: {
-              replies: true,
+              replies: {
+                where: {
+                  deleted: false,
+                }
+              },
             },
           },
         },
