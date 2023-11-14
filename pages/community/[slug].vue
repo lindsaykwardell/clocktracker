@@ -55,7 +55,7 @@
       <template v-else>
         <Loading />
       </template>
-      <div class="max-w-[800px] m-auto flex flex-col gap-3 mt-8">
+      <div class="w-full md:w-11/12 lg:max-w-[800px] m-auto flex flex-col gap-3 mt-8">
         <div v-if="isMember" class="bg-stone-900 p-4">
           <label>
             Add to the conversation
