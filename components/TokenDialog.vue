@@ -1,10 +1,14 @@
 <template>
   <Dialog v-model:visible="show" size="lg">
     <template #title>
-      <div class="flex flex-col md:flex-row w-full">
+      <div class="flex flex-col md:flex-row w-full gap-2">
         <h2 class="flex-grow text-2xl font-bold font-dumbledor">
           Select a Role
         </h2>
+        <label class="flex items-center">
+          <input v-model="showAllRoles" type="checkbox" class="mr-2" />
+          <span>All Roles</span>
+        </label>
         <input
           v-model="roleFilter"
           type="text"
@@ -38,8 +42,11 @@
 </template>
 
 <script setup lang="ts">
-import { Alignment, RoleType } from "@prisma/client";
+import { Alignment, Role } from "@prisma/client";
 import naturalOrder from "natural-order";
+import { RoleType } from "~/composables/useRoles";
+
+const roles = useRoles();
 
 const props = defineProps<{
   availableRoles: {
@@ -54,7 +61,11 @@ const props = defineProps<{
 
 const emit = defineEmits(["update:visible", "selectRole"]);
 
-const travelerRoles = await $fetch("/api/roles/traveler");
+const showAllRoles = ref(false);
+
+const allRoles = computed(() => roles.getAllRoles);
+const travelerRoles = computed(() => roles.getRoleByType(RoleType.TRAVELER));
+
 const roleFilter = ref("");
 const show = computed({
   get: () => props.visible,
@@ -64,10 +75,10 @@ const show = computed({
 const filteredRoles = computed(() => {
   return naturalOrder(
     [
-      ...props.availableRoles.filter(
+      ...(showAllRoles.value ? allRoles.value : props.availableRoles).filter(
         (role) => role.type !== "FABLED" && role.type !== "TRAVELER"
       ),
-      ...travelerRoles,
+      ...travelerRoles.value,
     ].filter((role) =>
       role.name.toLowerCase().includes(roleFilter.value.toLowerCase())
     )
@@ -121,13 +132,7 @@ const roleGroups = computed(() => {
   ];
 });
 
-function formatRoleAsCharacter(role: {
-  type: RoleType;
-  id: string;
-  token_url: string;
-  name: string;
-  initial_alignment: Alignment;
-}) {
+function formatRoleAsCharacter(role: Role) {
   return {
     alignment: role.initial_alignment,
     role,
@@ -138,5 +143,9 @@ watchEffect(() => {
   if (show.value) {
     roleFilter.value = "";
   }
+});
+
+onMounted(() => {
+  roles.fetchRoles();
 });
 </script>
