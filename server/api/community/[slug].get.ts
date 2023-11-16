@@ -26,6 +26,9 @@ export default defineEventHandler(async (handler) => {
           privacy: true,
           charts: true,
         },
+        orderBy: {
+          display_name: "asc",
+        }
       },
       admins: {
         select: {

@@ -56,6 +56,7 @@
                   class="flex-1 whitespace-nowrap rounded transition duration-150 border border-transparent px-4 py-2 mt-2"
                 />
                 <button
+                  @click="removeUser(member.user_id)"
                   class="flex-1 whitespace-nowrap rounded transition duration-150 border border-red-800 hover:bg-red-900 text-white px-4 py-2 mt-2"
                 >
                   Remove
@@ -70,17 +71,27 @@
 </template>
 
 <script setup lang="ts">
+definePageMeta({
+  middleware: "community-admin",
+});
+
 const communities = useCommunities();
 const route = useRoute();
 const user = useSupabaseUser();
 
 const slug = route.params.slug as string;
 
+function isMe(id: string) {
+  return user.value?.id === id;
+}
+
 function toggleAdmin(user_id: string) {
   communities.toggleAdmin(slug, user_id);
 }
 
-function isMe(id: string) {
-  return user.value?.id === id;
+function removeUser(user_id: string) {
+  if (confirm("Are you sure you want to remove this user?")) {
+    communities.removeUser(slug, user_id);
+  }
 }
 </script>
