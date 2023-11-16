@@ -47,18 +47,12 @@
             </nuxt-link>
           </div>
         </div>
-        <div class="flex flex-wrap w-11/12 m-auto pb-2">
-          <nuxt-link
-            v-for="member in community.data.members"
-            :to="`/@${member.username}`"
-          >
-            <Avatar
-              :value="member.avatar"
-              :size="community.data.members.length > 50 ? 'xs' : 'sm'"
-              class="border-stone-800"
-            />
-          </nuxt-link>
-        </div>
+        <slot
+          name="header"
+          :community="community"
+          :isMember="isMember"
+          :isModerator="isModerator"
+        />
       </div>
       <slot
         :community="community"
@@ -87,10 +81,10 @@ const isModerator = computed(() =>
 );
 
 function currentTabClass(tab: string) {
+  const formattedTab = `/community/${slug}${tab ? "/" + tab : ""}`;
   return {
-    "border-stone-500":
-      route.path === `/community/${slug}${tab ? "/" + tab : ""}`,
-    "border-transparent": route.path !== `/community/${slug}/${tab}`,
+    "border-stone-500": route.path === formattedTab,
+    "border-transparent": route.path !== formattedTab,
   };
 }
 

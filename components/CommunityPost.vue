@@ -6,7 +6,13 @@
       <div class="flex flex-grow flex-wrap items-center gap-4 md:h-12">
         <Avatar :value="post.user.avatar" size="xs" />
         <div class="flex flex-col flex-grow">
-          <div>{{ post.user.display_name }}</div>
+          <div
+            :class="{
+              'text-green-500': isUserModerator(post.user.user_id),
+            }"
+          >
+            {{ post.user.display_name }}
+          </div>
           <div class="text-sm">
             <a href="#" class="decoration-stone-500 dark:decoration-stone-400">
               <span class="text-stone-500 dark:text-stone-400">
@@ -17,7 +23,10 @@
         </div>
       </div>
       <div>
-        <button v-if="isMe(post.user.user_id) || isModerator" @click="deletePost(post.id)">
+        <button
+          v-if="isMe(post.user.user_id) || isModerator"
+          @click="deletePost(post.id)"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="32"
@@ -67,7 +76,13 @@
           <div class="flex flex-grow flex-wrap items-center gap-4 md:h-12">
             <Avatar :value="reply.user.avatar" size="xs" />
             <div class="flex flex-col flex-grow">
-              <div>{{ reply.user.display_name }}</div>
+              <div
+                :class="{
+                  'text-green-500': isUserModerator(reply.user.user_id),
+                }"
+              >
+                {{ reply.user.display_name }}
+              </div>
               <div class="text-sm">
                 <a
                   href="#"
@@ -81,7 +96,10 @@
             </div>
           </div>
           <div>
-            <button v-if="isMe(reply.user.user_id) || isModerator" @click="deletePost(reply.id)">
+            <button
+              v-if="isMe(reply.user.user_id) || isModerator"
+              @click="deletePost(reply.id)"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="32"
@@ -127,13 +145,14 @@
 </template>
 
 <script setup lang="ts">
-import { CommunityPost } from "~/composables/useCommunities";
+import { Community, CommunityPost } from "~/composables/useCommunities";
 import VueMarkdown from "vue-markdown-render";
 
 const user = useSupabaseUser();
 
 const props = defineProps<{
   post: CommunityPost;
+  community: Community;
   isMember: boolean;
   isModerator: boolean;
 }>();
@@ -148,6 +167,10 @@ function formatDate(date: string) {
     dateStyle: "medium",
     timeStyle: "medium",
   }).format(new Date(date));
+}
+
+function isUserModerator(user_id: string) {
+  return props.community.admins.map(({ user_id }) => user_id).includes(user_id);
 }
 
 function isMe(id: string) {
