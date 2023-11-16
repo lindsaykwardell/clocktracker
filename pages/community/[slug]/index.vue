@@ -101,7 +101,6 @@ async function deletePost(postId: string) {
 }
 
 onMounted(() => {
-  communities.fetchCommunity(slug);
   games.fetchCommunityGames(slug);
 });
 </script>

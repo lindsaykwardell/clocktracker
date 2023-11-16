@@ -168,6 +168,60 @@ export const useCommunities = defineStore("communities", {
       } catch (err) {
         console.error(err);
       }
+    },
+    async joinCommunity(slug: string) {
+      try {
+        const user = useSupabaseUser();
+        const users = useUsers();
+        const me = users.getUserById(user.value?.id);
+        const community = this.communities.get(slug);
+        if (
+          community?.status === Status.SUCCESS &&
+          me?.status === Status.SUCCESS
+        ) {
+          await $fetch(`/api/community/${slug}/join`, {
+            method: "POST",
+          });
+
+          community.data.members.push(me.data);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    },
+    async leaveCommunity(slug: string) {
+      try {
+        const user = useSupabaseUser();
+
+        const community = this.communities.get(slug);
+        if (user.value && community?.status === Status.SUCCESS) {
+          await $fetch(`/api/community/${slug}/leave`, {
+            method: "DELETE",
+          });
+
+          community.data.members = community.data.members.filter(
+            (member) => member.user_id !== user.value!.id
+          );
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    },
+    async removeUser(slug: string, user_id: string) {
+      try {
+        const community = this.communities.get(slug);
+        if (community?.status === Status.SUCCESS) {
+          await $fetch(`/api/community/${slug}/admin/${user_id}/remove`, {
+            method: "DELETE",
+          });
+
+          community.data.members = community.data.members.filter(
+            (member) => member.user_id !== user_id
+          );
+        }
+      } catch (err) {
+        console.error(err);
+      }
     }
   },
 });

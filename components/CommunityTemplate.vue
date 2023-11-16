@@ -12,6 +12,7 @@
               </h3>
             </div>
             <button
+              @click="isMember ? leave() : join()"
               class="whitespace-nowrap flex gap-1 items-center justify-center py-1 w-[150px] rounded transition duration-150 hover:bg-blue-900"
               :class="{
                 'bg-blue-950': !isMember,
@@ -41,7 +42,7 @@
             <nuxt-link
               :to="`/community/${community.data.slug}/dashboard`"
               class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-700"
-              :class="currentTabClass('mod-dashboard')"
+              :class="currentTabClass('dashboard')"
             >
               Moderator Dashboard
             </nuxt-link>
@@ -86,6 +87,16 @@ function currentTabClass(tab: string) {
     "border-stone-500": route.path === formattedTab,
     "border-transparent": route.path !== formattedTab,
   };
+}
+
+function leave() {
+  if (confirm("Are you sure you want to leave this community?")) {
+    communities.leaveCommunity(slug);
+  }
+}
+
+function join() {
+  communities.joinCommunity(slug);
 }
 
 onMounted(() => {
