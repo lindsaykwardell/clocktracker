@@ -144,5 +144,30 @@ export const useCommunities = defineStore("communities", {
         console.error(err);
       }
     },
+    async toggleAdmin(slug: string, user_id: string) {
+      try {
+        const community = this.communities.get(slug);
+        if (community?.status === Status.SUCCESS) {
+          const is_admin = community.data.admins.some(
+            (admin) => admin.user_id === user_id
+          );
+
+          const method = is_admin ? "DELETE" : "POST";
+          await $fetch(`/api/community/${slug}/admin/${user_id}`, {
+            method,
+          });
+
+          if (is_admin) {
+            community.data.admins = community.data.admins.filter(
+              (admin) => admin.user_id !== user_id
+            );
+          } else {
+            community.data.admins.push({ user_id });
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
   },
 });
