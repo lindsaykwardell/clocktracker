@@ -36,7 +36,17 @@ export default defineEventHandler(async (handler) => {
           name: true,
           slug: true,
           description: true,
-          _count: true,
+          _count: {
+            select: {
+              members: true,
+              admins: true,
+              posts: {
+                where: {
+                  deleted: false,
+                },
+              },
+            },
+          },
         },
       },
     },
