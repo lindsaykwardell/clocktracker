@@ -36,6 +36,7 @@ export default defineEventHandler(async (handler) => {
           name: true,
           slug: true,
           description: true,
+          _count: true,
         },
       },
     },

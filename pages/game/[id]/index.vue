@@ -1,5 +1,5 @@
 <template>
-  <AuthenticatedTemplate>
+  <StandardTemplate>
     <section
       v-if="game.status === Status.SUCCESS && player.status === Status.SUCCESS"
       class="flex flex-col gap-4 bg-gradient-to-b from-stone-100 to-stone-300 text-black w-full lg:w-4/5 m-auto md:my-4 rounded shadow-lg"
@@ -353,7 +353,7 @@
     <template v-else>
       <Loading class="h-screen" />
     </template>
-  </AuthenticatedTemplate>
+  </StandardTemplate>
 </template>
 
 <script setup lang="ts">

@@ -1,5 +1,5 @@
 <template>
-  <AuthenticatedTemplate>
+  <StandardTemplate>
     <template
       v-if="
         friends.friends.status === Status.SUCCESS &&
@@ -75,7 +75,7 @@
         <Loading />
       </div>
     </template>
-  </AuthenticatedTemplate>
+  </StandardTemplate>
 </template>
 
 <script setup lang="ts">

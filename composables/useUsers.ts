@@ -21,11 +21,16 @@ export type User = {
   charts: Chart[];
   bgg_username: string | null;
   enable_bgstats: boolean;
-  communities: {
+  communities?: {
     id: string;
     name: string;
     slug: string;
     description: string;
+    _count: {
+      members: number;
+      admins: number;
+      posts: number;
+    };
   }[];
 };
 

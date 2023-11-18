@@ -1,5 +1,5 @@
 <template>
-  <AuthenticatedTemplate>
+  <StandardTemplate>
     <div class="flex gap-4 xl:max-w-[1200px] m-auto mt-4">
       <nav class="flex flex-col md:w-[300px] items-center">
         <Avatar :value="avatar" class="mt-10 md:mt-0" />
@@ -42,7 +42,7 @@
         <slot />
       </section>
     </div>
-  </AuthenticatedTemplate>
+  </StandardTemplate>
 </template>
 
 <script setup lang="ts">

@@ -1,5 +1,5 @@
 <template>
-  <AuthenticatedTemplate>
+  <StandardTemplate>
     <section class="py-6">
       <h2 class="font-dumbledor text-4xl text-center">Create Community</h2>
       <form
@@ -39,7 +39,7 @@
         </template>
       </form>
     </section>
-  </AuthenticatedTemplate>
+  </StandardTemplate>
 </template>
 
 <script setup lang="ts">

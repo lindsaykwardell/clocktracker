@@ -1,5 +1,5 @@
 <template>
-  <AuthenticatedTemplate>
+  <StandardTemplate>
     <template v-if="myGames.status !== Status.SUCCESS">
       <Loading class="h-screen" />
     </template>
@@ -127,7 +127,7 @@
       </div>
       <Chart class="py-6 m-auto" :games="myGames.data" :options="options" />
     </template>
-  </AuthenticatedTemplate>
+  </StandardTemplate>
 </template>
 
 <script setup lang="ts">

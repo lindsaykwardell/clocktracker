@@ -1,10 +1,10 @@
 <template>
-  <AuthenticatedTemplate>
+  <StandardTemplate>
     <section class="py-6">
       <h2 class="font-dumbledor text-4xl text-center">Add Game</h2>
       <GameEditor :game="game" @submit="submitGame" :inFlight="inFlight" />
     </section>
-  </AuthenticatedTemplate>
+  </StandardTemplate>
 </template>
 
 <script setup lang="ts">
@@ -140,9 +140,7 @@ async function submitGame() {
     inFlight.value = false;
     console.error(error.value);
   } else {
-    router.push(
-      `/game/${data.value?.id}`
-    );
+    router.push(`/game/${data.value?.id}`);
   }
 }
 </script>
