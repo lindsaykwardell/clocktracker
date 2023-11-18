@@ -1,5 +1,5 @@
 <template>
-  <AuthenticatedTemplate>
+  <StandardTemplate>
     <template v-if="community.status === Status.SUCCESS">
       <div class="bg-stone-950 shadow-lg">
         <div
@@ -66,7 +66,7 @@
         <Loading />
       </div>
     </template>
-  </AuthenticatedTemplate>
+  </StandardTemplate>
 </template>
 
 <script setup lang="ts">

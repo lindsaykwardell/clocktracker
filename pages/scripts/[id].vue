@@ -1,5 +1,5 @@
 <template>
-  <AuthenticatedTemplate>
+  <StandardTemplate>
     <section
       class="flex flex-col gap-4 bg-gradient-to-b from-stone-100 to-stone-300 text-black w-full lg:w-4/5 m-auto md:my-4 rounded shadow-lg"
     >
@@ -172,7 +172,7 @@
       </div>
     </section>
     <GameOverviewGrid :games="recentGames" readonly class="print:hidden" />
-  </AuthenticatedTemplate>
+  </StandardTemplate>
 </template>
 
 <script setup lang="ts">
@@ -257,7 +257,7 @@ const scriptStats = await $fetch<{
   >;
 }>("/api/script/" + script.id + "/stats");
 
-const recentGames = ref<RecentGameRecord[]>([])
+const recentGames = ref<RecentGameRecord[]>([]);
 
 const averageGamesPlayed = computed(() =>
   Math.round(
@@ -426,7 +426,7 @@ const scriptLink = computed(() => {
 
 onMounted(async () => {
   recentGames.value = await allGames.fetchRecentGamesForScript(script.id);
-})
+});
 </script>
 
 <style scoped>
