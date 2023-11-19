@@ -238,5 +238,32 @@ export const useCommunities = defineStore("communities", {
         });
       }
     },
+    async updateCommunity(
+      slug: string,
+      body: {
+        slug: string;
+        name: string;
+        description: string;
+      }
+    ) {
+      const user = useSupabaseUser();
+      if (this.isModerator(slug, user.value?.id)) {
+        const response = await $fetch<Community>(`/api/community/${slug}`, {
+          method: "PUT",
+          body: JSON.stringify(body),
+        });
+
+        this.communities.set(body.slug, {
+          status: Status.SUCCESS,
+          data: response,
+        });
+
+        if (response.slug !== slug) {
+          const router = useRouter();
+          this.communities.delete(slug);
+          router.push(`/community/${response.slug}/dashboard`);
+        }
+      }
+    },
   },
 });
