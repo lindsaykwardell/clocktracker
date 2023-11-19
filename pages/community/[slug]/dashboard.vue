@@ -1,15 +1,59 @@
 <template>
   <CommunityTemplate v-slot="{ community, isModerator }">
     <div class="flex flex-col gap-3 p-2">
-      <form class="flex gap-3 items-center">
-        <Avatar :value="community.data.icon" size="lg" class="community-icon" />
-        <button
-          @click="toggleChangeIcon"
-          type="button"
-          class="whitespace-nowrap flex gap-1 items-center justify-center py-1 w-[150px] rounded transition duration-150 hover:bg-blue-900 border border-blue-600 text-white"
-        >
-          Change Icon
-        </button>
+      <form @submit.prevent="updateCommunity" class="flex gap-4 items-center p-2">
+        <div class="flex flex-col items-center">
+          <Avatar
+            :value="community.data.icon"
+            size="lg"
+            class="community-icon"
+          />
+          <button
+            @click="toggleChangeIcon"
+            type="button"
+            class="whitespace-nowrap flex gap-1 items-center justify-center py-1 w-[150px] rounded transition duration-150 hover:bg-blue-900 border border-blue-600 text-white"
+          >
+            Change Icon
+          </button>
+        </div>
+        <div class="flex-grow flex flex-col gap-3">
+          <label>
+            <span class="block">Name</span>
+            <input
+              v-model="updatedName"
+              class="block w-full border border-stone-500 bg-stone-600 rounded-md p-2"
+              required
+            />
+          </label>
+          <label>
+            <span class="block">Description</span>
+            <textarea
+              v-model="updatedDescription"
+              class="block w-full border border-stone-500 text-white bg-stone-600 rounded-md p-2"
+              rows="5"
+            ></textarea>
+          </label>
+          <label>
+            <span class="block">Slug</span>
+            <input
+              v-model="updatedSlug"
+              class="block w-full border border-stone-500 bg-stone-600 rounded-md p-2"
+              required
+            />
+          </label>
+          <button
+            type="submit"
+            id="save-game"
+            class="w-full bg-blue-700 hover:bg-blue-800 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
+            :disabled="inFlight"
+          >
+            <template v-if="inFlight">
+              <Spinner />
+              Saving...
+            </template>
+            <template v-else>Save Game</template>
+          </button>
+        </div>
       </form>
       <div class="overflow-scroll w-screen md:w-full">
         <table v-if="isModerator" class="w-full">
@@ -102,6 +146,25 @@ const showIconDialog = ref(false);
 
 const slug = route.params.slug as string;
 
+const updatedName = ref("");
+const updatedDescription = ref("");
+const updatedSlug = ref("");
+const loaded = ref(false);
+const inFlight = ref(false);
+
+const community = computed(() => {
+  return communities.getCommunity(slug);
+});
+
+watchEffect(() => {
+  if (community.value.status === Status.SUCCESS && !loaded.value) {
+    updatedName.value = community.value.data.name;
+    updatedDescription.value = community.value.data.description;
+    updatedSlug.value = community.value.data.slug;
+    loaded.value = true;
+  }
+});
+
 function isMe(id: string) {
   return user.value?.id === id;
 }
@@ -113,6 +176,16 @@ function toggleChangeIcon() {
 function updateIcon({ token_url }: { token_url: string }) {
   communities.updateIcon(slug, token_url);
   showIconDialog.value = false;
+}
+
+function updateCommunity() {
+  inFlight.value = true;
+  communities.updateCommunity(slug, {
+    name: updatedName.value,
+    description: updatedDescription.value,
+    slug: updatedSlug.value,
+  });
+  inFlight.value = false;
 }
 
 function toggleAdmin(user_id: string) {
