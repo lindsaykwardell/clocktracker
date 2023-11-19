@@ -1,7 +1,10 @@
 <template>
   <CommunityTemplate v-slot="{ community, isModerator }">
-    <div class="flex flex-col gap-3 p-2">
-      <form @submit.prevent="updateCommunity" class="flex gap-4 items-center p-2">
+    <div v-if="isModerator" class="flex flex-col gap-3 p-2">
+      <form
+        @submit.prevent="updateCommunity"
+        class="flex gap-4 items-center p-2"
+      >
         <div class="flex flex-col items-center">
           <Avatar
             :value="community.data.icon"
@@ -56,7 +59,7 @@
         </div>
       </form>
       <div class="overflow-scroll w-screen md:w-full">
-        <table v-if="isModerator" class="w-full">
+        <table class="w-full">
           <thead>
             <tr>
               <th />

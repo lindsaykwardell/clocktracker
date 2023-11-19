@@ -1,8 +1,7 @@
 export default defineNuxtRouteMiddleware(async (to, from) => {
   const user = useSupabaseUser();
   const communities = useCommunities();
-  const route = useRoute();
-  const slug = route.params.slug as string;
+  const slug = to.params.slug as string;
   const community = communities.getCommunity(slug);
 
   if (!user.value) {
