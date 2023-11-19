@@ -36,6 +36,7 @@ export default defineEventHandler(async (handler) => {
           name: true,
           slug: true,
           description: true,
+          icon: true,
           _count: {
             select: {
               members: true,
@@ -103,6 +104,18 @@ export default defineEventHandler(async (handler) => {
           name: true,
           slug: true,
           description: true,
+          icon: true,
+          _count: {
+            select: {
+              members: true,
+              admins: true,
+              posts: {
+                where: {
+                  deleted: false,
+                },
+              },
+            },
+          },
         },
       },
     },

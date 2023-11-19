@@ -29,10 +29,11 @@ export type CommunityPost = {
 };
 
 export type Community = {
-  id: string;
+  id: number;
   name: string;
   slug: string;
   description: string;
+  icon: string;
   members: User[];
   admins: {
     user_id: string;
@@ -222,6 +223,20 @@ export const useCommunities = defineStore("communities", {
       } catch (err) {
         console.error(err);
       }
-    }
+    },
+    async updateIcon(slug: string, icon: string) {
+      const user = useSupabaseUser();
+      if (this.isModerator(slug, user.value?.id)) {
+        const response = await $fetch<Community>(`/api/community/${slug}`, {
+          method: "PUT",
+          body: JSON.stringify({ icon }),
+        });
+
+        this.communities.set(slug, {
+          status: Status.SUCCESS,
+          data: response,
+        });
+      }
+    },
   },
 });

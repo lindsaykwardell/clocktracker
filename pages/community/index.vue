@@ -7,42 +7,49 @@
             :to="`/community/${community.slug}`"
             class="bg-stone-900 w-full p-2"
           >
-            <h3 class="font-dumbledor text-2xl lg:text-3xl">
-              {{ community.name }}
-            </h3>
-            <p class="whitespace-pre-wrap text-left w-full py-4">
-              {{ community.description }}
-            </p>
-            <section class="flex gap-6 text-stone-600">
+            <div class="flex gap-3 items-center">
+              <Avatar :value="community.icon" size="lg" />
               <div>
-                <span
-                  class="text-stone-200 bg-blue-800 rounded-full px-2 py-1 text-xs font-bold aspect-square"
-                >
-                  {{ community._count.members }}
-                </span>
-                <span>
-                  Member{{ community._count.members === 1 ? "" : "s" }}
-                </span>
+                <h3 class="font-dumbledor text-2xl lg:text-3xl">
+                  {{ community.name }}
+                </h3>
+                <p class="whitespace-pre-wrap text-left w-full py-4">
+                  {{ community.description }}
+                </p>
+                <section class="flex gap-6 text-stone-600">
+                  <div>
+                    <span
+                      class="text-stone-200 bg-blue-800 rounded-full px-2 py-1 text-xs font-bold aspect-square"
+                    >
+                      {{ community._count.members }}
+                    </span>
+                    <span>
+                      Member{{ community._count.members === 1 ? "" : "s" }}
+                    </span>
+                  </div>
+                  <div>
+                    <span
+                      class="text-stone-200 bg-green-800 rounded-full px-2 py-1 text-xs font-bold aspect-square"
+                    >
+                      {{ community._count.admins }}
+                    </span>
+                    <span>
+                      Admin{{ community._count.admins === 1 ? "" : "s" }}
+                    </span>
+                  </div>
+                  <div>
+                    <span
+                      class="text-stone-200 bg-purple-800 rounded-full px-2 py-1 text-xs font-bold aspect-square"
+                    >
+                      {{ community._count.posts }}
+                    </span>
+                    <span>
+                      Post{{ community._count.posts === 1 ? "" : "s" }}
+                    </span>
+                  </div>
+                </section>
               </div>
-              <div>
-                <span
-                  class="text-stone-200 bg-green-800 rounded-full px-2 py-1 text-xs font-bold aspect-square"
-                >
-                  {{ community._count.admins }}
-                </span>
-                <span>
-                  Admin{{ community._count.admins === 1 ? "" : "s" }}
-                </span>
-              </div>
-              <div>
-                <span
-                  class="text-stone-200 bg-purple-800 rounded-full px-2 py-1 text-xs font-bold aspect-square"
-                >
-                  {{ community._count.posts }}
-                </span>
-                <span> Post{{ community._count.posts === 1 ? "" : "s" }} </span>
-              </div>
-            </section>
+            </div>
           </nuxt-link>
         </template>
       </div>

@@ -242,6 +242,7 @@ model Community {
   deleted      Boolean         @default(false)
   deleted_date DateTime?
   posts        CommunityPost[]
+  icon         String          @default("/img/default.png")
 }
 
 model CommunityPost {

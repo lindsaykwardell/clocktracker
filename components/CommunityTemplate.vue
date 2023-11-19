@@ -5,24 +5,31 @@
         <div
           class="flex flex-col items-center p-2 w-full md:w-3/4 lg:w-2/3 xl:w-1/2 m-auto"
         >
-          <div class="flex flex-col items-center gap-3 w-full">
-            <div class="flex-grow flex flex-col items-center md:items-start">
-              <h3 class="font-dumbledor text-2xl lg:text-3xl">
-                {{ community.data.name }}
-              </h3>
+          <div class="flex gap-3 items-center w-full">
+            <Avatar
+              :value="community.data.icon"
+              size="lg"
+              class="border-stone-800 flex-shrink"
+            />
+            <div class="flex-grow flex flex-col justify-start gap-3 w-full">
+              <div class="flex flex-col items-center md:items-start">
+                <h3 class="font-dumbledor text-2xl lg:text-3xl">
+                  {{ community.data.name }}
+                </h3>
+              </div>
+              <button
+                @click="isMember ? leave() : join()"
+                class="whitespace-nowrap flex gap-1 items-center justify-center py-1 w-[150px] rounded transition duration-150 hover:bg-blue-900"
+                :class="{
+                  'bg-blue-950': !isMember,
+                  'border border-blue-950 text-blue-700 hover:text-white':
+                    isMember,
+                }"
+              >
+                <template v-if="isMember"> Leave Community </template>
+                <template v-else> Join Community </template>
+              </button>
             </div>
-            <button
-              @click="isMember ? leave() : join()"
-              class="whitespace-nowrap flex gap-1 items-center justify-center py-1 w-[150px] rounded transition duration-150 hover:bg-blue-900"
-              :class="{
-                'bg-blue-950': !isMember,
-                'border border-blue-950 text-blue-700 hover:text-white':
-                  isMember,
-              }"
-            >
-              <template v-if="isMember"> Leave Community </template>
-              <template v-else> Join Community </template>
-            </button>
           </div>
           <hr class="border-stone-100 w-full my-4" />
           <p class="whitespace-pre-wrap text-left w-full py-4">
