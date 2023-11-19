@@ -26,6 +26,7 @@ export type User = {
     name: string;
     slug: string;
     description: string;
+    icon: string;
     _count: {
       members: number;
       admins: number;

@@ -5,7 +5,7 @@
         <h2 class="flex-grow text-2xl font-bold font-dumbledor">
           Select a Role
         </h2>
-        <label class="flex items-center">
+        <label v-if="!alwaysShowAllRoles" class="flex items-center">
           <input v-model="showAllRoles" type="checkbox" class="mr-2" />
           <span>All Roles</span>
         </label>
@@ -57,11 +57,12 @@ const props = defineProps<{
     initial_alignment: Alignment;
   }[];
   visible: boolean;
+  alwaysShowAllRoles?: boolean;
 }>();
 
 const emit = defineEmits(["update:visible", "selectRole"]);
 
-const showAllRoles = ref(false);
+const showAllRoles = ref(props.alwaysShowAllRoles || false);
 
 const allRoles = computed(() => roles.getAllRoles);
 const travelerRoles = computed(() => roles.getRoleByType(RoleType.TRAVELER));
