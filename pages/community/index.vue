@@ -8,7 +8,7 @@
             class="bg-stone-900 w-full p-2"
           >
             <div class="flex gap-3 items-center">
-              <Avatar :value="community.icon" size="lg" />
+              <Avatar :value="community.icon" size="lg" class="community-icon" />
               <div>
                 <h3 class="font-dumbledor text-2xl lg:text-3xl">
                   {{ community.name }}

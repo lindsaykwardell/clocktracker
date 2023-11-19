@@ -2,7 +2,7 @@
   <CommunityTemplate v-slot="{ community, isModerator }">
     <div class="flex flex-col gap-3 p-2">
       <form class="flex gap-3 items-center">
-        <Avatar :value="community.data.icon" size="lg" />
+        <Avatar :value="community.data.icon" size="lg" class="community-icon" />
         <button
           @click="toggleChangeIcon"
           type="button"

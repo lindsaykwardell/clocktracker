@@ -9,7 +9,7 @@
             <Avatar
               :value="community.data.icon"
               size="lg"
-              class="border-stone-800 flex-shrink"
+              class="border-stone-800 flex-shrink community-icon"
             />
             <div class="flex-grow flex flex-col justify-start gap-3 w-full">
               <div class="flex flex-col items-center md:items-start">
@@ -110,3 +110,11 @@ onMounted(() => {
   communities.fetchCommunity(slug);
 });
 </script>
+
+<style>
+.community-icon {
+  background-image: url("/img/token-bg.png");
+  background-size: cover;
+  background-position: center;
+}
+</style>
