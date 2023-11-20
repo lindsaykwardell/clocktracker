@@ -471,7 +471,8 @@
 </template>
 
 <script setup lang="ts">
-import type { Alignment, Role, RoleType } from "@prisma/client";
+import type { Alignment } from "@prisma/client";
+import type { RoleType } from "~/composables/useRoles";
 import { v4 as uuid } from "uuid";
 import naturalOrder from "natural-order";
 import { watchDebounced } from "@vueuse/core";
@@ -528,7 +529,15 @@ const users = useUsers();
 const games = useGames();
 const friends = useFriends();
 
-const roles = ref<Role[]>([]);
+const roles = ref<
+  {
+    type: RoleType;
+    id: string;
+    token_url: string;
+    name: string;
+    initial_alignment: Alignment;
+  }[]
+>([]);
 const scripts = ref<{ id: number; name: string }[]>([]);
 const baseScripts = ref<{ id: number; name: string }[]>([]);
 const tokenMode = ref<"role" | "related_role">("role");
@@ -763,11 +772,27 @@ function selectScript(script: { name: string; id: number | null }) {
 watchEffect(async () => {
   roles.value = [];
   if (props.game.script_id) {
-    const result = await useFetch(`/api/script/${props.game.script_id}`);
-    roles.value = result.data.value?.roles ?? [];
+    const result = await $fetch<{
+      roles: {
+        type: RoleType;
+        id: string;
+        token_url: string;
+        name: string;
+        initial_alignment: Alignment;
+      }[];
+    }>(`/api/script/${props.game.script_id}`);
+    roles.value = result.roles ?? [];
   } else {
-    const result = await useFetch("/api/roles");
-    roles.value = result.data.value ?? [];
+    const result = await $fetch<
+      {
+        type: RoleType;
+        id: string;
+        token_url: string;
+        name: string;
+        initial_alignment: Alignment;
+      }[]
+    >("/api/roles");
+    roles.value = result ?? [];
   }
 });
 
