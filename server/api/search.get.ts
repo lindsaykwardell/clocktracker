@@ -12,10 +12,9 @@ export default defineEventHandler(async (handler) => {
     return {
       users: [],
       communities: [],
+      scripts: [],
     };
   }
-
-  console.log(query);
 
   const communities = await prisma.community.findMany({
     where: {
@@ -51,7 +50,35 @@ export default defineEventHandler(async (handler) => {
     },
   });
 
-  console.log(communities);
+  const scripts = await prisma.script.findMany({
+    where: {
+      OR: [
+        {
+          name: {
+            contains: query,
+            mode: "insensitive",
+          },
+        },
+        {
+          author: {
+            contains: query,
+            mode: "insensitive",
+          },
+        },
+      ],
+    },
+    include: {
+      _count: {
+        select: {
+          games: {
+            where: {
+              parent_game_id: null,
+            },
+          },
+        },
+      },
+    },
+  });
 
   const users = await prisma.userSettings.findMany({
     where: {
@@ -107,5 +134,6 @@ export default defineEventHandler(async (handler) => {
   return {
     communities,
     users,
+    scripts,
   };
 });

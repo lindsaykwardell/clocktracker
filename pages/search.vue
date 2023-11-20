@@ -23,7 +23,7 @@
           </label>
         </form>
       </div>
-      <div class="py-4">
+      <div class="py-4 flex flex-col gap-4">
         <div v-if="searching" class="flex justify-center gap-1">
           <Spinner />
           Searching...
@@ -31,8 +31,8 @@
         <CommunityCard
           v-for="community in communities"
           :community="community"
-          class="bg-stone-900"
         />
+        <ScriptCard v-for="script in scripts" :script="script" />
         <UserCard
           v-for="user in users"
           class="w-full flex flex-col md:flex-row my-4"
@@ -71,6 +71,21 @@ const communities = ref<
     };
   }[]
 >([]);
+const scripts = ref<
+  {
+    id: number;
+    name: string;
+    version: string;
+    author: string;
+    type: string;
+    json_url: string;
+    pdf_url: string;
+    characters_last_updated: string | null;
+    _count: {
+      games: number;
+    };
+  }[]
+>([]);
 const query = ref("");
 const searching = ref(false);
 
@@ -78,6 +93,7 @@ async function search() {
   searching.value = true;
   users.value = [];
   communities.value = [];
+  scripts.value = [];
   const result = await $fetch("/api/search", {
     params: {
       query: query.value,
@@ -85,6 +101,7 @@ async function search() {
   });
 
   users.value = result.users;
+  scripts.value = result.scripts;
   communities.value = result.communities;
 
   searching.value = false;
