@@ -13,9 +13,9 @@
             />
             <div class="flex-grow flex flex-col justify-start gap-3 w-full">
               <div class="flex flex-col items-center md:items-start">
-                <h3 class="font-dumbledor text-2xl lg:text-3xl">
+                <h1 class="font-dumbledor text-1xl lg:text-2xl">
                   {{ community.data.name }}
-                </h3>
+                </h1>
               </div>
               <button
                 @click="isMember ? leave() : join()"
