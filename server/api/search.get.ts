@@ -44,7 +44,11 @@ export default defineEventHandler(async (handler) => {
         select: {
           members: true,
           admins: true,
-          posts: true,
+          posts: {
+            where: {
+              deleted: false,
+            }
+          },
         },
       },
     },
