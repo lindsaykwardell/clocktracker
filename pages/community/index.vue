@@ -1,14 +1,27 @@
 <template>
   <StandardTemplate>
     <template v-if="me.status === Status.SUCCESS">
-      <div class="w-[800px] m-auto flex gap-4">
+      <div class="flex justify-end items-center p-4">
+        <nuxt-link
+          to="/community/create"
+          class="bg-blue-700 hover:bg-blue-800 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
+        >
+          Create Community
+        </nuxt-link>
+      </div>
+      <div class="w-[800px] m-auto flex flex-col items-center gap-4">
+        <h1 class="font-dumbledor text-4xl lg:text-3xl">Communities</h1>
         <template v-for="community in myCommunities">
           <nuxt-link
             :to="`/community/${community.slug}`"
             class="bg-stone-900 w-full p-2"
           >
-            <div class="flex gap-3 items-center">
-              <Avatar :value="community.icon" size="lg" class="community-icon" />
+            <div class="flex gap-3 items-top">
+              <Avatar
+                :value="community.icon"
+                size="lg"
+                class="community-icon"
+              />
               <div>
                 <h3 class="font-dumbledor text-2xl lg:text-3xl">
                   {{ community.name }}
