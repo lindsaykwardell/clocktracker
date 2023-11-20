@@ -14,6 +14,11 @@ export default defineEventHandler(async (handler) => {
     },
     select: {
       id: true,
+      banned_users: {
+        select: {
+          user_id: true,
+        },
+      },
     },
   });
 
@@ -22,6 +27,18 @@ export default defineEventHandler(async (handler) => {
     throw createError({
       status: 404,
       statusMessage: "Not Found",
+    });
+  }
+
+  if (
+    community.banned_users.some((banned_user) => banned_user.user_id === me?.id)
+  ) {
+    console.error(
+      `User ${me?.id} is banned from community ${slug} (${community.id})`
+    );
+    throw createError({
+      status: 403,
+      statusMessage: "Forbidden",
     });
   }
 

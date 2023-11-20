@@ -38,6 +38,7 @@ export type Community = {
   admins: {
     user_id: string;
   }[];
+  banned_users?: User[];
   posts: CommunityPost[];
 };
 
@@ -68,6 +69,18 @@ export const useCommunities = defineStore("communities", {
 
         return community.data?.admins.some(
           (admin) => admin.user_id === user_id
+        );
+      };
+    },
+    isBanned(): (slug: string, user_id: string | undefined) => boolean {
+      return (slug: string, user_id: string | undefined) => {
+        const community = this.getCommunity(slug);
+        if (community.status !== Status.SUCCESS) return false;
+
+        return (
+          community.data?.banned_users?.some(
+            (banned_user) => banned_user.user_id === user_id
+          ) ?? false
         );
       };
     },
@@ -212,12 +225,35 @@ export const useCommunities = defineStore("communities", {
       try {
         const community = this.communities.get(slug);
         if (community?.status === Status.SUCCESS) {
-          await $fetch(`/api/community/${slug}/admin/${user_id}/remove`, {
-            method: "DELETE",
-          });
+          const removedUser = await $fetch(
+            `/api/community/${slug}/admin/${user_id}/remove`,
+            {
+              method: "DELETE",
+            }
+          );
 
           community.data.members = community.data.members.filter(
             (member) => member.user_id !== user_id
+          );
+          community.data.admins = community.data.admins.filter(
+            (admin) => admin.user_id !== user_id
+          );
+          community.data.banned_users!.push(removedUser as User);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    },
+    async unbanUser(slug: string, user_id: string) {
+      try {
+        const community = this.communities.get(slug);
+        if (community?.status === Status.SUCCESS) {
+          await $fetch(`/api/community/${slug}/admin/${user_id}/unban`, {
+            method: "DELETE",
+          });
+
+          community.data.banned_users = community.data.banned_users!.filter(
+            (banned_user) => banned_user.user_id !== user_id
           );
         }
       } catch (err) {
