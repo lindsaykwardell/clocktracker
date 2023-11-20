@@ -43,6 +43,7 @@ const game = reactive<{
   location_type: "ONLINE" | "IN_PERSON";
   location: string;
   community_name: string;
+  community_id: number | null;
   player_count: number | null;
   traveler_count: number | null;
   player_characters: {
@@ -94,6 +95,7 @@ const game = reactive<{
   location_type: savedGame.data.value?.location_type || "ONLINE",
   location: savedGame.data.value?.location || "",
   community_name: savedGame.data.value?.community_name || "",
+  community_id: savedGame.data.value?.community_id || null,
   player_count: savedGame.data.value?.player_count || null,
   traveler_count: savedGame.data.value?.traveler_count || null,
   player_characters: savedGame.data.value?.player_characters.map(

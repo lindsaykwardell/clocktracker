@@ -23,7 +23,7 @@
           readonly
         />
         <template v-else>
-          <p class="text-center">No games have been played yet.</p>
+          <p class="text-center py-3 text-stone-400">No games have been played yet.</p>
         </template>
       </template>
       <template v-else>

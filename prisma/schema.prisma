@@ -19,8 +19,8 @@ model Game {
   location_type            LocationType   @default(ONLINE)
   location                 String
   community_name           String         @default("")
-  community                Community?     @relation(fields: [communityId], references: [id])
-  communityId              Int?
+  community                Community?     @relation(fields: [community_id], references: [id])
+  community_id              Int?
   player_count             Int?
   traveler_count           Int?
   player_characters        Character[]

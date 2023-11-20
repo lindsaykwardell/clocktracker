@@ -108,7 +108,11 @@ export const useGames = defineStore("games", {
           for (const [_, gameStatus] of this.games) {
             if (gameStatus.status === Status.SUCCESS) {
               const game = gameStatus.data;
-              if (game.user_id === user.user_id) {
+              if (
+                game.user_id === user.user_id &&
+                game.community_id === community.data.id &&
+                game.privacy === "PUBLIC"
+              ) {
                 games.push(game);
               }
             }
@@ -158,14 +162,16 @@ export const useGames = defineStore("games", {
         return Array.from(tags);
       };
     },
-    getCommunitiesByPlayer(): (username: string) => string[] {
+    getCommunityNamesByPlayer(): (username: string) => string[] {
       return (username: string) => {
         const games = this.getByPlayer(username);
         if (games.status !== Status.SUCCESS) return [];
 
         const communities = new Set<string>();
         for (const game of games.data) {
-          communities.add(game.community_name);
+          if (game.community_name) {
+            communities.add(game.community_name);
+          }
         }
 
         return Array.from(communities);
