@@ -50,7 +50,7 @@
             </template>
             <template v-else> Online </template>
           </td>
-          <td class="hidden md:table-cell">{{ game.community }}</td>
+          <td class="hidden md:table-cell">{{ game.community_name }}</td>
           <td class="hidden md:table-cell">{{ game.player_count }}</td>
           <td class="flex gap-1">
             <img

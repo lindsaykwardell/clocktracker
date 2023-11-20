@@ -1,5 +1,5 @@
 <template>
-  <AuthenticatedTemplate>
+  <StandardTemplate>
     <div class="w-full flex flex-col gap-8">
       <template v-if="playerFetchStatus === Status.SUCCESS && player">
         <UserHeader :player="player">
@@ -77,7 +77,7 @@
         <Loading class="h-screen" />
       </template>
     </div>
-  </AuthenticatedTemplate>
+  </StandardTemplate>
 </template>
 
 <script setup lang="ts">

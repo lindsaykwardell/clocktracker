@@ -21,6 +21,18 @@ export type User = {
   charts: Chart[];
   bgg_username: string | null;
   enable_bgstats: boolean;
+  communities?: {
+    id: number;
+    name: string;
+    slug: string;
+    description: string;
+    icon: string;
+    _count: {
+      members: number;
+      admins: number;
+      posts: number;
+    };
+  }[];
 };
 
 export const useUsers = defineStore("users", {

@@ -16,7 +16,7 @@
                 <option value="character">Character</option>
                 <option value="script">Script</option>
                 <option value="location">Location</option>
-                <option value="community">Community</option>
+                <option value="community_name">Community</option>
                 <option value="players">Players</option>
               </select>
             </label>
@@ -148,8 +148,8 @@
 </template>
 
 <script setup lang="ts">
-import { FetchStatus } from "composables/useFetchStatus";
-import { GameRecord } from "composables/useGames";
+import { FetchStatus } from "~/composables/useFetchStatus";
+import { GameRecord } from "~/composables/useGames";
 import naturalOrder from "natural-order";
 
 const user = useSupabaseUser();
@@ -169,7 +169,7 @@ const myPage = computed(() => {
   } else {
     return false;
   }
-})
+});
 
 const myTags = computed(() => {
   if (me.value?.status === Status.SUCCESS) {
@@ -182,7 +182,7 @@ const myTags = computed(() => {
 const ready = ref(false);
 const gameView = ref<"grid" | "table">("grid");
 const sortBy = ref<
-  "character" | "date" | "script" | "location" | "community" | "players"
+  "character" | "date" | "script" | "location" | "community_name" | "players"
 >("date");
 const orderBy = ref<"asc" | "desc">("desc");
 const selectedTag = ref<string | null>(null);
@@ -225,8 +225,8 @@ const sortedGames = computed(() => {
             return ["script"];
           case "location":
             return ["location_type", "location"];
-          case "community":
-            return ["community"];
+          case "community_name":
+            return ["community_name"];
           case "players":
             return ["player_count"];
           default:

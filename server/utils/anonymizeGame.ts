@@ -89,10 +89,6 @@ export async function anonymizeGame(
   // Friends only user, public game (not friend)
   // Friends only user, private game (not friend)
 
-  console.log("isFriend", isFriend);
-  console.log("game.user.privacy", game.user.privacy);
-  console.log("game.privacy", game.privacy);
-
   if (
     !isFriend &&
     (game.user.privacy === PrivacySetting.PRIVATE ||

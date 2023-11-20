@@ -1,7 +1,7 @@
 <template>
-  <AuthenticatedTemplate>
+  <StandardTemplate>
     <Spinner />
-  </AuthenticatedTemplate>
+  </StandardTemplate>
 </template>
 
 <script setup lang="ts">

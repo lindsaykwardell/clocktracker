@@ -1,7 +1,7 @@
 <template>
   <div class="flex relative">
     <nav
-      class="flex flex-col gap-3 p-2 rounded md:rounded-none rounded-l-none md:pb-0 fixed md:sticky top-0 md:h-screen bg-stone-900 md:w-[150px] z-50"
+      class="flex flex-col gap-3 p-2 rounded md:rounded-none rounded-l-none md:pb-0 fixed md:sticky top-0 md:h-screen bg-stone-900 md:w-[175px] z-50"
       :class="{
         'h-screen w-screen': showMenu,
       }"
@@ -36,6 +36,7 @@
         <template v-if="user">
           <NavLink to="/" icon="innkeeper"> My Profile </NavLink>
           <NavLink to="/search" icon="investigator"> Search </NavLink>
+          <NavLink to="/add-game" icon="mezepheles"> Add Game </NavLink>
           <NavLink
             to="/friends"
             icon="eviltwin"
@@ -43,7 +44,7 @@
           >
             Friends
           </NavLink>
-          <NavLink to="/add-game" icon="mezepheles"> Add Game </NavLink>
+          <NavLink to="/community" icon="cultleader"> Communities </NavLink>
           <NavLink to="/settings" icon="tinker"> Settings </NavLink>
           <NavLink to="/logout" icon="balloonist"> Logout </NavLink>
         </template>

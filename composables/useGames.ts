@@ -97,6 +97,32 @@ export const useGames = defineStore("games", {
         return { status: Status.SUCCESS, data: games };
       };
     },
+    getByCommunity(): (slug: string) => FetchStatus<GameRecord[]> {
+      return (slug: string) => {
+        const communities = useCommunities();
+        const community = communities.getCommunity(slug);
+        if (community.status !== Status.SUCCESS) return community;
+
+        const games: GameRecord[] = [];
+        for (const user of community.data.members) {
+          for (const [_, gameStatus] of this.games) {
+            if (gameStatus.status === Status.SUCCESS) {
+              const game = gameStatus.data;
+              if (
+                game.user_id === user.user_id &&
+                game.community_id === community.data.id &&
+                game.privacy === "PUBLIC" &&
+                game.parent_game_id === null
+              ) {
+                games.push(game);
+              }
+            }
+          }
+        }
+
+        return { status: Status.SUCCESS, data: games };
+      };
+    },
     getPendingByPlayer(): (username: string) => FetchStatus<GameRecord[]> {
       return (username: string) => {
         const users = useUsers();
@@ -137,14 +163,16 @@ export const useGames = defineStore("games", {
         return Array.from(tags);
       };
     },
-    getCommunitiesByPlayer(): (username: string) => string[] {
+    getCommunityNamesByPlayer(): (username: string) => string[] {
       return (username: string) => {
         const games = this.getByPlayer(username);
         if (games.status !== Status.SUCCESS) return [];
 
         const communities = new Set<string>();
         for (const game of games.data) {
-          communities.add(game.community);
+          if (game.community_name) {
+            communities.add(game.community_name);
+          }
         }
 
         return Array.from(communities);
@@ -291,6 +319,16 @@ export const useGames = defineStore("games", {
       });
 
       for (const game of similar) {
+        this.games.set(game.id, {
+          status: Status.SUCCESS,
+          data: game,
+        });
+      }
+    },
+    async fetchCommunityGames(slug: string) {
+      const games = await $fetch<GameRecord[]>(`/api/games/community/${slug}`);
+
+      for (const game of games) {
         this.games.set(game.id, {
           status: Status.SUCCESS,
           data: game,
