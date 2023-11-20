@@ -18,7 +18,9 @@ model Game {
   script_id                Int?
   location_type            LocationType   @default(ONLINE)
   location                 String
-  community                String         @default("")
+  community_name           String         @default("")
+  community                Community?     @relation(fields: [communityId], references: [id])
+  communityId              Int?
   player_count             Int?
   traveler_count           Int?
   player_characters        Character[]
@@ -243,6 +245,7 @@ model Community {
   deleted_date DateTime?
   posts        CommunityPost[]
   icon         String          @default("/img/default.png")
+  games        Game[]
 }
 
 model CommunityPost {
