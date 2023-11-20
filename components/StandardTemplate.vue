@@ -26,7 +26,11 @@
           'flex flex-col items-center': showMenu,
         }"
       >
-        <nuxt-link to="/" class="flex items-center gap-4">
+        <nuxt-link
+          id="clocktracker-icon"
+          to="/"
+          class="flex items-center gap-4"
+        >
           <img
             src="/logo-ct-sm.png"
             class="w-[75px] rounded-full"
@@ -34,18 +38,29 @@
           />
         </nuxt-link>
         <template v-if="user">
-          <NavLink to="/" icon="innkeeper"> My Profile </NavLink>
-          <NavLink to="/search" icon="investigator"> Search </NavLink>
-          <NavLink to="/add-game" icon="mezepheles"> Add Game </NavLink>
+          <NavLink id="my-profile" to="/" icon="innkeeper">
+            My Profile
+          </NavLink>
+          <NavLink id="search" to="/search" icon="investigator">
+            Search
+          </NavLink>
+          <NavLink id="add-game" to="/add-game" icon="mezepheles">
+            Add Game
+          </NavLink>
           <NavLink
+            id="friends"
             to="/friends"
             icon="eviltwin"
             :notificationCount="friends.getRequestCount(user.id)"
           >
             Friends
           </NavLink>
-          <NavLink to="/community" icon="cultleader"> Communities </NavLink>
-          <NavLink to="/settings" icon="tinker"> Settings </NavLink>
+          <NavLink id="communities" to="/community" icon="cultleader">
+            Communities
+          </NavLink>
+          <NavLink id="settings" to="/settings" icon="tinker">
+            Settings
+          </NavLink>
           <NavLink to="/logout" icon="balloonist"> Logout </NavLink>
         </template>
         <template v-else>
@@ -53,6 +68,7 @@
         </template>
         <div class="flex-grow" />
         <a
+          id="discord"
           href="https://discord.gg/KwMz8ThamT"
           class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
         >
@@ -76,11 +92,62 @@
       <slot />
     </main>
   </div>
+  <Tour v-if="user" :steps="tour" tourKey="new-community-nav-item" />
 </template>
 
 <script setup lang="ts">
+import { Step } from "~/composables/useStep";
+
 const user = useSupabaseUser();
 const friends = useFriends();
 
 const showMenu = ref(false);
+
+const tour: Step[] = [
+  {
+    target: "#clocktracker-icon",
+    content:
+      "Welcome to ClockTracker! You can see your friends, communities, and games here. Let's walk through some of the features available to you.",
+  },
+  {
+    target: "#my-profile",
+    content:
+      "This is your profile. You can see your recorded games and personalized stats here.",
+  },
+  {
+    target: "#search",
+    content:
+      "You can search for users and communities, and connect with the people that you play with.",
+  },
+  {
+    target: "#add-game",
+    content:
+      "You can add a game and record as much or as little data about your playthrough as you would like. You can use the base scripts, one of the community scripts, or just add whatever characters you want from a custom script.",
+  },
+  {
+    target: "#friends",
+    content:
+      "You can see your friends here. You can also see friend requests and send friend requests.",
+  },
+  {
+    target: "#communities",
+    content:
+      "Communities are a new feature to connect with your friends. You can create a community and invite your friends to join. Once you have a community, you can see what scripts your friends have been playing and discuss them.",
+  },
+  {
+    target: "#settings",
+    content:
+      "You can change your settings here. You can change your display name, username, password, as well as connect ClockTracker to sites like BoardGameGeek.",
+  },
+  {
+    target: "#discord",
+    content:
+      "You can join the ClockTracker Discord server here. You can ask questions, report bugs, or just chat with other ClockTracker users.",
+  },
+  {
+    target: "#anchor-center",
+    content:
+      "That's it! You're ready to start using ClockTracker. If you have any questions, feel free to reach out on Discord.",
+  },
+];
 </script>
