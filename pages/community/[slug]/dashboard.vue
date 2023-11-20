@@ -58,6 +58,7 @@
           </button>
         </div>
       </form>
+      <h2 class="text-2xl">Members</h2>
       <div class="overflow-scroll w-screen md:w-full">
         <table class="w-full">
           <thead>
@@ -120,6 +121,46 @@
                     class="flex-1 whitespace-nowrap rounded transition duration-150 border border-red-800 hover:bg-red-900 text-white px-4 py-2 mt-2"
                   >
                     Remove
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <h2 class="text-2xl">Banned Users</h2>
+      <div class="overflow-scroll w-screen md:w-full">
+        <table class="w-full">
+          <thead>
+            <tr>
+              <th />
+              <th class="text-left">Name</th>
+              <th class="text-left">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="member in community.data.banned_users">
+              <td class="w-[50px] min-w-[50px]">
+                <Avatar
+                  :value="member.avatar"
+                  size="xs"
+                  class="border-stone-800"
+                />
+              </td>
+              <td class="">
+                <div
+                  class="whitespace-nowrap overflow-hidden overflow-ellipsis"
+                >
+                  {{ member.display_name }} (@{{ member.username }})
+                </div>
+              </td>
+              <td class="w-[250px]">
+                <div class="flex justify-end gap-2">
+                  <button
+                    @click="unbanUser(member.user_id)"
+                    class="whitespace-nowrap rounded transition duration-150 border border-red-800 hover:bg-red-900 text-white px-4 py-2 mt-2 w-[125px]"
+                  >
+                    Unban
                   </button>
                 </div>
               </td>
@@ -198,6 +239,12 @@ function toggleAdmin(user_id: string) {
 function removeUser(user_id: string) {
   if (confirm("Are you sure you want to remove this user?")) {
     communities.removeUser(slug, user_id);
+  }
+}
+
+function unbanUser(user_id: string) {
+  if (confirm("Are you sure you want to unban this user?")) {
+    communities.unbanUser(slug, user_id);
   }
 }
 </script>
