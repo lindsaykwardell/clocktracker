@@ -111,7 +111,8 @@ export const useGames = defineStore("games", {
               if (
                 game.user_id === user.user_id &&
                 game.community_id === community.data.id &&
-                game.privacy === "PUBLIC"
+                game.privacy === "PUBLIC" &&
+                game.parent_game_id === null
               ) {
                 games.push(game);
               }
