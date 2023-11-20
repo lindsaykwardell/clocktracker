@@ -3,7 +3,7 @@
     <div v-if="isModerator" class="flex flex-col gap-3 p-2">
       <form
         @submit.prevent="updateCommunity"
-        class="flex gap-4 items-center p-2"
+        class="flex flex-col md:flex-row gap-4 items-center p-2"
       >
         <div class="flex flex-col items-center">
           <Avatar
@@ -19,7 +19,7 @@
             Change Icon
           </button>
         </div>
-        <div class="flex-grow flex flex-col gap-3">
+        <div class="flex-grow w-full flex flex-col gap-3">
           <label>
             <span class="block">Name</span>
             <input
