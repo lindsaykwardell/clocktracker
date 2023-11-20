@@ -1,6 +1,5 @@
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["fullTextSearch"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -20,7 +19,7 @@ model Game {
   location                 String
   community_name           String         @default("")
   community                Community?     @relation(fields: [community_id], references: [id])
-  community_id              Int?
+  community_id             Int?
   player_count             Int?
   traveler_count           Int?
   player_characters        Character[]
