@@ -32,6 +32,7 @@ export default defineEventHandler(async (handler) => {
       deleted: false,
       community_id: community.id,
       privacy: PrivacySetting.PUBLIC,
+      parent_game_id: null,
     },
     include: {
       user: {
