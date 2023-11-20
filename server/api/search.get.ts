@@ -18,6 +18,11 @@ export default defineEventHandler(async (handler) => {
 
   const communities = await prisma.community.findMany({
     where: {
+      banned_users: {
+        none: {
+          user_id: me?.id || "",
+        },
+      },
       OR: [
         {
           name: {
@@ -47,7 +52,7 @@ export default defineEventHandler(async (handler) => {
           posts: {
             where: {
               deleted: false,
-            }
+            },
           },
         },
       },
