@@ -1,10 +1,10 @@
 <template>
-  <AuthenticatedTemplate>
+  <StandardTemplate>
     <section class="py-6">
       <h2 class="font-dumbledor text-4xl text-center">Add Game</h2>
       <GameEditor :game="game" @submit="submitGame" :inFlight="inFlight" />
     </section>
-  </AuthenticatedTemplate>
+  </StandardTemplate>
 </template>
 
 <script setup lang="ts">
@@ -31,7 +31,8 @@ const game = reactive<{
   is_storyteller: boolean;
   location_type: "ONLINE" | "IN_PERSON";
   location: string;
-  community: string;
+  community_name: string;
+  community_id: number | null;
   player_count: number | null;
   traveler_count: number | null;
   player_characters: {
@@ -80,7 +81,8 @@ const game = reactive<{
   is_storyteller: false,
   location_type: "ONLINE",
   location: "",
-  community: "",
+  community_name: "",
+  community_id: null,
   player_count: null,
   traveler_count: null,
   player_characters: [
@@ -140,9 +142,7 @@ async function submitGame() {
     inFlight.value = false;
     console.error(error.value);
   } else {
-    router.push(
-      `/game/${data.value?.id}`
-    );
+    router.push(`/game/${data.value?.id}`);
   }
 }
 </script>

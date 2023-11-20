@@ -1,5 +1,5 @@
 <template>
-  <AuthenticatedTemplate>
+  <StandardTemplate>
     <div class="max-w-[1000px] w-5/6 py-4 m-auto">
       <div>
         <form @submit.prevent.stop="search" role="search">
@@ -36,7 +36,7 @@
         />
       </div>
     </div>
-  </AuthenticatedTemplate>
+  </StandardTemplate>
 </template>
 
 <script setup lang="ts">

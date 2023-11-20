@@ -30,6 +30,26 @@ export default defineEventHandler(async (handler) => {
       charts: true,
       bgg_username: true,
       enable_bgstats: true,
+      communities: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          description: true,
+          icon: true,
+          _count: {
+            select: {
+              members: true,
+              admins: true,
+              posts: {
+                where: {
+                  deleted: false,
+                },
+              },
+            },
+          },
+        },
+      },
     },
   });
 
@@ -78,6 +98,26 @@ export default defineEventHandler(async (handler) => {
       charts: true,
       bgg_username: true,
       enable_bgstats: true,
+      communities: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          description: true,
+          icon: true,
+          _count: {
+            select: {
+              members: true,
+              admins: true,
+              posts: {
+                where: {
+                  deleted: false,
+                },
+              },
+            },
+          },
+        },
+      },
     },
   });
 

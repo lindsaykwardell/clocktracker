@@ -1,5 +1,5 @@
 <template>
-  <AuthenticatedTemplate>
+  <StandardTemplate>
     <section
       v-if="game.status === Status.SUCCESS && player.status === Status.SUCCESS"
       class="flex flex-col gap-4 bg-gradient-to-b from-stone-100 to-stone-300 text-black w-full lg:w-4/5 m-auto md:my-4 rounded shadow-lg"
@@ -114,9 +114,9 @@
             </label>
           </div>
           <div class="flex flex-col md:flex-row gap-4 mt-4 justify-start">
-            <label v-if="game.data.community" class="flex gap-3 items-center">
+            <label v-if="game.data.community_name" class="flex gap-3 items-center">
               <span>Community</span>
-              {{ game.data.community }}
+              {{ game.data.community_name }}
             </label>
             <label class="flex gap-3 items-center">
               <span>Location</span>
@@ -353,7 +353,7 @@
     <template v-else>
       <Loading class="h-screen" />
     </template>
-  </AuthenticatedTemplate>
+  </StandardTemplate>
 </template>
 
 <script setup lang="ts">

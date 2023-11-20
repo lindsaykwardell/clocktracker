@@ -194,8 +194,8 @@ export default defineEventHandler(async (handler) => {
       parent_game_id: null,
       OR: [
         {
-          community: {
-            equals: game.community,
+          community_name: {
+            equals: game.community_name,
             mode: "insensitive",
           },
         },
