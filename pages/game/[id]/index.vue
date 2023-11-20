@@ -114,9 +114,9 @@
             </label>
           </div>
           <div class="flex flex-col md:flex-row gap-4 mt-4 justify-start">
-            <label v-if="game.data.community" class="flex gap-3 items-center">
+            <label v-if="game.data.community_name" class="flex gap-3 items-center">
               <span>Community</span>
-              {{ game.data.community }}
+              {{ game.data.community_name }}
             </label>
             <label class="flex gap-3 items-center">
               <span>Location</span>

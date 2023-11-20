@@ -188,7 +188,7 @@
         <span class="block">Community</span>
         <input
           type="text"
-          v-model="game.community"
+          v-model="game.community_name"
           class="block w-full border border-stone-500 rounded-md p-2"
           list="communities"
         />
@@ -602,7 +602,7 @@ const props = defineProps<{
     is_storyteller: boolean;
     location_type: "ONLINE" | "IN_PERSON";
     location: string;
-    community: string;
+    community_name: string;
     player_count: number | null;
     traveler_count: number | null;
     player_characters: {
