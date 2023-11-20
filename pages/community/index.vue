@@ -11,60 +11,10 @@
       </div>
       <div class="w-full lg:w-[800px] m-auto flex flex-col items-center gap-4">
         <h1 class="font-dumbledor text-4xl lg:text-3xl">Communities</h1>
-        <template v-for="community in myCommunities">
-          <nuxt-link
-            :to="`/community/${community.slug}`"
-            class="bg-stone-900 w-full p-2"
-          >
-            <div class="flex flex-col md:flex-row gap-3 items-top">
-              <Avatar
-                :value="community.icon"
-                size="lg"
-                class="community-icon m-auto"
-              />
-              <div class="flex-grow">
-                <h2 class="font-dumbledor text-xl lg:text-2xl">
-                  {{ community.name }}
-                </h2>
-                <p class="whitespace-pre-wrap text-left w-full py-4">
-                  {{ community.description }}
-                </p>
-                <section class="flex gap-6 text-stone-600">
-                  <div>
-                    <span
-                      class="text-stone-200 bg-blue-800 rounded-full px-2 py-1 text-xs font-bold aspect-square"
-                    >
-                      {{ community._count.members }}
-                    </span>
-                    <span>
-                      Member{{ community._count.members === 1 ? "" : "s" }}
-                    </span>
-                  </div>
-                  <div>
-                    <span
-                      class="text-stone-200 bg-green-800 rounded-full px-2 py-1 text-xs font-bold aspect-square"
-                    >
-                      {{ community._count.admins }}
-                    </span>
-                    <span>
-                      Admin{{ community._count.admins === 1 ? "" : "s" }}
-                    </span>
-                  </div>
-                  <div>
-                    <span
-                      class="text-stone-200 bg-purple-800 rounded-full px-2 py-1 text-xs font-bold aspect-square"
-                    >
-                      {{ community._count.posts }}
-                    </span>
-                    <span>
-                      Post{{ community._count.posts === 1 ? "" : "s" }}
-                    </span>
-                  </div>
-                </section>
-              </div>
-            </div>
-          </nuxt-link>
-        </template>
+        <CommunityCard
+          v-for="community in myCommunities"
+          :community="community"
+        />
       </div>
     </template>
     <template v-else>
