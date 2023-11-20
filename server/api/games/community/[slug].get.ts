@@ -12,12 +12,8 @@ export default defineEventHandler(async (handler) => {
     where: {
       slug,
     },
-    include: {
-      members: {
-        select: {
-          user_id: true,
-        },
-      },
+    select: {
+      id: true,
     },
   });
 
@@ -29,12 +25,12 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
+  console.log(`Fetching games for community ${slug} (${community.id})`);
+
   const games = await prisma.game.findMany({
     where: {
       deleted: false,
-      user_id: {
-        in: community.members.map((member) => member.user_id),
-      },
+      community_id: community.id,
       privacy: PrivacySetting.PUBLIC,
     },
     include: {

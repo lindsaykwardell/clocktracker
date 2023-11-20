@@ -22,7 +22,7 @@ export type User = {
   bgg_username: string | null;
   enable_bgstats: boolean;
   communities?: {
-    id: string;
+    id: number;
     name: string;
     slug: string;
     description: string;
