@@ -53,7 +53,7 @@
 </template>
 
 <script setup lang="ts">
-import { GameRecord } from "composables/useGames";
+import { GameRecord } from "~/composables/useGames";
 import { Bar, Pie, PolarArea } from "vue-chartjs";
 import { colord, extend } from "colord";
 import mixPlugin from "colord/plugins/mix";
