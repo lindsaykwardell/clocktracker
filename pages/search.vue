@@ -2,7 +2,7 @@
   <StandardTemplate>
     <div class="max-w-[1000px] w-5/6 py-4 m-auto">
       <div>
-        <form @submit.prevent.stop="search" role="search">
+        <form @submit.prevent.stop role="search">
           <label>
             <span class="block">Search</span>
             <div class="relative">
@@ -11,15 +11,14 @@
                 type="search"
                 spellcheck="false"
                 class="block w-full border border-stone-500 rounded-md p-2 text-lg bg-stone-600"
-                placeholder="Type a name, then press enter"
+                placeholder="Type in a user or community name"
               />
-              <button
-                @click="search"
+              <div
                 class="absolute right-2 -top-2 w-16 h-16"
                 aria-label="Search"
               >
                 <img src="/img/role/investigator.png" />
-              </button>
+              </div>
             </div>
           </label>
         </form>
@@ -29,6 +28,11 @@
           <Spinner />
           Searching...
         </div>
+        <CommunityCard
+          v-for="community in communities"
+          :community="community"
+          class="bg-stone-900"
+        />
         <UserCard
           v-for="user in users"
           class="w-full flex flex-col md:flex-row my-4"
@@ -40,6 +44,8 @@
 </template>
 
 <script setup lang="ts">
+import { watchDebounced } from "@vueuse/core";
+
 const users = ref<
   {
     user_id: string;
@@ -51,22 +57,38 @@ const users = ref<
     location: string | null;
   }[]
 >([]);
+const communities = ref<
+  {
+    id: number;
+    name: string;
+    slug: string;
+    description: string;
+    icon: string | null;
+    _count: {
+      members: number;
+      admins: number;
+      posts: number;
+    };
+  }[]
+>([]);
 const query = ref("");
 const searching = ref(false);
 
 async function search() {
   searching.value = true;
   users.value = [];
-  const result = await useFetch("/api/search", {
+  communities.value = [];
+  const result = await $fetch("/api/search", {
     params: {
       query: query.value,
     },
   });
 
-  if (result.data.value) {
-    users.value = result.data.value;
-  }
+  users.value = result.users;
+  communities.value = result.communities;
 
   searching.value = false;
 }
+
+watchDebounced(query, search, { debounce: 500 });
 </script>

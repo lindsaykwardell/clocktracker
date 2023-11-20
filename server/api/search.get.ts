@@ -9,10 +9,51 @@ export default defineEventHandler(async (handler) => {
 
   // Don't query if it's too small
   if (query.length < 3) {
-    return [];
+    return {
+      users: [],
+      communities: [],
+    };
   }
 
-  return prisma.userSettings.findMany({
+  console.log(query);
+
+  const communities = await prisma.community.findMany({
+    where: {
+      OR: [
+        {
+          name: {
+            contains: query,
+            mode: "insensitive",
+          },
+        },
+        {
+          slug: {
+            contains: query,
+            mode: "insensitive",
+          },
+        },
+        {
+          description: {
+            contains: query,
+            mode: "insensitive",
+          },
+        },
+      ],
+    },
+    include: {
+      _count: {
+        select: {
+          members: true,
+          admins: true,
+          posts: true,
+        },
+      },
+    },
+  });
+
+  console.log(communities);
+
+  const users = await prisma.userSettings.findMany({
     where: {
       AND: [
         {
@@ -37,13 +78,13 @@ export default defineEventHandler(async (handler) => {
           OR: [
             {
               username: {
-                search: query,
+                contains: query,
                 mode: "insensitive",
               },
             },
             {
               display_name: {
-                search: query,
+                contains: query,
                 mode: "insensitive",
               },
             },
@@ -62,4 +103,9 @@ export default defineEventHandler(async (handler) => {
       charts: true,
     },
   });
+
+  return {
+    communities,
+    users,
+  };
 });

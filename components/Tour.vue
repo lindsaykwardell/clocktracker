@@ -1,11 +1,23 @@
 <template>
-  <VTour ref="tour" :steps="steps" @onTourEnd="onTourEnd" />
+  <VTour
+    ref="tour"
+    :steps="steps"
+    @onTourStart="tourStarted = true"
+    @onTourEnd="onTourEnd"
+  />
+  <div
+    v-if="tourStarted"
+    class="fixed top-0 left-0 w-screen h-screen flex justify-center items-center bg-stone-800/40 z-50"
+  >
+    <div id="anchor-center" class="w-[1px] h-[1px]" />
+  </div>
 </template>
 
 <script setup lang="ts">
 import type { Step } from "~/composables/useStep";
 
 const tour = ref();
+const tourStarted = ref(false);
 
 const props = defineProps<{
   steps: Step[];
@@ -20,6 +32,8 @@ function onTourEnd() {
     "tours",
     JSON.stringify({ ...tours, [props.tourKey]: true })
   );
+
+  tourStarted.value = false;
 }
 
 onMounted(() => {
