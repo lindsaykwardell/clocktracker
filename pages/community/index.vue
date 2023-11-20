@@ -22,7 +22,7 @@
                 size="lg"
                 class="community-icon m-auto"
               />
-              <div>
+              <div class="flex-grow">
                 <h2 class="font-dumbledor text-xl lg:text-2xl">
                   {{ community.name }}
                 </h2>
