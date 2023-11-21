@@ -70,6 +70,54 @@
           </button>
         </div>
       </form>
+      <template v-if="community.data.join_requests?.length">
+        <h2 class="text-2xl">Join Requests</h2>
+        <div class="overflow-scroll w-screen md:w-full">
+          <table class="w-full">
+            <thead>
+              <tr>
+                <th />
+                <th class="text-left">Name</th>
+                <th class="text-left">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="member in community.data.join_requests">
+                <td class="w-[50px] min-w-[50px]">
+                  <Avatar
+                    :value="member.avatar"
+                    size="xs"
+                    class="border-stone-800"
+                  />
+                </td>
+                <td class="">
+                  <div
+                    class="whitespace-nowrap overflow-hidden overflow-ellipsis"
+                  >
+                    {{ member.display_name }} (@{{ member.username }})
+                  </div>
+                </td>
+                <td class="w-[250px]">
+                  <div class="flex justify-end gap-2">
+                    <button
+                      @click="approveUser(member.user_id)"
+                      class="whitespace-nowrap rounded transition duration-150 border border-green-800 hover:bg-green-900 text-white px-4 py-2 mt-2 w-[125px]"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      @click="denyUser(member.user_id)"
+                      class="whitespace-nowrap rounded transition duration-150 border border-red-800 hover:bg-red-900 text-white px-4 py-2 mt-2 w-[125px]"
+                    >
+                      Ignore
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </template>
       <h2 class="text-2xl">Members</h2>
       <div class="overflow-scroll w-screen md:w-full">
         <table class="w-full">
@@ -140,46 +188,48 @@
           </tbody>
         </table>
       </div>
-      <h2 class="text-2xl">Banned Users</h2>
-      <div class="overflow-scroll w-screen md:w-full">
-        <table class="w-full">
-          <thead>
-            <tr>
-              <th />
-              <th class="text-left">Name</th>
-              <th class="text-left">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="member in community.data.banned_users">
-              <td class="w-[50px] min-w-[50px]">
-                <Avatar
-                  :value="member.avatar"
-                  size="xs"
-                  class="border-stone-800"
-                />
-              </td>
-              <td class="">
-                <div
-                  class="whitespace-nowrap overflow-hidden overflow-ellipsis"
-                >
-                  {{ member.display_name }} (@{{ member.username }})
-                </div>
-              </td>
-              <td class="w-[250px]">
-                <div class="flex justify-end gap-2">
-                  <button
-                    @click="unbanUser(member.user_id)"
-                    class="whitespace-nowrap rounded transition duration-150 border border-red-800 hover:bg-red-900 text-white px-4 py-2 mt-2 w-[125px]"
+      <template v-if="community.data.banned_users?.length">
+        <h2 class="text-2xl">Banned Users</h2>
+        <div class="overflow-scroll w-screen md:w-full">
+          <table class="w-full">
+            <thead>
+              <tr>
+                <th />
+                <th class="text-left">Name</th>
+                <th class="text-left">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="member in community.data.banned_users">
+                <td class="w-[50px] min-w-[50px]">
+                  <Avatar
+                    :value="member.avatar"
+                    size="xs"
+                    class="border-stone-800"
+                  />
+                </td>
+                <td class="">
+                  <div
+                    class="whitespace-nowrap overflow-hidden overflow-ellipsis"
                   >
-                    Unban
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+                    {{ member.display_name }} (@{{ member.username }})
+                  </div>
+                </td>
+                <td class="w-[250px]">
+                  <div class="flex justify-end gap-2">
+                    <button
+                      @click="unbanUser(member.user_id)"
+                      class="whitespace-nowrap rounded transition duration-150 border border-red-800 hover:bg-red-900 text-white px-4 py-2 mt-2 w-[125px]"
+                    >
+                      Unban
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </template>
     </div>
     <TokenDialog
       v-model:visible="showIconDialog"
@@ -261,5 +311,13 @@ function unbanUser(user_id: string) {
   if (confirm("Are you sure you want to unban this user?")) {
     communities.unbanUser(slug, user_id);
   }
+}
+
+function approveUser(user_id: string) {
+  communities.approveUser(slug, user_id);
+}
+
+function denyUser(user_id: string) {
+  communities.denyUser(slug, user_id);
 }
 </script>
