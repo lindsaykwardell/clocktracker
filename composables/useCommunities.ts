@@ -86,6 +86,20 @@ export const useCommunities = defineStore("communities", {
         );
       };
     },
+    isPending(): (slug: string, user_id: string | undefined) => boolean {
+      return (slug: string, user_id: string | undefined) => {
+        const community = this.getCommunity(slug);
+        if (community.status !== Status.SUCCESS) return false;
+
+        console.log(community.data?.join_requests);
+
+        return (
+          community.data?.join_requests?.some(
+            (join_request) => join_request.user_id === user_id
+          ) ?? false
+        );
+      };
+    },
   },
   actions: {
     async fetchCommunity(slug: string) {
@@ -199,7 +213,15 @@ export const useCommunities = defineStore("communities", {
             method: "POST",
           });
 
-          community.data.members.push(me.data);
+          if (community.data.is_private) {
+            // Assume there was no prior join requests array,
+            // because one wouldn't have been fetched.
+
+            community.data.join_requests = community.data.join_requests || [];
+            community.data.join_requests.push(me.data);
+          } else {
+            community.data.members.push(me.data);
+          }
         }
       } catch (err) {
         console.error(err);
@@ -256,6 +278,42 @@ export const useCommunities = defineStore("communities", {
 
           community.data.banned_users = community.data.banned_users!.filter(
             (banned_user) => banned_user.user_id !== user_id
+          );
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    },
+    async approveUser(slug: string, user_id: string) {
+      try {
+        const community = this.communities.get(slug);
+        if (community?.status === Status.SUCCESS) {
+          const user = await $fetch<User>(
+            `/api/community/${slug}/admin/${user_id}/approve`,
+            {
+              method: "POST",
+            }
+          );
+
+          community.data.join_requests = community.data.join_requests!.filter(
+            (join_request) => join_request.user_id !== user_id
+          );
+          community.data.members.push(user);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    },
+    async denyUser(slug: string, user_id: string) {
+      try {
+        const community = this.communities.get(slug);
+        if (community?.status === Status.SUCCESS) {
+          await $fetch(`/api/community/${slug}/admin/${user_id}/deny`, {
+            method: "DELETE",
+          });
+
+          community.data.join_requests = community.data.join_requests!.filter(
+            (join_request) => join_request.user_id !== user_id
           );
         }
       } catch (err) {

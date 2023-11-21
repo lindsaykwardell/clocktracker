@@ -28,6 +28,8 @@
                 }"
               >
                 <template v-if="isMember"> Leave Community </template>
+                <template v-else-if="isPending">Requested</template>
+                <template v-else-if="isNotAllowed">Request to Join</template>
                 <template v-else> Join Community </template>
               </button>
             </div>
@@ -63,6 +65,7 @@
           :isModerator="isModerator"
           :isBanned="isBanned"
           :isNotAllowed="isNotAllowed"
+          :isPending="isPending"
         />
       </div>
       <slot
@@ -71,6 +74,7 @@
         :isModerator="isModerator"
         :isBanned="isBanned"
         :isNotAllowed="isNotAllowed"
+        :isPending="isPending"
       />
     </template>
     <template v-else>
@@ -93,6 +97,7 @@ const isModerator = computed(() =>
   communities.isModerator(slug, user.value?.id)
 );
 const isBanned = computed(() => communities.isBanned(slug, user.value?.id));
+const isPending = computed(() => communities.isPending(slug, user.value?.id));
 const isNotAllowed = computed(() => {
   if (community.value.status !== Status.SUCCESS) return true;
 
