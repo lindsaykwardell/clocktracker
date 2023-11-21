@@ -15,7 +15,33 @@ export function generateName() {
   return {
     username,
     display_name,
+    randomRole,
   };
+}
+
+export function generateUsers(count: number) {
+  const fakeMembers = [];
+
+  for (let i = 0; i < count; i++) {
+    const randomName = generateName();
+
+    fakeMembers.push({
+      username: "anonymous",
+      display_name: randomName.display_name,
+      avatar: `/img/role/${randomName.randomRole
+        .toLowerCase()
+        .replace(/ /g, "")
+        .replace(/'/g, "")
+        .replace(/-/g, "")}.png`,
+      pronouns: "they/them",
+      bio: "This user is anonymous.",
+      location: "Unknown",
+      privacy: "PUBLIC",
+      charts: [],
+    });
+  }
+
+  return fakeMembers;
 }
 
 const townsfolk = [
