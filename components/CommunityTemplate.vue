@@ -18,7 +18,7 @@
                 </h1>
               </div>
               <button
-                v-if="!isBanned"
+                v-if="user && !isBanned"
                 @click="isMember ? leave() : join()"
                 class="whitespace-nowrap flex gap-1 items-center justify-center py-1 w-[150px] rounded transition duration-150 hover:bg-blue-900"
                 :class="{
@@ -62,6 +62,7 @@
           :isMember="isMember"
           :isModerator="isModerator"
           :isBanned="isBanned"
+          :isNotAllowed="isNotAllowed"
         />
       </div>
       <slot
@@ -69,6 +70,7 @@
         :isMember="isMember"
         :isModerator="isModerator"
         :isBanned="isBanned"
+        :isNotAllowed="isNotAllowed"
       />
     </template>
     <template v-else>
@@ -91,6 +93,13 @@ const isModerator = computed(() =>
   communities.isModerator(slug, user.value?.id)
 );
 const isBanned = computed(() => communities.isBanned(slug, user.value?.id));
+const isNotAllowed = computed(() => {
+  if (community.value.status !== Status.SUCCESS) return true;
+
+  if (community.value.data.is_private === false) return false;
+
+  return !isMember.value && !isBanned.value && community.value.data.is_private;
+});
 
 function currentTabClass(tab: string) {
   const formattedTab = `/community/${slug}${tab ? "/" + tab : ""}`;

@@ -14,6 +14,12 @@ export default defineEventHandler(async (handler) => {
     },
     select: {
       id: true,
+      is_private: true,
+      members: {
+        select: {
+          user_id: true,
+        },
+      },
       banned_users: {
         select: {
           user_id: true,
@@ -42,7 +48,14 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  console.log(`Fetching games for community ${slug} (${community.id})`);
+  // If the community is private, only members can see the games
+  // But it's not an error.
+  if (
+    community.is_private &&
+    !community.members.some((member) => member.user_id === me?.id)
+  ) {
+    return [];
+  }
 
   const games = await prisma.game.findMany({
     where: {

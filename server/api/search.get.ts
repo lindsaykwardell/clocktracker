@@ -44,7 +44,13 @@ export default defineEventHandler(async (handler) => {
         },
       ],
     },
-    include: {
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      description: true,
+      icon: true,
+      is_private: true,
       _count: {
         select: {
           members: true,
