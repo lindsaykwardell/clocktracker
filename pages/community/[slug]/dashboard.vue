@@ -20,14 +20,34 @@
           </button>
         </div>
         <div class="flex-grow w-full flex flex-col gap-3">
-          <label>
-            <span class="block">Name</span>
-            <input
-              v-model="updatedName"
-              class="block w-full border border-stone-500 bg-stone-600 rounded-md p-2"
-              required
-            />
-          </label>
+          <div class="flex flex-col md:flex-row md:gap-2">
+            <label class="block flex-grow">
+              <span class="block">Name</span>
+              <input
+                v-model="updatedName"
+                class="block w-full border border-stone-500 bg-stone-600 rounded-md p-2"
+                required
+              />
+            </label>
+            <label class="block">
+              <span class="block">Slug</span>
+              <input
+                v-model="updatedSlug"
+                class="block w-full border border-stone-500 bg-stone-600 rounded-md p-2"
+                required
+              />
+            </label>
+            <label class="block">
+              <span class="block">Privacy</span>
+              <select
+                v-model="updatedPrivacy"
+                class="block w-full border border-stone-500 bg-stone-600 rounded-md p-2 h-[42px]"
+              >
+                <option :value="false">Public</option>
+                <option :value="true">Private</option>
+              </select>
+            </label>
+          </div>
           <label>
             <span class="block">Description</span>
             <textarea
@@ -35,14 +55,6 @@
               class="block w-full border border-stone-500 text-white bg-stone-600 rounded-md p-2"
               rows="5"
             ></textarea>
-          </label>
-          <label>
-            <span class="block">Slug</span>
-            <input
-              v-model="updatedSlug"
-              class="block w-full border border-stone-500 bg-stone-600 rounded-md p-2"
-              required
-            />
           </label>
           <button
             type="submit"
@@ -58,6 +70,54 @@
           </button>
         </div>
       </form>
+      <template v-if="community.data.join_requests?.length">
+        <h2 class="text-2xl">Join Requests</h2>
+        <div class="overflow-scroll w-screen md:w-full">
+          <table class="w-full">
+            <thead>
+              <tr>
+                <th />
+                <th class="text-left">Name</th>
+                <th class="text-left">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="member in community.data.join_requests">
+                <td class="w-[50px] min-w-[50px]">
+                  <Avatar
+                    :value="member.avatar"
+                    size="xs"
+                    class="border-stone-800"
+                  />
+                </td>
+                <td class="">
+                  <div
+                    class="whitespace-nowrap overflow-hidden overflow-ellipsis"
+                  >
+                    {{ member.display_name }} (@{{ member.username }})
+                  </div>
+                </td>
+                <td class="w-[250px]">
+                  <div class="flex justify-end gap-2">
+                    <button
+                      @click="approveUser(member.user_id)"
+                      class="whitespace-nowrap rounded transition duration-150 border border-green-800 hover:bg-green-900 text-white px-4 py-2 mt-2 w-[125px]"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      @click="denyUser(member.user_id)"
+                      class="whitespace-nowrap rounded transition duration-150 border border-red-800 hover:bg-red-900 text-white px-4 py-2 mt-2 w-[125px]"
+                    >
+                      Ignore
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </template>
       <h2 class="text-2xl">Members</h2>
       <div class="overflow-scroll w-screen md:w-full">
         <table class="w-full">
@@ -128,46 +188,48 @@
           </tbody>
         </table>
       </div>
-      <h2 class="text-2xl">Banned Users</h2>
-      <div class="overflow-scroll w-screen md:w-full">
-        <table class="w-full">
-          <thead>
-            <tr>
-              <th />
-              <th class="text-left">Name</th>
-              <th class="text-left">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="member in community.data.banned_users">
-              <td class="w-[50px] min-w-[50px]">
-                <Avatar
-                  :value="member.avatar"
-                  size="xs"
-                  class="border-stone-800"
-                />
-              </td>
-              <td class="">
-                <div
-                  class="whitespace-nowrap overflow-hidden overflow-ellipsis"
-                >
-                  {{ member.display_name }} (@{{ member.username }})
-                </div>
-              </td>
-              <td class="w-[250px]">
-                <div class="flex justify-end gap-2">
-                  <button
-                    @click="unbanUser(member.user_id)"
-                    class="whitespace-nowrap rounded transition duration-150 border border-red-800 hover:bg-red-900 text-white px-4 py-2 mt-2 w-[125px]"
+      <template v-if="community.data.banned_users?.length">
+        <h2 class="text-2xl">Banned Users</h2>
+        <div class="overflow-scroll w-screen md:w-full">
+          <table class="w-full">
+            <thead>
+              <tr>
+                <th />
+                <th class="text-left">Name</th>
+                <th class="text-left">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="member in community.data.banned_users">
+                <td class="w-[50px] min-w-[50px]">
+                  <Avatar
+                    :value="member.avatar"
+                    size="xs"
+                    class="border-stone-800"
+                  />
+                </td>
+                <td class="">
+                  <div
+                    class="whitespace-nowrap overflow-hidden overflow-ellipsis"
                   >
-                    Unban
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+                    {{ member.display_name }} (@{{ member.username }})
+                  </div>
+                </td>
+                <td class="w-[250px]">
+                  <div class="flex justify-end gap-2">
+                    <button
+                      @click="unbanUser(member.user_id)"
+                      class="whitespace-nowrap rounded transition duration-150 border border-red-800 hover:bg-red-900 text-white px-4 py-2 mt-2 w-[125px]"
+                    >
+                      Unban
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </template>
     </div>
     <TokenDialog
       v-model:visible="showIconDialog"
@@ -193,6 +255,7 @@ const slug = route.params.slug as string;
 const updatedName = ref("");
 const updatedDescription = ref("");
 const updatedSlug = ref("");
+const updatedPrivacy = ref(false);
 const loaded = ref(false);
 const inFlight = ref(false);
 
@@ -205,6 +268,7 @@ watchEffect(() => {
     updatedName.value = community.value.data.name;
     updatedDescription.value = community.value.data.description;
     updatedSlug.value = community.value.data.slug;
+    updatedPrivacy.value = community.value.data.is_private;
     loaded.value = true;
   }
 });
@@ -228,6 +292,7 @@ function updateCommunity() {
     name: updatedName.value,
     description: updatedDescription.value,
     slug: updatedSlug.value,
+    is_private: updatedPrivacy.value,
   });
   inFlight.value = false;
 }
@@ -246,5 +311,13 @@ function unbanUser(user_id: string) {
   if (confirm("Are you sure you want to unban this user?")) {
     communities.unbanUser(slug, user_id);
   }
+}
+
+function approveUser(user_id: string) {
+  communities.approveUser(slug, user_id);
+}
+
+function denyUser(user_id: string) {
+  communities.denyUser(slug, user_id);
 }
 </script>

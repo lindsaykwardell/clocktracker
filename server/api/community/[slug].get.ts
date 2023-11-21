@@ -18,6 +18,17 @@ export default defineEventHandler(async (handler) => {
     },
   }));
 
+  const isPendingMember = !!(await prisma.community.findFirst({
+    where: {
+      slug,
+      join_requests: {
+        some: {
+          user_id: me?.id || "",
+        },
+      },
+    },
+  }));
+
   const isBanned = !!(await prisma.community.findFirst({
     where: {
       slug,
@@ -39,6 +50,7 @@ export default defineEventHandler(async (handler) => {
       slug: true,
       description: true,
       icon: true,
+      is_private: true,
       members: {
         select: {
           user_id: true,
@@ -61,6 +73,38 @@ export default defineEventHandler(async (handler) => {
         },
       },
       banned_users: isBanned
+        ? {
+            where: {
+              user_id: me!.id,
+            },
+            select: {
+              user_id: true,
+              username: true,
+              display_name: true,
+              avatar: true,
+              pronouns: true,
+              bio: true,
+              location: true,
+              privacy: true,
+              charts: true,
+            },
+          }
+        : isModerator
+        ? {
+            select: {
+              user_id: true,
+              username: true,
+              display_name: true,
+              avatar: true,
+              pronouns: true,
+              bio: true,
+              location: true,
+              privacy: true,
+              charts: true,
+            },
+          }
+        : false,
+      join_requests: isPendingMember
         ? {
             where: {
               user_id: me!.id,
@@ -156,7 +200,11 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  if (isBanned) {
+  const isMember = !!community.members.find(
+    (member) => member.user_id === (me?.id || "")
+  );
+
+  if (isBanned || (community.is_private && !isMember)) {
     community.members = [];
     community.admins = [];
     community.posts = [];

@@ -8,8 +8,6 @@ export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
   const { id: gameToMergeWith } = await readBody<{ id: string }>(handler);
 
-  console.log(gameToMergeWith);
-
   if (!gameId || !me) {
     throw createError({
       status: 400,
@@ -127,7 +125,8 @@ export default defineEventHandler(async (handler) => {
       storyteller:
         gameToMergeWithData?.storyteller || game.parent_game.storyteller,
       location: gameToMergeWithData?.location || game.parent_game.location,
-      community_name: gameToMergeWithData?.community_name || game.parent_game.community_name,
+      community_name:
+        gameToMergeWithData?.community_name || game.parent_game.community_name,
     },
   });
 
