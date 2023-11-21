@@ -34,11 +34,13 @@ export type Community = {
   slug: string;
   description: string;
   icon: string;
+  is_private: boolean;
   members: User[];
   admins: {
     user_id: string;
   }[];
   banned_users?: User[];
+  join_requests?: User[];
   posts: CommunityPost[];
 };
 
@@ -280,6 +282,7 @@ export const useCommunities = defineStore("communities", {
         slug: string;
         name: string;
         description: string;
+        is_private: boolean;
       }
     ) {
       const user = useSupabaseUser();

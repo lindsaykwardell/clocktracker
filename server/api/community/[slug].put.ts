@@ -11,6 +11,7 @@ export default defineEventHandler(async (handler) => {
     description?: string;
     slug?: string;
     icon?: string;
+    is_private?: boolean;
   }>(handler);
 
   if (!me) {
@@ -52,10 +53,11 @@ export default defineEventHandler(async (handler) => {
       slug: community_slug,
     },
     data: {
-      name: body.name || community.name,
-      description: body.description || community.description,
-      slug: body.slug || community.slug,
-      icon: body.icon || community.icon,
+      name: body.name ?? community.name,
+      description: body.description ?? community.description,
+      slug: body.slug ?? community.slug,
+      icon: body.icon ?? community.icon,
+      is_private: body.is_private ?? community.is_private,
     },
     select: {
       id: true,

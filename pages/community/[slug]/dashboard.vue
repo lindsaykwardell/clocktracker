@@ -20,14 +20,34 @@
           </button>
         </div>
         <div class="flex-grow w-full flex flex-col gap-3">
-          <label>
-            <span class="block">Name</span>
-            <input
-              v-model="updatedName"
-              class="block w-full border border-stone-500 bg-stone-600 rounded-md p-2"
-              required
-            />
-          </label>
+          <div class="flex flex-col md:flex-row md:gap-2">
+            <label class="block flex-grow">
+              <span class="block">Name</span>
+              <input
+                v-model="updatedName"
+                class="block w-full border border-stone-500 bg-stone-600 rounded-md p-2"
+                required
+              />
+            </label>
+            <label class="block">
+              <span class="block">Slug</span>
+              <input
+                v-model="updatedSlug"
+                class="block w-full border border-stone-500 bg-stone-600 rounded-md p-2"
+                required
+              />
+            </label>
+            <label class="block">
+              <span class="block">Privacy</span>
+              <select
+                v-model="updatedPrivacy"
+                class="block w-full border border-stone-500 bg-stone-600 rounded-md p-2 h-[42px]"
+              >
+                <option :value="false">Public</option>
+                <option :value="true">Private</option>
+              </select>
+            </label>
+          </div>
           <label>
             <span class="block">Description</span>
             <textarea
@@ -35,14 +55,6 @@
               class="block w-full border border-stone-500 text-white bg-stone-600 rounded-md p-2"
               rows="5"
             ></textarea>
-          </label>
-          <label>
-            <span class="block">Slug</span>
-            <input
-              v-model="updatedSlug"
-              class="block w-full border border-stone-500 bg-stone-600 rounded-md p-2"
-              required
-            />
           </label>
           <button
             type="submit"
@@ -193,6 +205,7 @@ const slug = route.params.slug as string;
 const updatedName = ref("");
 const updatedDescription = ref("");
 const updatedSlug = ref("");
+const updatedPrivacy = ref(false);
 const loaded = ref(false);
 const inFlight = ref(false);
 
@@ -205,6 +218,7 @@ watchEffect(() => {
     updatedName.value = community.value.data.name;
     updatedDescription.value = community.value.data.description;
     updatedSlug.value = community.value.data.slug;
+    updatedPrivacy.value = community.value.data.is_private;
     loaded.value = true;
   }
 });
@@ -228,6 +242,7 @@ function updateCommunity() {
     name: updatedName.value,
     description: updatedDescription.value,
     slug: updatedSlug.value,
+    is_private: updatedPrivacy.value,
   });
   inFlight.value = false;
 }

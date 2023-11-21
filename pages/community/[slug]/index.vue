@@ -14,10 +14,15 @@
         </nuxt-link>
       </div>
     </template>
-    <template #default="{ community, isMember, isModerator, isBanned }">
+    <template #default="{ community, isMember, isModerator, isBanned, isNotAllowed }">
       <div v-if="isBanned">
         <p class="text-center py-3 text-stone-400">
           You have been banned from this community.
+        </p>
+      </div>
+      <div v-else-if="isNotAllowed">
+        <p class="text-center py-3 text-stone-400">
+          This community is private. You must join to view it.
         </p>
       </div>
       <template v-else>
