@@ -34,11 +34,13 @@ export type Community = {
   slug: string;
   description: string;
   icon: string;
+  is_private: boolean;
   members: User[];
   admins: {
     user_id: string;
   }[];
   banned_users?: User[];
+  join_requests?: User[];
   posts: CommunityPost[];
 };
 
@@ -80,6 +82,20 @@ export const useCommunities = defineStore("communities", {
         return (
           community.data?.banned_users?.some(
             (banned_user) => banned_user.user_id === user_id
+          ) ?? false
+        );
+      };
+    },
+    isPending(): (slug: string, user_id: string | undefined) => boolean {
+      return (slug: string, user_id: string | undefined) => {
+        const community = this.getCommunity(slug);
+        if (community.status !== Status.SUCCESS) return false;
+
+        console.log(community.data?.join_requests);
+
+        return (
+          community.data?.join_requests?.some(
+            (join_request) => join_request.user_id === user_id
           ) ?? false
         );
       };
@@ -197,7 +213,15 @@ export const useCommunities = defineStore("communities", {
             method: "POST",
           });
 
-          community.data.members.push(me.data);
+          if (community.data.is_private) {
+            // Assume there was no prior join requests array,
+            // because one wouldn't have been fetched.
+
+            community.data.join_requests = community.data.join_requests || [];
+            community.data.join_requests.push(me.data);
+          } else {
+            community.data.members.push(me.data);
+          }
         }
       } catch (err) {
         console.error(err);
@@ -260,6 +284,42 @@ export const useCommunities = defineStore("communities", {
         console.error(err);
       }
     },
+    async approveUser(slug: string, user_id: string) {
+      try {
+        const community = this.communities.get(slug);
+        if (community?.status === Status.SUCCESS) {
+          const user = await $fetch<User>(
+            `/api/community/${slug}/admin/${user_id}/approve`,
+            {
+              method: "POST",
+            }
+          );
+
+          community.data.join_requests = community.data.join_requests!.filter(
+            (join_request) => join_request.user_id !== user_id
+          );
+          community.data.members.push(user);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    },
+    async denyUser(slug: string, user_id: string) {
+      try {
+        const community = this.communities.get(slug);
+        if (community?.status === Status.SUCCESS) {
+          await $fetch(`/api/community/${slug}/admin/${user_id}/deny`, {
+            method: "DELETE",
+          });
+
+          community.data.join_requests = community.data.join_requests!.filter(
+            (join_request) => join_request.user_id !== user_id
+          );
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    },
     async updateIcon(slug: string, icon: string) {
       const user = useSupabaseUser();
       if (this.isModerator(slug, user.value?.id)) {
@@ -280,6 +340,7 @@ export const useCommunities = defineStore("communities", {
         slug: string;
         name: string;
         description: string;
+        is_private: boolean;
       }
     ) {
       const user = useSupabaseUser();
