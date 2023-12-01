@@ -84,11 +84,18 @@
         </nuxt-link>
       </div>
     </div>
+    <div v-if="infiniteScroll">
+      <div v-if="!pingedLoadMore" ref="loadMore" />
+      <div v-else class="flex justify-center items-center py-6 w-full">
+        <Loading />
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { GameRecord } from "~/composables/useGames";
+import { useInfiniteScroll } from "@vueuse/core";
 const gamesStore = useGames();
 
 const config = useRuntimeConfig();
@@ -98,6 +105,7 @@ const props = defineProps<{
   readonly?: boolean;
   cardWidth?: string;
   onCardClick?: (game: GameRecord) => void;
+  infiniteScroll?: (skip: number) => void;
 }>();
 
 const componentIs = computed(() => {
@@ -120,6 +128,29 @@ const cardWidth = computed(() => props.cardWidth || "w-1/2 lg:w-1/3 xl:w-1/4");
 function handleCardClick(game: GameRecord) {
   if (props.onCardClick) props.onCardClick(game);
 }
+
+const loadMore = ref();
+const pingedLoadMore = ref(false);
+
+useInfiniteScroll(
+  loadMore,
+  () => {
+    if (props.infiniteScroll) {
+      if (!pingedLoadMore.value) {
+        props.infiniteScroll(props.games.length);
+        pingedLoadMore.value = true;
+        return;
+      }
+    }
+  },
+  {
+    distance: 20,
+  }
+);
+
+watchEffect(() => {
+  if (props.games.length) pingedLoadMore.value = false;
+});
 </script>
 
 <style scoped>

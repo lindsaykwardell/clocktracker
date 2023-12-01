@@ -114,6 +114,7 @@
               :games="sortedGames"
               :username="player.username"
               :readonly="!myPage"
+              :infiniteScroll="infiniteScroll"
             />
             <GameOverviewList
               v-if="gameView === 'table'"
@@ -286,4 +287,10 @@ watch(
   },
   { deep: true }
 );
+
+function infiniteScroll(skip: number) {
+  if (props.games.status === Status.SUCCESS) {
+    allGames.fetchPlayerGames(props.player?.username || "", skip);
+  }
+}
 </script>

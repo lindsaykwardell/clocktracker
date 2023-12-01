@@ -7,6 +7,7 @@ const prisma = new PrismaClient();
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
   const username = handler.context.params?.username as string;
+  const skip = getQuery(handler)?.skip;
 
   const user = await prisma.userSettings.findUnique({
     where: {
@@ -241,6 +242,8 @@ export default defineEventHandler(async (handler) => {
         },
       },
     },
+    skip,
+    take: 30,
   });
 
   const anonymizedGames: GameRecord[] = [];
