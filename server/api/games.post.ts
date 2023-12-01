@@ -7,9 +7,6 @@ import {
   Grimoire,
   Alignment,
 } from "@prisma/client";
-// @ts-ignore
-import dayjs from "dayjs";
-import axios from "axios";
 
 const prisma = new PrismaClient();
 

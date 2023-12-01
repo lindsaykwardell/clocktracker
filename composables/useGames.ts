@@ -265,11 +265,11 @@ export const useGames = defineStore("games", {
         });
       }
     },
-    async fetchPlayerGames(username: string) {
+    async fetchPlayerGames(username: string, skip?: number) {
       if (!this.players.has(username))
         this.players.set(username, { status: Status.LOADING });
 
-      const games = await $fetch<GameRecord[]>(`/api/user/${username}/games`);
+      const games = await $fetch<GameRecord[]>(`/api/user/${username}/games?skip=${skip || 0}`);
 
       this.players.set(username, { status: Status.SUCCESS, data: true });
 
