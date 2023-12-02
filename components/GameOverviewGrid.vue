@@ -135,6 +135,7 @@ const pingedLoadMore = ref(false);
 useInfiniteScroll(
   loadMore,
   () => {
+    console.log("pinged", props.games.length)
     if (props.infiniteScroll) {
       if (!pingedLoadMore.value) {
         props.infiniteScroll(props.games.length);
