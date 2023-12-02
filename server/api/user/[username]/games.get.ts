@@ -8,6 +8,8 @@ export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
   const username = handler.context.params?.username as string;
   const skip = +(getQuery(handler)?.skip ?? "0");
+  const waiting_for_confirmation =
+    getQuery(handler)?.show_tagged_games === "true";
 
   const user = await prisma.userSettings.findUnique({
     where: {
@@ -36,6 +38,7 @@ export default defineEventHandler(async (handler) => {
     where: {
       deleted: false,
       user_id: user?.user_id,
+      waiting_for_confirmation: false,
       OR: [
         // PUBLIC PROFILE
         // PUBLIC GAME
@@ -204,6 +207,7 @@ export default defineEventHandler(async (handler) => {
     where: {
       deleted: false,
       user_id: user?.user_id,
+      waiting_for_confirmation,
       OR: [
         // PUBLIC PROFILE
         // PUBLIC GAME
@@ -414,7 +418,7 @@ export default defineEventHandler(async (handler) => {
       date: "desc",
     },
     skip,
-    take: 30,
+    take: waiting_for_confirmation ? undefined : 30,
   });
 
   const anonymizedGames: GameRecord[] = [];
