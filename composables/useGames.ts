@@ -49,7 +49,7 @@ export type RecentGameRecord = GameRecord & {
 export const useGames = defineStore("games", {
   state: () => ({
     games: new Map<string, FetchStatus<GameRecord>>(),
-    players: new Map<string, FetchStatus<boolean>>(),
+    players: new Map<string, FetchStatus<number>>(),
     similar: new Map<string, FetchStatus<string[]>>(),
   }),
   getters: {
@@ -244,6 +244,20 @@ export const useGames = defineStore("games", {
         return characters[characters.length - 1];
       };
     },
+    allGamesLoadedForPlayer(): (username: string) => boolean {
+      return (username: string) => {
+        const playerStatus = this.players.get(username);
+        if (!playerStatus) return false;
+
+        const games = this.getByPlayer(username);
+
+        return (
+          playerStatus.status === Status.SUCCESS &&
+          games.status === Status.SUCCESS &&
+          games.data.length === playerStatus.data
+        );
+      };
+    },
   },
   actions: {
     async fetchGame(gameId: string) {
@@ -269,9 +283,12 @@ export const useGames = defineStore("games", {
       if (!this.players.has(username))
         this.players.set(username, { status: Status.LOADING });
 
-      const games = await $fetch<GameRecord[]>(`/api/user/${username}/games?skip=${skip || 0}`);
+      const { total, games } = await $fetch<{
+        total: number;
+        games: GameRecord[];
+      }>(`/api/user/${username}/games?skip=${skip || 0}`);
 
-      this.players.set(username, { status: Status.SUCCESS, data: true });
+      this.players.set(username, { status: Status.SUCCESS, data: total });
 
       for (const game of games) {
         this.games.set(game.id, {
@@ -280,16 +297,16 @@ export const useGames = defineStore("games", {
         });
       }
 
-      const allGames = this.getByPlayer(username);
-      if (allGames.status === Status.SUCCESS) {
-        for (const game of allGames.data) {
-          // If the game is in the new data, don't worry
-          if (games.map((g) => g.id).includes(game.id)) continue;
+      // const allGames = this.getByPlayer(username);
+      // if (allGames.status === Status.SUCCESS) {
+      //   for (const game of allGames.data) {
+      //     // If the game is in the new data, don't worry
+      //     if (games.map((g) => g.id).includes(game.id)) continue;
 
-          // Purge the game if it's not in the new data
-          this.games.delete(game.id);
-        }
-      }
+      //     // Purge the game if it's not in the new data
+      //     this.games.delete(game.id);
+      //   }
+      // }
     },
     async fetchRecentGamesForScript(scriptId: number) {
       const games = await $fetch<RecentGameRecord[]>(

@@ -114,7 +114,7 @@
               :games="sortedGames"
               :username="player.username"
               :readonly="!myPage"
-              :infiniteScroll="infiniteScroll"
+              :infiniteScroll="allGamesLoaded ? undefined : infiniteScroll"
             />
             <GameOverviewList
               v-if="gameView === 'table'"
@@ -286,6 +286,10 @@ watch(
     localStorage.setItem("lastSelectedTags", JSON.stringify(value));
   },
   { deep: true }
+);
+
+const allGamesLoaded = computed(() =>
+  allGames.allGamesLoadedForPlayer(props.player?.username || "")
 );
 
 function infiniteScroll(skip: number) {
