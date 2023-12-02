@@ -665,7 +665,6 @@ const props = defineProps<{
         player_id?: string | null;
       }[];
     }[];
-    is_grimoire_protected?: boolean;
     ignore_for_stats: boolean;
     tags: string[];
     privacy: string;
