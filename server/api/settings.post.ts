@@ -21,7 +21,7 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  if (!body.username) {
+  if (body.username === "") {
     throw createError({
       status: 409,
       statusMessage: "Username is required",
