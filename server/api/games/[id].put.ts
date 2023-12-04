@@ -250,7 +250,6 @@ export default defineEventHandler(async (handler) => {
           grimoire: {
             connect: game.grimoire.map((g) => ({ id: g.id })),
           },
-          is_grimoire_protected: true,
           parent_game_id: game.parent_game_id || game.id,
           waiting_for_confirmation: true,
           is_storyteller: false,
@@ -313,7 +312,6 @@ export default defineEventHandler(async (handler) => {
               grimoire: {
                 connect: game.grimoire.map((g) => ({ id: g.id })),
               },
-              is_grimoire_protected: true,
               parent_game_id: game.id,
               waiting_for_confirmation: true,
               tags: [],
