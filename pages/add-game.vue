@@ -131,18 +131,33 @@ const formattedGame = computed(() => ({
 }));
 
 async function submitGame() {
-  inFlight.value = true;
+  const privacyNotice = (() => {
+    if (game.privacy === "PUBLIC") {
+      return `, and this game will be publicly visible to anyone who visits the site.`;
+    } else if (game.privacy === "PRIVATE") {
+      return `, and this game will be visible to your friends and anyone you share the link with.`;
+    } else {
+      return ", and this game will be visible to your friends.";
+    }
+  })();
+  if (
+    confirm(
+      `Are you sure you are ready to save this game? Any tagged players will be notified${privacyNotice}`
+    )
+  ) {
+    inFlight.value = true;
 
-  const { data, error } = await useFetch("/api/games", {
-    method: "POST",
-    body: JSON.stringify(formattedGame.value),
-  });
+    const { data, error } = await useFetch("/api/games", {
+      method: "POST",
+      body: JSON.stringify(formattedGame.value),
+    });
 
-  if (error.value) {
-    inFlight.value = false;
-    console.error(error.value);
-  } else {
-    router.push(`/game/${data.value?.id}`);
+    if (error.value) {
+      inFlight.value = false;
+      console.error(error.value);
+    } else {
+      router.push(`/game/${data.value?.id}`);
+    }
   }
 }
 </script>
