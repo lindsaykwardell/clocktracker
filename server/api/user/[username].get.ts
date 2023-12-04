@@ -82,6 +82,24 @@ export default defineEventHandler(async (handler) => {
                 },
               },
             },
+            {
+              communities: {
+                some: {
+                  AND: [
+                    {
+                      members: {
+                        some: { user_id: me?.id || "" },
+                      },
+                    },
+                    {
+                      members: {
+                        some: { username },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
           ],
         },
         {
