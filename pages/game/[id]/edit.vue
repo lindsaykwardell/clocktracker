@@ -81,7 +81,6 @@ const game = reactive<{
       player_id?: string | null;
     }[];
   }[];
-  is_grimoire_protected: boolean;
   ignore_for_stats: boolean;
   tags: string[];
   privacy: string;
@@ -148,7 +147,6 @@ const game = reactive<{
           tokens: [],
         },
       ],
-  is_grimoire_protected: savedGame.data.value?.is_grimoire_protected || false,
   ignore_for_stats: savedGame.data.value?.ignore_for_stats || false,
   tags: savedGame.data.value?.tags || [],
   privacy: savedGame.data.value?.privacy || "PUBLIC",

@@ -33,7 +33,6 @@ model Game {
   grimoire                 Grimoire[]
   grimoire_id              Int?           @unique
   is_storyteller           Boolean        @default(false)
-  is_grimoire_protected    Boolean        @default(false)
   parent_game              Game?          @relation("AssociatedGame", fields: [parent_game_id], references: [id])
   parent_game_id           String?
   child_games              Game[]         @relation("AssociatedGame")

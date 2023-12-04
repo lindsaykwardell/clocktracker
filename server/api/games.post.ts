@@ -7,9 +7,6 @@ import {
   Grimoire,
   Alignment,
 } from "@prisma/client";
-// @ts-ignore
-import dayjs from "dayjs";
-import axios from "axios";
 
 const prisma = new PrismaClient();
 
@@ -163,7 +160,6 @@ export default defineEventHandler(async (handler) => {
         grimoire: {
           connect: newGame.grimoire.map((g) => ({ id: g.id })),
         },
-        is_grimoire_protected: true,
         parent_game_id: newGame.id,
         waiting_for_confirmation: true,
         tags: [],
@@ -208,7 +204,6 @@ export default defineEventHandler(async (handler) => {
             grimoire: {
               connect: newGame.grimoire.map((g) => ({ id: g.id })),
             },
-            is_grimoire_protected: true,
             parent_game_id: newGame.id,
             waiting_for_confirmation: true,
             tags: [],

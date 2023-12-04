@@ -1,6 +1,8 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
 const { PrismaClient, Alignment, RoleType } = require("@prisma/client");
+const { faker } = require("@faker-js/faker");
+const { v4: uuidv4 } = require("uuid");
 
 const prisma = new PrismaClient();
 
@@ -595,6 +597,376 @@ async function main() {
     });
   }
 
+  console.log("Seeding users");
+
+  const testUser = await prisma.userSettings.create({
+    data: {
+      user_id: "1d6f5c04-8df4-4bc5-a073-23552f99c011",
+      username: "test",
+      finished_welcome: true,
+      avatar: "/img/default.png",
+      email: "me@me.me",
+      display_name: "Test User",
+      location: "Testville",
+      pronouns: "they/them",
+      is_admin: false,
+      privacy: "PUBLIC",
+    },
+  });
+
+  const testUser2 = await prisma.userSettings.create({
+    data: {
+      user_id: "8e5b6688-1688-424a-be33-6a42916e2256",
+      username: "test2",
+      finished_welcome: true,
+      avatar: "/img/default.png",
+      email: "me2@me.me",
+      display_name: "Test User 2",
+      location: "Testville",
+      pronouns: "they/them",
+      is_admin: false,
+      privacy: "PRIVATE",
+    },
+  });
+
+  const lindsaykwardell = await prisma.userSettings.create({
+    data: {
+      user_id: "e53045e0-e144-491a-8ef0-0a5240cbd406",
+      username: "lindsaykwardell",
+      finished_welcome: true,
+      avatar:
+        "https://cdn.discordapp.com/avatars/645112854265069591/5fd0619567d5a1799be521833cfa8168.png",
+      email: "veryme@me.me",
+      display_name: "Lindsay Wardell 🏳️‍⚧️",
+      bio: "Writing code, killing demons, even when evil.",
+      location: "The Internet",
+      is_admin: true,
+      privacy: "FRIENDS_ONLY",
+    },
+  });
+
+  const users = [testUser, testUser2, lindsaykwardell];
+
+  for (let i = 0; i < 100; i++) {
+    const { username, display_name, randomRole } = generateName();
+    const user = await prisma.userSettings.create({
+      data: {
+        user_id: uuidv4(),
+        username,
+        display_name,
+        finished_welcome: true,
+        avatar: `/img/role/${randomRole
+          .toLowerCase()
+          .replace(/ /g, "")
+          .replace(/'/g, "")
+          .replace(/-/g, "")}.png`,
+        email: faker.internet.email(),
+        location: faker.location.city(),
+        pronouns: "they/them",
+        is_admin: false,
+        privacy: "PUBLIC",
+      },
+    });
+
+    users.push(user);
+  }
+
+  console.log("Seeding friends");
+
+  await prisma.friendRequest.createMany({
+    data: [
+      {
+        user_id: testUser.user_id,
+        from_user_id: lindsaykwardell.user_id,
+        accepted: true,
+      },
+      {
+        user_id: testUser2.user_id,
+        from_user_id: testUser.user_id,
+        accepted: true,
+      },
+    ],
+  });
+
+  await prisma.friend.createMany({
+    data: [
+      {
+        user_id: testUser.user_id,
+        friend_id: lindsaykwardell.user_id,
+      },
+      {
+        user_id: lindsaykwardell.user_id,
+        friend_id: testUser.user_id,
+      },
+      {
+        user_id: testUser2.user_id,
+        friend_id: testUser.user_id,
+      },
+      {
+        user_id: testUser.user_id,
+        friend_id: testUser2.user_id,
+      },
+    ],
+  });
+
+  for (let i = 0; i < 200; i++) {
+    let user1;
+    let user2;
+
+    while (!user1 || !user2 || user1.user_id === user2.user_id) {
+      user1 = users[Math.floor(Math.random() * users.length)];
+      user2 = users[Math.floor(Math.random() * users.length)];
+    }
+
+    const exists = await prisma.friendRequest.findFirst({
+      where: {
+        user_id: user1.user_id,
+        from_user_id: user2.user_id,
+      },
+    });
+
+    if (exists) {
+      continue;
+    }
+
+    await prisma.friendRequest.create({
+      data: {
+        user_id: user1.user_id,
+        from_user_id: user2.user_id,
+        accepted: true,
+      },
+    });
+
+    await prisma.friend.createMany({
+      data: [
+        {
+          user_id: user1.user_id,
+          friend_id: user2.user_id,
+        },
+        {
+          user_id: user2.user_id,
+          friend_id: user1.user_id,
+        },
+      ],
+    });
+  }
+
+  console.log("Seeding communities");
+  const communities = [];
+  for (let i = 0; i < 30; i++) {
+    // capitalize the first letter of each word
+    const { randomRole } = generateName();
+    const name = `${randomRole} ${faker.location.city()}`.replace(
+      /\w\S*/g,
+      (w) => w.replace(/^\w/, (c) => c.toUpperCase())
+    );
+    const description = faker.lorem.paragraph();
+    const slug = name.toLowerCase().replace(/ /g, "-");
+    const icon = "/img/default.png";
+    const isPrivate = Math.random() > 0.8;
+
+    const userCount = Math.floor(Math.random() * 50) + 5;
+    const communityUsers = [];
+    for (let i = 0; i < userCount; i++) {
+      const user = users[Math.floor(Math.random() * users.length)];
+
+      if (user) {
+        communityUsers.push({
+          user_id: user.user_id,
+        });
+      }
+    }
+
+    // create mock posts
+    const postCount = Math.floor(Math.random() * 50) + 12;
+    const posts = [];
+    for (let i = 0; i < postCount; i++) {
+      const poster =
+        communityUsers[Math.floor(Math.random() * communityUsers.length)];
+
+      if (poster) {
+        const repliesCount = Math.floor(Math.random() * 10) + 1;
+        const replies = [];
+        for (let i = 0; i < repliesCount; i++) {
+          const replyer =
+            communityUsers[Math.floor(Math.random() * communityUsers.length)];
+
+          if (replyer) {
+            replies.push({
+              user_id: replyer.user_id,
+              content: faker.lorem.paragraph(),
+            });
+          }
+        }
+        posts.push({
+          user_id: poster.user_id,
+          content: faker.lorem.paragraph(),
+          replies,
+        });
+      }
+    }
+
+    const community = await prisma.community.create({
+      data: {
+        name,
+        description,
+        slug,
+        icon,
+        is_private: isPrivate,
+        admins: {
+          connect: [communityUsers[0]],
+        },
+        members: {
+          connect: communityUsers,
+        },
+      },
+      include: {
+        members: {
+          select: {
+            user_id: true,
+          },
+        },
+      },
+    });
+
+    communities.push(community);
+
+    for (const post of posts) {
+      await prisma.communityPost.create({
+        data: {
+          user_id: post.user_id,
+          content: post.content,
+          community_id: community.id,
+          replies: {
+            create: post.replies.map((reply) => ({
+              user_id: reply.user_id,
+              content: reply.content,
+              community_id: community.id,
+            })),
+          },
+        },
+      });
+    }
+  }
+
+  console.log("Seeding games");
+  // The goal is to create a number of games at different sizes for each player.
+  // This will allow us to test the game list.
+
+  for (const index in users) {
+    const user = users[index];
+    const gameCount = (() => {
+      if (user.user_id === lindsaykwardell.user_id) {
+        return 100;
+      } else if (user.user_id === testUser.user_id) {
+        return 200;
+      } else if (user.user_id === testUser2.user_id) {
+        return 50;
+      } else {
+        return Math.floor(Math.random() * 200);
+      }
+    })();
+    console.log(
+      `Seeding ${gameCount} games for ${user.username} (${+index + 1}/${
+        users.length
+      })`
+    );
+    for (let i = 0; i < gameCount; i++) {
+      const player_count = Math.floor(Math.random() * 10) + 5;
+      const script = scriptList[Math.floor(Math.random() * scriptList.length)];
+      const role =
+        script.roles[Math.floor(Math.random() * script.roles.length)];
+
+      const grimoirePages = Math.floor(Math.random() * 6) + 1;
+
+      const grimoire = [];
+      const players = [];
+
+      for (let i = 0; i < player_count; i++) {
+        const player = {
+          name: i === 0 ? user.username : faker.person.firstName(),
+          id: i === 0 ? user.user_id : null,
+          order: i,
+          role: script.roles[Math.floor(Math.random() * script.roles.length)],
+        };
+
+        players.push(player);
+      }
+
+      for (let p = 0; p < grimoirePages; p++) {
+        const tokens = [];
+        for (let i = 0; i < player_count; i++) {
+          const token = {
+            player_name: players[i].name,
+            player_id: players[i].id,
+            role_id: players[i].role.id,
+            alignment: players[i].role.initial_alignment,
+            is_dead:
+              grimoire.some((g) =>
+                g.tokens.some((t) => t.player_id === players[i].id && t.is_dead)
+              ) || Math.random() < p / grimoirePages,
+            order: i,
+          };
+
+          tokens.push(token);
+        }
+
+        grimoire.push({
+          tokens,
+        });
+      }
+
+      const belongsTo = communities.filter((c) =>
+        c.members.some((m) => m.user_id === user.user_id)
+      );
+
+      const community = {
+        id: undefined,
+        name: undefined,
+      };
+
+      if (Math.random() > 0.5 && belongsTo.length > 0) {
+        const randomCommunity =
+          belongsTo[Math.floor(Math.random() * belongsTo.length)];
+        community.id = randomCommunity.id;
+        community.name = randomCommunity.name;
+      }
+
+      await prisma.game.create({
+        data: {
+          user_id: user.user_id,
+          community_id: community.id,
+          community_name: community.name,
+          script: script.name,
+          script_id: script.id,
+          date: faker.date.past(),
+          location_type: "ONLINE",
+          location: faker.location.city(),
+          player_count,
+          win: Math.random() > 0.5,
+          notes: faker.lorem.paragraph(),
+          storyteller: faker.person.firstName(),
+          player_characters: {
+            create: [
+              {
+                name: role.name,
+                alignment: role.initial_alignment,
+                role_id: role.id,
+              },
+            ],
+          },
+          grimoire: {
+            create: grimoire.map((g) => ({
+              tokens: {
+                create: g.tokens,
+              },
+            })),
+          },
+        },
+      });
+    }
+  }
+
   console.log("Done!");
 }
 
@@ -784,6 +1156,27 @@ const fabled = [
   "Gardener",
   "Ferryman",
 ];
+
+const roles = [...townsfolk, ...outsiders, ...minions, ...demons, ...travelers];
+
+function generateName() {
+  const randomRole =
+    roles[Math.floor(Math.random() * roles.length)] || "Traveler";
+  const adjective = faker.word.adjective();
+
+  const username = faker.internet.userName({
+    firstName: adjective,
+    lastName: randomRole,
+  });
+  const display_name =
+    adjective.charAt(0).toUpperCase() + adjective.slice(1) + " " + randomRole;
+
+  return {
+    username,
+    display_name,
+    randomRole,
+  };
+}
 
 main()
   .then(async () => {
