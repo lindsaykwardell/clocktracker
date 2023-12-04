@@ -294,7 +294,7 @@ const allGamesLoaded = computed(() =>
 
 function infiniteScroll(skip: number) {
   if (props.games.status === Status.SUCCESS) {
-    allGames.fetchPlayerGames(props.player?.username || "", skip);
+    allGames.fetchPlayerGames(props.player?.username || "", { skip });
   }
 }
 </script>
