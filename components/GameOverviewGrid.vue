@@ -84,11 +84,11 @@
         </nuxt-link>
       </div>
     </div>
-    <div v-if="infiniteScroll">
-      <div v-if="!pingedLoadMore" ref="loadMore" />
-      <div v-else class="flex justify-center items-center py-6 w-full">
-        <Loading />
-      </div>
+  </div>
+  <div v-if="infiniteScroll">
+    <div v-if="!pingedLoadMore" ref="loadMore" />
+    <div v-else class="flex justify-center items-center py-6 w-full">
+      <Loading />
     </div>
   </div>
 </template>
@@ -135,7 +135,6 @@ const pingedLoadMore = ref(false);
 useInfiniteScroll(
   loadMore,
   () => {
-    console.log("pinged", props.games.length)
     if (props.infiniteScroll) {
       if (!pingedLoadMore.value) {
         props.infiniteScroll(props.games.length);
@@ -145,7 +144,7 @@ useInfiniteScroll(
     }
   },
   {
-    distance: 20,
+    distance: 30,
   }
 );
 

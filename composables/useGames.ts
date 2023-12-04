@@ -279,16 +279,27 @@ export const useGames = defineStore("games", {
         });
       }
     },
-    async fetchPlayerGames(username: string, skip?: number) {
+    async fetchPlayerGames(
+      username: string,
+      config?: { skip?: number; take?: number; show_tagged_games?: boolean }
+    ) {
       if (!this.players.has(username))
         this.players.set(username, { status: Status.LOADING });
 
       const { total, games } = await $fetch<{
         total: number;
         games: GameRecord[];
-      }>(`/api/user/${username}/games?skip=${skip || 0}`);
+      }>(
+        `/api/user/${username}/games?skip=${
+          config?.skip || 0
+        }&show_tagged_games=${config?.show_tagged_games || false}&take=${
+          config?.take || 12
+        }`
+      );
 
-      this.players.set(username, { status: Status.SUCCESS, data: total });
+      if (!config?.show_tagged_games) {
+        this.players.set(username, { status: Status.SUCCESS, data: total });
+      }
 
       for (const game of games) {
         this.games.set(game.id, {

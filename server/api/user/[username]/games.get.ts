@@ -8,6 +8,7 @@ export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
   const username = handler.context.params?.username as string;
   const skip = +(getQuery(handler)?.skip ?? "0");
+  const take = +(getQuery(handler)?.take ?? "12");
   const waiting_for_confirmation =
     getQuery(handler)?.show_tagged_games === "true";
 
@@ -418,7 +419,7 @@ export default defineEventHandler(async (handler) => {
       date: "desc",
     },
     skip,
-    take: waiting_for_confirmation ? undefined : 30,
+    take: waiting_for_confirmation ? undefined : take,
   });
 
   const anonymizedGames: GameRecord[] = [];
