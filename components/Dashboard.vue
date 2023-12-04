@@ -121,6 +121,7 @@
               :games="sortedGames"
               :username="player.username"
               :readonly="!myPage"
+              :infiniteScroll="allGamesLoaded ? undefined : infiniteScroll"
             />
             <p
               v-if="!sortedGames.length"
