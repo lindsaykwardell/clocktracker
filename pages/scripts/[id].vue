@@ -171,7 +171,7 @@
         </div>
       </div>
     </section>
-    <GameOverviewGrid :games="recentGames" readonly class="print:hidden" />
+    <GameOverviewGrid :games="recentGames" readonly />
   </StandardTemplate>
 </template>
 

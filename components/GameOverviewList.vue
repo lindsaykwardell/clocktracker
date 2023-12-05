@@ -86,22 +86,53 @@
       </tbody>
     </table>
   </div>
+  <div v-if="infiniteScroll">
+    <div v-if="!pingedLoadMore" ref="loadMore" />
+    <div v-else class="flex justify-center items-center py-6 w-full">
+      <Loading />
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { GameRecord } from "~/composables/useGames";
+import { useInfiniteScroll } from "@vueuse/core";
 
 const gamesStore = useGames();
 
-defineProps<{
+const props = defineProps<{
   games: GameRecord[];
   readonly?: boolean;
   username: string;
+  infiniteScroll?: (skip: number) => void;
 }>();
 
 function formatDate(date: Date) {
   return new Intl.DateTimeFormat(navigator.language).format(new Date(date));
 }
+
+const loadMore = ref();
+const pingedLoadMore = ref(false);
+
+useInfiniteScroll(
+  loadMore,
+  () => {
+    if (props.infiniteScroll) {
+      if (!pingedLoadMore.value) {
+        props.infiniteScroll(props.games.length);
+        pingedLoadMore.value = true;
+        return;
+      }
+    }
+  },
+  {
+    distance: 30,
+  }
+);
+
+watchEffect(() => {
+  if (props.games.length) pingedLoadMore.value = false;
+});
 </script>
 
 <style scoped>
