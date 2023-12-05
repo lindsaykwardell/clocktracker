@@ -49,11 +49,12 @@ export type Event = {
   id: string;
   title: string;
   description: string;
-  start: Date;
-  end: Date;
+  start: string;
+  end: string;
   location: string;
   location_type: "ONLINE" | "IN_PERSON";
   player_count?: number;
+  image?: string;
   registered_players: {
     name: string;
     seat: number;
