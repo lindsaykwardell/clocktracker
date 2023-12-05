@@ -190,6 +190,35 @@ export default defineEventHandler(async (handler) => {
           },
         },
       },
+      events: {
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          start: true,
+          end: true,
+          location: true,
+          location_type: true,
+          player_count: true,
+          registered_players: {
+            select: {
+              name: true,
+              seat: true,
+              user: {
+                select: {
+                  username: true,
+                  avatar: true,
+                },
+              },
+            },
+          },
+        },
+        where: {
+          end: {
+            gte: new Date(),
+          },
+        },
+      },
     },
   });
 
