@@ -237,6 +237,7 @@ export default defineEventHandler(async (handler) => {
     community.members = [];
     community.admins = [];
     community.posts = [];
+    community.events = [];
   }
 
   return community;
