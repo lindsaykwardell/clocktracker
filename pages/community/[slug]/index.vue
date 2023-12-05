@@ -14,7 +14,9 @@
         </nuxt-link>
       </div>
     </template>
-    <template #default="{ community, isMember, isModerator, isBanned, isNotAllowed }">
+    <template
+      #default="{ community, isMember, isModerator, isBanned, isNotAllowed }"
+    >
       <div v-if="isBanned">
         <p class="text-center py-3 text-stone-400">
           You have been banned from this community.
@@ -42,6 +44,12 @@
         <template v-else>
           <Loading />
         </template>
+        <nuxt-link
+          v-if="community.data.events.length > 0"
+          :to="`${community.data.slug}/events/${community.data.events[0].id}`"
+        >
+          <EventCard :event="community.data.events[0]" class="m-auto" />
+        </nuxt-link>
         <div
           class="w-full md:w-11/12 lg:max-w-[800px] m-auto flex flex-col gap-3 mt-8"
         >

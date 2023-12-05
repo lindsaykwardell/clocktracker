@@ -278,6 +278,7 @@ model Event {
   player_count       Int?
   location_type      LocationType    @default(ONLINE)
   location           String
+  image              String?
   registered_players EventAttendee[]
   community          Community?      @relation(fields: [community_id], references: [id])
   community_id       Int?
