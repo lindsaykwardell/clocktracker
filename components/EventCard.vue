@@ -1,14 +1,20 @@
 <template>
   <section class="max-w-[600px] bg-stone-900 rounded shadow">
-    <img v-if="event.image" :src="event.image" />
+    <img
+      v-if="event.image"
+      :src="event.image"
+      class="w-full md:w-[600px] object-cover h-[250px]"
+    />
     <div class="p-3 flex flex-col gap-2">
       <div class="flex text-stone-400">
         <div class="flex-grow">
-          <time
-            >{{ formatDate(event.start) }} ﹒
-            {{ formatTime(event.start) }}</time
-          >
-          - <time>{{ formatTime(event.end) }}</time>
+          <ClientOnly>
+            <time
+              >{{ formatDate(event.start) }} ﹒
+              {{ formatTime(event.start) }}</time
+            >
+            - <time>{{ formatTime(event.end) }}</time>
+          </ClientOnly>
         </div>
         <div>
           <template v-if="event.location_type === 'ONLINE'"> Online </template>

@@ -39,12 +39,11 @@
       </template>
     </div>
     <div v-if="isModerator" class="flex justify-end p-4">
-      <nuxt-link :to="`/community/${community.data.slug}/events/create`">
-        <button
-          class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
-        >
-          Create Event
-        </button>
+      <nuxt-link
+        :to="`/community/${community.data.slug}/events/create`"
+        class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
+      >
+        Create Event
       </nuxt-link>
     </div>
   </CommunityTemplate>
