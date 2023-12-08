@@ -13,5 +13,5 @@ const eventId = route.params.eventId as string;
 
 console.log(eventId);
 
-const event = await $fetch<Event>(`/api/community/${slug}/events/${eventId}`);
+const event = await $fetch<Event>(`/api/community/${slug}/event/${eventId}`);
 </script>

@@ -46,7 +46,7 @@
         </template>
         <nuxt-link
           v-if="community.data.events.length > 0"
-          :to="`${community.data.slug}/events/${community.data.events[0].id}`"
+          :to="`${community.data.slug}/event/${community.data.events[0].id}`"
         >
           <EventCard :event="community.data.events[0]" class="m-auto" />
         </nuxt-link>
