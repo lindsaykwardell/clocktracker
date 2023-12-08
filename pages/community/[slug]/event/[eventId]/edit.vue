@@ -1,13 +1,13 @@
 <template>
   <CommunityTemplate moderatorOnly>
     <h2 class="font-dumbledor text-2xl lg:text-3xl mb-4 text-center">
-      Create Event
+      Edit Event
     </h2>
     <EventEditor
       :event="event"
       :inFlight="inFlight"
       :errors="errors"
-      @save="createEvent"
+      @save="saveEvent"
     />
   </CommunityTemplate>
 </template>
@@ -19,13 +19,13 @@ const router = useRouter();
 const route = useRoute();
 
 const slug = route.params.slug as string;
+const eventId = route.params.eventId as string;
 
 definePageMeta({
   middleware: "community-admin",
 });
 
-const start = dayjs().format("YYYY-MM-DDTHH:mm");
-const end = dayjs().add(1.5, "hour").format("YYYY-MM-DDTHH:mm");
+const existingEvent = await $fetch(`/api/community/${slug}/event/${eventId}`);
 
 const event = reactive<{
   title: string;
@@ -37,14 +37,14 @@ const event = reactive<{
   description: string;
   image?: string;
 }>({
-  title: "",
-  description: "",
-  start,
-  end,
-  player_count: undefined,
-  location_type: "ONLINE",
-  location: "",
-  image: undefined,
+  title: existingEvent.title,
+  description: existingEvent.description,
+  start: dayjs(existingEvent.start).format("YYYY-MM-DDTHH:mm"),
+  end: dayjs(existingEvent.end).format("YYYY-MM-DDTHH:mm"),
+  player_count: existingEvent.player_count,
+  location_type: existingEvent.location_type,
+  location: existingEvent.location,
+  image: existingEvent.image,
 });
 
 const formattedEvent = computed(() => {
@@ -58,14 +58,17 @@ const formattedEvent = computed(() => {
 const inFlight = ref(false);
 const errors = ref("");
 
-async function createEvent() {
+async function saveEvent() {
   inFlight.value = true;
   errors.value = "";
   try {
-    const saved = await $fetch(`/api/community/${slug}/event`, {
-      method: "POST",
-      body: JSON.stringify(formattedEvent.value),
-    });
+    const saved = await $fetch(
+      `/api/community/${slug}/event/${existingEvent.id}`,
+      {
+        method: "PUT",
+        body: JSON.stringify(formattedEvent.value),
+      }
+    );
 
     if (saved) {
       router.push(`/community/${slug}/event/${saved.id}`);
