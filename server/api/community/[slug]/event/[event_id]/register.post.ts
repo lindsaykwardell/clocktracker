@@ -1,46 +1,56 @@
 import { PrismaClient } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
-import dayjs from "dayjs";
 
 const prisma = new PrismaClient();
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
   const slug = handler.context.params!.slug;
-  const year = handler.context.params!.year;
-  const month = handler.context.params!.month;
+  const event_id = handler.context.params!.event_id;
+  const body = await readBody<{
+    name: string;
+  } | null>(handler);
 
-  // Get the first day of the month
-  const start = dayjs(`${year}-${month}-01`).toDate();
-  // Get the first day of the next month
-  const end = dayjs(start).add(1, "month").toDate();
+  if (!me) {
+    throw createError({
+      status: 401,
+      statusMessage: "Unauthorized",
+    });
+  }
 
-  const event = await prisma.event.findMany({
+  if (!body) {
+    throw createError({
+      status: 400,
+      statusMessage: "Bad Request",
+    });
+  }
+
+  const seat =
+    (await prisma.eventAttendee.count({
+      where: {
+        event_id,
+      },
+    })) + 1;
+
+  const event = await prisma.event.update({
     where: {
+      id: event_id,
       community: {
         slug,
-        banned_users: {
-          none: {
+        members: {
+          some: {
             user_id: me?.id || "",
           },
         },
-        OR: [
-          {
-            is_private: false,
-          },
-          {
-            members: {
-              some: {
-                user_id: me?.id || "",
-              },
-            },
-            is_private: true,
-          },
-        ],
       },
-      start: {
-        gte: start,
-        lt: end,
+    },
+    data: {
+      registered_players: {
+        create: {
+          user_id: me?.id,
+          name: body.name || "",
+          seat,
+        },
       },
     },
     select: {

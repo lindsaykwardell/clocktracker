@@ -51,6 +51,7 @@ export default defineEventHandler(async (handler) => {
           seat: true,
           user: {
             select: {
+              user_id: true,
               username: true,
               avatar: true,
             },

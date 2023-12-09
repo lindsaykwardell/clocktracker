@@ -42,11 +42,25 @@
             </span>
           </template>
         </div>
-        <button
-          class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
-        >
-          Register
-        </button>
+        <slot :event="event" />
+      </div>
+      <div class="flex flex-wrap w-11/12 m-auto pb-2">
+        <template v-for="player in event.registered_players">
+          <nuxt-link v-if="player.user" :to="`/@${player.user.username}`">
+            <Avatar
+              :value="player.user.avatar"
+              size="xs"
+              class="border-stone-800"
+            />
+          </nuxt-link>
+          <template v-else>
+            <Avatar
+              value="/img/default.png"
+              size="xs"
+              class="border-stone-800"
+            />
+          </template>
+        </template>
       </div>
     </div>
   </section>
