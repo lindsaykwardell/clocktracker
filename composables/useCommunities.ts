@@ -59,6 +59,7 @@ export type Event = {
     name: string;
     seat: number;
     user: {
+      user_id: string;
       username: string;
       avatar: string | null;
     };
