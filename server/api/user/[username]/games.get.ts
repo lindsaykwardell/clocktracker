@@ -415,9 +415,17 @@ export default defineEventHandler(async (handler) => {
         },
       },
     },
-    orderBy: {
-      date: "desc",
-    },
+    orderBy: [
+      {
+        date: "desc",
+      },
+      {
+        created_at: "desc",
+      },
+      {
+        id: "desc",
+      },
+    ],
     skip,
     take: waiting_for_confirmation ? undefined : take,
   });
