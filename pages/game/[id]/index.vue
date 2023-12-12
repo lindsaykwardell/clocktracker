@@ -335,7 +335,8 @@
             <path d="M320 160h-14.6l-10.7 241h14.6z" fill="currentColor" />
             <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
           </svg>
-          Delete
+          <template v-if="game.data.waiting_for_confirmation">Ignore</template>
+          <template v-else>Delete</template>
         </button>
       </div>
       <Dialog v-model:visible="showSimilarGamesDialog" size="lg">
