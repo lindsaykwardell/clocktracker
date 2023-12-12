@@ -101,7 +101,7 @@ const me = computed(() => {
 });
 
 const potentiallyTaggedPlayers = computed(() => {
-  return [me.value, ...friends.getFriends].map((player) => ({
+  return [me.value, ...friends.getFriends, ...friends.getCommunityMembers].map((player) => ({
     ...player,
     username: `@${player?.username}`,
   }));
@@ -213,6 +213,10 @@ watch(
 );
 
 function checkIfPlayerNameIsFriend(token: Token) {
+  if (props.readonly) {
+    return;
+  }
+
   if (token.player_name === null || token.player_name === undefined) {
     token.player_name = "";
   }

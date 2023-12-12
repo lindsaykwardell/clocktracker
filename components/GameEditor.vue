@@ -1042,6 +1042,10 @@ watch(
     }
   }
 );
+
+onMounted(() => {
+  friends.fetchCommunityMembers();
+})
 </script>
 
 <style scoped>
