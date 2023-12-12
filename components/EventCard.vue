@@ -42,26 +42,10 @@
             </span>
           </template>
         </div>
-        <slot :event="event" />
+        <slot name="register" :event="event" />
       </div>
-      <div class="flex flex-wrap w-11/12 m-auto pb-2">
-        <template v-for="player in event.registered_players">
-          <nuxt-link v-if="player.user" :to="`/@${player.user.username}`">
-            <Avatar
-              :value="player.user.avatar"
-              size="xs"
-              class="border-stone-800"
-            />
-          </nuxt-link>
-          <template v-else>
-            <Avatar
-              value="/img/default.png"
-              size="xs"
-              class="border-stone-800"
-            />
-          </template>
-        </template>
-      </div>
+
+      <slot name="footer" :event="event" />
     </div>
   </section>
 </template>

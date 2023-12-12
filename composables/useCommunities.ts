@@ -113,8 +113,6 @@ export const useCommunities = defineStore("communities", {
         const community = this.getCommunity(slug);
         if (community.status !== Status.SUCCESS) return false;
 
-        console.log(community.data?.join_requests);
-
         return (
           community.data?.join_requests?.some(
             (join_request) => join_request.user_id === user_id
