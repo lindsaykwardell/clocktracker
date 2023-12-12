@@ -33,9 +33,9 @@ const event = reactive<{
   end: string;
   location_type: "ONLINE" | "IN_PERSON";
   location: string;
-  player_count?: number;
+  player_count: number | null;
   description: string;
-  image?: string;
+  image: string | null;
 }>({
   title: existingEvent.title,
   description: existingEvent.description,
@@ -78,11 +78,3 @@ async function saveEvent() {
   }
 }
 </script>
-
-<style scoped>
-input,
-select {
-  height: 2.5rem;
-  @apply text-black;
-}
-</style>

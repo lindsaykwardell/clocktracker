@@ -47,8 +47,33 @@
         <nuxt-link
           v-if="community.data.events.length > 0"
           :to="`${community.data.slug}/event/${community.data.events[0].id}`"
+          
         >
-          <EventCard :event="community.data.events[0]" class="m-auto" />
+          <EventCard :event="community.data.events[0]" class="m-auto mt-6">
+            <template #footer="{ event }">
+              <div class="flex flex-wrap w-11/12 m-auto pb-2">
+                <template v-for="player in event.registered_players">
+                  <nuxt-link
+                    v-if="player.user"
+                    :to="`/@${player.user.username}`"
+                  >
+                    <Avatar
+                      :value="player.user.avatar"
+                      size="xs"
+                      class="border-stone-800"
+                    />
+                  </nuxt-link>
+                  <template v-else>
+                    <Avatar
+                      value="/img/default.png"
+                      size="xs"
+                      class="border-stone-800"
+                    />
+                  </template>
+                </template>
+              </div>
+            </template>
+          </EventCard>
         </nuxt-link>
         <div
           class="w-full md:w-11/12 lg:max-w-[800px] m-auto flex flex-col gap-3 mt-8"

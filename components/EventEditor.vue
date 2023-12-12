@@ -96,7 +96,7 @@
         <Spinner />
         Saving...
       </template>
-      <template v-else>Create New Event</template>
+      <template v-else>Save Event</template>
     </button>
     <template v-if="errors">
       <div class="text-red-500 text-center">{{ errors }}</div>
@@ -114,9 +114,9 @@ const props = defineProps<{
     end: string;
     location_type: "ONLINE" | "IN_PERSON";
     location: string;
-    player_count?: number;
+    player_count: number | null;
     description: string;
-    image?: string;
+    image: string | null;
   };
   inFlight: boolean;
   errors: string;
@@ -164,3 +164,19 @@ async function selectFiles(e: Event) {
   props.event.image = `${config.public.supabase.url}/storage/v1/object/public/events/${data.path}`;
 }
 </script>
+
+<style scoped>
+input,
+select {
+  height: 2.5rem;
+  @apply text-lg bg-stone-600 text-white;
+
+  &:disabled {
+    @apply bg-stone-700;
+  }
+}
+
+textarea {
+  @apply text-lg bg-stone-600 text-white;
+}
+</style>

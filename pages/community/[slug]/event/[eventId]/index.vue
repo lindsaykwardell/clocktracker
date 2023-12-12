@@ -1,14 +1,88 @@
 <template>
   <CommunityTemplate v-slot="{ isModerator, isMember }">
     <EventCard v-if="event" :event="event" class="m-auto my-6">
-      <button
-        v-if="isMember"
-        @click="register"
-        class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
-      >
-        <template v-if="alreadyRegistered">Unregister</template>
-        <template v-else>Register</template>
-      </button>
+      <template #register>
+        <button
+          v-if="isMember"
+          @click="register"
+          class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
+        >
+          <template v-if="alreadyRegistered">Unregister</template>
+          <template v-else>Register</template>
+        </button>
+      </template>
+      <template #footer>
+        <div class="flex gap-4">
+          <div class="flex-1">
+            <h3 class="font-bold">Players</h3>
+            <ul>
+              <li
+                v-for="player in event.player_count
+                  ? event.registered_players.slice(0, event.player_count)
+                  : event.registered_players"
+              >
+                <nuxt-link
+                  v-if="player.user"
+                  :to="`/@${player.user.username}`"
+                  class="flex gap-2 items-center"
+                >
+                  <Avatar
+                    :value="player.user.avatar"
+                    size="xs"
+                    class="border-stone-800"
+                  />
+                  <div>{{ player.name }}</div>
+                </nuxt-link>
+                <div v-else class="flex gap-2 items-center">
+                  <Avatar
+                    value="/img/default.png"
+                    size="xs"
+                    class="border-stone-800"
+                  />
+                  <div>{{ player.name }}</div>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <div
+            v-if="
+              event.player_count &&
+              event.registered_players.length > event.player_count
+            "
+            class="flex-1"
+          >
+            <h3 class="font-bold">Waitlist</h3>
+            <ul>
+              <li
+                v-for="player in event.registered_players.slice(
+                  event.player_count
+                )"
+              >
+                <nuxt-link
+                  v-if="player.user"
+                  :to="`/@${player.user.username}`"
+                  class="flex gap-2 items-center"
+                >
+                  <Avatar
+                    :value="player.user.avatar"
+                    size="xs"
+                    class="border-stone-800"
+                  />
+                  <div>{{ player.name }}</div>
+                </nuxt-link>
+                <div v-else class="flex gap-2 items-center">
+                  <Avatar
+                    value="/img/default.png"
+                    size="xs"
+                    class="border-stone-800"
+                  />
+                  <div>{{ player.name }}</div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </template>
     </EventCard>
     <div class="flex justify-end gap-4 p-4">
       <nuxt-link
