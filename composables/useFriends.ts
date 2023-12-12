@@ -26,6 +26,7 @@ export const useFriends = defineStore("friends", {
     friends: { status: Status.IDLE } as FetchStatus<User[]>,
     requests: { status: Status.IDLE } as FetchStatus<PendingFriendRequest[]>,
     recommended: { status: Status.IDLE } as FetchStatus<User[]>,
+    communityMembers: { status: Status.IDLE } as FetchStatus<User[]>,
   }),
   getters: {
     getFriends(): User[] {
@@ -62,6 +63,11 @@ export const useFriends = defineStore("friends", {
       if (this.recommended.status !== Status.SUCCESS) return [];
 
       return this.recommended.data;
+    },
+    getCommunityMembers(): User[] {
+      if (this.communityMembers.status !== Status.SUCCESS) return [];
+
+      return this.communityMembers.data;
     },
     getFriendRequest(): (user_id: string) => PendingFriendRequest | undefined {
       return (user_id: string): PendingFriendRequest | undefined => {
@@ -145,6 +151,19 @@ export const useFriends = defineStore("friends", {
       const request = await $fetch<User[]>("/api/friends/suggested");
 
       this.recommended = {
+        status: Status.SUCCESS,
+        data: request,
+      };
+
+      const users = useUsers();
+      request.forEach((user) => {
+        users.storeUser(user);
+      });
+    },
+    async fetchCommunityMembers() {
+      const request = await $fetch<User[]>("/api/community_members");
+
+      this.communityMembers = {
         status: Status.SUCCESS,
         data: request,
       };

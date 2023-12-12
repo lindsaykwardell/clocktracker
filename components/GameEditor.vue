@@ -108,12 +108,6 @@
             </section>
           </Dialog>
         </label>
-        <datalist id="storyteller-friends">
-          <option
-            v-for="friend in friends.getFriends"
-            :value="`@${friend?.username}`"
-          />
-        </datalist>
         <div class="flex-1 flex flex-col justify-start">
           <label>
             <span class="block">Storyteller</span>
@@ -587,7 +581,7 @@ const myLocations = computed(() => {
 
 const potentialStorytellers = computed(() => {
   if (me.value.status === Status.SUCCESS) {
-    return friends.getFriends
+    return [...friends.getFriends, ...friends.getCommunityMembers]
       .map((f) => ({ ...f, username: `@${f.username}` }))
       .filter(
         (friend) =>
@@ -1042,6 +1036,10 @@ watch(
     }
   }
 );
+
+onMounted(() => {
+  friends.fetchCommunityMembers();
+});
 </script>
 
 <style scoped>
