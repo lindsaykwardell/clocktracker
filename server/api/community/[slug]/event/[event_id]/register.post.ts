@@ -25,13 +25,6 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  const seat =
-    (await prisma.eventAttendee.count({
-      where: {
-        event_id,
-      },
-    })) + 1;
-
   const event = await prisma.event.update({
     where: {
       id: event_id,
@@ -49,7 +42,6 @@ export default defineEventHandler(async (handler) => {
         create: {
           user_id: me?.id,
           name: body.name || "",
-          seat,
         },
       },
     },
@@ -66,7 +58,7 @@ export default defineEventHandler(async (handler) => {
       registered_players: {
         select: {
           name: true,
-          seat: true,
+          created_at: true,
           user: {
             select: {
               user_id: true,
@@ -74,6 +66,9 @@ export default defineEventHandler(async (handler) => {
               avatar: true,
             },
           },
+        },
+        orderBy: {
+          created_at: "asc",
         },
       },
     },

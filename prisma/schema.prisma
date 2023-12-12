@@ -289,7 +289,6 @@ model EventAttendee {
   event      Event         @relation(fields: [event_id], references: [id])
   event_id   String
   name       String
-  seat       Int
   user       UserSettings? @relation(fields: [user_id], references: [user_id])
   user_id    String?
   created_at DateTime      @default(now()) @db.Timestamptz(6)

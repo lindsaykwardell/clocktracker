@@ -48,7 +48,7 @@ export default defineEventHandler(async (handler) => {
       registered_players: {
         select: {
           name: true,
-          seat: true,
+          created_at: true,
           user: {
             select: {
               user_id: true,
@@ -56,6 +56,9 @@ export default defineEventHandler(async (handler) => {
               avatar: true,
             },
           },
+        },
+        orderBy: {
+          created_at: "asc",
         },
       },
     },

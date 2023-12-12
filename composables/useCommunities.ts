@@ -57,7 +57,7 @@ export type Event = {
   image?: string;
   registered_players: {
     name: string;
-    seat: number;
+    created_at: string;
     user: {
       user_id: string;
       username: string;
