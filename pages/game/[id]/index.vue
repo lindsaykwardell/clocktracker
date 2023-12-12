@@ -302,6 +302,7 @@
           Merge with similar game
         </button>
         <nuxt-link
+          v-if="!game.data.waiting_for_confirmation"
           class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial"
           :to="`/game/${route.params.id}/edit`"
           ><svg
@@ -335,7 +336,8 @@
             <path d="M320 160h-14.6l-10.7 241h14.6z" fill="currentColor" />
             <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
           </svg>
-          Delete
+          <template v-if="game.data.waiting_for_confirmation">Ignore</template>
+          <template v-else>Delete</template>
         </button>
       </div>
       <Dialog v-model:visible="showSimilarGamesDialog" size="lg">
