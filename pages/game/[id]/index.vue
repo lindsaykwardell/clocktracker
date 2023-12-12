@@ -302,6 +302,7 @@
           Merge with similar game
         </button>
         <nuxt-link
+          v-if="!game.data.waiting_for_confirmation"
           class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial"
           :to="`/game/${route.params.id}/edit`"
           ><svg
