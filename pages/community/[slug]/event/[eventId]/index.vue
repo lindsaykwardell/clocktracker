@@ -114,9 +114,9 @@ const eventId = route.params.eventId as string;
 const users = useUsers();
 const user = useSupabaseUser();
 
-const event = ref<Event | null>(null);
-
-event.value = await $fetch<Event>(`/api/community/${slug}/event/${eventId}`);
+const event = ref<Event>(
+  await $fetch<Event>(`/api/community/${slug}/event/${eventId}`)
+);
 
 const alreadyRegistered = computed(() => {
   const me = users.getUserById(user.value?.id);
