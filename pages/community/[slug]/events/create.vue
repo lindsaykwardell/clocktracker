@@ -75,11 +75,3 @@ async function createEvent() {
   }
 }
 </script>
-
-<style scoped>
-input,
-select {
-  height: 2.5rem;
-  @apply text-black;
-}
-</style>
