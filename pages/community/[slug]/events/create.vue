@@ -36,6 +36,7 @@ const event = reactive<{
   player_count: number | null;
   description: string;
   image: string | null;
+  who_can_register: "ANYONE" | "COMMUNITY_MEMBERS";
 }>({
   title: "",
   description: "",
@@ -45,6 +46,7 @@ const event = reactive<{
   location_type: "ONLINE",
   location: "",
   image: null,
+  who_can_register: "COMMUNITY_MEMBERS",
 });
 
 const formattedEvent = computed(() => {

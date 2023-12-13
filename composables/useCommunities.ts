@@ -55,6 +55,7 @@ export type Event = {
   location_type: "ONLINE" | "IN_PERSON";
   player_count?: number;
   image?: string;
+  who_can_register: "ANYONE" | "COMMUNITY_MEMBERS";
   registered_players: {
     name: string;
     created_at: string;

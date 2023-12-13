@@ -53,6 +53,7 @@ export default defineEventHandler(async (handler) => {
       location_type: true,
       player_count: true,
       image: true,
+      who_can_register: true,
       registered_players: {
         select: {
           name: true,
