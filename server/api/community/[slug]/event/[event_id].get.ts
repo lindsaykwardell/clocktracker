@@ -8,8 +8,6 @@ export default defineEventHandler(async (handler) => {
   const slug = handler.context.params!.slug;
   const event_id = handler.context.params!.event_id;
 
-  console.log(event_id);
-
   const event = await prisma.event.findUnique({
     where: {
       id: event_id,

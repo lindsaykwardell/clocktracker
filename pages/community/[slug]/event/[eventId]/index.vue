@@ -20,6 +20,7 @@
                 v-for="player in event.player_count
                   ? event.registered_players.slice(0, event.player_count)
                   : event.registered_players"
+                class="hover:underline"
               >
                 <nuxt-link
                   v-if="player.user"
