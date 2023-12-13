@@ -41,7 +41,7 @@ export default defineEventHandler(async (handler) => {
       registered_players: {
         create: {
           user_id: me?.id,
-          name: body.name || "",
+          name: body.name,
         },
       },
     },
