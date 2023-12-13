@@ -33,18 +33,18 @@ const event = reactive<{
   end: string;
   location_type: "ONLINE" | "IN_PERSON";
   location: string;
-  player_count?: number;
+  player_count: number | null;
   description: string;
-  image?: string;
+  image: string | null;
 }>({
   title: "",
   description: "",
   start,
   end,
-  player_count: undefined,
+  player_count: null,
   location_type: "ONLINE",
   location: "",
-  image: undefined,
+  image: null,
 });
 
 const formattedEvent = computed(() => {
