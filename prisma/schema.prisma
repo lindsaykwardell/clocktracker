@@ -282,6 +282,12 @@ model Event {
   registered_players EventAttendee[]
   community          Community?      @relation(fields: [community_id], references: [id])
   community_id       Int?
+  who_can_register   WhoCanRegister  @default(COMMUNITY_MEMBERS)
+}
+
+enum WhoCanRegister {
+  ANYONE
+  COMMUNITY_MEMBERS
 }
 
 model EventAttendee {

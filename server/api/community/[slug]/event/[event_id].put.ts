@@ -1,4 +1,4 @@
-import { LocationType, PrismaClient } from "@prisma/client";
+import { LocationType, PrismaClient, WhoCanRegister } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
 
 const prisma = new PrismaClient();
@@ -15,6 +15,7 @@ export default defineEventHandler(async (handler) => {
     location: string;
     location_type: LocationType;
     player_count?: number;
+    who_can_register: WhoCanRegister;
   } | null>(handler);
 
   if (!me) {

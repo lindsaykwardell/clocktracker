@@ -3,8 +3,8 @@
     <EventCard v-if="event" :event="event" class="m-auto my-6">
       <template #register>
         <button
-          v-if="isMember"
-          @click="register"
+          v-if="event.who_can_register === 'ANYONE' ? true : isMember"
+          @click="initRegister"
           class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
         >
           <template v-if="alreadyRegistered">Unregister</template>
@@ -101,6 +101,31 @@
         Delete Event
       </button>
     </div>
+    <Dialog v-model:visible="showRegisterDialog" size="sm">
+      <h3 class="font-dumbledor text-xl lg:text-2xl mb-4 text-center">
+        Register
+      </h3>
+      <form
+        @submit.prevent="register(attendeeName)"
+        class="flex flex-col gap-4 p-6"
+      >
+        <label class="flex-grow">
+          <span class="block">Name</span>
+          <input
+            v-model="attendeeName"
+            class="block w-full border border-stone-500 rounded-md p-2 bg-stone-600 text-white text-lg"
+            required
+          />
+        </label>
+        <button
+          type="submit"
+          id="register-attendee"
+          class="w-full bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
+        >
+          Register
+        </button>
+      </form>
+    </Dialog>
   </CommunityTemplate>
 </template>
 
@@ -113,6 +138,9 @@ const slug = route.params.slug as string;
 const eventId = route.params.eventId as string;
 const users = useUsers();
 const user = useSupabaseUser();
+
+const showRegisterDialog = ref(false);
+const attendeeName = ref("");
 
 const event = ref<Event>(
   await $fetch<Event>(`/api/community/${slug}/event/${eventId}`)
@@ -132,14 +160,16 @@ const alreadyRegistered = computed(() => {
   );
 });
 
-async function register() {
+function initRegister() {
   const me = users.getUserById(user.value?.id);
-  let name = "";
-
   if (me.status !== Status.SUCCESS) {
-    return;
+    showRegisterDialog.value = true;
+  } else {
+    register(me.data.display_name);
   }
+}
 
+async function register(name: string) {
   if (alreadyRegistered.value) {
     event.value = await $fetch<Event>(
       `/api/community/${slug}/event/${eventId}/register`,
@@ -148,8 +178,6 @@ async function register() {
       }
     );
   } else {
-    const name = me.data.display_name;
-
     event.value = await $fetch<Event>(
       `/api/community/${slug}/event/${eventId}/register`,
       {
@@ -159,6 +187,9 @@ async function register() {
         }),
       }
     );
+
+    showRegisterDialog.value = false;
+    attendeeName.value = "";
   }
 }
 

@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, WhoCanRegister } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
 
 const prisma = new PrismaClient();
@@ -10,13 +10,6 @@ export default defineEventHandler(async (handler) => {
   const body = await readBody<{
     name: string;
   } | null>(handler);
-
-  if (!me) {
-    throw createError({
-      status: 401,
-      statusMessage: "Unauthorized",
-    });
-  }
 
   if (!body) {
     throw createError({
@@ -30,12 +23,22 @@ export default defineEventHandler(async (handler) => {
       id: event_id,
       community: {
         slug,
-        members: {
-          some: {
-            user_id: me?.id || "",
-          },
-        },
       },
+      OR: [
+        {
+          community: {
+            members: {
+              some: {
+                user_id: me?.id || "",
+              },
+            },
+          },
+          who_can_register: WhoCanRegister.COMMUNITY_MEMBERS,
+        },
+        {
+          who_can_register: WhoCanRegister.ANYONE,
+        },
+      ],
     },
     data: {
       registered_players: {

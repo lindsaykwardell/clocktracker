@@ -3,14 +3,26 @@
     class="max-w-[1000px] m-auto py-6 flex flex-col gap-4"
     @submit.prevent="emit('save', event)"
   >
-    <label>
-      <span class="block">Title</span>
-      <input
-        v-model="event.title"
-        class="block w-full border border-stone-500 rounded-md p-2"
-        required
-      />
-    </label>
+    <div class="flex gap-4">
+      <label class="flex-grow">
+        <span class="block">Title</span>
+        <input
+          v-model="event.title"
+          class="block w-full border border-stone-500 rounded-md p-2"
+          required
+        />
+      </label>
+      <label>
+        <span class="block">Who Can Register</span>
+        <select
+          v-model="event.who_can_register"
+          class="block w-full border border-stone-500 rounded-md p-2"
+        >
+          <option value="COMMUNITY_MEMBERS">Community Members</option>
+          <option value="ANYONE">Anyone</option>
+        </select>
+      </label>
+    </div>
     <div class="flex gap-4">
       <label class="flex-1">
         <span class="block">Start Date</span>
@@ -117,6 +129,7 @@ const props = defineProps<{
     player_count: number | null;
     description: string;
     image: string | null;
+    who_can_register: "ANYONE" | "COMMUNITY_MEMBERS";
   };
   inFlight: boolean;
   errors: string;
