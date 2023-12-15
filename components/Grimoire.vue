@@ -100,8 +100,19 @@ const me = computed(() => {
   }
 });
 
+const communityMembersWhoArentFriends = computed(() =>
+  friends.getCommunityMembers.filter(
+    (member) =>
+      !friends.getFriends.find((friend) => friend.user_id === member.user_id)
+  )
+);
+
 const potentiallyTaggedPlayers = computed(() => {
-  return [me.value, ...friends.getFriends, ...friends.getCommunityMembers].map((player) => ({
+  return [
+    me.value,
+    ...friends.getFriends,
+    ...communityMembersWhoArentFriends.value,
+  ].map((player) => ({
     ...player,
     username: `@${player?.username}`,
   }));
