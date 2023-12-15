@@ -180,17 +180,19 @@
       </label>
       <label class="flex-1">
         <span class="block">Community</span>
-        <SelectedCommunityInput
-          v-model:value="game.community_name"
-          :communities="myCommunities"
-          inputClass="w-full border border-stone-500 rounded-md p-2 h-[2.5rem] text-lg bg-stone-600 disabled:bg-stone-700"
-        />
-        <!-- <input
-          type="text"
-          v-model="game.community_name"
-          class="block w-full border border-stone-500 rounded-md p-2"
-          list="communities"
-        /> -->
+        <div class="flex gap-2">
+          <Avatar
+            v-if="game.community_id"
+            :value="myCommunities.find((c) => c.id === game.community_id)?.icon"
+            size="xs"
+            class="border-stone-800 flex-shrink community-icon"
+          />
+          <SelectedCommunityInput
+            v-model:value="game.community_name"
+            :communities="myCommunities"
+            inputClass="w-full border border-stone-500 rounded-md p-2 h-[2.5rem] text-lg bg-stone-600 disabled:bg-stone-700"
+          />
+        </div>
       </label>
       <label class="flex-1">
         <span class="block">Players</span>
