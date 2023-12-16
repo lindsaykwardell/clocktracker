@@ -40,5 +40,12 @@ export default defineEventHandler(async (handler) => {
     },
   });
 
-  return communityMembers.flatMap((community) => community.members);
+  const members = communityMembers.flatMap((community) => community.members);
+  // filter out duplicates
+  const uniqueMembers = members.filter(
+    (member, index) =>
+      members.findIndex((m) => m.user_id === member.user_id) === index
+  );
+
+  return uniqueMembers;
 });
