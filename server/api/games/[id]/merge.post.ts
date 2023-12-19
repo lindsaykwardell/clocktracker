@@ -70,6 +70,12 @@ export default defineEventHandler(async (handler) => {
               id: "asc",
             },
           },
+          community: {
+            select: {
+              slug: true,
+              icon: true,
+            },
+          },
         },
       },
     },
@@ -175,6 +181,11 @@ export default defineEventHandler(async (handler) => {
         },
         orderBy: {
           id: "asc",
+        },
+      },
+      community: {
+        select: {
+          slug: true,
         },
       },
     },
