@@ -112,7 +112,6 @@
             <GameOverviewGrid
               v-if="gameView === 'grid'"
               :games="sortedGames"
-              :username="player.username"
               :readonly="!myPage"
               :infiniteScroll="allGamesLoaded ? undefined : infiniteScroll"
             />
