@@ -114,9 +114,26 @@
             </label>
           </div>
           <div class="flex flex-col md:flex-row gap-4 mt-4 justify-start">
-            <label v-if="game.data.community_name" class="flex gap-3 items-center">
+            <label
+              v-if="game.data.community_name"
+              class="flex gap-3 items-center"
+            >
               <span>Community</span>
-              {{ game.data.community_name }}
+              <Avatar
+                v-if="game.data.community?.icon"
+                :value="game.data.community.icon"
+                size="xs"
+                class="border-stone-800 flex-shrink community-icon"
+              />
+
+              <nuxt-link
+                v-if="game.data.community?.slug"
+                class="hover:underline text-blue-800 hover:text-blue-700"
+                :to="`/community/${game.data.community.slug}`"
+              >
+                {{ game.data.community_name }}
+              </nuxt-link>
+              <div v-else>{{ game.data.community_name }}</div>
             </label>
             <label class="flex gap-3 items-center">
               <span>Location</span>
@@ -372,6 +389,7 @@ const route = useRoute();
 const user = useSupabaseUser();
 const users = useUsers();
 const games = useGames();
+const communities = useCommunities();
 const friends = useFriends();
 const gameId = route.params.id as string;
 const bggInFlight = ref(false);
