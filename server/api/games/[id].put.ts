@@ -165,6 +165,12 @@ export default defineEventHandler(async (handler) => {
           child_games: true,
         },
       },
+      community: {
+        select: {
+          slug: true,
+          icon: true,
+        },
+      },
     },
   });
 
