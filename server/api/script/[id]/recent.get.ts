@@ -54,6 +54,12 @@ export default defineEventHandler(async (handler) => {
           },
         },
       },
+      community: {
+        select: {
+          slug: true,
+          icon: true,
+        },
+      },
     },
     take: 12,
     orderBy: {

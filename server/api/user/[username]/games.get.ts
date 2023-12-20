@@ -414,6 +414,12 @@ export default defineEventHandler(async (handler) => {
           },
         },
       },
+      community: {
+        select: {
+          slug: true,
+          icon: true,
+        },
+      },
     },
     orderBy: [
       {
@@ -426,8 +432,8 @@ export default defineEventHandler(async (handler) => {
         id: "desc",
       },
     ],
-    skip,
-    take: waiting_for_confirmation ? undefined : take,
+    // skip,
+    // take: waiting_for_confirmation ? undefined : take,
   });
 
   const anonymizedGames: GameRecord[] = [];

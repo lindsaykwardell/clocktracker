@@ -165,6 +165,12 @@ export default defineEventHandler(async (handler) => {
           id: "asc",
         },
       },
+      community: {
+        select: {
+          slug: true,
+          icon: true,
+        },
+      },
     },
   });
 
@@ -300,6 +306,11 @@ export default defineEventHandler(async (handler) => {
               display_name: true,
             },
           },
+        },
+      },
+      community: {
+        select: {
+          slug: true,
         },
       },
     },
