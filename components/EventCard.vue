@@ -3,7 +3,7 @@
     <img
       v-if="event.image"
       :src="event.image"
-      class="w-full md:w-[600px] object-cover h-[250px]"
+      class="w-full md:w-[600px] object-cover h-[150px] md:h-[250px]"
     />
     <div class="p-3 flex flex-col gap-2">
       <div class="flex text-stone-400">
