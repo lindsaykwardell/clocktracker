@@ -24,7 +24,7 @@
         </div>
       </div>
       <h2 class="font-dumbledor text-lg lg:text-xl">{{ event.title }}</h2>
-      <VueMarkdown class="post" :source="event.description" />
+      <VueMarkdown class="post text-sm md:text-base" :source="event.description" />
       <div class="flex justify-between gap-2 items-center">
         <div>
           <template v-if="event.player_count">
