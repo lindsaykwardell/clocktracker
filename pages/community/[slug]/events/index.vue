@@ -7,16 +7,16 @@
       </h2>
       <button class="text-2xl" @click="forwardOneMonth">＞</button>
     </div>
-    <div class="grid grid-cols-7">
+    <div class="grid grid-cols-7 text-xs md:text-base">
       <template v-for="week in weeks">
         <div v-for="day in week">
-          <div v-if="day" class="h-[150px] p-1 hover:bg-stone-700">
+          <div v-if="day" class="min-h-[100px] md:min-h-[150px] p-1 hover:bg-stone-700">
             <span class="text-stone-500">{{ day?.date() }}</span>
             <ul>
               <li v-for="event in eventsOnDay(day)">
                 <a
                   :href="`/community/${community.data.slug}/event/${event.id}`"
-                  class="flex gap-3"
+                  class="flex flex-col md:flex-row gap-3"
                 >
                   <div class="flex-grow hover:underline">
                     <span class="text-stone-500">
