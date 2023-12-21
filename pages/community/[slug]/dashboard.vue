@@ -66,7 +66,7 @@
               <Spinner />
               Saving...
             </template>
-            <template v-else>Save Game</template>
+            <template v-else>Save Community</template>
           </button>
         </div>
       </form>
