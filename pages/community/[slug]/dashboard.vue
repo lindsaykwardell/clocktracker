@@ -1,6 +1,6 @@
 <template>
-  <CommunityTemplate v-slot="{ community, isModerator }">
-    <div v-if="isModerator" class="flex flex-col gap-3 p-2">
+  <CommunityTemplate moderatorOnly v-slot="{ community }">
+    <div class="flex flex-col gap-3 p-2">
       <form
         @submit.prevent="updateCommunity"
         class="flex flex-col md:flex-row gap-4 items-center p-2"
@@ -66,7 +66,7 @@
               <Spinner />
               Saving...
             </template>
-            <template v-else>Save Game</template>
+            <template v-else>Save Community</template>
           </button>
         </div>
       </form>

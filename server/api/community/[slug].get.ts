@@ -190,6 +190,39 @@ export default defineEventHandler(async (handler) => {
           },
         },
       },
+      events: {
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          start: true,
+          end: true,
+          location: true,
+          location_type: true,
+          player_count: true,
+          image: true,
+          registered_players: {
+            select: {
+              name: true,
+              created_at: true,
+              user: {
+                select: {
+                  username: true,
+                  avatar: true,
+                },
+              },
+            },
+            orderBy: {
+              created_at: "asc",
+            },
+          },
+        },
+        where: {
+          end: {
+            gte: new Date(),
+          },
+        },
+      },
     },
   });
 
@@ -208,6 +241,7 @@ export default defineEventHandler(async (handler) => {
     community.members = [];
     community.admins = [];
     community.posts = [];
+    community.events = [];
   }
 
   return community;
