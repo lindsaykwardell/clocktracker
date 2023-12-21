@@ -47,7 +47,6 @@
         <nuxt-link
           v-if="community.data.events.length > 0"
           :to="`${community.data.slug}/event/${community.data.events[0].id}`"
-          
         >
           <EventCard :event="community.data.events[0]" class="m-auto mt-6">
             <template #footer="{ event }">
@@ -118,6 +117,8 @@ const slug = route.params.slug as string;
 const communities = useCommunities();
 const games = useGames();
 
+const metadata = await $fetch(`/api/community/${slug}/minimal`);
+
 const message = ref("");
 
 const recentGames = computed(() => {
@@ -149,5 +150,52 @@ async function deletePost(postId: string) {
 
 onMounted(() => {
   games.fetchCommunityGames(slug);
+});
+
+useHead({
+  title: metadata.name,
+  meta: [
+    {
+      hid: "description",
+      name: "description",
+      content: metadata.description,
+    },
+    {
+      property: "og:title",
+      content: metadata.name,
+    },
+    {
+      property: "og:description",
+      content: metadata.description,
+    },
+    {
+      property: "og:image",
+      content: metadata.icon,
+    },
+    {
+      property: "og:url",
+      content: route.fullPath,
+    },
+    {
+      property: "twitter:card",
+      content: "summary_large_image",
+    },
+    {
+      property: "twitter:url",
+      content: route.fullPath,
+    },
+    {
+      property: "twitter:title",
+      content: metadata.name,
+    },
+    {
+      property: "twitter:description",
+      content: metadata.description,
+    },
+    {
+      property: "twitter:image",
+      content: metadata.icon,
+    },
+  ],
 });
 </script>
