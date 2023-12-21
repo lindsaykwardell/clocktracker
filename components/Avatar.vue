@@ -9,6 +9,7 @@
       'w-32 md:w-40 h-32 md:h-40 aspect-square	': size === 'lg',
     }"
     crossorigin="anonymous"
+    onerror="this.onerror=null;this.src='/img/default.png';"
   />
 </template>
 
@@ -18,7 +19,5 @@ const props = defineProps<{
   size?: "xs" | "sm" | "md" | "lg";
 }>();
 
-const avatarUrl = computed(
-  () => `${props.value ?? "/img/default.png"}?width=500&height=500`
-);
+const avatarUrl = computed(() => `${props.value ?? "/img/default.png"}`);
 </script>
