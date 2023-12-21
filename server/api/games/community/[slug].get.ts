@@ -107,6 +107,12 @@ export default defineEventHandler(async (handler) => {
           },
         },
       },
+      community: {
+        select: {
+          slug: true,
+          icon: true,
+        },
+      },
     },
     orderBy: {
       date: "desc",

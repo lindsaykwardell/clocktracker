@@ -33,6 +33,10 @@ export type GameRecord = Game & {
       display_name: string;
     };
   };
+  community?: {
+    slug: string;
+    icon: string;
+  };
 };
 
 export type RecentGameRecord = GameRecord & {
