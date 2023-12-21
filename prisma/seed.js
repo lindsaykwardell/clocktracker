@@ -3,6 +3,7 @@ const cheerio = require("cheerio");
 const { PrismaClient, Alignment, RoleType } = require("@prisma/client");
 const { faker } = require("@faker-js/faker");
 const { v4: uuidv4 } = require("uuid");
+const dayjs = require("dayjs");
 
 const prisma = new PrismaClient();
 
@@ -842,6 +843,67 @@ async function main() {
               user_id: reply.user_id,
               content: reply.content,
               community_id: community.id,
+            })),
+          },
+        },
+      });
+    }
+
+    // Seed events
+    const eventCount = Math.floor(Math.random() * 50) + 1;
+    const events = [];
+    for (let i = 0; i < eventCount; i++) {
+      let player_count = Math.floor(Math.random() * 12);
+      if (player_count < 5) {
+        player_count = undefined;
+      }
+
+      const registered_players = [];
+      const registered_player_count = Math.floor(Math.random() * 20);
+      for (let i = 0; i < registered_player_count; i++) {
+        const user = users[Math.floor(Math.random() * users.length)];
+
+        if (user) {
+          registered_players.push({
+            name: user.display_name,
+            user_id: user.user_id,
+          });
+        }
+      }
+
+      const start = faker.date.future();
+      const end = dayjs(start)
+        .add(Math.floor(Math.random() * 5), "hour")
+        .toDate();
+
+      const event = {
+        title: faker.lorem.sentence(),
+        description: faker.lorem.paragraph(),
+        start,
+        end,
+        location: faker.location.city(),
+        community_id: community.id,
+        player_count,
+        registered_players,
+      };
+
+      events.push(event);
+    }
+
+    for (const event of events) {
+      await prisma.event.create({
+        data: {
+          title: event.title,
+          description: event.description,
+          start: event.start,
+          end: event.end,
+          location: event.location,
+          community_id: event.community_id,
+          player_count: event.player_count,
+          registered_players: {
+            create: event.registered_players.map((player) => ({
+              name: player.name,
+              user_id: player.user_id,
             })),
           },
         },
