@@ -131,6 +131,13 @@
 
 <script setup lang="ts">
 import { Event } from "~/composables/useCommunities";
+import dayjs from "dayjs";
+
+type EventView = Event & {
+  community: {
+    name: string;
+  };
+};
 
 const route = useRoute();
 const router = useRouter();
@@ -142,8 +149,8 @@ const user = useSupabaseUser();
 const showRegisterDialog = ref(false);
 const attendeeName = ref("");
 
-const event = ref<Event>(
-  await $fetch<Event>(`/api/community/${slug}/event/${eventId}`)
+const event = ref<EventView>(
+  await $fetch<EventView>(`/api/community/${slug}/event/${eventId}`)
 );
 
 const alreadyRegistered = computed(() => {
@@ -171,14 +178,14 @@ function initRegister() {
 
 async function register(name: string) {
   if (alreadyRegistered.value) {
-    event.value = await $fetch<Event>(
+    event.value = await $fetch<EventView>(
       `/api/community/${slug}/event/${eventId}/register`,
       {
         method: "DELETE",
       }
     );
   } else {
-    event.value = await $fetch<Event>(
+    event.value = await $fetch<EventView>(
       `/api/community/${slug}/event/${eventId}/register`,
       {
         method: "POST",
@@ -202,4 +209,63 @@ function deleteEvent() {
     });
   }
 }
+
+useHead({
+  title: `${event.value.community.name} | ${event.value.title}`,
+  meta: [
+    {
+      hid: "description",
+      name: "description",
+      content: `${event.value.title}, hosted by ${
+        event.value.community.name
+      } on ${dayjs(event.value.start).format("MMMM D, YYYY")} at ${dayjs(
+        event.value.start
+      ).format("HH:MM a")}.`,
+    },
+    {
+      property: "og:title",
+      content: `${event.value.community.name} | ${event.value.title}`,
+    },
+    {
+      property: "og:description",
+      content: `${event.value.title}, hosted by ${
+        event.value.community.name
+      } on ${dayjs(event.value.start).format("MMMM D, YYYY")} at ${dayjs(
+        event.value.start
+      ).format("HH:MM a")}.`,
+    },
+    {
+      property: "og:image",
+      content: event.value.image,
+    },
+    {
+      property: "og:url",
+      content: route.fullPath,
+    },
+    {
+      property: "twitter:card",
+      content: "summary_large_image",
+    },
+    {
+      property: "twitter:url",
+      content: route.fullPath,
+    },
+    {
+      property: "twitter:title",
+      content: `${event.value.community.name} | ${event.value.title}`,
+    },
+    {
+      property: "twitter:description",
+      content: `${event.value.title}, hosted by ${
+        event.value.community.name
+      } on ${dayjs(event.value.start).format("MMMM D, YYYY")} at ${dayjs(
+        event.value.start
+      ).format("HH:MM a")}.`,
+    },
+    {
+      property: "twitter:image",
+      content: event.value.image,
+    },
+  ],
+});
 </script>
