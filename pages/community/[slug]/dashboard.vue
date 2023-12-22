@@ -49,6 +49,13 @@
             </label>
           </div>
           <label>
+            <span class="block">Discord Server ID</span>
+            <input
+              v-model="updatedDiscordServerId"
+              class="block w-full border border-stone-500 bg-stone-600 rounded-md p-2"
+            />
+          </label>
+          <label>
             <span class="block">Description</span>
             <textarea
               v-model="updatedDescription"
@@ -256,6 +263,7 @@ const updatedName = ref("");
 const updatedDescription = ref("");
 const updatedSlug = ref("");
 const updatedPrivacy = ref(false);
+const updatedDiscordServerId = ref<string | undefined>("");
 const loaded = ref(false);
 const inFlight = ref(false);
 
@@ -269,6 +277,7 @@ watchEffect(() => {
     updatedDescription.value = community.value.data.description;
     updatedSlug.value = community.value.data.slug;
     updatedPrivacy.value = community.value.data.is_private;
+    updatedDiscordServerId.value = community.value.data.discord_server_id;
     loaded.value = true;
   }
 });
@@ -293,6 +302,7 @@ function updateCommunity() {
     description: updatedDescription.value,
     slug: updatedSlug.value,
     is_private: updatedPrivacy.value,
+    discord_server_id: updatedDiscordServerId.value,
   });
   inFlight.value = false;
 }

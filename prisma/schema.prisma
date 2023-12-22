@@ -235,22 +235,23 @@ enum DataField {
 }
 
 model Community {
-  id            Int             @id @default(autoincrement())
-  name          String
-  slug          String          @unique
-  description   String
-  members       UserSettings[]  @relation("CommunityMember")
-  admins        UserSettings[]  @relation("CommunityAdmin")
-  banned_users  UserSettings[]  @relation("CommunityBanned")
-  join_requests UserSettings[]  @relation("CommunityJoinRequest")
-  created_at    DateTime?       @default(now()) @db.Timestamptz(6)
-  deleted       Boolean         @default(false)
-  deleted_date  DateTime?
-  posts         CommunityPost[]
-  icon          String          @default("/img/default.png")
-  games         Game[]
-  is_private    Boolean         @default(false)
-  events        Event[]
+  id                Int             @id @default(autoincrement())
+  name              String
+  slug              String          @unique
+  description       String
+  members           UserSettings[]  @relation("CommunityMember")
+  admins            UserSettings[]  @relation("CommunityAdmin")
+  banned_users      UserSettings[]  @relation("CommunityBanned")
+  join_requests     UserSettings[]  @relation("CommunityJoinRequest")
+  created_at        DateTime?       @default(now()) @db.Timestamptz(6)
+  deleted           Boolean         @default(false)
+  deleted_date      DateTime?
+  posts             CommunityPost[]
+  icon              String          @default("/img/default.png")
+  games             Game[]
+  is_private        Boolean         @default(false)
+  events            Event[]
+  discord_server_id String?
 }
 
 model CommunityPost {
