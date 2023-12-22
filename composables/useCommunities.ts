@@ -2,6 +2,23 @@ import { defineStore } from "pinia";
 import { FetchStatus } from "./useFetchStatus";
 import { User } from "./useUsers";
 
+export type Community = {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  icon: string;
+  is_private: boolean;
+  members: User[];
+  admins: {
+    user_id: string;
+  }[];
+  banned_users?: User[];
+  join_requests?: User[];
+  posts: CommunityPost[];
+  events: Event[];
+};
+
 export type CommunityPost = {
   id: string;
   content: string;
@@ -28,20 +45,26 @@ export type CommunityPost = {
   };
 };
 
-export type Community = {
-  id: number;
-  name: string;
-  slug: string;
+export type Event = {
+  id: string;
+  title: string;
   description: string;
-  icon: string;
-  is_private: boolean;
-  members: User[];
-  admins: {
-    user_id: string;
+  start: string;
+  end: string;
+  location: string;
+  location_type: "ONLINE" | "IN_PERSON";
+  player_count?: number;
+  image?: string;
+  who_can_register: "ANYONE" | "COMMUNITY_MEMBERS";
+  registered_players: {
+    name: string;
+    created_at: string;
+    user: {
+      user_id: string;
+      username: string;
+      avatar: string | null;
+    };
   }[];
-  banned_users?: User[];
-  join_requests?: User[];
-  posts: CommunityPost[];
 };
 
 export const useCommunities = defineStore("communities", {
@@ -90,8 +113,6 @@ export const useCommunities = defineStore("communities", {
       return (slug: string, user_id: string | undefined) => {
         const community = this.getCommunity(slug);
         if (community.status !== Status.SUCCESS) return false;
-
-        console.log(community.data?.join_requests);
 
         return (
           community.data?.join_requests?.some(

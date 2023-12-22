@@ -38,10 +38,7 @@
           <p class="whitespace-pre-wrap text-left w-full py-4">
             {{ community.data.description }}
           </p>
-          <div
-            v-if="isModerator"
-            class="flex justify-start w-screen md:w-full gap-1 h-12"
-          >
+          <div class="flex justify-start w-screen md:w-full gap-1 h-12">
             <nuxt-link
               :to="`/community/${community.data.slug}`"
               class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-700"
@@ -50,6 +47,14 @@
               Home
             </nuxt-link>
             <nuxt-link
+              :to="`/community/${community.data.slug}/events`"
+              class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-700"
+              :class="currentTabClass('events')"
+            >
+              Events
+            </nuxt-link>
+            <nuxt-link
+              v-if="isModerator"
               :to="`/community/${community.data.slug}/dashboard`"
               class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-700"
               :class="currentTabClass('dashboard')"
@@ -69,6 +74,7 @@
         />
       </div>
       <slot
+        v-if="!props.moderatorOnly || isModerator"
         :community="community"
         :isMember="isMember"
         :isModerator="isModerator"
@@ -90,6 +96,10 @@ const route = useRoute();
 const slug = route.params.slug as string;
 const communities = useCommunities();
 const user = useSupabaseUser();
+
+const props = defineProps<{
+  moderatorOnly?: boolean;
+}>()
 
 const community = computed(() => communities.getCommunity(slug));
 const isMember = computed(() => communities.isMember(slug, user.value?.id));

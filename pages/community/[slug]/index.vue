@@ -14,7 +14,9 @@
         </nuxt-link>
       </div>
     </template>
-    <template #default="{ community, isMember, isModerator, isBanned, isNotAllowed }">
+    <template
+      #default="{ community, isMember, isModerator, isBanned, isNotAllowed }"
+    >
       <div v-if="isBanned">
         <p class="text-center py-3 text-stone-400">
           You have been banned from this community.
@@ -42,6 +44,40 @@
         <template v-else>
           <Loading />
         </template>
+        <div
+          v-if="community.data.events.length > 0"
+          class="flex justify-center"
+        >
+          <nuxt-link
+            :to="`${community.data.slug}/event/${community.data.events[0].id}`"
+          >
+            <EventCard :event="community.data.events[0]" class="mt-6">
+              <template #footer="{ event }">
+                <div class="flex flex-wrap w-11/12 m-auto pb-2">
+                  <template v-for="player in event.registered_players">
+                    <nuxt-link
+                      v-if="player.user"
+                      :to="`/@${player.user.username}`"
+                    >
+                      <Avatar
+                        :value="player.user.avatar"
+                        size="xs"
+                        class="border-stone-800"
+                      />
+                    </nuxt-link>
+                    <template v-else>
+                      <Avatar
+                        value="/img/default.png"
+                        size="xs"
+                        class="border-stone-800"
+                      />
+                    </template>
+                  </template>
+                </div>
+              </template>
+            </EventCard>
+          </nuxt-link>
+        </div>
         <div
           class="w-full md:w-11/12 lg:max-w-[800px] m-auto flex flex-col gap-3 mt-8"
         >
@@ -85,6 +121,8 @@ const slug = route.params.slug as string;
 const communities = useCommunities();
 const games = useGames();
 
+const metadata = await $fetch(`/api/community/${slug}/minimal`);
+
 const message = ref("");
 
 const recentGames = computed(() => {
@@ -116,5 +154,52 @@ async function deletePost(postId: string) {
 
 onMounted(() => {
   games.fetchCommunityGames(slug);
+});
+
+useHead({
+  title: metadata.name,
+  meta: [
+    {
+      hid: "description",
+      name: "description",
+      content: metadata.description,
+    },
+    {
+      property: "og:title",
+      content: metadata.name,
+    },
+    {
+      property: "og:description",
+      content: metadata.description,
+    },
+    {
+      property: "og:image",
+      content: metadata.icon,
+    },
+    {
+      property: "og:url",
+      content: route.fullPath,
+    },
+    {
+      property: "twitter:card",
+      content: "summary_large_image",
+    },
+    {
+      property: "twitter:url",
+      content: route.fullPath,
+    },
+    {
+      property: "twitter:title",
+      content: metadata.name,
+    },
+    {
+      property: "twitter:description",
+      content: metadata.description,
+    },
+    {
+      property: "twitter:image",
+      content: metadata.icon,
+    },
+  ],
 });
 </script>

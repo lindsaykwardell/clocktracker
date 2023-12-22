@@ -107,12 +107,21 @@ const allGamesAreLoaded = computed(() => {
   return count.data === props.games.data.length;
 });
 
+const allGamesCount = computed(() => {
+  const count = allGames.players.get(props.username);
+  if (count?.status !== Status.SUCCESS) {
+    return 1000;
+  } else {
+    return count.data;
+  }
+});
+
 watchEffect(() => {
   if (!allGamesAreLoaded.value) {
     if (props.games.status === Status.SUCCESS) {
       allGames.fetchPlayerGames(props.username, {
-        skip: props.games.data.length,
-        take: props.games.data.length + 1000,
+        skip: 0,
+        take: allGamesCount.value,
       });
     } else {
       allGames.fetchPlayerGames(props.username);
