@@ -2,6 +2,7 @@
 import "dotenv/config";
 import { Client, GatewayIntentBits, REST, Routes } from "discord.js";
 import { PrismaClient } from "@prisma/client";
+import { exportEmbed } from "./eventEmbed";
 
 const prisma = new PrismaClient();
 
@@ -74,6 +75,9 @@ const main = async () => {
             gt: new Date(),
           },
         },
+        include: {
+          EventAttendee: true,
+        },
         orderBy: {
           start: "asc",
         },
@@ -84,9 +88,17 @@ const main = async () => {
         return;
       }
 
-      await interaction.reply(
-        `The next event is ${event.title} on ${event.start}. https://clocktracker.app/community/${community.slug}/event/${event.id}`
-      );
+      // const message = await interaction.reply(
+      //   `The next event is ${event.title} on ${event.start}. https://clocktracker.app/community/${community.slug}/event/${event.id}`
+      // );
+
+      const embed = exportEmbed(event, community);
+      const message = await interaction.channel.send({ embeds: [embed] });
+
+      // Add emoji reactions to the message
+      await message.react("👍");
+      // await message.react("👎");
+      await message.react("👎");
     }
   });
 
