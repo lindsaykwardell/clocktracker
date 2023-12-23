@@ -2,7 +2,7 @@ const axios = require("axios");
 const cheerio = require("cheerio");
 const { PrismaClient, Alignment, RoleType } = require("@prisma/client");
 
-const url = "https://botc-scripts.azurewebsites.net";
+const url = "https://botcscripts.com";
 const prisma = new PrismaClient();
 
 async function main() {
@@ -25,14 +25,21 @@ async function main() {
         $(columns[0]).find("a").attr("href")?.split("/")[2] ?? "",
         10
       );
-      const name = $(columns[0]).text();
-      const version = $(columns[1]).text();
-      const author = $(columns[2]).text();
-      const type = $(columns[3]).text();
-      const info = $(columns[4]).text();
-      const tags = $(columns[5]).text();
-      const json_url = fullUrl($(columns[6]).find("a").attr("href") ?? "");
-      const pdf_url = fullUrl($(columns[7]).find("a").attr("href") ?? "");
+      // Name and version are combined in column 1 like this: Blow My Skull (1.4.0)
+      // We need to break them apart, and store the version separately without the parens.
+      // Match with regex
+      const name = $(columns[0])
+        .text()
+        .split(/\s\((\d+(\.\d+)*)\)$/)[0];
+      const version = $(columns[0])
+        .text()
+        .split(/\s\((\d+(\.\d+)*)\)$/)[1]
+        .replace("(", "")
+        .replace(")", "");
+      const author = $(columns[1]).text();
+      const type = $(columns[2]).text();
+      const json_url = fullUrl(`/script/${id}/${version}/download`);
+      const pdf_url = fullUrl(`/script/${id}/${version}/download_pdf`);
 
       if (!isNaN(id)) {
         scriptList.push({
