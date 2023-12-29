@@ -250,6 +250,7 @@ const demons = [
   "Vortox",
   "Zombuul",
   "Ojo",
+  "Kazali",
 ];
 
 const travelers = [
