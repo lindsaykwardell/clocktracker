@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { FetchStatus } from "./useFetchStatus";
 import type { Game, Character, Grimoire, Token } from "@prisma/client";
+import naturalOrder from "natural-order";
 
 export type FullCharacter = Character & {
   role?: {
@@ -272,6 +273,9 @@ export const useGames = defineStore("games", {
       const games = this.getByPlayer(me.data.username);
 
       if (games.status !== Status.SUCCESS) return [];
+      const orderedGames = naturalOrder(games.data)
+        .orderBy("desc")
+        .sort(["date"]);
 
       const scriptList: { name: string; id: number | null }[] = [];
 
