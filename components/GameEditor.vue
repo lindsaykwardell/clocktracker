@@ -38,7 +38,7 @@
             <template #title>
               <h2 class="text-2xl font-bold font-dumbledor">Select Script</h2>
             </template>
-            <section class="p-4">
+            <section class="p-4 flex flex-col gap-2">
               <div class="flex justify-around gap-8 pb-4">
                 <button
                   class="flex-1 w-1 hover:bg-stone-800 rounded-lg hover:shadow-xl"
@@ -60,6 +60,15 @@
                     src="/img/sects_and_violets.png"
                     alt="Sects and Violets"
                   />
+                </button>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <button
+                  v-for="script in recentScripts"
+                  @click="selectScript(script)"
+                  class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
+                >
+                  {{ script.name }}
                 </button>
               </div>
               <div class="relative">
@@ -535,6 +544,11 @@ const roles = ref<
 >([]);
 const scripts = ref<{ id: number; name: string }[]>([]);
 const baseScripts = ref<{ id: number; name: string }[]>([]);
+const recentScripts = computed(() =>
+  games.getRecentScripts.filter((s) =>
+    !baseScripts.value.some((b) => b.id === s.id)
+  )
+);
 const tokenMode = ref<"role" | "related_role">("role");
 
 let focusedToken: Character | null = null;
