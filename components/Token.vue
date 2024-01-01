@@ -155,6 +155,8 @@ const alignmentImage = computed(() => {
   }
   if (props.character?.alignment === "EVIL") {
     return "/img/role/evil.png";
+  } else {
+    return "/1x1.png";
   }
 });
 </script>

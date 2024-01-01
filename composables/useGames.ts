@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { FetchStatus } from "./useFetchStatus";
 import type { Game, Character, Grimoire, Token } from "@prisma/client";
+import naturalOrder from "natural-order";
 
 export type FullCharacter = Character & {
   role?: {
@@ -261,6 +262,36 @@ export const useGames = defineStore("games", {
           games.data.length === playerStatus.data
         );
       };
+    },
+    getRecentScripts(): { name: string; id: number | null }[] {
+      const user = useSupabaseUser();
+      if (!user.value) return [];
+      const users = useUsers();
+      const me = users.getUserById(user.value.id);
+      if (me.status !== Status.SUCCESS) return [];
+
+      const games = this.getByPlayer(me.data.username);
+
+      if (games.status !== Status.SUCCESS) return [];
+      const orderedGames = naturalOrder(games.data)
+        .orderBy("desc")
+        .sort(["date"]);
+
+      const scriptList: { name: string; id: number | null }[] = [];
+
+      for (const game of games.data) {
+        if (scriptList.length >= 10) continue;
+
+        if (
+          !scriptList.some(
+            (s) => s.name === game.script && s.id === game.script_id
+          )
+        ) {
+          scriptList.push({ name: game.script, id: game.script_id });
+        }
+      }
+
+      return scriptList;
     },
   },
   actions: {
