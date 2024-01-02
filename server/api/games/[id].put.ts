@@ -5,6 +5,7 @@ import {
   Character,
   Grimoire,
   Token,
+  WinStatus,
   Alignment,
 } from "@prisma/client";
 
@@ -231,16 +232,16 @@ export default defineEventHandler(async (handler) => {
       const win = (() => {
         if (parentGameLastAlignment === Alignment.NEUTRAL) {
           if (lastAlignment === Alignment.GOOD) {
-            return game.win;
+            return game.win === WinStatus.WIN;
           } else {
-            return !game.win;
+            return game.win === WinStatus.LOSS;
           }
         }
 
         if (lastAlignment === parentGameLastAlignment) {
-          return game.win;
+          return game.win === WinStatus.WIN;
         } else {
-          return !game.win;
+          return game.win === WinStatus.LOSS;
         }
       })();
 
@@ -259,7 +260,7 @@ export default defineEventHandler(async (handler) => {
           parent_game_id: game.parent_game_id || game.id,
           waiting_for_confirmation: true,
           is_storyteller: false,
-          win,
+          win: win ? WinStatus.WIN : WinStatus.LOSS,
         },
       });
     } else {
@@ -314,7 +315,7 @@ export default defineEventHandler(async (handler) => {
               user_id: friend.user_id,
               player_characters: {},
               notes: "",
-              win,
+              win: win ? WinStatus.WIN : WinStatus.LOSS,
               grimoire: {
                 connect: game.grimoire.map((g) => ({ id: g.id })),
               },

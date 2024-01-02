@@ -3,6 +3,12 @@ import { FetchStatus } from "./useFetchStatus";
 import type { Game, Character, Grimoire, Token } from "@prisma/client";
 import naturalOrder from "natural-order";
 
+export enum WinStatus {
+  WIN = "WIN",
+  LOSS = "LOSS",
+  NOT_RECORDED = "NOT_RECORDED",
+}
+
 export type FullCharacter = Character & {
   role?: {
     token_url: string;
@@ -12,7 +18,8 @@ export type FullCharacter = Character & {
   related_role?: { token_url: string };
 };
 
-export type GameRecord = Game & {
+export type GameRecord = Omit<Game, "win"> & {
+  win: WinStatus;
   player_characters: FullCharacter[];
   user: {
     username: string;
