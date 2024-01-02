@@ -5,9 +5,13 @@
         <h2 class="flex-grow text-2xl font-bold font-dumbledor">
           Select a Role
         </h2>
-        <label v-if="!alwaysShowAllRoles" class="flex items-center">
+        <label v-if="!hideAllRolesToggle" class="flex items-center">
           <input v-model="showAllRoles" type="checkbox" class="mr-2" />
           <span>All Roles</span>
+        </label>
+        <label class="flex items-center">
+          <input v-model="showFabled" type="checkbox" class="mr-2" />
+          <span>Show Fabled</span>
         </label>
         <input
           v-model="roleFilter"
@@ -63,9 +67,16 @@ const props = defineProps<{
 const emit = defineEmits(["update:visible", "selectRole"]);
 
 const showAllRoles = ref(props.alwaysShowAllRoles || false);
+const hideAllRolesToggle = computed(
+  () =>
+    props.alwaysShowAllRoles ||
+    props.availableRoles.length === roles.getAllRoles.length
+);
+const showFabled = ref(false);
 
 const allRoles = computed(() => roles.getAllRoles);
 const travelerRoles = computed(() => roles.getRoleByType(RoleType.TRAVELER));
+const fabledRoles = computed(() => roles.getRoleByType(RoleType.FABLED));
 
 const roleFilter = ref("");
 const show = computed({
@@ -80,6 +91,7 @@ const filteredRoles = computed(() => {
         (role) => role.type !== "FABLED" && role.type !== "TRAVELER"
       ),
       ...travelerRoles.value,
+      ...(showFabled.value ? fabledRoles.value : []),
     ].filter((role) =>
       role.name.toLowerCase().includes(roleFilter.value.toLowerCase())
     )
@@ -108,6 +120,10 @@ const travelers = computed(() => {
   return filteredRoles.value.filter((role) => role.type === "TRAVELER");
 });
 
+const fabled = computed(() => {
+  return filteredRoles.value.filter((role) => role.type === "FABLED");
+});
+
 const roleGroups = computed(() => {
   return [
     {
@@ -129,6 +145,10 @@ const roleGroups = computed(() => {
     {
       name: "Travelers",
       roles: travelers.value,
+    },
+    {
+      name: "Fabled",
+      roles: fabled.value,
     },
   ];
 });

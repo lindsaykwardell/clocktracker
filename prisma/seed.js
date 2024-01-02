@@ -1,6 +1,11 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
-const { PrismaClient, Alignment, RoleType } = require("@prisma/client");
+const {
+  PrismaClient,
+  Alignment,
+  RoleType,
+  WinStatus,
+} = require("@prisma/client");
 const { faker } = require("@faker-js/faker");
 const { v4: uuidv4 } = require("uuid");
 const dayjs = require("dayjs");
@@ -1005,7 +1010,7 @@ async function main() {
           location_type: "ONLINE",
           location: faker.location.city(),
           player_count,
-          win: Math.random() > 0.5,
+          win: Math.random() > 0.5 ? WinStatus.WIN : WinStatus.LOSS,
           notes: faker.lorem.paragraph(),
           storyteller: faker.person.firstName(),
           player_characters: {

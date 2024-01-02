@@ -23,7 +23,7 @@ model Game {
   player_count             Int?
   traveler_count           Int?
   player_characters        Character[]
-  win                      Boolean
+  win                      WinStatus
   notes                    String
   image_urls               String[]
   storyteller              String?
@@ -42,6 +42,12 @@ model Game {
   deleted                  Boolean        @default(false)
   deleted_date             DateTime?
   privacy                  PrivacySetting @default(PUBLIC)
+}
+
+enum WinStatus {
+  WIN
+  LOSS
+  NOT_RECORDED
 }
 
 model Grimoire {

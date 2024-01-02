@@ -1,4 +1,4 @@
-import { PrismaClient, Alignment, Role } from "@prisma/client";
+import { PrismaClient, Alignment, Role, WinStatus } from "@prisma/client";
 import naturalOrder from "natural-order";
 // @ts-ignore
 import dayjs from "dayjs";
@@ -92,7 +92,7 @@ export default defineEventHandler(async (handler) => {
     (acc, game) => {
       let win = acc.win;
       if (game.is_storyteller) {
-        win = game.win ? acc.win + 1 : acc.win;
+        win = game.win === WinStatus.WIN ? acc.win + 1 : acc.win;
       } else {
         const last_character =
           game.player_characters[game.player_characters.length - 1];
@@ -138,9 +138,15 @@ export default defineEventHandler(async (handler) => {
 
           if (!character) return acc;
 
-          if (game.win && character.alignment === Alignment.GOOD) {
+          if (
+            game.win === WinStatus.WIN &&
+            character.alignment === Alignment.GOOD
+          ) {
             win++;
-          } else if (!game.win && character.alignment === Alignment.EVIL) {
+          } else if (
+            game.win === WinStatus.LOSS &&
+            character.alignment === Alignment.EVIL
+          ) {
             win++;
           }
         } else {
@@ -153,7 +159,7 @@ export default defineEventHandler(async (handler) => {
           )
             return acc;
 
-          win = game.win ? win + 1 : win;
+          win = game.win === WinStatus.WIN ? win + 1 : win;
         }
 
         return { total: acc.total + 1, win };
