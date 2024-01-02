@@ -16,10 +16,13 @@ export function eventEmbed(
     //   iconURL: "https://i.imgur.com/AfFp7pu.png",
     //   url: "https://discord.js.org",
     // })
-    .setDescription(event.description)
     .setThumbnail(`https://clocktracker.app${community.icon}`)
     // .setImage("https://i.imgur.com/AfFp7pu.png")
     .setTimestamp(event.start);
+
+  if (event.description) {
+    embed.setDescription(event.description);
+  }
 
   if (event.player_count) {
     embed.addFields(
