@@ -53,7 +53,7 @@
 </template>
 
 <script setup lang="ts">
-import { GameRecord } from "~/composables/useGames";
+import { GameRecord, WinStatus } from "~/composables/useGames";
 import { Bar, Pie, PolarArea } from "vue-chartjs";
 import { colord, extend } from "colord";
 import mixPlugin from "colord/plugins/mix";
@@ -278,7 +278,10 @@ const datasets = computed(() => {
     return (
       getPivot(
         games,
-        [(game) => game.win, (game) => !game.win],
+        [
+          (game) => game.win === WinStatus.WIN,
+          (game) => game.win === WinStatus.LOSS,
+        ],
         [
           (c) => colord(c).mix(colord("#0000FF"), 0.15).toHex(),
           (c) => colord(c).mix(colord("#FF0000"), 0.15).toHex(),
@@ -286,8 +289,8 @@ const datasets = computed(() => {
       ) ?? [
         {
           data: [
-            games.filter((game) => game.win).length,
-            games.filter((game) => !game.win).length,
+            games.filter((game) => game.win === WinStatus.WIN).length,
+            games.filter((game) => game.win === WinStatus.LOSS).length,
           ],
           backgroundColor: ["#0000FF", "#FF0000"],
         },
@@ -486,7 +489,9 @@ function getPivot(
         label: "Yes",
         data: validators.map(
           (validator) =>
-            games.filter((game) => game.win && validator(game)).length
+            games.filter(
+              (game) => game.win === WinStatus.WIN && validator(game)
+            ).length
         ),
         backgroundColor: mixColors.map((mixColor) => mixColor("#0000FF")),
       },
@@ -494,7 +499,9 @@ function getPivot(
         label: "No",
         data: validators.map(
           (validator) =>
-            games.filter((game) => !game.win && validator(game)).length
+            games.filter(
+              (game) => game.win === WinStatus.LOSS && validator(game)
+            ).length
         ),
         backgroundColor: mixColors.map((mixColor) => mixColor("#FF0000")),
       },

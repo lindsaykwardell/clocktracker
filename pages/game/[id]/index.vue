@@ -142,13 +142,18 @@
               }}
               {{ game.data.location ? ` (${game.data.location})` : "" }}
             </label>
-            <label class="flex gap-3 items-center">
+            <label
+              v-if="game.data?.win !== WinStatus.NOT_RECORDED"
+              class="flex gap-3 items-center"
+            >
               <span class="block">Win?</span>
               <template v-if="game.data.is_storyteller">
-                {{ game.data?.win ? "Good wins" : "Evil wins" }}
+                {{
+                  game.data?.win === WinStatus.WIN ? "Good wins" : "Evil wins"
+                }}
               </template>
               <template v-else>
-                {{ game.data?.win ? "Yes" : "No" }}
+                {{ game.data?.win === WinStatus.WIN ? "Yes" : "No" }}
               </template>
             </label>
             <label v-if="game.data.parent_game" class="flex gap-3 items-center">
@@ -376,7 +381,7 @@
 </template>
 
 <script setup lang="ts">
-import { GameRecord } from "~/composables/useGames";
+import { GameRecord, WinStatus } from "~/composables/useGames";
 import dayjs from "dayjs";
 import VueMarkdown from "vue-markdown-render";
 import { User } from "~/composables/useUsers";
