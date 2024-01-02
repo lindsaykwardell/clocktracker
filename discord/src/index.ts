@@ -2,7 +2,7 @@
 import "dotenv/config";
 import { Client, GatewayIntentBits, REST, Routes } from "discord.js";
 import { PrismaClient } from "@prisma/client";
-import { exportEmbed } from "./eventEmbed";
+import { eventEmbed } from "./eventEmbed";
 
 const prisma = new PrismaClient();
 
@@ -92,7 +92,7 @@ const main = async () => {
       //   `The next event is ${event.title} on ${event.start}. https://clocktracker.app/community/${community.slug}/event/${event.id}`
       // );
 
-      const embed = exportEmbed(event, community);
+      const embed = eventEmbed(event, community);
       const message = await interaction.channel.send({ embeds: [embed] });
 
       // Add emoji reactions to the message
