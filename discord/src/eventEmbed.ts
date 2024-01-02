@@ -1,7 +1,7 @@
 import { EmbedBuilder } from "discord.js";
 import { Event, Community, EventAttendee } from "@prisma/client";
 
-export function exportEmbed(
+export function eventEmbed(
   event: Event & { EventAttendee: EventAttendee[] },
   community: Community
 ) {
