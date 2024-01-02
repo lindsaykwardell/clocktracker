@@ -1,4 +1,4 @@
-import { Alignment, PrismaClient, RoleType } from "@prisma/client";
+import { Alignment, PrismaClient, RoleType, WinStatus } from "@prisma/client";
 // @ts-ignore
 import dayjs from "dayjs";
 
@@ -183,9 +183,15 @@ export default defineEventHandler(async (handler) => {
 
         if (!character) return acc;
 
-        if (game.win && character.alignment === Alignment.GOOD) {
+        if (
+          game.win === WinStatus.WIN &&
+          character.alignment === Alignment.GOOD
+        ) {
           win++;
-        } else if (!game.win && character.alignment === Alignment.EVIL) {
+        } else if (
+          game.win === WinStatus.LOSS &&
+          character.alignment === Alignment.EVIL
+        ) {
           win++;
         }
       } else {
@@ -194,7 +200,7 @@ export default defineEventHandler(async (handler) => {
 
         if (!character || character.role_id !== role.id) return acc;
 
-        win = game.win ? win + 1 : win;
+        win = game.win === WinStatus.WIN ? win + 1 : win;
       }
 
       return { total: acc.total + 1, win };

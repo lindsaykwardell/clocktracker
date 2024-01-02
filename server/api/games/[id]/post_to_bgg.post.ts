@@ -1,5 +1,10 @@
 import type { User } from "@supabase/supabase-js";
-import { Alignment, PrismaClient, PrivacySetting } from "@prisma/client";
+import {
+  Alignment,
+  PrismaClient,
+  PrivacySetting,
+  WinStatus,
+} from "@prisma/client";
 import axios from "axios";
 // @ts-ignore
 import dayjs from "dayjs";
@@ -144,16 +149,16 @@ export default defineEventHandler(async (handler) => {
         win: (() => {
           if (parentGameLastAlignment === Alignment.NEUTRAL) {
             if (token.alignment === Alignment.GOOD) {
-              return game.win;
+              return game.win === WinStatus.WIN;
             } else {
-              return !game.win;
+              return game.win !== WinStatus.WIN;
             }
           }
 
           if (token.alignment === parentGameLastAlignment) {
-            return game.win;
+            return game.win === WinStatus.WIN;
           } else {
-            return !game.win;
+            return game.win !== WinStatus.WIN;
           }
         })(),
         color:

@@ -6,6 +6,7 @@ import {
   Token,
   Grimoire,
   Alignment,
+  WinStatus,
 } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -128,16 +129,16 @@ export default defineEventHandler(async (handler) => {
     const win = (() => {
       if (parentGameLastAlignment === Alignment.NEUTRAL) {
         if (lastAlignment === Alignment.GOOD) {
-          return newGame.win;
+          return newGame.win === WinStatus.WIN;
         } else {
-          return !newGame.win;
+          return newGame.win === WinStatus.LOSS;
         }
       }
 
       if (lastAlignment === parentGameLastAlignment) {
-        return newGame.win;
+        return newGame.win === WinStatus.WIN;
       } else {
-        return !newGame.win;
+        return newGame.win === WinStatus.LOSS;
       }
     })();
 
@@ -155,7 +156,7 @@ export default defineEventHandler(async (handler) => {
           create: [...player_characters],
         },
         notes: "",
-        win,
+        win: win ? WinStatus.WIN : WinStatus.LOSS,
         // map the already created grimoires to the new game
         grimoire: {
           connect: newGame.grimoire.map((g) => ({ id: g.id })),
@@ -186,9 +187,9 @@ export default defineEventHandler(async (handler) => {
       if (friend !== null) {
         const win = (() => {
           if (parentGameLastAlignment === Alignment.GOOD) {
-            return newGame.win;
+            return newGame.win === WinStatus.WIN;
           } else {
-            return !newGame.win;
+            return newGame.win === WinStatus.LOSS;
           }
         })();
 
@@ -200,7 +201,7 @@ export default defineEventHandler(async (handler) => {
             user_id: friend.user_id,
             player_characters: {},
             notes: "",
-            win,
+            win: win ? WinStatus.WIN : WinStatus.LOSS,
             grimoire: {
               connect: newGame.grimoire.map((g) => ({ id: g.id })),
             },
