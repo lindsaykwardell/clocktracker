@@ -9,7 +9,7 @@
 
 <script setup lang="ts">
 import dayjs from "dayjs";
-import { GameRecord } from "~/composables/useGames";
+import { GameRecord, WinStatus } from "~/composables/useGames";
 
 definePageMeta({
   middleware: ["auth"],
@@ -59,7 +59,7 @@ const game = reactive<{
     };
     related_role?: { token_url: string };
   }[];
-  win: boolean;
+  win: WinStatus;
   notes: string;
   image_urls: string[];
   grimoire: {
@@ -120,7 +120,7 @@ const game = reactive<{
       related_role_id: null,
     },
   ],
-  win: savedGame.data.value?.win ? true : false,
+  win: savedGame.data.value?.win || WinStatus.NOT_RECORDED,
   notes: savedGame.data.value?.notes || "",
   image_urls: savedGame.data.value?.image_urls || [],
   grimoire: savedGame.data.value?.grimoire.length

@@ -1,5 +1,5 @@
 import UAParser from "ua-parser-js";
-import { GameRecord } from "./useGames";
+import { GameRecord, WinStatus } from "./useGames";
 import dayjs from "dayjs";
 import { FetchStatus } from "./useFetchStatus";
 
@@ -53,16 +53,16 @@ export const useBGStats = (g: ComputedRef<FetchStatus<GameRecord>>) => {
                 winner: (() => {
                   if (parentGameLastAlignment === "NEUTRAL") {
                     if (token.alignment === "GOOD") {
-                      return game.win;
+                      return game.win === WinStatus.WIN;
                     } else {
-                      return !game.win;
+                      return game.win === WinStatus.LOSS;
                     }
                   }
 
                   if (token.alignment === parentGameLastAlignment) {
-                    return game.win;
+                    return game.win === WinStatus.WIN;
                   } else {
-                    return !game.win;
+                    return game.win === WinStatus.LOSS;
                   }
                 })(),
               })),
@@ -92,7 +92,7 @@ export const useBGStats = (g: ComputedRef<FetchStatus<GameRecord>>) => {
                       .name
                   }`,
               sourcePlayerId: game.user.username,
-              winner: game.win,
+              winner: game.win === WinStatus.WIN,
             },
           ]
       ).filter((p) => !!p),
