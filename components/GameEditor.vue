@@ -38,7 +38,7 @@
             <template #title>
               <h2 class="text-2xl font-bold font-dumbledor">Select Script</h2>
             </template>
-            <section class="p-4">
+            <section class="p-4 flex flex-col gap-2">
               <div class="flex justify-around gap-8 pb-4">
                 <button
                   class="flex-1 w-1 hover:bg-stone-800 rounded-lg hover:shadow-xl"
@@ -60,6 +60,15 @@
                     src="/img/sects_and_violets.png"
                     alt="Sects and Violets"
                   />
+                </button>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <button
+                  v-for="script in recentScripts"
+                  @click="selectScript(script)"
+                  class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
+                >
+                  {{ script.name }}
                 </button>
               </div>
               <div class="relative">
@@ -282,7 +291,7 @@
           <input
             type="radio"
             v-model="game.win"
-            :value="true"
+            :value="WinStatus.WIN"
             class="block w-full border border-stone-500 rounded-md p-2"
           />
           <span class="block whitespace-nowrap">
@@ -294,13 +303,22 @@
           <input
             type="radio"
             v-model="game.win"
-            :value="false"
+            :value="WinStatus.LOSS"
             class="block w-full border border-stone-500 rounded-md p-2"
           />
           <span class="block whitespace-nowrap">
             <template v-if="game.is_storyteller">Evil wins</template>
             <template v-else>Loss</template>
           </span>
+        </label>
+        <label class="flex gap-2 items-center">
+          <input
+            type="radio"
+            v-model="game.win"
+            :value="WinStatus.NOT_RECORDED"
+            class="block w-full border border-stone-500 rounded-md p-2"
+          />
+          <span class="block whitespace-nowrap"> Not recorded </span>
         </label>
         <label class="flex gap-2 items-center">
           <input type="checkbox" v-model="game.ignore_for_stats" />
@@ -472,6 +490,7 @@ import { v4 as uuid } from "uuid";
 import naturalOrder from "natural-order";
 import { watchDebounced } from "@vueuse/core";
 import { Step, Placement } from "~/composables/useStep";
+import { WinStatus } from "~/composables/useGames";
 
 const tour: Step[] = [
   {
@@ -535,6 +554,11 @@ const roles = ref<
 >([]);
 const scripts = ref<{ id: number; name: string }[]>([]);
 const baseScripts = ref<{ id: number; name: string }[]>([]);
+const recentScripts = computed(() =>
+  games.getRecentScripts.filter(
+    (s) => !baseScripts.value.some((b) => b.id === s.id)
+  )
+);
 const tokenMode = ref<"role" | "related_role">("role");
 
 let focusedToken: Character | null = null;
@@ -639,7 +663,7 @@ const props = defineProps<{
       };
       related_role?: { token_url: string };
     }[];
-    win: boolean;
+    win: WinStatus;
     notes: string;
     image_urls: string[];
     grimoire: {

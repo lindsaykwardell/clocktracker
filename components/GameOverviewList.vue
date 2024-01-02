@@ -57,12 +57,16 @@
               class="w-8 h-8 md:w-12 md:h-12 col-span-auto z-10"
               :src="
                 game.is_storyteller
-                  ? game.win
+                  ? game.win === WinStatus.WIN
                     ? '/img/role/good.png'
-                    : '/img/role/evil.png'
-                  : game.win
+                    : game.win === WinStatus.LOSS
+                    ? '/img/role/evil.png'
+                    : '/1x1.png'
+                  : game.win === WinStatus.WIN
                   ? '/img/win.png'
-                  : '/img/loss.png'
+                  : game.win === WinStatus.LOSS
+                  ? '/img/loss.png'
+                  : '/1x1.png'
               "
             />
             <nuxt-link
@@ -95,7 +99,7 @@
 </template>
 
 <script setup lang="ts">
-import { GameRecord } from "~/composables/useGames";
+import { GameRecord, WinStatus } from "~/composables/useGames";
 import { useInfiniteScroll } from "@vueuse/core";
 
 const gamesStore = useGames();

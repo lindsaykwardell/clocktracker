@@ -9,6 +9,7 @@
 
 <script setup lang="ts">
 import dayjs from "dayjs";
+import { WinStatus } from "~/composables/useGames";
 
 definePageMeta({
   middleware: "auth",
@@ -50,7 +51,7 @@ const game = reactive<{
     };
     related_role?: { token_url: string };
   }[];
-  win: boolean;
+  win: WinStatus;
   notes: string;
   image_urls: string[];
   grimoire: {
@@ -104,7 +105,7 @@ const game = reactive<{
       },
     },
   ],
-  win: false,
+  win: WinStatus.NOT_RECORDED,
   notes: "",
   image_urls: [],
   grimoire: [

@@ -8,6 +8,7 @@
 <script setup lang="ts">
 import type { Game, Character } from "@prisma/client";
 import { Bar } from "vue-chartjs";
+import { WinStatus } from "~/composables/useGames";
 
 const props = defineProps<{
   games: (Game & {
@@ -31,12 +32,12 @@ const chartData = computed(() => ({
         games.value.filter(
           (game) =>
             game.player_characters[game.player_characters.length - 1]?.role
-              ?.type === "TOWNSFOLK" && game.win
+              ?.type === "TOWNSFOLK" && game.win === WinStatus.WIN
         ).length,
         games.value.filter(
           (game) =>
             game.player_characters[game.player_characters.length - 1]?.role
-              ?.type === "TOWNSFOLK" && !game.win
+              ?.type === "TOWNSFOLK" && game.win === WinStatus.LOSS
         ).length,
       ],
       backgroundColor: "blue",
@@ -47,12 +48,12 @@ const chartData = computed(() => ({
         games.value.filter(
           (game) =>
             game.player_characters[game.player_characters.length - 1]?.role
-              ?.type === "OUTSIDER" && game.win
+              ?.type === "OUTSIDER" && game.win === WinStatus.WIN
         ).length,
         games.value.filter(
           (game) =>
             game.player_characters[game.player_characters.length - 1]?.role
-              ?.type === "OUTSIDER" && !game.win
+              ?.type === "OUTSIDER" && game.win === WinStatus.LOSS
         ).length,
       ],
       backgroundColor: "lightblue",
@@ -63,12 +64,12 @@ const chartData = computed(() => ({
         games.value.filter(
           (game) =>
             game.player_characters[game.player_characters.length - 1]?.role
-              ?.type === "MINION" && game.win
+              ?.type === "MINION" && game.win === WinStatus.WIN
         ).length,
         games.value.filter(
           (game) =>
             game.player_characters[game.player_characters.length - 1]?.role
-              ?.type === "MINION" && !game.win
+              ?.type === "MINION" && game.win === WinStatus.LOSS
         ).length,
       ],
       backgroundColor: "pink",
@@ -79,12 +80,12 @@ const chartData = computed(() => ({
         games.value.filter(
           (game) =>
             game.player_characters[game.player_characters.length - 1]?.role
-              ?.type === "DEMON" && game.win
+              ?.type === "DEMON" && game.win === WinStatus.WIN
         ).length,
         games.value.filter(
           (game) =>
             game.player_characters[game.player_characters.length - 1]?.role
-              ?.type === "DEMON" && !game.win
+              ?.type === "DEMON" && game.win === WinStatus.LOSS
         ).length,
       ],
       backgroundColor: "red",
@@ -95,12 +96,12 @@ const chartData = computed(() => ({
         games.value.filter(
           (game) =>
             game.player_characters[game.player_characters.length - 1]?.role
-              ?.type === "TRAVELER" && game.win
+              ?.type === "TRAVELER" && game.win === WinStatus.WIN
         ).length,
         games.value.filter(
           (game) =>
             game.player_characters[game.player_characters.length - 1]?.role
-              ?.type === "TRAVELER" && !game.win
+              ?.type === "TRAVELER" && game.win === WinStatus.LOSS
         ).length,
       ],
       backgroundColor: "purple",
