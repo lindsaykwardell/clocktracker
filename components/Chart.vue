@@ -318,7 +318,7 @@ function getPivot(
                   ?.type === "TOWNSFOLK" && validator(game)
             ).length
         ),
-        backgroundColor: mixColors.map((mixColor) => mixColor("#0000FF")),
+        backgroundColor: "#0000FF",
       },
       {
         label: "Outsider",
@@ -330,7 +330,7 @@ function getPivot(
                   ?.type === "OUTSIDER" && validator(game)
             ).length
         ),
-        backgroundColor: mixColors.map((mixColor) => mixColor("#ADD8E6")),
+        backgroundColor: "#ADD8E6",
       },
       {
         label: "Minion",
@@ -342,7 +342,7 @@ function getPivot(
                   ?.type === "MINION" && validator(game)
             ).length
         ),
-        backgroundColor: mixColors.map((mixColor) => mixColor("#FFC0CB")),
+        backgroundColor: "#FFC0CB",
       },
       {
         label: "Demon",
@@ -354,7 +354,7 @@ function getPivot(
                   ?.type === "DEMON" && validator(game)
             ).length
         ),
-        backgroundColor: mixColors.map((mixColor) => mixColor("#FF0000")),
+        backgroundColor: "#FF0000",
       },
     ];
   } else if (props.options.pivot === "ALIGNMENT") {
@@ -369,7 +369,7 @@ function getPivot(
                   ?.alignment === "GOOD" && validator(game)
             ).length
         ),
-        backgroundColor: mixColors.map((mixColor) => mixColor("#0000FF")),
+        backgroundColor: "#0000FF",
       },
       {
         label: "Evil",
@@ -381,7 +381,7 @@ function getPivot(
                   ?.alignment === "EVIL" && validator(game)
             ).length
         ),
-        backgroundColor: mixColors.map((mixColor) => mixColor("#FF0000")),
+        backgroundColor: "#FF0000",
       },
     ];
   } else if (props.options.pivot === "SCRIPT") {
@@ -394,7 +394,7 @@ function getPivot(
               (game) => game.script === Script.TroubleBrewing && validator(game)
             ).length
         ),
-        backgroundColor: mixColors.map((mixColor) => mixColor("#FF0000")),
+        backgroundColor: "#FF0000",
       },
       {
         label: "Bad Moon Rising",
@@ -404,7 +404,7 @@ function getPivot(
               (game) => game.script === Script.BadMoonRising && validator(game)
             ).length
         ),
-        backgroundColor: mixColors.map((mixColor) => mixColor("#FFFF00")),
+        backgroundColor: "#FFFF00",
       },
       {
         label: "Sects and Violets",
@@ -415,7 +415,7 @@ function getPivot(
                 game.script === Script.SectsAndViolets && validator(game)
             ).length
         ),
-        backgroundColor: mixColors.map((mixColor) => mixColor("#800080")),
+        backgroundColor: "#800080",
       },
       {
         label: "Custom Script",
@@ -424,7 +424,7 @@ function getPivot(
             games.filter((game) => isBaseScript(game.script) && validator(game))
               .length
         ),
-        backgroundColor: mixColors.map((mixColor) => mixColor("#008000")),
+        backgroundColor: "#008000",
       },
     ];
   } else if (props.options.pivot === "GAME_SIZE") {
@@ -438,7 +438,7 @@ function getPivot(
                 game.player_count && game.player_count <= 6 && validator(game)
             ).length
         ),
-        backgroundColor: mixColors.map((mixColor) => mixColor("#ADD8E6")),
+        backgroundColor: "#ADD8E6",
       },
       {
         label: "1 Minion",
@@ -453,7 +453,7 @@ function getPivot(
             ).length
         ),
         // Blue
-        backgroundColor: mixColors.map((mixColor) => mixColor("#0000FF")),
+        backgroundColor: "#0000FF",
       },
       {
         label: "2 Minions",
@@ -468,7 +468,7 @@ function getPivot(
             ).length
         ),
         // Purple
-        backgroundColor: mixColors.map((mixColor) => mixColor("#800080")),
+        backgroundColor: "#800080",
       },
       {
         label: "3 Minions",
@@ -480,7 +480,7 @@ function getPivot(
             ).length
         ),
         // Red
-        backgroundColor: mixColors.map((mixColor) => mixColor("#FF0000")),
+        backgroundColor: "#FF0000",
       },
     ];
   } else if (props.options.pivot === "WIN") {
@@ -493,7 +493,7 @@ function getPivot(
               (game) => game.win === WinStatus.WIN && validator(game)
             ).length
         ),
-        backgroundColor: mixColors.map((mixColor) => mixColor("#0000FF")),
+        backgroundColor: "#0000FF",
       },
       {
         label: "No",
@@ -503,7 +503,7 @@ function getPivot(
               (game) => game.win === WinStatus.LOSS && validator(game)
             ).length
         ),
-        backgroundColor: mixColors.map((mixColor) => mixColor("#FF0000")),
+        backgroundColor: "#FF0000",
       },
     ];
   }
