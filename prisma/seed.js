@@ -677,6 +677,36 @@ async function main() {
     users.push(user);
   }
 
+  console.log("Seeding charts");
+
+  const charts = [
+    {
+      title: "Win Rate",
+      type: "BAR",
+      data: "WIN",
+      pivot: "ROLE",
+      width: 250,
+      height: 250,
+    },
+    {
+      title: "Role Types",
+      type: "PIE",
+      data: "ROLE",
+      pivot: null,
+      width: 250,
+      height: 250,
+    }
+  ]
+
+  for (const user of users) {
+    await prisma.chart.createMany({
+      data: charts.map((chart) => ({
+        ...chart,
+        user_id: user.user_id,
+      })),
+    });
+  }
+
   console.log("Seeding friends");
 
   await prisma.friendRequest.createMany({
