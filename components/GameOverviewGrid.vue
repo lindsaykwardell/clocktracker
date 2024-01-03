@@ -98,7 +98,7 @@
 </template>
 
 <script setup lang="ts">
-import { GameRecord, WinStatus } from "~/composables/useGames";
+import { WinStatus } from "~/composables/useGames";
 import { useInfiniteScroll } from "@vueuse/core";
 const gamesStore = useGames();
 

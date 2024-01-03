@@ -489,7 +489,6 @@ import type { RoleType } from "~/composables/useRoles";
 import { v4 as uuid } from "uuid";
 import naturalOrder from "natural-order";
 import { watchDebounced } from "@vueuse/core";
-import { Step, Placement } from "~/composables/useStep";
 import { WinStatus } from "~/composables/useGames";
 
 const tour: Step[] = [

@@ -9,7 +9,7 @@
 
 <script setup lang="ts">
 import dayjs from "dayjs";
-import { GameRecord, WinStatus } from "~/composables/useGames";
+import { WinStatus } from "~/composables/useGames";
 
 definePageMeta({
   middleware: ["auth"],
