@@ -4,6 +4,9 @@
       <Loading class="h-screen" />
     </template>
     <div v-else class="flex flex-col h-screen">
+      <div class="p-6">
+        <button @click="goBack" class="text-lg text-stone-400 hover:text-stone-300">← Back</button>
+      </div>
       <div class="flex-grow flex justify-center items-center">
         <Chart class="py-6 m-auto" :games="myGames.data" :options="options" />
       </div>
@@ -217,6 +220,14 @@ async function saveChart() {
     });
   }
 
+  if (me.value.status === Status.SUCCESS) {
+    router.push(`/@${me.value.data.username}?view=charts`);
+  } else {
+    router.push("/");
+  }
+}
+
+function goBack() {
   if (me.value.status === Status.SUCCESS) {
     router.push(`/@${me.value.data.username}?view=charts`);
   } else {
