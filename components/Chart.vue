@@ -519,24 +519,28 @@ const chartData = computed(() => ({
 const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
-  scales: {
-    x: {
-      stacked: true,
-      ticks: {
-        min: 0,
-        stepSize: 1,
-        max: 4,
-      },
-    },
-    y: {
-      stacked: true,
-      ticks: {
-        min: 0,
-        stepSize: 1,
-        max: 4,
-      },
-    },
-  },
+  scales:
+    props.options.type === "PIE" ||
+    props.options.type === "POLAR_AREA"
+      ? undefined
+      : {
+          x: {
+            stacked: true,
+            ticks: {
+              min: 0,
+              stepSize: 1,
+              max: 4,
+            },
+          },
+          y: {
+            stacked: true,
+            ticks: {
+              min: 0,
+              stepSize: 1,
+              max: 4,
+            },
+          },
+        },
   plugins: {
     legend: {
       display: false,
