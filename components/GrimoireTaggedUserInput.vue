@@ -12,7 +12,6 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { User } from "~/composables/useUsers";
 
 const props = defineProps<{
   users: User[];

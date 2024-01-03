@@ -53,7 +53,6 @@
 </template>
 
 <script setup lang="ts">
-import { GameRecord, WinStatus } from "~/composables/useGames";
 import { Bar, Pie, PolarArea } from "vue-chartjs";
 import { colord, extend } from "colord";
 import mixPlugin from "colord/plugins/mix";
@@ -520,8 +519,7 @@ const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
   scales:
-    props.options.type === "PIE" ||
-    props.options.type === "POLAR_AREA"
+    props.options.type === "PIE" || props.options.type === "POLAR_AREA"
       ? undefined
       : {
           x: {

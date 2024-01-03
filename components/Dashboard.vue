@@ -149,8 +149,6 @@
 </template>
 
 <script setup lang="ts">
-import { FetchStatus } from "~/composables/useFetchStatus";
-import { GameRecord } from "~/composables/useGames";
 import naturalOrder from "natural-order";
 
 const user = useSupabaseUser();

@@ -51,7 +51,7 @@
 
 <script setup lang="ts">
 import dayjs from "dayjs";
-import { Event } from "~/composables/useCommunities";
+import type { Event } from "~/composables/useCommunities";
 
 const route = useRoute();
 const slug = route.params.slug as string;
