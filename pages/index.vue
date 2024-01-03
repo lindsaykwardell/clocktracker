@@ -20,13 +20,12 @@
         Tell Your Clocktower Story
       </h1>
       <section
-        class="w-11/12 md:max-w-[800px] bg-stone-900 text-lg p-4 border border-stone-950 shadow-xl"
+        class="w-11/12 md:max-w-[800px] bg-stone-900 text-xl p-4 border border-stone-950 shadow-xl"
       >
         <p>
-          ClockTracker is an app to help you track your games of Blood on the
-          Clocktower. It allows you to record your games, and see what your
-          friends have been playing. You can also see what scripts and roles
-          you've been playing, and how you've been performing over time.
+          ClockTracker is a tool to record games of Blood on the Clocktower and
+          connect with friends. Join hundreds of players in tracking your games,
+          sharing your experiences, and improving your bluffs.
         </p>
       </section>
       <section
@@ -34,9 +33,9 @@
       >
         <img src="/img/home-grid.png" class="aspect-video w-96 object-cover" />
         <p class="text-lg w-11-12 md:w-1/2">
-          Record your games and share them with your friends. See what games you
-          have played over time, and remember the best experiences you've had
-          with your friends.
+          Record your games and share them with your friends. Look back at the
+          games you've played, and remember the best experiences you've had with
+          your friends.
         </p>
       </section>
       <section
