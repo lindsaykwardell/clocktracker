@@ -136,7 +136,6 @@
 </template>
 
 <script setup lang="ts">
-import { Community, CommunityPost } from "~/composables/useCommunities";
 import VueMarkdown from "vue-markdown-render";
 
 const user = useSupabaseUser();

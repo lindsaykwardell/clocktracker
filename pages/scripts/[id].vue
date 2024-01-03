@@ -177,9 +177,8 @@
 
 <script setup lang="ts">
 import type { Script, Role, RoleType, Alignment } from "@prisma/client";
-import { ChartOptions } from "chart.js";
+import type { ChartOptions } from "chart.js";
 import { Line, Pie } from "vue-chartjs";
-import { RecentGameRecord } from "~/composables/useGames";
 
 const route = useRoute();
 const { scriptLogo } = useScripts();
