@@ -38,7 +38,6 @@ import {
   ComboboxOptions,
   ComboboxOption,
 } from "@headlessui/vue";
-import { User } from "~/composables/useUsers";
 
 const props = defineProps<{
   users: User[];

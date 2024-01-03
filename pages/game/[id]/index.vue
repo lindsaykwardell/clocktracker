@@ -381,11 +381,9 @@
 </template>
 
 <script setup lang="ts">
-import { GameRecord, WinStatus } from "~/composables/useGames";
+import { WinStatus } from "~/composables/useGames";
 import dayjs from "dayjs";
 import VueMarkdown from "vue-markdown-render";
-import { User } from "~/composables/useUsers";
-import { FetchStatus } from "~/composables/useFetchStatus";
 
 const { scriptLogo } = useScripts();
 const config = useRuntimeConfig();

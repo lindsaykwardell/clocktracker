@@ -73,9 +73,6 @@
 </template>
 
 <script setup lang="ts">
-import { FetchStatus } from "~/composables/useFetchStatus";
-import { GameRecord } from "~/composables/useGames";
-
 const props = defineProps<{
   games: FetchStatus<GameRecord[]>;
   username: string;

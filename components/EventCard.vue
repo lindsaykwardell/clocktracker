@@ -24,7 +24,10 @@
         </div>
       </div>
       <h2 class="font-dumbledor text-lg lg:text-xl">{{ event.title }}</h2>
-      <VueMarkdown class="post text-sm md:text-base" :source="event.description" />
+      <VueMarkdown
+        class="post text-sm md:text-base"
+        :source="event.description"
+      />
       <div class="flex justify-between gap-2 items-center">
         <div>
           <template v-if="event.player_count">
@@ -51,7 +54,7 @@
 </template>
 
 <script setup lang="ts">
-import { Event } from "~/composables/useCommunities";
+import type { Event } from "~/composables/useCommunities";
 import VueMarkdown from "vue-markdown-render";
 
 const props = defineProps<{
