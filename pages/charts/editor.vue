@@ -3,130 +3,140 @@
     <template v-if="myGames.status !== Status.SUCCESS">
       <Loading class="h-screen" />
     </template>
-    <template v-else>
-      <div class="flex gap-2">
-        <input
-          type="text"
-          class="flex-grow block border border-stone-500 rounded-md p-2"
-          v-model="options.title"
-        />
-        <button
-          @click="saveChart"
-          class="bg-green-700 hover:bg-green-800 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
-        >
-          Save
-        </button>
+    <div v-else class="flex flex-col h-screen">
+      <div class="p-6">
+        <button @click="goBack" class="text-lg text-stone-400 hover:text-stone-300">← Back</button>
       </div>
-      <div class="flex gap-2 w-full">
-        <label class="flex-1 flex items-center gap-1">
-          Chart Type
-          <select
-            class="block border w-full border-stone-500 rounded-md p-2"
-            v-model="options.type"
-          >
-            <option value="LIST">List</option>
-            <option value="BAR">Bar</option>
-            <option value="PIE">Pie</option>
-            <option value="POLAR_AREA">Polar Area</option>
-          </select>
-        </label>
-        <label class="flex-1 flex items-center gap-1">
-          Data Field
-          <select
-            class="block border w-full border-stone-500 rounded-md p-2"
-            v-model="options.data"
-          >
-            <option value="ALIGNMENT">Alignment</option>
-            <option value="GAME_SIZE">Game Size</option>
-            <option value="ROLE">Role</option>
-            <option value="SCRIPT">Script</option>
-            <option value="WIN">Win</option>
-          </select>
-        </label>
-        <!-- refactor the below radio buttons into a select dropdown -->
-        <label class="flex-1 flex items-center gap-1">
-          Pivot
-          <select
-            class="block border w-full border-stone-500 rounded-md p-2"
-            v-model="options.pivot"
-          >
-            <option :value="null">Do not pivot</option>
-            <option value="ALIGNMENT">Alignment</option>
-            <option value="GAME_SIZE">Game Size</option>
-            <option value="ROLE">Role</option>
-            <option value="SCRIPT">Script</option>
-            <option value="WIN">Win</option>
-          </select>
-        </label>
-        <label class="flex-1 flex items-center gap-1">
-          Width
-          <input
-            type="number"
-            class="block border w-full border-stone-500 rounded-md p-2"
-            v-model="options.width"
-            placeholder="250"
-          />
-        </label>
-        <label class="flex-1 flex items-center gap-1">
-          Height
-          <input
-            type="number"
-            class="block border w-full border-stone-500 rounded-md p-2"
-            v-model="options.height"
-            placeholder="250"
-          />
-        </label>
+      <div class="flex-grow flex justify-center items-center">
+        <Chart class="py-6 m-auto" :games="myGames.data" :options="options" />
       </div>
-      <div class="flex justify-between">
-        <div class="flex-1 flex gap-1">
-          <select v-model="selectedIncludeTag" class="">
-            <option :value="null">Include Tag</option>
-            <option
-              v-for="tag in myTags.filter(
-                (tag) =>
-                  !options.include_tags.includes(tag) &&
-                  !options.exclude_tags.includes(tag)
-              )"
+      <div class="p-6 m-6 bg-stone-950">
+        <div class="flex gap-2">
+          <label class="flex items-center gap-1 flex-grow">
+            Title
+            <input
+              type="text"
+              class="flex-grow block border border-stone-500 rounded-md p-2"
+              v-model="options.title"
+            />
+          </label>
+          <button
+            @click="saveChart"
+            class="bg-green-700 hover:bg-green-800 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
+          >
+            Save
+          </button>
+        </div>
+        <div class="flex gap-2 w-full">
+          <label class="flex-1 flex items-center gap-1">
+            Chart Type
+            <select
+              class="block border w-full border-stone-500 rounded-md p-2"
+              v-model="options.type"
             >
-              {{ tag }}
-            </option>
-          </select>
-          <div class="flex flex-wrap gap-2">
-            <button
-              v-for="(tag, index) in options.include_tags"
-              class="bg-blue-600 hover:bg-blue-700 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
-              @click.prevent="options.include_tags.splice(index, 1)"
+              <option value="LIST">List</option>
+              <option value="BAR">Bar</option>
+              <option value="PIE">Pie</option>
+              <option value="POLAR_AREA">Polar Area</option>
+            </select>
+          </label>
+          <label class="flex-1 flex items-center gap-1">
+            Data Field
+            <select
+              class="block border w-full border-stone-500 rounded-md p-2"
+              v-model="options.data"
             >
-              {{ tag }}
-            </button>
+              <option value="ALIGNMENT">Alignment</option>
+              <option value="GAME_SIZE">Game Size</option>
+              <option value="ROLE">Role</option>
+              <option value="SCRIPT">Script</option>
+              <option value="WIN">Win</option>
+            </select>
+          </label>
+          <!-- refactor the below radio buttons into a select dropdown -->
+          <label class="flex-1 flex items-center gap-1">
+            Pivot
+            <select
+              class="block border w-full border-stone-500 rounded-md p-2"
+              v-model="options.pivot"
+            >
+              <option :value="null">Do not pivot</option>
+              <option value="ALIGNMENT">Alignment</option>
+              <option value="GAME_SIZE">Game Size</option>
+              <option value="ROLE">Role</option>
+              <option value="SCRIPT">Script</option>
+              <option value="WIN">Win</option>
+            </select>
+          </label>
+          <label class="flex-1 flex items-center gap-1">
+            Width
+            <input
+              type="number"
+              class="block border w-full border-stone-500 rounded-md p-2"
+              v-model="options.width"
+              placeholder="250"
+            />
+          </label>
+          <label class="flex-1 flex items-center gap-1">
+            Height
+            <input
+              type="number"
+              class="block border w-full border-stone-500 rounded-md p-2"
+              v-model="options.height"
+              placeholder="250"
+            />
+          </label>
+        </div>
+        <div class="flex justify-between">
+          <div class="flex-1 flex gap-1">
+            <select v-model="selectedIncludeTag" class="">
+              <option :value="null">Include Tag</option>
+              <option
+                v-for="tag in myTags.filter(
+                  (tag) =>
+                    !options.include_tags.includes(tag) &&
+                    !options.exclude_tags.includes(tag)
+                )"
+              >
+                {{ tag }}
+              </option>
+            </select>
+            <div class="flex flex-wrap gap-2">
+              <button
+                v-for="(tag, index) in options.include_tags"
+                class="bg-blue-600 hover:bg-blue-700 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
+                @click.prevent="options.include_tags.splice(index, 1)"
+              >
+                {{ tag }}
+              </button>
+            </div>
+          </div>
+          <div class="flex-1 flex gap-1">
+            <select v-model="selectedExcludeTag" class="">
+              <option :value="null">Exclude Tag</option>
+              <option
+                v-for="tag in myTags.filter(
+                  (tag) =>
+                    !options.include_tags.includes(tag) &&
+                    !options.exclude_tags.includes(tag)
+                )"
+              >
+                {{ tag }}
+              </option>
+            </select>
+            <div class="flex flex-wrap gap-2">
+              <button
+                v-for="(tag, index) in options.exclude_tags"
+                class="bg-red-600 hover:bg-red-700 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
+                @click.prevent="options.exclude_tags.splice(index, 1)"
+              >
+                {{ tag }}
+              </button>
+            </div>
           </div>
         </div>
-        <div class="flex-1 flex gap-1">
-          <select v-model="selectedExcludeTag" class="">
-            <option :value="null">Exclude Tag</option>
-            <option
-              v-for="tag in myTags.filter(
-                (tag) =>
-                  !options.include_tags.includes(tag) &&
-                  !options.exclude_tags.includes(tag)
-              )"
-            >
-              {{ tag }}
-            </option>
-          </select>
-          <div class="flex flex-wrap gap-2">
-            <button
-              v-for="(tag, index) in options.exclude_tags"
-              class="bg-red-600 hover:bg-red-700 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
-              @click.prevent="options.exclude_tags.splice(index, 1)"
-            >
-              {{ tag }}
-            </button>
-          </div>
-        </div>
       </div>
-      <Chart class="py-6 m-auto" :games="myGames.data" :options="options" />
-    </template>
+    </div>
   </StandardTemplate>
 </template>
 
@@ -210,6 +220,14 @@ async function saveChart() {
     });
   }
 
+  if (me.value.status === Status.SUCCESS) {
+    router.push(`/@${me.value.data.username}?view=charts`);
+  } else {
+    router.push("/");
+  }
+}
+
+function goBack() {
   if (me.value.status === Status.SUCCESS) {
     router.push(`/@${me.value.data.username}?view=charts`);
   } else {

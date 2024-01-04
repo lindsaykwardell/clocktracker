@@ -26,9 +26,6 @@
 </template>
 
 <script setup lang="ts">
-import { FetchStatus } from "~/composables/useFetchStatus";
-import { User } from "~/composables/useUsers";
-
 definePageMeta({
   middleware: "auth",
 });
