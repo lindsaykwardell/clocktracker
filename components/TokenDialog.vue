@@ -46,7 +46,8 @@
 </template>
 
 <script setup lang="ts">
-import { Alignment, Role } from "@prisma/client";
+import { Alignment } from "@prisma/client";
+import type { Role } from "@prisma/client";
 import naturalOrder from "natural-order";
 import { RoleType } from "~/composables/useRoles";
 

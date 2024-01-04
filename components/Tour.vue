@@ -14,8 +14,6 @@
 </template>
 
 <script setup lang="ts">
-import type { Step } from "~/composables/useStep";
-
 const tour = ref();
 const tourStarted = ref(false);
 

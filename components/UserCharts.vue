@@ -19,7 +19,7 @@
             </option>
           </select>
         </label>
-        <div class="flex flex-wrap gap-2">
+        <div class="flex flex-wrap gap-2 flex-grow">
           <button
             v-for="(tag, index) in selectedTags"
             class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
@@ -30,7 +30,7 @@
         </div>
         <nuxt-link
           to="/charts/editor"
-          class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
+          class="bg-blue-700 hover:bg-blue-800 transition duration-150 px-3 py-2 rounded flex items-center gap-2"
         >
           Add Chart
         </nuxt-link>
@@ -51,20 +51,13 @@
             :games="filteredGames"
             class="sm:w-1/2 md:w-2/5 pl-4"
           />
-          <WinRateByRole
-            :games="filteredGames"
-            class="h-[250px] w-screen md:w-1/3"
-          />
-          <RoleType
-            :games="filteredGames"
-            class="h-[250px] w-screen md:w-1/3"
-          />
           <Chart
             v-for="chart in allCharts"
             :games="filteredGames"
             :options="chart"
             showControls
             @deleteChart="deleteChart"
+            class="m-4"
           />
         </template>
       </div>
@@ -80,9 +73,6 @@
 </template>
 
 <script setup lang="ts">
-import { FetchStatus } from "~/composables/useFetchStatus";
-import { GameRecord } from "~/composables/useGames";
-
 const props = defineProps<{
   games: FetchStatus<GameRecord[]>;
   username: string;

@@ -130,7 +130,7 @@
 </template>
 
 <script setup lang="ts">
-import { Event } from "~/composables/useCommunities";
+import type { Event } from "~/composables/useCommunities";
 import dayjs from "dayjs";
 
 type EventView = Event & {
