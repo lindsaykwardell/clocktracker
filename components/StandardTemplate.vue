@@ -96,8 +96,6 @@
 </template>
 
 <script setup lang="ts">
-import { Step } from "~/composables/useStep";
-
 const user = useSupabaseUser();
 const friends = useFriends();
 
