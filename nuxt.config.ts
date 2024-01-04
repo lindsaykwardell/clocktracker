@@ -82,6 +82,9 @@ export default defineNuxtConfig({
       ],
     },
   },
+  supabase: {
+    redirect: false,
+  },
   runtimeConfig: {
     public: {
       sentryDsn: process.env.SENTRY_DSN,
