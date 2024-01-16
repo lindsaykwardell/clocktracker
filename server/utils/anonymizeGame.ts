@@ -101,7 +101,7 @@ export async function anonymizeGame(
     game.storyteller = shortenName(game.storyteller);
     game.co_storytellers.map(shortenName);
     game.location = shortenName(game.location);
-    game.community = shortenName(game.community);
+    game.community_name = shortenName(game.community_name);
 
     game.grimoire.map((g) =>
       g.tokens.map((t) => {
