@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { FetchStatus } from "./useFetchStatus";
+import type { FetchStatus } from "./useFetchStatus";
 import type { Game, Character, Grimoire, Token } from "@prisma/client";
 import naturalOrder from "natural-order";
 
@@ -364,6 +364,20 @@ export const useGames = defineStore("games", {
     async fetchRecentGamesForScript(scriptId: number) {
       const games = await $fetch<RecentGameRecord[]>(
         `/api/script/${scriptId}/recent`
+      );
+
+      for (const game of games) {
+        this.games.set(game.id, {
+          status: Status.SUCCESS,
+          data: game,
+        });
+      }
+
+      return games;
+    },
+    async fetchRecentGamesForRole(role_id: string) {
+      const games = await $fetch<RecentGameRecord[]>(
+        `/api/role/${role_id}/recent`
       );
 
       for (const game of games) {
