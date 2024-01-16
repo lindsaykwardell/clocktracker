@@ -38,6 +38,12 @@ export default defineEventHandler(async (handler) => {
       waiting_for_confirmation: false,
     },
     include: {
+      user: {
+        select: {
+          privacy: true,
+          username: true,
+        },
+      },
       player_characters: {
         include: {
           role: {
@@ -65,6 +71,16 @@ export default defineEventHandler(async (handler) => {
         },
         orderBy: {
           id: "asc",
+        },
+      },
+      parent_game: {
+        select: {
+          user: {
+            select: {
+              username: true,
+              display_name: true,
+            },
+          },
         },
       },
       community: {
