@@ -33,7 +33,7 @@
               <div class="flex flex-wrap justify-around gap-3 p-4">
                 <a
                   v-for="role in roleGroup.roles"
-                  :href="`https://wiki.bloodontheclocktower.com/${role.name}`"
+                  :href="`/roles/${role.id}`"
                   target="_blank"
                   class="token-wrapper hover:underline flex flex-col items-center gap-2"
                 >

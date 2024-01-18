@@ -15,7 +15,6 @@
               </h1>
             </div>
           </div>
-          <GameOverviewGrid :games="recentGames" readonly cardWidth="w-1/2 xl:w-1/3" />
         </div>
         <div class="flex flex-col gap-1 print:w-full">
           <Token
@@ -71,7 +70,7 @@
               <tr v-for="script in role_data.popular_scripts">
                 <td>
                   <a
-                    :href="`/script/${script.script}`"
+                    :href="`/scripts/${script.script}`"
                     target="_blank"
                     class="hover:underline"
                   >
@@ -87,6 +86,11 @@
         </div>
       </div>
     </section>
+    <GameOverviewGrid
+      :games="recentGames"
+      readonly
+      cardWidth="w-1/2 xl:w-1/3"
+    />
   </StandardTemplate>
 </template>
 
@@ -102,7 +106,17 @@ const users = useUsers();
 const recentGames = ref<RecentGameRecord[]>([]);
 
 const myGamesWithRole = computed(() => {
-  return [];
+  if (!user.value) return [];
+  const me = users.getUserById(user.value.id);
+
+  if (me.status !== Status.SUCCESS) return [];
+  const myGames = games.getByPlayer(me.data.username);
+
+  if (myGames.status !== Status.SUCCESS) return [];
+
+  return myGames.data.filter((game) =>
+    game.player_characters.some((character) => character.role_id === role_id)
+  );
 });
 
 const role_data = await $fetch(`/api/role/${role_id}`);
