@@ -59,7 +59,7 @@
             </div>
             <div class="font-dumbledor text-2xl">
               <a
-                :href="`https://wiki.bloodontheclocktower.com/${last_character?.name}`"
+                :href="`/roles/${last_character?.id}`"
                 target="_blank"
                 class="hover:underline flex flex-col items-center"
               >
