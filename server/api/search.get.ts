@@ -146,9 +146,54 @@ export default defineEventHandler(async (handler) => {
     },
   });
 
+  const roles = await prisma.role.findMany({
+    where: {
+      name: {
+        contains: query,
+        mode: "insensitive",
+      },
+    },
+    // We need to count the number of games a given role appears in
+    // Roles are included in games via Character, which has a many to one relationship with Game
+    // We can't use _count here because it doesn't support nested includes
+    include: {
+      _count: {
+        select: {
+          scripts: true,
+        },
+      },
+      character: {
+        select: {
+          game: {
+            select: {
+              id: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
   return {
     communities,
     users,
     scripts,
+    roles: roles.map((role) => ({
+      id: role.id,
+      name: role.name,
+      initial_alignment: role.initial_alignment,
+      type: role.type,
+      token_url: role.token_url,
+      _count: {
+        scripts: role._count.scripts,
+        games: role.character.reduce((acc, character) => {
+          if (character?.game && !acc.includes(character.game.id)) {
+            acc.push(character.game.id);
+          }
+
+          return acc;
+        }, [] as string[]).length,
+      },
+    })),
   };
 });
