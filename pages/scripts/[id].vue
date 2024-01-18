@@ -149,7 +149,7 @@
               >
                 <td>
                   <a
-                    :href="`https://wiki.bloodontheclocktower.com/${role[0]}`"
+                    :href="`/roles/${role[0].toLowerCase().replace(/ /g, '_')}`"
                     target="_blank"
                     class="hover:underline"
                   >
@@ -419,7 +419,7 @@ const scriptLink = computed(() => {
   if (script.name === "Sects and Violets")
     return "https://wiki.bloodontheclocktower.com/Sects_%26_Violets";
   else {
-    return `https://botc-scripts.azurewebsites.net/script/${script.id}/${script.version}/`;
+    return `https://botcscripts.com/script/${script.id}/${script.version}/`;
   }
 });
 
