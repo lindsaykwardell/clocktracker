@@ -208,6 +208,5 @@ const wikiUrl = computed(() => {
 
 onMounted(async () => {
   recentGames.value = await games.fetchRecentGamesForRole(role_id);
-  console.log(recentGames.value);
 });
 </script>
