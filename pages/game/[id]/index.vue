@@ -146,14 +146,14 @@
               v-if="game.data?.win !== WinStatus.NOT_RECORDED"
               class="flex gap-3 items-center"
             >
-              <span class="block">Win?</span>
+              <span class="block">Result</span>
               <template v-if="game.data.is_storyteller">
                 {{
                   game.data?.win === WinStatus.WIN ? "Good wins" : "Evil wins"
                 }}
               </template>
               <template v-else>
-                {{ game.data?.win === WinStatus.WIN ? "Yes" : "No" }}
+                {{ game.data?.win === WinStatus.WIN ? "Win" : "Loss" }}
               </template>
             </label>
             <label v-if="game.data.parent_game" class="flex gap-3 items-center">
