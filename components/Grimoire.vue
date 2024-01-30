@@ -10,29 +10,56 @@
         <button
           type="button"
           @click.prevent="token.is_dead = !token.is_dead"
-          :disabled="readonly"
+          :disabled="props.readonly"
           class="absolute top-0 left-0 z-10 flex justify-center w-full duration-200"
           :class="{
-            'cursor-default': readonly,
+            'cursor-default': props.readonly,
             'opacity-0': !token.is_dead,
             'hover:opacity-50 transition hover:-translate-y-2':
-              !readonly && !token.is_dead,
+              !props.readonly && !token.is_dead,
           }"
         >
           <img src="/img/shroud.png" class="w-8 md:w-10" />
         </button>
+        <a
+          v-if="props.readonly && token.role_id"
+          :href="`/roles/${token.role_id}`"
+          target="_blank"
+          class="hover:underline flex flex-col items-center"
+        >
+          <Token
+            @clickRole="
+              !props.readonly ? openRoleSelectionDialog(token, 'role') : null
+            "
+            @clickRelated="
+              !props.readonly
+                ? openRoleSelectionDialog(token, 'related_role')
+                : null
+            "
+            @clickAlignment="toggleAlignment(token)"
+            :character="token"
+            size="md"
+            :class="{ 'cursor-pointer': !props.readonly }"
+            :alwaysShowAlignment="!props.readonly && !!token.role"
+          />
+        </a>
         <Token
-          @clickRole="!readonly ? openRoleSelectionDialog(token, 'role') : null"
+          v-else
+          @clickRole="
+            !props.readonly ? openRoleSelectionDialog(token, 'role') : null
+          "
           @clickRelated="
-            !readonly ? openRoleSelectionDialog(token, 'related_role') : null
+            !props.readonly
+              ? openRoleSelectionDialog(token, 'related_role')
+              : null
           "
           @clickAlignment="toggleAlignment(token)"
           :character="token"
           size="md"
-          :class="{ 'cursor-pointer': !readonly }"
-          :alwaysShowAlignment="!readonly && !!token.role"
+          :class="{ 'cursor-pointer': !props.readonly }"
+          :alwaysShowAlignment="!props.readonly && !!token.role"
         />
-        <div v-if="!readonly" class="relative z-50">
+        <div v-if="!props.readonly" class="relative z-50">
           <ClientOnly>
             <GrimoireTaggedUserInput
               :users="filteredTaggablePlayers"
