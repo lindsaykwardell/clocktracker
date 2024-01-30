@@ -78,15 +78,19 @@ export default defineEventHandler(async (handler) => {
         },
       },
     },
-    orderBy: {
-      _count: {
-        script_id: "desc",
+    orderBy: [
+      {
+        _count: {
+          script_id: "desc",
+        },
       },
-    },
+      {
+        script: "asc",
+      },
+    ],
     _count: {
       script_id: true,
     },
-    take: 10,
   });
 
   const popular_scripts_formatted = popular_scripts.map((script) => {

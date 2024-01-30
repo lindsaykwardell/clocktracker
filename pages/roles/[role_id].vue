@@ -13,7 +13,40 @@
               <h1 class="text-3xl font-dumbledor">
                 {{ role_data.role.name }}
               </h1>
+              <h2 class="text-xl font-dumbledor">
+                {{ role_data.role.type }}
+              </h2>
             </div>
+          </div>
+          <div class="flex flex-wrap gap-2 py-6">
+            <a
+              v-for="script in role_data.popular_scripts"
+              :href="`/script/${script.script}`"
+              target="_blank"
+              class="script-wrapper hover:underline flex flex-col items-center gap-2"
+            >
+              <div class="relative flex justify-center items-center">
+                <div
+                  class="script-chart absolute w-32 h-32 md:w-44 md:h-44 -left-2 -top-2 transition duration-200 ease-in-out print:hidden"
+                >
+                  <Pie
+                    :data="
+                      perScriptRadioData(
+                        script.wins,
+                        script.count - script.wins
+                      )
+                    "
+                    :options="scriptWinRatioOptions"
+                  />
+                </div>
+                <!-- <Token :character="formatRoleAsCharacter(role)" size="md" /> -->
+                <img
+                  class="relative z-50 w-28 h-28 md:w-40 md:h-40 bg-slate-200/30 hover:bg-slate-200/50 transition duration-200 rounded-full overflow-visible"
+                  :src="scripts.scriptLogo(script.script)"
+                />
+              </div>
+              <span>{{ script.script }}</span>
+            </a>
           </div>
         </div>
         <div class="flex flex-col gap-1 print:w-full">
@@ -67,7 +100,7 @@
                   <th>Win %</th>
                 </tr>
               </thead>
-              <tr v-for="script in role_data.popular_scripts">
+              <tr v-for="script in topTenScripts">
                 <td>
                   <a
                     :href="`/scripts/${script.script}`"
@@ -102,6 +135,7 @@ const role_id = route.params.role_id as string;
 const games = useGames();
 const user = useSupabaseUser();
 const users = useUsers();
+const scripts = useScripts();
 
 const recentGames = ref<RecentGameRecord[]>([]);
 
@@ -118,6 +152,10 @@ const myGamesWithRole = computed(() => {
     game.player_characters.some((character) => character.role_id === role_id)
   );
 });
+
+const topTenScripts = computed(() =>
+  [...role_data.popular_scripts].slice(0, 10)
+);
 
 const role_data = await $fetch(`/api/role/${role_id}`);
 
@@ -183,10 +221,36 @@ const winRatioData = computed(() => ({
   ],
 }));
 
+function perScriptRadioData(wins: number, losses: number) {
+  return {
+    labels: ["Win", "Loss"],
+    datasets: [
+      {
+        data: [wins, losses],
+        hoverOffset: 4,
+        backgroundColor: ["blue", "red"],
+      },
+    ],
+  };
+}
+
 const winRatioOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: true,
   plugins: {
+    legend: {
+      display: false,
+    },
+  },
+}));
+
+const scriptWinRatioOptions = computed(() => ({
+  responsive: true,
+  maintainAspectRatio: true,
+  plugins: {
+    tooltip: {
+      enabled: false,
+    },
     legend: {
       display: false,
     },
@@ -210,3 +274,17 @@ onMounted(async () => {
   recentGames.value = await games.fetchRecentGamesForRole(role_id);
 });
 </script>
+
+<style scoped>
+.script-wrapper {
+  .script-chart {
+    @apply opacity-40;
+  }
+
+  &:hover {
+    .script-chart {
+      @apply opacity-100;
+    }
+  }
+}
+</style>
