@@ -5,7 +5,7 @@
       <li v-for="(character, i) in characters" :key="character.name">
         {{ i + 1 }}.
         <a
-          :href="`https://wiki.bloodontheclocktower.com/${character.name}`"
+          :href="`/roles/${character.name.toLowerCase().replace(/ /g, '_')}`"
           target="_blank"
           class="hover:underline"
           >{{ character.name }}</a
@@ -30,7 +30,7 @@ const props = defineProps<{
 // Return the top five characters
 const characters = computed(() => {
   const allPlayedCharacters = props.games
-    .filter(game => !game.ignore_for_stats)
+    .filter((game) => !game.ignore_for_stats)
     .flatMap((game) => game.player_characters)
     .filter((character) => character.name && character.name !== "Storyteller");
 
