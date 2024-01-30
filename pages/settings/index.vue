@@ -13,6 +13,9 @@
           <input
             v-model="username"
             class="block w-full border border-stone-500 rounded-md p-2"
+            pattern="^[a-zA-Z0-9_-]*$"
+            title="Username can only contain letters, numbers, underscores, and dashes."
+            required
           />
         </label>
         <label class="block w-full xl:w-3/4">
