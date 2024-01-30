@@ -59,7 +59,7 @@
             </div>
             <div class="font-dumbledor text-2xl">
               <a
-                :href="`/roles/${last_character?.id}`"
+                :href="`/roles/${last_character?.role_id}`"
                 target="_blank"
                 class="hover:underline flex flex-col items-center"
               >
