@@ -21,7 +21,7 @@
           <div class="flex flex-wrap gap-2 py-6">
             <a
               v-for="script in role_data.popular_scripts"
-              :href="`/script/${script.script}`"
+              :href="`/scripts/${script.script}`"
               target="_blank"
               class="script-wrapper hover:underline flex flex-col items-center gap-2"
             >
