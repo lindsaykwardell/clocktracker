@@ -319,6 +319,7 @@
         <button
           v-if="similarGames.length > 0"
           @click="showSimilarGamesDialog = true"
+          :disabled="mergeInFlight"
           class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial"
         >
           Merge with similar game
@@ -384,6 +385,7 @@
 import { WinStatus } from "~/composables/useGames";
 import dayjs from "dayjs";
 import VueMarkdown from "vue-markdown-render";
+import { merge } from "cypress/types/lodash";
 
 const { scriptLogo } = useScripts();
 const config = useRuntimeConfig();
@@ -396,6 +398,7 @@ const communities = useCommunities();
 const friends = useFriends();
 const gameId = route.params.id as string;
 const bggInFlight = ref(false);
+const mergeInFlight = ref(false);
 
 const game = computed(() => games.getGame(gameId));
 const player = computed<FetchStatus<User>>(() => {
@@ -583,6 +586,7 @@ async function confirmGame() {
 
 async function confirmMergeGame(game: GameRecord) {
   if (confirm("Are you sure you want to merge these games?")) {
+    mergeInFlight.value = true;
     const result = await $fetch<GameRecord>(`/api/games/${gameId}/merge`, {
       method: "POST",
       body: game,
