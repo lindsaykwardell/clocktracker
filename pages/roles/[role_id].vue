@@ -18,12 +18,12 @@
               </h2>
             </div>
           </div>
-          <div class="flex flex-wrap gap-2 py-6">
+          <div class="flex flex-wrap py-6">
             <a
               v-for="script in role_data.popular_scripts"
               :href="`/scripts/${script.script}`"
               target="_blank"
-              class="script-wrapper hover:underline flex flex-col items-center gap-2"
+              class="script-wrapper hover:underline flex flex-col items-center gap-2 w-1/4 text-center p-2"
             >
               <div class="relative flex justify-center items-center">
                 <div
@@ -41,7 +41,7 @@
                 </div>
                 <!-- <Token :character="formatRoleAsCharacter(role)" size="md" /> -->
                 <img
-                  class="relative z-50 w-28 h-28 md:w-40 md:h-40 bg-slate-200/30 hover:bg-slate-200/50 transition duration-200 rounded-full overflow-visible"
+                  class="token relative z-50 w-28 h-28 md:w-40 md:h-40 transition duration-200 rounded-full overflow-visible"
                   :src="scripts.scriptLogo(script.script)"
                 />
               </div>
@@ -286,5 +286,12 @@ onMounted(async () => {
       @apply opacity-100;
     }
   }
+}
+
+.token {
+  background-image: url("/img/token-bg.png");
+  /* cover and fit the bg */
+  background-size: cover;
+  background-position: center;
 }
 </style>
