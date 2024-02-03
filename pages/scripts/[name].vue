@@ -184,10 +184,10 @@ const route = useRoute();
 const { scriptLogo } = useScripts();
 const allGames = useGames();
 
-const scriptIdOrName = route.params.id as string;
+const scriptName = route.params.name as string;
 
 const script = await $fetch<Script & { roles: Role[] }>(
-  "/api/script/" + scriptIdOrName
+  "/api/script/" + scriptName
 );
 
 useHead({

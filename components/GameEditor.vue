@@ -117,6 +117,24 @@
             </section>
           </Dialog>
         </label>
+        <div v-if="scriptVersions.length > 1" class="flex flex-col gap-1">
+          <label>
+            <span class="block">Script Version</span>
+            <select
+              v-model="game.script_id"
+              class="block w-full border border-stone-500 rounded-md p-2"
+            >
+              <option
+                v-for="version in naturalOrder(scriptVersions)
+                  .orderBy('desc')
+                  .sort()"
+                :value="version.id"
+              >
+                {{ version.version }}
+              </option>
+            </select>
+          </label>
+        </div>
         <div class="flex-1 flex flex-col justify-start">
           <label>
             <span class="block">Storyteller</span>
@@ -558,6 +576,7 @@ const recentScripts = computed(() =>
     (s) => !baseScripts.value.some((b) => b.id === s.id)
   )
 );
+const scriptVersions = ref<{ id: number; version: string }[]>([]);
 const tokenMode = ref<"role" | "related_role">("role");
 
 let focusedToken: Character | null = null;
@@ -804,6 +823,7 @@ function selectScript(script: { name: string; id: number | null }) {
 
 watchEffect(async () => {
   roles.value = [];
+
   if (props.game.script_id) {
     const result = await $fetch<{
       roles: {
@@ -815,6 +835,11 @@ watchEffect(async () => {
       }[];
     }>(`/api/script/${props.game.script_id}`);
     roles.value = result.roles ?? [];
+
+    const versions = await $fetch(
+      `/api/script/${props.game.script_id}/versions`
+    );
+    scriptVersions.value = versions;
   } else {
     const result = await $fetch<
       {
@@ -826,6 +851,7 @@ watchEffect(async () => {
       }[]
     >("/api/roles");
     roles.value = result ?? [];
+    scriptVersions.value = [];
   }
 });
 
