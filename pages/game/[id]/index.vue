@@ -385,7 +385,6 @@
 import { WinStatus } from "~/composables/useGames";
 import dayjs from "dayjs";
 import VueMarkdown from "vue-markdown-render";
-import { merge } from "cypress/types/lodash";
 
 const { scriptLogo } = useScripts();
 const config = useRuntimeConfig();
