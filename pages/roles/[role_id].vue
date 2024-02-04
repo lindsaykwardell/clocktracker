@@ -21,7 +21,7 @@
           <div class="flex flex-wrap py-6 justify-center">
             <a
               v-for="script in role_data.popular_scripts"
-              :href="`/scripts/${script.script}`"
+              :href="`/scripts/${script.script.replaceAll(' ', '_')}`"
               target="_blank"
               class="script-wrapper hover:underline flex flex-col items-center gap-2 w-[150px] md:w-[200px] lg:w-1/2 xl:w-1/3  text-center p-2"
             >
@@ -102,7 +102,7 @@
               <tr v-for="script in topTenScripts">
                 <td>
                   <a
-                    :href="`/scripts/${script.script}`"
+                    :href="`/scripts/${script.script.replaceAll(' ', '_')}`"
                     target="_blank"
                     class="hover:underline"
                   >

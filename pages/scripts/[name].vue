@@ -23,6 +23,22 @@
                   By {{ script.author }}
                 </div>
               </div>
+              <div class="flex flex-col md:flex-row gap-2">
+                <div class="font-dumbledor text-lg font-bold bottom-[20px]">
+                  <select
+                    v-model="version"
+                    class="bg-stone-100 text-stone-900 rounded-md p-2"
+                  >
+                    <option
+                      v-for="version in scripts"
+                      :value="version.version"
+                      :key="version.version"
+                    >
+                      {{ version.version }}
+                    </option>
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
           <div v-for="roleGroup in roleGroups" class="break-inside-avoid">
@@ -185,30 +201,39 @@ const { scriptLogo } = useScripts();
 const allGames = useGames();
 
 const scriptName = route.params.name as string;
+const version = ref(route.query.version as string);
 
-const script = await $fetch<Script & { roles: Role[] }>(
-  "/api/script/" + scriptName
+const scripts = await $fetch<Array<Script & { roles: Role[] }>>(
+  "/api/script/name/" + scriptName
+);
+
+if (!version.value) {
+  version.value = scripts[0].version;
+}
+
+const script = computed(
+  () => scripts.find((s) => s.version === version.value) || scripts[0]
 );
 
 useHead({
-  title: script.name,
+  title: script.value.name,
   meta: [
     {
       hid: "description",
       name: "description",
-      content: `View stats and recent games for ${script.name}.`,
+      content: `View stats and recent games for ${script.value.name}.`,
     },
     {
       property: "og:title",
-      content: script.name,
+      content: script.value.name,
     },
     {
       property: "og:description",
-      content: `View stats and recent games for ${script.name}.`,
+      content: `View stats and recent games for ${script.value.name}.`,
     },
     {
       property: "og:image",
-      content: scriptLogo(script.name),
+      content: scriptLogo(script.value.name),
     },
     {
       property: "og:url",
@@ -224,20 +249,20 @@ useHead({
     },
     {
       property: "twitter:title",
-      content: script.name,
+      content: script.value.name,
     },
     {
       property: "twitter:description",
-      content: `View stats and recent games for ${script.name}.`,
+      content: `View stats and recent games for ${script.value.name}.`,
     },
     {
       property: "twitter:image",
-      content: scriptLogo(script.name),
+      content: scriptLogo(script.value.name),
     },
   ],
 });
 
-const scriptStats = await $fetch<{
+const scriptStats = ref<{
   count: number;
   win_loss: {
     total: number;
@@ -254,34 +279,64 @@ const scriptStats = await $fetch<{
       loss: number;
     }
   >;
-}>("/api/script/" + script.id + "/stats");
+}>({
+  count: 0,
+  win_loss: {
+    total: 0,
+    win: 0,
+    loss: 0,
+    pct: 0,
+  },
+  games_by_month: {},
+  role_win_rates: {},
+});
+
+// scriptStats.value = await $fetch<{
+//   count: number;
+//   win_loss: {
+//     total: number;
+//     win: number;
+//     loss: number;
+//     pct: number;
+//   };
+//   games_by_month: Record<string, number>;
+//   role_win_rates: Record<
+//     string,
+//     {
+//       total: number;
+//       win: number;
+//       loss: number;
+//     }
+//   >;
+// }>("/api/script/" + script.value.id + "/stats");
 
 const recentGames = ref<RecentGameRecord[]>([]);
 
 const averageGamesPlayed = computed(() =>
   Math.round(
-    Object.values(scriptStats.games_by_month).reduce((a, b) => a + b, 0) / 52
+    Object.values(scriptStats.value.games_by_month).reduce((a, b) => a + b, 0) /
+      52
   )
 );
 
 const townsfolk = computed(() => {
-  return script.roles.filter((role) => role.type === "TOWNSFOLK");
+  return script.value.roles.filter((role) => role.type === "TOWNSFOLK");
 });
 
 const outsiders = computed(() => {
-  return script.roles.filter((role) => role.type === "OUTSIDER");
+  return script.value.roles.filter((role) => role.type === "OUTSIDER");
 });
 
 const minions = computed(() => {
-  return script.roles.filter((role) => role.type === "MINION");
+  return script.value.roles.filter((role) => role.type === "MINION");
 });
 
 const demons = computed(() => {
-  return script.roles.filter((role) => role.type === "DEMON");
+  return script.value.roles.filter((role) => role.type === "DEMON");
 });
 
 const travelers = computed(() => {
-  return script.roles.filter((role) => role.type === "TRAVELER");
+  return script.value.roles.filter((role) => role.type === "TRAVELER");
 });
 
 const roleGroups = computed(() => {
@@ -310,10 +365,10 @@ const roleGroups = computed(() => {
 });
 
 const past12MonthsData = computed(() => ({
-  labels: Object.keys(scriptStats.games_by_month),
+  labels: Object.keys(scriptStats.value.games_by_month),
   datasets: [
     {
-      data: Object.values(scriptStats.games_by_month),
+      data: Object.values(scriptStats.value.games_by_month),
     },
   ],
 }));
@@ -352,7 +407,7 @@ const winRatioData = computed(() => ({
   labels: ["Good Wins", "Evil Wins"],
   datasets: [
     {
-      data: [scriptStats.win_loss.win, scriptStats.win_loss.loss],
+      data: [scriptStats.value.win_loss.win, scriptStats.value.win_loss.loss],
       hoverOffset: 4,
       backgroundColor: ["blue", "red"],
     },
@@ -383,7 +438,7 @@ const roleWinRateOptions = computed<ChartOptions>(() => ({
 }));
 
 function roleWinRateData(role: Role) {
-  const roleStats = scriptStats.role_win_rates[role.id];
+  const roleStats = scriptStats.value.role_win_rates[role.id];
 
   return {
     labels: ["Win", "Loss"],
@@ -412,20 +467,45 @@ function formatRoleAsCharacter(role: {
 }
 
 const scriptLink = computed(() => {
-  if (script.name === "Trouble Brewing")
+  if (script.value.name === "Trouble Brewing")
     return "https://wiki.bloodontheclocktower.com/Trouble_Brewing";
-  if (script.name === "Bad Moon Rising")
+  if (script.value.name === "Bad Moon Rising")
     return "https://wiki.bloodontheclocktower.com/Bad_Moon_Rising";
-  if (script.name === "Sects and Violets")
+  if (script.value.name === "Sects and Violets")
     return "https://wiki.bloodontheclocktower.com/Sects_%26_Violets";
   else {
-    return `https://botcscripts.com/script/${script.id}/${script.version}/`;
+    return `https://botcscripts.com/script/${script.value.id}/${script.value.version}/`;
   }
 });
 
-onMounted(async () => {
-  recentGames.value = await allGames.fetchRecentGamesForScript(script.id);
-});
+watch(
+  script,
+  async (newScript) => {
+    scriptStats.value = await $fetch<{
+      count: number;
+      win_loss: {
+        total: number;
+        win: number;
+        loss: number;
+        pct: number;
+      };
+      games_by_month: Record<string, number>;
+      role_win_rates: Record<
+        string,
+        {
+          total: number;
+          win: number;
+          loss: number;
+        }
+      >;
+    }>("/api/script/" + newScript.id + "/stats");
+
+    recentGames.value = await allGames.fetchRecentGamesForScript(
+      script.value.id
+    );
+  },
+  { immediate: true }
+);
 </script>
 
 <style scoped>
