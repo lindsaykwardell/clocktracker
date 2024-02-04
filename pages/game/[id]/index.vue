@@ -551,11 +551,11 @@ function fullImageUrl(file: string) {
 }
 
 function scriptLink(game: GameRecord) {
-  if (game.script === "Sects & Violets") return "/scripts/Sects and Violets";
+  if (game.script === "Sects & Violets") return "/scripts/Sects_and_Violets";
 
-  if (game.script_id) return `/scripts/${game.script}`;
+  if (game.script_id) return `/scripts/${game.script.replaceAll(" ", "_")}?version=`;
 
-  return `https://botc-scripts.azurewebsites.net/?search=${game.script.replace(
+  return `https://botcscripts.com/?search=${game.script.replace(
     / /g,
     "+"
   )}&script_type=&include=&exclude=&edition=&author=`;
