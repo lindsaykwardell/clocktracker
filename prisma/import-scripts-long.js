@@ -1,6 +1,8 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
 const { PrismaClient, Alignment, RoleType } = require("@prisma/client");
+const { Worker } = require("worker_threads");
+const ProgressBar = require("progress");
 
 const url = "https://botcscripts.com";
 const prisma = new PrismaClient();
@@ -13,7 +15,6 @@ async function main() {
   }
 
   async function parsePage(page) {
-    console.log(`Parsing page ${page}...`);
     const response = await axios.get(url + "?page=" + page);
     const $ = cheerio.load(response.data);
     // Iterate over the table rows
@@ -61,55 +62,60 @@ async function main() {
   const $ = cheerio.load(response.data);
   const lastPage = parseInt($("ul.pagination li:nth-last-child(2) a").text());
   console.log(`Found ${lastPage} pages.`);
-  for (let i = 1; i <= 1; i++) {
+  const pageBar = new ProgressBar(":current / :total [:bar] :elapseds", {
+    total: lastPage,
+  });
+  for (let i = 1; i <= lastPage; i++) {
     await parsePage(i);
+    pageBar.tick();
   }
 
   // Upsert all the scripts
   console.log("Upserting scripts...");
-  for (const script of scriptList) {
-    console.log("Upserting script: ", script.name);
-    const response = await axios.get(url + "/script/" + script.script_id);
-    const $ = cheerio.load(response.data);
-    // const description = $("div#notes").text();
-    const versions = [];
-    $("select[name=selected_version] option").each((index, element) => {
-      const version = $(element).text().trim();
-      versions.push(version);
-    });
-    console.log("Versions: ", JSON.stringify(versions));
 
-    for (const version of versions) {
-      console.log("Upserting version: ", version);
-      const versionedScript = {
-        ...script,
-        version,
-        json_url: fullUrl(`/script/${script.script_id}/${version}/download`),
-        pdf_url: fullUrl(`/script/${script.script_id}/${version}/download_pdf`),
-      };
+  const batchedScripts = [];
+  for (let i = 0; i < scriptList.length; i += 20) {
+    batchedScripts.push(scriptList.slice(i, i + 20));
+  }
 
-      console.log(
-        "Upserting versioned script: ",
-        versionedScript.name,
-        versionedScript.script_id,
-        versionedScript.version
+  const upsertBar = new ProgressBar(":percent [:bar] :elapseds", {
+    total: scriptList.length,
+  });
+
+  for (const batch of batchedScripts) {
+    const promises = batch.map(async (script) => {
+      const { versions } = await fetchVersions(
+        url + `/script/${script.script_id}`
       );
+      for (const version of versions) {
+        const versionedScript = {
+          ...script,
+          version,
+          json_url: fullUrl(`/script/${script.script_id}/${version}/download`),
+          pdf_url: fullUrl(
+            `/script/${script.script_id}/${version}/download_pdf`
+          ),
+        };
 
-      await prisma.script.upsert({
-        where: {
-          script_id_version: {
-            script_id: versionedScript.script_id,
-            version: versionedScript.version,
+        await prisma.script.upsert({
+          where: {
+            script_id_version: {
+              script_id: versionedScript.script_id,
+              version: versionedScript.version,
+            },
           },
-        },
-        update: {
-          ...versionedScript,
-        },
-        create: {
-          ...versionedScript,
-        },
-      });
-    }
+          update: {
+            ...versionedScript,
+          },
+          create: {
+            ...versionedScript,
+          },
+        });
+      }
+      upsertBar.tick();
+    });
+
+    await Promise.all(promises);
   }
 
   const roles = [
@@ -136,6 +142,18 @@ async function main() {
   }
 
   console.log("Done!");
+}
+
+function fetchVersions(url) {
+  return new Promise((resolve, reject) => {
+    const worker = new Worker("./prisma/fetchVersions.js", { workerData: url });
+    worker.on("message", resolve);
+    worker.on("error", reject);
+    worker.on("exit", (code) => {
+      if (code !== 0)
+        reject(new Error(`Worker stopped with exit code ${code}`));
+    });
+  });
 }
 
 function toRole(name, type, alignment) {

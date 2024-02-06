@@ -25,6 +25,7 @@
     "cypress": "^13.6.2",
     "nuxt": "^3.9.0",
     "prisma": "^5.7.1",
+    "progress": "^2.0.3",
     "sass": "^1.69.7",
     "start-server-and-test": "^2.0.0",
     "supabase": "^1.127.4",
