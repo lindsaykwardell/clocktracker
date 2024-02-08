@@ -75,7 +75,12 @@
                 :href="scriptLink(game.data)"
               >
                 {{ game.data.script }}
-                <template v-if="game.data.associated_script">
+                <template
+                  v-if="
+                    game.data.associated_script &&
+                    !isBaseScript(game.data.script)
+                  "
+                >
                   v{{ game.data.associated_script.version }}
                 </template>
               </a>
@@ -389,7 +394,7 @@ import { WinStatus } from "~/composables/useGames";
 import dayjs from "dayjs";
 import VueMarkdown from "vue-markdown-render";
 
-const { scriptLogo } = useScripts();
+const { scriptLogo, isBaseScript } = useScripts();
 const config = useRuntimeConfig();
 const router = useRouter();
 const route = useRoute();
@@ -556,7 +561,10 @@ function fullImageUrl(file: string) {
 function scriptLink(game: GameRecord) {
   if (game.script === "Sects & Violets") return "/scripts/Sects_and_Violets";
 
-  if (game.script_id) return `/scripts/${game.script.replaceAll(" ", "_")}?version=${game.associated_script?.version}`;
+  if (game.script_id)
+    return `/scripts/${game.script.replaceAll(" ", "_")}?version=${
+      game.associated_script?.version
+    }`;
 
   return `https://botcscripts.com/?search=${game.script.replace(
     / /g,
