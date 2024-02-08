@@ -197,6 +197,7 @@ import type { ChartOptions } from "chart.js";
 import { Line, Pie } from "vue-chartjs";
 
 const route = useRoute();
+const router = useRouter();
 const { scriptLogo } = useScripts();
 const allGames = useGames();
 
@@ -214,6 +215,15 @@ if (!version.value) {
 const script = computed(
   () => scripts.find((s) => s.version === version.value) || scripts[0]
 );
+
+watchEffect(() => {
+  // update the URL when the version changes
+  // This needs to be
+  if (version.value !== route.query.version) {
+    // route.query.version = version.value;
+    router.push({ query: { version: version.value } });
+  }
+});
 
 useHead({
   title: script.value.name,
