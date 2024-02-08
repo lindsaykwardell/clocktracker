@@ -69,6 +69,9 @@
                   class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
                 >
                   {{ script.name }}
+                  <template v-if="script.version">
+                    &nbsp;v{{ script.version }}
+                  </template>
                 </button>
               </div>
               <div class="relative">
@@ -124,12 +127,7 @@
               v-model="game.script_id"
               class="block w-full border border-stone-500 rounded-md p-2"
             >
-              <option
-                v-for="version in naturalOrder(scriptVersions)
-                  .orderBy('desc')
-                  .sort()"
-                :value="version.id"
-              >
+              <option v-for="version in scriptVersions" :value="version.id">
                 {{ version.version }}
               </option>
             </select>
@@ -839,7 +837,9 @@ watchEffect(async () => {
     const versions = await $fetch(
       `/api/script/${props.game.script_id}/versions`
     );
-    scriptVersions.value = versions;
+    scriptVersions.value = naturalOrder(versions)
+      .orderBy("desc")
+      .sort(["version"]);
   } else {
     const result = await $fetch<
       {
