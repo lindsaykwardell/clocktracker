@@ -177,7 +177,13 @@ export default defineEventHandler(async (handler) => {
   return {
     communities,
     users,
-    scripts,
+    scripts: scripts.reduce((acc, script) => {
+      if (!acc.some((s) => s.script_id === script.script_id)) {
+        acc.push(script);
+      }
+
+      return acc;
+    }, [] as typeof scripts),
     roles: roles.map((role) => ({
       id: role.id,
       name: role.name,
