@@ -1,12 +1,13 @@
 import { PrismaClient, RoleType } from "@prisma/client";
 import naturalOrder from "natural-order";
+import { isVersionOne } from "~/server/utils/getScriptVersions";
 
 const prisma = new PrismaClient();
 
 export default defineEventHandler(async (handler) => {
   const name = (handler.context.params?.name as string).replace(/_/g, " ");
 
-  const scripts = await prisma.script.findMany({
+  let scripts = await prisma.script.findMany({
     where: {
       name,
     },
@@ -27,6 +28,31 @@ export default defineEventHandler(async (handler) => {
       status: 404,
       statusMessage: "Not Found",
     });
+  }
+
+  if (scripts.length === 1 && !isVersionOne(scripts[0].version)) {
+    const script_ = { ...scripts[0], roles: undefined };
+
+    try {
+      await getScriptVersions(script_);
+
+      scripts = await prisma.script.findMany({
+        where: {
+          name,
+        },
+        include: {
+          roles: {
+            where: {
+              type: {
+                not: RoleType.FABLED,
+              },
+            },
+          },
+        },
+      });
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   // If the characters have not been fetched, fetch them
