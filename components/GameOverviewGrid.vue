@@ -68,6 +68,9 @@
           </a>
           <div class="font-gothic text-white md:text-lg p-1">
             {{ game.script }}
+            <template v-if="game.associated_script && !scripts.isBaseScript(game.script)">
+              v{{ game.associated_script.version }}
+            </template>
           </div>
         </div>
         <nuxt-link
@@ -103,6 +106,7 @@ import { useInfiniteScroll } from "@vueuse/core";
 const gamesStore = useGames();
 
 const config = useRuntimeConfig();
+const scripts = useScripts();
 
 const props = defineProps<{
   games: GameRecord[];
