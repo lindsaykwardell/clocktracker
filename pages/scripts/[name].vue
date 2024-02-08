@@ -484,7 +484,7 @@ const scriptLink = computed(() => {
   if (script.value.name === "Sects and Violets")
     return "https://wiki.bloodontheclocktower.com/Sects_%26_Violets";
   else {
-    return `https://botcscripts.com/script/${script.value.id}/${script.value.version}/`;
+    return `https://botcscripts.com/script/${script.value.script_id}/${script.value.version}/`;
   }
 });
 

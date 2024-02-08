@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { getScriptVersions } from "~/server/utils/getScriptVersions";
 
 const prisma = new PrismaClient();
 
@@ -11,9 +12,6 @@ export default defineEventHandler(async (handler) => {
     where: {
       id: +id,
     },
-    select: {
-      script_id: true,
-    },
   });
 
   if (!script) {
@@ -24,13 +22,5 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  return prisma.script.findMany({
-    where: {
-      script_id: script.script_id,
-    },
-    select: {
-      id: true,
-      version: true,
-    },
-  });
+  return getScriptVersions(script);
 });
