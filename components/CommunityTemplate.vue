@@ -38,7 +38,7 @@
           <p class="whitespace-pre-wrap text-left w-full py-4">
             {{ community.data.description }}
           </p>
-          <div class="flex justify-start w-screen md:w-full gap-1 h-12">
+          <nav v-if="!isNotAllowed" class="flex justify-start w-screen md:w-full gap-1 h-12">
             <nuxt-link
               :to="`/community/${community.data.slug}`"
               class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-700"
@@ -61,7 +61,7 @@
             >
               Moderator Dashboard
             </nuxt-link>
-          </div>
+          </nav>
         </div>
         <slot
           name="header"
