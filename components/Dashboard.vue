@@ -58,6 +58,7 @@
             </div>
             <div class="flex-grow"></div>
             <div class="flex gap-2 items-center">
+              <slot />
               <button
                 class="rounded w-[100px] py-1 justify-center text-lg flex gap-2 bg-stone-600 hover:bg-stone-700 transition duration-150"
                 :class="{

@@ -36,6 +36,13 @@ export type GameRecord = Game & {
       display_name: string;
     };
   };
+  community?: {
+    slug: string;
+    icon: string;
+  };
+  associated_script?: {
+    version: string;
+  };
 };
 
 export async function anonymizeGame(
@@ -102,6 +109,7 @@ export async function anonymizeGame(
     game.co_storytellers.map(shortenName);
     game.location = shortenName(game.location);
     game.community_name = shortenName(game.community_name);
+    game.community = undefined;
 
     game.grimoire.map((g) =>
       g.tokens.map((t) => {

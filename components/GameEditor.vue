@@ -1,7 +1,7 @@
 <template>
   <form class="max-w-[1000px] m-auto py-6" @submit.prevent="emit('submit')">
     <fieldset
-      class="flex flex-col flex-wrap md:flex-row gap-5 border rounded border-stone-500 p-4 my-3"
+      class="flex flex-col gap-5 border rounded border-stone-500 p-4 my-3"
     >
       <legend>Game Setup</legend>
       <div class="w-full flex flex-col md:flex-row gap-5">
@@ -120,7 +120,13 @@
             </section>
           </Dialog>
         </label>
-        <div v-if="!isBaseScript(game.script) && (scriptVersions.length > 1 || fetchingScriptVersions)" class="flex flex-col gap-1">
+        <div
+          v-if="
+            !isBaseScript(game.script) &&
+            (scriptVersions.length > 1 || fetchingScriptVersions)
+          "
+          class="flex flex-col gap-1"
+        >
           <label>
             <span class="block">Script Version</span>
             <select
@@ -132,7 +138,10 @@
                 {{ version.version }}
               </option>
             </select>
-            <div v-else class="block w-full border border-stone-500 rounded-md p-2">
+            <div
+              v-else
+              class="block w-full border border-stone-500 rounded-md p-2"
+            >
               Loading...
             </div>
           </label>
@@ -174,75 +183,82 @@
           </button>
         </div>
       </div>
-      <label class="flex-1">
-        <span class="block">Privacy</span>
-        <select
-          v-model="game.privacy"
-          class="block w-full border border-stone-500 rounded-md p-2"
+      <div class="w-full flex flex-wrap gap-5">
+        <label class="w-full md:w-auto">
+          <span class="block">Privacy</span>
+          <select
+            v-model="game.privacy"
+            class="block w-full border border-stone-500 rounded-md p-2"
+          >
+            <option value="PUBLIC">Public</option>
+            <option value="PRIVATE">Private</option>
+            <option value="FRIENDS_ONLY">Friends Only</option>
+          </select>
+        </label>
+        <label class="w-full md:w-auto">
+          <span class="block">Location Type</span>
+          <select
+            v-model="game.location_type"
+            class="block w-full border border-stone-500 rounded-md p-2"
+          >
+            <option value="ONLINE">Online</option>
+            <option value="IN_PERSON">In Person</option>
+          </select>
+        </label>
+        <label
+          v-if="game.location_type === 'IN_PERSON'"
+          class="w-full md:w-auto md:flex-1"
         >
-          <option value="PUBLIC">Public</option>
-          <option value="PRIVATE">Private</option>
-          <option value="FRIENDS_ONLY">Friends Only</option>
-        </select>
-      </label>
-      <label class="flex-1">
-        <span class="block">Location Type</span>
-        <select
-          v-model="game.location_type"
-          class="block w-full border border-stone-500 rounded-md p-2"
-        >
-          <option value="ONLINE">Online</option>
-          <option value="IN_PERSON">In Person</option>
-        </select>
-      </label>
-      <label v-if="game.location_type === 'IN_PERSON'" class="flex-1">
-        <span class="block">Location</span>
-        <input
-          type="text"
-          v-model="game.location"
-          class="block w-full border border-stone-500 rounded-md p-2"
-          list="locations"
-        />
-        <datalist id="locations">
-          <option v-for="location in myLocations" :value="location"></option>
-        </datalist>
-      </label>
-      <label class="flex-1">
-        <span class="block">Community</span>
-        <div class="flex gap-2">
-          <Avatar
-            v-if="game.community_id"
-            :value="myCommunities.find((c) => c.id === game.community_id)?.icon"
-            size="xs"
-            class="border-stone-800 flex-shrink community-icon"
+          <span class="block">Location</span>
+          <input
+            type="text"
+            v-model="game.location"
+            class="block w-full border border-stone-500 rounded-md p-2"
+            list="locations"
           />
-          <SelectedCommunityInput
-            v-model:value="game.community_name"
-            :communities="myCommunities"
-            inputClass="w-full border border-stone-500 rounded-md p-2 h-[2.5rem] text-lg bg-stone-600 disabled:bg-stone-700"
-          />
-        </div>
-      </label>
-      <label class="flex-1">
-        <span class="block">Players</span>
-        <input
-          type="number"
-          id="player-count"
-          v-model="game.player_count"
-          class="block w-full border border-stone-500 rounded-md p-2"
-          min="5"
-          max="20"
-        />
-      </label>
-      <label class="flex-1">
-        <span class="block">Travelers</span>
-        <input
-          type="number"
-          v-model="game.traveler_count"
-          class="block w-full border border-stone-500 rounded-md p-2"
-          min="0"
-        />
-      </label>
+          <datalist id="locations">
+            <option v-for="location in myLocations" :value="location"></option>
+          </datalist>
+        </label>
+        <label class="w-full md:w-auto md:flex-1">
+          <span class="block">Community</span>
+          <div class="flex gap-2">
+            <Avatar
+              v-if="game.community_id"
+              :value="
+                myCommunities.find((c) => c.id === game.community_id)?.icon
+              "
+              size="xs"
+              class="border-stone-800 flex-shrink community-icon"
+            />
+            <SelectedCommunityInput
+              v-model:value="game.community_name"
+              :communities="myCommunities"
+              inputClass="w-full border border-stone-500 rounded-md p-2 h-[2.5rem] text-lg bg-stone-600 disabled:bg-stone-700"
+            />
+          </div>
+        </label>
+        <label class="w-1/3 md:w-auto">
+          <span class="block">Players</span>
+          <select
+            v-model="game.player_count"
+            class="block w-full border border-stone-500 rounded-md p-2"
+          >
+            <option :value="null"></option>
+            <option v-for="i in 11" :value="i + 4">{{ i + 4 }}</option>
+          </select>
+        </label>
+        <label class="w-1/3 md:w-auto">
+          <span class="block">Travelers</span>
+          <select
+            v-model="game.traveler_count"
+            class="block w-full border border-stone-500 rounded-md p-2"
+          >
+            <option :value="null"></option>
+            <option v-for="i in 5" :value="i">{{ i }}</option>
+          </select>
+        </label>
+      </div>
     </fieldset>
     <fieldset
       v-if="!game.is_storyteller"

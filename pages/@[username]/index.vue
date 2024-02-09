@@ -65,7 +65,19 @@
             v-if="currentTab === 'pending'"
             :player="player"
             :games="pendingGames"
-          />
+          >
+            <button
+              type="button"
+              class="rounded py-1 justify-center text-lg flex gap-2 bg-green-800 hover:bg-green-900 transition duration-150 px-2"
+              @click="addTaggedGamesToProfile"
+              :disabled="inFlight"
+            >
+              <template v-if="inFlight">
+                <Spinner class="m-auto" />
+              </template>
+              <template v-else> Add all games to profile </template>
+            </button>
+          </Dashboard>
         </template>
         <template v-else>
           <p class="text-center text-2xl my-4 font-dumbledor">
@@ -91,6 +103,7 @@
 
 <script setup lang="ts">
 const route = useRoute();
+const router = useRouter();
 const users = useUsers();
 const friends = useFriends();
 const gameStore = useGames();
@@ -143,6 +156,39 @@ function currentTabClass(tab: string) {
     "border-stone-500": currentTab.value === tab,
     "border-transparent": currentTab.value !== tab,
   };
+}
+
+const inFlight = ref(false);
+
+async function addTaggedGamesToProfile() {
+  if (pendingGames.value.status !== Status.SUCCESS) return;
+
+  if (
+    confirm("Are you sure you want to add all tagged games to your profile?")
+  ) {
+    inFlight.value = true;
+    try {
+      const results = await Promise.all(
+        pendingGames.value.data.map((game) =>
+          $fetch<GameRecord>(`/api/games/${game.id}/confirm`, {
+            method: "POST",
+          })
+        )
+      );
+
+      for (const game of results) {
+        gameStore.games.set(game.id, { status: Status.SUCCESS, data: game });
+      }
+
+      router.push(`/@${username}`);
+    } catch (err) {
+      inFlight.value = false;
+      console.error(err);
+      alert(
+        "There was an error adding the games to your profile. Try again in a few minutes."
+      );
+    }
+  }
 }
 
 onMounted(() => {
