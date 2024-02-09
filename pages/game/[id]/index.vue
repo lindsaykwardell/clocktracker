@@ -401,7 +401,6 @@ const route = useRoute();
 const user = useSupabaseUser();
 const users = useUsers();
 const games = useGames();
-const communities = useCommunities();
 const friends = useFriends();
 const gameId = route.params.id as string;
 const bggInFlight = ref(false);
