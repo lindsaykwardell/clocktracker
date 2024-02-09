@@ -1,5 +1,6 @@
 import type { User } from "@supabase/supabase-js";
 import { PrismaClient, PrivacySetting } from "@prisma/client";
+import { fetchGame } from "~/server/utils/fetchGames";
 
 const prisma = new PrismaClient();
 
@@ -144,55 +145,5 @@ export default defineEventHandler(async (handler) => {
   });
 
   // Return the newly merged game
-  return prisma.game.findUnique({
-    where: {
-      id: gameToMergeWith,
-    },
-    include: {
-      user: {
-        select: {
-          username: true,
-        },
-      },
-      player_characters: {
-        include: {
-          role: {
-            select: {
-              token_url: true,
-              type: true,
-              initial_alignment: true,
-            },
-          },
-          related_role: {
-            select: {
-              token_url: true,
-            },
-          },
-        },
-      },
-      grimoire: {
-        include: {
-          tokens: {
-            include: {
-              role: true,
-              related_role: true,
-            },
-          },
-        },
-        orderBy: {
-          id: "asc",
-        },
-      },
-      community: {
-        select: {
-          slug: true,
-        },
-      },
-      associated_script: {
-        select: {
-          version: true,
-        },
-      },
-    },
-  });
+  return fetchGame(gameToMergeWith, me);
 });
