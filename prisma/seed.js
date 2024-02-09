@@ -15,7 +15,8 @@ const prisma = new PrismaClient();
 async function main() {
   const scriptList = [
     {
-      id: 133,
+      id: 5000,
+      script_id: 133,
       name: "Trouble Brewing",
       version: "1.0.0",
       author: "The Pandemonium Institute",
@@ -183,7 +184,8 @@ async function main() {
       ],
     },
     {
-      id: 135,
+      id: 5001,
+      script_id: 135,
       name: "Bad Moon Rising",
       version: "1.0.0",
       author: "The Pandemonium Institute",
@@ -372,7 +374,8 @@ async function main() {
       ],
     },
     {
-      id: 134,
+      id: 5002,
+      script_id: 134,
       name: "Sects and Violets",
       version: "1.0.0",
       author: "The Pandemonium Institute",
@@ -588,14 +591,13 @@ async function main() {
   for (const script of scriptList) {
     await prisma.script.create({
       data: {
-        id: script.id,
+        script_id: script.script_id,
         name: script.name,
         version: script.version,
         author: script.author,
         type: script.type,
         json_url: script.json_url,
         pdf_url: script.pdf_url,
-        characters_last_updated: new Date(),
         roles: {
           connect: script.roles.map((role) => ({ id: role.id })),
         },
@@ -695,8 +697,8 @@ async function main() {
       pivot: null,
       width: 250,
       height: 250,
-    }
-  ]
+    },
+  ];
 
   for (const user of users) {
     await prisma.chart.createMany({

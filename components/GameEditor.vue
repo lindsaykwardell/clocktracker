@@ -69,6 +69,9 @@
                   class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
                 >
                   {{ script.name }}
+                  <template v-if="script.version">
+                    &nbsp;v{{ script.version }}
+                  </template>
                 </button>
               </div>
               <div class="relative">
@@ -117,6 +120,23 @@
             </section>
           </Dialog>
         </label>
+        <div v-if="!isBaseScript(game.script) && (scriptVersions.length > 1 || fetchingScriptVersions)" class="flex flex-col gap-1">
+          <label>
+            <span class="block">Script Version</span>
+            <select
+              v-if="!fetchingScriptVersions"
+              v-model="game.script_id"
+              class="block w-full border border-stone-500 rounded-md p-2"
+            >
+              <option v-for="version in scriptVersions" :value="version.id">
+                {{ version.version }}
+              </option>
+            </select>
+            <div v-else class="block w-full border border-stone-500 rounded-md p-2">
+              Loading...
+            </div>
+          </label>
+        </div>
         <div class="flex-1 flex flex-col justify-start">
           <label>
             <span class="block">Storyteller</span>
@@ -541,6 +561,7 @@ const user = useSupabaseUser();
 const users = useUsers();
 const games = useGames();
 const friends = useFriends();
+const { isBaseScript } = useScripts();
 
 const roles = ref<
   {
@@ -558,6 +579,8 @@ const recentScripts = computed(() =>
     (s) => !baseScripts.value.some((b) => b.id === s.id)
   )
 );
+const scriptVersions = ref<{ id: number; version: string }[]>([]);
+const fetchingScriptVersions = ref(false);
 const tokenMode = ref<"role" | "related_role">("role");
 
 let focusedToken: Character | null = null;
@@ -803,8 +826,11 @@ function selectScript(script: { name: string; id: number | null }) {
 }
 
 watchEffect(async () => {
+  scriptVersions.value = [];
   roles.value = [];
+
   if (props.game.script_id) {
+    fetchingScriptVersions.value = true;
     const result = await $fetch<{
       roles: {
         type: RoleType;
@@ -815,6 +841,14 @@ watchEffect(async () => {
       }[];
     }>(`/api/script/${props.game.script_id}`);
     roles.value = result.roles ?? [];
+
+    const versions = await $fetch(
+      `/api/script/${props.game.script_id}/versions`
+    );
+    scriptVersions.value = naturalOrder(versions)
+      .orderBy("desc")
+      .sort(["version"]);
+    fetchingScriptVersions.value = false;
   } else {
     const result = await $fetch<
       {

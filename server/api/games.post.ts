@@ -79,6 +79,11 @@ export default defineEventHandler(async (handler) => {
           },
         },
       },
+      associated_script: {
+        select: {
+          version: true,
+        },
+      },
     },
   });
 

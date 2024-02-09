@@ -188,6 +188,11 @@ export default defineEventHandler(async (handler) => {
           slug: true,
         },
       },
+      associated_script: {
+        select: {
+          version: true,
+        },
+      },
     },
   });
 });

@@ -45,6 +45,9 @@ export type GameRecord = Omit<Game, "win"> & {
     slug: string;
     icon: string;
   };
+  associated_script?: {
+    version: string;
+  };
 };
 
 export type RecentGameRecord = GameRecord & {
@@ -270,7 +273,7 @@ export const useGames = defineStore("games", {
         );
       };
     },
-    getRecentScripts(): { name: string; id: number | null }[] {
+    getRecentScripts(): { name: string; id: number | null; version: string }[] {
       const user = useSupabaseUser();
       if (!user.value) return [];
       const users = useUsers();
@@ -284,7 +287,8 @@ export const useGames = defineStore("games", {
         .orderBy("desc")
         .sort(["date"]);
 
-      const scriptList: { name: string; id: number | null }[] = [];
+      const scriptList: { name: string; id: number | null; version: string }[] =
+        [];
 
       for (const game of games.data) {
         if (scriptList.length >= 10) continue;
@@ -294,7 +298,11 @@ export const useGames = defineStore("games", {
             (s) => s.name === game.script && s.id === game.script_id
           )
         ) {
-          scriptList.push({ name: game.script, id: game.script_id });
+          scriptList.push({
+            name: game.script,
+            id: game.script_id,
+            version: game.associated_script?.version ?? "",
+          });
         }
       }
 
