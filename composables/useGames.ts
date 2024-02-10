@@ -1,6 +1,13 @@
 import { defineStore } from "pinia";
 import type { FetchStatus } from "./useFetchStatus";
-import type { Game, Character, Grimoire, Token } from "@prisma/client";
+import type {
+  Game,
+  Character,
+  Grimoire,
+  Token,
+  DemonBluff,
+  Fabled,
+} from "@prisma/client";
 import naturalOrder from "natural-order";
 
 export enum WinStatus {
@@ -18,9 +25,24 @@ export type FullCharacter = Character & {
   related_role?: { token_url: string };
 };
 
+export type FullDemonBluff = DemonBluff & {
+  role?: {
+    token_url: string;
+    type: string;
+  };
+};
+
+export type FullFabled = Fabled & {
+  role?: {
+    token_url: string;
+  };
+};
+
 export type GameRecord = Omit<Game, "win"> & {
   win: WinStatus;
   player_characters: FullCharacter[];
+  demon_bluffs: FullDemonBluff[];
+  fabled: FullFabled[];
   user: {
     username: string;
   };

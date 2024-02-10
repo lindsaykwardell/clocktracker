@@ -7,6 +7,8 @@ import {
   Token,
   WinStatus,
   Alignment,
+  DemonBluff,
+  Fabled,
 } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -17,6 +19,8 @@ export default defineEventHandler(async (handler) => {
   const body = await readBody<
     | (Game & {
         player_characters: (Character & { role?: { token_url: string } })[];
+        demon_bluffs: (DemonBluff & { role?: { token_url: string } })[];
+        fabled: (Fabled & { role?: { token_url: string } })[];
         grimoire: Partial<Grimoire & { tokens: Partial<Token>[] }>[];
       })
     | null
@@ -49,6 +53,8 @@ export default defineEventHandler(async (handler) => {
     },
     include: {
       player_characters: true,
+      demon_bluffs: true,
+      fabled: true,
     },
   });
 
@@ -74,6 +80,22 @@ export default defineEventHandler(async (handler) => {
           },
         },
         create: [...body.player_characters],
+      },
+      demon_bluffs: {
+        deleteMany: {
+          id: {
+            in: existingGame.demon_bluffs.map((bluff) => bluff.id),
+          },
+        },
+        create: [...body.demon_bluffs],
+      },
+      fabled: {
+        deleteMany: {
+          id: {
+            in: existingGame.fabled.map((fabled) => fabled.id),
+          },
+        },
+        create: [...body.fabled],
       },
       grimoire: {
         deleteMany: {
@@ -258,6 +280,12 @@ export default defineEventHandler(async (handler) => {
           player_characters: {
             create: [...player_characters],
           },
+          demon_bluffs: {
+            create: [...body.demon_bluffs],
+          },
+          fabled: {
+            create: [...body.fabled],
+          },
           // map the already created grimoires to the new game
           grimoire: {
             connect: game.grimoire.map((g) => ({ id: g.id })),
@@ -319,6 +347,12 @@ export default defineEventHandler(async (handler) => {
               date: new Date(body.date),
               user_id: friend.user_id,
               player_characters: {},
+              demon_bluffs: {
+                create: [...body.demon_bluffs],
+              },
+              fabled: {
+                create: [...body.fabled],
+              },
               notes: "",
               win: win ? WinStatus.WIN : WinStatus.LOSS,
               grimoire: {
