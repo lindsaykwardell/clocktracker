@@ -26,7 +26,7 @@
     </div>
     <slot />
     <div
-      v-if="character?.related_role"
+      v-if="character?.related_role && !hideRelated"
       :id="relatedId"
       class="token related bg-center bg-cover absolute bottom-0 -right-3 rounded-full shadow-xl border border-black flex justify-center items-center"
       :class="relatedSize"
@@ -48,12 +48,12 @@
 const props = defineProps<{
   character?:
     | {
-        alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
+        alignment?: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
         name?: string;
         related?: string | null;
         role?: {
           token_url: string;
-          initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+          initial_alignment?: "GOOD" | "EVIL" | "NEUTRAL";
           name?: string;
         };
         related_role?: { token_url: string; name?: string };
@@ -61,6 +61,7 @@ const props = defineProps<{
     | undefined;
   size?: "sm" | "md" | "lg";
   alwaysShowAlignment?: boolean;
+  hideRelated?: boolean;
   outline?: boolean;
   relatedId?: string;
 }>();

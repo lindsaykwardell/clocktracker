@@ -199,6 +199,25 @@ export async function fetchGames(
           },
         },
       },
+      demon_bluffs: {
+        include: {
+          role: {
+            select: {
+              token_url: true,
+              type: true,
+            },
+          },
+        },
+      },
+      fabled: {
+        include: {
+          role: {
+            select: {
+              token_url: true,
+            },
+          },
+        },
+      },
       grimoire: {
         include: {
           tokens: {
@@ -392,6 +411,25 @@ export async function fetchGame(
             },
           },
           related_role: {
+            select: {
+              token_url: true,
+            },
+          },
+        },
+      },
+      demon_bluffs: {
+        include: {
+          role: {
+            select: {
+              token_url: true,
+              type: true,
+            },
+          },
+        },
+      },
+      fabled: {
+        include: {
+          role: {
             select: {
               token_url: true,
             },
