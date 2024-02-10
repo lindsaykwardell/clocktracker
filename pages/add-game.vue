@@ -51,6 +51,21 @@ const game = reactive<{
     };
     related_role?: { token_url: string };
   }[];
+  demon_bluffs: {
+    name: string;
+    role_id: string | null;
+    role?: {
+      token_url: string;
+      type: string;
+    };
+  }[];
+  fabled: {
+    name: string;
+    role_id: string | null;
+    role?: {
+      token_url: string;
+    };
+  }[];
   win: WinStatus;
   notes: string;
   image_urls: string[];
@@ -105,6 +120,25 @@ const game = reactive<{
       },
     },
   ],
+  demon_bluffs: [
+    // {
+    //   name: "",
+    //   role_id: null,
+    //   role: {
+    //     token_url: "/1x1.png",
+    //     type: "",
+    //   },
+    // },
+  ],
+  fabled: [
+    // {
+    //   name: "",
+    //   role_id: null,
+    //   role: {
+    //     token_url: "/1x1.png",
+    //   },
+    // },
+  ],
   win: WinStatus.NOT_RECORDED,
   notes: "",
   image_urls: [],
@@ -128,6 +162,14 @@ const formattedGame = computed(() => ({
     related: character.related,
     role_id: character.role_id,
     related_role_id: character.related_role_id,
+  })),
+  demon_bluffs: game.demon_bluffs.map((demon_bluff) => ({
+    name: demon_bluff.name,
+    role_id: demon_bluff.role_id,
+  })),
+  fabled: game.fabled.map((fabled) => ({
+    name: fabled.name,
+    role_id: fabled.role_id,
   })),
 }));
 
