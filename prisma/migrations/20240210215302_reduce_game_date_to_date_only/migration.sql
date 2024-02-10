@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE "Event" ALTER COLUMN "end" SET DEFAULT NOW() + interval '1.5 hours';
+
+-- AlterTable
+ALTER TABLE "Game" ALTER COLUMN "date" SET DEFAULT CURRENT_TIMESTAMP,
+ALTER COLUMN "date" SET DATA TYPE DATE;
