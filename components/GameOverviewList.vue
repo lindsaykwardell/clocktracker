@@ -120,7 +120,9 @@ const props = defineProps<{
 }>();
 
 function formatDate(date: Date) {
-  return new Intl.DateTimeFormat(navigator.language).format(new Date(date));
+  return new Intl.DateTimeFormat(navigator.language, {
+    timeZone: "UTC",
+  }).format(new Date(date));
 }
 
 const loadMore = ref();

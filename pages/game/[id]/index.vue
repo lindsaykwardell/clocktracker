@@ -642,6 +642,7 @@ async function postToBGG() {
 function formatDate(date: Date) {
   return new Intl.DateTimeFormat(navigator.language, {
     dateStyle: "long",
+    timeZone: "UTC",
   }).format(new Date(date));
 }
 

@@ -68,7 +68,11 @@
           </a>
           <div class="font-gothic text-white md:text-lg p-1">
             {{ game.script }}
-            <template v-if="game.associated_script && !scripts.isBaseScript(game.script)">
+            <template
+              v-if="
+                game.associated_script && !scripts.isBaseScript(game.script)
+              "
+            >
               v{{ game.associated_script.version }}
             </template>
           </div>
@@ -122,7 +126,9 @@ const componentIs = computed(() => {
 });
 
 function formatDate(date: Date) {
-  return new Intl.DateTimeFormat(navigator.language).format(new Date(date));
+  return new Intl.DateTimeFormat(navigator.language, {
+    timeZone: "UTC",
+  }).format(new Date(date));
 }
 
 function fullImageUrl(file: string) {
