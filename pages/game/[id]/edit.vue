@@ -85,7 +85,7 @@ const game = reactive<{
   tags: string[];
   privacy: string;
 }>({
-  date: dayjs(savedGame.data.value?.date).format("YYYY-MM-DD"),
+  date: savedGame.data.value?.date.toString().slice(0, 10) || "",
   script: savedGame.data.value?.script || "",
   script_id: savedGame.data.value?.script_id || null,
   storyteller: savedGame.data.value?.storyteller || "",
@@ -151,6 +151,8 @@ const game = reactive<{
   tags: savedGame.data.value?.tags || [],
   privacy: savedGame.data.value?.privacy || "PUBLIC",
 });
+
+console.log(game.date);
 
 const formattedGame = computed(() => ({
   ...game,
