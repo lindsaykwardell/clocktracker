@@ -113,6 +113,11 @@ export default defineEventHandler(async (handler) => {
           icon: true,
         },
       },
+      associated_script: {
+        select: {
+          version: true,
+        },
+      },
     },
     orderBy: {
       date: "desc",

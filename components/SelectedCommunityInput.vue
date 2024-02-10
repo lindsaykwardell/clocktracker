@@ -1,5 +1,5 @@
 <template>
-  <div class="relative ">
+  <div class="relative flex-grow">
     <Combobox v-model="value">
       <ComboboxInput
         @focus="emit('inputFocused')"

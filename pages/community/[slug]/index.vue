@@ -14,101 +14,84 @@
         </nuxt-link>
       </div>
     </template>
-    <template
-      #default="{ community, isMember, isModerator, isBanned, isNotAllowed }"
-    >
-      <div v-if="isBanned">
-        <p class="text-center py-3 text-stone-400">
-          You have been banned from this community.
-        </p>
-      </div>
-      <div v-else-if="isNotAllowed">
-        <p class="text-center py-3 text-stone-400">
-          This community is private. You must join to view it.
-        </p>
-      </div>
-      <template v-else>
-        <template v-if="recentGames.status === Status.SUCCESS">
-          <GameOverviewGrid
-            v-if="recentGames.data.length > 0"
-            :games="recentGames.data"
-            cardWidth="w-1/2 lg:w-1/4"
-            readonly
-          />
-          <template v-else>
-            <p class="text-center py-3 text-stone-400">
-              No games have been played yet.
-            </p>
-          </template>
-        </template>
+    <template #default="{ community, isMember, isModerator }">
+      <template v-if="recentGames.status === Status.SUCCESS">
+        <GameOverviewGrid
+          v-if="recentGames.data.length > 0"
+          :games="recentGames.data"
+          cardWidth="w-1/2 lg:w-1/4"
+          readonly
+        />
         <template v-else>
-          <Loading />
+          <p class="text-center py-3 text-stone-400">
+            No games have been played yet.
+          </p>
         </template>
-        <div
-          v-if="community.data.events.length > 0"
-          class="flex justify-center"
-        >
-          <nuxt-link
-            :to="`${community.data.slug}/event/${community.data.events[0].id}`"
-          >
-            <EventCard :event="community.data.events[0]" class="mt-6">
-              <template #footer="{ event }">
-                <div class="flex flex-wrap w-11/12 m-auto pb-2">
-                  <template v-for="player in event.registered_players">
-                    <nuxt-link
-                      v-if="player.user"
-                      :to="`/@${player.user.username}`"
-                    >
-                      <Avatar
-                        :value="player.user.avatar"
-                        size="xs"
-                        class="border-stone-800"
-                      />
-                    </nuxt-link>
-                    <template v-else>
-                      <Avatar
-                        value="/img/default.png"
-                        size="xs"
-                        class="border-stone-800"
-                      />
-                    </template>
-                  </template>
-                </div>
-              </template>
-            </EventCard>
-          </nuxt-link>
-        </div>
-        <div
-          class="w-full md:w-11/12 lg:max-w-[800px] m-auto flex flex-col gap-3 mt-8"
-        >
-          <div v-if="isMember" class="bg-stone-900 p-4">
-            <label>
-              Add to the conversation
-              <form @submit.prevent="submitPost">
-                <ExpandingTextarea
-                  class="block w-full border border-stone-500 rounded-md p-2 text-lg bg-stone-600"
-                  v-model="message"
-                />
-                <button
-                  type="submit"
-                  class="rounded transition duration-150 bg-blue-800 hover:bg-blue-900 text-white px-4 py-2 mt-2"
-                >
-                  Send
-                </button>
-              </form>
-            </label>
-          </div>
-          <CommunityPost
-            v-for="post in community.data.posts"
-            :post="post"
-            :community="community.data"
-            :isMember="isMember"
-            :isModerator="isModerator"
-            @delete="deletePost"
-            @reply="submitReply"
-          />
-        </div>
       </template>
+      <template v-else>
+        <Loading />
+      </template>
+      <div v-if="community.data.events.length > 0" class="flex justify-center">
+        <nuxt-link
+          :to="`${community.data.slug}/event/${community.data.events[0].id}`"
+        >
+          <EventCard :event="community.data.events[0]" class="mt-6">
+            <template #footer="{ event }">
+              <div class="flex flex-wrap w-11/12 m-auto pb-2">
+                <template v-for="player in event.registered_players">
+                  <nuxt-link
+                    v-if="player.user"
+                    :to="`/@${player.user.username}`"
+                  >
+                    <Avatar
+                      :value="player.user.avatar"
+                      size="xs"
+                      class="border-stone-800"
+                    />
+                  </nuxt-link>
+                  <template v-else>
+                    <Avatar
+                      value="/img/default.png"
+                      size="xs"
+                      class="border-stone-800"
+                    />
+                  </template>
+                </template>
+              </div>
+            </template>
+          </EventCard>
+        </nuxt-link>
+      </div>
+      <div
+        class="w-full md:w-11/12 lg:max-w-[800px] m-auto flex flex-col gap-3 mt-8"
+      >
+        <div v-if="isMember" class="bg-stone-900 p-4">
+          <label>
+            Add to the conversation
+            <form @submit.prevent="submitPost">
+              <ExpandingTextarea
+                class="block w-full border border-stone-500 rounded-md p-2 text-lg bg-stone-600"
+                v-model="message"
+              />
+              <button
+                type="submit"
+                class="rounded transition duration-150 bg-blue-800 hover:bg-blue-900 text-white px-4 py-2 mt-2"
+              >
+                Send
+              </button>
+            </form>
+          </label>
+        </div>
+        <CommunityPost
+          v-for="post in community.data.posts"
+          :post="post"
+          :community="community.data"
+          :isMember="isMember"
+          :isModerator="isModerator"
+          @delete="deletePost"
+          @reply="submitReply"
+        />
+      </div>
     </template>
   </CommunityTemplate>
 </template>

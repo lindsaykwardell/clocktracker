@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
 }
 
 model Game {
@@ -88,16 +89,19 @@ model Character {
 }
 
 model Script {
-  id                      Int       @id
-  name                    String
-  version                 String
-  author                  String
-  type                    String
-  json_url                String
-  pdf_url                 String
-  roles                   Role[]
-  characters_last_updated DateTime?
-  games                   Game[]
+  id          Int    @id @default(autoincrement())
+  script_id   Int
+  name        String
+  version     String
+  author      String
+  type        String
+  json_url    String
+  pdf_url     String
+  description String @default("")
+  roles       Role[]
+  games       Game[]
+
+  @@unique([script_id, version])
 }
 
 model Role {

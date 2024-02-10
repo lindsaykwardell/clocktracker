@@ -1,5 +1,6 @@
 import type { User } from "@supabase/supabase-js";
 import { PrismaClient } from "@prisma/client";
+import { fetchGame } from "~/server/utils/fetchGames";
 
 const prisma = new PrismaClient();
 
@@ -30,65 +31,17 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  return prisma.game.update({
+  await prisma.game.update({
     where: {
-      id: gameId,
+      id: game.id,
     },
     data: {
       waiting_for_confirmation: false,
     },
-    include: {
-      user: {
-        select: {
-          privacy: true,
-          username: true,
-        },
-      },
-      player_characters: {
-        include: {
-          role: {
-            select: {
-              token_url: true,
-              type: true,
-              initial_alignment: true,
-            },
-          },
-          related_role: {
-            select: {
-              token_url: true,
-            },
-          },
-        },
-      },
-      grimoire: {
-        include: {
-          tokens: {
-            include: {
-              role: true,
-              related_role: true,
-            },
-          },
-        },
-        orderBy: {
-          id: "asc",
-        },
-      },
-      parent_game: {
-        select: {
-          user: {
-            select: {
-              username: true,
-              display_name: true,
-            },
-          },
-        },
-      },
-      community: {
-        select: {
-          slug: true,
-          icon: true,
-        },
-      },
+    select: {
+      waiting_for_confirmation: true,
     },
   });
+
+  return fetchGame(game.id, user);
 });
