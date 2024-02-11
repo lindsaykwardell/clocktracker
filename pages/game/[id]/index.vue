@@ -174,9 +174,41 @@
               </nuxt-link>
             </label>
           </div>
-          <div class="flex flex-wrap gap-2 mt-4">
+          <div
+            v-if="game.data.demon_bluffs.length || game.data.fabled.length"
+            class="flex flex-col md:flex-row gap-4 mt-4 justify-start"
+          >
+            <label
+              v-if="game.data.demon_bluffs.length"
+              class="flex gap-3 items-center"
+            >
+              <span class="block">Demon Bluffs</span>
+              <div class="flex flex-wrap gap-2">
+                <Token
+                  v-for="bluff in game.data.demon_bluffs"
+                  :key="bluff.id"
+                  :character="bluff"
+                  size="sm"
+                />
+              </div>
+            </label>
+            <label
+              v-if="game.data.fabled.length"
+              class="flex gap-3 items-center"
+            >
+              <span class="block">Fabled</span>
+              <div class="flex flex-wrap gap-2">
+                <Token
+                  v-for="fabled in game.data.fabled"
+                  :key="fabled.id"
+                  :character="fabled"
+                  size="sm"
+                />
+              </div>
+            </label>
+          </div>
+          <div v-if="game.data.bgg_id" class="flex flex-wrap gap-2 mt-4">
             <a
-              v-if="game.data.bgg_id"
               class="flex gap-1 items-center hover:underline text-blue-800 hover:text-blue-700"
               target="_blank"
               :href="`https://boardgamegeek.com/play/details/${game.data.bgg_id}`"
@@ -642,6 +674,7 @@ async function postToBGG() {
 function formatDate(date: Date) {
   return new Intl.DateTimeFormat(navigator.language, {
     dateStyle: "long",
+    timeZone: "UTC",
   }).format(new Date(date));
 }
 

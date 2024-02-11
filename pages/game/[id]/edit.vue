@@ -59,6 +59,21 @@ const game = reactive<{
     };
     related_role?: { token_url: string };
   }[];
+  demon_bluffs: {
+    name: string;
+    role_id: string | null;
+    role?: {
+      token_url: string;
+      type: string;
+    };
+  }[];
+  fabled: {
+    name: string;
+    role_id: string | null;
+    role?: {
+      token_url: string;
+    };
+  }[];
   win: WinStatus;
   notes: string;
   image_urls: string[];
@@ -85,7 +100,7 @@ const game = reactive<{
   tags: string[];
   privacy: string;
 }>({
-  date: dayjs(savedGame.data.value?.date).format("YYYY-MM-DD"),
+  date: savedGame.data.value?.date.toString().slice(0, 10) || "",
   script: savedGame.data.value?.script || "",
   script_id: savedGame.data.value?.script_id || null,
   storyteller: savedGame.data.value?.storyteller || "",
@@ -120,6 +135,23 @@ const game = reactive<{
       related_role_id: null,
     },
   ],
+  demon_bluffs:
+    savedGame.data.value?.demon_bluffs.map((demon_bluff) => ({
+      name: demon_bluff.name,
+      role_id: demon_bluff.role_id,
+      role: demon_bluff.role || {
+        token_url: "/1x1.png",
+        type: "",
+      },
+    })) || [],
+  fabled:
+    savedGame.data.value?.fabled.map((fabled) => ({
+      name: fabled.name,
+      role_id: fabled.role_id,
+      role: fabled.role || {
+        token_url: "/1x1.png",
+      },
+    })) || [],
   win: savedGame.data.value?.win || WinStatus.NOT_RECORDED,
   notes: savedGame.data.value?.notes || "",
   image_urls: savedGame.data.value?.image_urls || [],
@@ -152,6 +184,8 @@ const game = reactive<{
   privacy: savedGame.data.value?.privacy || "PUBLIC",
 });
 
+console.log(game.date);
+
 const formattedGame = computed(() => ({
   ...game,
   date: dayjs(game.date).toISOString(),
@@ -162,6 +196,14 @@ const formattedGame = computed(() => ({
     related: character.related,
     role_id: character.role_id,
     related_role_id: character.related_role_id,
+  })),
+  demon_bluffs: game.demon_bluffs.map((demon_bluff) => ({
+    name: demon_bluff.name,
+    role_id: demon_bluff.role_id,
+  })),
+  fabled: game.fabled.map((fabled) => ({
+    name: fabled.name,
+    role_id: fabled.role_id,
   })),
 }));
 

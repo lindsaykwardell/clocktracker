@@ -13,7 +13,7 @@ model Game {
   bgg_id                   Int?           @unique
   user_id                  String
   created_at               DateTime?      @default(now()) @db.Timestamptz(6)
-  date                     DateTime
+  date                     DateTime       @default(now()) @db.Date
   script                   String
   script_id                Int?
   location_type            LocationType   @default(ONLINE)
@@ -43,6 +43,8 @@ model Game {
   deleted                  Boolean        @default(false)
   deleted_date             DateTime?
   privacy                  PrivacySetting @default(PUBLIC)
+  demon_bluffs             DemonBluff[]
+  fabled                   Fabled[]
 }
 
 enum WinStatus {
@@ -88,6 +90,26 @@ model Character {
   related_role    Role?     @relation("RelatedRole", fields: [related_role_id], references: [id])
 }
 
+model DemonBluff {
+  id      Int     @id @default(autoincrement())
+  name    String
+  role    Role?   @relation(fields: [role_id], references: [id])
+  related String?
+  game    Game?   @relation(fields: [game_id], references: [id])
+  game_id String?
+  role_id String?
+}
+
+model Fabled {
+  id      Int     @id @default(autoincrement())
+  name    String
+  role    Role?   @relation(fields: [role_id], references: [id])
+  related String?
+  game    Game?   @relation(fields: [game_id], references: [id])
+  game_id String?
+  role_id String?
+}
+
 model Script {
   id          Int    @id @default(autoincrement())
   script_id   Int
@@ -105,16 +127,18 @@ model Script {
 }
 
 model Role {
-  id                String      @id
+  id                String       @id
   name              String
   initial_alignment Alignment
   token_url         String
   type              RoleType
   scripts           Script[]
-  related_character Character[] @relation("RelatedRole")
+  related_character Character[]  @relation("RelatedRole")
   character         Character[]
   tokens            Token[]
-  related_tokens    Token[]     @relation("RelatedToken")
+  related_tokens    Token[]      @relation("RelatedToken")
+  demon_bluffs      DemonBluff[]
+  fabled            Fabled[]
 }
 
 enum Alignment {

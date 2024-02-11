@@ -7,6 +7,8 @@ import {
   Grimoire,
   Alignment,
   WinStatus,
+  DemonBluff,
+  Fabled,
 } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -16,6 +18,8 @@ export default defineEventHandler(async (handler) => {
   const body = await readBody<
     | (Game & {
         player_characters: (Character & { role?: { token_url: string } })[];
+        demon_bluffs: (DemonBluff & { role?: { token_url: string } })[];
+        fabled: (Fabled & { role?: { token_url: string } })[];
         grimoire: Partial<Grimoire & { tokens: Partial<Token>[] }>[];
       })
     | null
@@ -42,6 +46,12 @@ export default defineEventHandler(async (handler) => {
       user_id: user.id,
       player_characters: {
         create: [...body.player_characters],
+      },
+      demon_bluffs: {
+        create: [...body.demon_bluffs],
+      },
+      fabled: {
+        create: [...body.fabled],
       },
       grimoire: {
         create: [
@@ -160,6 +170,12 @@ export default defineEventHandler(async (handler) => {
         player_characters: {
           create: [...player_characters],
         },
+        demon_bluffs: {
+          create: [...body.demon_bluffs],
+        },
+        fabled: {
+          create: [...body.fabled],
+        },
         notes: "",
         win: win ? WinStatus.WIN : WinStatus.LOSS,
         // map the already created grimoires to the new game
@@ -205,6 +221,12 @@ export default defineEventHandler(async (handler) => {
             date: new Date(body.date),
             user_id: friend.user_id,
             player_characters: {},
+            demon_bluffs: {
+              create: [...body.demon_bluffs],
+            },
+            fabled: {
+              create: [...body.fabled],
+            },
             notes: "",
             win: win ? WinStatus.WIN : WinStatus.LOSS,
             grimoire: {

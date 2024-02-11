@@ -311,11 +311,117 @@
           </button>
         </Token>
       </div>
-      <TokenDialog
-        v-model:visible="showRoleSelectionDialog"
-        :availableRoles="roles"
-        @selectRole="selectRoleForToken"
-      />
+    </fieldset>
+    <fieldset
+      class="flex flex-col flex-wrap gap-5 border rounded border-stone-500 p-4 my-3"
+    >
+      <legend>Demon Bluffs and Fabled</legend>
+      <details :open="game.demon_bluffs.length > 0">
+        <summary class="cursor-pointer">Demon Bluffs</summary>
+        <div class="flex justify-center md:justify-normal flex-wrap gap-5">
+          <div
+            v-for="(character, i) in game.demon_bluffs"
+            class="relative border border-stone-600 rounded p-4 flex justify-center items-center aspect-square"
+          >
+            <button
+              type="button"
+              @click="removeDemonBluff(i)"
+              class="absolute top-1 right-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 512 512"
+              >
+                <path
+                  d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
+                  fill="currentColor"
+                />
+                <path d="M249 160h14v241h-14z" fill="currentColor" />
+                <path d="M320 160h-14.6l-10.7 241h14.6z" fill="currentColor" />
+                <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
+              </svg>
+            </button>
+            <Token
+              :character="character"
+              size="md"
+              class="cursor-pointer"
+              @clickRole="
+                openRoleSelectionDialog(character, 'role', 'demon_bluffs')
+              "
+              id="player-role"
+              hideRelated
+            />
+          </div>
+          <div
+            v-if="game.demon_bluffs.length < 3"
+            class="border border-stone-600 rounded p-4 flex justify-center items-center aspect-square"
+          >
+            <Token outline size="md" class="font-dumbledor">
+              <button
+                type="button"
+                @click="addDemonBluff"
+                class="w-full h-full p-1 text-sm"
+              >
+                Add Demon Bluff
+              </button>
+            </Token>
+          </div>
+        </div>
+      </details>
+
+      <details :open="game.fabled.length > 0">
+        <summary class="cursor-pointer">Fabled</summary>
+        <div class="flex justify-center md:justify-normal flex-wrap gap-5">
+          <div
+            v-for="(character, i) in game.fabled"
+            class="relative border border-stone-600 rounded p-4 flex justify-center items-center aspect-square"
+          >
+            <button
+              type="button"
+              @click="removeFabled(i)"
+              class="absolute top-1 right-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 512 512"
+              >
+                <path
+                  d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
+                  fill="currentColor"
+                />
+                <path d="M249 160h14v241h-14z" fill="currentColor" />
+                <path d="M320 160h-14.6l-10.7 241h14.6z" fill="currentColor" />
+                <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
+              </svg>
+            </button>
+            <Token
+              :character="character"
+              size="md"
+              class="cursor-pointer"
+              @clickRole="openRoleSelectionDialog(character, 'role', 'fabled')"
+              id="player-role"
+              hideRelated
+            />
+          </div>
+          <div
+            class="border border-stone-600 rounded p-4 flex justify-center items-center aspect-square"
+          >
+            <Token outline size="md" class="font-dumbledor">
+              <button
+                type="button"
+                @click="addFabled"
+                class="w-full h-full p-1 text-sm"
+              >
+                Add Fabled
+              </button>
+            </Token>
+          </div>
+        </div>
+      </details>
     </fieldset>
     <fieldset
       id="game-results"
@@ -517,6 +623,13 @@
     </button>
   </form>
   <Tour :steps="tour" tourKey="game-editor" />
+  <TokenDialog
+    v-model:visible="showRoleSelectionDialog"
+    :availableRoles="visibleRoles"
+    @selectRole="selectRoleForToken"
+    :alwaysShowFabled="tokenSet === 'fabled'"
+    :hideTravelers="tokenSet !== 'player_characters'"
+  />
 </template>
 
 <script setup lang="ts">
@@ -560,13 +673,13 @@ const tour: Step[] = [
 type Character = {
   name: string;
   role_id: string | null;
-  alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
-  showRelated: boolean;
-  related: string;
-  related_role_id: string | null;
+  alignment?: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
+  showRelated?: boolean;
+  related?: string;
+  related_role_id?: string | null;
   role?: {
     token_url: string;
-    initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+    initial_alignment?: "GOOD" | "EVIL" | "NEUTRAL";
   };
   related_role?: { token_url: string };
 };
@@ -588,6 +701,20 @@ const roles = ref<
     initial_alignment: Alignment;
   }[]
 >([]);
+
+const visibleRoles = computed(() => {
+  return roles.value.filter((role) => {
+    switch (tokenSet.value) {
+      case "player_characters":
+        return true;
+      case "demon_bluffs":
+        return role.type === "TOWNSFOLK" || role.type === "OUTSIDER";
+      case "fabled":
+        return role.type === "FABLED";
+    }
+  });
+});
+
 const scripts = ref<{ id: number; name: string }[]>([]);
 const baseScripts = ref<{ id: number; name: string }[]>([]);
 const recentScripts = computed(() =>
@@ -598,8 +725,11 @@ const recentScripts = computed(() =>
 const scriptVersions = ref<{ id: number; version: string }[]>([]);
 const fetchingScriptVersions = ref(false);
 const tokenMode = ref<"role" | "related_role">("role");
+const tokenSet = ref<"player_characters" | "demon_bluffs" | "fabled">(
+  "player_characters"
+);
 
-let focusedToken: Character | null = null;
+let focusedToken: Partial<Character> | null = null;
 
 const baseScriptData = await $fetch(
   "/api/script?author=The Pandemonium Institute"
@@ -701,6 +831,21 @@ const props = defineProps<{
       };
       related_role?: { token_url: string };
     }[];
+    demon_bluffs: {
+      name: string;
+      role_id: string | null;
+      role?: {
+        token_url: string;
+        type: string;
+      };
+    }[];
+    fabled: {
+      name: string;
+      role_id: string | null;
+      role?: {
+        token_url: string;
+      };
+    }[];
     win: WinStatus;
     notes: string;
     image_urls: string[];
@@ -769,6 +914,23 @@ function addCharacter() {
   );
 }
 
+function addDemonBluff() {
+  props.game.demon_bluffs.push({
+    name: "",
+    role_id: null,
+    role: {
+      token_url: "/1x1.png",
+      type: "",
+    },
+  });
+
+  openRoleSelectionDialog(
+    props.game.demon_bluffs[props.game.demon_bluffs.length - 1],
+    "role",
+    "demon_bluffs"
+  );
+}
+
 function addTag() {
   if (tagsInput.value) {
     props.game.tags.push(tagsInput.value);
@@ -778,6 +940,30 @@ function addTag() {
 
 function removeCharacter(i: number) {
   props.game.player_characters.splice(i, 1);
+}
+
+function removeDemonBluff(i: number) {
+  props.game.demon_bluffs.splice(i, 1);
+}
+
+function addFabled() {
+  props.game.fabled.push({
+    name: "",
+    role_id: null,
+    role: {
+      token_url: "/1x1.png",
+    },
+  });
+
+  openRoleSelectionDialog(
+    props.game.fabled[props.game.fabled.length - 1],
+    "role",
+    "fabled"
+  );
+}
+
+function removeFabled(i: number) {
+  props.game.fabled.splice(i, 1);
 }
 
 function uploadFile() {
@@ -880,11 +1066,13 @@ watchEffect(async () => {
 });
 
 function openRoleSelectionDialog(
-  token: Character,
-  mode: "role" | "related_role"
+  token: Partial<Character>,
+  mode: "role" | "related_role",
+  set: "player_characters" | "demon_bluffs" | "fabled" = "player_characters"
 ) {
   focusedToken = token;
   tokenMode.value = mode;
+  tokenSet.value = set;
   showRoleSelectionDialog.value = true;
 }
 
