@@ -93,7 +93,9 @@ const filteredRoles = computed(() => {
       ...(showAllRoles.value ? allRoles.value : props.availableRoles).filter(
         (role) => role.type !== "FABLED" && role.type !== "TRAVELER"
       ),
-      ...((props.hideTravelers && !showAllRoles.value) ? [] : travelerRoles.value),
+      ...(props.hideTravelers && !showAllRoles.value
+        ? []
+        : travelerRoles.value),
       ...(showFabled.value || props.alwaysShowFabled ? fabledRoles.value : []),
     ].filter((role) =>
       role.name.toLowerCase().includes(roleFilter.value.toLowerCase())
