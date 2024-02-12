@@ -8,7 +8,7 @@
       />
       <ComboboxOptions
         v-if="filteredPeople.length > 0"
-        class="absolute text-sm bg-stone-900 border border-stone-500 max-h-[150px] min-w-[200px] w-full overflow-y-scroll overflow-x-hidden"
+        class="absolute text-sm bg-stone-900 border border-stone-500 max-h-[150px] min-w-[200px] w-full overflow-y-scroll overflow-x-hidden z-10"
         :class="{
           'bottom-8': renderListOnTop,
         }"
