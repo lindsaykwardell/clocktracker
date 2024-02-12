@@ -30,7 +30,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
 import naturalOrder from "natural-order";
 import {
   Combobox,
@@ -40,7 +39,12 @@ import {
 } from "@headlessui/vue";
 
 const props = defineProps<{
-  users: User[];
+  users: {
+    username: string;
+    display_name?: string;
+    user_id?: string | null;
+    avatar?: string | null;
+  }[];
   value: string;
   renderListOnTop?: boolean;
   inputClass?: string;
