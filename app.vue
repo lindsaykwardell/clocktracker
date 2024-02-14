@@ -23,6 +23,11 @@ import {
 const friends = useFriends();
 const users = useUsers();
 const user = useSupabaseUser();
+const featureFlags = useFeatureFlags();
+
+await featureFlags.init();
+
+console.log(featureFlags.isEnabled("test-feature-flag"));
 
 onMounted(() => {
   users.fetchMe(user.value?.id);
