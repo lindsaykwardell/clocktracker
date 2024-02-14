@@ -6,12 +6,6 @@ const prisma = new PrismaClient();
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
 
-  const percentage = Math.floor(
-    ((me ? parseInt(me.id.slice(0, 2), 16) : 0) / 255) * 100
-  );
-
-  console.log(percentage);
-
   const flags = await prisma.featureFlag.findMany({
     select: {
       id: true,
@@ -24,11 +18,6 @@ export default defineEventHandler(async (handler) => {
       OR: [
         {
           active: true,
-        },
-        {
-          percentage: {
-            lte: percentage,
-          },
         },
         {
           active_for: {
