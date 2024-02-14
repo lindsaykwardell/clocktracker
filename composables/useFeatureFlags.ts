@@ -27,8 +27,6 @@ export const useFeatureFlags = defineStore("featureFlags", {
       for (const [key, value] of Object.entries(data.value || {})) {
         this.flags.set(key, value);
       }
-
-      console.log(this.flags)
     },
   },
 });

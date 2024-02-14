@@ -2,7 +2,9 @@
   <StandardTemplate>
     <section class="py-6">
       <h2 class="font-dumbledor text-4xl text-center">Edit Game</h2>
-      <GameEditor :game="game" @submit="submitGame" :inFlight="inFlight" />
+      <ClientOnly>
+        <GameEditor :game="game" @submit="submitGame" :inFlight="inFlight" />
+      </ClientOnly>
     </section>
   </StandardTemplate>
 </template>
