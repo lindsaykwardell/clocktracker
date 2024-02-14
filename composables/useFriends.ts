@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
-import { FetchStatus } from "./useFetchStatus";
-import { FriendRequest } from "@prisma/client";
-import { User } from "./useUsers";
+import type { FetchStatus } from "./useFetchStatus";
+import type { FriendRequest } from "@prisma/client";
+import type { User } from "./useUsers";
 import naturalOrder from "natural-order";
 
 type Friend = {
@@ -100,7 +100,7 @@ export const useFriends = defineStore("friends", {
 
         return this.friends.data.some((friend) => friend.username === username);
       };
-    }
+    },
   },
   actions: {
     async fetchFriends() {
