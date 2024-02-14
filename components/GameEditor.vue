@@ -655,10 +655,9 @@
     </fieldset>
     <fieldset class="border rounded border-stone-500 p-4 my-3">
       <legend>Notes</legend>
-      <textarea
+      <ExpandingTextarea
         v-model="game.notes"
-        class="block w-full border border-stone-500 rounded-md p-2"
-        rows="5"
+        class="block w-full border border-stone-500 rounded-md p-2 min-h-[10rem]"
       />
       <label class="block py-2">
         <span class="block">Add Tag</span>
