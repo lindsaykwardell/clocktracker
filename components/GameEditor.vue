@@ -258,170 +258,25 @@
             <option v-for="i in 5" :value="i">{{ i }}</option>
           </select>
         </label>
-      </div>
-    </fieldset>
-    <fieldset
-      v-if="!game.is_storyteller"
-      class="flex justify-center md:justify-normal flex-wrap gap-5 border rounded border-stone-500 p-4 my-3"
-    >
-      <legend>Player Roles</legend>
-      <div
-        v-for="(character, i) in game.player_characters"
-        class="relative border border-stone-600 rounded p-4 flex justify-center items-center aspect-square"
-      >
-        <button
-          type="button"
-          v-if="i !== 0"
-          @click="removeCharacter(i)"
-          class="absolute top-1 right-1"
+        <label
+          v-if="featureFlags.isEnabled('advanced-editor')"
+          class="w-1/3 md:w-auto flex flex-col gap-2 items-center"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="32"
-            height="32"
-            viewBox="0 0 512 512"
+          <span class="block">Record Full Game</span>
+          <Switch
+            v-model="advancedModeEnabled"
+            :class="advancedModeEnabled ? 'bg-blue-900' : 'bg-blue-700'"
+            class="relative inline-flex h-[24px] w-[60px] shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
           >
-            <path
-              d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
-              fill="currentColor"
+            <span class="sr-only">Use setting</span>
+            <span
+              aria-hidden="true"
+              :class="advancedModeEnabled ? 'translate-x-9' : 'translate-x-0'"
+              class="pointer-events-none inline-block h-[20px] w-[20px] transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out"
             />
-            <path d="M249 160h14v241h-14z" fill="currentColor" />
-            <path d="M320 160h-14.6l-10.7 241h14.6z" fill="currentColor" />
-            <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
-          </svg>
-        </button>
-        <Token
-          :character="character"
-          alwaysShowAlignment
-          size="lg"
-          class="cursor-pointer"
-          @clickRole="openRoleSelectionDialog(character, 'role')"
-          @clickRelated="openRoleSelectionDialog(character, 'related_role')"
-          @clickAlignment="toggleAlignment(character)"
-          id="player-role"
-          relatedId="related-player-role"
-        />
+          </Switch>
+        </label>
       </div>
-      <div
-        class="border border-stone-600 rounded p-4 flex justify-center items-center aspect-square"
-      >
-        <Token outline size="lg" class="font-dumbledor">
-          <button type="button" @click="addCharacter" class="w-full h-full">
-            Add Character
-          </button>
-        </Token>
-      </div>
-    </fieldset>
-    <fieldset
-      class="flex flex-col flex-wrap gap-5 border rounded border-stone-500 p-4 my-3"
-    >
-      <legend>Demon Bluffs and Fabled</legend>
-      <details :open="game.demon_bluffs.length > 0">
-        <summary class="cursor-pointer">Demon Bluffs</summary>
-        <div class="flex justify-center md:justify-normal flex-wrap gap-5">
-          <div
-            v-for="(character, i) in game.demon_bluffs"
-            class="relative border border-stone-600 rounded p-4 flex justify-center items-center aspect-square"
-          >
-            <button
-              type="button"
-              @click="removeDemonBluff(i)"
-              class="absolute top-1 right-1"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="32"
-                height="32"
-                viewBox="0 0 512 512"
-              >
-                <path
-                  d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
-                  fill="currentColor"
-                />
-                <path d="M249 160h14v241h-14z" fill="currentColor" />
-                <path d="M320 160h-14.6l-10.7 241h14.6z" fill="currentColor" />
-                <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
-              </svg>
-            </button>
-            <Token
-              :character="character"
-              size="md"
-              class="cursor-pointer"
-              @clickRole="
-                openRoleSelectionDialog(character, 'role', 'demon_bluffs')
-              "
-              id="player-role"
-              hideRelated
-            />
-          </div>
-          <div
-            v-if="game.demon_bluffs.length < 3"
-            class="border border-stone-600 rounded p-4 flex justify-center items-center aspect-square"
-          >
-            <Token outline size="md" class="font-dumbledor">
-              <button
-                type="button"
-                @click="addDemonBluff"
-                class="w-full h-full p-1 text-sm"
-              >
-                Add Demon Bluff
-              </button>
-            </Token>
-          </div>
-        </div>
-      </details>
-
-      <details :open="game.fabled.length > 0">
-        <summary class="cursor-pointer">Fabled</summary>
-        <div class="flex justify-center md:justify-normal flex-wrap gap-5">
-          <div
-            v-for="(character, i) in game.fabled"
-            class="relative border border-stone-600 rounded p-4 flex justify-center items-center aspect-square"
-          >
-            <button
-              type="button"
-              @click="removeFabled(i)"
-              class="absolute top-1 right-1"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="32"
-                height="32"
-                viewBox="0 0 512 512"
-              >
-                <path
-                  d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
-                  fill="currentColor"
-                />
-                <path d="M249 160h14v241h-14z" fill="currentColor" />
-                <path d="M320 160h-14.6l-10.7 241h14.6z" fill="currentColor" />
-                <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
-              </svg>
-            </button>
-            <Token
-              :character="character"
-              size="md"
-              class="cursor-pointer"
-              @clickRole="openRoleSelectionDialog(character, 'role', 'fabled')"
-              id="player-role"
-              hideRelated
-            />
-          </div>
-          <div
-            class="border border-stone-600 rounded p-4 flex justify-center items-center aspect-square"
-          >
-            <Token outline size="md" class="font-dumbledor">
-              <button
-                type="button"
-                @click="addFabled"
-                class="w-full h-full p-1 text-sm"
-              >
-                Add Fabled
-              </button>
-            </Token>
-          </div>
-        </div>
-      </details>
     </fieldset>
     <fieldset
       id="game-results"
@@ -469,12 +324,152 @@
       </fieldset>
     </fieldset>
     <fieldset
-      v-if="game.grimoire[0].tokens.length > 2"
+      v-if="!game.is_storyteller"
+      class="flex justify-center md:justify-normal flex-wrap gap-5 border rounded border-stone-500 p-4 my-3"
+    >
+      <legend v-if="!advancedModeEnabled">Player Roles</legend>
+      <legend v-else>Grimoire</legend>
+      <template v-if="!advancedModeEnabled">
+        <div
+          v-for="(character, i) in game.player_characters"
+          class="relative border border-stone-600 rounded p-4 flex justify-center items-center aspect-square"
+        >
+          <button
+            type="button"
+            v-if="i !== 0"
+            @click="removeCharacter(i)"
+            class="absolute top-1 right-1"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="32"
+              height="32"
+              viewBox="0 0 512 512"
+            >
+              <path
+                d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
+                fill="currentColor"
+              />
+              <path d="M249 160h14v241h-14z" fill="currentColor" />
+              <path d="M320 160h-14.6l-10.7 241h14.6z" fill="currentColor" />
+              <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
+            </svg>
+          </button>
+          <Token
+            :character="character"
+            alwaysShowAlignment
+            size="lg"
+            class="cursor-pointer"
+            @clickRole="openRoleSelectionDialog(character, 'role')"
+            @clickRelated="openRoleSelectionDialog(character, 'related_role')"
+            @clickAlignment="toggleAlignment(character)"
+            id="player-role"
+            relatedId="related-player-role"
+          />
+        </div>
+        <div
+          class="border border-stone-600 rounded p-4 flex justify-center items-center aspect-square"
+        >
+          <Token outline size="lg" class="font-dumbledor">
+            <button type="button" @click="addCharacter" class="w-full h-full">
+              Add Character
+            </button>
+          </Token>
+        </div>
+      </template>
+      <template v-else>
+        <div
+          v-if="game.player_count && game.player_count >= 5"
+          class="pt-3 relative bg-center bg-cover w-full"
+          :class="{
+            'trouble-brewing': game.script === 'Trouble Brewing',
+            'sects-and-violets': game.script === 'Sects and Violets',
+            'bad-moon-rising': game.script === 'Bad Moon Rising',
+            'custom-script':
+              [
+                'Trouble Brewing',
+                'Sects and Violets',
+                'Bad Moon Rising',
+              ].indexOf(game.script) === -1,
+          }"
+        >
+          <button
+            v-if="game.grimoire.length > 1"
+            @click.prevent="deletePage"
+            class="absolute top-1 right-1 bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial z-10"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="32"
+              height="32"
+              viewBox="0 0 512 512"
+            >
+              <path
+                d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
+                fill="currentColor"
+              />
+              <path d="M249 160h14v241h-14z" fill="currentColor" />
+              <path d="M320 160h-14.6l-10.7 241h14.6z" fill="currentColor" />
+              <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
+            </svg>
+            <span class="hidden md:inline">Delete page</span>
+          </button>
+          <button
+            type="button"
+            @click="pageBackward"
+            v-if="grimPage !== 0"
+            class="absolute bottom-0 left-1 flex items-center font-dumbledor"
+          >
+            <span
+              class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded"
+            >
+              {{ "<" }} Previous page
+            </span>
+          </button>
+          <button
+            type="button"
+            @click="pageForward"
+            class="absolute bottom-0 right-1 flex items-center font-dumbledor"
+          >
+            <span
+              v-if="grimPage <= game.grimoire.length - 1"
+              class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded"
+            >
+              {{
+                grimPage === game.grimoire.length - 1 ? "Add page" : "Next page"
+              }}
+              {{ ">" }}
+            </span>
+          </button>
+          <div class="w-screen md:w-auto overflow-scroll">
+            <Grimoire
+              :tokens="game.grimoire[grimPage].tokens"
+              :availableRoles="orderedRoles"
+              :excludePlayers="storytellerNames"
+              @selectedMe="applyMyRoleToGrimoire"
+            />
+          </div>
+          <div
+            class="text-center bg-gradient-to-b from-transparent via-stone-800 to-stone-800"
+          >
+            Page {{ grimPage + 1 }} of {{ game.grimoire.length }}
+          </div>
+        </div>
+      </template>
+    </fieldset>
+    <fieldset
       class="block border rounded border-stone-500 p-4 my-3 bg-center bg-cover"
     >
-      <legend>Grimoire</legend>
-      <details :open="game.grimoire[0].tokens.some((token) => token.role)">
-        <summary class="cursor-pointer">Edit Grimoire</summary>
+      <legend>Additional Details</legend>
+      <details
+        v-if="
+          !featureFlags.isEnabled('advanced-editor') &&
+          game.player_count &&
+          game.player_count >= 5
+        "
+        :open="game.grimoire[0].tokens.some((token) => token.role)"
+      >
+        <summary class="cursor-pointer">Grimoire</summary>
         <div
           class="pt-3 relative bg-center bg-cover"
           :class="{
@@ -552,13 +547,117 @@
           </div>
         </div>
       </details>
+      <details :open="game.demon_bluffs.length > 0">
+        <summary class="cursor-pointer">Demon Bluffs</summary>
+        <div class="flex justify-center md:justify-normal flex-wrap gap-5">
+          <div
+            v-for="(character, i) in game.demon_bluffs"
+            class="relative border border-stone-600 rounded p-4 flex justify-center items-center aspect-square"
+          >
+            <button
+              type="button"
+              @click="removeDemonBluff(i)"
+              class="absolute top-1 right-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 512 512"
+              >
+                <path
+                  d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
+                  fill="currentColor"
+                />
+                <path d="M249 160h14v241h-14z" fill="currentColor" />
+                <path d="M320 160h-14.6l-10.7 241h14.6z" fill="currentColor" />
+                <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
+              </svg>
+            </button>
+            <Token
+              :character="character"
+              size="md"
+              class="cursor-pointer"
+              @clickRole="
+                openRoleSelectionDialog(character, 'role', 'demon_bluffs')
+              "
+              id="player-role"
+              hideRelated
+            />
+          </div>
+          <div
+            v-if="game.demon_bluffs.length < 3"
+            class="border border-stone-600 rounded p-4 flex justify-center items-center aspect-square"
+          >
+            <Token outline size="md" class="font-dumbledor">
+              <button
+                type="button"
+                @click="addDemonBluff"
+                class="w-full h-full p-1 text-sm"
+              >
+                Add Demon Bluff
+              </button>
+            </Token>
+          </div>
+        </div>
+      </details>
+      <details :open="game.fabled.length > 0">
+        <summary class="cursor-pointer">Fabled</summary>
+        <div class="flex justify-center md:justify-normal flex-wrap gap-5">
+          <div
+            v-for="(character, i) in game.fabled"
+            class="relative border border-stone-600 rounded p-4 flex justify-center items-center aspect-square"
+          >
+            <button
+              type="button"
+              @click="removeFabled(i)"
+              class="absolute top-1 right-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 512 512"
+              >
+                <path
+                  d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
+                  fill="currentColor"
+                />
+                <path d="M249 160h14v241h-14z" fill="currentColor" />
+                <path d="M320 160h-14.6l-10.7 241h14.6z" fill="currentColor" />
+                <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
+              </svg>
+            </button>
+            <Token
+              :character="character"
+              size="md"
+              class="cursor-pointer"
+              @clickRole="openRoleSelectionDialog(character, 'role', 'fabled')"
+              id="player-role"
+              hideRelated
+            />
+          </div>
+          <div
+            class="border border-stone-600 rounded p-4 flex justify-center items-center aspect-square"
+          >
+            <Token outline size="md" class="font-dumbledor">
+              <button
+                type="button"
+                @click="addFabled"
+                class="w-full h-full p-1 text-sm"
+              >
+                Add Fabled
+              </button>
+            </Token>
+          </div>
+        </div>
+      </details>
     </fieldset>
     <fieldset class="border rounded border-stone-500 p-4 my-3">
       <legend>Notes</legend>
-      <textarea
+      <ExpandingTextarea
         v-model="game.notes"
-        class="block w-full border border-stone-500 rounded-md p-2"
-        rows="5"
+        class="block w-full border border-stone-500 rounded-md p-2 min-h-[10rem]"
       />
       <label class="block py-2">
         <span class="block">Add Tag</span>
@@ -637,8 +736,9 @@ import type { Alignment } from "@prisma/client";
 import type { RoleType } from "~/composables/useRoles";
 import { v4 as uuid } from "uuid";
 import naturalOrder from "natural-order";
-import { watchDebounced } from "@vueuse/core";
+import { watchDebounced, useLocalStorage } from "@vueuse/core";
 import { WinStatus } from "~/composables/useGames";
+import { Switch } from "@headlessui/vue";
 
 const tour: Step[] = [
   {
@@ -691,6 +791,18 @@ const users = useUsers();
 const games = useGames();
 const friends = useFriends();
 const { isBaseScript } = useScripts();
+const featureFlags = useFeatureFlags();
+
+const advancedModeEnabled_ = useLocalStorage("advancedModeEnabled", "false");
+
+const advancedModeEnabled = computed({
+  get: () =>
+    featureFlags.isEnabled("advanced-editor") &&
+    advancedModeEnabled_.value === "true",
+  set: (value) => {
+    advancedModeEnabled_.value = value ? "true" : "false";
+  },
+});
 
 const roles = ref<
   {

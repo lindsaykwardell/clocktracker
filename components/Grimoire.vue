@@ -93,7 +93,8 @@
 </template>
 
 <script setup lang="ts">
-import { RoleType, Alignment } from "@prisma/client";
+import { Alignment } from "@prisma/client";
+import { RoleType } from "~/composables/useRoles";
 
 type Token = {
   alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;

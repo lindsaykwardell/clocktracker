@@ -8,6 +8,15 @@ datasource db {
   directUrl = env("DIRECT_DATABASE_URL")
 }
 
+model FeatureFlag {
+  id          Int            @id @default(autoincrement())
+  name        String
+  description String
+  active      Boolean        @default(false)
+  active_for  UserSettings[]
+  created_at  DateTime       @default(now()) @db.Timestamptz(6)
+}
+
 model Game {
   id                       String         @id @default(uuid())
   bgg_id                   Int?           @unique
@@ -193,6 +202,7 @@ model UserSettings {
   community_join_requests Community[]     @relation("CommunityJoinRequest")
   community_posts         CommunityPost[]
   EventAttendee           EventAttendee[]
+  FeatureFlag             FeatureFlag[]
 }
 
 enum PrivacySetting {

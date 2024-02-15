@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
-import { FetchStatus } from "./useFetchStatus";
-import { User } from "./useUsers";
+import type { FetchStatus } from "./useFetchStatus";
+import type { User } from "./useUsers";
 
 export type Community = {
   id: number;

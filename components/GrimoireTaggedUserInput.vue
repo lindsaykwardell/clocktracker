@@ -14,7 +14,12 @@
 import { ref, computed } from "vue";
 
 const props = defineProps<{
-  users: User[];
+  users: {
+    username: string;
+    display_name?: string;
+    user_id?: string | null;
+    avatar?: string | null;
+  }[];
   value: string;
 }>();
 
