@@ -85,6 +85,7 @@ const game = reactive<{
       related_role_id: string | null;
       related_role?: { token_url: string };
       player_name: string;
+      reminders: { reminder: string; token_url: string }[];
     }[];
   }[];
   ignore_for_stats: boolean;

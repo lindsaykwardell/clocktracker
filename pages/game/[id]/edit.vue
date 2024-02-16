@@ -96,6 +96,7 @@ const game = reactive<{
       related_role?: { token_url: string };
       player_name: string;
       player_id?: string | null;
+      reminders: { reminder: string; token_url: string }[];
     }[];
   }[];
   ignore_for_stats: boolean;
@@ -173,6 +174,7 @@ const game = reactive<{
             (token.role ? { token_url: "/1x1.png" } : undefined),
           player_name: token.player_name,
           player_id: token.player_id,
+          reminders: [],
         })),
       }))
     : [
