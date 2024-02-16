@@ -7,6 +7,23 @@
           'z-50': token.order === focusedToken?.order,
         }"
       >
+        <div class="reminder-tokens">
+          <Token
+            v-for="(reminderToken, tokenIndex) in token.reminders"
+            class="reminder-token"
+            :character="{ role: { token_url: reminderToken.token_url } }"
+            size="sm"
+            :style="`--ti: ${tokenIndex}`"
+          />
+          <Token
+            class="reminder-token opacity-0 hover:opacity-100 transition duration-200 cursor-pointer"
+            :character="{ role: { token_url: '/img/reminder-token.webp' } }"
+            size="reminder"
+            :style="`--ti: ${token.reminders?.length ?? 0}`"
+          >
+            
+          </Token>
+        </div>
         <button
           type="button"
           @click.prevent="token.is_dead = !token.is_dead"
@@ -109,6 +126,7 @@ type Token = {
   };
   related_role_id: string | null;
   related_role?: { token_url: string; name?: string };
+  reminders: { reminder: string; token_url: string }[];
   player_name: string;
   player_id?: string | null;
 };
@@ -240,6 +258,19 @@ function toggleAlignment(token: Token) {
   }
 }
 
+const reminderTokens = [
+  {
+    role: {
+      token_url: "/img/default.png",
+    },
+  },
+  {
+    role: {
+      token_url: "/img/default.png",
+    },
+  },
+];
+
 // watch the tokens, and when it changes check if each of them is a friend
 watch(
   () => props.tokens,
@@ -285,7 +316,7 @@ function checkIfPlayerNameIsFriend(token: Token) {
 .container {
   --d: 7rem;
   --rel: calc(
-    8 / (var(--m) * 2)
+    8 / (var(--m) * 2 - 5)
   ); /* how much extra space we want between images, 1 = one image size */
   --r: calc(
     0.5 * (1 + var(--rel)) * var(--d) / tan(pi / var(--m))
@@ -311,6 +342,22 @@ function checkIfPlayerNameIsFriend(token: Token) {
   height: var(--d); */
   --az: calc((var(--i) - var(--offset)) * 1turn / var(--m));
   transform: rotate(var(--az)) translate(var(--r)) rotate(calc(-1 * var(--az)));
+}
+
+.container div.token-seat .reminder-tokens {
+  position: absolute;
+  top: calc(50% - 2rem);
+  left: calc(50% - 2rem);
+  /* transform: translate(-50%, -50%); */
+  transform: rotate(var(--az)) translate(-7rem) rotate(calc(-1 * var(--az)));
+
+  & .reminder-token {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: rotate(var(--az)) translate(calc(var(--ti) * -3rem))
+      rotate(calc(-1 * var(--az)));
+  }
 }
 
 img {
