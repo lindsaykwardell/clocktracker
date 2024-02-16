@@ -70,20 +70,30 @@ model Grimoire {
 }
 
 model Token {
-  id              Int           @id @default(autoincrement())
-  role            Role?         @relation(fields: [role_id], references: [id])
+  id              Int             @id @default(autoincrement())
+  role            Role?           @relation(fields: [role_id], references: [id])
   role_id         String?
-  related_role    Role?         @relation("RelatedToken", fields: [related_role_id], references: [id])
+  related_role    Role?           @relation("RelatedToken", fields: [related_role_id], references: [id])
   related_role_id String?
   alignment       Alignment
-  is_dead         Boolean       @default(false)
+  is_dead         Boolean         @default(false)
   order           Int
-  created_at      DateTime      @default(now()) @db.Timestamptz(6)
-  grimoire        Grimoire?     @relation(fields: [grimoire_id], references: [id])
+  created_at      DateTime        @default(now()) @db.Timestamptz(6)
+  grimoire        Grimoire?       @relation(fields: [grimoire_id], references: [id])
   grimoire_id     Int?
-  player_name     String        @default("")
-  player          UserSettings? @relation(fields: [player_id], references: [user_id])
+  player_name     String          @default("")
+  player          UserSettings?   @relation(fields: [player_id], references: [user_id])
   player_id       String?
+  reminders       ReminderToken[]
+}
+
+model ReminderToken {
+  id         Int      @id @default(autoincrement())
+  reminder   String   @default("")
+  token_url  String   @default("")
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  token      Token?   @relation(fields: [token_id], references: [id])
+  token_id   Int?
 }
 
 model Character {
