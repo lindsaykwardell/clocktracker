@@ -174,7 +174,10 @@ const game = reactive<{
             (token.role ? { token_url: "/1x1.png" } : undefined),
           player_name: token.player_name,
           player_id: token.player_id,
-          reminders: [],
+          reminders: token.reminders.map((reminder) => ({
+            reminder: reminder.reminder,
+            token_url: reminder.token_url,
+          }))
         })),
       }))
     : [

@@ -12,16 +12,20 @@
             v-for="(reminderToken, tokenIndex) in token.reminders"
             class="reminder-token"
             :character="{ role: { token_url: reminderToken.token_url } }"
-            size="sm"
+            size="reminder"
             :style="`--ti: ${tokenIndex}`"
-          />
+          >
+            <template #reminder>
+              {{ reminderToken.reminder }}
+            </template>
+          </Token>
           <Token
+            v-if="!readonly"
             class="reminder-token opacity-0 hover:opacity-100 transition duration-200 cursor-pointer"
-            :character="{ role: { token_url: '/img/reminder-token.webp' } }"
+            :character="{ role: { token_url: '/1x1.png' } }"
             size="reminder"
             :style="`--ti: ${token.reminders?.length ?? 0}`"
           >
-            
           </Token>
         </div>
         <button
@@ -94,7 +98,7 @@
         </a>
         <span
           v-else-if="token.player_name"
-          class="bg-stone-600 rounded p-1 border-2 border-stone-500 text-center text-ellipsis max-w-[150px] overflow-hidden whitespace-nowrap"
+          class="bg-stone-600 rounded p-1 border-2 border-stone-500 text-center text-ellipsis text-xs md:text-sm max-w-[150px] overflow-hidden whitespace-nowrap"
         >
           {{ token.player_name }}
         </span>
@@ -338,24 +342,30 @@ function checkIfPlayerNameIsFriend(token: Token) {
   left: 50%;
   margin: calc(-0.5 * var(--d));
   --offset: calc(1.25 + (0.25 * (var(--m) - 5)));
-  /* width: var(--d);
-  height: var(--d); */
+  width: var(--d);
   --az: calc((var(--i) - var(--offset)) * 1turn / var(--m));
   transform: rotate(var(--az)) translate(var(--r)) rotate(calc(-1 * var(--az)));
 }
 
 .container div.token-seat .reminder-tokens {
   position: absolute;
-  top: calc(50% - 2rem);
-  left: calc(50% - 2rem);
+  --rd: 2rem;
+  --distance: -7rem;
+  @media (max-width: 768px) {
+    --rd: 1.5rem;
+    --distance: -6rem;
+  }
+  top: calc(50% - var(--rd));
+  left: calc(50% - var(--rd));
   /* transform: translate(-50%, -50%); */
-  transform: rotate(var(--az)) translate(-7rem) rotate(calc(-1 * var(--az)));
+  transform: rotate(var(--az)) translate(var(--distance))
+    rotate(calc(-1 * var(--az)));
 
   & .reminder-token {
     position: absolute;
     top: 0;
     left: 0;
-    transform: rotate(var(--az)) translate(calc(var(--ti) * -3rem))
+    transform: rotate(var(--az)) translate(calc(var(--ti) * -2.25 * var(--rd)))
       rotate(calc(-1 * var(--az)));
   }
 }

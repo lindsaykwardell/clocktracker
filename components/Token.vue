@@ -12,6 +12,9 @@
       loading="lazy"
       :alt="character?.name || character?.role?.name || 'Unknown'"
     />
+    <div class="text-xs text-center relative -top-4">
+      <slot name="reminder" />
+    </div>
     <div
       v-if="
         (character?.role &&
@@ -75,7 +78,7 @@ const tokenClass = computed(() => {
       classes += "w-8 h-8 md:w-12 md:h-12";
       break;
     case "reminder":
-      classes += "w-12 h-12 md:w-16 md:h-16";
+      classes += "reminder flex-col w-12 h-12 md:w-16 md:h-16";
       break;
     case "md":
       classes += "w-20 h-20 md:w-28 md:h-28";
@@ -101,7 +104,7 @@ const imageSize = computed(() => {
     case "sm":
       return "md:w-12 md:h-12";
     case "reminder":
-      return "w-12 h-12 md:w-16 md:h-16";
+      return "relative -top-2 w-12 h-12 md:w-16 md:h-16";
     case "md":
       return "md:w-20 md:h-20";
     case "lg":
@@ -170,5 +173,9 @@ const alignmentImage = computed(() => {
 <style scoped>
 .token {
   background-image: url("/img/token-bg.png");
+
+  &.reminder {
+    background-image: url("/img/reminder-token.webp");
+  }
 }
 </style>
