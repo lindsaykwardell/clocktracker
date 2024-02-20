@@ -146,18 +146,28 @@ model Script {
 }
 
 model Role {
-  id                String       @id
+  id                String         @id
   name              String
   initial_alignment Alignment
   token_url         String
   type              RoleType
   scripts           Script[]
-  related_character Character[]  @relation("RelatedRole")
+  related_character Character[]    @relation("RelatedRole")
   character         Character[]
   tokens            Token[]
-  related_tokens    Token[]      @relation("RelatedToken")
+  related_tokens    Token[]        @relation("RelatedToken")
   demon_bluffs      DemonBluff[]
   fabled            Fabled[]
+  reminders         RoleReminder[]
+}
+
+model RoleReminder {
+  id       Int    @id @default(autoincrement())
+  reminder String
+  role_id  String
+  role     Role   @relation(fields: [role_id], references: [id])
+
+  @@unique([role_id, reminder])
 }
 
 enum Alignment {
