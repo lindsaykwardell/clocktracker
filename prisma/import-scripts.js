@@ -1,8 +1,9 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
-const { PrismaClient, Alignment, RoleType } = require("@prisma/client");
+const { PrismaClient } = require("@prisma/client");
 const { Worker } = require("worker_threads");
 const ProgressBar = require("progress");
+const { roles, reminders } = require("./roles");
 
 const url = "https://botcscripts.com";
 const prisma = new PrismaClient();
@@ -96,17 +97,6 @@ async function main() {
     upsertBar.tick();
   }
 
-  const roles = [
-    ...townsfolk.map((role) =>
-      toRole(role, RoleType.TOWNSFOLK, Alignment.GOOD)
-    ),
-    ...outsiders.map((role) => toRole(role, RoleType.OUTSIDER, Alignment.GOOD)),
-    ...minions.map((role) => toRole(role, RoleType.MINION, Alignment.EVIL)),
-    ...demons.map((role) => toRole(role, RoleType.DEMON, Alignment.EVIL)),
-    ...travelers.map((role) => toRole(role, RoleType.TRAVELER, Alignment.GOOD)),
-    ...fabled.map((role) => toRole(role, RoleType.FABLED, Alignment.NEUTRAL)),
-  ];
-
   // Upsert all the roles
   console.log("Upserting roles...");
   for (const role of roles) {
@@ -121,207 +111,6 @@ async function main() {
 
   console.log("Done!");
 }
-
-function fetchVersions(url) {
-  return new Promise((resolve, reject) => {
-    const worker = new Worker("./prisma/fetchVersions.js", { workerData: url });
-    worker.on("message", resolve);
-    worker.on("error", reject);
-    worker.on("exit", (code) => {
-      if (code !== 0)
-        reject(new Error(`Worker stopped with exit code ${code}`));
-    });
-  });
-}
-
-function toRole(name, type, alignment) {
-  return {
-    id: name.toLowerCase().replace(/ /g, "_").replace(/'/g, ""),
-    name,
-    type,
-    initial_alignment: alignment,
-    token_url: `/img/role/${name
-      .toLowerCase()
-      .replace(/ /g, "")
-      .replace(/'/g, "")
-      .replace(/-/g, "")}.png`,
-  };
-}
-
-const townsfolk = [
-  "Alchemist",
-  "Amnesiac",
-  "Artist",
-  "Atheist",
-  "Balloonist",
-  "Bounty Hunter",
-  "Cannibal",
-  "Chambermaid",
-  "Chef",
-  "Choirboy",
-  "Clockmaker",
-  "Courtier",
-  "Cult Leader",
-  "Dreamer",
-  "Empath",
-  "Engineer",
-  "Exorcist",
-  "Farmer",
-  "Fisherman",
-  "Flowergirl",
-  "Fool",
-  "Fortune Teller",
-  "Gambler",
-  "General",
-  "Gossip",
-  "Grandmother",
-  "High Priestess",
-  "Huntsman",
-  "Innkeeper",
-  "Investigator",
-  "Juggler",
-  "King",
-  "Knight",
-  "Librarian",
-  "Lycanthrope",
-  "Magician",
-  "Mathematician",
-  "Mayor",
-  "Minstrel",
-  "Monk",
-  "Nightwatchman",
-  "Noble",
-  "Oracle",
-  "Pacifist",
-  "Philosopher",
-  "Pixie",
-  "Poppy Grower",
-  "Preacher",
-  "Professor",
-  "Ravenkeeper",
-  "Sage",
-  "Sailor",
-  "Savant",
-  "Seamstress",
-  "Slayer",
-  "Snake Charmer",
-  "Soldier",
-  "Steward",
-  "Tea Lady",
-  "Town Crier",
-  "Undertaker",
-  "Virgin",
-  "Washerwoman",
-  "Shugenja",
-  "Village Idiot",
-];
-
-const outsiders = [
-  "Acrobat",
-  "Barber",
-  "Butler",
-  "Damsel",
-  "Drunk",
-  "Golem",
-  "Goon",
-  "Heretic",
-  "Klutz",
-  "Lunatic",
-  "Moonchild",
-  "Mutant",
-  "Politician",
-  "Puzzlemaster",
-  "Recluse",
-  "Saint",
-  "Snitch",
-  "Sweetheart",
-  "Tinker",
-  "Plague Doctor",
-  "Hatter",
-];
-
-const minions = [
-  "Assassin",
-  "Baron",
-  "Boomdandy",
-  "Cerenovus",
-  "Devil's Advocate",
-  "Evil Twin",
-  "Fearmonger",
-  "Goblin",
-  "Godfather",
-  "Marionette",
-  "Mastermind",
-  "Mezepheles",
-  "Organ Grinder",
-  "Pit-Hag",
-  "Poisoner",
-  "Psychopath",
-  "Scarlet Woman",
-  "Spy",
-  "Vizier",
-  "Widow",
-  "Witch",
-  "Harpy",
-];
-
-const demons = [
-  "Al-Hadikhia",
-  "Fang Gu",
-  "Imp",
-  "Legion",
-  "Leviathan",
-  "Lil' Monsta",
-  "Lleech",
-  "No Dashii",
-  "Po",
-  "Pukka",
-  "Riot",
-  "Shabaloth",
-  "Vigormortis",
-  "Vortox",
-  "Zombuul",
-  "Ojo",
-  "Kazali",
-];
-
-const travelers = [
-  "Scapegoat",
-  "Gunslinger",
-  "Beggar",
-  "Bureaucrat",
-  "Thief",
-  "Butcher",
-  "Bone Collector",
-  "Harlot",
-  "Barista",
-  "Deviant",
-  "Apprentice",
-  "Matron",
-  "Voudon",
-  "Judge",
-  "Bishop",
-  "Gangster",
-];
-
-const fabled = [
-  "Doomsayer",
-  "Angel",
-  "Buddhist",
-  "Hell's Librarian",
-  "Revolutionary",
-  "Fiddler",
-  "Toymaker",
-  "Fibbin",
-  "Duchess",
-  "Sentinel",
-  "Spirit of Ivory",
-  "Djinn",
-  "Storm Catcher",
-  "Bootlegger",
-  "Gardener",
-  "Ferryman",
-];
 
 main()
   .then(async () => {
