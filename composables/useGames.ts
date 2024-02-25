@@ -7,6 +7,7 @@ import type {
   Token,
   DemonBluff,
   Fabled,
+  ReminderToken,
 } from "@prisma/client";
 import naturalOrder from "natural-order";
 
@@ -55,6 +56,7 @@ export type GameRecord = Omit<Game, "win"> & {
         name: string;
       };
       related_role?: { token_url: string };
+      reminders: ReminderToken[];
     })[];
   })[];
   parent_game?: {

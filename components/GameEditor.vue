@@ -978,6 +978,7 @@ const props = defineProps<{
         related_role?: { token_url: string; name?: string };
         player_name: string;
         player_id?: string | null;
+        reminders: { reminder: string; token_url: string }[];
       }[];
     }[];
     ignore_for_stats: boolean;
@@ -1239,6 +1240,7 @@ watchEffect(() => {
         role_id: null,
         related_role_id: null,
         player_name: "",
+        reminders: [],
       });
     }
 
