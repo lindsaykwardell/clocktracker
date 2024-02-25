@@ -109,6 +109,20 @@ async function main() {
     });
   }
 
+  // Upsert the reminders
+  for (const reminder of reminders) {
+    await prisma.roleReminder.upsert({
+      where: {
+        role_id_reminder: {
+          role_id: reminder.role_id,
+          reminder: reminder.reminder,
+        },
+      },
+      update: reminder,
+      create: reminder,
+    });
+  }
+
   console.log("Done!");
 }
 
