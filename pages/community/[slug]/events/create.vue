@@ -37,6 +37,10 @@ const event = reactive<{
   description: string;
   image: string | null;
   who_can_register: "ANYONE" | "COMMUNITY_MEMBERS";
+  waitlists: {
+    name: string;
+    default: boolean;
+  }[];
 }>({
   title: "",
   description: "",
@@ -47,6 +51,7 @@ const event = reactive<{
   location: "",
   image: null,
   who_can_register: "COMMUNITY_MEMBERS",
+  waitlists: [],
 });
 
 const formattedEvent = computed(() => {
