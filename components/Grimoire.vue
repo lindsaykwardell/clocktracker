@@ -8,23 +8,20 @@
         }"
       >
         <div class="reminder-tokens">
-          <Token
+          <ReminderToken
             v-for="(reminderToken, tokenIndex) in token.reminders"
             class="reminder-token"
-            :character="{ role: { token_url: reminderToken.token_url } }"
-            size="reminder"
+            :reminder="reminderToken"
             :style="`--ti: ${tokenIndex}`"
           >
-            <template #reminder>
-              {{ reminderToken.reminder }}
-            </template>
-          </Token>
+          </ReminderToken>
           <Token
             v-if="!readonly"
             class="reminder-token opacity-0 hover:opacity-100 transition duration-200 cursor-pointer"
             :character="{ role: { token_url: '/1x1.png' } }"
             size="reminder"
             :style="`--ti: ${token.reminders?.length ?? 0}`"
+            @click="openReminderDialog(token)"
           >
           </Token>
         </div>
@@ -111,6 +108,12 @@
     :availableRoles="availableRoles"
     @selectRole="selectRoleForToken"
   />
+  <ReminderDialog
+    v-if="reminders.length > 0"
+    v-model:visible="showReminderDialog"
+    :reminders="reminders"
+    @selectReminder="selectReminder"
+  />
 </template>
 
 <script setup lang="ts">
@@ -139,6 +142,7 @@ const friends = useFriends();
 const users = useUsers();
 const user = useSupabaseUser();
 const games = useGames();
+const roles = useRoles();
 
 const me = computed(() => {
   const meStatus = users.getUserById(user.value?.id);
@@ -214,7 +218,12 @@ const orderedTokens = computed(() =>
   props.tokens.sort((a, b) => a.order - b.order)
 );
 
+const reminders = computed(() =>
+  roles.getRemindersForRoles(props.availableRoles?.map((r) => r.id) ?? [])
+);
+
 const showRoleSelectionDialog = ref(false);
+const showReminderDialog = ref(false);
 const focusedToken = ref<Token | null>(null);
 const tokenMode = ref<"role" | "related_role">("role");
 
@@ -262,19 +271,6 @@ function toggleAlignment(token: Token) {
   }
 }
 
-const reminderTokens = [
-  {
-    role: {
-      token_url: "/img/default.png",
-    },
-  },
-  {
-    role: {
-      token_url: "/img/default.png",
-    },
-  },
-];
-
 // watch the tokens, and when it changes check if each of them is a friend
 watch(
   () => props.tokens,
@@ -314,6 +310,25 @@ function checkIfPlayerNameIsFriend(token: Token) {
     }
   }
 }
+
+function openReminderDialog(token: Token) {
+  focusedToken.value = token;
+  showReminderDialog.value = true;
+}
+
+function selectReminder(reminder: { reminder: string; token_url: string }) {
+  if (focusedToken.value) {
+    focusedToken.value.reminders.push({
+      reminder: reminder.reminder,
+      token_url: reminder.token_url,
+    });
+  }
+  showReminderDialog.value = false;
+}
+
+onMounted(() => {
+  roles.fetchRoles();
+});
 </script>
 
 <style scoped>

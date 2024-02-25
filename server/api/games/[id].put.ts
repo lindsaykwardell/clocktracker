@@ -9,6 +9,7 @@ import {
   Alignment,
   DemonBluff,
   Fabled,
+  ReminderToken,
 } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -21,7 +22,15 @@ export default defineEventHandler(async (handler) => {
         player_characters: (Character & { role?: { token_url: string } })[];
         demon_bluffs: (DemonBluff & { role?: { token_url: string } })[];
         fabled: (Fabled & { role?: { token_url: string } })[];
-        grimoire: Partial<Grimoire & { tokens: Partial<Token>[] }>[];
+        grimoire: Partial<
+          Grimoire & {
+            tokens: Partial<
+              Token & {
+                reminders: Partial<ReminderToken>[];
+              }
+            >[];
+          }
+        >[];
       })
     | null
   >(handler);
@@ -64,6 +73,8 @@ export default defineEventHandler(async (handler) => {
       statusMessage: "Not Found",
     });
   }
+
+  console.log(JSON.stringify(body, null, 2))
 
   const game = await prisma.game.update({
     where: {
@@ -116,6 +127,13 @@ export default defineEventHandler(async (handler) => {
                   order: token.order || index,
                   player_name: token.player_name || "",
                   player_id: token.player_id,
+                  reminders: {
+                    create:
+                      token.reminders?.map((reminder) => ({
+                        reminder: reminder.reminder,
+                        token_url: reminder.token_url,
+                      })) || [],
+                  },
                 })),
               },
             })),
@@ -147,6 +165,13 @@ export default defineEventHandler(async (handler) => {
                       order: token.order || index,
                       player_name: token.player_name || "",
                       player_id: token.player_id,
+                      reminders: {
+                        create:
+                          token.reminders?.map((reminder) => ({
+                            reminder: reminder.reminder,
+                            token_url: reminder.token_url,
+                          })) || [],
+                      },
                     })),
                   update: g.tokens
                     ?.filter((token) => token.id)
@@ -162,6 +187,32 @@ export default defineEventHandler(async (handler) => {
                         order: token.order || index,
                         player_name: token.player_name || "",
                         player_id: token.player_id,
+                        reminders: {
+                          deleteMany: {
+                            id: {
+                              notIn: token.reminders
+                                ?.filter((reminder) => !!reminder.id)
+                                .map((reminder) => reminder.id!),
+                            },
+                          },
+                          create: token.reminders
+                            ?.filter((reminder) => !reminder.id)
+                            .map((reminder) => ({
+                              reminder: reminder.reminder,
+                              token_url: reminder.token_url,
+                            })),
+                          update: token.reminders
+                            ?.filter((reminder) => reminder.id)
+                            .map((reminder) => ({
+                              where: {
+                                id: reminder.id,
+                              },
+                              data: {
+                                reminder: reminder.reminder,
+                                token_url: reminder.token_url,
+                              },
+                            })),
+                        },
                       },
                     })),
                 },
