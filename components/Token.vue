@@ -12,7 +12,7 @@
       loading="lazy"
       :alt="character?.name || character?.role?.name || 'Unknown'"
     />
-    <div class="text-xs text-center relative -top-4">
+    <div class="text-xs text-center relative -top-2">
       <slot name="reminder" />
     </div>
     <div
@@ -104,7 +104,7 @@ const imageSize = computed(() => {
     case "sm":
       return "md:w-12 md:h-12";
     case "reminder":
-      return "relative -top-2 w-12 h-12 md:w-16 md:h-16";
+      return "relative w-8 h-8 md:w-12 md:h-12";
     case "md":
       return "md:w-20 md:h-20";
     case "lg":

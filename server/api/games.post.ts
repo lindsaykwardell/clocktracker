@@ -20,7 +20,15 @@ export default defineEventHandler(async (handler) => {
         player_characters: (Character & { role?: { token_url: string } })[];
         demon_bluffs: (DemonBluff & { role?: { token_url: string } })[];
         fabled: (Fabled & { role?: { token_url: string } })[];
-        grimoire: Partial<Grimoire & { tokens: Partial<Token>[] }>[];
+        grimoire: Partial<
+          Grimoire & {
+            tokens: Partial<
+              Token & {
+                reminders: Partial<{ reminder: string; token_url: string }>[];
+              }
+            >[];
+          }
+        >[];
       })
     | null
   >(handler);
@@ -66,6 +74,13 @@ export default defineEventHandler(async (handler) => {
                 order: token.order || index,
                 player_name: token.player_name || "",
                 player_id: token.player_id,
+                reminders: {
+                  create:
+                    token.reminders?.map((reminder) => ({
+                      reminder: reminder.reminder,
+                      token_url: reminder.token_url,
+                    })) || [],
+                },
               })),
             },
           })),
