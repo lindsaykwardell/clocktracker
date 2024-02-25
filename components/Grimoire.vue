@@ -239,9 +239,15 @@ const orderedTokens = computed(() =>
   props.tokens.sort((a, b) => a.order - b.order)
 );
 
-const reminders = computed(() =>
-  roles.getRemindersForRoles(props.availableRoles?.map((r) => r.id) ?? [])
-);
+const reminders = computed(() => {
+  const travelers = roles.getRoleByType(RoleType.TRAVELER);
+  const fabled = roles.getRoleByType(RoleType.FABLED);
+  return roles.getRemindersForRoles([
+    ...(props.availableRoles?.map((r) => r.id) ?? []),
+    ...travelers.map((r) => r.id),
+    ...fabled.map((r) => r.id),
+  ]);
+});
 
 const showRoleSelectionDialog = ref(false);
 const showReminderDialog = ref(false);
