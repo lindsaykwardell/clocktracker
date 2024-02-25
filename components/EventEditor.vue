@@ -83,6 +83,52 @@
         rows="5"
       ></textarea>
     </label>
+    <div>
+      <label>
+        <span class="block">Waitlists</span>
+        <div
+          v-if="event.waitlists.length <= 0"
+          class="italic text-stone-400 text-sm"
+        >
+          By default, users will be automatically added to a waitlist if the
+          event is full. You can customize this behavior by adding waitlists.
+        </div>
+        <div
+          v-for="(waitlist, index) in event.waitlists"
+          :key="index"
+          class="flex items-center"
+        >
+          <label class="flex items-center">
+            Default
+            <input
+              type="checkbox"
+              v-model="waitlist.default"
+              @click="ensureOneDefaultWaitlist(index)"
+              class="m-2"
+            />
+          </label>
+          <input
+            v-model="waitlist.name"
+            type="text"
+            class="block flex-grow border border-stone-500 rounded-md p-2"
+          />
+          <button
+            type="button"
+            @click.stop.prevent="event.waitlists.splice(index, 1)"
+            class="block transition duration-150 text-white font-bold py-2 px-4 rounded"
+          >
+            Remove
+          </button>
+        </div>
+        <button
+          type="button"
+          @click="event.waitlists.push({ name: '', default: false })"
+          class="transition duration-150 text-white font-bold py-2 px-4 rounded"
+        >
+          Add Waitlist
+        </button>
+      </label>
+    </div>
     <label>
       <span class="block">Image</span>
       <img
@@ -130,6 +176,11 @@ const props = defineProps<{
     description: string;
     image: string | null;
     who_can_register: "ANYONE" | "COMMUNITY_MEMBERS";
+    waitlists: {
+      id?: number;
+      name: string;
+      default: boolean;
+    }[];
   };
   inFlight: boolean;
   errors: string;
@@ -175,6 +226,22 @@ async function selectFiles(e: Event) {
   }
 
   props.event.image = `${config.public.supabase.url}/storage/v1/object/public/events/${data.path}`;
+}
+
+watchEffect(() => {
+  // This is possible because of how the input works.
+  // @ts-ignore
+  if (props.event.player_count === "") {
+    props.event.player_count = null;
+  }
+});
+
+function ensureOneDefaultWaitlist(index: number) {
+  props.event.waitlists.forEach((waitlist, i) => {
+    if (i !== index) {
+      waitlist.default = false;
+    }
+  });
 }
 </script>
 
