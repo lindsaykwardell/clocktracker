@@ -12,8 +12,12 @@
       loading="lazy"
       :alt="character?.name || character?.role?.name || 'Unknown'"
     />
-    <div class="text-xs text-center relative -top-2">
-      <slot name="reminder" />
+    <div
+      v-if="reminderText"
+      class="text-center relative -top-2"
+      :class="reminderTextSize"
+    >
+      {{ reminderText }}
     </div>
     <div
       v-if="
@@ -67,6 +71,7 @@ const props = defineProps<{
   hideRelated?: boolean;
   outline?: boolean;
   relatedId?: string;
+  reminderText?: string;
 }>();
 
 const emit = defineEmits(["clickRelated", "clickRole", "clickAlignment"]);
@@ -167,6 +172,19 @@ const alignmentImage = computed(() => {
   } else {
     return "/1x1.png";
   }
+});
+
+const reminderTextSize = computed(() => {
+  // We're basing the size on the number of characters in the reminder text
+  if (props.reminderText?.length) {
+    if (props.reminderText.length > 15) {
+      return "text-[0.45rem] md:text-[0.5rem]";
+    }
+    if (props.reminderText.length > 10) {
+      return "leading-4 text-[0.5rem] md:text-xs";
+    }
+  }
+  return "text-[0.5rem] md:text-xs";
 });
 </script>
 
