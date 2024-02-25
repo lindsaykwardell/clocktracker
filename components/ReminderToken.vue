@@ -2,10 +2,8 @@
   <Token
     :character="{ role: { token_url: reminder.token_url } }"
     size="reminder"
+    :reminderText="reminder.reminder"
   >
-    <template #reminder>
-      {{ reminder.reminder }}
-    </template>
   </Token>
 </template>
 
