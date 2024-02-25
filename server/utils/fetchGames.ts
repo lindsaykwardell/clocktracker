@@ -224,6 +224,7 @@ export async function fetchGames(
             include: {
               role: true,
               related_role: true,
+              reminders: true,
             },
           },
         },
@@ -442,6 +443,7 @@ export async function fetchGame(
             include: {
               role: true,
               related_role: true,
+              reminders: true,
             },
           },
         },
