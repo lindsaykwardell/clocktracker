@@ -87,7 +87,7 @@ export default defineEventHandler(async (handler) => {
     await prisma.eventWaitlistAttendee.create({
       data: {
         waitlist_id: body.waitlist_id,
-        user_id: me!.id || "",
+        user_id: me?.id || null,
         name: body.name,
       },
     });
@@ -96,7 +96,7 @@ export default defineEventHandler(async (handler) => {
     await prisma.eventAttendee.create({
       data: {
         event_id: event.id,
-        user_id: me!.id || "",
+        user_id: me?.id || null,
         name: body.name,
       },
     });
@@ -105,7 +105,7 @@ export default defineEventHandler(async (handler) => {
     await prisma.eventAttendee.create({
       data: {
         event_id: event.id,
-        user_id: me!.id || "",
+        user_id: me?.id || null,
         name: body.name,
       },
     });
@@ -114,7 +114,7 @@ export default defineEventHandler(async (handler) => {
     await prisma.eventWaitlistAttendee.create({
       data: {
         waitlist_id: event.waitlists.find((w) => w.default)!.id,
-        user_id: me!.id || "",
+        user_id: me?.id || null,
         name: body.name,
       },
     });
@@ -123,7 +123,7 @@ export default defineEventHandler(async (handler) => {
     await prisma.eventAttendee.create({
       data: {
         event_id: event.id,
-        user_id: me!.id || "",
+        user_id: me?.id || null,
         name: body.name,
       },
     });
