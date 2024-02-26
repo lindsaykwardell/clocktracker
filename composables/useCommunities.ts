@@ -65,6 +65,20 @@ export type Event = {
       avatar: string | null;
     };
   }[];
+  waitlists: {
+    id: number;
+    name: string;
+    default: boolean;
+    users: {
+      name: string;
+      created_at: string;
+      user: {
+        user_id: string;
+        username: string;
+        avatar: string | null;
+      };
+    }[];
+  }[];
 };
 
 export const useCommunities = defineStore("communities", {

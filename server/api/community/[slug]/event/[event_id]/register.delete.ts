@@ -15,7 +15,7 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  const event = await prisma.event.update({
+  const event = await prisma.event.findUnique({
     where: {
       id: event_id,
       community: {
@@ -27,10 +27,43 @@ export default defineEventHandler(async (handler) => {
         },
       },
     },
-    data: {
-      registered_players: {
-        deleteMany: {
-          user_id: me!.id,
+    select: {
+      id: true,
+    },
+  });
+
+  if (!event) {
+    throw createError({
+      status: 404,
+      statusMessage: "Not Found",
+    });
+  }
+
+  await prisma.eventAttendee.deleteMany({
+    where: {
+      event_id,
+      user_id: me.id,
+    },
+  });
+
+  await prisma.eventWaitlistAttendee.deleteMany({
+    where: {
+      waitlist: {
+        event_id,
+      },
+      user_id: me.id,
+    },
+  });
+
+  return prisma.event.findUnique({
+    where: {
+      id: event_id,
+      community: {
+        slug,
+        members: {
+          some: {
+            user_id: me?.id || "",
+          },
         },
       },
     },
@@ -60,6 +93,33 @@ export default defineEventHandler(async (handler) => {
           created_at: "asc",
         },
       },
+      waitlists: {
+        select: {
+          id: true,
+          name: true,
+          default: true,
+          created_at: true,
+          users: {
+            select: {
+              created_at: true,
+              name: true,
+              user: {
+                select: {
+                  user_id: true,
+                  username: true,
+                  avatar: true,
+                },
+              },
+            },
+            orderBy: {
+              created_at: "asc",
+            },
+          },
+        },
+        orderBy: {
+          created_at: "asc",
+        },
+      },
       community: {
         select: {
           name: true,
@@ -67,13 +127,4 @@ export default defineEventHandler(async (handler) => {
       },
     },
   });
-
-  if (!event) {
-    throw createError({
-      status: 404,
-      statusMessage: "Not Found",
-    });
-  }
-
-  return event;
 });
