@@ -137,6 +137,13 @@
       >
         Edit Event
       </nuxt-link>
+      <nuxt-link
+        v-if="isModerator"
+        :to="`/community/${slug}/events/create?duplicate=${eventId}`"
+        class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
+      >
+        Duplicate Event
+      </nuxt-link>
       <button
         v-if="isModerator"
         @click="deleteEvent"
