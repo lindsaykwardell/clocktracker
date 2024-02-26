@@ -177,7 +177,7 @@ const game = reactive<{
           reminders: token.reminders.map((reminder) => ({
             reminder: reminder.reminder,
             token_url: reminder.token_url,
-          }))
+          })),
         })),
       }))
     : [
@@ -190,8 +190,6 @@ const game = reactive<{
   tags: savedGame.data.value?.tags || [],
   privacy: savedGame.data.value?.privacy || "PUBLIC",
 });
-
-console.log(game.date);
 
 const formattedGame = computed(() => ({
   ...game,
