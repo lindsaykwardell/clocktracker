@@ -38,7 +38,7 @@
           <EventCard :event="community.data.events[0]" class="mt-6">
             <template #footer="{ event }">
               <div class="flex flex-wrap w-11/12 m-auto pb-2">
-                <template v-for="player in event.registered_players">
+                <template v-for="player in allEventAttendees(event)">
                   <nuxt-link
                     v-if="player.user"
                     :to="`/@${player.user.username}`"
@@ -98,6 +98,7 @@
 
 <script setup lang="ts">
 import naturalOrder from "natural-order";
+import type { Event } from "~/composables/useCommunities";
 
 const route = useRoute();
 const slug = route.params.slug as string;
@@ -133,6 +134,13 @@ async function submitReply(content: { content: string; parent_id: string }) {
 
 async function deletePost(postId: string) {
   await communities.deletePost(slug, postId);
+}
+
+function allEventAttendees(event: Event) {
+  return [
+    ...event.registered_players,
+    ...(event.waitlists?.flatMap((w) => w.users) ?? []),
+  ];
 }
 
 onMounted(() => {
