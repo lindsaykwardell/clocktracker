@@ -12,6 +12,9 @@ export default defineEventHandler(async (handler) => {
 
   return prisma.event.findMany({
     where: {
+      end: {
+        gte: new Date().toISOString(),
+      },
       OR: [
         {
           registered_players: {
