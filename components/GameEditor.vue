@@ -967,6 +967,7 @@ const props = defineProps<{
         alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
         order: number;
         is_dead: boolean;
+        used_ghost_vote: boolean;
         role_id: string | null;
         role?: {
           token_url: string;
@@ -1236,6 +1237,7 @@ watchEffect(() => {
         id: undefined,
         alignment: undefined,
         is_dead: false,
+        used_ghost_vote: false,
         order: grimoire.tokens.length,
         role_id: null,
         related_role_id: null,
