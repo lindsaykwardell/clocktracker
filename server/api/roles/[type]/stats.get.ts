@@ -181,6 +181,7 @@ export default defineEventHandler(async (handler) => {
             include: {
               role: true,
               related_role: true,
+              reminders: true,
             },
           },
         },
