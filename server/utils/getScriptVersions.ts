@@ -17,34 +17,38 @@ export async function getScriptVersions(script: Script) {
 
   if (versions.length === 1 && !versionOne.includes(versions[0].version)) {
     // If there is only one version and it's not the first, assume there are more that we need to fetch.
-    const fetchedVersions = await fetchVersions(script.script_id);
+    try {
+      const fetchedVersions = await fetchVersions(script.script_id);
 
-    for (const version of fetchedVersions) {
-      const versionedScript = {
-        ...script,
-        id: undefined,
-        version: version,
-        json_url: `https://botcscripts.com/script/${script.script_id}/${version}/download`,
-        pdf_url: `https://botcscripts.com/script/${script.script_id}/${version}/download_pdf`,
-      };
-      const script_ = await prisma.script.upsert({
-        where: {
-          script_id_version: {
-            script_id: versionedScript.script_id,
-            version: versionedScript.version,
+      for (const version of fetchedVersions) {
+        const versionedScript = {
+          ...script,
+          id: undefined,
+          version: version,
+          json_url: `https://botcscripts.com/script/${script.script_id}/${version}/download`,
+          pdf_url: `https://botcscripts.com/script/${script.script_id}/${version}/download_pdf`,
+        };
+        const script_ = await prisma.script.upsert({
+          where: {
+            script_id_version: {
+              script_id: versionedScript.script_id,
+              version: versionedScript.version,
+            },
           },
-        },
-        update: {
-          ...versionedScript,
-        },
-        create: {
-          ...versionedScript,
-        },
-      });
+          update: {
+            ...versionedScript,
+          },
+          create: {
+            ...versionedScript,
+          },
+        });
 
-      if (versions[0].version !== script_.version) {
-        versions.push(script_);
+        if (versions[0].version !== script_.version) {
+          versions.push(script_);
+        }
       }
+    } catch {
+      // If we can't fetch the versions, just return the one we have.
     }
   }
 
