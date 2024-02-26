@@ -3,7 +3,8 @@
     <template
       v-if="
         friends.friends.status === Status.SUCCESS &&
-        friends.requests.status === Status.SUCCESS
+        friends.requests.status === Status.SUCCESS &&
+        friends.recommended.status === Status.SUCCESS
       "
     >
       <template v-if="friends.getFriendRequests.length > 0">
