@@ -1342,7 +1342,20 @@ watch(
           token.used_ghost_vote || newTokens[j].used_ghost_vote;
         token.player_id = newTokens[j].player_id;
         token.player_name = newTokens[j].player_name;
-        token.reminders = newTokens[j].reminders;
+        for (const reminder of newTokens[j].reminders) {
+          if (
+            !token.reminders.some(
+              (r) =>
+                r.reminder === reminder.reminder &&
+                r.token_url === reminder.token_url
+            )
+          ) {
+            token.reminders.push({
+              reminder: reminder.reminder,
+              token_url: reminder.token_url,
+            });
+          }
+        }
 
         if (!token.role_id) {
           token.role = newTokens[j].role;
