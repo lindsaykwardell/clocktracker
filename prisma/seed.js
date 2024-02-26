@@ -899,7 +899,10 @@ async function main() {
       for (let i = 0; i < registered_player_count; i++) {
         const user = users[Math.floor(Math.random() * users.length)];
 
-        if (user) {
+        if (
+          user &&
+          !registered_players.some((p) => p.user_id === user.user_id)
+        ) {
           registered_players.push({
             name: user.display_name,
             user_id: user.user_id,
