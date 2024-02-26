@@ -56,13 +56,13 @@
             'hover:opacity-50 transition hover:-translate-y-2':
               !readonly && token.is_dead && !token.used_ghost_vote,
           }"
-          @click.prevent="token.used_ghost_vote = !token.used_ghost_vote"
+          @click.prevent="toggleUsedGhostVote(token)"
         >
           <img src="/img/token-bg-dead.webp" class="w-4 md:w-8" />
         </button>
         <button
           type="button"
-          @click.prevent="token.is_dead = !token.is_dead"
+          @click.prevent="toggleIsDead(token)"
           :disabled="props.readonly"
           class="absolute top-0 left-0 z-10 flex justify-center w-full duration-200"
           :class="{
@@ -376,6 +376,18 @@ function removeReminder(
     (r) =>
       r.reminder !== reminder.reminder && r.token_url !== reminder.token_url
   );
+}
+
+function toggleIsDead(token: Token) {
+  token.is_dead = !token.is_dead;
+  token.used_ghost_vote = false;
+}
+
+function toggleUsedGhostVote(token: Token) {
+  token.used_ghost_vote = !token.used_ghost_vote;
+  if (!token.used_ghost_vote) {
+    token.is_dead = false;
+  }
 }
 
 onMounted(() => {
