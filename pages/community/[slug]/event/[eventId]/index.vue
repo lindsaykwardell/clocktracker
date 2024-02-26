@@ -20,12 +20,11 @@
                 v-for="player in event.player_count
                   ? event.registered_players.slice(0, event.player_count)
                   : event.registered_players"
-                class="hover:underline"
               >
                 <nuxt-link
                   v-if="player.user"
                   :to="`/@${player.user.username}`"
-                  class="flex gap-2 items-center"
+                  class="flex gap-2 items-center hover:underline"
                 >
                   <Avatar
                     :value="player.user.avatar"
@@ -69,7 +68,7 @@
                   <nuxt-link
                     v-if="player.user"
                     :to="`/@${player.user.username}`"
-                    class="flex gap-2 items-center"
+                    class="flex gap-2 items-center hover:underline"
                   >
                     <Avatar
                       :value="player.user.avatar"
@@ -96,7 +95,7 @@
                   <nuxt-link
                     v-if="player.user"
                     :to="`/@${player.user.username}`"
-                    class="flex gap-2 items-center"
+                    class="flex gap-2 items-center hover:underline"
                   >
                     <Avatar
                       :value="player.user.avatar"
