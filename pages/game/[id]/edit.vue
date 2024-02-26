@@ -86,6 +86,7 @@ const game = reactive<{
       alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
       order: number;
       is_dead: boolean;
+      used_ghost_vote: boolean;
       role_id: string | null;
       role?: {
         token_url: string;
@@ -166,6 +167,7 @@ const game = reactive<{
           alignment: token.alignment,
           order: token.order,
           is_dead: token.is_dead,
+          used_ghost_vote: token.used_ghost_vote,
           role_id: token.role_id,
           role: token.role,
           related_role_id: token.related_role_id,
