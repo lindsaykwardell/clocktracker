@@ -164,6 +164,7 @@
 
 <script setup lang="ts">
 import { v4 as uuid } from "uuid";
+import dayjs from "dayjs";
 
 const props = defineProps<{
   event: {
@@ -243,6 +244,17 @@ function ensureOneDefaultWaitlist(index: number) {
     }
   });
 }
+
+watchEffect(() => {
+  console.log(props.event.start, props.event.end);
+  if (props.event.start && props.event.end) {
+    const start = dayjs(props.event.start);
+    const end = dayjs(props.event.end);
+    if (start > end) {
+      props.event.end = props.event.start;
+    }
+  }
+});
 </script>
 
 <style scoped>

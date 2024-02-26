@@ -1,6 +1,6 @@
 <template>
   <CommunityTemplate moderatorOnly>
-    <h2 class="font-dumbledor text-2xl lg:text-3xl mb-4 text-center">
+    <h2 class="font-dumbledor text-2xl lg:text-3xl my-4 text-center">
       Edit Event
     </h2>
     <EventEditor
