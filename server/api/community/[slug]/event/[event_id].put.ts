@@ -16,6 +16,7 @@ export default defineEventHandler(async (handler) => {
     location_type: LocationType;
     player_count?: number;
     who_can_register: WhoCanRegister;
+    image: string | null;
     waitlists: {
       id?: number;
       name: string;
@@ -71,6 +72,7 @@ export default defineEventHandler(async (handler) => {
       location_type: body.location_type,
       player_count: body.player_count,
       who_can_register: body.who_can_register,
+      image: body.image,
       waitlists: {
         deleteMany: {
           id: {

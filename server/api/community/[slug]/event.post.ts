@@ -20,6 +20,7 @@ export default defineEventHandler(async (handler) => {
       default?: boolean;
     }[];
     who_can_register: WhoCanRegister;
+    image: string | null;
   } | null>(handler);
 
   if (!me) {
@@ -64,6 +65,7 @@ export default defineEventHandler(async (handler) => {
       location_type: body.location_type,
       player_count: body.player_count,
       who_can_register: body.who_can_register,
+      image: body.image,
       community_id: community.id,
       waitlists: {
         createMany: {
