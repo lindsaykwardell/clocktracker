@@ -246,7 +246,6 @@ function ensureOneDefaultWaitlist(index: number) {
 }
 
 watchEffect(() => {
-  console.log(props.event.start, props.event.end);
   if (props.event.start && props.event.end) {
     const start = dayjs(props.event.start);
     const end = dayjs(props.event.end);
