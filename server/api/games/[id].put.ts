@@ -74,8 +74,6 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  console.log(JSON.stringify(body, null, 2))
-
   const game = await prisma.game.update({
     where: {
       id: gameId,
@@ -124,6 +122,7 @@ export default defineEventHandler(async (handler) => {
                   related_role_id: token.related_role_id,
                   alignment: token.alignment || Alignment.NEUTRAL,
                   is_dead: token.is_dead || false,
+                  used_ghost_vote: token.used_ghost_vote || false,
                   order: token.order || index,
                   player_name: token.player_name || "",
                   player_id: token.player_id,
@@ -162,6 +161,7 @@ export default defineEventHandler(async (handler) => {
                       related_role_id: token.related_role_id,
                       alignment: token.alignment || Alignment.NEUTRAL,
                       is_dead: token.is_dead || false,
+                      used_ghost_vote: token.used_ghost_vote || false,
                       order: token.order || index,
                       player_name: token.player_name || "",
                       player_id: token.player_id,
@@ -184,6 +184,7 @@ export default defineEventHandler(async (handler) => {
                         related_role_id: token.related_role_id,
                         alignment: token.alignment || Alignment.NEUTRAL,
                         is_dead: token.is_dead || false,
+                        used_ghost_vote: token.used_ghost_vote || false,
                         order: token.order || index,
                         player_name: token.player_name || "",
                         player_id: token.player_id,
