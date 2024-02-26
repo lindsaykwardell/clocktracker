@@ -34,8 +34,9 @@
       <div v-if="community.data.events.length > 0" class="flex justify-center">
         <nuxt-link
           :to="`${community.data.slug}/event/${community.data.events[0].id}`"
+          class="w-full md:w-[600px]"
         >
-          <EventCard :event="community.data.events[0]" class="mt-6">
+          <EventCard :event="community.data.events[0]" class="mt-6 m-auto">
             <template #footer="{ event }">
               <div class="flex flex-wrap w-11/12 m-auto pb-2">
                 <template v-for="player in allEventAttendees(event)">
