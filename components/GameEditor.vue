@@ -1338,8 +1338,11 @@ watch(
         if (i <= grimPage.value) return;
 
         token.is_dead = token.is_dead || newTokens[j].is_dead;
+        token.used_ghost_vote =
+          token.used_ghost_vote || newTokens[j].used_ghost_vote;
         token.player_id = newTokens[j].player_id;
         token.player_name = newTokens[j].player_name;
+        token.reminders = newTokens[j].reminders;
 
         if (!token.role_id) {
           token.role = newTokens[j].role;
