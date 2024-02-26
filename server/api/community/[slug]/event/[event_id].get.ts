@@ -68,6 +68,8 @@ export default defineEventHandler(async (handler) => {
           created_at: true,
           users: {
             select: {
+              name: true,
+              created_at: true,
               user: {
                 select: {
                   user_id: true,
