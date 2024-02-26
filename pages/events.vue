@@ -5,7 +5,7 @@
         <h1 class="text-3xl font-bold mb-8 font-dumbledor py-4">
           My Upcoming Events
         </h1>
-        <div class="w-full md:w-[600px]">
+        <div class="w-full md:w-[600px] flex flex-col gap-4">
           <nuxt-link
             v-for="event in events"
             :to="`/community/${event.community.slug}/event/${event.id}`"
