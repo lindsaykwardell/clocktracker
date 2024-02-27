@@ -58,6 +58,7 @@
           <NavLink id="communities" to="/community" icon="cultleader">
             Communities
           </NavLink>
+          <NavLink id="events" to="/events" icon="mutant"> Events </NavLink>
           <NavLink id="settings" to="/settings" icon="tinker">
             Settings
           </NavLink>

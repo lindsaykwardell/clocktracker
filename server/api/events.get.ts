@@ -4,68 +4,40 @@ import { User } from "@supabase/supabase-js";
 const prisma = new PrismaClient();
 
 export default defineEventHandler(async (handler) => {
-  const me: User | null = handler.context.user;
-  const slug = handler.context.params!.slug;
-  const event_id = handler.context.params!.event_id;
+  const user: User | null = handler.context.user;
 
-  if (!me) {
-    throw createError({
-      status: 401,
-      statusMessage: "Unauthorized",
-    });
+  if (!user) {
+    return [];
   }
 
-  const event = await prisma.event.findUnique({
+  return prisma.event.findMany({
     where: {
-      id: event_id,
-      community: {
-        slug,
-        members: {
-          some: {
-            user_id: me?.id || "",
+      end: {
+        gte: new Date().toISOString(),
+      },
+      OR: [
+        {
+          registered_players: {
+            some: {
+              user_id: user.id,
+            },
           },
         },
-      },
-    },
-    select: {
-      id: true,
-    },
-  });
-
-  if (!event) {
-    throw createError({
-      status: 404,
-      statusMessage: "Not Found",
-    });
-  }
-
-  await prisma.eventAttendee.deleteMany({
-    where: {
-      event_id,
-      user_id: me.id,
-    },
-  });
-
-  await prisma.eventWaitlistAttendee.deleteMany({
-    where: {
-      waitlist: {
-        event_id,
-      },
-      user_id: me.id,
-    },
-  });
-
-  return prisma.event.findUnique({
-    where: {
-      id: event_id,
-      community: {
-        slug,
-        members: {
-          some: {
-            user_id: me?.id || "",
+        {
+          waitlists: {
+            some: {
+              users: {
+                some: {
+                  user_id: user.id,
+                },
+              },
+            },
           },
         },
-      },
+      ],
+    },
+    orderBy: {
+      start: "asc",
     },
     select: {
       id: true,
@@ -77,6 +49,7 @@ export default defineEventHandler(async (handler) => {
       location_type: true,
       player_count: true,
       image: true,
+      who_can_register: true,
       registered_players: {
         select: {
           name: true,
@@ -101,8 +74,8 @@ export default defineEventHandler(async (handler) => {
           created_at: true,
           users: {
             select: {
-              created_at: true,
               name: true,
+              created_at: true,
               user: {
                 select: {
                   user_id: true,
@@ -123,6 +96,7 @@ export default defineEventHandler(async (handler) => {
       community: {
         select: {
           name: true,
+          slug: true,
         },
       },
     },
