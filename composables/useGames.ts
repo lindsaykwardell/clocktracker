@@ -451,5 +451,42 @@ export const useGames = defineStore("games", {
         });
       }
     },
+    async importGames() {
+      const input = document.createElement("input");
+      input.type = "file";
+      // Accept only csv files
+      input.accept = ".csv";
+      input.onchange = this.selectFile;
+      input.click();
+    },
+    async selectFile(e: Event) {
+      const uploadedFiles = (e.target as HTMLInputElement).files;
+      if (!uploadedFiles) return;
+
+      const file = Array.from(uploadedFiles)[0];
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const text = e.target?.result;
+        if (typeof text === "string") {
+          this.uploadImportedGames(text);
+        }
+      };
+
+      reader.readAsText(file);
+    },
+    async uploadImportedGames(csv: string) {
+      const games = await $fetch<GameRecord[]>("/api/import", {
+        method: "POST",
+        body: JSON.stringify({ csv }),
+      });
+
+      for (const game of games) {
+        this.games.set(game.id, {
+          status: Status.SUCCESS,
+          data: game,
+        });
+      }
+    },
   },
 });

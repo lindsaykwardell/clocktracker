@@ -306,35 +306,8 @@ function infiniteScroll(skip: number) {
 }
 
 function initImportGames() {
-  const input = document.createElement("input");
-  input.type = "file";
-  // Accept only csv files
-  input.accept = ".csv";
-  input.onchange = selectFile;
-  input.click();
-}
-
-async function selectFile(e: Event) {
-  const uploadedFiles = (e.target as HTMLInputElement).files;
-  if (!uploadedFiles) return;
-
-  const file = Array.from(uploadedFiles)[0];
-
-  const reader = new FileReader();
-  reader.onload = async (e) => {
-    const text = e.target?.result;
-    if (typeof text === "string") {
-      uploadImportedGames(text);
-    }
-  };
-
-  reader.readAsText(file);
-}
-
-async function uploadImportedGames(csv: string) {
-  await $fetch("/api/import", {
-    method: "POST",
-    body: JSON.stringify({ csv }),
-  });
+  if (user.value) {
+    allGames.importGames();
+  }
 }
 </script>
