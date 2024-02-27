@@ -77,7 +77,7 @@ export const useUsers = defineStore("users", {
       if (!user_id) return;
       const games = useGames();
       const me = await $fetch<User>("/api/settings");
-      games.fetchPlayerGames(me.username);
+      // games.fetchPlayerGames(me.username);
 
       this.storeUser(me);
     },
