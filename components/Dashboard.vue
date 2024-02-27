@@ -151,6 +151,7 @@
         Import Games
       </button>
     </div>
+    <ImportGamesDialog v-model:visible="importGamesDialogVisible" />
   </template>
   <template v-else>
     <Loading />
@@ -163,6 +164,7 @@ import naturalOrder from "natural-order";
 const user = useSupabaseUser();
 const users = useUsers();
 const allGames = useGames();
+const importGamesDialogVisible = ref(false);
 
 const me = computed(() => {
   if (user.value) {
@@ -306,8 +308,6 @@ function infiniteScroll(skip: number) {
 }
 
 function initImportGames() {
-  if (user.value) {
-    allGames.importGames();
-  }
+  importGamesDialogVisible.value = true;
 }
 </script>
