@@ -19,7 +19,7 @@
               Download Import Template
             </a>
           </li>
-          <li>Enter your game details.</li>
+          <li>Enter your game details into the spreadsheet. Make sure you save it as a CSV!</li>
           <li>
             <button @click="initiateImport" class="underline">
               Upload the template with your games
