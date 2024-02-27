@@ -31,10 +31,38 @@
               </select>
             </label>
             <label class="flex gap-2 items-center">
-              <span class="block whitespace-nowrap w-20 md:w-auto">Tags</span>
+              <select
+                v-model="selectedRole"
+                class="w-full rounded p-1 text-lg bg-stone-600"
+                aria-label="Role"
+              >
+                <option :value="null">Filter by role</option>
+                <option
+                  v-for="role in roles.getAllRoles"
+                  :key="role.id"
+                  :value="role.id"
+                >
+                  {{ role.name }}
+                </option>
+              </select>
+            </label>
+            <label v-if="myCommunities.length" class="flex gap-2 items-center">
+              <select
+                v-model="selectedCommunity"
+                class="w-full rounded p-1 text-lg bg-stone-600"
+                aria-label="Community"
+              >
+                <option :value="null">Filter by community</option>
+                <option v-for="community in myCommunities" :key="community">
+                  {{ community }}
+                </option>
+              </select>
+            </label>
+            <label class="flex gap-2 items-center">
               <select
                 v-model="selectedTag"
                 class="w-full rounded p-1 text-lg bg-stone-600"
+                aria-label="Tags"
               >
                 <option :value="null">Filter by tag</option>
                 <option
@@ -47,17 +75,8 @@
                 </option>
               </select>
             </label>
-            <div class="flex flex-wrap gap-2">
-              <button
-                v-for="(tag, index) in selectedTags"
-                class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
-                @click.prevent="selectedTags.splice(index, 1)"
-              >
-                {{ tag }}
-              </button>
-            </div>
             <div class="flex-grow"></div>
-            <div class="flex gap-2 items-center">
+            <div class="flex gap-2 items-center justify-end">
               <slot />
               <button
                 class="rounded w-[100px] py-1 justify-center text-lg flex gap-2 bg-stone-600 hover:bg-stone-700 transition duration-150"
@@ -106,6 +125,17 @@
                   />
                 </svg>
                 Table
+              </button>
+            </div>
+          </div>
+          <div class="flex flex-col md:flex-row gap-3 px-4">
+            <div class="flex flex-wrap gap-2">
+              <button
+                v-for="(tag, index) in selectedTags"
+                class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
+                @click.prevent="selectedTags.splice(index, 1)"
+              >
+                {{ tag }}
               </button>
             </div>
           </div>
@@ -163,6 +193,7 @@ import naturalOrder from "natural-order";
 
 const user = useSupabaseUser();
 const users = useUsers();
+const roles = useRoles();
 const allGames = useGames();
 const importGamesDialogVisible = ref(false);
 
@@ -189,6 +220,14 @@ const myTags = computed(() => {
   }
 });
 
+const myCommunities = computed(() => {
+  if (!props.player) {
+    return [];
+  } else {
+    return allGames.getCommunityNamesByPlayer(props.player.username);
+  }
+});
+
 const ready = ref(false);
 const gameView = ref<"grid" | "table">("grid");
 const sortBy = ref<
@@ -197,6 +236,8 @@ const sortBy = ref<
 const orderBy = ref<"asc" | "desc">("desc");
 const selectedTag = ref<string | null>(null);
 const selectedTags = ref<string[]>([]);
+const selectedRole = ref<string | null>(null);
+const selectedCommunity = ref<string | null>(null);
 
 watchEffect(() => {
   if (selectedTag.value) {
@@ -246,16 +287,24 @@ const sortedGames = computed(() => {
     )
     .filter(
       (game) =>
-        !selectedTags.value.length ||
-        selectedTags.value.every((tag) => game.tags.includes(tag))
+        (!selectedTags.value.length ||
+          selectedTags.value.every((tag) => game.tags.includes(tag))) && // filter by tags
+        (!selectedRole.value ||
+          game.player_characters[game.player_characters.length - 1]?.role_id ===
+            selectedRole.value) && // filter by role
+        (!selectedCommunity.value ||
+          game.community_name === selectedCommunity.value) // filter by community
     );
 });
 
 onMounted(() => {
+  roles.fetchRoles();
+
   const lastSortBy = localStorage.getItem("lastSortBy");
   const lastOrderBy = localStorage.getItem("lastOrderBy");
   const lastGameView = localStorage.getItem("lastGameView");
   const lastSelectedTags = localStorage.getItem("lastSelectedTags");
+  const lastSelectedRole = localStorage.getItem("lastSelectedRole");
   if (lastSortBy) {
     sortBy.value = lastSortBy as any;
   }
@@ -267,6 +316,9 @@ onMounted(() => {
   }
   if (lastSelectedTags) {
     selectedTags.value = JSON.parse(lastSelectedTags);
+  }
+  if (lastSelectedRole) {
+    selectedRole.value = lastSelectedRole;
   }
   ready.value = true;
 });
@@ -295,6 +347,12 @@ watch(
     localStorage.setItem("lastSelectedTags", JSON.stringify(value));
   },
   { deep: true }
+);
+watch(
+  () => selectedRole.value,
+  (value) => {
+    localStorage.setItem("lastSelectedRole", value || "");
+  }
 );
 
 const allGamesLoaded = computed(() =>
