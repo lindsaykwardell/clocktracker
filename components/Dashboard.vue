@@ -133,16 +133,25 @@
         </div>
       </section>
     </template>
-    <template v-else>
-      <p class="text-center text-2xl my-4 font-dumbledor">No games yet!</p>
+    <div v-else class="flex flex-col items-center gap-6">
+      <p class="text-center text-2xl font-dumbledor">No games yet!</p>
       <nuxt-link
         v-if="user && user.id === player.user_id"
         to="/add-game"
-        class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded text-center text-xl m-auto block w-[300px] my-8"
+        class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded text-center text-xl m-auto block w-[300px]"
       >
         Add Your First Game
       </nuxt-link>
-    </template>
+      <p>or</p>
+      <button
+        type="button"
+        @click="initImportGames"
+        class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded text-center text-xl m-auto block w-[300px]"
+      >
+        Import Games
+      </button>
+    </div>
+    <ImportGamesDialog v-model:visible="importGamesDialogVisible" />
   </template>
   <template v-else>
     <Loading />
@@ -155,6 +164,7 @@ import naturalOrder from "natural-order";
 const user = useSupabaseUser();
 const users = useUsers();
 const allGames = useGames();
+const importGamesDialogVisible = ref(false);
 
 const me = computed(() => {
   if (user.value) {
@@ -295,5 +305,9 @@ function infiniteScroll(skip: number) {
   if (props.games.status === Status.SUCCESS) {
     allGames.fetchPlayerGames(props.player?.username || "", { skip });
   }
+}
+
+function initImportGames() {
+  importGamesDialogVisible.value = true;
 }
 </script>
