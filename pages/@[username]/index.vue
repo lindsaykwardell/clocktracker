@@ -64,7 +64,7 @@
             <button
               type="button"
               @click="initImportGames"
-              class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded text-center m-auto block"
+              class="rounded w-[110px] py-2 justify-center flex gap-2 bg-stone-600 hover:bg-stone-700 transition duration-150"
             >
               Import Games
             </button>
