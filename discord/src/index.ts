@@ -62,18 +62,30 @@ const main = async () => {
       );
 
       // The put method is used to fully refresh all commands in the guild with the current set
-      const data = await rest.put(
-        Routes.applicationGuildCommands(
-          process.env.CLIENT_ID,
-          process.env.DEV_GUILD_ID
-        ),
-        { body: commands }
-      );
+      if (process.env.NODE_ENV === "production") {
+        const data = await rest.put(
+          Routes.applicationCommands(process.env.CLIENT_ID),
+          { body: commands }
+        );
 
-      console.log(
-        // @ts-ignore
-        `Successfully reloaded ${data.length} application (/) commands.`
-      );
+        console.log(
+          // @ts-ignore
+          `Successfully reloaded ${data.length} application (/) commands.`
+        );
+      } else {
+        const data = await rest.put(
+          Routes.applicationGuildCommands(
+            process.env.CLIENT_ID,
+            process.env.DEV_GUILD_ID
+          ),
+          { body: commands }
+        );
+
+        console.log(
+          // @ts-ignore
+          `Successfully reloaded ${data.length} application (/) commands.`
+        );
+      }
     } catch (error) {
       // And of course, make sure you catch and log any errors!
       console.error(error);
