@@ -43,7 +43,14 @@
             <Token :character="gamesStore.getLastCharater(game.id)" size="sm" />
           </td>
           <td class="hidden md:table-cell">{{ formatDate(game.date) }}</td>
-          <td>{{ game.script }}</td>
+          <td>
+            {{ game.script }}
+            <template
+              v-if="game.associated_script && !isBaseScript(game.script)"
+            >
+              v{{ game.associated_script.version }}
+            </template>
+          </td>
           <td class="hidden md:table-cell">
             <template v-if="game.location_type === 'IN_PERSON'">
               {{ game.location || "In Person" }}
@@ -103,6 +110,7 @@ import { WinStatus } from "~/composables/useGames";
 import { useInfiniteScroll } from "@vueuse/core";
 
 const gamesStore = useGames();
+const { isBaseScript } = useScripts();
 
 const props = defineProps<{
   games: GameRecord[];
@@ -112,7 +120,9 @@ const props = defineProps<{
 }>();
 
 function formatDate(date: Date) {
-  return new Intl.DateTimeFormat(navigator.language).format(new Date(date));
+  return new Intl.DateTimeFormat(navigator.language, {
+    timeZone: "UTC",
+  }).format(new Date(date));
 }
 
 const loadMore = ref();

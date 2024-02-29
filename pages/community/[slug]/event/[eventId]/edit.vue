@@ -1,6 +1,6 @@
 <template>
   <CommunityTemplate moderatorOnly>
-    <h2 class="font-dumbledor text-2xl lg:text-3xl mb-4 text-center">
+    <h2 class="font-dumbledor text-2xl lg:text-3xl my-4 text-center">
       Edit Event
     </h2>
     <EventEditor
@@ -37,6 +37,11 @@ const event = reactive<{
   description: string;
   image: string | null;
   who_can_register: "ANYONE" | "COMMUNITY_MEMBERS";
+  waitlists: {
+    id?: number;
+    name: string;
+    default: boolean;
+  }[];
 }>({
   title: existingEvent.title,
   description: existingEvent.description,
@@ -47,6 +52,11 @@ const event = reactive<{
   location: existingEvent.location,
   image: existingEvent.image,
   who_can_register: existingEvent.who_can_register,
+  waitlists: existingEvent.waitlists.map((w) => ({
+    id: w.id,
+    name: w.name,
+    default: w.default,
+  })),
 });
 
 const formattedEvent = computed(() => {

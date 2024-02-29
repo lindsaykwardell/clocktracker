@@ -87,30 +87,9 @@ export default defineEventHandler(async (handler) => {
           },
         },
       },
-      grimoire: {
-        include: {
-          tokens: {
-            include: {
-              role: true,
-              related_role: true,
-            },
-          },
-        },
-      },
-      parent_game: {
+      associated_script: {
         select: {
-          user: {
-            select: {
-              username: true,
-              display_name: true,
-            },
-          },
-        },
-      },
-      community: {
-        select: {
-          slug: true,
-          icon: true,
+          version: true,
         },
       },
     },
@@ -123,7 +102,12 @@ export default defineEventHandler(async (handler) => {
   const anonymizedGames: GameRecord[] = [];
 
   for (const game of games) {
-    anonymizedGames.push(await anonymizeGame(game as GameRecord, me));
+    anonymizedGames.push(
+      await anonymizeGame(
+        { ...game, grimoire: [], demon_bluffs: [], fabled: [] } as GameRecord,
+        me
+      )
+    );
   }
 
   return anonymizedGames;

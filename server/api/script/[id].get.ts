@@ -1,23 +1,16 @@
 import { PrismaClient, RoleType } from "@prisma/client";
-// @ts-ignore
-import dayjs from "dayjs";
 
 const prisma = new PrismaClient();
 
+// This endpoint is specifically for fetching a script by its ID
+// This is the ClockTracker ID, not the BOTC script db ID.
 export default defineEventHandler(async (handler) => {
-  const id_or_name = handler.context.params?.id as string;
+  const id = handler.context.params?.id as string;
 
-  const script = await prisma.script.findFirst({
-    where: !isNaN(+id_or_name)
-      ? {
-          id: +id_or_name,
-        }
-      : {
-          name: {
-            equals: decodeURIComponent(id_or_name),
-            mode: "insensitive",
-          },
-        },
+  const script = await prisma.script.findUnique({
+    where: {
+      id: +id,
+    },
     include: {
       roles: {
         where: {
@@ -30,18 +23,15 @@ export default defineEventHandler(async (handler) => {
   });
 
   if (!script) {
-    console.error(`Script not found: ${id_or_name}`);
+    console.error(`Script not found: ${id}`);
     throw createError({
       status: 404,
       statusMessage: "Not Found",
     });
   }
 
-  // If the characters have not been fetched in the last two weeks, fetch them again
-  if (
-    script.characters_last_updated === null ||
-    dayjs().diff(script.characters_last_updated, "day") > 14
-  ) {
+  // If the characters have not been fetched, fetch them
+  if (script.roles.length === 0) {
     const roleIds: { id: string }[] = (
       await fetch(script.json_url).then((res) => res.json())
     )
@@ -70,7 +60,6 @@ export default defineEventHandler(async (handler) => {
         roles: {
           connect: knownRoles,
         },
-        characters_last_updated: new Date(),
       },
       include: {
         roles: {

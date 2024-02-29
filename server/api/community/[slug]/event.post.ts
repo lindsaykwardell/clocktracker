@@ -1,4 +1,4 @@
-import { LocationType, PrismaClient } from "@prisma/client";
+import { LocationType, PrismaClient, WhoCanRegister } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
 
 const prisma = new PrismaClient();
@@ -14,6 +14,13 @@ export default defineEventHandler(async (handler) => {
     location: string;
     location_type: LocationType;
     player_count?: number;
+    waitlists: {
+      id?: number;
+      name: string;
+      default?: boolean;
+    }[];
+    who_can_register: WhoCanRegister;
+    image: string | null;
   } | null>(handler);
 
   if (!me) {
@@ -50,8 +57,24 @@ export default defineEventHandler(async (handler) => {
 
   const event = await prisma.event.create({
     data: {
-      ...body,
+      title: body.title,
+      description: body.description,
+      start: body.start,
+      end: body.end,
+      location: body.location,
+      location_type: body.location_type,
+      player_count: body.player_count,
+      who_can_register: body.who_can_register,
+      image: body.image,
       community_id: community.id,
+      waitlists: {
+        createMany: {
+          data: body.waitlists.map((waitlist) => ({
+            name: waitlist.name,
+            default: waitlist.default,
+          })),
+        },
+      },
     },
   });
 

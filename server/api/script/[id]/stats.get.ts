@@ -7,6 +7,7 @@ const prisma = new PrismaClient();
 
 export default defineEventHandler(async (handler) => {
   const script_id = +handler.context.params!.id;
+
   const script = await prisma.script.findFirst({
     where: {
       id: script_id,
@@ -29,12 +30,6 @@ export default defineEventHandler(async (handler) => {
       AND: [
         {
           OR: [
-            {
-              script: {
-                equals: script.name,
-                mode: "insensitive",
-              },
-            },
             {
               script_id,
             },
@@ -72,12 +67,32 @@ export default defineEventHandler(async (handler) => {
           },
         },
       },
+      demon_bluffs: {
+        include: {
+          role: {
+            select: {
+              token_url: true,
+              type: true,
+            },
+          },
+        },
+      },
+      fabled: {
+        include: {
+          role: {
+            select: {
+              token_url: true,
+            },
+          },
+        },
+      },
       grimoire: {
         include: {
           tokens: {
             include: {
               role: true,
               related_role: true,
+              reminders: true,
             },
           },
         },

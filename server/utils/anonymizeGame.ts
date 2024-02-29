@@ -1,4 +1,4 @@
-import type { Game, Character, Grimoire, Token } from "@prisma/client";
+import type { Game, Character, Grimoire, Token, ReminderToken } from "@prisma/client";
 import { PrivacySetting, PrismaClient } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
 
@@ -28,6 +28,7 @@ export type GameRecord = Game & {
         name: string;
       };
       related_role?: { token_url: string };
+      reminders: ReminderToken[];
     })[];
   })[];
   parent_game?: {
@@ -35,6 +36,13 @@ export type GameRecord = Game & {
       username: string;
       display_name: string;
     };
+  };
+  community?: {
+    slug: string;
+    icon: string;
+  };
+  associated_script?: {
+    version: string;
   };
 };
 
@@ -101,7 +109,8 @@ export async function anonymizeGame(
     game.storyteller = shortenName(game.storyteller);
     game.co_storytellers.map(shortenName);
     game.location = shortenName(game.location);
-    game.community = shortenName(game.community);
+    game.community_name = shortenName(game.community_name);
+    game.community = undefined;
 
     game.grimoire.map((g) =>
       g.tokens.map((t) => {

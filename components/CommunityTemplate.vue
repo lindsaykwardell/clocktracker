@@ -3,7 +3,7 @@
     <template v-if="community.status === Status.SUCCESS">
       <div class="bg-stone-950 shadow-lg">
         <div
-          class="flex flex-col items-center p-2 w-full md:w-3/4 lg:w-2/3 xl:w-1/2 m-auto"
+          class="flex flex-col items-center w-full md:w-3/4 lg:w-2/3 xl:w-1/2 m-auto"
         >
           <div class="flex gap-3 items-center w-full">
             <Avatar
@@ -38,7 +38,10 @@
           <p class="whitespace-pre-wrap text-left w-full py-4">
             {{ community.data.description }}
           </p>
-          <div class="flex justify-start w-screen md:w-full gap-1 h-12">
+          <nav
+            v-if="!isNotAllowed"
+            class="flex justify-start w-screen md:w-full gap-1 h-12"
+          >
             <nuxt-link
               :to="`/community/${community.data.slug}`"
               class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-700"
@@ -61,7 +64,7 @@
             >
               Moderator Dashboard
             </nuxt-link>
-          </div>
+          </nav>
         </div>
         <slot
           name="header"
@@ -73,8 +76,18 @@
           :isPending="isPending"
         />
       </div>
+      <div v-if="isBanned">
+        <p class="text-center py-3 text-stone-400">
+          You have been banned from this community.
+        </p>
+      </div>
+      <div v-else-if="isNotAllowed">
+        <p class="text-center py-3 text-stone-400">
+          This community is private. You must join to view it.
+        </p>
+      </div>
       <slot
-        v-if="!props.moderatorOnly || isModerator"
+        v-else-if="!props.moderatorOnly || isModerator"
         :community="community"
         :isMember="isMember"
         :isModerator="isModerator"
@@ -99,7 +112,7 @@ const user = useSupabaseUser();
 
 const props = defineProps<{
   moderatorOnly?: boolean;
-}>()
+}>();
 
 const community = computed(() => communities.getCommunity(slug));
 const isMember = computed(() => communities.isMember(slug, user.value?.id));

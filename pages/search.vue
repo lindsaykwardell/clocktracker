@@ -69,6 +69,18 @@
                 {{ scripts.length }} Script{{ scripts.length === 1 ? "" : "s" }}
               </h2>
             </button>
+            <button
+              @click="showRoles = !showRoles"
+              class="transition duration-150 px-2 py-1 rounded flex items-center gap-2"
+              :class="{
+                'bg-stone-600 hover:bg-stone-700': showRoles,
+                'bg-stone-700 hover:bg-stone-600 text-stone-400': !showRoles,
+              }"
+            >
+              <h2>
+                {{ roles.length }} Role{{ roles.length === 1 ? "" : "s" }}
+              </h2>
+            </button>
           </div>
           <template v-if="showCommunities">
             <CommunityCard
@@ -76,15 +88,14 @@
               :community="community"
             />
           </template>
+          <template v-if="showRoles">
+            <RoleCard v-for="role in roles" :role="role" />
+          </template>
           <template v-if="showScripts">
             <ScriptCard v-for="script in scripts" :script="script" />
           </template>
           <template v-if="showUsers">
-            <UserCard
-              v-for="user in users"
-              
-              :username="user.username"
-            />
+            <UserCard v-for="user in users" :username="user.username" />
           </template>
         </template>
       </div>
@@ -93,6 +104,7 @@
 </template>
 
 <script setup lang="ts">
+import type { Role } from "@prisma/client";
 import { watchDebounced } from "@vueuse/core";
 
 const users = ref<
@@ -135,18 +147,23 @@ const scripts = ref<
     };
   }[]
 >([]);
+const roles = ref<(Role & { _count: { scripts: number; games: number } })[]>(
+  []
+);
 const query = ref("");
 const searching = ref(false);
 
 const showUsers = ref(true);
 const showCommunities = ref(true);
 const showScripts = ref(true);
+const showRoles = ref(true);
 
 async function search() {
   searching.value = true;
   users.value = [];
   communities.value = [];
   scripts.value = [];
+  roles.value = [];
   const result = await $fetch("/api/search", {
     params: {
       query: query.value,
@@ -156,6 +173,11 @@ async function search() {
   users.value = result.users;
   scripts.value = result.scripts;
   communities.value = result.communities;
+  if ("roles" in result) {
+    roles.value = result.roles;
+  } else {
+    roles.value = [];
+  }
 
   searching.value = false;
 }

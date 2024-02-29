@@ -7,6 +7,8 @@ import {
   Grimoire,
   Alignment,
   WinStatus,
+  DemonBluff,
+  Fabled,
 } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -16,7 +18,17 @@ export default defineEventHandler(async (handler) => {
   const body = await readBody<
     | (Game & {
         player_characters: (Character & { role?: { token_url: string } })[];
-        grimoire: Partial<Grimoire & { tokens: Partial<Token>[] }>[];
+        demon_bluffs: (DemonBluff & { role?: { token_url: string } })[];
+        fabled: (Fabled & { role?: { token_url: string } })[];
+        grimoire: Partial<
+          Grimoire & {
+            tokens: Partial<
+              Token & {
+                reminders: Partial<{ reminder: string; token_url: string }>[];
+              }
+            >[];
+          }
+        >[];
       })
     | null
   >(handler);
@@ -43,6 +55,12 @@ export default defineEventHandler(async (handler) => {
       player_characters: {
         create: [...body.player_characters],
       },
+      demon_bluffs: {
+        create: [...body.demon_bluffs],
+      },
+      fabled: {
+        create: [...body.fabled],
+      },
       grimoire: {
         create: [
           ...body.grimoire.map((g) => ({
@@ -53,9 +71,17 @@ export default defineEventHandler(async (handler) => {
                 related_role_id: token.related_role_id,
                 alignment: token.alignment || Alignment.NEUTRAL,
                 is_dead: token.is_dead || false,
+                used_ghost_vote: token.used_ghost_vote || false,
                 order: token.order || index,
                 player_name: token.player_name || "",
                 player_id: token.player_id,
+                reminders: {
+                  create:
+                    token.reminders?.map((reminder) => ({
+                      reminder: reminder.reminder,
+                      token_url: reminder.token_url,
+                    })) || [],
+                },
               })),
             },
           })),
@@ -75,8 +101,14 @@ export default defineEventHandler(async (handler) => {
             include: {
               role: true,
               related_role: true,
+              reminders: true,
             },
           },
+        },
+      },
+      associated_script: {
+        select: {
+          version: true,
         },
       },
     },
@@ -155,6 +187,12 @@ export default defineEventHandler(async (handler) => {
         player_characters: {
           create: [...player_characters],
         },
+        demon_bluffs: {
+          create: [...body.demon_bluffs],
+        },
+        fabled: {
+          create: [...body.fabled],
+        },
         notes: "",
         win: win ? WinStatus.WIN : WinStatus.LOSS,
         // map the already created grimoires to the new game
@@ -200,6 +238,12 @@ export default defineEventHandler(async (handler) => {
             date: new Date(body.date),
             user_id: friend.user_id,
             player_characters: {},
+            demon_bluffs: {
+              create: [...body.demon_bluffs],
+            },
+            fabled: {
+              create: [...body.fabled],
+            },
             notes: "",
             win: win ? WinStatus.WIN : WinStatus.LOSS,
             grimoire: {

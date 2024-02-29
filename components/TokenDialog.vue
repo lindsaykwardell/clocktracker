@@ -9,7 +9,7 @@
           <input v-model="showAllRoles" type="checkbox" class="mr-2" />
           <span>All Roles</span>
         </label>
-        <label class="flex items-center">
+        <label v-if="!alwaysShowFabled" class="flex items-center">
           <input v-model="showFabled" type="checkbox" class="mr-2" />
           <span>Show Fabled</span>
         </label>
@@ -63,6 +63,8 @@ const props = defineProps<{
   }[];
   visible: boolean;
   alwaysShowAllRoles?: boolean;
+  alwaysShowFabled?: boolean;
+  hideTravelers?: boolean;
 }>();
 
 const emit = defineEmits(["update:visible", "selectRole"]);
@@ -91,8 +93,10 @@ const filteredRoles = computed(() => {
       ...(showAllRoles.value ? allRoles.value : props.availableRoles).filter(
         (role) => role.type !== "FABLED" && role.type !== "TRAVELER"
       ),
-      ...travelerRoles.value,
-      ...(showFabled.value ? fabledRoles.value : []),
+      ...(props.hideTravelers && !showAllRoles.value
+        ? []
+        : travelerRoles.value),
+      ...(showFabled.value || props.alwaysShowFabled ? fabledRoles.value : []),
     ].filter((role) =>
       role.name.toLowerCase().includes(roleFilter.value.toLowerCase())
     )

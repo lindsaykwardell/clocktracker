@@ -1,4 +1,4 @@
-import type { Role } from "@prisma/client";
+import type { Role, RoleReminder } from "@prisma/client";
 import { defineStore } from "pinia";
 
 export enum RoleType {
@@ -10,25 +10,46 @@ export enum RoleType {
   FABLED = "FABLED",
 }
 
+export type RoleRecord = Role & {
+  reminders: RoleReminder[];
+};
+
 export const useRoles = defineStore("roles", {
   state: () => ({
-    roles: new Map<string, Role>(),
+    roles: new Map<string, RoleRecord>(),
   }),
   getters: {
-    getRole(): (roleId: string) => Role | undefined {
+    getRole(): (roleId: string) => RoleRecord | undefined {
       return (roleId: string) => {
         return this.roles.get(roleId.toLowerCase());
       };
     },
-    getRoleByType(): (roleType: RoleType) => Role[] {
+    getRoleByType(): (roleType: RoleType) => RoleRecord[] {
       return (roleType: RoleType) => {
         return Array.from(this.roles.values()).filter(
           (role) => role.type === roleType
         );
       };
     },
-    getAllRoles(): Role[] {
+    getAllRoles(): RoleRecord[] {
       return Array.from(this.roles.values());
+    },
+    getRemindersForRoles(): (
+      roleIds: string[]
+    ) => (RoleReminder & { token_url: string })[] {
+      return (roleIds: string[]) =>
+        Array.from(this.roles.values())
+          .filter((role) => roleIds.includes(role.id))
+          .reduce(
+            (reminders, role) => [
+              ...reminders,
+              ...role.reminders.map((reminder) => ({
+                ...reminder,
+                token_url: role.token_url,
+              })),
+            ],
+            [] as (RoleReminder & { token_url: string })[]
+          );
     },
   },
   actions: {

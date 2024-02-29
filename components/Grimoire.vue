@@ -7,32 +7,112 @@
           'z-50': token.order === focusedToken?.order,
         }"
       >
+        <div class="reminder-tokens">
+          <div
+            v-for="(reminderToken, tokenIndex) in token.reminders"
+            class="reminder-token"
+            :style="`--ti: ${tokenIndex}`"
+          >
+            <button
+              v-if="!readonly"
+              type="button"
+              class="z-50 absolute w-full h-full flex justify-center items-center rounded-full bg-black/25 opacity-0 hover:opacity-100 transition duration-200 cursor-pointer"
+              @click="removeReminder(token, reminderToken)"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 512 512"
+              >
+                <path
+                  d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
+                  fill="currentColor"
+                />
+                <path d="M249 160h14v241h-14z" fill="currentColor" />
+                <path d="M320 160h-14.6l-10.7 241h14.6z" fill="currentColor" />
+                <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
+              </svg>
+            </button>
+            <ReminderToken :reminder="reminderToken"> </ReminderToken>
+          </div>
+          <Token
+            v-if="!readonly"
+            class="reminder-token opacity-0 hover:opacity-100 transition duration-200 cursor-pointer"
+            :character="{ role: { token_url: '/1x1.png' } }"
+            size="reminder"
+            :style="`--ti: ${token.reminders?.length ?? 0}`"
+            @click="openReminderDialog(token)"
+          >
+          </Token>
+        </div>
         <button
           type="button"
-          @click.prevent="token.is_dead = !token.is_dead"
-          :disabled="readonly"
-          class="absolute top-0 left-0 z-10 flex justify-center w-full duration-200"
+          v-if="token.is_dead || token.used_ghost_vote"
+          class="absolute top-0 left-0 z-20 flex justify-center w-full duration-200"
           :class="{
             'cursor-default': readonly,
+            'opacity-0': !token.used_ghost_vote,
+            'hover:opacity-50 transition hover:-translate-y-2':
+              !readonly && token.is_dead && !token.used_ghost_vote,
+          }"
+          @click.prevent="toggleUsedGhostVote(token)"
+        >
+          <img src="/img/token-bg-dead.webp" class="w-4 md:w-8" />
+        </button>
+        <button
+          type="button"
+          @click.prevent="toggleIsDead(token)"
+          :disabled="props.readonly"
+          class="absolute top-0 left-0 z-10 flex justify-center w-full duration-200"
+          :class="{
+            'cursor-default': props.readonly,
             'opacity-0': !token.is_dead,
             'hover:opacity-50 transition hover:-translate-y-2':
-              !readonly && !token.is_dead,
+              !props.readonly && !token.is_dead,
           }"
         >
           <img src="/img/shroud.png" class="w-8 md:w-10" />
         </button>
+        <a
+          v-if="props.readonly && token.role_id"
+          :href="`/roles/${token.role_id}`"
+          target="_blank"
+          class="hover:underline flex flex-col items-center"
+        >
+          <Token
+            @clickRole="
+              !props.readonly ? openRoleSelectionDialog(token, 'role') : null
+            "
+            @clickRelated="
+              !props.readonly
+                ? openRoleSelectionDialog(token, 'related_role')
+                : null
+            "
+            @clickAlignment="toggleAlignment(token)"
+            :character="token"
+            size="md"
+            :class="{ 'cursor-pointer': !props.readonly }"
+            :alwaysShowAlignment="!props.readonly && !!token.role"
+          />
+        </a>
         <Token
-          @clickRole="!readonly ? openRoleSelectionDialog(token, 'role') : null"
+          v-else
+          @clickRole="
+            !props.readonly ? openRoleSelectionDialog(token, 'role') : null
+          "
           @clickRelated="
-            !readonly ? openRoleSelectionDialog(token, 'related_role') : null
+            !props.readonly
+              ? openRoleSelectionDialog(token, 'related_role')
+              : null
           "
           @clickAlignment="toggleAlignment(token)"
           :character="token"
           size="md"
-          :class="{ 'cursor-pointer': !readonly }"
-          :alwaysShowAlignment="!readonly && !!token.role"
+          :class="{ 'cursor-pointer': !props.readonly }"
+          :alwaysShowAlignment="!props.readonly && !!token.role"
         />
-        <div v-if="!readonly" class="relative z-50">
+        <div v-if="!props.readonly" class="relative z-50">
           <ClientOnly>
             <GrimoireTaggedUserInput
               :users="filteredTaggablePlayers"
@@ -50,7 +130,7 @@
         </a>
         <span
           v-else-if="token.player_name"
-          class="bg-stone-600 rounded p-1 border-2 border-stone-500 text-center text-ellipsis max-w-[150px] overflow-hidden whitespace-nowrap"
+          class="bg-stone-600 rounded p-1 border-2 border-stone-500 text-center text-ellipsis text-xs md:text-sm max-w-[150px] overflow-hidden whitespace-nowrap"
         >
           {{ token.player_name }}
         </span>
@@ -63,15 +143,23 @@
     :availableRoles="availableRoles"
     @selectRole="selectRoleForToken"
   />
+  <ReminderDialog
+    v-if="reminders.length > 0"
+    v-model:visible="showReminderDialog"
+    :reminders="reminders"
+    @selectReminder="selectReminder"
+  />
 </template>
 
 <script setup lang="ts">
-import { RoleType, Alignment } from "@prisma/client";
+import { Alignment } from "@prisma/client";
+import { RoleType } from "~/composables/useRoles";
 
 type Token = {
   alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
   order: number;
   is_dead: boolean;
+  used_ghost_vote: boolean;
   role_id: string | null;
   role?: {
     token_url: string;
@@ -81,6 +169,7 @@ type Token = {
   };
   related_role_id: string | null;
   related_role?: { token_url: string; name?: string };
+  reminders: { reminder: string; token_url: string }[];
   player_name: string;
   player_id?: string | null;
 };
@@ -89,6 +178,7 @@ const friends = useFriends();
 const users = useUsers();
 const user = useSupabaseUser();
 const games = useGames();
+const roles = useRoles();
 
 const me = computed(() => {
   const meStatus = users.getUserById(user.value?.id);
@@ -164,7 +254,18 @@ const orderedTokens = computed(() =>
   props.tokens.sort((a, b) => a.order - b.order)
 );
 
+const reminders = computed(() => {
+  const travelers = roles.getRoleByType(RoleType.TRAVELER);
+  const fabled = roles.getRoleByType(RoleType.FABLED);
+  return roles.getRemindersForRoles([
+    ...(props.availableRoles?.map((r) => r.id) ?? []),
+    ...travelers.map((r) => r.id),
+    ...fabled.map((r) => r.id),
+  ]);
+});
+
 const showRoleSelectionDialog = ref(false);
+const showReminderDialog = ref(false);
 const focusedToken = ref<Token | null>(null);
 const tokenMode = ref<"role" | "related_role">("role");
 
@@ -251,13 +352,54 @@ function checkIfPlayerNameIsFriend(token: Token) {
     }
   }
 }
+
+function openReminderDialog(token: Token) {
+  focusedToken.value = token;
+  showReminderDialog.value = true;
+}
+
+function selectReminder(reminder: { reminder: string; token_url: string }) {
+  if (focusedToken.value) {
+    focusedToken.value.reminders.push({
+      reminder: reminder.reminder,
+      token_url: reminder.token_url,
+    });
+  }
+  showReminderDialog.value = false;
+}
+
+function removeReminder(
+  token: Token,
+  reminder: { reminder: string; token_url: string }
+) {
+  token.reminders = token.reminders.filter(
+    (r) =>
+      r.reminder !== reminder.reminder && r.token_url !== reminder.token_url
+  );
+}
+
+function toggleIsDead(token: Token) {
+  token.is_dead = !token.is_dead;
+  token.used_ghost_vote = false;
+}
+
+function toggleUsedGhostVote(token: Token) {
+  token.used_ghost_vote = !token.used_ghost_vote;
+  if (!token.used_ghost_vote) {
+    token.is_dead = false;
+  }
+}
+
+onMounted(() => {
+  roles.fetchRoles();
+});
 </script>
 
 <style scoped>
 .container {
   --d: 7rem;
   --rel: calc(
-    8 / (var(--m) * 2)
+    8 / (var(--m) * 2 - 5)
   ); /* how much extra space we want between images, 1 = one image size */
   --r: calc(
     0.5 * (1 + var(--rel)) * var(--d) / tan(pi / var(--m))
@@ -279,10 +421,32 @@ function checkIfPlayerNameIsFriend(token: Token) {
   left: 50%;
   margin: calc(-0.5 * var(--d));
   --offset: calc(1.25 + (0.25 * (var(--m) - 5)));
-  /* width: var(--d);
-  height: var(--d); */
+  width: var(--d);
   --az: calc((var(--i) - var(--offset)) * 1turn / var(--m));
   transform: rotate(var(--az)) translate(var(--r)) rotate(calc(-1 * var(--az)));
+}
+
+.container div.token-seat .reminder-tokens {
+  position: absolute;
+  --rd: 2rem;
+  --distance: -7rem;
+  @media (max-width: 768px) {
+    --rd: 1.5rem;
+    --distance: -6rem;
+  }
+  top: calc(50% - var(--rd));
+  left: calc(50% - var(--rd));
+  /* transform: translate(-50%, -50%); */
+  transform: rotate(var(--az)) translate(var(--distance))
+    rotate(calc(-1 * var(--az)));
+
+  & .reminder-token {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: rotate(var(--az)) translate(calc(var(--ti) * -2.25 * var(--rd)))
+      rotate(calc(-1 * var(--az)));
+  }
 }
 
 img {

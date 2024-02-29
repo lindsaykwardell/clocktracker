@@ -16,6 +16,12 @@ export default defineEventHandler(async (handler) => {
     location_type: LocationType;
     player_count?: number;
     who_can_register: WhoCanRegister;
+    image: string | null;
+    waitlists: {
+      id?: number;
+      name: string;
+      default?: boolean;
+    }[];
   } | null>(handler);
 
   if (!me) {
@@ -58,7 +64,41 @@ export default defineEventHandler(async (handler) => {
       id: event_id,
     },
     data: {
-      ...body,
+      title: body.title,
+      description: body.description,
+      start: body.start,
+      end: body.end,
+      location: body.location,
+      location_type: body.location_type,
+      player_count: body.player_count,
+      who_can_register: body.who_can_register,
+      image: body.image,
+      waitlists: {
+        deleteMany: {
+          id: {
+            notIn: body.waitlists
+              .filter((waitlist) => !!waitlist.id)
+              .map((waitlist) => waitlist.id!),
+          },
+        },
+        create: body.waitlists
+          .filter((waitlist) => !waitlist.id)
+          .map((waitlist) => ({
+            name: waitlist.name,
+            default: waitlist.default,
+          })),
+        update: body.waitlists
+          .filter((waitlist) => waitlist.id)
+          .map((waitlist) => ({
+            where: {
+              id: waitlist.id!,
+            },
+            data: {
+              name: waitlist.name,
+              default: waitlist.default,
+            },
+          })),
+      },
     },
   });
 
