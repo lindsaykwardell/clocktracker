@@ -70,6 +70,33 @@ export default defineEventHandler(async (handler) => {
           created_at: "asc",
         },
       },
+      waitlists: {
+        select: {
+          id: true,
+          name: true,
+          default: true,
+          created_at: true,
+          users: {
+            select: {
+              name: true,
+              created_at: true,
+              user: {
+                select: {
+                  user_id: true,
+                  username: true,
+                  avatar: true,
+                },
+              },
+            },
+            orderBy: {
+              created_at: "asc",
+            },
+          },
+        },
+        orderBy: {
+          created_at: "asc",
+        },
+      },
     },
   });
 

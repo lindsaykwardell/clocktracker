@@ -1,6 +1,6 @@
 <template>
   <CommunityTemplate moderatorOnly>
-    <h2 class="font-dumbledor text-2xl lg:text-3xl mb-4 text-center">
+    <h2 class="font-dumbledor text-2xl lg:text-3xl my-4 text-center">
       Create Event
     </h2>
     <EventEditor
@@ -24,8 +24,8 @@ definePageMeta({
   middleware: "community-admin",
 });
 
-const start = dayjs().format("YYYY-MM-DDTHH:mm");
-const end = dayjs().add(1.5, "hour").format("YYYY-MM-DDTHH:mm");
+const start = dayjs().add(1, "hour").format("YYYY-MM-DDTHH:mm");
+const end = dayjs().add(2.5, "hour").format("YYYY-MM-DDTHH:mm");
 
 const event = reactive<{
   title: string;
@@ -37,6 +37,10 @@ const event = reactive<{
   description: string;
   image: string | null;
   who_can_register: "ANYONE" | "COMMUNITY_MEMBERS";
+  waitlists: {
+    name: string;
+    default: boolean;
+  }[];
 }>({
   title: "",
   description: "",
@@ -47,7 +51,30 @@ const event = reactive<{
   location: "",
   image: null,
   who_can_register: "COMMUNITY_MEMBERS",
+  waitlists: [],
 });
+
+if (route.query.duplicate) {
+  try {
+    const previousEvent = await $fetch(
+      `/api/community/${slug}/event/${route.query.duplicate}`
+    );
+
+    event.title = previousEvent.title;
+    event.description = previousEvent.description;
+    event.player_count = previousEvent.player_count;
+    event.location_type = previousEvent.location_type;
+    event.location = previousEvent.location;
+    event.image = previousEvent.image;
+    event.who_can_register = previousEvent.who_can_register;
+    event.waitlists = previousEvent.waitlists.map((w) => ({
+      name: w.name,
+      default: w.default,
+    }));
+  } catch {
+    // ignore
+  }
+}
 
 const formattedEvent = computed(() => {
   return {

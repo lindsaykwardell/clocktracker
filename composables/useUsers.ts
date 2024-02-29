@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
-import { FetchStatus } from "./useFetchStatus";
-import { Chart } from "@prisma/client";
+import type { FetchStatus } from "./useFetchStatus";
+import type { Chart } from "@prisma/client";
 
 export enum PrivacySetting {
   PUBLIC = "PUBLIC",
@@ -77,7 +77,7 @@ export const useUsers = defineStore("users", {
       if (!user_id) return;
       const games = useGames();
       const me = await $fetch<User>("/api/settings");
-      games.fetchPlayerGames(me.username);
+      // games.fetchPlayerGames(me.username);
 
       this.storeUser(me);
     },

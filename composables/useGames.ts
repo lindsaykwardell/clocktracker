@@ -1,6 +1,14 @@
 import { defineStore } from "pinia";
-import { FetchStatus } from "./useFetchStatus";
-import type { Game, Character, Grimoire, Token } from "@prisma/client";
+import type { FetchStatus } from "./useFetchStatus";
+import type {
+  Game,
+  Character,
+  Grimoire,
+  Token,
+  DemonBluff,
+  Fabled,
+  ReminderToken,
+} from "@prisma/client";
 import naturalOrder from "natural-order";
 
 export enum WinStatus {
@@ -18,9 +26,24 @@ export type FullCharacter = Character & {
   related_role?: { token_url: string };
 };
 
+export type FullDemonBluff = DemonBluff & {
+  role?: {
+    token_url: string;
+    type: string;
+  };
+};
+
+export type FullFabled = Fabled & {
+  role?: {
+    token_url: string;
+  };
+};
+
 export type GameRecord = Omit<Game, "win"> & {
   win: WinStatus;
   player_characters: FullCharacter[];
+  demon_bluffs: FullDemonBluff[];
+  fabled: FullFabled[];
   user: {
     username: string;
   };
@@ -33,6 +56,7 @@ export type GameRecord = Omit<Game, "win"> & {
         name: string;
       };
       related_role?: { token_url: string };
+      reminders: ReminderToken[];
     })[];
   })[];
   parent_game?: {
@@ -44,6 +68,9 @@ export type GameRecord = Omit<Game, "win"> & {
   community?: {
     slug: string;
     icon: string;
+  };
+  associated_script?: {
+    version: string;
   };
 };
 
@@ -270,7 +297,7 @@ export const useGames = defineStore("games", {
         );
       };
     },
-    getRecentScripts(): { name: string; id: number | null }[] {
+    getRecentScripts(): { name: string; id: number | null; version: string }[] {
       const user = useSupabaseUser();
       if (!user.value) return [];
       const users = useUsers();
@@ -284,7 +311,8 @@ export const useGames = defineStore("games", {
         .orderBy("desc")
         .sort(["date"]);
 
-      const scriptList: { name: string; id: number | null }[] = [];
+      const scriptList: { name: string; id: number | null; version: string }[] =
+        [];
 
       for (const game of games.data) {
         if (scriptList.length >= 10) continue;
@@ -294,7 +322,11 @@ export const useGames = defineStore("games", {
             (s) => s.name === game.script && s.id === game.script_id
           )
         ) {
-          scriptList.push({ name: game.script, id: game.script_id });
+          scriptList.push({
+            name: game.script,
+            id: game.script_id,
+            version: game.associated_script?.version ?? "",
+          });
         }
       }
 
@@ -375,6 +407,20 @@ export const useGames = defineStore("games", {
 
       return games;
     },
+    async fetchRecentGamesForRole(role_id: string) {
+      const games = await $fetch<RecentGameRecord[]>(
+        `/api/role/${role_id}/recent`
+      );
+
+      for (const game of games) {
+        this.games.set(game.id, {
+          status: Status.SUCCESS,
+          data: game,
+        });
+      }
+
+      return games;
+    },
     async fetchSimilarGames(gameId: string) {
       if (!this.similar.has(gameId))
         this.similar.set(gameId, { status: Status.LOADING });
@@ -404,6 +450,57 @@ export const useGames = defineStore("games", {
           data: game,
         });
       }
+    },
+    async importGames(showLoader: () => void) {
+      const this_ = this;
+
+      return new Promise((resolve, reject) => {
+        try {
+          async function selectFile(e: Event) {
+            showLoader();
+            const uploadedFiles = (e.target as HTMLInputElement).files;
+            if (!uploadedFiles) return;
+
+            const file = Array.from(uploadedFiles)[0];
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+              const text = e.target?.result;
+              if (typeof text === "string") {
+                uploadImportedGames(text);
+              }
+            };
+
+            reader.readAsText(file);
+          }
+
+          async function uploadImportedGames(csv: string) {
+            const games = await $fetch<GameRecord[]>("/api/import", {
+              method: "POST",
+              body: JSON.stringify({ csv }),
+            });
+
+            for (const game of games) {
+              this_.games.set(game.id, {
+                status: Status.SUCCESS,
+                data: game,
+              });
+            }
+
+            resolve(games);
+          }
+
+          const input = document.createElement("input");
+          input.type = "file";
+          // Accept only csv files
+          input.accept = ".csv";
+          input.onchange = selectFile;
+          input.click();
+        } catch (err) {
+          console.error(err);
+          reject(err);
+        }
+      });
     },
   },
 });

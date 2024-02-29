@@ -59,7 +59,7 @@
             </div>
             <div class="font-dumbledor text-2xl">
               <a
-                :href="`https://wiki.bloodontheclocktower.com/${last_character?.name}`"
+                :href="`/roles/${last_character?.role_id}`"
                 target="_blank"
                 class="hover:underline flex flex-col items-center"
               >
@@ -75,6 +75,14 @@
                 :href="scriptLink(game.data)"
               >
                 {{ game.data.script }}
+                <template
+                  v-if="
+                    game.data.associated_script &&
+                    !isBaseScript(game.data.script)
+                  "
+                >
+                  v{{ game.data.associated_script.version }}
+                </template>
               </a>
             </label>
             <label v-if="storytellers.length" class="flex gap-3 items-center">
@@ -146,14 +154,14 @@
               v-if="game.data?.win !== WinStatus.NOT_RECORDED"
               class="flex gap-3 items-center"
             >
-              <span class="block">Win?</span>
+              <span class="block">Result</span>
               <template v-if="game.data.is_storyteller">
                 {{
                   game.data?.win === WinStatus.WIN ? "Good wins" : "Evil wins"
                 }}
               </template>
               <template v-else>
-                {{ game.data?.win === WinStatus.WIN ? "Yes" : "No" }}
+                {{ game.data?.win === WinStatus.WIN ? "Win" : "Loss" }}
               </template>
             </label>
             <label v-if="game.data.parent_game" class="flex gap-3 items-center">
@@ -166,9 +174,41 @@
               </nuxt-link>
             </label>
           </div>
-          <div class="flex flex-wrap gap-2 mt-4">
+          <div
+            v-if="game.data.demon_bluffs.length || game.data.fabled.length"
+            class="flex flex-col md:flex-row gap-4 mt-4 justify-start"
+          >
+            <label
+              v-if="game.data.demon_bluffs.length"
+              class="flex gap-3 items-center"
+            >
+              <span class="block">Demon Bluffs</span>
+              <div class="flex flex-wrap gap-2">
+                <Token
+                  v-for="bluff in game.data.demon_bluffs"
+                  :key="bluff.id"
+                  :character="bluff"
+                  size="sm"
+                />
+              </div>
+            </label>
+            <label
+              v-if="game.data.fabled.length"
+              class="flex gap-3 items-center"
+            >
+              <span class="block">Fabled</span>
+              <div class="flex flex-wrap gap-2">
+                <Token
+                  v-for="fabled in game.data.fabled"
+                  :key="fabled.id"
+                  :character="fabled"
+                  size="sm"
+                />
+              </div>
+            </label>
+          </div>
+          <div v-if="game.data.bgg_id" class="flex flex-wrap gap-2 mt-4">
             <a
-              v-if="game.data.bgg_id"
               class="flex gap-1 items-center hover:underline text-blue-800 hover:text-blue-700"
               target="_blank"
               :href="`https://boardgamegeek.com/play/details/${game.data.bgg_id}`"
@@ -319,6 +359,7 @@
         <button
           v-if="similarGames.length > 0"
           @click="showSimilarGamesDialog = true"
+          :disabled="mergeInFlight"
           class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial"
         >
           Merge with similar game
@@ -385,17 +426,17 @@ import { WinStatus } from "~/composables/useGames";
 import dayjs from "dayjs";
 import VueMarkdown from "vue-markdown-render";
 
-const { scriptLogo } = useScripts();
+const { scriptLogo, isBaseScript } = useScripts();
 const config = useRuntimeConfig();
 const router = useRouter();
 const route = useRoute();
 const user = useSupabaseUser();
 const users = useUsers();
 const games = useGames();
-const communities = useCommunities();
 const friends = useFriends();
 const gameId = route.params.id as string;
 const bggInFlight = ref(false);
+const mergeInFlight = ref(false);
 
 const game = computed(() => games.getGame(gameId));
 const player = computed<FetchStatus<User>>(() => {
@@ -549,11 +590,14 @@ function fullImageUrl(file: string) {
 }
 
 function scriptLink(game: GameRecord) {
-  if (game.script === "Sects & Violets") return "/scripts/Sects and Violets";
+  if (game.script === "Sects & Violets") return "/scripts/Sects_and_Violets";
 
-  if (game.script_id) return `/scripts/${game.script}`;
+  if (game.script_id)
+    return `/scripts/${game.script.replaceAll(" ", "_")}?version=${
+      game.associated_script?.version
+    }`;
 
-  return `https://botc-scripts.azurewebsites.net/?search=${game.script.replace(
+  return `https://botcscripts.com/?search=${game.script.replace(
     / /g,
     "+"
   )}&script_type=&include=&exclude=&edition=&author=`;
@@ -583,6 +627,7 @@ async function confirmGame() {
 
 async function confirmMergeGame(game: GameRecord) {
   if (confirm("Are you sure you want to merge these games?")) {
+    mergeInFlight.value = true;
     const result = await $fetch<GameRecord>(`/api/games/${gameId}/merge`, {
       method: "POST",
       body: game,
@@ -629,6 +674,7 @@ async function postToBGG() {
 function formatDate(date: Date) {
   return new Intl.DateTimeFormat(navigator.language, {
     dateStyle: "long",
+    timeZone: "UTC",
   }).format(new Date(date));
 }
 

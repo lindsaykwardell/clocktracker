@@ -13,6 +13,13 @@
       :alt="character?.name || character?.role?.name || 'Unknown'"
     />
     <div
+      v-if="reminderText"
+      class="text-center relative -top-2"
+      :class="reminderTextSize"
+    >
+      {{ reminderText }}
+    </div>
+    <div
       v-if="
         (character?.role &&
           character.alignment !== character.role?.initial_alignment) ||
@@ -26,7 +33,7 @@
     </div>
     <slot />
     <div
-      v-if="character?.related_role"
+      v-if="character?.related_role && !hideRelated"
       :id="relatedId"
       class="token related bg-center bg-cover absolute bottom-0 -right-3 rounded-full shadow-xl border border-black flex justify-center items-center"
       :class="relatedSize"
@@ -48,21 +55,23 @@
 const props = defineProps<{
   character?:
     | {
-        alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
+        alignment?: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
         name?: string;
         related?: string | null;
         role?: {
           token_url: string;
-          initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+          initial_alignment?: "GOOD" | "EVIL" | "NEUTRAL";
           name?: string;
         };
         related_role?: { token_url: string; name?: string };
       }
     | undefined;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "reminder" | "md" | "lg";
   alwaysShowAlignment?: boolean;
+  hideRelated?: boolean;
   outline?: boolean;
   relatedId?: string;
+  reminderText?: string;
 }>();
 
 const emit = defineEmits(["clickRelated", "clickRole", "clickAlignment"]);
@@ -72,6 +81,9 @@ const tokenClass = computed(() => {
   switch (props.size) {
     case "sm":
       classes += "w-8 h-8 md:w-12 md:h-12";
+      break;
+    case "reminder":
+      classes += "reminder flex-col w-12 h-12 md:w-16 md:h-16";
       break;
     case "md":
       classes += "w-20 h-20 md:w-28 md:h-28";
@@ -96,6 +108,8 @@ const imageSize = computed(() => {
   switch (props.size) {
     case "sm":
       return "md:w-12 md:h-12";
+    case "reminder":
+      return "relative w-8 h-8 md:w-12 md:h-12";
     case "md":
       return "md:w-20 md:h-20";
     case "lg":
@@ -159,10 +173,27 @@ const alignmentImage = computed(() => {
     return "/1x1.png";
   }
 });
+
+const reminderTextSize = computed(() => {
+  // We're basing the size on the number of characters in the reminder text
+  if (props.reminderText?.length) {
+    if (props.reminderText.length > 15) {
+      return "text-[0.45rem] md:text-[0.5rem]";
+    }
+    if (props.reminderText.length > 10) {
+      return "leading-4 text-[0.5rem] md:text-xs";
+    }
+  }
+  return "text-[0.5rem] md:text-xs";
+});
 </script>
 
 <style scoped>
 .token {
   background-image: url("/img/token-bg.png");
+
+  &.reminder {
+    background-image: url("/img/reminder-token.webp");
+  }
 }
 </style>

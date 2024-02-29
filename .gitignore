@@ -27,3 +27,5 @@ logs
 
 cypress/videos
 cypress/screenshots
+
+reminders.json

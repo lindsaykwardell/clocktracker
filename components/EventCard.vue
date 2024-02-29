@@ -6,7 +6,7 @@
       class="w-full md:w-[600px] object-cover h-[150px] md:h-[250px]"
     />
     <div class="p-3 flex flex-col gap-2">
-      <div class="flex text-stone-400">
+      <div class="flex flex-col md:flex-row text-stone-400">
         <div class="flex-grow">
           <ClientOnly>
             <time
@@ -28,21 +28,19 @@
         class="post text-sm md:text-base"
         :source="event.description"
       />
-      <div class="flex justify-between gap-2 items-center">
+      <div class="flex flex-col md:flex-row justify-between gap-2 items-center">
         <div>
-          <template v-if="event.player_count">
-            <span class="text-stone-400">
-              {{ registeredPlayerCount }}/{{ event.player_count }} players
-              registered
-            </span>
-            <template v-if="waitlistCount > 0">
-              <span class="text-stone-400">({{ waitlistCount }} waiting)</span>
+          <span class="text-stone-400">
+            <template v-if="event.player_count">
+              {{ registeredPlayerCount }}/{{ event.player_count }}
             </template>
-          </template>
-          <template v-else>
-            <span class="text-stone-400">
-              {{ registeredPlayerCount }} players registered
-            </span>
+            <template v-else>
+              {{ registeredPlayerCount }}
+            </template>
+            players registered
+          </span>
+          <template v-if="waitlistCount > 0">
+            <span class="text-stone-400">({{ waitlistCount }} waiting)</span>
           </template>
         </div>
         <slot name="register" :event="event" />
@@ -75,11 +73,14 @@ const registeredPlayerCount = computed(() => {
 const waitlistCount = computed(() => {
   const count = props.event.registered_players.length;
   const max = props.event.player_count;
+  const waitlistedPlayers = props.event.waitlists.flatMap(
+    (w) => w.users
+  ).length;
 
   if (max && count >= max) {
-    return count - max;
+    return count - max + waitlistedPlayers;
   } else {
-    return 0;
+    return 0 + waitlistedPlayers;
   }
 });
 

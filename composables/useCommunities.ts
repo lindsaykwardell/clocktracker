@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
-import { FetchStatus } from "./useFetchStatus";
-import { User } from "./useUsers";
+import type { FetchStatus } from "./useFetchStatus";
+import type { User } from "./useUsers";
 
 export type Community = {
   id: number;
@@ -65,6 +65,20 @@ export type Event = {
       username: string;
       avatar: string | null;
     };
+  }[];
+  waitlists: {
+    id: number;
+    name: string;
+    default: boolean;
+    users: {
+      name: string;
+      created_at: string;
+      user: {
+        user_id: string;
+        username: string;
+        avatar: string | null;
+      };
+    }[];
   }[];
 };
 

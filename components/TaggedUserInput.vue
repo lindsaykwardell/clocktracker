@@ -8,7 +8,7 @@
       />
       <ComboboxOptions
         v-if="filteredPeople.length > 0"
-        class="absolute text-sm bg-stone-900 border border-stone-500 max-h-[150px] min-w-[200px] w-full overflow-y-scroll overflow-x-hidden"
+        class="absolute text-sm bg-stone-900 border border-stone-500 max-h-[150px] min-w-[200px] w-full overflow-y-scroll overflow-x-hidden z-10"
         :class="{
           'bottom-8': renderListOnTop,
         }"
@@ -30,7 +30,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
 import naturalOrder from "natural-order";
 import {
   Combobox,
@@ -40,7 +39,12 @@ import {
 } from "@headlessui/vue";
 
 const props = defineProps<{
-  users: User[];
+  users: {
+    username: string;
+    display_name?: string;
+    user_id?: string | null;
+    avatar?: string | null;
+  }[];
   value: string;
   renderListOnTop?: boolean;
   inputClass?: string;

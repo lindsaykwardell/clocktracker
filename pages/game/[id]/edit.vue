@@ -2,7 +2,9 @@
   <StandardTemplate>
     <section class="py-6">
       <h2 class="font-dumbledor text-4xl text-center">Edit Game</h2>
-      <GameEditor :game="game" @submit="submitGame" :inFlight="inFlight" />
+      <ClientOnly>
+        <GameEditor :game="game" @submit="submitGame" :inFlight="inFlight" />
+      </ClientOnly>
     </section>
   </StandardTemplate>
 </template>
@@ -59,6 +61,21 @@ const game = reactive<{
     };
     related_role?: { token_url: string };
   }[];
+  demon_bluffs: {
+    name: string;
+    role_id: string | null;
+    role?: {
+      token_url: string;
+      type: string;
+    };
+  }[];
+  fabled: {
+    name: string;
+    role_id: string | null;
+    role?: {
+      token_url: string;
+    };
+  }[];
   win: WinStatus;
   notes: string;
   image_urls: string[];
@@ -69,6 +86,7 @@ const game = reactive<{
       alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
       order: number;
       is_dead: boolean;
+      used_ghost_vote: boolean;
       role_id: string | null;
       role?: {
         token_url: string;
@@ -79,13 +97,14 @@ const game = reactive<{
       related_role?: { token_url: string };
       player_name: string;
       player_id?: string | null;
+      reminders: { reminder: string; token_url: string }[];
     }[];
   }[];
   ignore_for_stats: boolean;
   tags: string[];
   privacy: string;
 }>({
-  date: dayjs(savedGame.data.value?.date).format("YYYY-MM-DD"),
+  date: savedGame.data.value?.date.toString().slice(0, 10) || "",
   script: savedGame.data.value?.script || "",
   script_id: savedGame.data.value?.script_id || null,
   storyteller: savedGame.data.value?.storyteller || "",
@@ -120,6 +139,23 @@ const game = reactive<{
       related_role_id: null,
     },
   ],
+  demon_bluffs:
+    savedGame.data.value?.demon_bluffs.map((demon_bluff) => ({
+      name: demon_bluff.name,
+      role_id: demon_bluff.role_id,
+      role: demon_bluff.role || {
+        token_url: "/1x1.png",
+        type: "",
+      },
+    })) || [],
+  fabled:
+    savedGame.data.value?.fabled.map((fabled) => ({
+      name: fabled.name,
+      role_id: fabled.role_id,
+      role: fabled.role || {
+        token_url: "/1x1.png",
+      },
+    })) || [],
   win: savedGame.data.value?.win || WinStatus.NOT_RECORDED,
   notes: savedGame.data.value?.notes || "",
   image_urls: savedGame.data.value?.image_urls || [],
@@ -131,6 +167,7 @@ const game = reactive<{
           alignment: token.alignment,
           order: token.order,
           is_dead: token.is_dead,
+          used_ghost_vote: token.used_ghost_vote,
           role_id: token.role_id,
           role: token.role,
           related_role_id: token.related_role_id,
@@ -139,6 +176,10 @@ const game = reactive<{
             (token.role ? { token_url: "/1x1.png" } : undefined),
           player_name: token.player_name,
           player_id: token.player_id,
+          reminders: token.reminders.map((reminder) => ({
+            reminder: reminder.reminder,
+            token_url: reminder.token_url,
+          })),
         })),
       }))
     : [
@@ -162,6 +203,14 @@ const formattedGame = computed(() => ({
     related: character.related,
     role_id: character.role_id,
     related_role_id: character.related_role_id,
+  })),
+  demon_bluffs: game.demon_bluffs.map((demon_bluff) => ({
+    name: demon_bluff.name,
+    role_id: demon_bluff.role_id,
+  })),
+  fabled: game.fabled.map((fabled) => ({
+    name: fabled.name,
+    role_id: fabled.role_id,
   })),
 }));
 

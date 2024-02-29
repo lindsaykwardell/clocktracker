@@ -1,7 +1,8 @@
 import UAParser from "ua-parser-js";
-import { GameRecord, WinStatus } from "./useGames";
+import { WinStatus } from "./useGames";
+import type { GameRecord } from "./useGames";
 import dayjs from "dayjs";
-import { FetchStatus } from "./useFetchStatus";
+import type { FetchStatus } from "./useFetchStatus";
 
 export const useBGStats = (g: ComputedRef<FetchStatus<GameRecord>>) => {
   const user = useSupabaseUser();
