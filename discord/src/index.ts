@@ -1,137 +1,117 @@
 // use dotenv to load environment variables
 import "dotenv/config";
 import {
+  CacheType,
   Client,
+  Collection,
+  CommandInteraction,
+  Events,
   GatewayIntentBits,
   REST,
   Routes,
-  Events,
-  ComponentType,
 } from "discord.js";
-import { PrismaClient } from "@prisma/client";
-import { eventEmbed } from "./eventEmbed";
-import { SupabaseClient } from "@supabase/supabase-js";
+import fs from "fs";
+import path from "path";
 
-const prisma = new PrismaClient();
-const supabase = new SupabaseClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_KEY
-);
+type Command = {
+  data: { name: string; [key: string]: any };
+  execute: (interaction: CommandInteraction<CacheType>) => Promise<void>;
+};
 
 const main = async () => {
-  const commands = [
-    {
-      name: "ping",
-      description: "Replies with Pong!",
-    },
-    {
-      name: "user-count",
-      description: "Replies with the number of users in the server",
-    },
-    {
-      name: "next-event",
-      description: "Replies with the next event for this server",
-    },
-    {
-      name: "poll",
-      description: "Test reactions",
-    },
-  ];
+  const client = new Client({
+    intents: [GatewayIntentBits.Guilds],
+  }) as Client<boolean> & {
+    commands: Collection<string, Command>;
+  };
 
-  const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
+  client.commands = new Collection();
 
-  try {
-    console.log("Started refreshing application (/) commands.");
+  const commands = [];
+  const foldersPath = path.join(__dirname, "commands");
+  const commandFolders = fs.readdirSync(foldersPath);
 
-    await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), {
-      body: commands,
-    });
-
-    console.log("Successfully reloaded application (/) commands.");
-  } catch (error) {
-    console.error(error);
+  for (const folder of commandFolders) {
+    const commandsPath = path.join(foldersPath, folder);
+    const commandFiles = fs
+      .readdirSync(commandsPath)
+      .filter((file) => file.endsWith(".ts"));
+    for (const file of commandFiles) {
+      const filePath = path.join(commandsPath, file);
+      const command: Command = await import(filePath);
+      // Set a new item in the Collection with the key as the command name and the value as the exported module
+      if ("data" in command && "execute" in command) {
+        client.commands.set(command.data.name, command);
+        commands.push(command.data.toJSON());
+      } else {
+        console.log(
+          `[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`
+        );
+      }
+    }
   }
 
-  const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+  // Construct and prepare an instance of the REST module
+  const rest = new REST().setToken(process.env.TOKEN);
 
-  client.on(Events.ClientReady, () => {
-    console.log(`Logged in as ${client.user.tag}!`);
-  });
+  // and deploy your commands!
+  (async () => {
+    try {
+      console.log(
+        `Started refreshing ${commands.length} application (/) commands.`
+      );
 
-  client.on(Events.Error, console.error);
+      // The put method is used to fully refresh all commands in the guild with the current set
+      const data = await rest.put(
+        Routes.applicationGuildCommands(
+          process.env.CLIENT_ID,
+          process.env.DEV_GUILD_ID
+        ),
+        { body: commands }
+      );
+
+      console.log(
+        // @ts-ignore
+        `Successfully reloaded ${data.length} application (/) commands.`
+      );
+    } catch (error) {
+      // And of course, make sure you catch and log any errors!
+      console.error(error);
+    }
+  })();
 
   client.on(Events.InteractionCreate, async (interaction) => {
     if (!interaction.isChatInputCommand()) return;
 
-    if (interaction.commandName === "ping") {
-      await interaction.reply("Pong!");
+    const command = client.commands.get(interaction.commandName);
+
+    if (!command) {
+      console.error(
+        `No command matching ${interaction.commandName} was found.`
+      );
+      return;
     }
 
-    if (interaction.commandName === "user-count") {
-      const users = await prisma.userSettings.count();
-      await interaction.reply(`There are ${users} users in the server!`);
-    }
-
-    if (interaction.commandName === "next-event") {
-      // Find the user in the Supabase database where the discord ID matches the user ID
-      // const supabaseUser = await supabase
-      //   .from("users")
-      //   .select("*")
-      //   .eq("discord_id", interaction.user.id)
-      //   .single();
-
-      // console.log(supabaseUser);
-
-      const community = await prisma.community.findFirst({
-        where: {
-          discord_server_id: interaction.guildId,
-        },
-      });
-
-      if (!community) {
-        await interaction.reply("There is no community for this server!");
-        return;
-      }
-
-      const event = await prisma.event.findFirst({
-        where: {
-          community_id: community.id,
-          start: {
-            gt: new Date(),
-          },
-        },
-        include: {
-          EventAttendee: true,
-        },
-        orderBy: {
-          start: "asc",
-        },
-      });
-
-      if (!event) {
-        await interaction.reply("There are no upcoming events!");
-        return;
+    try {
+      await command.execute(interaction);
+    } catch (error) {
+      console.error(error);
+      if (interaction.replied || interaction.deferred) {
+        await interaction.followUp({
+          content: "There was an error while executing this command!",
+          ephemeral: true,
+        });
       } else {
-        await interaction.reply(
-          `The next event is ${event.title} on ${event.start}. https://clocktracker.app/community/${community.slug}/event/${event.id}`
-        );
+        await interaction.reply({
+          content: "There was an error while executing this command!",
+          ephemeral: true,
+        });
       }
-
-      const embed = eventEmbed(event, community);
-      const message = await interaction.channel.send({ embeds: [embed] });
-
-      // Add emoji reactions to the message
-      await message.react("👍");
-      await message.react("👎");
-
-      const collector = message.createReactionCollector();
-
-      collector.on("collect", (reaction, user) => {
-        interaction.channel.send(
-          `${user.tag} reacted with ${reaction.emoji.name}`
-        );
-      });
     }
+  });
+
+  client.once(Events.ClientReady, (readyClient) => {
+    console.log(`Ready! Logged in as ${readyClient.user.tag}`);
   });
 
   client.login(process.env.TOKEN);
@@ -142,6 +122,4 @@ main()
     console.error(e);
     process.exit(1);
   })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+  .finally(async () => {});
