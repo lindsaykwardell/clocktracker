@@ -22,8 +22,5 @@
     "prisma": "^5.10.2",
     "tsx": "^4.7.1",
     "typescript": "^5.3.3"
-  },
-  "prisma": {
-    "schema": "../prisma/schema.prisma"
   }
 }
