@@ -40,36 +40,94 @@ export async function execute(interaction: CommandInteraction<CacheType>) {
 
   const { embed, row } = await buildEmbed(event_id);
 
-  const response = await interaction.reply({
+  await interaction.reply({
     embeds: [embed],
     // @ts-ignore
     components: [row],
   });
+}
 
-  setInterval(async () => {
-    const updated = await buildEmbed(event_id);
+export async function handleRegisterButtonClick(i) {
+  const user: UserSettings | null = await getClocktrackerUser(i.user);
+  const selection = i.customId;
 
-    response.edit({
-      embeds: [updated.embed],
-      // @ts-ignore
-      components: [updated.row],
-    });
-  }, 1000 * 60 * 5);
-
-  const collector = response.createMessageComponentCollector({
-    componentType: ComponentType.Button,
+  const event_id: string = i.message.embeds[0].footer.text;
+  const event = await prisma.event.findUnique({
+    where: {
+      id: event_id,
+    },
+    include: {
+      waitlists: {
+        include: {
+          users: true,
+        },
+      },
+    },
   });
 
-  collector.on("collect", async (i) => {
-    const user: UserSettings | null = await getClocktrackerUser(i.user);
-    const selection = i.customId;
+  if (!event) {
+    return i.reply({
+      content: "No event found with that ID",
+      ephemeral: true,
+    });
+  }
 
-    const name = user.display_name || i.user.username;
-    const user_id = user?.user_id;
+  const name = user.display_name || i.user.username;
+  const user_id = user?.user_id;
 
-    if (selection === "register") {
-      if (user_id) {
-        const registered = await prisma.eventAttendee.findFirst({
+  if (selection === "register") {
+    if (user_id) {
+      const registered = await prisma.eventAttendee.findFirst({
+        where: {
+          event_id: event.id,
+          user_id: user_id,
+        },
+      });
+
+      await prisma.eventWaitlistAttendee.deleteMany({
+        where: {
+          waitlist: {
+            event_id: event.id,
+          },
+          user_id: user_id,
+        },
+      });
+
+      if (registered) {
+        await prisma.eventAttendee.deleteMany({
+          where: {
+            event_id: event.id,
+            user_id: user_id,
+          },
+        });
+      } else {
+        await prisma.eventAttendee.create({
+          data: {
+            event_id: event.id,
+            user_id: user_id,
+            name,
+          },
+        });
+      }
+    } else {
+      await i.reply({
+        content: "You must link your Clocktracker account to register",
+        ephemeral: true,
+      });
+    }
+  }
+
+  if (event.waitlists) {
+    for (const waitlist of event.waitlists) {
+      if (+selection === waitlist.id) {
+        const waitlisted = await prisma.eventWaitlistAttendee.findFirst({
+          where: {
+            waitlist_id: waitlist.id,
+            user_id: user_id,
+          },
+        });
+
+        await prisma.eventAttendee.deleteMany({
           where: {
             event_id: event.id,
             user_id: user_id,
@@ -81,90 +139,39 @@ export async function execute(interaction: CommandInteraction<CacheType>) {
             waitlist: {
               event_id: event.id,
             },
+            waitlist_id: {
+              not: waitlist.id,
+            },
             user_id: user_id,
           },
         });
 
-        if (registered) {
-          await prisma.eventAttendee.deleteMany({
-            where: {
-              event_id: event.id,
-              user_id: user_id,
-            },
-          });
-        } else {
-          await prisma.eventAttendee.create({
-            data: {
-              event_id: event.id,
-              user_id: user_id,
-              name,
-            },
-          });
-        }
-      } else {
-        await i.reply({
-          content: "You must link your Clocktracker account to register",
-          ephemeral: true,
-        });
-      }
-    }
-
-    if (event.waitlists) {
-      for (const waitlist of event.waitlists) {
-        if (+selection === waitlist.id) {
-          const waitlisted = await prisma.eventWaitlistAttendee.findFirst({
+        if (waitlisted) {
+          await prisma.eventWaitlistAttendee.deleteMany({
             where: {
               waitlist_id: waitlist.id,
               user_id: user_id,
             },
           });
-
-          await prisma.eventAttendee.deleteMany({
-            where: {
-              event_id: event.id,
+        } else {
+          await prisma.eventWaitlistAttendee.create({
+            data: {
+              waitlist_id: waitlist.id,
               user_id: user_id,
+              name,
             },
           });
-
-          await prisma.eventWaitlistAttendee.deleteMany({
-            where: {
-              waitlist: {
-                event_id: event.id,
-              },
-              waitlist_id: {
-                not: waitlist.id,
-              },
-              user_id: user_id,
-            },
-          });
-
-          if (waitlisted) {
-            await prisma.eventWaitlistAttendee.deleteMany({
-              where: {
-                waitlist_id: waitlist.id,
-                user_id: user_id,
-              },
-            });
-          } else {
-            await prisma.eventWaitlistAttendee.create({
-              data: {
-                waitlist_id: waitlist.id,
-                user_id: user_id,
-                name,
-              },
-            });
-          }
         }
       }
     }
+  }
 
-    const updated = await buildEmbed(event_id);
+  const updated = await buildEmbed(event_id);
 
-    i.update({
-      embeds: [updated.embed],
-      // @ts-ignore
-      components: [updated.row],
-    });
+  i.update({
+    embeds: [updated.embed],
+    // @ts-ignore
+    components: [updated.row],
   });
 }
 
@@ -196,7 +203,8 @@ async function buildEmbed(event_id: string) {
       url: `https://clocktracker.app/community/${event.community.slug}`,
     })
     // .setThumbnail(`https://clocktracker.app${event.community.icon}`)
-    .setTimestamp(event.start);
+    .setTimestamp(event.start)
+    .setFooter({ text: event.id });
 
   if (event.image) {
     embed.setImage(event.image);
