@@ -27,7 +27,6 @@ export const data = new SlashCommandBuilder()
 
 export async function execute(interaction: CommandInteraction<CacheType>) {
   const event_id = interaction.options.get("id").value as string;
-  console.log(event_id);
 
   const event = await findEvent(event_id);
 
@@ -40,10 +39,18 @@ export async function execute(interaction: CommandInteraction<CacheType>) {
 
   const { embed, row } = await buildEmbed(event_id);
 
-  await interaction.reply({
+  const response = await interaction.reply({
     embeds: [embed],
     // @ts-ignore
     components: [row],
+  });
+
+  await prisma.eventDiscordPost.create({
+    data: {
+      event_id: event.id,
+      channel_id: interaction.channel.id,
+      message_id: response.id,
+    },
   });
 }
 
