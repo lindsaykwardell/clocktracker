@@ -193,6 +193,7 @@ enum LocationType {
 
 model UserSettings {
   user_id                 String                  @id
+  discord_id              String?                 @unique
   username                String                  @unique
   display_name            String
   finished_welcome        Boolean                 @default(false)
