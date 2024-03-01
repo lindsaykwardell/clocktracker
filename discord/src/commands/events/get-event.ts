@@ -29,84 +29,7 @@ export async function execute(interaction: CommandInteraction<CacheType>) {
   const event_id = interaction.options.get("id").value as string;
   console.log(event_id);
 
-  const event = await prisma.event.findUnique({
-    where: {
-      id: event_id,
-      community: {
-        // slug,
-        // banned_users: {
-        //   none: {
-        //     user_id: me?.id || "",
-        //   },
-        // },
-        OR: [
-          {
-            is_private: false,
-          },
-          // {
-          //   members: {
-          //     some: {
-          //       user_id: me?.id || "",
-          //     },
-          //   },
-          //   is_private: true,
-          // },
-        ],
-      },
-    },
-    include: {
-      registered_players: {
-        select: {
-          name: true,
-          created_at: true,
-          user: {
-            select: {
-              user_id: true,
-              username: true,
-              avatar: true,
-            },
-          },
-        },
-        orderBy: {
-          created_at: "asc",
-        },
-      },
-      waitlists: {
-        select: {
-          id: true,
-          name: true,
-          default: true,
-          created_at: true,
-          users: {
-            select: {
-              name: true,
-              created_at: true,
-              user: {
-                select: {
-                  user_id: true,
-                  username: true,
-                  avatar: true,
-                },
-              },
-            },
-            orderBy: {
-              created_at: "asc",
-            },
-          },
-        },
-        orderBy: {
-          created_at: "asc",
-        },
-      },
-      community: {
-        select: {
-          name: true,
-          slug: true,
-          icon: true,
-        },
-      },
-    },
-  });
+  const event = await findEvent(event_id);
 
   if (!event) {
     return interaction.reply({
@@ -115,94 +38,23 @@ export async function execute(interaction: CommandInteraction<CacheType>) {
     });
   }
 
-  const embed = new EmbedBuilder()
-    .setColor(0x0099ff)
-    .setTitle(event.title)
-    .setURL(
-      `https://clocktracker.app/community/${event.community.slug}/event/${event.id}`
-    )
-    .setAuthor({
-      name: event.community.name,
-      iconURL: `https://clocktracker.app${event.community.icon}`,
-      url: `https://clocktracker.app/community/${event.community.slug}`,
-    })
-    // .setThumbnail(`https://clocktracker.app${event.community.icon}`)
-    .setTimestamp(event.start);
-
-  if (event.image) {
-    embed.setImage(event.image);
-  }
-
-  if (event.description) {
-    embed.setDescription(event.description);
-  }
-
-  const fields = [
-    {
-      name:
-        `Players (${
-          event.player_count &&
-          event.registered_players.length > event.player_count
-            ? event.player_count
-            : event.registered_players.length
-        }` +
-        (event.player_count ? `/${event.player_count}` : "") +
-        ")",
-      value: event.registered_players.map((p) => p.name).join("\n") || "None",
-      inline: true,
-    },
-  ];
-
-  if (
-    event.player_count &&
-    event.registered_players.length > event.player_count
-  ) {
-    fields.push({
-      name: `Waitlist (${
-        event.registered_players.length - event.player_count
-      })`,
-      value:
-        event.registered_players
-          .slice(event.player_count)
-          .map((p) => p.name)
-          .join("\n") || "None",
-      inline: true,
-    });
-  }
-
-  if (event.waitlists) {
-    for (const waitlist of event.waitlists) {
-      fields.push({
-        name: `${waitlist.name} (${waitlist.users.length})`,
-        value: waitlist.users.map((u) => u.name).join("\n") || "None",
-        inline: true,
-      });
-    }
-  }
-
-  embed.addFields(fields);
-
-  const registerButton = new ButtonBuilder()
-    .setCustomId("register")
-    .setLabel("Register")
-    .setStyle(ButtonStyle.Primary);
-
-  const row = new ActionRowBuilder().addComponents(registerButton);
-
-  for (const waitlist of event.waitlists) {
-    const waitlistButton = new ButtonBuilder()
-      .setCustomId(`${waitlist.id}`)
-      .setLabel(`${waitlist.name}`)
-      .setStyle(ButtonStyle.Secondary);
-
-    row.addComponents(waitlistButton);
-  }
+  const { embed, row } = await buildEmbed(event_id);
 
   const response = await interaction.reply({
     embeds: [embed],
     // @ts-ignore
     components: [row],
   });
+
+  setInterval(async () => {
+    const updated = await buildEmbed(event_id);
+
+    response.edit({
+      embeds: [updated.embed],
+      // @ts-ignore
+      components: [updated.row],
+    });
+  }, 1000 * 60 * 5);
 
   const collector = response.createMessageComponentCollector({
     componentType: ComponentType.Button,
@@ -306,10 +158,12 @@ export async function execute(interaction: CommandInteraction<CacheType>) {
       }
     }
 
+    const updated = await buildEmbed(event_id);
+
     i.update({
-      embeds: [await rebuildEmbed(event.id)],
+      embeds: [updated.embed],
       // @ts-ignore
-      components: [row],
+      components: [updated.row],
     });
   });
 }
@@ -324,8 +178,100 @@ async function getClocktrackerUser(user: User): Promise<UserSettings | null> {
   return clocktrackerUser;
 }
 
-async function rebuildEmbed(event_id: string) {
-  const event = await prisma.event.findUnique({
+async function buildEmbed(event_id: string) {
+  const event = await findEvent(event_id);
+  if (!event) {
+    throw new Error("No event found with that ID");
+  }
+
+  const embed = new EmbedBuilder()
+    .setColor(0x0099ff)
+    .setTitle(event.title)
+    .setURL(
+      `https://clocktracker.app/community/${event.community.slug}/event/${event.id}`
+    )
+    .setAuthor({
+      name: event.community.name,
+      iconURL: `https://clocktracker.app${event.community.icon}`,
+      url: `https://clocktracker.app/community/${event.community.slug}`,
+    })
+    // .setThumbnail(`https://clocktracker.app${event.community.icon}`)
+    .setTimestamp(event.start);
+
+  if (event.image) {
+    embed.setImage(event.image);
+  }
+
+  if (event.description) {
+    embed.setDescription(event.description);
+  }
+
+  const fields = [
+    {
+      name:
+        `Players (${
+          event.player_count &&
+          event.registered_players.length > event.player_count
+            ? event.player_count
+            : event.registered_players.length
+        }` +
+        (event.player_count ? `/${event.player_count}` : "") +
+        ")",
+      value: event.registered_players.map((p) => p.name).join("\n") || "None",
+      inline: true,
+    },
+  ];
+
+  if (
+    event.player_count &&
+    event.registered_players.length > event.player_count
+  ) {
+    fields.push({
+      name: `Waitlist (${
+        event.registered_players.length - event.player_count
+      })`,
+      value:
+        event.registered_players
+          .slice(event.player_count)
+          .map((p) => p.name)
+          .join("\n") || "None",
+      inline: true,
+    });
+  }
+
+  if (event.waitlists) {
+    for (const waitlist of event.waitlists) {
+      fields.push({
+        name: `${waitlist.name} (${waitlist.users.length})`,
+        value: waitlist.users.map((u) => u.name).join("\n") || "None",
+        inline: true,
+      });
+    }
+  }
+
+  embed.addFields(fields);
+
+  const registerButton = new ButtonBuilder()
+    .setCustomId("register")
+    .setLabel("Register")
+    .setStyle(ButtonStyle.Primary);
+
+  const row = new ActionRowBuilder().addComponents(registerButton);
+
+  for (const waitlist of event.waitlists) {
+    const waitlistButton = new ButtonBuilder()
+      .setCustomId(`${waitlist.id}`)
+      .setLabel(`${waitlist.name}`)
+      .setStyle(ButtonStyle.Secondary);
+
+    row.addComponents(waitlistButton);
+  }
+
+  return { embed, row };
+}
+
+function findEvent(event_id: string) {
+  return prisma.event.findUnique({
     where: {
       id: event_id,
       community: {
@@ -403,77 +349,4 @@ async function rebuildEmbed(event_id: string) {
       },
     },
   });
-
-  if (!event) {
-    throw new Error("No event found with that ID");
-  }
-
-  const embed = new EmbedBuilder()
-    .setColor(0x0099ff)
-    .setTitle(event.title)
-    .setURL(
-      `https://clocktracker.app/community/${event.community.slug}/event/${event.id}`
-    )
-    .setAuthor({
-      name: event.community.name,
-      iconURL: `https://clocktracker.app${event.community.icon}`,
-      url: `https://clocktracker.app/community/${event.community.slug}`,
-    })
-    // .setThumbnail(`https://clocktracker.app${event.community.icon}`)
-    .setTimestamp(event.start);
-
-  if (event.image) {
-    embed.setImage(event.image);
-  }
-
-  if (event.description) {
-    embed.setDescription(event.description);
-  }
-
-  const fields = [
-    {
-      name:
-        `Players (${
-          event.player_count &&
-          event.registered_players.length > event.player_count
-            ? event.player_count
-            : event.registered_players.length
-        }` +
-        (event.player_count ? `/${event.player_count}` : "") +
-        ")",
-      value: event.registered_players.map((p) => p.name).join("\n") || "None",
-      inline: true,
-    },
-  ];
-
-  if (
-    event.player_count &&
-    event.registered_players.length > event.player_count
-  ) {
-    fields.push({
-      name: `Waitlist (${
-        event.registered_players.length - event.player_count
-      })`,
-      value:
-        event.registered_players
-          .slice(event.player_count)
-          .map((p) => p.name)
-          .join("\n") || "None",
-      inline: true,
-    });
-  }
-
-  if (event.waitlists) {
-    for (const waitlist of event.waitlists) {
-      fields.push({
-        name: `${waitlist.name} (${waitlist.users.length})`,
-        value: waitlist.users.map((u) => u.name).join("\n") || "None",
-        inline: true,
-      });
-    }
-  }
-
-  embed.addFields(fields);
-
-  return embed;
 }

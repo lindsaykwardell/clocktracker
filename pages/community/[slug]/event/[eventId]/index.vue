@@ -203,6 +203,20 @@ const event = ref<EventView>(
   await $fetch<EventView>(`/api/community/${slug}/event/${eventId}`)
 );
 
+let poll: NodeJS.Timeout | null = null;
+
+onMounted(() => {
+  poll = setInterval(async () => {
+    event.value = await $fetch<EventView>(
+      `/api/community/${slug}/event/${eventId}`
+    );
+  }, 1000 * 60 * 5);
+});
+
+onUnmounted(() => {
+  clearInterval(poll!);
+});
+
 const alreadyRegistered = computed(() => {
   const me = users.getUserById(user.value?.id);
 
