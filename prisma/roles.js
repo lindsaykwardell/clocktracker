@@ -149,6 +149,7 @@ const demons = [
   "Zombuul",
   "Ojo",
   "Kazali",
+  "Yaggababble",
 ];
 
 const travelers = [
@@ -862,6 +863,18 @@ const reminders = [
   {
     role_id: "village_idiot",
     reminder: "Drunk",
+  },
+  {
+    role_id: "yaggababble",
+    reminder: "Dead",
+  },
+  {
+    role_id: "yaggababble",
+    reminder: "Dead",
+  },
+  {
+    role_id: "yaggababble",
+    reminder: "Dead",
   },
   {
     role_id: "angel",
