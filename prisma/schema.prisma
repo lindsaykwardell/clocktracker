@@ -337,21 +337,32 @@ model CommunityPost {
 }
 
 model Event {
-  id                 String          @id @default(uuid())
-  created_at         DateTime        @default(now()) @db.Timestamptz(6)
-  start              DateTime        @default(now()) @db.Timestamptz(6)
-  end                DateTime        @default(dbgenerated("NOW() + interval '1.5 hours'")) @db.Timestamptz(6)
+  id                 String             @id @default(uuid())
+  created_at         DateTime           @default(now()) @db.Timestamptz(6)
+  start              DateTime           @default(now()) @db.Timestamptz(6)
+  end                DateTime           @default(dbgenerated("NOW() + interval '1.5 hours'")) @db.Timestamptz(6)
   title              String
   description        String
   player_count       Int?
-  location_type      LocationType    @default(ONLINE)
+  location_type      LocationType       @default(ONLINE)
   location           String
   image              String?
   registered_players EventAttendee[]
-  community          Community?      @relation(fields: [community_id], references: [id])
+  community          Community?         @relation(fields: [community_id], references: [id])
   community_id       Int?
-  who_can_register   WhoCanRegister  @default(COMMUNITY_MEMBERS)
+  who_can_register   WhoCanRegister     @default(COMMUNITY_MEMBERS)
   waitlists          EventWaitlist[]
+  discord_posts      EventDiscordPost[]
+}
+
+model EventDiscordPost {
+  event      Event    @relation(fields: [event_id], references: [id])
+  event_id   String
+  message_id String
+  channel_id String
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+
+  @@id([channel_id, message_id])
 }
 
 enum WhoCanRegister {

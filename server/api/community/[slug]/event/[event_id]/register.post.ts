@@ -1,5 +1,6 @@
 import { PrismaClient, WhoCanRegister } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
+import { fetchEventAndUpdateDiscord } from "~/server/utils/fetchEventAndUpdateDiscord";
 
 const prisma = new PrismaClient();
 
@@ -55,6 +56,8 @@ export default defineEventHandler(async (handler) => {
           default: true,
         },
       },
+      discord_posts: true,
+      community: true,
     },
   });
 
@@ -129,86 +132,5 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  return prisma.event.findUnique({
-    where: {
-      id: event_id,
-      community: {
-        slug,
-      },
-      OR: [
-        {
-          community: {
-            members: {
-              some: {
-                user_id: me?.id || "",
-              },
-            },
-          },
-          who_can_register: WhoCanRegister.COMMUNITY_MEMBERS,
-        },
-        {
-          who_can_register: WhoCanRegister.ANYONE,
-        },
-      ],
-    },
-    select: {
-      id: true,
-      title: true,
-      description: true,
-      start: true,
-      end: true,
-      location: true,
-      location_type: true,
-      player_count: true,
-      image: true,
-      registered_players: {
-        select: {
-          name: true,
-          created_at: true,
-          user: {
-            select: {
-              user_id: true,
-              username: true,
-              avatar: true,
-            },
-          },
-        },
-        orderBy: {
-          created_at: "asc",
-        },
-      },
-      waitlists: {
-        select: {
-          id: true,
-          name: true,
-          default: true,
-          created_at: true,
-          users: {
-            select: {
-              name: true,
-              created_at: true,
-              user: {
-                select: {
-                  user_id: true,
-                  username: true,
-                  avatar: true,
-                },
-              },
-            },
-            orderBy: {
-              created_at: "asc",
-            },
-          },
-        },
-        orderBy: {
-          created_at: "asc",
-        },
-      },
-      community: {
-        select: {
-          name: true,
-        },
-      },
-    },
-  });
+  return fetchEventAndUpdateDiscord(event_id);
 });
