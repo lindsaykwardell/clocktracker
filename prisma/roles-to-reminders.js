@@ -14,8 +14,8 @@ const roles = [
     name: "Dawn",
     firstNightReminder: "Wait for a few seconds. End the Night Phase.",
     otherNightReminder: "Wait for a few seconds. End the Night Phase.",
-    firstNight: 64,
-    otherNight: 83,
+    firstNight: 65,
+    otherNight: 84,
   },
   {
     id: "minioninfo",
@@ -24,7 +24,7 @@ const roles = [
     team: "minion",
     firstNightReminder:
       "If there are 7 or more players, wake all Minions:\n\tShow the *THIS IS THE DEMON* token. Point to the Demon.\n\tShow the *THESE ARE YOUR MINIONS* token. Point to the other Minions.",
-    firstNight: 11,
+    firstNight: 12,
     otherNight: 0,
   },
   {
@@ -34,7 +34,7 @@ const roles = [
     team: "demon",
     firstNightReminder:
       "If there are 7 or more players, wake the Demon:\n\tShow the *THESE ARE YOUR MINIONS* token. Point to all Minions.\n\tShow the *THESE CHARACTERS ARE NOT IN PLAY* token. Show 3 not-in-play good character tokens.",
-    firstNight: 14,
+    firstNight: 15,
     otherNight: 0,
   },
   {
@@ -48,7 +48,7 @@ const roles = [
     reminders: ["Townsfolk", "Wrong"],
     setup: false,
     ability: "You start knowing that 1 of 2 players is a particular Townsfolk.",
-    firstNight: 39,
+    firstNight: 40,
     otherNight: 0,
   },
   {
@@ -63,7 +63,7 @@ const roles = [
     setup: false,
     ability:
       "You start knowing that 1 of 2 players is a particular Outsider. (Or that zero are in play.)",
-    firstNight: 40,
+    firstNight: 41,
     otherNight: 0,
   },
   {
@@ -77,7 +77,7 @@ const roles = [
     reminders: ["Minion", "Wrong"],
     setup: false,
     ability: "You start knowing that 1 of 2 players is a particular Minion.",
-    firstNight: 41,
+    firstNight: 42,
     otherNight: 0,
   },
   {
@@ -90,7 +90,7 @@ const roles = [
     reminders: [],
     setup: false,
     ability: "You start knowing how many pairs of evil players there are.",
-    firstNight: 42,
+    firstNight: 43,
     otherNight: 0,
   },
   {
@@ -104,8 +104,8 @@ const roles = [
     setup: false,
     ability:
       "Each night, you learn how many of your 2 alive neighbors are evil.",
-    firstNight: 43,
-    otherNight: 62,
+    firstNight: 44,
+    otherNight: 63,
   },
   {
     id: "fortuneteller",
@@ -120,8 +120,8 @@ const roles = [
     setup: false,
     ability:
       "Each night, choose 2 players: you learn if either is a Demon. There is a good player that registers as a Demon to you.",
-    firstNight: 44,
-    otherNight: 63,
+    firstNight: 45,
+    otherNight: 64,
   },
   {
     id: "undertaker",
@@ -135,7 +135,7 @@ const roles = [
     setup: false,
     ability: "Each night*, you learn which character died by execution today.",
     firstNight: 0,
-    otherNight: 64,
+    otherNight: 65,
   },
   {
     id: "monk",
@@ -164,7 +164,7 @@ const roles = [
     ability:
       "If you die at night, you are woken to choose a player: you learn their character.",
     firstNight: 0,
-    otherNight: 61,
+    otherNight: 62,
   },
   {
     id: "virgin",
@@ -232,8 +232,8 @@ const roles = [
     setup: false,
     ability:
       "Each night, choose a player (not yourself): tomorrow, you may only vote if they are voting too.",
-    firstNight: 45,
-    otherNight: 77,
+    firstNight: 46,
+    otherNight: 78,
     jinxes: [
       {
         id: "cannibal",
@@ -304,7 +304,7 @@ const roles = [
     setup: false,
     ability:
       "Each night, choose a player: they are poisoned tonight and tomorrow day.",
-    firstNight: 22,
+    firstNight: 23,
     otherNight: 12,
   },
   {
@@ -325,8 +325,8 @@ const roles = [
     ],
     ability:
       "Each night, you see the Grimoire. You might register as good & as a Townsfolk or Outsider, even if dead.",
-    firstNight: 59,
-    otherNight: 78,
+    firstNight: 60,
+    otherNight: 79,
     jinxes: [
       {
         id: "alchemist",
@@ -515,8 +515,8 @@ const roles = [
     setup: false,
     ability:
       "You start knowing a good player & their character. If the Demon kills them, you die too.",
-    firstNight: 46,
-    otherNight: 60,
+    firstNight: 47,
+    otherNight: 61,
   },
   {
     id: "sailor",
@@ -529,7 +529,7 @@ const roles = [
     setup: false,
     ability:
       "Each night, choose an alive player: either you or they are drunk until dusk. You can't die.",
-    firstNight: 16,
+    firstNight: 17,
     otherNight: 9,
   },
   {
@@ -545,8 +545,8 @@ const roles = [
     setup: false,
     ability:
       "Each night, choose 2 alive players (not yourself): you learn how many woke tonight due to their ability.",
-    firstNight: 62,
-    otherNight: 81,
+    firstNight: 63,
+    otherNight: 82,
     jinxes: [
       {
         id: "mathematician",
@@ -613,7 +613,7 @@ const roles = [
     ability:
       "Each day, you may make a public statement. Tonight, if it was true, a player dies.",
     firstNight: 0,
-    otherNight: 46,
+    otherNight: 47,
   },
   {
     id: "courtier",
@@ -628,7 +628,7 @@ const roles = [
     setup: false,
     ability:
       "Once per game, at night, choose a character: they are drunk for 3 nights & 3 days.",
-    firstNight: 24,
+    firstNight: 25,
     otherNight: 13,
   },
   {
@@ -644,7 +644,7 @@ const roles = [
     ability:
       "Once per game, at night*, choose a dead player: if they are a Townsfolk, they are resurrected.",
     firstNight: 0,
-    otherNight: 52,
+    otherNight: 53,
   },
   {
     id: "minstrel",
@@ -710,7 +710,7 @@ const roles = [
     setup: false,
     ability: "You might die at any time.",
     firstNight: 0,
-    otherNight: 58,
+    otherNight: 59,
   },
   {
     id: "moonchild",
@@ -725,7 +725,7 @@ const roles = [
     ability:
       "When you learn that you died, publicly choose 1 alive player. Tonight, if it was a good player, they die.",
     firstNight: 0,
-    otherNight: 59,
+    otherNight: 60,
   },
   {
     id: "goon",
@@ -754,7 +754,7 @@ const roles = [
     setup: false,
     ability:
       "You think you are a Demon, but you are not. The Demon knows who you are & who you choose at night.",
-    firstNight: 13,
+    firstNight: 14,
     otherNight: 26,
     jinxes: [
       {
@@ -776,8 +776,8 @@ const roles = [
     setup: true,
     ability:
       "You start knowing which Outsiders are in play. If 1 died today, choose a player tonight: they die. [-1 or +1 Outsider]",
-    firstNight: 26,
-    otherNight: 45,
+    firstNight: 27,
+    otherNight: 46,
     jinxes: [
       {
         id: "heretic",
@@ -798,7 +798,7 @@ const roles = [
     setup: false,
     ability:
       "Each night, choose a living player (different to last night): if executed tomorrow, they don't die.",
-    firstNight: 27,
+    firstNight: 28,
     otherNight: 18,
   },
   {
@@ -814,7 +814,7 @@ const roles = [
     ability:
       "Once per game, at night*, choose a player: they die, even if for some reason they could not.",
     firstNight: 0,
-    otherNight: 44,
+    otherNight: 45,
   },
   {
     id: "mastermind",
@@ -857,7 +857,7 @@ const roles = [
     setup: false,
     ability:
       "Each night, choose a player: they are poisoned. The previously poisoned player dies then becomes healthy.",
-    firstNight: 34,
+    firstNight: 35,
     otherNight: 32,
   },
   {
@@ -979,7 +979,7 @@ const roles = [
     setup: false,
     ability:
       "You start knowing how many steps from the Demon to its nearest Minion.",
-    firstNight: 47,
+    firstNight: 48,
     otherNight: 0,
   },
   {
@@ -995,8 +995,8 @@ const roles = [
     setup: false,
     ability:
       "Each night, choose a player (not yourself or Travellers): you learn 1 good and 1 evil character, 1 of which is correct.",
-    firstNight: 48,
-    otherNight: 65,
+    firstNight: 49,
+    otherNight: 66,
   },
   {
     id: "snakecharmer",
@@ -1011,7 +1011,7 @@ const roles = [
     setup: false,
     ability:
       "Each night, choose an alive player: a chosen Demon swaps characters & alignments with you & is then poisoned.",
-    firstNight: 25,
+    firstNight: 26,
     otherNight: 16,
   },
   {
@@ -1025,8 +1025,8 @@ const roles = [
     setup: false,
     ability:
       "Each night, you learn how many players’ abilities worked abnormally (since dawn) due to another character's ability.",
-    firstNight: 63,
-    otherNight: 82,
+    firstNight: 64,
+    otherNight: 83,
   },
   {
     id: "flowergirl",
@@ -1039,7 +1039,7 @@ const roles = [
     setup: false,
     ability: "Each night*, you learn if a Demon voted today.",
     firstNight: 0,
-    otherNight: 66,
+    otherNight: 67,
   },
   {
     id: "towncrier",
@@ -1052,7 +1052,7 @@ const roles = [
     setup: false,
     ability: "Each night*, you learn if a Minion nominated today.",
     firstNight: 0,
-    otherNight: 67,
+    otherNight: 68,
   },
   {
     id: "oracle",
@@ -1065,7 +1065,7 @@ const roles = [
     setup: false,
     ability: "Each night*, you learn how many dead players are evil.",
     firstNight: 0,
-    otherNight: 68,
+    otherNight: 69,
   },
   {
     id: "savant",
@@ -1094,8 +1094,8 @@ const roles = [
     setup: false,
     ability:
       "Once per game, at night, choose 2 players (not yourself): you learn if they are the same alignment.",
-    firstNight: 49,
-    otherNight: 69,
+    firstNight: 50,
+    otherNight: 70,
   },
   {
     id: "philosopher",
@@ -1146,7 +1146,7 @@ const roles = [
     ability:
       "On your 1st day, publicly guess up to 5 players' characters. That night, you learn how many you got correct.",
     firstNight: 0,
-    otherNight: 70,
+    otherNight: 71,
   },
   {
     id: "sage",
@@ -1160,7 +1160,7 @@ const roles = [
     setup: false,
     ability: "If the Demon kills you, you learn that it is 1 of 2 players.",
     firstNight: 0,
-    otherNight: 51,
+    otherNight: 52,
   },
   {
     id: "mutant",
@@ -1187,7 +1187,7 @@ const roles = [
     setup: false,
     ability: "When you die, 1 player is drunk from now on.",
     firstNight: 0,
-    otherNight: 50,
+    otherNight: 51,
   },
   {
     id: "barber",
@@ -1202,7 +1202,7 @@ const roles = [
     ability:
       "If you died today or tonight, the Demon may choose 2 players (not another Demon) to swap characters.",
     firstNight: 0,
-    otherNight: 49,
+    otherNight: 50,
   },
   {
     id: "klutz",
@@ -1230,7 +1230,7 @@ const roles = [
     setup: false,
     ability:
       "You & an opposing player know each other. If the good player is executed, evil wins. Good can't win if you both live.",
-    firstNight: 28,
+    firstNight: 29,
     otherNight: 0,
     jinxes: [
       {
@@ -1251,7 +1251,7 @@ const roles = [
     setup: false,
     ability:
       "Each night, choose a player: if they nominate tomorrow, they die. If just 3 players live, you lose this ability.",
-    firstNight: 29,
+    firstNight: 30,
     otherNight: 19,
   },
   {
@@ -1267,7 +1267,7 @@ const roles = [
     setup: false,
     ability:
       "Each night, choose a player & a good character: they are “mad” they are this character tomorrow, or might be executed.",
-    firstNight: 30,
+    firstNight: 31,
     otherNight: 20,
     jinxes: [
       {
@@ -1467,7 +1467,7 @@ const roles = [
     reminders: ["Know", "Know", "Know"],
     setup: false,
     ability: "You start knowing 3 players, 1 and only 1 of which is evil.",
-    firstNight: 52,
+    firstNight: 53,
     otherNight: 0,
   },
   {
@@ -1482,8 +1482,8 @@ const roles = [
     setup: false,
     ability:
       "You start knowing 1 evil player. If the player you know dies, you learn another evil player tonight. [1 Townsfolk is evil]",
-    firstNight: 56,
-    otherNight: 74,
+    firstNight: 57,
+    otherNight: 75,
   },
   {
     id: "pixie",
@@ -1496,7 +1496,7 @@ const roles = [
     setup: false,
     ability:
       "You start knowing 1 in-play Townsfolk. If you were mad that you were this character, you gain their ability when they die.",
-    firstNight: 35,
+    firstNight: 36,
     otherNight: 0,
   },
   {
@@ -1510,8 +1510,8 @@ const roles = [
     setup: false,
     ability:
       "Each night, you learn which alignment the Storyteller believes is winning: good, evil, or neither.",
-    firstNight: 61,
-    otherNight: 80,
+    firstNight: 62,
+    otherNight: 81,
   },
   {
     id: "preacher",
@@ -1526,7 +1526,7 @@ const roles = [
     setup: false,
     ability:
       "Each night, choose a player: a Minion, if chosen, learns this. All chosen Minions have no ability.",
-    firstNight: 19,
+    firstNight: 20,
     otherNight: 11,
   },
   {
@@ -1542,8 +1542,8 @@ const roles = [
     setup: false,
     ability:
       "Each night, if the dead outnumber the living, you learn 1 alive character. The Demon knows who you are.",
-    firstNight: 15,
-    otherNight: 73,
+    firstNight: 16,
+    otherNight: 74,
   },
   {
     id: "balloonist",
@@ -1557,8 +1557,8 @@ const roles = [
     setup: true,
     ability:
       "Each night, you learn 1 player of each character type, until there are no more types to learn. [+1 Outsider]",
-    firstNight: 53,
-    otherNight: 71,
+    firstNight: 54,
+    otherNight: 72,
   },
   {
     id: "cultleader",
@@ -1573,8 +1573,8 @@ const roles = [
     setup: false,
     ability:
       "Each night, you become the alignment of an alive neighbor. If all good players choose to join your cult, your team wins.",
-    firstNight: 58,
-    otherNight: 76,
+    firstNight: 59,
+    otherNight: 77,
   },
   {
     id: "lycanthrope",
@@ -1608,8 +1608,8 @@ const roles = [
     setup: false,
     ability:
       "You do not know what your ability is. Each day, privately guess what it is: you learn how accurate you are.",
-    firstNight: 38,
-    otherNight: 56,
+    firstNight: 39,
+    otherNight: 57,
   },
   {
     id: "nightwatchman",
@@ -1624,8 +1624,8 @@ const roles = [
     setup: false,
     ability:
       "Once per game, at night, choose a player: they learn who you are.",
-    firstNight: 57,
-    otherNight: 75,
+    firstNight: 58,
+    otherNight: 76,
   },
   {
     id: "engineer",
@@ -1640,7 +1640,7 @@ const roles = [
     setup: false,
     ability:
       "Once per game, at night, choose which Minions or which Demon is in play.",
-    firstNight: 18,
+    firstNight: 19,
     otherNight: 10,
   },
   {
@@ -1670,8 +1670,8 @@ const roles = [
     setup: true,
     ability:
       "Once per game, at night, choose a living player: the Damsel, if chosen, becomes a not-in-play Townsfolk. [+the Damsel]",
-    firstNight: 36,
-    otherNight: 54,
+    firstNight: 37,
+    otherNight: 55,
   },
   {
     id: "alchemist",
@@ -1706,7 +1706,7 @@ const roles = [
     setup: false,
     ability: "If you die at night, an alive good player becomes a Farmer.",
     firstNight: 0,
-    otherNight: 57,
+    otherNight: 58,
   },
   {
     id: "magician",
@@ -1720,7 +1720,7 @@ const roles = [
     setup: false,
     ability:
       "The Demon thinks you are a Minion. Minions think you are a Demon.",
-    firstNight: 10,
+    firstNight: 11,
     otherNight: 0,
   },
   {
@@ -1736,7 +1736,7 @@ const roles = [
     ability:
       "If the Demon kills the King, you learn which player is the Demon. [+ the King]",
     firstNight: 0,
-    otherNight: 53,
+    otherNight: 54,
   },
   {
     id: "poppygrower",
@@ -1800,7 +1800,7 @@ const roles = [
     reminders: [],
     setup: false,
     ability: "Minions start knowing 3 not-in-play characters.",
-    firstNight: 12,
+    firstNight: 13,
     otherNight: 0,
   },
   {
@@ -1815,7 +1815,7 @@ const roles = [
     ability:
       "Each night*, if either good living neighbor is drunk or poisoned, you die.",
     firstNight: 0,
-    otherNight: 47,
+    otherNight: 48,
   },
   {
     id: "puzzlemaster",
@@ -1857,8 +1857,8 @@ const roles = [
     setup: false,
     ability:
       "All Minions know you are in play. If a Minion publicly guesses you (once), your team loses.",
-    firstNight: 37,
-    otherNight: 55,
+    firstNight: 38,
+    otherNight: 56,
   },
   {
     id: "golem",
@@ -1908,7 +1908,7 @@ const roles = [
     ],
     ability:
       "On your 1st night, look at the Grimoire and choose a player: they are poisoned. 1 good player knows a Widow is in play.",
-    firstNight: 23,
+    firstNight: 24,
     otherNight: 0,
     jinxes: [
       {
@@ -1948,7 +1948,7 @@ const roles = [
     setup: false,
     ability:
       "Each night, choose a player. If you nominate & execute them, their team loses. All players know if you choose a new player.",
-    firstNight: 31,
+    firstNight: 32,
     otherNight: 22,
     jinxes: [
       {
@@ -2005,7 +2005,7 @@ const roles = [
     setup: false,
     ability:
       "You start knowing a secret word. The 1st good player to say this word becomes evil that night.",
-    firstNight: 33,
+    firstNight: 34,
     otherNight: 24,
   },
   {
@@ -2031,7 +2031,7 @@ const roles = [
         name: "replace-character",
       },
     ],
-    firstNight: 17,
+    firstNight: 18,
     otherNight: 0,
     jinxes: [
       {
@@ -2124,7 +2124,7 @@ const roles = [
         name: "bag-disabled",
       },
     ],
-    firstNight: 20,
+    firstNight: 21,
     otherNight: 42,
     jinxes: [
       {
@@ -2169,7 +2169,7 @@ const roles = [
     setup: false,
     ability:
       "Each night*, choose a player: they die. You start by choosing an alive player: they are poisoned - you die if & only if they die.",
-    firstNight: 21,
+    firstNight: 22,
     otherNight: 41,
     jinxes: [
       {
@@ -2271,8 +2271,8 @@ const roles = [
     setup: false,
     ability:
       "If more than 1 good player is executed, evil wins. All players know you are in play. After day 5, evil wins.",
-    firstNight: 65,
-    otherNight: 84,
+    firstNight: 66,
+    otherNight: 85,
     jinxes: [
       {
         id: "soldier",
@@ -2538,7 +2538,7 @@ const roles = [
     setup: false,
     ability:
       "All players know who you are. You can not die during the day. If good voted, you may choose to execute immediately.",
-    firstNight: 66,
+    firstNight: 67,
     otherNight: 0,
     jinxes: [
       {
@@ -2582,7 +2582,7 @@ const roles = [
     reminders: ["Know", "Know"],
     setup: false,
     ability: "You start knowing 2 players that are not the Demon.",
-    firstNight: 51,
+    firstNight: 52,
     otherNight: 0,
   },
   {
@@ -2594,7 +2594,7 @@ const roles = [
     reminders: ["Know"],
     setup: false,
     ability: "You start knowing 1 good player.",
-    firstNight: 50,
+    firstNight: 51,
     otherNight: 0,
   },
   {
@@ -2608,8 +2608,8 @@ const roles = [
     setup: false,
     ability:
       "Each night, learn which player the Storyteller believes you should talk to most.",
-    firstNight: 60,
-    otherNight: 79,
+    firstNight: 61,
+    otherNight: 80,
   },
   {
     id: "harpy",
@@ -2624,7 +2624,7 @@ const roles = [
     setup: false,
     ability:
       "Each night, choose 2 players: tomorrow, the 1st player is mad that the 2nd is evil, or both might die.",
-    firstNight: 32,
+    firstNight: 33,
     otherNight: 23,
   },
   {
@@ -2651,7 +2651,7 @@ const roles = [
     setup: false,
     ability:
       "You start knowing if your closest evil player is clockwise or anti-clockwise. If equidistant, this info is arbitrary.",
-    firstNight: 54,
+    firstNight: 55,
     otherNight: 0,
   },
   {
@@ -2681,7 +2681,7 @@ const roles = [
     ability:
       "If you died today or tonight, the Minion & Demon players may choose new Minion & Demon characters to be.",
     firstNight: 0,
-    otherNight: 48,
+    otherNight: 49,
   },
   {
     id: "kazali",
@@ -2695,7 +2695,7 @@ const roles = [
     ability:
       "Each night*, choose a player: they die. [You choose which players are which Minions. -? to +? Outsiders]",
     firstNight: 7,
-    otherNight: 43,
+    otherNight: 44,
     jinxes: [
       {
         id: "bountyhunter",
@@ -2743,8 +2743,24 @@ const roles = [
         name: "bag-duplicate",
       },
     ],
-    firstNight: 55,
-    otherNight: 72,
+    firstNight: 56,
+    otherNight: 73,
+  },
+  {
+    id: "yaggababble",
+    name: "Yaggababble",
+    team: "demon",
+    edition: "",
+    firstNightReminder:
+      "Choose a secret phrase. Wake the Yaggababble and let them know their secret phrase.",
+    otherNightReminder:
+      "For each time the Yaggababble said the phrase today, you may choose a player. They die. :reminder:",
+    reminders: ["Dead", "Dead", "Dead"],
+    setup: false,
+    ability:
+      "You start knowing a secret phrase. For each time you said it publicly today, a player might die.",
+    firstNight: 10,
+    otherNight: 43,
   },
   {
     id: "doomsayer",

@@ -179,6 +179,7 @@ const demons = [
   "Zombuul",
   "Ojo",
   "Kazali",
+  "Yaggababble",
 ];
 
 const travelers = [
