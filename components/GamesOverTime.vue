@@ -23,6 +23,13 @@ const validMonths = Array.from(Array(12).keys()).map((i) =>
   dayjs().subtract(i, "month").format("YYYY MMMM")
 );
 
+const colors = {
+  tb: "#A00A23",
+  bmr: "#F4C43C",
+  snv: "#944CAC",
+  custom: "#008000",
+}
+
 const data = computed(() => {
   const data: {
     [key: string]: {
@@ -64,29 +71,29 @@ const chartData = computed(() => ({
     {
       label: "Trouble Brewing",
       data: months.map((month) => data.value[month]?.troubleBrewing ?? 0),
-      backgroundColor: "red",
-      borderColor: "red",
+      backgroundColor: colors.tb,
+      borderColor: colors.tb,
       tension: 0.1,
     },
     {
       label: "Sects and Violets",
       data: months.map((month) => data.value[month]?.sectsAndViolets ?? 0),
-      backgroundColor: "purple",
-      borderColor: "purple",
+      backgroundColor: colors.snv,
+      borderColor: colors.snv,
       tension: 0.1,
     },
     {
       label: "Bad Moon Rising",
       data: months.map((month) => data.value[month]?.badMoonRising ?? 0),
-      backgroundColor: "yellow",
-      borderColor: "yellow",
+      backgroundColor: colors.bmr,
+      borderColor: colors.bmr,
       tension: 0.1,
     },
     {
       label: "Custom Script",
       data: months.map((month) => data.value[month]?.customScript ?? 0),
-      backgroundColor: "green",
-      borderColor: "green",
+      backgroundColor: colors.custom,
+      borderColor: colors.custom,
       tension: 0.1,
     },
   ],
