@@ -102,5 +102,5 @@ export default defineEventHandler(async (handler) => {
     },
   });
 
-  return updatedEvent;
+  return fetchEventAndUpdateDiscord(updatedEvent.id);
 });

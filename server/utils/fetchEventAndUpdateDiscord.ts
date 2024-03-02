@@ -107,7 +107,10 @@ export async function fetchEventAndUpdateDiscord(event_id: string) {
       const channel = await client.channels.fetch(post.channel_id);
       if (!channel) return;
       // @ts-ignore
-      const messages = await channel.messages.fetch({ limit: 10, around: post.message_id });
+      const messages = await channel.messages.fetch({
+        limit: 10,
+        around: post.message_id,
+      });
 
       for (const message of messages) {
         if (message[1].embeds[0]?.footer?.text === event.id) {
@@ -128,14 +131,15 @@ export async function fetchEventAndUpdateDiscord(event_id: string) {
             })
             // .setThumbnail(`https://clocktracker.app${event.community.icon}`)
             .setTimestamp(event.start)
-            .setFooter({ text: event.id });
+            .setFooter({ text: event.id })
+            .setDescription(
+              `<t:${event.start.getTime() / 1000}:f>\n\n${
+                event.description ?? ""
+              }`
+            );
 
           if (event.image) {
             embed.setImage(event.image);
-          }
-
-          if (event.description) {
-            embed.setDescription(event.description);
           }
 
           const fields = [

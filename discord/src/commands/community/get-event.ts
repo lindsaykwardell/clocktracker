@@ -211,14 +211,13 @@ async function buildEmbed(event_id: string) {
     })
     // .setThumbnail(`https://clocktracker.app${event.community.icon}`)
     .setTimestamp(event.start)
-    .setFooter({ text: event.id });
+    .setFooter({ text: event.id })
+    .setDescription(
+      `<t:${event.start.getTime() / 1000}:f>\n\n${event.description ?? ""}`
+    );
 
   if (event.image) {
     embed.setImage(event.image);
-  }
-
-  if (event.description) {
-    embed.setDescription(event.description);
   }
 
   const fields = [
