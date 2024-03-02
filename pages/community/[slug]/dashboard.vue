@@ -48,7 +48,7 @@
               </select>
             </label>
           </div>
-          <label>
+          <label v-if="featureFlags.isEnabled('discord-server-integration')">
             <span class="block">Discord Server ID</span>
             <input
               v-model="updatedDiscordServerId"
@@ -255,32 +255,19 @@ definePageMeta({
 const communities = useCommunities();
 const route = useRoute();
 const user = useSupabaseUser();
+const featureFlags = useFeatureFlags();
 const showIconDialog = ref(false);
 
 const slug = route.params.slug as string;
 
-const updatedName = ref("");
-const updatedDescription = ref("");
-const updatedSlug = ref("");
-const updatedPrivacy = ref(false);
-const updatedDiscordServerId = ref<string | undefined>("");
-const loaded = ref(false);
+const community = await $fetch(`/api/community/${slug}`);
+
+const updatedName = ref(community.name);
+const updatedDescription = ref(community.description);
+const updatedSlug = ref(community.slug);
+const updatedPrivacy = ref(community.is_private);
+const updatedDiscordServerId = ref<string | null>(community.discord_server_id);
 const inFlight = ref(false);
-
-const community = computed(() => {
-  return communities.getCommunity(slug);
-});
-
-watchEffect(() => {
-  if (community.value.status === Status.SUCCESS && !loaded.value) {
-    updatedName.value = community.value.data.name;
-    updatedDescription.value = community.value.data.description;
-    updatedSlug.value = community.value.data.slug;
-    updatedPrivacy.value = community.value.data.is_private;
-    updatedDiscordServerId.value = community.value.data.discord_server_id;
-    loaded.value = true;
-  }
-});
 
 function isMe(id: string) {
   return user.value?.id === id;
