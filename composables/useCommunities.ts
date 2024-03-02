@@ -377,7 +377,7 @@ export const useCommunities = defineStore("communities", {
         name: string;
         description: string;
         is_private: boolean;
-        discord_server_id: string;
+        discord_server_id: string | null;
       }
     ) {
       const user = useSupabaseUser();
