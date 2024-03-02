@@ -52,7 +52,7 @@
                 event.registered_players.length > event.player_count) ||
               event.waitlists.length > 0
             "
-            class="flex-1"
+            class="flex-1 flex flex-col gap-2"
           >
             <template
               v-if="
