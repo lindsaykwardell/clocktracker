@@ -12,6 +12,7 @@ export default defineEventHandler(async (handler) => {
     slug?: string;
     icon?: string;
     is_private?: boolean;
+    discord_server_id?: string;
   }>(handler);
 
   if (!me) {
@@ -58,6 +59,7 @@ export default defineEventHandler(async (handler) => {
       slug: body.slug ?? community.slug,
       icon: body.icon ?? community.icon,
       is_private: body.is_private ?? community.is_private,
+      discord_server_id: body.discord_server_id ?? community.discord_server_id,
     },
     select: {
       id: true,
@@ -65,6 +67,7 @@ export default defineEventHandler(async (handler) => {
       slug: true,
       description: true,
       icon: true,
+      discord_server_id: true,
       members: {
         select: {
           user_id: true,

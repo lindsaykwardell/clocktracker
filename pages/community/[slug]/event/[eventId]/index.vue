@@ -4,10 +4,12 @@
       <template #register>
         <button
           v-if="event.who_can_register === 'ANYONE' ? true : isMember"
+          :disabled="inFlight"
           @click="initRegister()"
           class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
         >
-          <template v-if="alreadyRegistered">Unregister</template>
+          <template v-if="inFlight"><Spinner /></template>
+          <template v-else-if="alreadyRegistered">Unregister</template>
           <template v-else>Register</template>
         </button>
       </template>
@@ -50,7 +52,7 @@
                 event.registered_players.length > event.player_count) ||
               event.waitlists.length > 0
             "
-            class="flex-1"
+            class="flex-1 flex flex-col gap-2"
           >
             <template
               v-if="
@@ -115,7 +117,10 @@
                 </li>
               </ul>
               <button
-                v-if="event.who_can_register === 'ANYONE' ? true : isMember"
+                v-if="
+                  !inFlight &&
+                  (event.who_can_register === 'ANYONE' ? true : isMember)
+                "
                 @click="initRegister(waitlist.id)"
                 class="transition duration-150 text-stone-400 hover:text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
               >
@@ -168,11 +173,13 @@
           />
         </label>
         <button
+          :disabled="inFlight"
           type="submit"
           id="register-attendee"
           class="w-full bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
         >
-          Register
+          <template v-if="inFlight"><Spinner /></template>
+          <template v-else>Register</template>
         </button>
       </form>
     </Dialog>
@@ -198,10 +205,25 @@ const user = useSupabaseUser();
 
 const showRegisterDialog = ref(false);
 const attendeeName = ref("");
+const inFlight = ref(false);
 
 const event = ref<EventView>(
   await $fetch<EventView>(`/api/community/${slug}/event/${eventId}`)
 );
+
+let poll: NodeJS.Timeout | null = null;
+
+onMounted(() => {
+  poll = setInterval(async () => {
+    event.value = await $fetch<EventView>(
+      `/api/community/${slug}/event/${eventId}`
+    );
+  }, 1000 * 60 * 5);
+});
+
+onUnmounted(() => {
+  clearInterval(poll!);
+});
 
 const alreadyRegistered = computed(() => {
   const me = users.getUserById(user.value?.id);
@@ -234,6 +256,7 @@ function initRegister(waitlistId?: number) {
 }
 
 async function register(name: string, waitlistId?: number) {
+  inFlight.value = true;
   if (alreadyRegistered.value) {
     event.value = await $fetch<EventView>(
       `/api/community/${slug}/event/${eventId}/register`,
@@ -256,6 +279,7 @@ async function register(name: string, waitlistId?: number) {
     showRegisterDialog.value = false;
     attendeeName.value = "";
   }
+  inFlight.value = false;
 }
 
 function deleteEvent() {
