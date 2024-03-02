@@ -108,7 +108,7 @@ export async function fetchEventAndUpdateDiscord(event_id: string) {
       if (!channel) return;
       // @ts-ignore
       const messages = await channel.messages.fetch({
-        limit: 10,
+        limit: 2,
         around: post.message_id,
       });
 
