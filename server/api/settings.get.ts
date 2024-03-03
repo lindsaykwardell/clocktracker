@@ -30,6 +30,7 @@ export default defineEventHandler(async (handler) => {
       charts: true,
       bgg_username: true,
       enable_bgstats: true,
+      discord_id: true,
       communities: {
         select: {
           id: true,
@@ -53,7 +54,22 @@ export default defineEventHandler(async (handler) => {
     },
   });
 
-  if (settings) return settings;
+  if (settings) {
+    if (!settings.discord_id && user.app_metadata.provider === "discord") {
+      await prisma.userSettings.update({
+        where: {
+          user_id: user.id,
+        },
+        data: {
+          discord_id: user.user_metadata.provider_id,
+        },
+      });
+    }
+
+    settings.discord_id = user.user_metadata.provider_id;
+
+    return settings;
+  }
 
   const existingUsername = user.user_metadata.full_name
     ? (

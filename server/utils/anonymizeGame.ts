@@ -1,4 +1,4 @@
-import type { Game, Character, Grimoire, Token } from "@prisma/client";
+import type { Game, Character, Grimoire, Token, ReminderToken } from "@prisma/client";
 import { PrivacySetting, PrismaClient } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
 
@@ -28,6 +28,7 @@ export type GameRecord = Game & {
         name: string;
       };
       related_role?: { token_url: string };
+      reminders: ReminderToken[];
     })[];
   })[];
   parent_game?: {

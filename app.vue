@@ -27,8 +27,6 @@ const featureFlags = useFeatureFlags();
 
 await featureFlags.init();
 
-console.log(featureFlags.isEnabled("test-feature-flag"));
-
 onMounted(() => {
   users.fetchMe(user.value?.id);
   friends.fetchFriends();

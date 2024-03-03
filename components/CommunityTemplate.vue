@@ -3,7 +3,7 @@
     <template v-if="community.status === Status.SUCCESS">
       <div class="bg-stone-950 shadow-lg">
         <div
-          class="flex flex-col items-center p-2 w-full md:w-3/4 lg:w-2/3 xl:w-1/2 m-auto"
+          class="flex flex-col items-center w-full md:w-3/4 lg:w-2/3 xl:w-1/2 m-auto"
         >
           <div class="flex gap-3 items-center w-full">
             <Avatar

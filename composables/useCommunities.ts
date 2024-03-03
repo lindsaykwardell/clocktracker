@@ -17,6 +17,7 @@ export type Community = {
   join_requests?: User[];
   posts: CommunityPost[];
   events: Event[];
+  discord_server_id?: string;
 };
 
 export type CommunityPost = {
@@ -64,6 +65,20 @@ export type Event = {
       username: string;
       avatar: string | null;
     };
+  }[];
+  waitlists: {
+    id: number;
+    name: string;
+    default: boolean;
+    users: {
+      name: string;
+      created_at: string;
+      user: {
+        user_id: string;
+        username: string;
+        avatar: string | null;
+      };
+    }[];
   }[];
 };
 
@@ -362,6 +377,7 @@ export const useCommunities = defineStore("communities", {
         name: string;
         description: string;
         is_private: boolean;
+        discord_server_id: string | null;
       }
     ) {
       const user = useSupabaseUser();

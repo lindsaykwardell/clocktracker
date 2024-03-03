@@ -199,51 +199,52 @@ export async function fetchGames(
           },
         },
       },
-      demon_bluffs: {
-        include: {
-          role: {
-            select: {
-              token_url: true,
-              type: true,
-            },
-          },
-        },
-      },
-      fabled: {
-        include: {
-          role: {
-            select: {
-              token_url: true,
-            },
-          },
-        },
-      },
-      grimoire: {
-        include: {
-          tokens: {
-            include: {
-              role: true,
-              related_role: true,
-            },
-          },
-        },
-      },
-      parent_game: {
-        select: {
-          user: {
-            select: {
-              username: true,
-              display_name: true,
-            },
-          },
-        },
-      },
-      community: {
-        select: {
-          slug: true,
-          icon: true,
-        },
-      },
+      // demon_bluffs: {
+      //   include: {
+      //     role: {
+      //       select: {
+      //         token_url: true,
+      //         type: true,
+      //       },
+      //     },
+      //   },
+      // },
+      // fabled: {
+      //   include: {
+      //     role: {
+      //       select: {
+      //         token_url: true,
+      //       },
+      //     },
+      //   },
+      // },
+      // grimoire: {
+      //   include: {
+      //     tokens: {
+      //       include: {
+      //         role: true,
+      //         related_role: true,
+      //         reminders: true,
+      //       },
+      //     },
+      //   },
+      // },
+      // parent_game: {
+      //   select: {
+      //     user: {
+      //       select: {
+      //         username: true,
+      //         display_name: true,
+      //       },
+      //     },
+      //   },
+      // },
+      // community: {
+      //   select: {
+      //     slug: true,
+      //     icon: true,
+      //   },
+      // },
       associated_script: {
         select: {
           version: true,
@@ -266,7 +267,17 @@ export async function fetchGames(
   const anonymizedGames: GameRecord[] = [];
 
   for (const game of games) {
-    anonymizedGames.push(await anonymizeGame(game as GameRecord, me));
+    anonymizedGames.push(
+      await anonymizeGame(
+        {
+          ...game,
+          grimoire: [],
+          demon_bluffs: [],
+          fabled: [],
+        } as GameRecord,
+        me
+      )
+    );
   }
 
   return anonymizedGames;
@@ -442,6 +453,7 @@ export async function fetchGame(
             include: {
               role: true,
               related_role: true,
+              reminders: true,
             },
           },
         },
