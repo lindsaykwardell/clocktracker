@@ -80,7 +80,7 @@
             </div>
           </a>
           <a
-            href="https://ko-fi.com/pdxbotc"
+            href="https://ko-fi.com/clocktracker"
             class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
             aria-label="Donate to ClockTracker"
           >
