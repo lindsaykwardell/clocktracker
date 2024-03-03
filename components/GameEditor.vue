@@ -655,10 +655,9 @@
     </fieldset>
     <fieldset class="border rounded border-stone-500 p-4 my-3">
       <legend>Notes</legend>
-      <textarea
+      <ExpandingTextarea
         v-model="game.notes"
-        class="block w-full border border-stone-500 rounded-md p-2"
-        rows="5"
+        class="block w-full border border-stone-500 rounded-md p-2 min-h-[10rem]"
       />
       <label class="block py-2">
         <span class="block">Add Tag</span>
@@ -968,6 +967,7 @@ const props = defineProps<{
         alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
         order: number;
         is_dead: boolean;
+        used_ghost_vote: boolean;
         role_id: string | null;
         role?: {
           token_url: string;
@@ -979,6 +979,7 @@ const props = defineProps<{
         related_role?: { token_url: string; name?: string };
         player_name: string;
         player_id?: string | null;
+        reminders: { reminder: string; token_url: string }[];
       }[];
     }[];
     ignore_for_stats: boolean;
@@ -1236,10 +1237,12 @@ watchEffect(() => {
         id: undefined,
         alignment: undefined,
         is_dead: false,
+        used_ghost_vote: false,
         order: grimoire.tokens.length,
         role_id: null,
         related_role_id: null,
         player_name: "",
+        reminders: [],
       });
     }
 
@@ -1335,8 +1338,37 @@ watch(
         if (i <= grimPage.value) return;
 
         token.is_dead = token.is_dead || newTokens[j].is_dead;
+        token.used_ghost_vote =
+          token.used_ghost_vote || newTokens[j].used_ghost_vote;
         token.player_id = newTokens[j].player_id;
         token.player_name = newTokens[j].player_name;
+        // Add any reminders that are not already there
+        for (const reminder of newTokens[j].reminders) {
+          if (
+            !token.reminders.some(
+              (r) =>
+                r.reminder === reminder.reminder &&
+                r.token_url === reminder.token_url
+            )
+          ) {
+            token.reminders.push({
+              reminder: reminder.reminder,
+              token_url: reminder.token_url,
+            });
+          }
+        }
+        // Remove any reminders that are not in the new tokens
+        for (let k = token.reminders.length - 1; k >= 0; k--) {
+          if (
+            !newTokens[j].reminders.some(
+              (r) =>
+                r.reminder === token.reminders[k].reminder &&
+                r.token_url === token.reminders[k].token_url
+            )
+          ) {
+            token.reminders.splice(k, 1);
+          }
+        }
 
         if (!token.role_id) {
           token.role = newTokens[j].role;

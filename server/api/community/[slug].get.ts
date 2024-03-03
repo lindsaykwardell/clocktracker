@@ -51,6 +51,7 @@ export default defineEventHandler(async (handler) => {
       description: true,
       icon: true,
       is_private: true,
+      discord_server_id: !!isModerator,
       members: {
         select: {
           user_id: true,
@@ -209,6 +210,33 @@ export default defineEventHandler(async (handler) => {
                 select: {
                   username: true,
                   avatar: true,
+                },
+              },
+            },
+            orderBy: {
+              created_at: "asc",
+            },
+          },
+          waitlists: {
+            select: {
+              id: true,
+              name: true,
+              default: true,
+              created_at: true,
+              users: {
+                select: {
+                  name: true,
+                  created_at: true,
+                  user: {
+                    select: {
+                      user_id: true,
+                      username: true,
+                      avatar: true,
+                    },
+                  },
+                },
+                orderBy: {
+                  created_at: "asc",
                 },
               },
             },

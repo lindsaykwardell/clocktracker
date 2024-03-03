@@ -7,6 +7,7 @@ import type {
   Token,
   DemonBluff,
   Fabled,
+  ReminderToken,
 } from "@prisma/client";
 import naturalOrder from "natural-order";
 
@@ -55,6 +56,7 @@ export type GameRecord = Omit<Game, "win"> & {
         name: string;
       };
       related_role?: { token_url: string };
+      reminders: ReminderToken[];
     })[];
   })[];
   parent_game?: {
@@ -448,6 +450,57 @@ export const useGames = defineStore("games", {
           data: game,
         });
       }
+    },
+    async importGames(showLoader: () => void) {
+      const this_ = this;
+
+      return new Promise((resolve, reject) => {
+        try {
+          async function selectFile(e: Event) {
+            showLoader();
+            const uploadedFiles = (e.target as HTMLInputElement).files;
+            if (!uploadedFiles) return;
+
+            const file = Array.from(uploadedFiles)[0];
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+              const text = e.target?.result;
+              if (typeof text === "string") {
+                uploadImportedGames(text);
+              }
+            };
+
+            reader.readAsText(file);
+          }
+
+          async function uploadImportedGames(csv: string) {
+            const games = await $fetch<GameRecord[]>("/api/import", {
+              method: "POST",
+              body: JSON.stringify({ csv }),
+            });
+
+            for (const game of games) {
+              this_.games.set(game.id, {
+                status: Status.SUCCESS,
+                data: game,
+              });
+            }
+
+            resolve(games);
+          }
+
+          const input = document.createElement("input");
+          input.type = "file";
+          // Accept only csv files
+          input.accept = ".csv";
+          input.onchange = selectFile;
+          input.click();
+        } catch (err) {
+          console.error(err);
+          reject(err);
+        }
+      });
     },
   },
 });

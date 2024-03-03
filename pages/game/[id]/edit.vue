@@ -86,6 +86,7 @@ const game = reactive<{
       alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
       order: number;
       is_dead: boolean;
+      used_ghost_vote: boolean;
       role_id: string | null;
       role?: {
         token_url: string;
@@ -96,6 +97,7 @@ const game = reactive<{
       related_role?: { token_url: string };
       player_name: string;
       player_id?: string | null;
+      reminders: { reminder: string; token_url: string }[];
     }[];
   }[];
   ignore_for_stats: boolean;
@@ -165,6 +167,7 @@ const game = reactive<{
           alignment: token.alignment,
           order: token.order,
           is_dead: token.is_dead,
+          used_ghost_vote: token.used_ghost_vote,
           role_id: token.role_id,
           role: token.role,
           related_role_id: token.related_role_id,
@@ -173,6 +176,10 @@ const game = reactive<{
             (token.role ? { token_url: "/1x1.png" } : undefined),
           player_name: token.player_name,
           player_id: token.player_id,
+          reminders: token.reminders.map((reminder) => ({
+            reminder: reminder.reminder,
+            token_url: reminder.token_url,
+          })),
         })),
       }))
     : [
@@ -185,8 +192,6 @@ const game = reactive<{
   tags: savedGame.data.value?.tags || [],
   privacy: savedGame.data.value?.privacy || "PUBLIC",
 });
-
-console.log(game.date);
 
 const formattedGame = computed(() => ({
   ...game,

@@ -46,6 +46,7 @@ export default defineEventHandler(async (handler) => {
       who_can_register: true,
       registered_players: {
         select: {
+          id: true,
           name: true,
           created_at: true,
           user: {
@@ -53,6 +54,34 @@ export default defineEventHandler(async (handler) => {
               user_id: true,
               username: true,
               avatar: true,
+            },
+          },
+        },
+        orderBy: {
+          created_at: "asc",
+        },
+      },
+      waitlists: {
+        select: {
+          id: true,
+          name: true,
+          default: true,
+          created_at: true,
+          users: {
+            select: {
+              id: true,
+              name: true,
+              created_at: true,
+              user: {
+                select: {
+                  user_id: true,
+                  username: true,
+                  avatar: true,
+                },
+              },
+            },
+            orderBy: {
+              created_at: "asc",
             },
           },
         },

@@ -70,20 +70,31 @@ model Grimoire {
 }
 
 model Token {
-  id              Int           @id @default(autoincrement())
-  role            Role?         @relation(fields: [role_id], references: [id])
+  id              Int             @id @default(autoincrement())
+  role            Role?           @relation(fields: [role_id], references: [id])
   role_id         String?
-  related_role    Role?         @relation("RelatedToken", fields: [related_role_id], references: [id])
+  related_role    Role?           @relation("RelatedToken", fields: [related_role_id], references: [id])
   related_role_id String?
   alignment       Alignment
-  is_dead         Boolean       @default(false)
+  is_dead         Boolean         @default(false)
+  used_ghost_vote Boolean         @default(false)
   order           Int
-  created_at      DateTime      @default(now()) @db.Timestamptz(6)
-  grimoire        Grimoire?     @relation(fields: [grimoire_id], references: [id])
+  created_at      DateTime        @default(now()) @db.Timestamptz(6)
+  grimoire        Grimoire?       @relation(fields: [grimoire_id], references: [id])
   grimoire_id     Int?
-  player_name     String        @default("")
-  player          UserSettings? @relation(fields: [player_id], references: [user_id])
+  player_name     String          @default("")
+  player          UserSettings?   @relation(fields: [player_id], references: [user_id])
   player_id       String?
+  reminders       ReminderToken[]
+}
+
+model ReminderToken {
+  id         Int      @id @default(autoincrement())
+  reminder   String   @default("")
+  token_url  String   @default("")
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  token      Token?   @relation(fields: [token_id], references: [id])
+  token_id   Int?
 }
 
 model Character {
@@ -136,18 +147,28 @@ model Script {
 }
 
 model Role {
-  id                String       @id
+  id                String         @id
   name              String
   initial_alignment Alignment
   token_url         String
   type              RoleType
   scripts           Script[]
-  related_character Character[]  @relation("RelatedRole")
+  related_character Character[]    @relation("RelatedRole")
   character         Character[]
   tokens            Token[]
-  related_tokens    Token[]      @relation("RelatedToken")
+  related_tokens    Token[]        @relation("RelatedToken")
   demon_bluffs      DemonBluff[]
   fabled            Fabled[]
+  reminders         RoleReminder[]
+}
+
+model RoleReminder {
+  id       Int    @id @default(autoincrement())
+  reminder String
+  role_id  String
+  role     Role   @relation(fields: [role_id], references: [id])
+
+  @@unique([role_id, reminder])
 }
 
 enum Alignment {
@@ -171,38 +192,40 @@ enum LocationType {
 }
 
 model UserSettings {
-  user_id                 String          @id
-  username                String          @unique
+  user_id                 String                  @id
+  discord_id              String?                 @unique
+  username                String                  @unique
   display_name            String
-  finished_welcome        Boolean         @default(false)
+  finished_welcome        Boolean                 @default(false)
   avatar                  String?
-  email                   String          @default("your@address.here")
+  email                   String                  @default("your@address.here")
   pronouns                String?
-  bio                     String          @default("")
+  bio                     String                  @default("")
   location                String?
   links                   ExternalLink[]
-  is_admin                Boolean         @default(false)
-  privacy                 PrivacySetting  @default(PUBLIC)
-  created_at              DateTime?       @default(now()) @db.Timestamptz(6)
+  is_admin                Boolean                 @default(false)
+  privacy                 PrivacySetting          @default(PUBLIC)
+  created_at              DateTime?               @default(now()) @db.Timestamptz(6)
   games                   Game[]
-  following               Following[]     @relation("Following") // people I follow
-  followers               Following[]     @relation("Follower") // people who follow me
-  friend_requests         FriendRequest[] @relation("Receiver")
-  sent_friend_requests    FriendRequest[] @relation("Sender")
-  friends                 Friend[]        @relation("Friend")
-  friend_of               Friend[]        @relation("FriendOf")
+  following               Following[]             @relation("Following") // people I follow
+  followers               Following[]             @relation("Follower") // people who follow me
+  friend_requests         FriendRequest[]         @relation("Receiver")
+  sent_friend_requests    FriendRequest[]         @relation("Sender")
+  friends                 Friend[]                @relation("Friend")
+  friend_of               Friend[]                @relation("FriendOf")
   token                   Token[]
   charts                  Chart[]
   bgg_username            String?
   bgg_cookies             String[]
-  enable_bgstats          Boolean         @default(false)
-  communities             Community[]     @relation("CommunityMember")
-  community_admin         Community[]     @relation("CommunityAdmin")
-  community_banned        Community[]     @relation("CommunityBanned")
-  community_join_requests Community[]     @relation("CommunityJoinRequest")
+  enable_bgstats          Boolean                 @default(false)
+  communities             Community[]             @relation("CommunityMember")
+  community_admin         Community[]             @relation("CommunityAdmin")
+  community_banned        Community[]             @relation("CommunityBanned")
+  community_join_requests Community[]             @relation("CommunityJoinRequest")
   community_posts         CommunityPost[]
-  EventAttendee           EventAttendee[]
+  events                  EventAttendee[]
   FeatureFlag             FeatureFlag[]
+  waitlisted_events       EventWaitlistAttendee[]
 }
 
 enum PrivacySetting {
@@ -279,22 +302,23 @@ enum DataField {
 }
 
 model Community {
-  id            Int             @id @default(autoincrement())
-  name          String
-  slug          String          @unique
-  description   String
-  members       UserSettings[]  @relation("CommunityMember")
-  admins        UserSettings[]  @relation("CommunityAdmin")
-  banned_users  UserSettings[]  @relation("CommunityBanned")
-  join_requests UserSettings[]  @relation("CommunityJoinRequest")
-  created_at    DateTime?       @default(now()) @db.Timestamptz(6)
-  deleted       Boolean         @default(false)
-  deleted_date  DateTime?
-  posts         CommunityPost[]
-  icon          String          @default("/img/default.png")
-  games         Game[]
-  is_private    Boolean         @default(false)
-  events        Event[]
+  id                Int             @id @default(autoincrement())
+  name              String
+  slug              String          @unique
+  description       String
+  members           UserSettings[]  @relation("CommunityMember")
+  admins            UserSettings[]  @relation("CommunityAdmin")
+  banned_users      UserSettings[]  @relation("CommunityBanned")
+  join_requests     UserSettings[]  @relation("CommunityJoinRequest")
+  created_at        DateTime?       @default(now()) @db.Timestamptz(6)
+  deleted           Boolean         @default(false)
+  deleted_date      DateTime?
+  posts             CommunityPost[]
+  icon              String          @default("/img/default.png")
+  games             Game[]
+  is_private        Boolean         @default(false)
+  events            Event[]
+  discord_server_id String?
 }
 
 model CommunityPost {
@@ -313,20 +337,32 @@ model CommunityPost {
 }
 
 model Event {
-  id                 String          @id @default(uuid())
-  created_at         DateTime        @default(now()) @db.Timestamptz(6)
-  start              DateTime        @default(now()) @db.Timestamptz(6)
-  end                DateTime        @default(dbgenerated("NOW() + interval '1.5 hours'")) @db.Timestamptz(6)
+  id                 String             @id @default(uuid())
+  created_at         DateTime           @default(now()) @db.Timestamptz(6)
+  start              DateTime           @default(now()) @db.Timestamptz(6)
+  end                DateTime           @default(dbgenerated("NOW() + interval '1.5 hours'")) @db.Timestamptz(6)
   title              String
   description        String
   player_count       Int?
-  location_type      LocationType    @default(ONLINE)
+  location_type      LocationType       @default(ONLINE)
   location           String
   image              String?
   registered_players EventAttendee[]
-  community          Community?      @relation(fields: [community_id], references: [id])
+  community          Community?         @relation(fields: [community_id], references: [id])
   community_id       Int?
-  who_can_register   WhoCanRegister  @default(COMMUNITY_MEMBERS)
+  who_can_register   WhoCanRegister     @default(COMMUNITY_MEMBERS)
+  waitlists          EventWaitlist[]
+  discord_posts      EventDiscordPost[]
+}
+
+model EventDiscordPost {
+  event      Event    @relation(fields: [event_id], references: [id])
+  event_id   String
+  message_id String
+  channel_id String
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+
+  @@id([channel_id, message_id])
 }
 
 enum WhoCanRegister {
@@ -342,4 +378,24 @@ model EventAttendee {
   user       UserSettings? @relation(fields: [user_id], references: [user_id])
   user_id    String?
   created_at DateTime      @default(now()) @db.Timestamptz(6)
+}
+
+model EventWaitlist {
+  id         Int                     @id @default(autoincrement())
+  event      Event                   @relation(fields: [event_id], references: [id])
+  event_id   String
+  name       String
+  created_at DateTime                @default(now()) @db.Timestamptz(6)
+  users      EventWaitlistAttendee[]
+  default    Boolean                 @default(false)
+}
+
+model EventWaitlistAttendee {
+  id          Int           @id @default(autoincrement())
+  waitlist    EventWaitlist @relation(fields: [waitlist_id], references: [id])
+  waitlist_id Int
+  name        String
+  user        UserSettings? @relation(fields: [user_id], references: [user_id])
+  user_id     String?
+  created_at  DateTime      @default(now()) @db.Timestamptz(6)
 }
