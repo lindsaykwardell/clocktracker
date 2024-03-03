@@ -462,7 +462,7 @@ function getPivot(
                 validator(game)
             ).length
         ),
-        backgroundColor: getColor(1, colors.small),
+        backgroundColor: getColor(colors.small),
       },
       {
         label: "2 Minions",
@@ -476,7 +476,7 @@ function getPivot(
                 validator(game)
             ).length
         ),
-        backgroundColor: getColor(2, colors.medium),
+        backgroundColor: getColor(colors.medium),
       },
       {
         label: "3 Minions",
@@ -487,7 +487,7 @@ function getPivot(
                 game.player_count && game.player_count > 13 && validator(game)
             ).length
         ),
-        backgroundColor: getColor(3, colors.large),
+        backgroundColor: getColor(colors.large),
       },
     ];
   } else if (props.options.pivot === "WIN") {
@@ -500,7 +500,7 @@ function getPivot(
               (game) => game.win === WinStatus.WIN && validator(game)
             ).length
         ),
-        backgroundColor: getColor(0, colors.win),
+        backgroundColor: getColor(colors.win),
       },
       {
         label: "Loss",
@@ -510,7 +510,7 @@ function getPivot(
               (game) => game.win === WinStatus.LOSS && validator(game)
             ).length
         ),
-        backgroundColor: getColor(1, colors.loss),
+        backgroundColor: getColor(colors.loss),
       },
     ];
   }
