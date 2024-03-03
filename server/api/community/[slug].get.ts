@@ -51,6 +51,7 @@ export default defineEventHandler(async (handler) => {
       description: true,
       icon: true,
       is_private: true,
+      discord_server_id: !!isModerator,
       members: {
         select: {
           user_id: true,
