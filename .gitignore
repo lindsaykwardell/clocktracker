@@ -29,4 +29,3 @@ cypress/videos
 cypress/screenshots
 
 reminders.json
-discord/prisma/**/*
