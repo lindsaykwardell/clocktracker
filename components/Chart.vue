@@ -58,7 +58,33 @@ import { colord, extend } from "colord";
 import mixPlugin from "colord/plugins/mix";
 
 extend([mixPlugin]);
+
 const { Script, isBaseScript } = useScripts();
+
+const colors = {
+  townsfolk: "#3297F4",
+  outsider: "#ADC9FA",
+  minion: "#D08C7F",
+  demon: "#8C0E12",
+
+  good: "#3297F4",
+  evil: "#8C0E12",
+
+  win: "#008000",
+  loss: "#A00A23",
+
+  tb: "#A00A23",
+  bmr: "#F4C43C",
+  snv: "#944CAC",
+  custom: "#008000",
+
+  teensy: "#ADD8E6",
+  small: "#0000FF",
+  medium: "#800080",
+  large: "#FF0000"
+}
+
+type DataType = "ROLE" | "ALIGNMENT" | "SCRIPT" | "GAME_SIZE" | "WIN"
 
 const props = defineProps<{
   games: GameRecord[];
@@ -66,8 +92,8 @@ const props = defineProps<{
     id?: number;
     title: string;
     type: string;
-    pivot: "ROLE" | "ALIGNMENT" | "SCRIPT" | "GAME_SIZE" | "WIN" | null;
-    data: "ROLE" | "ALIGNMENT" | "SCRIPT" | "GAME_SIZE" | "WIN";
+    pivot: DataType | null;
+    data: DataType;
     include_tags: string[];
     exclude_tags: string[];
     width: number;
@@ -96,7 +122,7 @@ const labels = computed(() => {
   } else if (props.options.data === "GAME_SIZE") {
     return ["Teensy", "1 Minion", "2 Minions", "3 Minions"];
   } else if (props.options.data === "WIN") {
-    return ["Yes", "No"];
+    return ["Win", "Loss"];
   } else {
     return [];
   }
@@ -129,12 +155,7 @@ const datasets = computed(() => {
             game.player_characters[game.player_characters.length - 1]?.role
               ?.type === "DEMON",
         ],
-        [
-          (c) => colord(c).mix(colord("#0000FF"), 0.15).toHex(),
-          (c) => colord(c).mix(colord("#ADD8E6"), 0.15).toHex(),
-          (c) => colord(c).mix(colord("#FFC0CB"), 0.15).toHex(),
-          (c) => colord(c).mix(colord("#FF0000"), 0.15).toHex(),
-        ]
+        [colors.townsfolk, colors.outsider, colors.minion, colors.demon]
       ) ?? [
         {
           data: [
@@ -159,7 +180,7 @@ const datasets = computed(() => {
                   ?.type === "DEMON"
             ).length,
           ],
-          backgroundColor: ["#0000FF", "#ADD8E6", "#FFC0CB", "#FF0000"],
+          backgroundColor: [colors.townsfolk, colors.outsider, colors.minion, colors.demon],
         },
       ]
     );
@@ -175,10 +196,7 @@ const datasets = computed(() => {
             game.player_characters[game.player_characters.length - 1]
               ?.alignment === "EVIL",
         ],
-        [
-          (c) => colord(c).mix(colord("#0000FF"), 0.15).toHex(),
-          (c) => colord(c).mix(colord("#FF0000"), 0.15).toHex(),
-        ]
+        [colors.good, colors.evil]
       ) ?? [
         {
           data: [
@@ -193,7 +211,7 @@ const datasets = computed(() => {
                   ?.alignment === "EVIL"
             ).length,
           ],
-          backgroundColor: ["#0000FF", "#FF0000"],
+          backgroundColor: [colors.good, colors.evil],
         },
       ]
     );
@@ -205,14 +223,9 @@ const datasets = computed(() => {
           (game) => game.script === Script.TroubleBrewing,
           (game) => game.script === Script.BadMoonRising,
           (game) => game.script === Script.SectsAndViolets,
-          (game) => isBaseScript(game.script),
+          (game) => !isBaseScript(game.script),
         ],
-        [
-          (c) => colord(c).mix(colord("#FF0000"), 0.15).toHex(),
-          (c) => colord(c).mix(colord("#FFFF00"), 0.15).toHex(),
-          (c) => colord(c).mix(colord("#800080"), 0.15).toHex(),
-          (c) => colord(c).mix(colord("#008000"), 0.15).toHex(),
-        ]
+        [colors.tb, colors.bmr, colors.snv, colors.custom]
       ) ?? [
         {
           data: [
@@ -221,9 +234,9 @@ const datasets = computed(() => {
             games.filter((game) => game.script === Script.BadMoonRising).length,
             games.filter((game) => game.script === Script.SectsAndViolets)
               .length,
-            games.filter((game) => isBaseScript(game.script)).length,
+            games.filter((game) => !isBaseScript(game.script)).length,
           ],
-          backgroundColor: ["#FF0000", "#FFFF00", "#800080", "#008000"],
+          backgroundColor: [colors.tb, colors.bmr, colors.snv, colors.custom],
         },
       ]
     );
@@ -243,12 +256,7 @@ const datasets = computed(() => {
             game.player_count <= 13,
           (game) => !!game.player_count && game.player_count > 13,
         ],
-        [
-          (c) => colord(c).mix(colord("#ADD8E6"), 0.15).toHex(),
-          (c) => colord(c).mix(colord("#0000FF"), 0.15).toHex(),
-          (c) => colord(c).mix(colord("#800080"), 0.15).toHex(),
-          (c) => colord(c).mix(colord("#FF0000"), 0.15).toHex(),
-        ]
+        [colors.teensy, colors.small, colors.medium, colors.large]
       ) ?? [
         {
           data: [
@@ -269,7 +277,7 @@ const datasets = computed(() => {
             games.filter((game) => game.player_count && game.player_count > 13)
               .length,
           ],
-          backgroundColor: ["#ADD8E6", "#0000FF", "#800080", "#FF0000"],
+          backgroundColor: [colors.teensy, colors.small, colors.medium, colors.large],
         },
       ]
     );
@@ -281,17 +289,14 @@ const datasets = computed(() => {
           (game) => game.win === WinStatus.WIN,
           (game) => game.win === WinStatus.LOSS,
         ],
-        [
-          (c) => colord(c).mix(colord("#0000FF"), 0.15).toHex(),
-          (c) => colord(c).mix(colord("#FF0000"), 0.15).toHex(),
-        ]
+        [colors.win, colors.loss]
       ) ?? [
         {
           data: [
             games.filter((game) => game.win === WinStatus.WIN).length,
             games.filter((game) => game.win === WinStatus.LOSS).length,
           ],
-          backgroundColor: ["#0000FF", "#FF0000"],
+          backgroundColor: [colors.win, colors.loss],
         },
       ]
     );
@@ -303,8 +308,14 @@ const datasets = computed(() => {
 function getPivot(
   games: GameRecord[],
   validators: ((game: GameRecord) => boolean)[],
-  mixColors: ((color: string) => string)[]
+  dataColors: string[]
 ) {
+  if (props.options.pivot === null) return null
+
+  const getColor = (categoryColor: string) => props.options.type === "BAR"
+    ? categoryColor
+    : dataColors
+
   if (props.options.pivot === "ROLE") {
     return [
       {
@@ -317,7 +328,7 @@ function getPivot(
                   ?.type === "TOWNSFOLK" && validator(game)
             ).length
         ),
-        backgroundColor: "#0000FF",
+        backgroundColor: getColor(colors.townsfolk),
       },
       {
         label: "Outsider",
@@ -329,7 +340,7 @@ function getPivot(
                   ?.type === "OUTSIDER" && validator(game)
             ).length
         ),
-        backgroundColor: "#ADD8E6",
+        backgroundColor: getColor(colors.outsider),
       },
       {
         label: "Minion",
@@ -341,7 +352,7 @@ function getPivot(
                   ?.type === "MINION" && validator(game)
             ).length
         ),
-        backgroundColor: "#FFC0CB",
+        backgroundColor: getColor(colors.minion),
       },
       {
         label: "Demon",
@@ -353,7 +364,7 @@ function getPivot(
                   ?.type === "DEMON" && validator(game)
             ).length
         ),
-        backgroundColor: "#FF0000",
+        backgroundColor: getColor(colors.demon),
       },
     ];
   } else if (props.options.pivot === "ALIGNMENT") {
@@ -368,7 +379,7 @@ function getPivot(
                   ?.alignment === "GOOD" && validator(game)
             ).length
         ),
-        backgroundColor: "#0000FF",
+        backgroundColor: getColor(colors.good),
       },
       {
         label: "Evil",
@@ -380,7 +391,7 @@ function getPivot(
                   ?.alignment === "EVIL" && validator(game)
             ).length
         ),
-        backgroundColor: "#FF0000",
+        backgroundColor: getColor(colors.evil),
       },
     ];
   } else if (props.options.pivot === "SCRIPT") {
@@ -393,7 +404,7 @@ function getPivot(
               (game) => game.script === Script.TroubleBrewing && validator(game)
             ).length
         ),
-        backgroundColor: "#FF0000",
+        backgroundColor: getColor(colors.tb),
       },
       {
         label: "Bad Moon Rising",
@@ -403,7 +414,7 @@ function getPivot(
               (game) => game.script === Script.BadMoonRising && validator(game)
             ).length
         ),
-        backgroundColor: "#FFFF00",
+        backgroundColor: getColor(colors.bmr),
       },
       {
         label: "Sects and Violets",
@@ -414,16 +425,16 @@ function getPivot(
                 game.script === Script.SectsAndViolets && validator(game)
             ).length
         ),
-        backgroundColor: "#800080",
+        backgroundColor: getColor(colors.snv),
       },
       {
         label: "Custom Script",
         data: validators.map(
           (validator) =>
-            games.filter((game) => isBaseScript(game.script) && validator(game))
+            games.filter((game) => !isBaseScript(game.script) && validator(game))
               .length
         ),
-        backgroundColor: "#008000",
+        backgroundColor: getColor(colors.custom),
       },
     ];
   } else if (props.options.pivot === "GAME_SIZE") {
@@ -437,7 +448,7 @@ function getPivot(
                 game.player_count && game.player_count <= 6 && validator(game)
             ).length
         ),
-        backgroundColor: "#ADD8E6",
+        backgroundColor: getColor(colors.teensy),
       },
       {
         label: "1 Minion",
@@ -451,8 +462,7 @@ function getPivot(
                 validator(game)
             ).length
         ),
-        // Blue
-        backgroundColor: "#0000FF",
+        backgroundColor: getColor(colors.small),
       },
       {
         label: "2 Minions",
@@ -466,8 +476,7 @@ function getPivot(
                 validator(game)
             ).length
         ),
-        // Purple
-        backgroundColor: "#800080",
+        backgroundColor: getColor(colors.medium),
       },
       {
         label: "3 Minions",
@@ -478,31 +487,30 @@ function getPivot(
                 game.player_count && game.player_count > 13 && validator(game)
             ).length
         ),
-        // Red
-        backgroundColor: "#FF0000",
+        backgroundColor: getColor(colors.large),
       },
     ];
   } else if (props.options.pivot === "WIN") {
     return [
       {
-        label: "Yes",
+        label: "Win",
         data: validators.map(
           (validator) =>
             games.filter(
               (game) => game.win === WinStatus.WIN && validator(game)
             ).length
         ),
-        backgroundColor: "#0000FF",
+        backgroundColor: getColor(colors.win),
       },
       {
-        label: "No",
+        label: "Loss",
         data: validators.map(
           (validator) =>
             games.filter(
               (game) => game.win === WinStatus.LOSS && validator(game)
             ).length
         ),
-        backgroundColor: "#FF0000",
+        backgroundColor: getColor(colors.loss),
       },
     ];
   }
