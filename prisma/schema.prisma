@@ -198,7 +198,7 @@ model UserSettings {
   display_name            String
   finished_welcome        Boolean                 @default(false)
   avatar                  String?
-  email                   String                  @default("your@address.here")
+  email                   String                  @unique @default("your@address.here")
   pronouns                String?
   bio                     String                  @default("")
   location                String?
