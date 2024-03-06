@@ -226,14 +226,17 @@ model UserSettings {
   events                  EventAttendee[]
   FeatureFlag             FeatureFlag[]
   waitlisted_events       EventWaitlistAttendee[]
+  payments                KoFiPayment[]
 }
 
 model KoFiPayment {
-  id                      Int      @id @default(autoincrement())
+  id                      Int           @id @default(autoincrement())
   email                   String
-  is_subscription_payment Boolean  @default(false)
+  is_subscription_payment Boolean       @default(false)
   timestamp               DateTime
   expires_at              DateTime
+  user                    UserSettings? @relation(fields: [user_id], references: [user_id])
+  user_id                 String?
 }
 
 enum PrivacySetting {
