@@ -228,6 +228,14 @@ model UserSettings {
   waitlisted_events       EventWaitlistAttendee[]
 }
 
+model KoFiPayment {
+  id                      Int      @id @default(autoincrement())
+  email                   String
+  is_subscription_payment Boolean  @default(false)
+  timestamp               DateTime
+  expires_at              DateTime
+}
+
 enum PrivacySetting {
   PUBLIC
   PRIVATE
