@@ -1,5 +1,6 @@
 import { PrismaClient, PrivacySetting } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
+import { addUserKofiLevel } from "../utils/addUserKofiLevel";
 
 const prisma = new PrismaClient();
 
@@ -146,6 +147,8 @@ export default defineEventHandler(async (handler) => {
     },
   });
 
+  const usersWithKofiLevel = await Promise.all(users.map(addUserKofiLevel));
+
   const roles = await prisma.role.findMany({
     where: {
       name: {
@@ -176,7 +179,7 @@ export default defineEventHandler(async (handler) => {
 
   return {
     communities,
-    users,
+    users: usersWithKofiLevel,
     scripts: scripts.reduce((acc, script) => {
       if (!acc.some((s) => s.script_id === script.script_id)) {
         acc.push(script);
