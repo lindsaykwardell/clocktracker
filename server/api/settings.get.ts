@@ -138,5 +138,18 @@ export default defineEventHandler(async (handler) => {
     },
   });
 
+  // connect KoFi payments that were made with the same email address
+  await prisma.koFiPayment.updateMany({
+    where: {
+      email: user.email,
+      user_id: {
+        equals: null,
+      },
+    },
+    data: {
+      user_id: user.id,
+    },
+  });
+
   return addUserKofiLevel(newSettings);
 });
