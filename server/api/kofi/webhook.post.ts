@@ -38,6 +38,13 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
+  // find the matching user, if any
+  const user = await prisma.userSettings.findFirst({
+    where: {
+      email: body.data.email,
+    },
+  });
+
   await prisma.koFiPayment.create({
     data: {
       email: body.data.email,
@@ -47,6 +54,7 @@ export default defineEventHandler(async (handler) => {
         .add(1, "month")
         .endOf("month")
         .toDate(),
+      user_id: user?.user_id,
     },
   });
 
