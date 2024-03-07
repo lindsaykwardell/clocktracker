@@ -5,10 +5,8 @@
   "description": "",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "prisma db pull && prisma generate && tsc",
-    "start": "pm2 start dist/index.js",
-    "reload": "pm2 reload dist/index.js",
-    "stop": "pm2 stop dist/index.js"
+    "build": "tsc",
+    "start": "node dist/index.js"
   },
   "keywords": [],
   "author": "Lindsay Wardell",
@@ -16,10 +14,10 @@
     "@prisma/client": "^5.10.2",
     "@supabase/supabase-js": "^2.39.7",
     "discord.js": "^14.14.1",
-    "dotenv": "^16.4.5",
-    "pm2": "^5.3.1"
+    "dotenv": "^16.4.5"
   },
   "devDependencies": {
+    "@flydotio/dockerfile": "^0.5.2",
     "@types/node": "^20.11.24",
     "nodemon": "^3.1.0",
     "prisma": "^5.10.2",
