@@ -49,6 +49,7 @@
         <button
           type="button"
           v-if="token.is_dead || token.used_ghost_vote"
+          :disabled="readonly"
           class="absolute top-0 left-0 z-20 flex justify-center w-full duration-200"
           :class="{
             'cursor-default': readonly,
