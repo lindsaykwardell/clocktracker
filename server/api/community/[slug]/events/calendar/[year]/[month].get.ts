@@ -57,6 +57,7 @@ export default defineEventHandler(async (handler) => {
       registered_players: {
         select: {
           name: true,
+          discord_user_id: true,
           created_at: true,
           user: {
             select: {
@@ -80,6 +81,7 @@ export default defineEventHandler(async (handler) => {
             select: {
               name: true,
               created_at: true,
+              discord_user_id: true,
               user: {
                 select: {
                   user_id: true,
