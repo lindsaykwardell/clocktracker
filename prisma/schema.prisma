@@ -382,13 +382,14 @@ enum WhoCanRegister {
 }
 
 model EventAttendee {
-  id         Int           @id @default(autoincrement())
-  event      Event         @relation(fields: [event_id], references: [id])
-  event_id   String
-  name       String
-  user       UserSettings? @relation(fields: [user_id], references: [user_id])
-  user_id    String?
-  created_at DateTime      @default(now()) @db.Timestamptz(6)
+  id              Int           @id @default(autoincrement())
+  event           Event         @relation(fields: [event_id], references: [id])
+  event_id        String
+  name            String
+  user            UserSettings? @relation(fields: [user_id], references: [user_id])
+  user_id         String?
+  discord_user_id String?
+  created_at      DateTime      @default(now()) @db.Timestamptz(6)
 }
 
 model EventWaitlist {
@@ -402,11 +403,12 @@ model EventWaitlist {
 }
 
 model EventWaitlistAttendee {
-  id          Int           @id @default(autoincrement())
-  waitlist    EventWaitlist @relation(fields: [waitlist_id], references: [id])
-  waitlist_id Int
-  name        String
-  user        UserSettings? @relation(fields: [user_id], references: [user_id])
-  user_id     String?
-  created_at  DateTime      @default(now()) @db.Timestamptz(6)
+  id              Int           @id @default(autoincrement())
+  waitlist        EventWaitlist @relation(fields: [waitlist_id], references: [id])
+  waitlist_id     Int
+  name            String
+  user            UserSettings? @relation(fields: [user_id], references: [user_id])
+  user_id         String?
+  discord_user_id String?
+  created_at      DateTime      @default(now()) @db.Timestamptz(6)
 }
