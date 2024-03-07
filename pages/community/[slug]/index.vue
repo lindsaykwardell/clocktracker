@@ -50,6 +50,13 @@
                       class="border-stone-800"
                     />
                   </nuxt-link>
+                  <template v-else-if="player.discord_user_id">
+                    <Avatar
+                      value="/img/discord.png"
+                      size="xs"
+                      class="border-stone-800"
+                    />
+                  </template>
                   <template v-else>
                     <Avatar
                       value="/img/default.png"
