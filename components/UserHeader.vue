@@ -36,6 +36,16 @@
             </svg>
             <span>{{ player.location }}</span>
           </div>
+          <div
+            v-if="player.kofi_level"
+            class="md:text-lg text-stone-400 flex gap-2 items-center"
+          >
+            <KoFi />
+            <span v-if="player.kofi_level === 'ONE_TIME'">Supporter</span>
+            <span v-else-if="player.kofi_level === 'SUBSCRIBER'">
+              Subscriber
+            </span>
+          </div>
         </div>
         <FriendButton
           v-if="user && !isUser"
@@ -64,6 +74,7 @@ const props = defineProps<{
     pronouns: string | null;
     bio: string;
     location: string | null;
+    kofi_level: string | null;
   };
 }>();
 

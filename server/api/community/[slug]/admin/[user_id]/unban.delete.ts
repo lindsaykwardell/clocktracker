@@ -1,5 +1,6 @@
 import type { User } from "@supabase/supabase-js";
 import { PrismaClient } from "@prisma/client";
+import { addUserKofiLevel } from "~/server/utils/addUserKofiLevel";
 
 const prisma = new PrismaClient();
 
@@ -77,5 +78,5 @@ export default defineEventHandler(async (handler) => {
     },
   });
 
-  return user;
+  return addUserKofiLevel(user);
 });

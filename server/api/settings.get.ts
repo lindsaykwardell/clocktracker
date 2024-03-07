@@ -1,5 +1,6 @@
 import type { User } from "@supabase/supabase-js";
 import { PrismaClient } from "@prisma/client";
+import { addUserKofiLevel } from "../utils/addUserKofiLevel";
 
 const prisma = new PrismaClient();
 
@@ -68,7 +69,7 @@ export default defineEventHandler(async (handler) => {
 
     settings.discord_id = user.user_metadata.provider_id;
 
-    return settings;
+    return addUserKofiLevel(settings);
   }
 
   const existingUsername = user.user_metadata.full_name
@@ -137,5 +138,18 @@ export default defineEventHandler(async (handler) => {
     },
   });
 
-  return newSettings;
+  // connect KoFi payments that were made with the same email address
+  await prisma.koFiPayment.updateMany({
+    where: {
+      email: user.email,
+      user_id: {
+        equals: null,
+      },
+    },
+    data: {
+      user_id: user.id,
+    },
+  });
+
+  return addUserKofiLevel(newSettings);
 });
