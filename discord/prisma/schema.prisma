@@ -170,7 +170,7 @@ model UserSettings {
   username                String                  @unique
   finished_welcome        Boolean                 @default(false)
   avatar                  String?
-  email                   String                  @default("your@address.here")
+  email                   String                  @unique @default("your@address.here")
   bio                     String                  @default("")
   display_name            String
   location                String?
@@ -194,6 +194,7 @@ model UserSettings {
   sent_friend_requests    FriendRequest[]         @relation("Sender")
   friend_requests         FriendRequest[]         @relation("Receiver")
   games                   Game[]
+  KoFiPayment             KoFiPayment[]
   token                   Token[]
   community_admin         Community[]             @relation("CommunityAdmin")
   community_banned        Community[]             @relation("CommunityBanned")
@@ -309,13 +310,14 @@ model Event {
 }
 
 model EventAttendee {
-  id         Int           @id @default(autoincrement())
-  event_id   String
-  name       String
-  user_id    String?
-  created_at DateTime      @default(now()) @db.Timestamptz(6)
-  event      Event         @relation(fields: [event_id], references: [id])
-  user       UserSettings? @relation(fields: [user_id], references: [user_id])
+  id              Int           @id @default(autoincrement())
+  event_id        String
+  name            String
+  user_id         String?
+  created_at      DateTime      @default(now()) @db.Timestamptz(6)
+  discord_user_id String?
+  event           Event         @relation(fields: [event_id], references: [id])
+  user            UserSettings? @relation(fields: [user_id], references: [user_id])
 }
 
 model EventWaitlist {
@@ -329,13 +331,14 @@ model EventWaitlist {
 }
 
 model EventWaitlistAttendee {
-  id          Int           @id @default(autoincrement())
-  waitlist_id Int
-  name        String
-  user_id     String?
-  created_at  DateTime      @default(now()) @db.Timestamptz(6)
-  user        UserSettings? @relation(fields: [user_id], references: [user_id])
-  waitlist    EventWaitlist @relation(fields: [waitlist_id], references: [id])
+  id              Int           @id @default(autoincrement())
+  waitlist_id     Int
+  name            String
+  user_id         String?
+  created_at      DateTime      @default(now()) @db.Timestamptz(6)
+  discord_user_id String?
+  user            UserSettings? @relation(fields: [user_id], references: [user_id])
+  waitlist        EventWaitlist @relation(fields: [waitlist_id], references: [id])
 }
 
 model EventDiscordPost {
@@ -346,6 +349,16 @@ model EventDiscordPost {
   Event      Event    @relation(fields: [event_id], references: [id])
 
   @@id([channel_id, message_id])
+}
+
+model KoFiPayment {
+  id                      Int           @id @default(autoincrement())
+  email                   String
+  is_subscription_payment Boolean       @default(false)
+  timestamp               DateTime
+  expires_at              DateTime
+  user_id                 String?
+  UserSettings            UserSettings? @relation(fields: [user_id], references: [user_id])
 }
 
 enum WinStatus {
