@@ -1,5 +1,6 @@
 import { PrismaClient, PrivacySetting } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
+import { addUserKofiLevel } from "~/server/utils/addUserKofiLevel";
 
 const prisma = new PrismaClient();
 
@@ -137,5 +138,5 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  return user;
+  return addUserKofiLevel(user);
 });
