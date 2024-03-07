@@ -35,6 +35,17 @@
                   />
                   <div>{{ player.name }}</div>
                 </nuxt-link>
+                <div
+                  v-else-if="player.discord_user_id"
+                  class="flex gap-2 items-center"
+                >
+                  <Avatar
+                    value="/img/discord.png"
+                    size="xs"
+                    class="border-stone-800"
+                  />
+                  <div>{{ player.name }}</div>
+                </div>
                 <div v-else class="flex gap-2 items-center">
                   <Avatar
                     value="/img/default.png"
