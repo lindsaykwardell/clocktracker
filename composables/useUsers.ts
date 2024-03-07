@@ -21,6 +21,7 @@ export type User = {
   charts: Chart[];
   bgg_username: string | null;
   enable_bgstats: boolean;
+  kofi_level: string;
   communities?: {
     id: number;
     name: string;
