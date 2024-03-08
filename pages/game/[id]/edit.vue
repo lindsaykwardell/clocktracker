@@ -58,6 +58,7 @@ const game = reactive<{
     role?: {
       token_url: string;
       initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+      type: string;
     };
     related_role?: { token_url: string };
   }[];
