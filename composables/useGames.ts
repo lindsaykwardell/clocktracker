@@ -57,6 +57,9 @@ export type GameRecord = Omit<Game, "win"> & {
       };
       related_role?: { token_url: string };
       reminders: ReminderToken[];
+      player?: {
+        username: string;
+      };
     })[];
   })[];
   parent_game?: {
