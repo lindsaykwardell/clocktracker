@@ -39,7 +39,10 @@
         </nuxt-link>
         <template v-if="user">
           <NavLink id="my-profile" to="/" icon="innkeeper">
-            My Profile
+            <template v-if="featureFlags.isEnabled('dashboard')">
+              Dashboard
+            </template>
+            <template v-else>My Profile</template>
           </NavLink>
           <NavLink id="search" to="/search" icon="investigator">
             Search
@@ -110,6 +113,7 @@
 <script setup lang="ts">
 const user = useSupabaseUser();
 const friends = useFriends();
+const featureFlags = useFeatureFlags();
 
 const showMenu = ref(false);
 

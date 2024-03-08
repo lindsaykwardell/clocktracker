@@ -99,6 +99,13 @@ export default defineEventHandler(async (handler) => {
           created_at: "asc",
         },
       },
+      community: {
+        select: {
+          name: true,
+          slug: true,
+          icon: true,
+        },
+      },
     },
   });
 

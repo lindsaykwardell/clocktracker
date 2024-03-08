@@ -34,7 +34,17 @@
         <div
           class="flex-grow items-center justify-center flex font-dumbledor text-3xl"
         >
-          <Token :character="gamesStore.getLastCharater(game.id)" size="lg" />
+          <Token
+            v-if="
+              gamesStore.getLastCharater(game.id).name ||
+              gamesStore.getLastCharater(game.id).alignment !== 'NEUTRAL'
+            "
+            :character="gamesStore.getLastCharater(game.id)"
+            size="lg"
+          />
+          <div v-else class="bg-black/25 flex justify-center">
+            <img :src="scripts.scriptLogo(game.script)" class="w-2/3" />
+          </div>
         </div>
         <div class="absolute w-full top-0 left-0" />
         <img

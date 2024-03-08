@@ -82,6 +82,11 @@ export type Event = {
       };
     }[];
   }[];
+  community: {
+    name: string;
+    slug: string;
+    icon: string;
+  };
 };
 
 export const useCommunities = defineStore("communities", {

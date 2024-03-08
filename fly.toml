@@ -1,15 +1,15 @@
-# fly.toml app configuration file generated for clocktracker on 2023-10-02T08:43:42-07:00
+# fly.toml app configuration file generated for clocktracker on 2024-03-08T06:23:24-07:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = "clocktracker"
-primary_region = "sea"
+app = 'clocktracker'
+primary_region = 'sea'
 
 [build]
 
 [env]
-  PORT = "8080"
+  PORT = '8080'
 
 [http_service]
   internal_port = 8080
@@ -17,4 +17,9 @@ primary_region = "sea"
   auto_stop_machines = true
   auto_start_machines = true
   min_machines_running = 0
-  processes = ["app"]
+  processes = ['app']
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
