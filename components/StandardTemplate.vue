@@ -38,9 +38,7 @@
           />
         </nuxt-link>
         <template v-if="user">
-          <NavLink id="my-profile" to="/" icon="innkeeper">
-            My Profile
-          </NavLink>
+          <NavLink id="my-profile" to="/" icon="innkeeper"> Dashboard </NavLink>
           <NavLink id="search" to="/search" icon="investigator">
             Search
           </NavLink>
