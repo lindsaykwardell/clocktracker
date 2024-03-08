@@ -40,7 +40,14 @@
             </a>
           </td>
           <td>
-            <Token :character="gamesStore.getLastCharater(game.id)" size="sm" />
+            <Token
+              v-if="
+                gamesStore.getLastCharater(game.id).name ||
+                gamesStore.getLastCharater(game.id).alignment !== 'NEUTRAL'
+              "
+              :character="gamesStore.getLastCharater(game.id)"
+              size="sm"
+            />
           </td>
           <td class="hidden md:table-cell">{{ formatDate(game.date) }}</td>
           <td>
