@@ -1024,7 +1024,7 @@ const badMoonRising = computed(() =>
 function addCharacter() {
   props.game.player_characters.push({
     name: "",
-    alignment: props.game.player_characters[0]?.alignment || "GOOD",
+    alignment: props.game.player_characters[0]?.alignment || "NEUTRAL",
     related: "",
     showRelated: false,
     role_id: null,
@@ -1208,8 +1208,16 @@ function openRoleSelectionDialog(
 }
 
 function toggleAlignment(token: Character) {
-  if (token.role) {
-    token.alignment = token.alignment === "GOOD" ? "EVIL" : "GOOD";
+  switch (token.alignment) {
+    case "GOOD":
+      token.alignment = "EVIL";
+      break;
+    case "EVIL":
+      token.alignment = "NEUTRAL";
+      break;
+    case "NEUTRAL":
+      token.alignment = "GOOD";
+      break;
   }
 }
 
@@ -1222,25 +1230,46 @@ function selectRoleForToken(role: {
 }) {
   if (focusedToken) {
     if (tokenMode.value === "role") {
-      focusedToken.role = {
-        token_url: role.token_url,
-        initial_alignment: role.initial_alignment,
-      };
-      focusedToken.role_id = role.id;
-      focusedToken.alignment = role.initial_alignment;
-      focusedToken.related_role = {
-        token_url: "/1x1.png",
-      };
-      focusedToken.name = role.name;
+      console.log(role);
+      if (role.id) {
+        focusedToken.role = {
+          token_url: role.token_url,
+          initial_alignment: role.initial_alignment,
+        };
+        focusedToken.role_id = role.id;
+        focusedToken.alignment = role.initial_alignment;
+        focusedToken.related_role = {
+          token_url: "/1x1.png",
+        };
+        focusedToken.name = role.name;
+      } else {
+        focusedToken.role = undefined;
+        focusedToken.role_id = undefined;
+        focusedToken.alignment = "NEUTRAL";
+        focusedToken.related_role = {
+          token_url: "/1x1.png",
+        };
+        focusedToken.name = "";
+      }
     } else {
-      focusedToken.related_role = {
-        token_url: role.token_url,
-      };
-      focusedToken.related_role_id = role.id;
-      focusedToken.related = role.name;
+      if (role.id) {
+        focusedToken.related_role = {
+          token_url: role.token_url,
+        };
+        focusedToken.related_role_id = role.id;
+        focusedToken.related = role.name;
+      } else {
+        focusedToken.related_role = {
+          token_url: "/1x1.png",
+        };
+        focusedToken.related_role_id = undefined;
+        focusedToken.related = "";
+      }
     }
   }
   showRoleSelectionDialog.value = false;
+
+  console.log(focusedToken);
 }
 
 watchEffect(() => {
@@ -1402,9 +1431,7 @@ watch(
       });
     });
 
-    if (myCharacters.length > 0) {
-      props.game.player_characters = myCharacters;
-    }
+    props.game.player_characters = myCharacters;
   },
   { deep: true }
 );

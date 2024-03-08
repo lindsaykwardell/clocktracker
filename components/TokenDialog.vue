@@ -69,6 +69,14 @@ const props = defineProps<{
 
 const emit = defineEmits(["update:visible", "selectRole"]);
 
+const blankRole = computed(() => ({
+  type: RoleType.TOWNSFOLK,
+  id: "",
+  token_url: "",
+  name: "",
+  initialAlignment: Alignment.NEUTRAL,
+}));
+
 const showAllRoles = ref(props.alwaysShowAllRoles || false);
 const hideAllRolesToggle = computed(
   () =>
@@ -121,6 +129,8 @@ const demons = computed(() => {
   return filteredRoles.value.filter((role) => role.type === "DEMON");
 });
 
+const blank = computed(() => [blankRole.value as any as Role]);
+
 const travelers = computed(() => {
   return filteredRoles.value.filter((role) => role.type === "TRAVELER");
 });
@@ -146,6 +156,10 @@ const roleGroups = computed(() => {
     {
       name: "Demons",
       roles: demons.value,
+    },
+    {
+      name: "Blank",
+      roles: blank.value,
     },
     {
       name: "Travelers",
