@@ -9,6 +9,6 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
       return;
     }
 
-    return navigateTo(`/@${settings.data.value.username}`);
+    return navigateTo(`/dashboard`);
   }
 });
