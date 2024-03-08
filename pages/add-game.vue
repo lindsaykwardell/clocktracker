@@ -158,7 +158,6 @@ const game = reactive<{
 
 const formattedGame = computed(() => ({
   ...game,
-  date: dayjs(game.date).toISOString(),
   player_count: game.player_count || null,
   player_characters: game.player_characters.map((character) => ({
     name: character.name,
