@@ -122,13 +122,17 @@
             />
           </ClientOnly>
         </div>
-        <a
+        <nuxt-link
           v-else-if="token.player_id"
-          :href="`/${token.player_name}`"
+          :to="`/${
+            token.player?.username
+              ? `@${token.player.username}`
+              : token.player_name
+          }`"
           class="bg-green-800 rounded p-1 border-2 border-green-700 text-center text-ellipsis text-xs md:text-sm max-w-[5rem] md:max-w-[7rem] overflow-hidden whitespace-nowrap hover:bg-blue-800 hover:border-blue-700 transition duration-150 hover:underline"
         >
           {{ token.player_name }}
-        </a>
+        </nuxt-link>
         <span
           v-else-if="token.player_name"
           class="bg-stone-600 rounded p-1 border-2 border-stone-500 text-center text-ellipsis text-xs md:text-sm max-w-[150px] overflow-hidden whitespace-nowrap"
@@ -173,6 +177,9 @@ type Token = {
   reminders: { reminder: string; token_url: string }[];
   player_name: string;
   player_id?: string | null;
+  player?: {
+    username: string;
+  };
 };
 
 const friends = useFriends();
@@ -233,7 +240,13 @@ const allTaggablePlayers = computed(() => {
   return [
     ...potentiallyTaggedPlayers.value,
     ...previouslyTaggedPlayers.value,
-  ].filter((player) => player);
+  ].filter(
+    (player, index, array) =>
+      player &&
+      array.findIndex(
+        (p) => p.user_id === player.user_id && p.username === player.username
+      ) === index
+  );
 });
 
 const props = defineProps<{
@@ -340,6 +353,7 @@ function checkIfPlayerNameIsFriend(token: Token) {
     );
     if (player) {
       if (token.player_id !== player.user_id) {
+        token.player_name = player.display_name || token.player_name;
         token.player_id = player.user_id;
       }
     } else {
@@ -349,7 +363,13 @@ function checkIfPlayerNameIsFriend(token: Token) {
     }
   } else {
     if (token.player_id) {
-      token.player_id = undefined;
+      const player = potentiallyTaggedPlayers.value.find(
+        (player) => player?.user_id === token.player_id
+      );
+
+      if (!player || player.display_name !== token.player_name) {
+        token.player_id = undefined;
+      }
     }
   }
 }

@@ -75,6 +75,11 @@ export default defineEventHandler(async (handler) => {
               role: true,
               related_role: true,
               reminders: true,
+              player: {
+                select: {
+                  username: true,
+                }
+              }
             },
           },
         },
