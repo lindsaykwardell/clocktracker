@@ -27,8 +27,9 @@ export const data = new SlashCommandBuilder()
 
 export async function execute(interaction: CommandInteraction<CacheType>) {
   const event_id = interaction.options.get("id").value as string;
+  const guild_id = interaction.guildId;
 
-  const event = await findEvent(event_id);
+  const event = await findEvent(guild_id, event_id);
 
   if (!event) {
     return interaction.reply({
@@ -37,7 +38,7 @@ export async function execute(interaction: CommandInteraction<CacheType>) {
     });
   }
 
-  const { embed, row } = await buildEmbed(event_id);
+  const { embed, row } = await buildEmbed(guild_id, event_id);
 
   const response = await interaction.reply({
     embeds: [embed],
@@ -55,6 +56,8 @@ export async function execute(interaction: CommandInteraction<CacheType>) {
 }
 
 export async function handleRegisterButtonClick(i) {
+  const guild_id = i.guildId;
+
   const user: UserSettings | null = await getClocktrackerUser(i.user);
   const selection = i.customId;
 
@@ -79,47 +82,63 @@ export async function handleRegisterButtonClick(i) {
     });
   }
 
-  const name = user.display_name || i.user.username;
+  const name = user?.display_name || i.user.username;
   const user_id = user?.user_id;
+  const discord_user_id = i.user.id;
 
   if (selection === "register") {
-    if (user_id) {
-      const registered = await prisma.eventAttendee.findFirst({
+    const registered = await prisma.eventAttendee.findFirst({
+      where: {
+        event_id: event.id,
+        OR: [
+          {
+            user_id,
+          },
+          {
+            discord_user_id,
+          },
+        ],
+      },
+    });
+
+    await prisma.eventWaitlistAttendee.deleteMany({
+      where: {
+        waitlist: {
+          event_id: event.id,
+        },
+        OR: [
+          {
+            user_id,
+          },
+          {
+            discord_user_id,
+          },
+        ],
+      },
+    });
+
+    if (registered) {
+      await prisma.eventAttendee.deleteMany({
         where: {
           event_id: event.id,
-          user_id: user_id,
+          OR: [
+            {
+              user_id,
+            },
+            {
+              discord_user_id,
+            },
+          ],
         },
       });
-
-      await prisma.eventWaitlistAttendee.deleteMany({
-        where: {
-          waitlist: {
-            event_id: event.id,
-          },
-          user_id: user_id,
-        },
-      });
-
-      if (registered) {
-        await prisma.eventAttendee.deleteMany({
-          where: {
-            event_id: event.id,
-            user_id: user_id,
-          },
-        });
-      } else {
-        await prisma.eventAttendee.create({
-          data: {
-            event_id: event.id,
-            user_id: user_id,
-            name,
-          },
-        });
-      }
     } else {
-      await i.reply({
-        content: "You must link your Clocktracker account to register",
-        ephemeral: true,
+      await prisma.eventAttendee.create({
+        data: {
+          event_id: event.id,
+          user_id: user_id,
+          discord_user_id,
+          name,
+        },
       });
     }
   }
@@ -130,14 +149,28 @@ export async function handleRegisterButtonClick(i) {
         const waitlisted = await prisma.eventWaitlistAttendee.findFirst({
           where: {
             waitlist_id: waitlist.id,
-            user_id: user_id,
+            OR: [
+              {
+                user_id,
+              },
+              {
+                discord_user_id,
+              },
+            ],
           },
         });
 
         await prisma.eventAttendee.deleteMany({
           where: {
             event_id: event.id,
-            user_id: user_id,
+            OR: [
+              {
+                user_id,
+              },
+              {
+                discord_user_id,
+              },
+            ],
           },
         });
 
@@ -149,7 +182,14 @@ export async function handleRegisterButtonClick(i) {
             waitlist_id: {
               not: waitlist.id,
             },
-            user_id: user_id,
+            OR: [
+              {
+                user_id,
+              },
+              {
+                discord_user_id,
+              },
+            ],
           },
         });
 
@@ -157,14 +197,22 @@ export async function handleRegisterButtonClick(i) {
           await prisma.eventWaitlistAttendee.deleteMany({
             where: {
               waitlist_id: waitlist.id,
-              user_id: user_id,
+              OR: [
+                {
+                  user_id,
+                },
+                {
+                  discord_user_id,
+                },
+              ],
             },
           });
         } else {
           await prisma.eventWaitlistAttendee.create({
             data: {
               waitlist_id: waitlist.id,
-              user_id: user_id,
+              user_id,
+              discord_user_id,
               name,
             },
           });
@@ -173,7 +221,7 @@ export async function handleRegisterButtonClick(i) {
     }
   }
 
-  const updated = await buildEmbed(event_id);
+  const updated = await buildEmbed(guild_id, event_id);
 
   i.update({
     embeds: [updated.embed],
@@ -192,8 +240,8 @@ async function getClocktrackerUser(user: User): Promise<UserSettings | null> {
   return clocktrackerUser;
 }
 
-async function buildEmbed(event_id: string) {
-  const event = await findEvent(event_id);
+async function buildEmbed(guild_id: string, event_id: string) {
+  const event = await findEvent(guild_id, event_id);
   if (!event) {
     throw new Error("No event found with that ID");
   }
@@ -284,30 +332,12 @@ async function buildEmbed(event_id: string) {
   return { embed, row };
 }
 
-function findEvent(event_id: string) {
+function findEvent(guild_id: string, event_id: string) {
   return prisma.event.findUnique({
     where: {
       id: event_id,
       community: {
-        // slug,
-        // banned_users: {
-        //   none: {
-        //     user_id: me?.id || "",
-        //   },
-        // },
-        OR: [
-          {
-            is_private: false,
-          },
-          // {
-          //   members: {
-          //     some: {
-          //       user_id: me?.id || "",
-          //     },
-          //   },
-          //   is_private: true,
-          // },
-        ],
+        discord_server_id: guild_id,
       },
     },
     include: {

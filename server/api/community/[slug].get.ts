@@ -206,6 +206,7 @@ export default defineEventHandler(async (handler) => {
             select: {
               name: true,
               created_at: true,
+              discord_user_id: true,
               user: {
                 select: {
                   username: true,
@@ -227,6 +228,7 @@ export default defineEventHandler(async (handler) => {
                 select: {
                   name: true,
                   created_at: true,
+                  discord_user_id: true,
                   user: {
                     select: {
                       user_id: true,

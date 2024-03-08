@@ -29,6 +29,7 @@ export async function fetchEventAndUpdateDiscord(event_id: string) {
         select: {
           name: true,
           created_at: true,
+          discord_user_id: true,
           user: {
             select: {
               user_id: true,
@@ -51,6 +52,7 @@ export async function fetchEventAndUpdateDiscord(event_id: string) {
             select: {
               name: true,
               created_at: true,
+              discord_user_id: true,
               user: {
                 select: {
                   user_id: true,
