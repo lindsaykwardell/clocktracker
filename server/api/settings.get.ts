@@ -69,6 +69,37 @@ export default defineEventHandler(async (handler) => {
 
     settings.discord_id = user.user_metadata.provider_id;
 
+    if (settings.charts.length <= 0) {
+      const charts = await prisma.chart.createMany({
+        data: [
+          {
+            user_id: settings.user_id,
+            title: "Win Rate",
+            type: "BAR",
+            data: "WIN",
+            pivot: "ROLE",
+            width: 250,
+            height: 250,
+          },
+          {
+            user_id: settings.user_id,
+            title: "Role Types",
+            type: "PIE",
+            data: "ROLE",
+            pivot: null,
+            width: 250,
+            height: 250,
+          },
+        ],
+      });
+
+      settings.charts = await prisma.chart.findMany({
+        where: {
+          user_id: settings.user_id,
+        },
+      });
+    }
+
     return addUserKofiLevel(settings);
   }
 
@@ -101,6 +132,26 @@ export default defineEventHandler(async (handler) => {
       display_name: user.user_metadata.full_name || randomName.display_name,
       avatar: user.user_metadata.avatar_url || "/img/default.png",
       email: user.email,
+      charts: {
+        create: [
+          {
+            title: "Win Rate",
+            type: "BAR",
+            data: "WIN",
+            pivot: "ROLE",
+            width: 250,
+            height: 250,
+          },
+          {
+            title: "Role Types",
+            type: "PIE",
+            data: "ROLE",
+            pivot: null,
+            width: 250,
+            height: 250,
+          },
+        ],
+      },
     },
     select: {
       user_id: true,
