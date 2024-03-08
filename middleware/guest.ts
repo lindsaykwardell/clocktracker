@@ -1,5 +1,6 @@
 export default defineNuxtRouteMiddleware(async (to, from) => {
   const user = useSupabaseUser();
+  const featureFlags = useFeatureFlags();
 
   if (user.value) {
     const settings = await useFetch("/api/settings");
@@ -9,6 +10,10 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
       return;
     }
 
-    return navigateTo(`/dashboard`);
+    if (featureFlags.isEnabled("dashboard")) {
+      return navigateTo(`/dashboard`);
+    }
+
+    return navigateTo(`/@${settings.data.value.username}`);
   }
 });
