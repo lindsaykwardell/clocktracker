@@ -56,7 +56,7 @@
             :games="games"
             :username="username"
           />
-          <Dashboard
+          <UserGamesView
             v-if="currentTab === 'dashboard'"
             :player="player"
             :games="games"
@@ -68,8 +68,8 @@
             >
               Import Games
             </button>
-          </Dashboard>
-          <Dashboard
+          </UserGamesView>
+          <UserGamesView
             v-if="currentTab === 'pending'"
             :player="player"
             :games="pendingGames"
@@ -85,7 +85,7 @@
               </template>
               <template v-else> Add all games to profile </template>
             </button>
-          </Dashboard>
+          </UserGamesView>
         </template>
         <template v-else>
           <p class="text-center text-2xl my-4 font-dumbledor">
