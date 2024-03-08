@@ -19,7 +19,13 @@
         <div v-for="day in week">
           <div
             v-if="day"
-            class="min-h-[100px] md:min-h-[150px] p-1 hover:bg-stone-700"
+            @click="emit('selectDay', day)"
+            class="p-1 hover:bg-stone-700"
+            :class="{
+              'min-h-[100px] md:min-h-[150px]': size !== 'sm',
+              'h-[75px]': size === 'sm',
+              'cursor-pointer': clickableDays,
+            }"
           >
             <span class="text-stone-500">{{ day?.date() }}</span>
             <ul v-if="size !== 'sm'">
@@ -44,6 +50,9 @@
                 </a>
               </li>
             </ul>
+            <div v-else class="flex justify-center text-4xl">
+              <template v-if="eventsOnDay(day).length">·</template>
+            </div>
           </div>
         </div>
       </template>
@@ -58,9 +67,10 @@ import type { Event } from "~/composables/useCommunities";
 const props = defineProps<{
   events: Event[];
   size: "sm" | "md" | "lg";
+  clickableDays?: boolean;
 }>();
 
-const emit = defineEmits(["viewChanged"]);
+const emit = defineEmits(["viewChanged", "selectDay"]);
 
 const year = ref(dayjs().year());
 const month = ref(dayjs().month() + 1);
