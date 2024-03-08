@@ -108,7 +108,7 @@ const game = reactive<{
   player_characters: [
     {
       name: "",
-      alignment: "GOOD",
+      alignment: "NEUTRAL",
       related: "",
       showRelated: false,
       role_id: null,

@@ -298,24 +298,39 @@ function selectRoleForToken(role: {
 }) {
   if (focusedToken.value) {
     if (tokenMode.value === "role") {
-      focusedToken.value.role = {
-        token_url: role.token_url,
-        initial_alignment: role.initial_alignment,
-        type: role.type,
-        name: role.name,
-      };
-      focusedToken.value.role_id = role.id;
-      focusedToken.value.alignment = role.initial_alignment;
-      focusedToken.value.related_role = {
-        token_url: "/1x1.png",
-      };
-      focusedToken.value.related_role_id = null;
+      if (role.id) {
+        focusedToken.value.role = {
+          token_url: role.token_url,
+          initial_alignment: role.initial_alignment,
+          type: role.type,
+          name: role.name,
+        };
+        focusedToken.value.role_id = role.id;
+        focusedToken.value.alignment = role.initial_alignment;
+        focusedToken.value.related_role = {
+          token_url: "/1x1.png",
+        };
+        focusedToken.value.related_role_id = null;
+      } else {
+        focusedToken.value.role = undefined;
+        focusedToken.value.role_id = null;
+        focusedToken.value.alignment = Alignment.NEUTRAL;
+        focusedToken.value.related_role = undefined;
+        focusedToken.value.related_role_id = null;
+      }
     } else {
-      focusedToken.value.related_role = {
-        token_url: role.token_url,
-        name: role.name,
-      };
-      focusedToken.value.related_role_id = role.id;
+      if (role.id) {
+        focusedToken.value.related_role = {
+          token_url: role.token_url,
+          name: role.name,
+        };
+        focusedToken.value.related_role_id = role.id;
+      } else {
+        focusedToken.value.related_role = {
+          token_url: "/1x1.png",
+        };
+        focusedToken.value.related_role_id = null;
+      }
     }
   }
   showRoleSelectionDialog.value = false;
