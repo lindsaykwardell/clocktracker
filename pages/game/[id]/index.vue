@@ -57,7 +57,12 @@
                 {{ formatDate(game.data.date) }}
               </time>
             </div>
-            <div class="font-dumbledor text-2xl">
+            <div
+              v-if="
+                last_character.name || last_character.alignment !== 'NEUTRAL'
+              "
+              class="font-dumbledor text-2xl"
+            >
               <a
                 :href="`/roles/${last_character?.role_id}`"
                 target="_blank"
@@ -423,6 +428,7 @@
 
 <script setup lang="ts">
 import { WinStatus } from "~/composables/useGames";
+import { PrivacySetting } from "@prisma/client";
 import dayjs from "dayjs";
 import VueMarkdown from "vue-markdown-render";
 
