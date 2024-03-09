@@ -5,13 +5,13 @@ WORKDIR /app
 
 COPY . .
 
-RUN yarn install \
-  --prefer-offline \
-  --frozen-lockfile \
-  --non-interactive \
-  --production=false
+RUN npm install
 
-RUN yarn build
+RUN --mount=type=secret,id=SUPABASE_URL \
+    --mount=type=secret,id=SUPABASE_KEY \
+    SUPABASE_URL="$(cat /run/secrets/SUPABASE_URL)" \
+    SUPABASE_KEY="$(cat /run/secrets/SUPABASE_KEY)" \
+    npm run build
 
 FROM node:lts
 
