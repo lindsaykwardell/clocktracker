@@ -35,7 +35,10 @@
               class="flex flex-col items-center"
               @click="emit('selectRole', role)"
             >
-              <Token :character="formatRoleAsCharacter(role)" size="md" />
+              <Token
+                :character="formatRoleAsCharacter(role as any)"
+                size="md"
+              />
               <span>{{ role.name }}</span>
             </button>
           </div>
@@ -46,7 +49,6 @@
 </template>
 
 <script setup lang="ts">
-import { Alignment } from "@prisma/client";
 import type { Role } from "@prisma/client";
 import naturalOrder from "natural-order";
 import { RoleType } from "~/composables/useRoles";
@@ -74,7 +76,7 @@ const blankRole = computed(() => ({
   id: "",
   token_url: "",
   name: "",
-  initialAlignment: Alignment.NEUTRAL,
+  initialAlignment: "NEUTRAL",
 }));
 
 const showAllRoles = ref(props.alwaysShowAllRoles || false);
@@ -172,7 +174,9 @@ const roleGroups = computed(() => {
   ];
 });
 
-function formatRoleAsCharacter(role: Role) {
+function formatRoleAsCharacter(
+  role: Omit<Role, "alignment"> & { alignment: "GOOD" | "EVIL" | "NEUTRAL" }
+) {
   return {
     alignment: role.initial_alignment,
     role,
