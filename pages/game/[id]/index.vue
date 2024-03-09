@@ -428,7 +428,6 @@
 
 <script setup lang="ts">
 import { WinStatus } from "~/composables/useGames";
-import { PrivacySetting } from "@prisma/client";
 import dayjs from "dayjs";
 import VueMarkdown from "vue-markdown-render";
 
@@ -651,7 +650,7 @@ watchEffect(() => {
   const me = users.getUserById(user.value?.id);
 
   if (me.status === Status.SUCCESS) {
-    anonymize.value = me.data.privacy === PrivacySetting.PRIVATE;
+    anonymize.value = me.data.privacy === "PRIVATE";
   }
 });
 

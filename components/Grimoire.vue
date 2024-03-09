@@ -145,7 +145,7 @@
   <TokenDialog
     v-if="availableRoles"
     v-model:visible="showRoleSelectionDialog"
-    :availableRoles="availableRoles"
+    :availableRoles="availableRoles as any"
     @selectRole="selectRoleForToken"
   />
   <ReminderDialog
@@ -157,7 +157,6 @@
 </template>
 
 <script setup lang="ts">
-import { Alignment } from "@prisma/client";
 import { RoleType } from "~/composables/useRoles";
 
 type Token = {
@@ -256,7 +255,7 @@ const props = defineProps<{
     id: string;
     token_url: string;
     name: string;
-    initial_alignment: Alignment;
+    initial_alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
   }[];
   readonly?: boolean;
   excludePlayers?: string[];
@@ -294,7 +293,7 @@ function selectRoleForToken(role: {
   id: string;
   token_url: string;
   name: string;
-  initial_alignment: Alignment;
+  initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
 }) {
   if (focusedToken.value) {
     if (tokenMode.value === "role") {
@@ -314,7 +313,7 @@ function selectRoleForToken(role: {
       } else {
         focusedToken.value.role = undefined;
         focusedToken.value.role_id = null;
-        focusedToken.value.alignment = Alignment.NEUTRAL;
+        focusedToken.value.alignment = "NEUTRAL";
         focusedToken.value.related_role = undefined;
         focusedToken.value.related_role_id = null;
       }
