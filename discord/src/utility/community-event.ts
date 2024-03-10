@@ -405,6 +405,62 @@ export function findEvent(guild_id: string, event_id: string) {
 export async function createEventAndReply(
   interaction: CommandInteraction<CacheType>
 ) {
+  const {
+    name,
+    description,
+    start_date,
+    end_date,
+    location,
+    location_type,
+    player_count,
+    image,
+    waitlists,
+    guild_id,
+  } = formatInputs(interaction);
+
+  const community = await prisma.community.findFirst({
+    where: {
+      discord_server_id: guild_id,
+    },
+  });
+
+  const event = await prisma.event.create({
+    data: {
+      community_id: community.id,
+      title: name,
+      description: description || "",
+      start: start_date,
+      end: end_date,
+      location: location || "",
+      location_type: location_type,
+      player_count: player_count || null,
+      image,
+      waitlists: {
+        createMany: {
+          data: waitlists,
+        },
+      },
+    },
+  });
+
+  const { embed, row } = await buildEmbed(guild_id, event.id);
+
+  const response = await interaction.reply({
+    embeds: [embed],
+    // @ts-ignore
+    components: [row],
+  });
+
+  await prisma.eventDiscordPost.create({
+    data: {
+      event_id: event.id,
+      channel_id: interaction.channel.id,
+      message_id: response.id,
+    },
+  });
+}
+
+function formatInputs(interaction) {
   const name = interaction.options.get("name").value as string;
   const description = interaction.options.get("description")?.value as string;
   const start_date_input = interaction.options.get("start_date")
@@ -486,44 +542,16 @@ export async function createEventAndReply(
     }
   })();
 
-  const community = await prisma.community.findFirst({
-    where: {
-      discord_server_id: guild_id,
-    },
-  });
-
-  const event = await prisma.event.create({
-    data: {
-      community_id: community.id,
-      title: name,
-      description: description || "",
-      start: start_date,
-      end: end_date,
-      location: location || "",
-      location_type: location_type,
-      player_count: player_count || null,
-      image,
-      waitlists: {
-        createMany: {
-          data: waitlists,
-        },
-      },
-    },
-  });
-
-  const { embed, row } = await buildEmbed(guild_id, event.id);
-
-  const response = await interaction.reply({
-    embeds: [embed],
-    // @ts-ignore
-    components: [row],
-  });
-
-  await prisma.eventDiscordPost.create({
-    data: {
-      event_id: event.id,
-      channel_id: interaction.channel.id,
-      message_id: response.id,
-    },
-  });
+  return {
+    name,
+    description,
+    start_date,
+    end_date,
+    location,
+    location_type,
+    player_count,
+    image,
+    waitlists,
+    guild_id,
+  };
 }
