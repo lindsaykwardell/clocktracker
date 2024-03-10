@@ -64,6 +64,12 @@ export const data = new SlashCommandBuilder()
   )
   .addStringOption((option) =>
     option
+      .setName("image")
+      .setDescription("A URL to an image for the event")
+      .setRequired(false)
+  )
+  .addStringOption((option) =>
+    option
       .setName("waitlist_1")
       .setDescription("The first custom waitlist for the event")
       .setRequired(false)
