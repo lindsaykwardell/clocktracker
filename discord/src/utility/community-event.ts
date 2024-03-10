@@ -227,7 +227,9 @@ export async function handleRegisterButtonClick(i) {
   });
 }
 
-export async function getClocktrackerUser(user: User): Promise<UserSettings | null> {
+export async function getClocktrackerUser(
+  user: User
+): Promise<UserSettings | null> {
   const clocktrackerUser = await prisma.userSettings.findUnique({
     where: {
       discord_id: user.id,
@@ -421,10 +423,10 @@ export async function createEventAndReply(
   const guild_id = interaction.guildId;
 
   const location_type = (() => {
-    if (location_type_input === "ONLINE") {
-      return LocationType.ONLINE;
-    } else {
+    if (location_type_input === "IN_PERSON") {
       return LocationType.IN_PERSON;
+    } else {
+      return LocationType.ONLINE;
     }
   })();
 
