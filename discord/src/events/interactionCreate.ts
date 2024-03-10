@@ -3,6 +3,19 @@ import { handleRegisterButtonClick } from "../commands/community/get-event";
 
 export const name = Events.InteractionCreate;
 export async function execute(interaction) {
+  // If the bot is in development mode, only allow commands in the development guild
+  if (
+    process.env.NODE_ENV !== "production" &&
+    interaction.guildId !== process.env.DEV_GUILD_ID
+  ) {
+    return;
+  } // If the bot is in production mode, only allow commands from guilds that aren't development
+  else if (
+    process.env.NODE_ENV === "production" &&
+    interaction.guildId === process.env.PROD_GUILD_ID
+  ) {
+    return;
+  }
   if (interaction.isChatInputCommand()) {
     const command = interaction.client.commands.get(interaction.commandName);
 
