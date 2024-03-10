@@ -1,5 +1,5 @@
 import { Events } from "discord.js";
-import { handleRegisterButtonClick } from "../commands/community/get-event";
+import { handleRegisterButtonClick } from "../utility/community-event";
 
 export const name = Events.InteractionCreate;
 export async function execute(interaction) {
@@ -12,7 +12,7 @@ export async function execute(interaction) {
   } // If the bot is in production mode, only allow commands from guilds that aren't development
   else if (
     process.env.NODE_ENV === "production" &&
-    interaction.guildId === process.env.PROD_GUILD_ID
+    interaction.guildId === process.env.DEV_GUILD_ID
   ) {
     return;
   }
@@ -41,6 +41,21 @@ export async function execute(interaction) {
           ephemeral: true,
         });
       }
+    }
+  } else if (interaction.isAutocomplete()) {
+    const command = interaction.client.commands.get(interaction.commandName);
+
+    if (!command) {
+      console.error(
+        `No command matching ${interaction.commandName} was found.`
+      );
+      return;
+    }
+
+    try {
+      await command.autocomplete(interaction);
+    } catch (error) {
+      console.error(error);
     }
   } else if (interaction.isButton()) {
     handleRegisterButtonClick(interaction);
