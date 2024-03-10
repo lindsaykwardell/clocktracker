@@ -415,6 +415,7 @@ export async function createEventAndReply(
   const location_type_input = interaction.options.get("location_type")
     ?.value as string;
   const player_count = interaction.options.get("player_count")?.value as number;
+  const image = interaction.options.get("image")?.value as string;
   const waitlist_1 = interaction.options.get("waitlist_1")?.value as string;
   const waitlist_2 = interaction.options.get("waitlist_2")?.value as string;
   const waitlist_3 = interaction.options.get("waitlist_3")?.value as string;
@@ -501,6 +502,7 @@ export async function createEventAndReply(
       location: location || "",
       location_type: location_type,
       player_count: player_count || null,
+      image,
       waitlists: {
         createMany: {
           data: waitlists,
