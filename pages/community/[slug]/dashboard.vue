@@ -50,10 +50,20 @@
           </div>
           <label v-if="featureFlags.isEnabled('discord-server-integration')">
             <span class="block">Discord Server ID</span>
-            <input
-              v-model="updatedDiscordServerId"
-              class="block w-full border border-stone-500 bg-stone-600 rounded-md p-2"
-            />
+            <div class="flex gap-2">
+              <input
+                v-model="updatedDiscordServerId"
+                class="block w-full border border-stone-500 bg-stone-600 rounded-md p-2"
+              />
+              <a
+                href="https://discord.com/oauth2/authorize?client_id=1125833336695304323&permissions=549755833344&scope=bot"
+                target="_blank"
+                class="text-center md:text-lg w-[200px] bg-[#5865F2] hover:bg-[#4752C4] transition duration-150 text-white font-bold py-2 px-4 rounded flex justify-center gap-2 items-center"
+              >
+                <Discord />
+                Add Bot
+              </a>
+            </div>
           </label>
           <label>
             <span class="block">Description</span>
