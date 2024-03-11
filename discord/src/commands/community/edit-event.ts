@@ -1,5 +1,5 @@
 import { CacheType, CommandInteraction, SlashCommandBuilder } from "discord.js";
-import { buildEmbed, formatInputs } from "../../utility/community-event";
+import { buildEmbed, formatInputs, handleRegisterButtonClick } from "../../utility/community-event";
 import { PrismaClient } from "@prisma/client";
 import dayjs from "dayjs";
 
@@ -277,3 +277,5 @@ export async function execute(interaction: CommandInteraction<CacheType>) {
     ephemeral: true,
   });
 }
+
+export const handleButton = handleRegisterButtonClick;

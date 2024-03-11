@@ -1,5 +1,9 @@
 import { CacheType, CommandInteraction, SlashCommandBuilder } from "discord.js";
-import { buildEmbed, formatInputs } from "../../utility/community-event";
+import {
+  buildEmbed,
+  formatInputs,
+  handleRegisterButtonClick,
+} from "../../utility/community-event";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -186,3 +190,5 @@ export async function execute(interaction: CommandInteraction<CacheType>) {
     },
   });
 }
+
+export const handleButton = handleRegisterButtonClick;
