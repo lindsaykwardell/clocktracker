@@ -1,5 +1,9 @@
 import { CacheType, CommandInteraction, SlashCommandBuilder } from "discord.js";
-import { buildEmbed, formatInputs, handleRegisterButtonClick } from "../../utility/community-event";
+import {
+  buildEmbed,
+  formatInputs,
+  handleRegisterButtonClick,
+} from "../../utility/community-event";
 import { PrismaClient } from "@prisma/client";
 import dayjs from "dayjs";
 
@@ -79,31 +83,61 @@ export const data = new SlashCommandBuilder()
   .addStringOption((option) =>
     option
       .setName("waitlist_1")
-      .setDescription("The first custom waitlist for the event")
+      .setDescription("Add a custom waitlist for the event")
       .setRequired(false)
   )
   .addStringOption((option) =>
     option
       .setName("waitlist_2")
-      .setDescription("The second custom waitlist for the event")
+      .setDescription("Add a custom waitlist for the event")
       .setRequired(false)
   )
   .addStringOption((option) =>
     option
       .setName("waitlist_3")
-      .setDescription("The third custom waitlist for the event")
+      .setDescription("Add a custom waitlist for the event")
       .setRequired(false)
   )
   .addStringOption((option) =>
     option
       .setName("waitlist_4")
-      .setDescription("The fourth custom waitlist for the event")
+      .setDescription("Add a custom waitlist for the event")
       .setRequired(false)
   )
   .addStringOption((option) =>
     option
       .setName("waitlist_5")
-      .setDescription("The fifth custom waitlist for the event")
+      .setDescription("Add a custom waitlist for the event")
+      .setRequired(false)
+  )
+  .addStringOption((option) =>
+    option
+      .setName("delete_waitlist_1")
+      .setDescription("Remove a custom waitlist for the event")
+      .setRequired(false)
+  )
+  .addStringOption((option) =>
+    option
+      .setName("delete_waitlist_2")
+      .setDescription("Remove a custom waitlist for the event")
+      .setRequired(false)
+  )
+  .addStringOption((option) =>
+    option
+      .setName("delete_waitlist_3")
+      .setDescription("Remove a custom waitlist for the event")
+      .setRequired(false)
+  )
+  .addStringOption((option) =>
+    option
+      .setName("delete_waitlist_4")
+      .setDescription("Remove a custom waitlist for the event")
+      .setRequired(false)
+  )
+  .addStringOption((option) =>
+    option
+      .setName("delete_waitlist_5")
+      .setDescription("Remove a custom waitlist for the event")
       .setRequired(false)
   );
 
@@ -187,6 +221,8 @@ export async function execute(interaction: CommandInteraction<CacheType>) {
     player_count,
     image,
     guild_id,
+    waitlists,
+    removedWaitlists,
   } = formatInputs(interaction, true);
 
   const existing_event = await prisma.event.findUnique({
@@ -197,7 +233,12 @@ export async function execute(interaction: CommandInteraction<CacheType>) {
       },
     },
     include: {
-      waitlists: true,
+      waitlists: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
     },
   });
 
@@ -221,22 +262,14 @@ export async function execute(interaction: CommandInteraction<CacheType>) {
       location_type: location_type || existing_event.location_type,
       player_count: player_count || existing_event.player_count,
       image: image || existing_event.image,
-      // waitlists: {
-      //   delete: existing_event.waitlists.filter((waitlist) =>
-      //     waitlists.every((newWaitlist) => newWaitlist !== waitlist.name)
-      //   ),
-      //   createMany: {
-      //     data: waitlists
-      //       .filter((waitlist) =>
-      //         existing_event.waitlists.every(
-      //           (existingWaitlist) => existingWaitlist.name !== waitlist
-      //         )
-      //       )
-      //       .map((waitlist) => ({
-      //         name: waitlist,
-      //       })),
-      //   },
-      // },
+      waitlists: {
+        delete: existing_event.waitlists.filter((waitlist) =>
+          removedWaitlists.includes(waitlist.name)
+        ),
+        createMany: {
+          data: waitlists,
+        },
+      },
     },
   });
 
