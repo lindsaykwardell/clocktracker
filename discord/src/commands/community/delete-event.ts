@@ -63,6 +63,26 @@ export async function autocomplete(interaction) {
 }
 
 export async function execute(interaction: CommandInteraction<CacheType>) {
+  const discord_user_id = interaction.user.id;
+
+  const clocktracker_user = await prisma.userSettings.findFirst({
+    where: {
+      discord_id: discord_user_id,
+      community_admin: {
+        some: {
+          discord_server_id: interaction.guild.id,
+        },
+      },
+    },
+  });
+
+  if (!clocktracker_user) {
+    return interaction.reply({
+      content: "Only a ClockTracker community admin can create events.",
+      ephemeral: true,
+    });
+  }
+
   const event_id = interaction.options.get("id").value as string;
   const guild_id = interaction.guildId;
 
