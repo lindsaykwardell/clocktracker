@@ -316,7 +316,7 @@ model EventAttendee {
   user_id         String?
   created_at      DateTime      @default(now()) @db.Timestamptz(6)
   discord_user_id String?
-  event           Event         @relation(fields: [event_id], references: [id])
+  event           Event         @relation(fields: [event_id], references: [id], onDelete: Cascade)
   user            UserSettings? @relation(fields: [user_id], references: [user_id])
 }
 
@@ -326,7 +326,7 @@ model EventWaitlist {
   name       String
   created_at DateTime                @default(now()) @db.Timestamptz(6)
   default    Boolean                 @default(false)
-  event      Event                   @relation(fields: [event_id], references: [id])
+  event      Event                   @relation(fields: [event_id], references: [id], onDelete: Cascade)
   users      EventWaitlistAttendee[]
 }
 
@@ -338,7 +338,7 @@ model EventWaitlistAttendee {
   created_at      DateTime      @default(now()) @db.Timestamptz(6)
   discord_user_id String?
   user            UserSettings? @relation(fields: [user_id], references: [user_id])
-  waitlist        EventWaitlist @relation(fields: [waitlist_id], references: [id])
+  waitlist        EventWaitlist @relation(fields: [waitlist_id], references: [id], onDelete: Cascade)
 }
 
 model EventDiscordPost {
@@ -346,7 +346,7 @@ model EventDiscordPost {
   message_id String
   channel_id String
   created_at DateTime @default(now()) @db.Timestamptz(6)
-  Event      Event    @relation(fields: [event_id], references: [id])
+  Event      Event    @relation(fields: [event_id], references: [id], onDelete: Cascade)
 
   @@id([channel_id, message_id])
 }

@@ -1,5 +1,9 @@
 import { CacheType, CommandInteraction, SlashCommandBuilder } from "discord.js";
-import { createEventAndReply } from "../../utility/community-event";
+import {
+  buildEmbed,
+  formatInputs,
+  handleRegisterButtonClick,
+} from "../../utility/community-event";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -61,6 +65,12 @@ export const data = new SlashCommandBuilder()
       .setRequired(false)
       .setMinValue(5)
       .setMaxValue(20)
+  )
+  .addStringOption((option) =>
+    option
+      .setName("image")
+      .setDescription("A URL to an image for the event")
+      .setRequired(false)
   )
   .addStringOption((option) =>
     option
@@ -126,5 +136,59 @@ export async function execute(interaction: CommandInteraction<CacheType>) {
     });
   }
 
-  await createEventAndReply(interaction);
+  const {
+    name,
+    description,
+    start_date,
+    end_date,
+    location,
+    location_type,
+    player_count,
+    image,
+    waitlists,
+    guild_id,
+  } = formatInputs(interaction);
+
+  const community = await prisma.community.findFirst({
+    where: {
+      discord_server_id: guild_id,
+    },
+  });
+
+  const event = await prisma.event.create({
+    data: {
+      community_id: community.id,
+      title: name,
+      description: description || "",
+      start: start_date,
+      end: end_date,
+      location: location || "",
+      location_type: location_type,
+      player_count: player_count || null,
+      image,
+      waitlists: {
+        createMany: {
+          data: waitlists,
+        },
+      },
+    },
+  });
+
+  const { embed, row } = await buildEmbed(guild_id, event.id);
+
+  const response = await interaction.reply({
+    embeds: [embed],
+    // @ts-ignore
+    components: [row],
+  });
+
+  await prisma.eventDiscordPost.create({
+    data: {
+      event_id: event.id,
+      channel_id: interaction.channel.id,
+      message_id: response.id,
+    },
+  });
 }
+
+export const handleButton = handleRegisterButtonClick;

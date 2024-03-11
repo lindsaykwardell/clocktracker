@@ -367,7 +367,7 @@ model Event {
 }
 
 model EventDiscordPost {
-  event      Event    @relation(fields: [event_id], references: [id])
+  event      Event    @relation(fields: [event_id], references: [id], onDelete: Cascade)
   event_id   String
   message_id String
   channel_id String
@@ -383,7 +383,7 @@ enum WhoCanRegister {
 
 model EventAttendee {
   id              Int           @id @default(autoincrement())
-  event           Event         @relation(fields: [event_id], references: [id])
+  event           Event         @relation(fields: [event_id], references: [id], onDelete: Cascade)
   event_id        String
   name            String
   user            UserSettings? @relation(fields: [user_id], references: [user_id])
@@ -394,7 +394,7 @@ model EventAttendee {
 
 model EventWaitlist {
   id         Int                     @id @default(autoincrement())
-  event      Event                   @relation(fields: [event_id], references: [id])
+  event      Event                   @relation(fields: [event_id], references: [id], onDelete: Cascade)
   event_id   String
   name       String
   created_at DateTime                @default(now()) @db.Timestamptz(6)
@@ -404,7 +404,7 @@ model EventWaitlist {
 
 model EventWaitlistAttendee {
   id              Int           @id @default(autoincrement())
-  waitlist        EventWaitlist @relation(fields: [waitlist_id], references: [id])
+  waitlist        EventWaitlist @relation(fields: [waitlist_id], references: [id], onDelete: Cascade)
   waitlist_id     Int
   name            String
   user            UserSettings? @relation(fields: [user_id], references: [user_id])
