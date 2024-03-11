@@ -58,6 +58,21 @@ export async function execute(interaction) {
       console.error(error);
     }
   } else if (interaction.isButton()) {
-    handleRegisterButtonClick(interaction);
+    const command = interaction.client.commands.get(
+      interaction.message.interaction.commandName
+    );
+
+    if (!command) {
+      console.error(
+        `No command matching ${interaction.commandName} was found.`
+      );
+      return;
+    }
+
+    try {
+      await command.handleButton(interaction);
+    } catch (error) {
+      console.error(error);
+    }
   }
 }

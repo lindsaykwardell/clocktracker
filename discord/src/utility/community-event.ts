@@ -31,27 +31,6 @@ export async function execute(interaction: CommandInteraction<CacheType>) {
   }
 }
 
-export async function replyWithEvent(i) {
-  const event_id = i.options.get("id").value as string;
-  const guild_id = i.guildId;
-
-  const { embed, row } = await buildEmbed(guild_id, event_id);
-
-  const response = await i.reply({
-    embeds: [embed],
-    // @ts-ignore
-    components: [row],
-  });
-
-  await prisma.eventDiscordPost.create({
-    data: {
-      event_id: event_id,
-      channel_id: i.channel.id,
-      message_id: response.id,
-    },
-  });
-}
-
 export async function handleRegisterButtonClick(i) {
   const guild_id = i.guildId;
 
@@ -227,7 +206,9 @@ export async function handleRegisterButtonClick(i) {
   });
 }
 
-export async function getClocktrackerUser(user: User): Promise<UserSettings | null> {
+export async function getClocktrackerUser(
+  user: User
+): Promise<UserSettings | null> {
   const clocktrackerUser = await prisma.userSettings.findUnique({
     where: {
       discord_id: user.id,
@@ -237,7 +218,7 @@ export async function getClocktrackerUser(user: User): Promise<UserSettings | nu
   return clocktrackerUser;
 }
 
-async function buildEmbed(guild_id: string, event_id: string) {
+export async function buildEmbed(guild_id: string, event_id: string) {
   const event = await findEvent(guild_id, event_id);
   if (!event) {
     throw new Error("No event found with that ID");
@@ -400,10 +381,9 @@ export function findEvent(guild_id: string, event_id: string) {
   });
 }
 
-export async function createEventAndReply(
-  interaction: CommandInteraction<CacheType>
-) {
-  const name = interaction.options.get("name").value as string;
+export function formatInputs(interaction, allowBlankDates = false) {
+  const id = interaction.options.get("id")?.value as string;
+  const name = interaction.options.get("name")?.value as string;
   const description = interaction.options.get("description")?.value as string;
   const start_date_input = interaction.options.get("start_date")
     ?.value as string;
@@ -413,6 +393,7 @@ export async function createEventAndReply(
   const location_type_input = interaction.options.get("location_type")
     ?.value as string;
   const player_count = interaction.options.get("player_count")?.value as number;
+  const image = interaction.options.get("image")?.value as string;
   const waitlist_1 = interaction.options.get("waitlist_1")?.value as string;
   const waitlist_2 = interaction.options.get("waitlist_2")?.value as string;
   const waitlist_3 = interaction.options.get("waitlist_3")?.value as string;
@@ -421,10 +402,10 @@ export async function createEventAndReply(
   const guild_id = interaction.guildId;
 
   const location_type = (() => {
-    if (location_type_input === "ONLINE") {
-      return LocationType.ONLINE;
-    } else {
+    if (location_type_input === "IN_PERSON") {
       return LocationType.IN_PERSON;
+    } else {
+      return LocationType.ONLINE;
     }
   })();
 
@@ -465,11 +446,13 @@ export async function createEventAndReply(
       return dayjs(start_date_input)
         .tz(timezone || "America/New_York")
         .toDate();
-    } else {
+    } else if (!allowBlankDates) {
       return dayjs()
         .tz(timezone || "America/New_York")
         .add(1, "hour")
         .toDate();
+    } else {
+      return null;
     }
   })();
 
@@ -478,48 +461,24 @@ export async function createEventAndReply(
       return dayjs(end_date_input)
         .tz(timezone || "America/New_York")
         .toDate();
-    } else {
+    } else if (!allowBlankDates) {
       return dayjs(start_date).add(1.5, "hour").toDate();
+    } else {
+      return null;
     }
   })();
 
-  const community = await prisma.community.findFirst({
-    where: {
-      discord_server_id: guild_id,
-    },
-  });
-
-  const event = await prisma.event.create({
-    data: {
-      community_id: community.id,
-      title: name,
-      description: description || "",
-      start: start_date,
-      end: end_date,
-      location: location || "",
-      location_type: location_type,
-      player_count: player_count || null,
-      waitlists: {
-        createMany: {
-          data: waitlists,
-        },
-      },
-    },
-  });
-
-  const { embed, row } = await buildEmbed(guild_id, event.id);
-
-  const response = await interaction.reply({
-    embeds: [embed],
-    // @ts-ignore
-    components: [row],
-  });
-
-  await prisma.eventDiscordPost.create({
-    data: {
-      event_id: event.id,
-      channel_id: interaction.channel.id,
-      message_id: response.id,
-    },
-  });
+  return {
+    id,
+    name,
+    description,
+    start_date,
+    end_date,
+    location,
+    location_type,
+    player_count,
+    image,
+    waitlists,
+    guild_id,
+  };
 }
