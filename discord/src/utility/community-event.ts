@@ -247,7 +247,9 @@ export async function buildEmbed(guild_id: string, event_id: string) {
     .setTimestamp(event.start)
     .setFooter({ text: event.id })
     .setDescription(
-      `<t:${event.start.getTime() / 1000}:f>\n\n${event.description ?? ""}`
+      `<t:${Math.round(event.start.getTime() / 1000)}:f>\n\n${
+        event.description ?? ""
+      }`
     );
 
   if (event.image) {
@@ -399,6 +401,16 @@ export function formatInputs(interaction, allowBlankDates = false) {
   const waitlist_3 = interaction.options.get("waitlist_3")?.value as string;
   const waitlist_4 = interaction.options.get("waitlist_4")?.value as string;
   const waitlist_5 = interaction.options.get("waitlist_5")?.value as string;
+  const delete_waitlist_1 = interaction.options.get("delete_waitlist_1")
+    ?.value as string;
+  const delete_waitlist_2 = interaction.options.get("delete_waitlist_2")
+    ?.value as string;
+  const delete_waitlist_3 = interaction.options.get("delete_waitlist_3")
+    ?.value as string;
+  const delete_waitlist_4 = interaction.options.get("delete_waitlist_4")
+    ?.value as string;
+  const delete_waitlist_5 = interaction.options.get("delete_waitlist_5")
+    ?.value as string;
   const guild_id = interaction.guildId;
 
   const location_type = (() => {
@@ -410,6 +422,7 @@ export function formatInputs(interaction, allowBlankDates = false) {
   })();
 
   const waitlists = [];
+  const removedWaitlists = [];
 
   if (waitlist_1) {
     waitlists.push({
@@ -439,6 +452,26 @@ export function formatInputs(interaction, allowBlankDates = false) {
     waitlists.push({
       name: waitlist_5,
     });
+  }
+
+  if (delete_waitlist_1) {
+    removedWaitlists.push(delete_waitlist_1);
+  }
+
+  if (delete_waitlist_2) {
+    removedWaitlists.push(delete_waitlist_2);
+  }
+
+  if (delete_waitlist_3) {
+    removedWaitlists.push(delete_waitlist_3);
+  }
+
+  if (delete_waitlist_4) {
+    removedWaitlists.push(delete_waitlist_4);
+  }
+
+  if (delete_waitlist_5) {
+    removedWaitlists.push(delete_waitlist_5);
   }
 
   const start_date = (() => {
@@ -479,6 +512,7 @@ export function formatInputs(interaction, allowBlankDates = false) {
     player_count,
     image,
     waitlists,
+    removedWaitlists,
     guild_id,
   };
 }
