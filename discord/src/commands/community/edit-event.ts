@@ -1,17 +1,25 @@
 import { CacheType, CommandInteraction, SlashCommandBuilder } from "discord.js";
 import { buildEmbed, formatInputs } from "../../utility/community-event";
 import { PrismaClient } from "@prisma/client";
+import dayjs from "dayjs";
 
 const prisma = new PrismaClient();
 
 export const data = new SlashCommandBuilder()
-  .setName("create-event")
-  .setDescription("Create a ClockTracker event")
+  .setName("edit-event")
+  .setDescription("Edit a ClockTracker event")
+  .addStringOption((option) =>
+    option
+      .setName("id")
+      .setDescription("The ID of the event")
+      .setRequired(true)
+      .setAutocomplete(true)
+  )
   .addStringOption((option) =>
     option
       .setName("name")
       .setDescription("The name of the event")
-      .setRequired(true)
+      .setRequired(false)
   )
   .addStringOption((option) =>
     option
@@ -100,15 +108,51 @@ export const data = new SlashCommandBuilder()
   );
 
 export async function autocomplete(interaction) {
-  const focusedValue = interaction.options.getFocused().toLowerCase();
-  const choices = Intl.supportedValuesOf("timeZone");
+  const focusedValue: { name: string; value: string } =
+    interaction.options.getFocused(true);
+  let choices: { name: string; value: string }[];
+
+  if (focusedValue.name === "timezone") {
+    choices = Intl.supportedValuesOf("timeZone").map((choice) => ({
+      name: choice,
+      value: choice,
+    }));
+  } else if (focusedValue.name === "id") {
+    const guild_id = interaction.guildId;
+
+    choices = (
+      await prisma.event.findMany({
+        where: {
+          community: {
+            discord_server_id: guild_id,
+          },
+          end: {
+            gte: new Date(),
+          },
+        },
+        take: 25,
+        orderBy: {
+          start: "asc",
+        },
+        select: {
+          id: true,
+          title: true,
+          start: true,
+        },
+      })
+    ).map((choice) => ({
+      name: `${choice.title} - ${dayjs(choice.start).format(
+        "YYYY-MM-DD HH:mm"
+      )}`,
+      value: choice.id,
+    }));
+  }
+
   const filtered = choices
-    .filter((choice) => choice.toLowerCase().includes(focusedValue))
+    .filter((choice) => choice.name.toLowerCase().includes(focusedValue.value))
     .slice(0, 25);
 
-  await interaction.respond(
-    filtered.map((choice) => ({ name: choice, value: choice }))
-  );
+  await interaction.respond(filtered);
 }
 
 export async function execute(interaction: CommandInteraction<CacheType>) {
@@ -133,6 +177,7 @@ export async function execute(interaction: CommandInteraction<CacheType>) {
   }
 
   const {
+    id,
     name,
     description,
     start_date,
@@ -141,48 +186,94 @@ export async function execute(interaction: CommandInteraction<CacheType>) {
     location_type,
     player_count,
     image,
-    waitlists,
     guild_id,
-  } = formatInputs(interaction);
+  } = formatInputs(interaction, true);
 
-  const community = await prisma.community.findFirst({
+  const existing_event = await prisma.event.findUnique({
     where: {
-      discord_server_id: guild_id,
+      id,
+      community: {
+        discord_server_id: guild_id,
+      },
+    },
+    include: {
+      waitlists: true,
     },
   });
 
-  const event = await prisma.event.create({
+  if (!existing_event) {
+    return interaction.reply({
+      content: "No event found with that ID",
+      ephemeral: true,
+    });
+  }
+
+  const event = await prisma.event.update({
+    where: {
+      id,
+    },
     data: {
-      community_id: community.id,
-      title: name,
-      description: description || "",
-      start: start_date,
-      end: end_date,
-      location: location || "",
-      location_type: location_type,
-      player_count: player_count || null,
-      image,
-      waitlists: {
-        createMany: {
-          data: waitlists,
-        },
-      },
+      title: name || existing_event.title,
+      description: description || existing_event.description,
+      start: start_date || existing_event.start,
+      end: end_date || existing_event.end,
+      location: location || existing_event.location,
+      location_type: location_type || existing_event.location_type,
+      player_count: player_count || existing_event.player_count,
+      image: image || existing_event.image,
+      // waitlists: {
+      //   delete: existing_event.waitlists.filter((waitlist) =>
+      //     waitlists.every((newWaitlist) => newWaitlist !== waitlist.name)
+      //   ),
+      //   createMany: {
+      //     data: waitlists
+      //       .filter((waitlist) =>
+      //         existing_event.waitlists.every(
+      //           (existingWaitlist) => existingWaitlist.name !== waitlist
+      //         )
+      //       )
+      //       .map((waitlist) => ({
+      //         name: waitlist,
+      //       })),
+      //   },
+      // },
     },
   });
 
   const { embed, row } = await buildEmbed(guild_id, event.id);
 
-  const response = await interaction.reply({
-    embeds: [embed],
-    // @ts-ignore
-    components: [row],
+  const discord_posts = await prisma.eventDiscordPost.findMany({
+    where: {
+      event_id: event.id,
+    },
+    select: {
+      channel_id: true,
+      message_id: true,
+    },
   });
 
-  await prisma.eventDiscordPost.create({
-    data: {
-      event_id: event.id,
-      channel_id: interaction.channel.id,
-      message_id: response.id,
-    },
+  discord_posts.forEach(async (post) => {
+    const channel = await interaction.client.channels.fetch(post.channel_id);
+    if (!channel) return;
+
+    // @ts-ignore
+    const messages = await channel.messages.fetch({
+      limit: 2,
+      around: post.message_id,
+    });
+
+    for (const message of messages) {
+      if (message[1].embeds[0]?.footer?.text === event.id) {
+        await message[1].edit({
+          embeds: [embed],
+          components: [row],
+        });
+      }
+    }
+  });
+
+  await interaction.reply({
+    content: "Event updated!",
+    ephemeral: true,
   });
 }

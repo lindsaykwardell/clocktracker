@@ -1,5 +1,5 @@
 import { CacheType, CommandInteraction, SlashCommandBuilder } from "discord.js";
-import { replyWithEvent, findEvent } from "../../utility/community-event";
+import { findEvent, buildEmbed } from "../../utility/community-event";
 import { PrismaClient } from "@prisma/client";
 import dayjs from "dayjs";
 
@@ -67,5 +67,19 @@ export async function execute(interaction: CommandInteraction<CacheType>) {
     });
   }
 
-  await replyWithEvent(interaction);
+  const { embed, row } = await buildEmbed(guild_id, event_id);
+
+  const response = await interaction.reply({
+    embeds: [embed],
+    // @ts-ignore
+    components: [row],
+  });
+
+  await prisma.eventDiscordPost.create({
+    data: {
+      event_id: event_id,
+      channel_id: interaction.channel.id,
+      message_id: response.id,
+    },
+  });
 }
