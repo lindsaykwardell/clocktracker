@@ -1431,7 +1431,9 @@ watch(
       });
     });
 
-    props.game.player_characters = myCharacters;
+    if (myCharacters.length > 0 || advancedModeEnabled.value) {
+      props.game.player_characters = myCharacters;
+    }
   },
   { deep: true }
 );
