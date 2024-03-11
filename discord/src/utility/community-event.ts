@@ -31,27 +31,6 @@ export async function execute(interaction: CommandInteraction<CacheType>) {
   }
 }
 
-export async function replyWithEvent(i) {
-  const event_id = i.options.get("id").value as string;
-  const guild_id = i.guildId;
-
-  const { embed, row } = await buildEmbed(guild_id, event_id);
-
-  const response = await i.reply({
-    embeds: [embed],
-    // @ts-ignore
-    components: [row],
-  });
-
-  await prisma.eventDiscordPost.create({
-    data: {
-      event_id: event_id,
-      channel_id: i.channel.id,
-      message_id: response.id,
-    },
-  });
-}
-
 export async function handleRegisterButtonClick(i) {
   const guild_id = i.guildId;
 
@@ -239,7 +218,7 @@ export async function getClocktrackerUser(
   return clocktrackerUser;
 }
 
-async function buildEmbed(guild_id: string, event_id: string) {
+export async function buildEmbed(guild_id: string, event_id: string) {
   const event = await findEvent(guild_id, event_id);
   if (!event) {
     throw new Error("No event found with that ID");
@@ -402,66 +381,9 @@ export function findEvent(guild_id: string, event_id: string) {
   });
 }
 
-export async function createEventAndReply(
-  interaction: CommandInteraction<CacheType>
-) {
-  const {
-    name,
-    description,
-    start_date,
-    end_date,
-    location,
-    location_type,
-    player_count,
-    image,
-    waitlists,
-    guild_id,
-  } = formatInputs(interaction);
-
-  const community = await prisma.community.findFirst({
-    where: {
-      discord_server_id: guild_id,
-    },
-  });
-
-  const event = await prisma.event.create({
-    data: {
-      community_id: community.id,
-      title: name,
-      description: description || "",
-      start: start_date,
-      end: end_date,
-      location: location || "",
-      location_type: location_type,
-      player_count: player_count || null,
-      image,
-      waitlists: {
-        createMany: {
-          data: waitlists,
-        },
-      },
-    },
-  });
-
-  const { embed, row } = await buildEmbed(guild_id, event.id);
-
-  const response = await interaction.reply({
-    embeds: [embed],
-    // @ts-ignore
-    components: [row],
-  });
-
-  await prisma.eventDiscordPost.create({
-    data: {
-      event_id: event.id,
-      channel_id: interaction.channel.id,
-      message_id: response.id,
-    },
-  });
-}
-
-function formatInputs(interaction) {
-  const name = interaction.options.get("name").value as string;
+export function formatInputs(interaction, allowBlankDates = false) {
+  const id = interaction.options.get("id")?.value as string;
+  const name = interaction.options.get("name")?.value as string;
   const description = interaction.options.get("description")?.value as string;
   const start_date_input = interaction.options.get("start_date")
     ?.value as string;
@@ -524,11 +446,13 @@ function formatInputs(interaction) {
       return dayjs(start_date_input)
         .tz(timezone || "America/New_York")
         .toDate();
-    } else {
+    } else if (!allowBlankDates) {
       return dayjs()
         .tz(timezone || "America/New_York")
         .add(1, "hour")
         .toDate();
+    } else {
+      return null;
     }
   })();
 
@@ -537,12 +461,15 @@ function formatInputs(interaction) {
       return dayjs(end_date_input)
         .tz(timezone || "America/New_York")
         .toDate();
-    } else {
+    } else if (!allowBlankDates) {
       return dayjs(start_date).add(1.5, "hour").toDate();
+    } else {
+      return null;
     }
   })();
 
   return {
+    id,
     name,
     description,
     start_date,
