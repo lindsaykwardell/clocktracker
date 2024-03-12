@@ -35,6 +35,16 @@ export default defineEventHandler(async (handler) => {
       deleted: false,
     },
     select: {
+      player_count: true,
+      traveler_count: true,
+      storyteller: true,
+      location: true,
+      community_name: true,
+      grimoire: {
+        select: {
+          id: true,
+        },
+      },
       parent_game: {
         include: {
           user: {
@@ -78,17 +88,8 @@ export default defineEventHandler(async (handler) => {
             },
           },
           grimoire: {
-            include: {
-              tokens: {
-                include: {
-                  role: true,
-                  related_role: true,
-                  reminders: true,
-                },
-              },
-            },
-            orderBy: {
-              id: "asc",
+            select: {
+              id: true,
             },
           },
           community: {
@@ -103,7 +104,7 @@ export default defineEventHandler(async (handler) => {
   });
 
   // If somehow there isn't a parent game, throw
-  if (!game?.parent_game) {
+  if (!game) {
     throw createError({
       status: 400,
       statusMessage: "Bad Request",
@@ -126,6 +127,36 @@ export default defineEventHandler(async (handler) => {
     },
   });
 
+  const player_count =
+    gameToMergeWithData?.player_count ||
+    game.parent_game?.player_count ||
+    game.player_count;
+
+  const traveler_count =
+    gameToMergeWithData?.traveler_count ||
+    game.parent_game?.traveler_count ||
+    game.traveler_count;
+
+  const storyteller = gameToMergeWithData?.storyteller || game.storyteller;
+  const location = gameToMergeWithData?.location || game.location;
+  const community_name =
+    gameToMergeWithData?.community_name || game.community_name;
+
+  // Merge the "game to merge with" to the parent game
+  await prisma.game.update({
+    where: {
+      id: gameToMergeWith,
+    },
+    data: {
+      player_count,
+      traveler_count,
+      storyteller,
+      location,
+      community_name,
+    },
+  });
+
+  // Delete the old grimoire
   // Remove the old grimoire from the game to merge with
   await prisma.grimoire.deleteMany({
     where: {
@@ -137,25 +168,35 @@ export default defineEventHandler(async (handler) => {
     },
   });
 
-  // Merge the "game to merge with" to the parent game
-  await prisma.game.update({
-    where: {
-      id: gameToMergeWith,
-    },
-    data: {
-      parent_game_id: game.parent_game.id,
-      grimoire: {
-        connect: game.parent_game.grimoire.map((g) => ({ id: g.id })),
+  if (game.parent_game) {
+    // Connect the parent grimoire to the game that's getting merged
+    await prisma.game.update({
+      where: {
+        id: gameToMergeWith,
       },
-      player_count: game.parent_game.player_count,
-      traveler_count: game.parent_game.traveler_count,
-      storyteller:
-        gameToMergeWithData?.storyteller || game.parent_game.storyteller,
-      location: gameToMergeWithData?.location || game.parent_game.location,
-      community_name:
-        gameToMergeWithData?.community_name || game.parent_game.community_name,
-    },
-  });
+      data: {
+        parent_game_id: game.parent_game.id,
+        grimoire: {
+          connect: game.parent_game.grimoire.map((g) => ({
+            id: g.id,
+          })),
+        },
+      },
+    });
+  } else {
+    await prisma.game.update({
+      where: {
+        id: gameToMergeWith,
+      },
+      data: {
+        grimoire: {
+          connect: game.grimoire.map((g) => ({
+            id: g.id,
+          })),
+        },
+      },
+    });
+  }
 
   // Delete the old child game
   await prisma.game.delete({
