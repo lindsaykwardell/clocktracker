@@ -685,11 +685,7 @@ function formatDate(date: Date) {
 
 onMounted(() => {
   games.fetchGame(route.params.id as string).then(() => {
-    if (
-      game.value.status === Status.SUCCESS &&
-      game.value.data.parent_game_id &&
-      game.value.data.waiting_for_confirmation
-    ) {
+    if (game.value.status === Status.SUCCESS) {
       games.fetchSimilarGames(game.value.data.id);
     }
   });
