@@ -6,6 +6,18 @@ const prisma = new PrismaClient();
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
 
+  const latest_kofi_payment = await prisma.koFiPayment.findFirst({
+    where: {
+      user_id: me?.id || "",
+      expires_at: {
+        gte: new Date(),
+      },
+    },
+    orderBy: {
+      expires_at: "desc",
+    },
+  });
+
   const flags = await prisma.featureFlag.findMany({
     select: {
       id: true,
@@ -25,6 +37,9 @@ export default defineEventHandler(async (handler) => {
               user_id: me?.id || "",
             },
           },
+        },
+        {
+          enabled_for_supporters: !!latest_kofi_payment,
         },
       ],
     },
