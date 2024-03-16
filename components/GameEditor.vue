@@ -265,7 +265,7 @@
           <span class="block">Record Grimoire</span>
           <Switch
             v-model="advancedModeEnabled"
-            :class="advancedModeEnabled ? 'bg-blue-900' : 'bg-blue-700'"
+            :class="advancedModeEnabled ? 'bg-blue-700' : 'bg-blue-950'"
             class="relative inline-flex h-[24px] w-[60px] shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
           >
             <span class="sr-only">Use setting</span>

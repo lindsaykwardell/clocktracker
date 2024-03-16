@@ -1,7 +1,9 @@
 <template>
   <StandardTemplate>
     <div class="flex gap-4 xl:max-w-[1200px] m-auto mt-4">
-      <nav class="flex flex-col md:w-[300px] items-center">
+      <nav
+        class="flex flex-col md:w-[300px] w-[100px] min-w-[100px] md:min-w-[300px] items-center"
+      >
         <Avatar :value="avatar" class="mt-10 md:mt-0" />
         <button
           @click.prevent.stop="selectAvatar"
@@ -35,6 +37,15 @@
             >
               Integrations
             </nuxt-link>
+            <nuxt-link
+              v-if="kofiLevel"
+              to="/settings/perks"
+              class="flex gap-2 w-full p-2 bg-stone-700 hover:bg-stone-900 duration-150"
+              active-class="bg-stone-950 hover:bg-black"
+            >
+              <KoFi class="w-6 h-6" />
+              <span>Perks</span>
+            </nuxt-link>
           </li>
         </ul>
       </nav>
@@ -51,6 +62,14 @@ const users = useUsers();
 const supabase = useSupabaseClient();
 import { v4 as uuid } from "uuid";
 const config = useRuntimeConfig();
+
+const kofiLevel = computed(() => {
+  const u = users.getUserById(user.value?.id);
+
+  if (u.status !== Status.SUCCESS) return null;
+
+  return u.data.kofi_level;
+});
 
 const avatar = computed(() => {
   const u = users.getUserById(user.value?.id);

@@ -31,7 +31,14 @@ type KoFiPayload = {
 export default defineEventHandler(async (handler) => {
   const body = await readBody<KoFiPayload>(handler);
 
+  if (typeof body.data !== "object") {
+    body.data = JSON.parse(body.data);
+  }
+
+  console.log("KoFi Webhook", body);
+
   if (!body || body.data.verification_token !== process.env.KOFI_TOKEN) {
+    console.error("Invalid KoFi Webhook", body?.data);
     throw createError({
       status: 400,
       statusMessage: "Bad Request",
