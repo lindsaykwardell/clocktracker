@@ -9,12 +9,13 @@ datasource db {
 }
 
 model FeatureFlag {
-  id          Int            @id @default(autoincrement())
-  name        String
-  description String
-  active      Boolean        @default(false)
-  active_for  UserSettings[]
-  created_at  DateTime       @default(now()) @db.Timestamptz(6)
+  id                     Int            @id @default(autoincrement())
+  name                   String
+  description            String
+  active                 Boolean        @default(false)
+  active_for             UserSettings[]
+  enabled_for_supporters Boolean        @default(false)
+  created_at             DateTime       @default(now()) @db.Timestamptz(6)
 }
 
 model Game {
@@ -218,6 +219,7 @@ model UserSettings {
   bgg_username            String?
   bgg_cookies             String[]
   enable_bgstats          Boolean                 @default(false)
+  opt_into_testing        Boolean                 @default(false)
   communities             Community[]             @relation("CommunityMember")
   community_admin         Community[]             @relation("CommunityAdmin")
   community_banned        Community[]             @relation("CommunityBanned")
