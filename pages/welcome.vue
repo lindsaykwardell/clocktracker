@@ -71,6 +71,7 @@
       </button>
       <span class="text-red-600">{{ errorMessage }}</span>
     </form>
+    <nuxt-link to="/logout" class="underline">Not you? Log out</nuxt-link>
   </main>
 </template>
 
