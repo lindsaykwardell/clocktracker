@@ -224,6 +224,8 @@ export default defineEventHandler(async (handler) => {
     },
     include: {
       player_characters: true,
+      demon_bluffs: true,
+      fabled: true,
       grimoire: {
         include: {
           tokens: {
@@ -234,16 +236,31 @@ export default defineEventHandler(async (handler) => {
               player: {
                 select: {
                   username: true,
-                }
-              }
+                },
+              },
             },
           },
         },
       },
-      child_games: true,
+      child_games: {
+        include: {
+          demon_bluffs: true,
+          fabled: true,
+          player_characters: true,
+        },
+      },
       parent_game: {
         include: {
-          child_games: true,
+          player_characters: true,
+          demon_bluffs: true,
+          fabled: true,
+          child_games: {
+            include: {
+              player_characters: true,
+              demon_bluffs: true,
+              fabled: true,
+            },
+          },
         },
       },
       community: {
@@ -310,26 +327,29 @@ export default defineEventHandler(async (handler) => {
 
     const relatedGame = related_games?.find((g) => g!.user_id === id);
 
-    if (!relatedGame) {
-      const lastAlignment =
-        player_characters[player_characters.length - 1].alignment;
+    const lastAlignment =
+      player_characters[player_characters.length - 1].alignment;
 
-      const win = (() => {
-        if (parentGameLastAlignment === Alignment.NEUTRAL) {
-          if (lastAlignment === Alignment.GOOD) {
-            return game.win === WinStatus.WIN;
-          } else {
-            return game.win === WinStatus.LOSS;
-          }
-        }
-
-        if (lastAlignment === parentGameLastAlignment) {
-          return game.win === WinStatus.WIN;
+    const win: WinStatus = (() => {
+      if (game.win === WinStatus.NOT_RECORDED) {
+        return WinStatus.NOT_RECORDED;
+      }
+      if (parentGameLastAlignment === Alignment.NEUTRAL) {
+        if (lastAlignment === Alignment.GOOD) {
+          return game.win === WinStatus.WIN ? WinStatus.WIN : WinStatus.LOSS;
         } else {
-          return game.win === WinStatus.LOSS;
+          return game.win === WinStatus.LOSS ? WinStatus.WIN : WinStatus.LOSS;
         }
-      })();
+      }
 
+      if (lastAlignment === parentGameLastAlignment) {
+        return game.win === WinStatus.WIN ? WinStatus.WIN : WinStatus.LOSS;
+      } else {
+        return game.win === WinStatus.LOSS ? WinStatus.WIN : WinStatus.LOSS;
+      }
+    })();
+
+    if (!relatedGame) {
       await prisma.game.create({
         data: {
           ...body,
@@ -355,11 +375,35 @@ export default defineEventHandler(async (handler) => {
         },
       });
     } else {
+      console.log(relatedGame.demon_bluffs.map((g) => ({ id: g.id })));
       await prisma.game.update({
         where: {
           id: relatedGame.id,
         },
         data: {
+          win,
+          demon_bluffs: {
+            deleteMany: relatedGame.demon_bluffs.map((g) => ({ id: g.id })),
+            create: game.demon_bluffs.map((g) => ({
+              ...g,
+              id: undefined,
+              game_id: undefined,
+            })),
+          },
+          fabled: {
+            deleteMany: relatedGame.fabled.map((g) => ({ id: g.id })),
+            create: game.fabled.map((g) => ({
+              ...g,
+              id: undefined,
+              game_id: undefined,
+            })),
+          },
+          player_characters: {
+            deleteMany: relatedGame.player_characters.map((g) => ({
+              id: g.id,
+            })),
+            create: player_characters,
+          },
           grimoire: {
             connect: game.grimoire.map((g) => ({ id: g.id })),
           },
@@ -384,20 +428,23 @@ export default defineEventHandler(async (handler) => {
         },
       });
 
+      const win = (() => {
+        if (game.win === WinStatus.NOT_RECORDED) {
+          return WinStatus.NOT_RECORDED;
+        }
+        if (parentGameLastAlignment === Alignment.GOOD) {
+          return game.win === WinStatus.WIN ? WinStatus.WIN : WinStatus.LOSS;
+        } else {
+          return game.win === WinStatus.LOSS ? WinStatus.WIN : WinStatus.LOSS;
+        }
+      })();
+
       if (friend !== null) {
         const childGame = game.child_games?.find(
           (g) => g.user_id === friend.user_id
         );
 
         if (!childGame) {
-          const win = (() => {
-            if (parentGameLastAlignment === Alignment.GOOD) {
-              return game.win;
-            } else {
-              return !game.win;
-            }
-          })();
-
           await prisma.game.create({
             data: {
               ...body,
@@ -427,6 +474,23 @@ export default defineEventHandler(async (handler) => {
               id: childGame.id,
             },
             data: {
+              win,
+              demon_bluffs: {
+                deleteMany: childGame.demon_bluffs.map((g) => ({ id: g.id })),
+                create: game.demon_bluffs.map((g) => ({
+                  ...g,
+                  id: undefined,
+                  game_id: undefined,
+                })),
+              },
+              fabled: {
+                deleteMany: childGame.fabled.map((g) => ({ id: g.id })),
+                create: game.fabled.map((g) => ({
+                  ...g,
+                  id: undefined,
+                  game_id: undefined,
+                })),
+              },
               grimoire: {
                 connect: game.grimoire.map((g) => ({ id: g.id })),
               },
