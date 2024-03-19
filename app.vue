@@ -1,6 +1,6 @@
 <template>
   <NuxtPage />
-  <!-- <AnnouncementDialog id="announcement-2">
+  <!-- <AnnouncementDialog id="announcement-3">
     <template #title>
       <h1 class="text-2xl font-bold font-dumbledor">Welcome to ClockTracker</h1>
     </template>
