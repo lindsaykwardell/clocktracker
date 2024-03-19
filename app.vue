@@ -1,5 +1,11 @@
 <template>
   <NuxtPage />
+  <!-- <AnnouncementDialog id="announcement-3">
+    <template #title>
+      <h1 class="text-2xl font-bold font-dumbledor">Welcome to ClockTracker</h1>
+    </template>
+    <p>This is a cool app, with a cool announcement.</p>
+  </AnnouncementDialog> -->
   <VitePwaManifest />
 </template>
 
