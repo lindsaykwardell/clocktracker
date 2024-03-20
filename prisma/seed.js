@@ -790,24 +790,15 @@ async function main() {
 
   console.log("Seeding communities");
   const communities = [];
-  for (let i = 0; i < 30; i++) {
-    // capitalize the first letter of each word
-    const { randomRole } = generateName();
-    const name = `${randomRole} ${faker.location.city()}`.replace(
-      /\w\S*/g,
-      (w) => w.replace(/^\w/, (c) => c.toUpperCase())
-    );
-    const description = faker.lorem.paragraph();
-    const slug = name.toLowerCase().replace(/ /g, "-");
-    const icon = "/img/default.png";
-    const isPrivate = Math.random() > 0.8;
 
+  async function seedCommunity(name, description, icon, isPrivate, members) {
+    const slug = name.toLowerCase().replace(/ /g, "-");
     const userCount = Math.floor(Math.random() * 50) + 5;
-    const communityUsers = [];
+    const communityUsers = [...members];
     for (let i = 0; i < userCount; i++) {
       const user = users[Math.floor(Math.random() * users.length)];
 
-      if (user) {
+      if (user && user.user_id) {
         communityUsers.push({
           user_id: user.user_id,
         });
@@ -950,6 +941,32 @@ async function main() {
     }
   }
 
+  await seedCommunity(
+    "Rose City Clocktower",
+    "A community for fans of Trouble Brewing.",
+    "/img/role/godfather.png",
+    false,
+    [
+      {
+        user_id: lindsaykwardell.user_id,
+      },
+    ]
+  );
+
+  for (let i = 0; i < 30; i++) {
+    // capitalize the first letter of each word
+    const { randomRole } = generateName();
+    const name = `${randomRole} ${faker.location.city()}`.replace(
+      /\w\S*/g,
+      (w) => w.replace(/^\w/, (c) => c.toUpperCase())
+    );
+    const description = faker.lorem.paragraph();
+    const icon = "/img/default.png";
+    const isPrivate = Math.random() > 0.8;
+
+    await seedCommunity(name, description, icon, isPrivate, []);
+  }
+
   console.log("Seeding games");
   // The goal is to create a number of games at different sizes for each player.
   // This will allow us to test the game list.
@@ -964,7 +981,7 @@ async function main() {
       } else if (user.user_id === testUser2.user_id) {
         return 50;
       } else {
-        return Math.floor(Math.random() * 200);
+        return Math.floor(Math.random() * 50);
       }
     })();
     console.log(
@@ -1033,6 +1050,34 @@ async function main() {
         community.name = randomCommunity.name;
       }
 
+      // demon bluffs
+      const demonBluffs = [];
+      if (Math.random() > 0.5) {
+        for (let i = 0; i < 3; i++) {
+          const role =
+            script.roles[Math.floor(Math.random() * script.roles.length)];
+          demonBluffs.push(role);
+        }
+      }
+      // fabled
+      const fabled = [];
+      if (Math.random() > 0.8) {
+        const fabledCharacters = await prisma.role.findMany({
+          where: {
+            type: "FABLED",
+          },
+        });
+
+        const fabledCount = Math.floor(Math.random() * 3) + 1;
+        for (let i = 0; i < fabledCount; i++) {
+          const role =
+            fabledCharacters[
+              Math.floor(Math.random() * fabledCharacters.length)
+            ];
+          fabled.push(role);
+        }
+      }
+
       await prisma.game.create({
         data: {
           user_id: user.user_id,
@@ -1061,6 +1106,18 @@ async function main() {
               tokens: {
                 create: g.tokens,
               },
+            })),
+          },
+          demon_bluffs: {
+            create: demonBluffs.map((role) => ({
+              name: role.name,
+              role_id: role.id,
+            })),
+          },
+          fabled: {
+            create: fabled.map((role) => ({
+              name: role.name,
+              role_id: role.id,
             })),
           },
         },
