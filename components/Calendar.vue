@@ -25,6 +25,8 @@
               'min-h-[100px] md:min-h-[150px]': size !== 'sm',
               'h-[75px]': size === 'sm',
               'cursor-pointer': clickableDays,
+              'border border-yellow-500': day.isSame(today, 'day'),
+              'bg-stone-700': day.isSame(selectedDay, 'day'),
             }"
           >
             <span class="text-stone-500">{{ day?.date() }}</span>
@@ -68,12 +70,14 @@ const props = defineProps<{
   events: Event[];
   size: "sm" | "md" | "lg";
   clickableDays?: boolean;
+  selectedDay?: dayjs.Dayjs | null;
 }>();
 
 const emit = defineEmits(["viewChanged", "selectDay"]);
 
 const year = ref(dayjs().year());
 const month = ref(dayjs().month() + 1);
+const today = dayjs();
 
 const formattedYearAndMonth = computed(() => {
   return dayjs()
