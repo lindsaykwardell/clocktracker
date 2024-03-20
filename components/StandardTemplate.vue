@@ -6,7 +6,7 @@
         'h-screen w-screen': showMenu,
       }"
     >
-      <button @click="showMenu = !showMenu" class="md:hidden">
+      <button id="show-navbar" @click="showMenu = !showMenu" class="md:hidden">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="32"
@@ -122,6 +122,9 @@ const tour: Step[] = [
     target: "#clocktracker-icon",
     content:
       "Welcome to ClockTracker! You can see your friends, communities, and games here. Let's walk through some of the features available to you.",
+    onNext: () => {
+      showMenu.value = true;
+    },
   },
   {
     target: "#my-profile",
@@ -162,6 +165,9 @@ const tour: Step[] = [
     target: "#anchor-center",
     content:
       "That's it! You're ready to start using ClockTracker. If you have any questions, feel free to reach out on Discord.",
+    onNext: () => {
+      showMenu.value = false;
+    },
   },
 ];
 </script>
