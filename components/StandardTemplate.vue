@@ -107,7 +107,7 @@
       <slot />
     </main>
   </div>
-  <Tour v-if="user" :steps="tour" tourKey="new-community-nav-item" />
+  <Tour v-if="user" :steps="tour" @onTourEnd="showMenu = false" tourKey="new-community-nav-item" />
 </template>
 
 <script setup lang="ts">
@@ -149,7 +149,7 @@ const tour: Step[] = [
   {
     target: "#communities",
     content:
-      "Communities are a new feature to connect with your friends. You can create a community and invite your friends to join. Once you have a community, you can see what scripts your friends have been playing and discuss them.",
+      "Communities are another way to connect. You can create a community and invite your friends to join. Once you have a community, you can create and manage events, and see what scripts you've all been playing.",
   },
   {
     target: "#settings",
@@ -165,9 +165,6 @@ const tour: Step[] = [
     target: "#anchor-center",
     content:
       "That's it! You're ready to start using ClockTracker. If you have any questions, feel free to reach out on Discord.",
-    onNext: () => {
-      showMenu.value = false;
-    },
   },
 ];
 </script>
