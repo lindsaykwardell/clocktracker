@@ -1,7 +1,7 @@
 <template>
   <div>
     <div
-      class="flex justify-around py-4"
+      class="flex justify-center md:justify-around gap-6 py-4"
       :class="{
         'text-xl lg:text-2xl': size === 'lg',
         'text-lg lg:text-xl': size === 'md',
@@ -23,7 +23,7 @@
             class="p-1 hover:bg-stone-700"
             :class="{
               'min-h-[100px] md:min-h-[150px]': size !== 'sm',
-              'h-[75px]': size === 'sm',
+              'h-[40px] md:h-[75px]': size === 'sm',
               'cursor-pointer': clickableDays,
               'border border-yellow-500': day.isSame(today, 'day'),
               'bg-stone-700': day.isSame(selectedDay, 'day'),
@@ -52,7 +52,10 @@
                 </a>
               </li>
             </ul>
-            <div v-else class="flex justify-center text-4xl">
+            <div
+              v-else
+              class="flex justify-center text-xl md:text-4xl leading-none"
+            >
               <template v-if="eventsOnDay(day).length">·</template>
             </div>
           </div>
