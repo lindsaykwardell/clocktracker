@@ -20,7 +20,7 @@
           <div
             v-if="day"
             @click="emit('selectDay', day)"
-            class="p-1 hover:bg-stone-700"
+            class="p-1 hover:bg-stone-700 overflow-hidden"
             :class="{
               'min-h-[100px] md:min-h-[150px]': size !== 'sm',
               'h-[40px] md:h-[75px]': size === 'sm',
@@ -29,7 +29,14 @@
               'bg-stone-700': day.isSame(selectedDay, 'day'),
             }"
           >
-            <span class="text-stone-500">{{ day?.date() }}</span>
+            <div
+              class="text-stone-500"
+              :class="{
+                'text-center': size === 'sm',
+              }"
+            >
+              {{ day?.date() }}
+            </div>
             <ul v-if="size !== 'sm'">
               <li v-for="event in eventsOnDay(day)">
                 <a
@@ -54,9 +61,9 @@
             </ul>
             <div
               v-else
-              class="flex justify-center text-xl md:text-4xl leading-none"
+              class="flex flex-wrap justify-center text-xl md:text-4xl leading-none"
             >
-              <template v-if="eventsOnDay(day).length">·</template>
+              <div v-for="_ in eventsOnDay(day).length">·</div>
             </div>
           </div>
         </div>
