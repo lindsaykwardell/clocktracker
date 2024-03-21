@@ -83,6 +83,7 @@
             </div>
           </a>
           <a
+            id="kofi"
             href="https://ko-fi.com/clocktracker"
             class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
             aria-label="Donate to ClockTracker"
@@ -107,7 +108,12 @@
       <slot />
     </main>
   </div>
-  <Tour v-if="user" :steps="tour" @onTourEnd="showMenu = false" tourKey="new-community-nav-item" />
+  <Tour
+    v-if="user"
+    :steps="tour"
+    @onTourEnd="showMenu = false"
+    tourKey="new-community-nav-item"
+  />
 </template>
 
 <script setup lang="ts">
@@ -152,6 +158,11 @@ const tour: Step[] = [
       "Communities are another way to connect. You can create a community and invite your friends to join. Once you have a community, you can create and manage events, and see what scripts you've all been playing.",
   },
   {
+    target: "#events",
+    content:
+      "Events that you are registered for can be viewed here. If you're looking for an event, check our your community's events page.",
+  },
+  {
     target: "#settings",
     content:
       "You can change your settings here. You can change your display name, username, password, as well as connect ClockTracker to sites like BoardGameGeek.",
@@ -160,6 +171,11 @@ const tour: Step[] = [
     target: "#discord",
     content:
       "You can join the ClockTracker Discord server here. You can ask questions, report bugs, or just chat with other ClockTracker users.",
+  },
+  {
+    target: "#kofi",
+    content:
+      "If you find ClockTracker valuable, you can donate to support us on Ko-Fi. Donations help keep the site running and are greatly appreciated.",
   },
   {
     target: "#anchor-center",
