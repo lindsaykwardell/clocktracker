@@ -1,11 +1,8 @@
 <template>
   <StandardTemplate>
     <template v-if="me.status === Status.SUCCESS">
-      <h1 class="text-3xl font-bold mb-8 font-dumbledor py-4 text-center">
-        My Upcoming Events
-      </h1>
-      <div class="flex flex-col lg:flex-row gap-4">
-        <div class="w-full lg:w-1/2">
+      <div class="flex flex-col lg:flex-row gap-4 relative">
+        <div class="w-full lg:w-1/2 sticky top-0 bg-stone-800">
           <Calendar
             size="sm"
             :events="events"
