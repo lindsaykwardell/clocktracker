@@ -129,6 +129,7 @@ const minions = [
   "Widow",
   "Witch",
   "Harpy",
+  "Summoner",
 ];
 
 const demons = [
@@ -875,6 +876,18 @@ const reminders = [
   {
     role_id: "yaggababble",
     reminder: "Dead",
+  },
+  {
+    role_id: "summoner",
+    reminder: "Night 1",
+  },
+  {
+    role_id: "summoner",
+    reminder: "Night 2",
+  },
+  {
+    role_id: "summoner",
+    reminder: "Night 3",
   },
   {
     role_id: "angel",
