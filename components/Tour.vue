@@ -22,6 +22,8 @@ const props = defineProps<{
   tourKey: string;
 }>();
 
+const emit = defineEmits(["onTourStart", "onTourEnd"]);
+
 function onTourEnd() {
   localStorage.removeItem("vjt-tour");
 
@@ -32,6 +34,7 @@ function onTourEnd() {
   );
 
   tourStarted.value = false;
+  emit("onTourEnd");
 }
 
 onMounted(() => {
@@ -40,6 +43,7 @@ onMounted(() => {
   ) {
     setTimeout(() => {
       tour.value.startTour();
+      emit("onTourStart");
     }, 1000);
   }
 });

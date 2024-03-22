@@ -1,7 +1,7 @@
 <template>
   <div>
     <div
-      class="flex justify-around py-4"
+      class="flex justify-center md:justify-around gap-6 py-4"
       :class="{
         'text-xl lg:text-2xl': size === 'lg',
         'text-lg lg:text-xl': size === 'md',
@@ -20,14 +20,23 @@
           <div
             v-if="day"
             @click="emit('selectDay', day)"
-            class="p-1 hover:bg-stone-700"
+            class="p-1 hover:bg-stone-700 overflow-hidden"
             :class="{
               'min-h-[100px] md:min-h-[150px]': size !== 'sm',
-              'h-[75px]': size === 'sm',
+              'h-[40px] md:h-[75px]': size === 'sm',
               'cursor-pointer': clickableDays,
+              'border border-yellow-500': day.isSame(today, 'day'),
+              'bg-stone-700': day.isSame(selectedDay, 'day'),
             }"
           >
-            <span class="text-stone-500">{{ day?.date() }}</span>
+            <div
+              class="text-stone-500"
+              :class="{
+                'text-center': size === 'sm',
+              }"
+            >
+              {{ day?.date() }}
+            </div>
             <ul v-if="size !== 'sm'">
               <li v-for="event in eventsOnDay(day)">
                 <a
@@ -50,8 +59,11 @@
                 </a>
               </li>
             </ul>
-            <div v-else class="flex justify-center text-4xl">
-              <template v-if="eventsOnDay(day).length">·</template>
+            <div
+              v-else
+              class="flex flex-wrap justify-center text-xl md:text-4xl leading-none"
+            >
+              <div v-for="_ in eventsOnDay(day).length">·</div>
             </div>
           </div>
         </div>
@@ -68,12 +80,14 @@ const props = defineProps<{
   events: Event[];
   size: "sm" | "md" | "lg";
   clickableDays?: boolean;
+  selectedDay?: dayjs.Dayjs | null;
 }>();
 
 const emit = defineEmits(["viewChanged", "selectDay"]);
 
 const year = ref(dayjs().year());
 const month = ref(dayjs().month() + 1);
+const today = dayjs();
 
 const formattedYearAndMonth = computed(() => {
   return dayjs()
