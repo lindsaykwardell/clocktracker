@@ -589,9 +589,8 @@ const storytellers = computed(() => {
 });
 
 function fullImageUrl(file: string) {
-  const transformations = "?width=500&height=500";
-  if (file.startsWith("http")) return file + transformations;
-  return `${config.public.supabase.url}/storage/v1/object/public/game-attachments/${file}${transformations}`;
+  if (file.startsWith("http")) return file;
+  return `${config.public.supabase.url}/storage/v1/object/public/game-attachments/${file}`;
 }
 
 function scriptLink(game: GameRecord) {
