@@ -159,6 +159,7 @@ const minions = [
   "Widow",
   "Witch",
   "Harpy",
+  "Summoner",
 ];
 
 const demons = [
