@@ -34,91 +34,10 @@
               <template v-if="game.script === ''">Select Script</template>
             </button>
           </div>
-          <Dialog v-model:visible="showScriptDialog">
-            <template #title>
-              <h2 class="text-2xl font-bold font-dumbledor">Select Script</h2>
-            </template>
-            <section class="p-4 flex flex-col gap-2">
-              <div class="flex justify-around gap-8 pb-4">
-                <button
-                  class="flex-1 w-1 hover:bg-stone-800 rounded-lg hover:shadow-xl"
-                  @click.prevent="selectScript(troubleBrewing!)"
-                >
-                  <img src="/img/trouble_brewing.png" alt="Trouble Brewing" />
-                </button>
-                <button
-                  class="flex-1 w-1 hover:bg-stone-800 rounded-lg hover:shadow-xl"
-                  @click.prevent="selectScript(badMoonRising!)"
-                >
-                  <img src="/img/bad_moon_rising.png" alt="Bad Moon Rising" />
-                </button>
-                <button
-                  class="flex-1 w-1 hover:bg-stone-800 rounded-lg hover:shadow-xl"
-                  @click.prevent="selectScript(sectsAndViolets!)"
-                >
-                  <img
-                    src="/img/sects_and_violets.png"
-                    alt="Sects and Violets"
-                  />
-                </button>
-              </div>
-              <div class="flex flex-wrap gap-2">
-                <button
-                  v-for="script in recentScripts"
-                  @click="selectScript(script)"
-                  class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
-                >
-                  {{ script.name }}
-                  <template v-if="script.version">
-                    &nbsp;v{{ script.version }}
-                  </template>
-                </button>
-              </div>
-              <div class="relative">
-                <input
-                  v-model="potentialScript"
-                  class="block w-full border border-stone-500 rounded-md p-2 text-lg bg-stone-600"
-                  placeholder="Search for a script"
-                />
-                <button
-                  type="button"
-                  @click="searchScripts"
-                  class="absolute right-2 -top-3 w-16 h-16"
-                >
-                  <img src="/img/role/investigator.png" />
-                </button>
-              </div>
-              <ul class="py-2">
-                <li
-                  v-for="script in scripts"
-                  class="px-1 py-2 hover:bg-stone-800"
-                >
-                  <button
-                    type="button"
-                    @click="selectScript(script)"
-                    class="w-full text-left"
-                  >
-                    {{ script.name }}
-                  </button>
-                </li>
-                <li
-                  class="px-1 py-2 hover:bg-stone-800"
-                  v-if="
-                    potentialScript &&
-                    !scripts.find((script) => script.name === potentialScript)
-                  "
-                >
-                  <button
-                    type="button"
-                    @click="selectScript({ name: potentialScript, id: null })"
-                    class="w-full text-left"
-                  >
-                    {{ potentialScript }} (Use custom script)
-                  </button>
-                </li>
-              </ul>
-            </section>
-          </Dialog>
+          <SelectScriptDialog
+            v-model:visible="showScriptDialog"
+            @selectScript="selectScript"
+          />
         </label>
         <div
           v-if="
@@ -807,7 +726,7 @@ const user = useSupabaseUser();
 const users = useUsers();
 const games = useGames();
 const friends = useFriends();
-const { isBaseScript } = useScripts();
+const { isBaseScript, fetchScriptVersions } = useScripts();
 const featureFlags = useFeatureFlags();
 
 const advancedModeEnabled_ = useLocalStorage("advancedModeEnabled", "false");
@@ -844,13 +763,6 @@ const visibleRoles = computed(() => {
   });
 });
 
-const scripts = ref<{ id: number; name: string }[]>([]);
-const baseScripts = ref<{ id: number; name: string }[]>([]);
-const recentScripts = computed(() =>
-  games.getRecentScripts.filter(
-    (s) => !baseScripts.value.some((b) => b.id === s.id)
-  )
-);
 const scriptVersions = ref<{ id: number; version: string }[]>([]);
 const fetchingScriptVersions = ref(false);
 const tokenMode = ref<"role" | "related_role">("role");
@@ -859,11 +771,6 @@ const tokenSet = ref<"player_characters" | "demon_bluffs" | "fabled">(
 );
 
 let focusedToken: Partial<Character> | null = null;
-
-const baseScriptData = await $fetch(
-  "/api/script?author=The Pandemonium Institute"
-);
-baseScripts.value = baseScriptData ?? [];
 
 const me = computed(() => users.getUserById(user.value?.id));
 const myTags = computed(() => {
@@ -1006,20 +913,9 @@ const props = defineProps<{
 }>();
 
 const grimPage = ref(props.game.grimoire.length - 1);
-const potentialScript = ref("");
 const tagsInput = ref("");
 
 const emit = defineEmits(["submit"]);
-
-const troubleBrewing = computed(() =>
-  baseScripts.value.find((script) => script.name === "Trouble Brewing")
-);
-const sectsAndViolets = computed(() =>
-  baseScripts.value.find((script) => script.name === "Sects and Violets")
-);
-const badMoonRising = computed(() =>
-  baseScripts.value.find((script) => script.name === "Bad Moon Rising")
-);
 
 function addCharacter() {
   props.game.player_characters.push({
@@ -1142,16 +1038,6 @@ async function removeFile(name: string) {
   props.game.image_urls = props.game.image_urls.filter((file) => file !== name);
 }
 
-async function searchScripts() {
-  if (potentialScript.value === "") {
-    scripts.value = [];
-    return;
-  }
-
-  const result = await useFetch(`/api/script?query=${potentialScript.value}`);
-  scripts.value = result.data.value ?? [];
-}
-
 function selectScript(script: { name: string; id: number | null }) {
   props.game.script = script.name;
   props.game.script_id = script.id;
@@ -1175,12 +1061,7 @@ watchEffect(async () => {
     }>(`/api/script/${props.game.script_id}`);
     roles.value = result.roles ?? [];
 
-    const versions = await $fetch(
-      `/api/script/${props.game.script_id}/versions`
-    );
-    scriptVersions.value = naturalOrder(versions)
-      .orderBy("desc")
-      .sort(["version"]);
+    scriptVersions.value = await fetchScriptVersions(props.game.script_id);
     fetchingScriptVersions.value = false;
   } else {
     const result = await $fetch<
@@ -1325,8 +1206,6 @@ function deletePage() {
   props.game.grimoire.splice(grimPage.value, 1);
   grimPage.value = Math.max(0, grimPage.value - 1);
 }
-
-watchDebounced(potentialScript, searchScripts, { debounce: 500 });
 
 watch(
   props.game.grimoire,

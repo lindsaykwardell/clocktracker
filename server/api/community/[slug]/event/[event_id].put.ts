@@ -17,6 +17,9 @@ export default defineEventHandler(async (handler) => {
     player_count?: number;
     who_can_register: WhoCanRegister;
     image: string | null;
+    storytellers: string[];
+    script: string;
+    script_id: number | null;
     waitlists: {
       id?: number;
       name: string;
@@ -72,6 +75,9 @@ export default defineEventHandler(async (handler) => {
       location_type: body.location_type,
       player_count: body.player_count,
       who_can_register: body.who_can_register,
+      storytellers: body.storytellers.filter((s) => s.length > 0),
+      script: body.script,
+      script_id: body.script_id,
       image: body.image,
       waitlists: {
         deleteMany: {
