@@ -197,7 +197,10 @@ const event = reactive<{
   player_count: number | null;
   description: string;
   image: string | null;
-  who_can_register: "ANYONE" | "COMMUNITY_MEMBERS";
+  who_can_register: "ANYONE" | "PRIVATE" | "COMMUNITY_MEMBERS";
+  storytellers: string[];
+  script: string;
+  script_id: number | null;
   waitlists: {
     id?: number;
     name: string;
@@ -213,6 +216,9 @@ const event = reactive<{
   location: existingEvent.location,
   image: existingEvent.image,
   who_can_register: existingEvent.who_can_register,
+  storytellers: existingEvent.storytellers,
+  script: existingEvent.script,
+  script_id: existingEvent.script_id,
   waitlists: existingEvent.waitlists.map((w) => ({
     id: w.id,
     name: w.name,

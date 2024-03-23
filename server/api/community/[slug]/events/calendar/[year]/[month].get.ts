@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, WhoCanRegister } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
 import dayjs from "dayjs";
 
@@ -42,6 +42,22 @@ export default defineEventHandler(async (handler) => {
         gte: start,
         lt: end,
       },
+      OR: [
+        {
+          who_can_register: {
+            not: WhoCanRegister.PRIVATE,
+          },
+        },
+        {
+          community: {
+            admins: {
+              some: {
+                user_id: me?.id || "",
+              },
+            },
+          },
+        },
+      ],
     },
     select: {
       id: true,
@@ -54,6 +70,9 @@ export default defineEventHandler(async (handler) => {
       player_count: true,
       image: true,
       who_can_register: true,
+      storytellers: true,
+      script: true,
+      script_id: true,
       registered_players: {
         select: {
           name: true,

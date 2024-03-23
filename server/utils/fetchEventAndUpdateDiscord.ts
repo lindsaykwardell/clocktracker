@@ -24,6 +24,10 @@ export async function fetchEventAndUpdateDiscord(event_id: string) {
       location: true,
       location_type: true,
       player_count: true,
+      storytellers: true,
+      script: true,
+      script_id: true,
+      who_can_register: true,
       image: true,
       registered_players: {
         select: {
