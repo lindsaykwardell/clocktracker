@@ -142,9 +142,8 @@ function formatDate(date: Date) {
 }
 
 function fullImageUrl(file: string) {
-  const transformations = "?width=400&height=300";
-  if (file.startsWith("http")) return file + transformations;
-  return `${config.public.supabase.url}/storage/v1/object/public/game-attachments/${file}${transformations}`;
+  if (file.startsWith("http")) return file;
+  return `${config.public.supabase.url}/storage/v1/object/public/game-attachments/${file}`;
 }
 
 const cardWidth = computed(() => props.cardWidth || "w-1/2 lg:w-1/3 xl:w-1/4");
