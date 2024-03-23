@@ -19,6 +19,7 @@
           class="block w-full border border-stone-500 rounded-md p-2"
         >
           <option value="COMMUNITY_MEMBERS">Community Members</option>
+          <option value="PRIVATE">Anyone with the event link</option>
           <option value="ANYONE">Anyone</option>
         </select>
       </label>

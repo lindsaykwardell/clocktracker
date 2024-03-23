@@ -380,6 +380,7 @@ model EventDiscordPost {
 
 enum WhoCanRegister {
   ANYONE
+  PRIVATE
   COMMUNITY_MEMBERS
 }
 

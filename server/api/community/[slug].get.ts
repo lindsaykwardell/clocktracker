@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, WhoCanRegister } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
 
 const prisma = new PrismaClient();
@@ -248,6 +248,9 @@ export default defineEventHandler(async (handler) => {
           },
         },
         where: {
+          who_can_register: {
+            not: WhoCanRegister.PRIVATE,
+          },
           end: {
             gte: new Date(),
           },
