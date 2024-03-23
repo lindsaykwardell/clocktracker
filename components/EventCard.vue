@@ -28,6 +28,37 @@
         class="post text-sm md:text-base"
         :source="event.description"
       />
+      <div class="flex flex-col md:flex-row gap-2 items-top justify-between">
+        <div
+          class="flex-1 flex gap-3 items-center"
+          v-if="event.storytellers.length"
+        >
+          <span class="text-sm text-stone-500"
+            >Storyteller{{ event.storytellers.length === 1 ? "" : "s" }}</span
+          >
+          <div>
+            <template v-for="(storyteller, index) in event.storytellers">
+              <span>{{ storyteller }}</span>
+              <template v-if="index !== event.storytellers.length - 1"
+                >,
+              </template>
+            </template>
+          </div>
+        </div>
+        <div class="flex-1 flex gap-3 items-center" v-if="event.script">
+          <span class="text-sm text-stone-500">Script</span>
+          <a class="hover:underline" :href="scriptLink(event)" target="">
+            {{ event.script }}
+            <!-- <template
+              v-if="
+                game.data.associated_script && !isBaseScript(game.data.script)
+              "
+            >
+              v{{ game.data.associated_script.version }}
+            </template> -->
+          </a>
+        </div>
+      </div>
       <div class="flex flex-col md:flex-row justify-between gap-2 items-center">
         <div>
           <span class="text-stone-400">
@@ -94,5 +125,16 @@ function formatTime(date: string) {
   return new Intl.DateTimeFormat(navigator.language, {
     timeStyle: "short",
   }).format(new Date(date));
+}
+
+function scriptLink(event: { script: string; script_id: number | null }) {
+  if (event.script === "Sects & Violets") return "/scripts/Sects_and_Violets";
+
+  if (event.script_id) return `/scripts/${event.script.replaceAll(" ", "_")}`;
+
+  return `https://botcscripts.com/?search=${event.script.replace(
+    / /g,
+    "+"
+  )}&script_type=&include=&exclude=&edition=&author=`;
 }
 </script>
