@@ -40,6 +40,9 @@ export default defineEventHandler(async (handler) => {
         {
           who_can_register: WhoCanRegister.ANYONE,
         },
+        {
+          who_can_register: WhoCanRegister.PRIVATE,
+        }
       ],
     },
     select: {

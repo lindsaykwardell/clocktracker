@@ -76,6 +76,59 @@
         />
       </label>
     </div>
+    <div class="flex gap-4">
+      <label class="flex-1">
+        <span class="block">Storytellers</span>
+        <div class="flex flex-col gap-1">
+          <div
+            v-for="(_, index) in event.storytellers"
+            :key="index"
+            class="flex gap-1"
+          >
+            <input
+              v-model="event.storytellers[index]"
+              type="text"
+              class="block w-full border border-stone-500 rounded-md p-2"
+            />
+            <button
+              type="button"
+              @click="event.storytellers.splice(index, 1)"
+              class="transition duration-150 text-white font-bold py-2 px-4 rounded"
+            >
+              Remove
+            </button>
+          </div>
+        </div>
+        <button @click="event.storytellers.push('')" type="button">
+          Add Storyteller
+        </button>
+      </label>
+      <label class="flex-1">
+        <span class="block">Script</span>
+        <div class="flex items-center gap-1">
+          <div v-if="event.script" class="flex-grow">{{ event.script }}</div>
+          <button
+            type="button"
+            id="select-script"
+            @click="showScriptDialog = !showScriptDialog"
+            class="flex gap-1 bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-1 px-4 rounded justify-center items-center"
+            :class="{
+              'w-full': !event.script,
+              'flex-shrink': event.script,
+            }"
+          >
+            <div class="w-[30px] overflow-hidden">
+              <img src="/img/role/investigator.png" />
+            </div>
+            <template v-if="event.script === ''">Select Script</template>
+          </button>
+        </div>
+        <SelectScriptDialog
+          v-model:visible="showScriptDialog"
+          @selectScript="selectScript"
+        />
+      </label>
+    </div>
     <label>
       <span class="block">Description</span>
       <textarea
@@ -177,7 +230,10 @@ const props = defineProps<{
     player_count: number | null;
     description: string;
     image: string | null;
-    who_can_register: "ANYONE" | "COMMUNITY_MEMBERS";
+    who_can_register: "ANYONE" | "PRIVATE" | "COMMUNITY_MEMBERS";
+    storytellers: string[];
+    script: string;
+    script_id: number | null;
     waitlists: {
       id?: number;
       name: string;
@@ -193,6 +249,7 @@ const emit = defineEmits(["save"]);
 const user = useSupabaseUser();
 const users = useUsers();
 const games = useGames();
+const showScriptDialog = ref(false);
 
 const me = computed(() => users.getUserById(user.value?.id));
 
@@ -255,6 +312,19 @@ watchEffect(() => {
     }
   }
 });
+
+watchEffect(() => {
+  console.log(props.event.storytellers);
+  if (props.event.storytellers?.length === 0) {
+    props.event.storytellers.push("");
+  }
+});
+
+function selectScript(script: { name: string; id: number | null }) {
+  props.event.script = script.name;
+  props.event.script_id = script.id;
+  showScriptDialog.value = false;
+}
 </script>
 
 <style scoped>

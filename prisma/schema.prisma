@@ -132,7 +132,7 @@ model Fabled {
 }
 
 model Script {
-  id          Int    @id @default(autoincrement())
+  id          Int     @id @default(autoincrement())
   script_id   Int
   name        String
   version     String
@@ -140,9 +140,10 @@ model Script {
   type        String
   json_url    String
   pdf_url     String
-  description String @default("")
+  description String  @default("")
   roles       Role[]
   games       Game[]
+  events      Event[]
 
   @@unique([script_id, version])
 }
@@ -360,6 +361,10 @@ model Event {
   location_type      LocationType       @default(ONLINE)
   location           String
   image              String?
+  storytellers       String[]
+  script             String             @default("")
+  script_id          Int?
+  associated_script  Script?            @relation(fields: [script_id], references: [id])
   registered_players EventAttendee[]
   community          Community?         @relation(fields: [community_id], references: [id])
   community_id       Int?
