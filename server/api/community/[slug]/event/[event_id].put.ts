@@ -20,6 +20,7 @@ export default defineEventHandler(async (handler) => {
     storytellers: string[];
     script: string;
     script_id: number | null;
+    game_link: string | null;
     waitlists: {
       id?: number;
       name: string;
@@ -78,6 +79,7 @@ export default defineEventHandler(async (handler) => {
       storytellers: body.storytellers.filter((s) => s.length > 0),
       script: body.script,
       script_id: body.script_id,
+      game_link: body.game_link,
       image: body.image,
       waitlists: {
         deleteMany: {

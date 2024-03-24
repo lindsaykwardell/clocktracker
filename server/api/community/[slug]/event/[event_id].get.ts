@@ -47,6 +47,7 @@ export default defineEventHandler(async (handler) => {
       storytellers: true,
       script: true,
       script_id: true,
+      game_link: true,
       registered_players: {
         select: {
           id: true,
