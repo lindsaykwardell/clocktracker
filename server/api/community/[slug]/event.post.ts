@@ -14,6 +14,10 @@ export default defineEventHandler(async (handler) => {
     location: string;
     location_type: LocationType;
     player_count?: number;
+    storytellers: string[];
+    script: string;
+    script_id: number | null;
+    game_link: string | null;
     waitlists: {
       id?: number;
       name: string;
@@ -67,6 +71,9 @@ export default defineEventHandler(async (handler) => {
       who_can_register: body.who_can_register,
       image: body.image,
       community_id: community.id,
+      storytellers: body.storytellers,
+      script_id: body.script_id,
+      game_link: body.game_link,
       waitlists: {
         createMany: {
           data: body.waitlists.map((waitlist) => ({

@@ -60,6 +60,7 @@ export type Event = {
   storytellers: string[];
   script: string;
   script_id: number | null;
+  game_link: string | null;
   registered_players: {
     name: string;
     created_at: string;

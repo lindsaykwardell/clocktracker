@@ -365,6 +365,7 @@ model Event {
   script             String             @default("")
   script_id          Int?
   associated_script  Script?            @relation(fields: [script_id], references: [id])
+  game_link          String?
   registered_players EventAttendee[]
   community          Community?         @relation(fields: [community_id], references: [id])
   community_id       Int?
