@@ -6,6 +6,7 @@ export default defineNuxtConfig({
     "@nuxtjs/supabase",
     "@vite-pwa/nuxt",
     "@pinia/nuxt",
+    "floating-vue/nuxt",
   ],
   app: {
     head: {

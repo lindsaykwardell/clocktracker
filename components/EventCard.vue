@@ -84,7 +84,9 @@
             <span class="text-stone-400">({{ waitlistCount }} waiting)</span>
           </template>
         </div>
-        <slot name="register" :event="event" />
+        <div class="flex gap-2 justify-end">
+          <slot name="register" :event="event" />
+        </div>
       </div>
 
       <slot name="footer" :event="event" />
