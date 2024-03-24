@@ -40,6 +40,7 @@ const event = reactive<{
   storytellers: string[];
   script: string;
   script_id: number | null;
+  game_link: string | null;
   waitlists: {
     name: string;
     default: boolean;
@@ -57,6 +58,7 @@ const event = reactive<{
   storytellers: [],
   script: "",
   script_id: null,
+  game_link: null,
   waitlists: [],
 });
 
@@ -76,6 +78,7 @@ if (route.query.duplicate) {
     event.storytellers = previousEvent.storytellers;
     event.script = previousEvent.script;
     event.script_id = previousEvent.script_id;
+    event.game_link = previousEvent.game_link;
     event.waitlists = previousEvent.waitlists.map((w) => ({
       name: w.name,
       default: w.default,

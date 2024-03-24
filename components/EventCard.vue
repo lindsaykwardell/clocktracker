@@ -28,6 +28,16 @@
         class="post text-sm md:text-base"
         :source="event.description"
       />
+      <div class="flex gap-3">
+        <span class="text-sm text-stone-500">Game Link</span>
+        <a
+          v-if="event.game_link"
+          :href="event.game_link"
+          target="_blank"
+          class="text-blue-600 text-sm hover:underline"
+          >{{ event.game_link }}</a
+        >
+      </div>
       <div class="flex flex-col md:flex-row gap-2 items-top justify-between">
         <div
           class="flex-1 flex gap-3 items-center"

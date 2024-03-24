@@ -78,6 +78,19 @@
     </div>
     <div class="flex gap-4">
       <label class="flex-1">
+        <span class="block">Game Link</span>
+        <input
+          v-model="event.game_link"
+          type="text"
+          class="block w-full border border-stone-500 rounded-md p-2"
+          placeholder="https://online.bloodontheclocktower.com/join/12345"
+          pattern="[Hh][Tt][Tt][Pp][Ss]?:\/\/(?:(?:[a-zA-Z\u00a1-\uffff0-9]+-?)*[a-zA-Z\u00a1-\uffff0-9]+)(?:\.(?:[a-zA-Z\u00a1-\uffff0-9]+-?)*[a-zA-Z\u00a1-\uffff0-9]+)*(?:\.(?:[a-zA-Z\u00a1-\uffff]{2,}))(?::\d{2,5})?(?:\/[^\s]*)?"
+          title="Please enter a valid URL"
+        />
+      </label>
+    </div>
+    <div class="flex gap-4">
+      <label class="flex-1">
         <span class="block">Storytellers</span>
         <div class="flex flex-col gap-1">
           <div
@@ -234,6 +247,7 @@ const props = defineProps<{
     storytellers: string[];
     script: string;
     script_id: number | null;
+    game_link: string | null;
     waitlists: {
       id?: number;
       name: string;
