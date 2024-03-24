@@ -49,6 +49,8 @@
     "colord": "^2.9.3",
     "dayjs": "^1.11.10",
     "discord.js": "^14.14.1",
+    "floating-vue": "^5.2.2",
+    "nanoid": "^5.0.6",
     "natural-order": "^2.0.2",
     "papaparse": "^5.4.1",
     "pinia": "^2.1.7",

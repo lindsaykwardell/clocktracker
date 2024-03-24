@@ -201,6 +201,7 @@ const event = reactive<{
   storytellers: string[];
   script: string;
   script_id: number | null;
+  game_link: string | null;
   waitlists: {
     id?: number;
     name: string;
@@ -219,6 +220,7 @@ const event = reactive<{
   storytellers: existingEvent.storytellers,
   script: existingEvent.script,
   script_id: existingEvent.script_id,
+  game_link: existingEvent.game_link,
   waitlists: existingEvent.waitlists.map((w) => ({
     id: w.id,
     name: w.name,
