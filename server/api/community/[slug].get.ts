@@ -202,6 +202,10 @@ export default defineEventHandler(async (handler) => {
           location_type: true,
           player_count: true,
           image: true,
+          who_can_register: true,
+          storytellers: true,
+          script: true,
+          script_id: true,
           registered_players: {
             select: {
               name: true,
