@@ -3,6 +3,17 @@
     <EventCard v-if="event" :event="event" class="m-auto my-6">
       <template #register>
         <button
+          class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
+          @click="getShareLink"
+          v-tooltip="{
+            content: 'Copied!',
+            shown: showShareTooltip,
+            triggers: [],
+          }"
+        >
+          Share
+        </button>
+        <button
           v-if="event.who_can_register === 'ANYONE' ? true : isMember"
           :disabled="inFlight"
           @click="initRegister()"
@@ -301,6 +312,17 @@ function deleteEvent() {
       router.push(`/community/${slug}/events`);
     });
   }
+}
+
+const showShareTooltip = ref(false);
+
+async function getShareLink() {
+  const short_link = await $fetch(`/api/events/${eventId}/share`);
+  navigator.clipboard.writeText(short_link);
+  showShareTooltip.value = true;
+  setTimeout(() => {
+    showShareTooltip.value = false;
+  }, 2000);
 }
 
 useHead({
