@@ -36,7 +36,10 @@ const event = reactive<{
   player_count: number | null;
   description: string;
   image: string | null;
-  who_can_register: "ANYONE" | "COMMUNITY_MEMBERS";
+  who_can_register: "ANYONE" | "PRIVATE" | "COMMUNITY_MEMBERS";
+  storytellers: string[];
+  script: string;
+  script_id: number | null;
   waitlists: {
     name: string;
     default: boolean;
@@ -51,6 +54,9 @@ const event = reactive<{
   location: "",
   image: null,
   who_can_register: "COMMUNITY_MEMBERS",
+  storytellers: [],
+  script: "",
+  script_id: null,
   waitlists: [],
 });
 
@@ -67,6 +73,9 @@ if (route.query.duplicate) {
     event.location = previousEvent.location;
     event.image = previousEvent.image;
     event.who_can_register = previousEvent.who_can_register;
+    event.storytellers = previousEvent.storytellers;
+    event.script = previousEvent.script;
+    event.script_id = previousEvent.script_id;
     event.waitlists = previousEvent.waitlists.map((w) => ({
       name: w.name,
       default: w.default,
