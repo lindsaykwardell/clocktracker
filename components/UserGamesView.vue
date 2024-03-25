@@ -3,78 +3,75 @@
     <template v-if="games.data.length">
       <section class="w-full flex flex-col md:flex-row gap-8 pb-20 md:pb-0">
         <div class="w-full flex flex-col gap-4">
-          <div class="flex flex-col md:flex-row gap-3 px-4">
-            <label class="flex gap-2 items-center">
-              <span class="block whitespace-nowrap w-20 md:w-auto">
-                Sort By
-              </span>
-              <select
-                v-model="sortBy"
-                class="w-full rounded p-1 text-lg bg-stone-600"
-              >
-                <option value="date">Date</option>
-                <option value="character">Character</option>
-                <option value="script">Script</option>
-                <option value="location">Location</option>
-                <option value="community_name">Community</option>
-                <option value="players">Players</option>
-              </select>
-            </label>
-            <label class="flex gap-2 items-center">
-              <span class="block whitespace-nowrap w-20 md:w-auto">Order</span>
-              <select
-                v-model="orderBy"
-                class="w-full rounded p-1 text-lg bg-stone-600"
-              >
-                <option value="asc">Ascending</option>
-                <option value="desc">Descending</option>
-              </select>
-            </label>
-            <label class="flex gap-2 items-center">
-              <select
-                v-model="selectedRole"
-                class="w-full rounded p-1 text-lg bg-stone-600"
-                aria-label="Role"
-              >
-                <option :value="null">Filter by role</option>
-                <option
-                  v-for="role in roles.getAllRoles"
-                  :key="role.id"
-                  :value="role.id"
+          <div class="flex flex-col lg:flex-row gap-3 px-4">
+            <div class="flex flex-col md:flex-row gap-3">
+              <label class="flex gap-2 items-center">
+                <select
+                  v-model="sortBy"
+                  class="w-full rounded p-1 text-lg bg-stone-600"
                 >
-                  {{ role.name }}
-                </option>
-              </select>
-            </label>
-            <label v-if="myCommunities.length" class="flex gap-2 items-center">
-              <select
-                v-model="selectedCommunity"
-                class="w-full rounded p-1 text-lg bg-stone-600"
-                aria-label="Community"
-              >
-                <option :value="null">Filter by community</option>
-                <option v-for="community in myCommunities" :key="community">
-                  {{ community }}
-                </option>
-              </select>
-            </label>
-            <label class="flex gap-2 items-center">
-              <select
-                v-model="selectedTag"
-                class="w-full rounded p-1 text-lg bg-stone-600"
-                aria-label="Tags"
-              >
-                <option :value="null">Filter by tag</option>
-                <option
-                  v-for="tag in myTags.filter(
-                    (tag) => !selectedTags.includes(tag)
-                  )"
-                  :key="tag"
+                  <option value="date">Sort by Date</option>
+                  <option value="character">Sort by Character</option>
+                  <option value="script">Sort by Script</option>
+                  <option value="location">Sort by Location</option>
+                  <option value="community_name">Sort by Community</option>
+                  <option value="players">Sort by Players</option>
+                </select>
+              </label>
+              <label class="flex gap-2 items-center">
+                <select
+                  v-model="orderBy"
+                  class="w-full rounded p-1 text-lg bg-stone-600"
                 >
-                  {{ tag }}
-                </option>
-              </select>
-            </label>
+                  <option value="asc">Ascending</option>
+                  <option value="desc">Descending</option>
+                </select>
+              </label>
+              <label class="flex gap-2 items-center">
+                <select
+                  v-model="selectedRole"
+                  class="w-full rounded p-1 text-lg bg-stone-600"
+                  aria-label="Role"
+                >
+                  <option :value="null">Filter by role</option>
+                  <option v-for="role in myRoles" :key="role" :value="role">
+                    {{ roleName(role) }}
+                  </option>
+                </select>
+              </label>
+              <label
+                v-if="myCommunities.length"
+                class="flex gap-2 items-center"
+              >
+                <select
+                  v-model="selectedCommunity"
+                  class="w-full rounded p-1 text-lg bg-stone-600"
+                  aria-label="Community"
+                >
+                  <option :value="null">Filter by community</option>
+                  <option v-for="community in myCommunities" :key="community">
+                    {{ community }}
+                  </option>
+                </select>
+              </label>
+              <label class="flex gap-2 items-center">
+                <select
+                  v-model="selectedTag"
+                  class="w-full rounded p-1 text-lg bg-stone-600"
+                  aria-label="Tags"
+                >
+                  <option :value="null">Filter by tag</option>
+                  <option
+                    v-for="tag in myTags.filter(
+                      (tag) => !selectedTags.includes(tag)
+                    )"
+                    :key="tag"
+                  >
+                    {{ tag }}
+                  </option>
+                </select>
+              </label>
+            </div>
             <div class="flex-grow"></div>
             <div class="flex gap-2 items-center justify-end">
               <slot />
@@ -220,6 +217,26 @@ const myTags = computed(() => {
   }
 });
 
+const myRoles = computed(() => {
+  if (props.games.status !== Status.SUCCESS) {
+    return [];
+  }
+  return naturalOrder([
+    ...new Set(
+      props.games.data
+        .map(
+          (game) =>
+            game.player_characters[game.player_characters.length - 1]?.role_id
+        )
+        .filter((role) => role) as string[]
+    ),
+  ]).sort();
+});
+
+function roleName(roleId: string) {
+  return roles.getRole(roleId)?.name || "";
+}
+
 const myCommunities = computed(() => {
   if (!props.player) {
     return [];
@@ -263,7 +280,12 @@ const sortedGames = computed(() => {
   if (props.games.status !== Status.SUCCESS) {
     return [];
   }
-  return naturalOrder(props.games.data)
+  return naturalOrder(
+    props.games.data.map((g) => ({
+      ...g,
+      last_character: g.player_characters[g.player_characters.length - 1]?.name,
+    }))
+  )
     .orderBy(orderBy.value)
     .sort(
       (() => {
@@ -271,7 +293,7 @@ const sortedGames = computed(() => {
           case "date":
             return ["date", "created_at"];
           case "character":
-            return []; // TODO implement sorting by last character
+            return ["last_character"]; // TODO implement sorting by last character
           case "script":
             return ["script"];
           case "location":
