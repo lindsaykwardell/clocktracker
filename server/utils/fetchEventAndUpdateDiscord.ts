@@ -29,6 +29,7 @@ export async function fetchEventAndUpdateDiscord(event_id: string) {
       script_id: true,
       who_can_register: true,
       image: true,
+      game_link: true,
       registered_players: {
         select: {
           name: true,
