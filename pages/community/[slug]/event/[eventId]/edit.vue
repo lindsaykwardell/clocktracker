@@ -22,22 +22,9 @@
               : registered_players"
             class="flex gap-2"
           >
-            <button @click="deleteRegisteredPlayer(player.id)">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="32"
-                height="32"
-                viewBox="0 0 512 512"
-              >
-                <path
-                  d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
-                  fill="currentColor"
-                />
-                <path d="M249 160h14v241h-14z" fill="currentColor" />
-                <path d="M320 160h-14.6l-10.7 241h14.6z" fill="currentColor" />
-                <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
-              </svg>
-            </button>
+            <EventPlayerPopover
+              :options="registeredOptions(player)"
+            />
             <nuxt-link
               v-if="player.user"
               :to="`/@${player.user.username}`"
@@ -80,25 +67,9 @@
               v-for="player in registered_players.slice(event.player_count)"
               class="flex gap-2"
             >
-              <button @click="deleteRegisteredPlayer(player.id)">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="32"
-                  height="32"
-                  viewBox="0 0 512 512"
-                >
-                  <path
-                    d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
-                    fill="currentColor"
-                  />
-                  <path d="M249 160h14v241h-14z" fill="currentColor" />
-                  <path
-                    d="M320 160h-14.6l-10.7 241h14.6z"
-                    fill="currentColor"
-                  />
-                  <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
-                </svg>
-              </button>
+              <EventPlayerPopover
+                :options="registeredOptions(player)"
+              />
               <nuxt-link
                 v-if="player.user"
                 :to="`/@${player.user.username}`"
@@ -126,25 +97,10 @@
           <h3 class="font-bold">{{ waitlist.name }}</h3>
           <ul>
             <li v-for="player in waitlist.users" class="flex gap-2">
-              <button @click="deleteWaitlistPlayer(waitlist.id, player.id)">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="32"
-                  height="32"
-                  viewBox="0 0 512 512"
-                >
-                  <path
-                    d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
-                    fill="currentColor"
-                  />
-                  <path d="M249 160h14v241h-14z" fill="currentColor" />
-                  <path
-                    d="M320 160h-14.6l-10.7 241h14.6z"
-                    fill="currentColor"
-                  />
-                  <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
-                </svg>
-              </button>
+              <EventPlayerPopover
+                :options="waitlistOptions(player, waitlist)"
+              />
+
               <nuxt-link
                 v-if="player.user"
                 :to="`/@${player.user.username}`"
@@ -239,6 +195,38 @@ const formattedEvent = computed(() => {
   };
 });
 
+function registeredOptions(player: any) {
+  return [
+    ...event.waitlists.map((waitlist) => ({
+      label: `Add to ${waitlist.name}`,
+      action: () => moveRegisteredPlayer(player.id, "registered", waitlist.id!),
+    })),
+    {
+      label: "Remove Player",
+      action: () => deleteRegisteredPlayer(player.id),
+    },
+  ];
+}
+
+function waitlistOptions(player: any, waitlist: any) {
+  return [
+    {
+      label: "Add to Registered",
+      action: () => moveRegisteredPlayer(player.id, waitlist.id!, "registered"),
+    },
+    ...event.waitlists
+      .filter((w) => w.id !== waitlist.id)
+      .map((w) => ({
+        label: `Add to ${w.name}`,
+        action: () => moveRegisteredPlayer(player.id, waitlist.id, w.id!),
+      })),
+    {
+      label: "Remove Player",
+      action: () => deleteWaitlistPlayer(waitlist.id, player.id),
+    },
+  ];
+}
+
 const inFlight = ref(false);
 const errors = ref("");
 
@@ -263,28 +251,49 @@ async function saveEvent() {
 }
 
 async function deleteRegisteredPlayer(id: number) {
-  await $fetch(`/api/community/${slug}/event/${eventId}/registered/${id}`, {
-    method: "DELETE",
-  });
+  if (confirm("Are you sure you want to remove this player?")) {
+    await $fetch(`/api/community/${slug}/event/${eventId}/registered/${id}`, {
+      method: "DELETE",
+    });
 
-  registered_players.value = registered_players.value.filter(
-    (p) => p.id !== id
-  );
+    registered_players.value = registered_players.value.filter(
+      (p) => p.id !== id
+    );
+  }
 }
 
 async function deleteWaitlistPlayer(waitlistId: number, id: number) {
-  await $fetch(
-    `/api/community/${slug}/event/${eventId}/waitlist/${waitlistId}/registered/${id}`,
+  if (confirm("Are you sure you want to remove this player?")) {
+    await $fetch(
+      `/api/community/${slug}/event/${eventId}/waitlist/${waitlistId}/registered/${id}`,
+      {
+        method: "DELETE",
+      }
+    );
+
+    waitlists.value = waitlists.value.map((w) => {
+      if (w.id === waitlistId) {
+        w.users = w.users.filter((u) => u.id !== id);
+      }
+      return w;
+    });
+  }
+}
+
+async function moveRegisteredPlayer(
+  player_id: number,
+  from: "registered" | number,
+  to: "registered" | number
+) {
+  const updatedEvent = await $fetch(
+    `/api/community/${slug}/event/${eventId}/registered`,
     {
-      method: "DELETE",
+      method: "PUT",
+      body: JSON.stringify({ player_id, from, to }),
     }
   );
 
-  waitlists.value = waitlists.value.map((w) => {
-    if (w.id === waitlistId) {
-      w.users = w.users.filter((u) => u.id !== id);
-    }
-    return w;
-  });
+  registered_players.value = updatedEvent.registered_players;
+  waitlists.value = updatedEvent.waitlists;
 }
 </script>

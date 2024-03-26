@@ -32,6 +32,7 @@ export async function fetchEventAndUpdateDiscord(event_id: string) {
       game_link: true,
       registered_players: {
         select: {
+          id: true,
           name: true,
           created_at: true,
           discord_user_id: true,
@@ -55,6 +56,7 @@ export async function fetchEventAndUpdateDiscord(event_id: string) {
           created_at: true,
           users: {
             select: {
+              id: true,
               name: true,
               created_at: true,
               discord_user_id: true,
