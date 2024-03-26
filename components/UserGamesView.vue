@@ -224,9 +224,10 @@ const myRoles = computed(() => {
   return naturalOrder([
     ...new Set(
       props.games.data
-        .map(
-          (game) =>
-            game.player_characters[game.player_characters.length - 1]?.role_id
+        .map((game) =>
+          game.is_storyteller
+            ? "storyteller"
+            : game.player_characters[game.player_characters.length - 1]?.role_id
         )
         .filter((role) => role) as string[]
     ),
@@ -234,6 +235,8 @@ const myRoles = computed(() => {
 });
 
 function roleName(roleId: string) {
+  if (roleId === "storyteller") return "Storyteller";
+
   return roles.getRole(roleId)?.name || "";
 }
 
@@ -283,7 +286,9 @@ const sortedGames = computed(() => {
   return naturalOrder(
     props.games.data.map((g) => ({
       ...g,
-      last_character: g.player_characters[g.player_characters.length - 1]?.name,
+      last_character: g.is_storyteller
+        ? "Storyteller"
+        : g.player_characters[g.player_characters.length - 1]?.name,
     }))
   )
     .orderBy(orderBy.value)
@@ -313,7 +318,8 @@ const sortedGames = computed(() => {
           selectedTags.value.every((tag) => game.tags.includes(tag))) && // filter by tags
         (!selectedRole.value ||
           game.player_characters[game.player_characters.length - 1]?.role_id ===
-            selectedRole.value) && // filter by role
+            selectedRole.value ||
+          (game.is_storyteller && selectedRole.value === "storyteller")) && // filter by role
         (!selectedCommunity.value ||
           game.community_name === selectedCommunity.value) // filter by community
     );
