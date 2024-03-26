@@ -38,6 +38,8 @@ function onTourEnd() {
 }
 
 onMounted(() => {
+  localStorage.removeItem("vjt-default");
+  localStorage.removeItem("vjt-tour");
   if (
     JSON.parse(localStorage.getItem("tours") || "{}")[props.tourKey] !== true
   ) {
