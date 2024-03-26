@@ -25,7 +25,7 @@ const props = defineProps<{
 const emit = defineEmits(["onTourStart", "onTourEnd"]);
 
 function onTourEnd() {
-  localStorage.removeItem("vjt-tour");
+  localStorage.removeItem("vjt-default");
 
   const tours = JSON.parse(localStorage.getItem("tours") || "{}");
   localStorage.setItem(

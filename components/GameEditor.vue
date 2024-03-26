@@ -692,6 +692,11 @@ const tour: Step[] = [
     content: "Enter the number of players in the game.",
   },
   {
+    target: "#game-results",
+    content: "Select whether you won or lost the game.",
+    placement: Placement.TOP_START,
+  },
+  {
     target: "#player-role",
     content: "Select your character role in the game.",
   },
@@ -699,11 +704,6 @@ const tour: Step[] = [
     target: "#related-player-role",
     content:
       "If your role is related to another (such as Drunk), you can enter a related role here.",
-  },
-  {
-    target: "#game-results",
-    content: "Select whether you won or lost the game.",
-    placement: Placement.TOP_START,
   },
   {
     target: "#save-game",
