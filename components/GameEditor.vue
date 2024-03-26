@@ -283,6 +283,12 @@
           @clickAlignment="toggleAlignment(character)"
           id="player-role"
           relatedId="related-player-role"
+          tokenTooltip="The role this player had in the game"
+          :relatedTokenTooltip="{
+            content:
+              '<div class=\'w-[250px]\'>The related role this player saw (if applicable). Example: The Drunk sees the Empath, or the Pixie sees the Snake Charmer</div>',
+            html: true,
+          }"
         />
       </div>
       <div
