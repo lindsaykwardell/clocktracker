@@ -198,7 +198,7 @@ const formattedEvent = computed(() => {
 function registeredOptions(player: any) {
   return [
     ...event.waitlists.map((waitlist) => ({
-      label: `Add to ${waitlist.name}`,
+      label: `Move to ${waitlist.name}`,
       action: () => moveRegisteredPlayer(player.id, "registered", waitlist.id!),
     })),
     {
@@ -211,13 +211,13 @@ function registeredOptions(player: any) {
 function waitlistOptions(player: any, waitlist: any) {
   return [
     {
-      label: "Add to Registered",
+      label: "Move to Registered",
       action: () => moveRegisteredPlayer(player.id, waitlist.id!, "registered"),
     },
     ...event.waitlists
       .filter((w) => w.id !== waitlist.id)
       .map((w) => ({
-        label: `Add to ${w.name}`,
+        label: `Move to ${w.name}`,
         action: () => moveRegisteredPlayer(player.id, waitlist.id, w.id!),
       })),
     {
