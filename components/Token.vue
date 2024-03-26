@@ -11,6 +11,7 @@
       :src="image"
       loading="lazy"
       :alt="character?.name || character?.role?.name || 'Unknown'"
+      v-tooltip="tokenTooltip"
     />
     <div
       v-if="reminderText"
@@ -29,7 +30,12 @@
       :class="relatedSize"
       @click.stop="emit('clickAlignment')"
     >
-      <img :class="relatedImageSize" :src="alignmentImage" loading="lazy" />
+      <img
+        :class="relatedImageSize"
+        :src="alignmentImage"
+        loading="lazy"
+        v-tooltip="alignmentTooltip"
+      />
     </div>
     <slot />
     <div
@@ -46,6 +52,7 @@
         :src="relatedImage"
         loading="lazy"
         :alt="character?.related || character.related_role?.name || 'Unknown'"
+        v-tooltip="relatedTokenTooltip"
       />
     </div>
   </div>
@@ -72,6 +79,9 @@ const props = defineProps<{
   outline?: boolean;
   relatedId?: string;
   reminderText?: string;
+  tokenTooltip?: any;
+  relatedTokenTooltip?: any;
+  alignmentTooltip?: any;
 }>();
 
 const emit = defineEmits(["clickRelated", "clickRole", "clickAlignment"]);
