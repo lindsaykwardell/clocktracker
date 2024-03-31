@@ -55,6 +55,8 @@ model Game {
   privacy                  PrivacySetting @default(PUBLIC)
   demon_bluffs             DemonBluff[]
   fabled                   Fabled[]
+
+  @@index([user_id])
 }
 
 enum WinStatus {
@@ -268,6 +270,8 @@ model Friend {
   user_id    String
   friend_id  String
   created_at DateTime?    @default(now()) @db.Timestamptz(6)
+
+  @@index([user_id])
 }
 
 model Following {
