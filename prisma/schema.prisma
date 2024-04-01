@@ -309,6 +309,7 @@ enum ChartType {
   BAR
   PIE
   POLAR_AREA
+  LIST
 }
 
 enum DataField {

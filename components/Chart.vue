@@ -49,6 +49,10 @@
       :data="chartData"
       :options="chartOptions"
     />
+    <List
+      v-if="options.type === 'LIST'"
+      :data="chartData"
+    />
   </div>
 </template>
 
