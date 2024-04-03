@@ -5,6 +5,15 @@ import cheerio from "cheerio";
 const prisma = new PrismaClient();
 
 export async function getScriptVersions(script: Script) {
+  if (!script.script_id) {
+    return [
+      {
+        id: script.id,
+        version: script.version,
+      },
+    ];
+  }
+
   const versions = await prisma.script.findMany({
     where: {
       script_id: script.script_id,
@@ -23,6 +32,7 @@ export async function getScriptVersions(script: Script) {
       for (const version of fetchedVersions) {
         const versionedScript = {
           ...script,
+          script_id: script.script_id,
           id: undefined,
           version: version,
           json_url: `https://botcscripts.com/script/${script.script_id}/${version}/download`,

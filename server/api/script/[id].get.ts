@@ -1,15 +1,29 @@
 import { PrismaClient, RoleType } from "@prisma/client";
+import { User } from "@supabase/supabase-js";
 
 const prisma = new PrismaClient();
 
 // This endpoint is specifically for fetching a script by its ID
 // This is the ClockTracker ID, not the BOTC script db ID.
 export default defineEventHandler(async (handler) => {
+  const me = handler.context.user as User | null;
   const id = handler.context.params?.id as string;
 
   const script = await prisma.script.findUnique({
     where: {
       id: +id,
+      OR: [
+        {
+          user_id: {
+            equals: me?.id || "",
+          },
+        },
+        {
+          user_id: {
+            equals: null,
+          },
+        },
+      ],
     },
     include: {
       roles: {

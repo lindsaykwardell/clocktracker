@@ -144,6 +144,18 @@ export default defineEventHandler(async (handler) => {
           equals: row.script,
           mode: "insensitive",
         },
+        OR: [
+          {
+            user_id: {
+              equals: user.id,
+            },
+          },
+          {
+            user_id: {
+              equals: null,
+            },
+          },
+        ],
       },
       orderBy: [
         {

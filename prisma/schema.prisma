@@ -134,15 +134,17 @@ model Fabled {
 }
 
 model Script {
-  id          Int     @id @default(autoincrement())
-  script_id   Int
+  id          Int           @id @default(autoincrement())
+  script_id   Int?
   name        String
   version     String
   author      String
   type        String
   json_url    String
   pdf_url     String
-  description String  @default("")
+  description String        @default("")
+  user        UserSettings? @relation(fields: [user_id], references: [user_id])
+  user_id     String?
   roles       Role[]
   games       Game[]
   events      Event[]
@@ -156,6 +158,7 @@ model Role {
   initial_alignment Alignment
   token_url         String
   type              RoleType
+  custom_role       Boolean        @default(false)
   scripts           Script[]
   related_character Character[]    @relation("RelatedRole")
   character         Character[]
@@ -232,6 +235,7 @@ model UserSettings {
   FeatureFlag             FeatureFlag[]
   waitlisted_events       EventWaitlistAttendee[]
   payments                KoFiPayment[]
+  uploaded_scripts        Script[]
 }
 
 model KoFiPayment {
