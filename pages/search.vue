@@ -82,6 +82,9 @@
               </h2>
             </button>
           </div>
+          <template v-if="showUsers">
+            <UserCard v-for="user in users" :username="user.username" />
+          </template>
           <template v-if="showCommunities">
             <CommunityCard
               v-for="community in communities"
@@ -93,9 +96,6 @@
           </template>
           <template v-if="showScripts">
             <ScriptCard v-for="script in scripts" :script="script" />
-          </template>
-          <template v-if="showUsers">
-            <UserCard v-for="user in users" :username="user.username" />
           </template>
         </template>
       </div>
