@@ -63,6 +63,13 @@
           >
             <button
               type="button"
+              @click="uploadScript"
+              class="rounded w-[110px] py-2 justify-center flex gap-2 bg-stone-600 hover:bg-stone-700 transition duration-150"
+            >
+              Upload Script
+            </button>
+            <button
+              type="button"
               @click="initImportGames"
               class="rounded w-[110px] py-2 justify-center flex gap-2 bg-stone-600 hover:bg-stone-700 transition duration-150"
             >
@@ -204,6 +211,36 @@ async function addTaggedGamesToProfile() {
       );
     }
   }
+}
+
+async function uploadScript() {
+  const fileInput = document.createElement("input");
+  fileInput.type = "file";
+  fileInput.accept = ".json";
+  fileInput.onchange = async () => {
+    if (!fileInput.files || !fileInput.files.length) return;
+
+    const file = fileInput.files[0];
+    // The file is a JSON array. Extract it from the file and send it to the server
+
+    const body = await file.text();
+
+    try {
+      await $fetch("/api/script/upload/upload", {
+        method: "POST",
+        body,
+      });
+
+      // gameStore.fetchPlayerGames(username);
+    } catch (err) {
+      console.error(err);
+      alert(
+        "There was an error uploading the file. Try again in a few minutes."
+      );
+    }
+  };
+
+  fileInput.click();
 }
 
 onMounted(() => {
