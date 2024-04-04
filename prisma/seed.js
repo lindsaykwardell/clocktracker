@@ -977,7 +977,7 @@ async function main() {
       if (user.user_id === lindsaykwardell.user_id) {
         return 100;
       } else if (user.user_id === testUser.user_id) {
-        return 2000;
+        return 200;
       } else if (user.user_id === testUser2.user_id) {
         return 50;
       } else {
