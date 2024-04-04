@@ -2,11 +2,24 @@
   <StandardTemplate>
     <section class="py-6">
       <h2 class="font-dumbledor text-4xl text-center">Add Game</h2>
+      <p class="text-center italic text-stone-400 pt-6 text-sm">
+        Adding more than one game?
+        <button
+          @click="initImportGames"
+          class="underline italic hover:text-white"
+        >
+          Import multiple games
+        </button>
+      </p>
       <ClientOnly>
         <GameEditor :game="game" @submit="submitGame" :inFlight="inFlight" />
       </ClientOnly>
     </section>
   </StandardTemplate>
+  <ImportGamesDialog
+    v-model:visible="importGamesDialogVisible"
+    @done="doneImporting"
+  />
 </template>
 
 <script setup lang="ts">
@@ -24,6 +37,17 @@ useHead({
 const router = useRouter();
 const inFlight = ref(false);
 const userSettings = await useFetch("/api/settings");
+
+const importGamesDialogVisible = ref(false);
+
+function initImportGames() {
+  importGamesDialogVisible.value = true;
+}
+
+function doneImporting() {
+  console.log("here");
+  router.push("/");
+}
 
 const game = reactive<{
   date: string;
