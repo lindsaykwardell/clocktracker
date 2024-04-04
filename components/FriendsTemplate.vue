@@ -5,7 +5,7 @@
         <nav
           class="flex flex-col md:w-[300px] w-[100px] min-w-[100px] md:min-w-[300px] items-center"
         >
-          <ul class="w-full py-4 sticky top-16">
+          <ul class="w-full sticky top-16 md:top-4">
             <li class="w-full">
               <nuxt-link
                 to="/friends"
