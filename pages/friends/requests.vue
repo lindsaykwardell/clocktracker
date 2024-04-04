@@ -1,6 +1,5 @@
 <template>
   <FriendsTemplate v-slot="{ requests }" fetchRequests>
-    <p class="text-center text-2xl my-4 font-dumbledor">Friends</p>
     <div class="flex flex-col gap-3 justify-center min-h-[12rem]">
       <UserCard
         v-for="request in requests"
