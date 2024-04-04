@@ -1,6 +1,5 @@
 import { PrismaClient, PrivacySetting } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
-import { GameRecord } from "~/server/utils/anonymizeGame";
 import { fetchGames } from "~/server/utils/fetchGames";
 
 const prisma = new PrismaClient();

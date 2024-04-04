@@ -170,15 +170,7 @@
         Add Your First Game
       </nuxt-link>
       <p>or</p>
-      <button
-        type="button"
-        @click="initImportGames"
-        class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded text-center text-xl m-auto block w-[300px]"
-      >
-        Import Games
-      </button>
     </div>
-    <ImportGamesDialog v-model:visible="importGamesDialogVisible" />
   </template>
   <template v-else>
     <Loading />
@@ -192,7 +184,6 @@ const user = useSupabaseUser();
 const users = useUsers();
 const roles = useRoles();
 const allGames = useGames();
-const importGamesDialogVisible = ref(false);
 
 const me = computed(() => {
   if (user.value) {
@@ -391,9 +382,5 @@ function infiniteScroll(skip: number) {
   if (props.games.status === Status.SUCCESS) {
     allGames.fetchPlayerGames(props.player?.username || "", { skip });
   }
-}
-
-function initImportGames() {
-  importGamesDialogVisible.value = true;
 }
 </script>
