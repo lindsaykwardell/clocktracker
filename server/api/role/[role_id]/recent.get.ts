@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 export default defineEventHandler(async (handler) => {
   const role_id = handler.context.params!.role_id;
 
-  console.log(role_id)
+  console.log(role_id);
 
   const games = await prisma.game.findMany({
     where: {
@@ -78,8 +78,8 @@ export default defineEventHandler(async (handler) => {
               player: {
                 select: {
                   username: true,
-                }
-              }
+                },
+              },
             },
           },
         },
@@ -104,7 +104,7 @@ export default defineEventHandler(async (handler) => {
 
   const returnGames: GameRecord[] = [];
   for (const game of games) {
-    returnGames.push(await anonymizeGame(game as GameRecord, null));
+    returnGames.push(await anonymizeGame(game as GameRecord, null, false)); // always default to anonymous when loading on a role page
   }
 
   return returnGames;

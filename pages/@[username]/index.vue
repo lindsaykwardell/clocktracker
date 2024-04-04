@@ -61,13 +61,12 @@
             :player="player"
             :games="games"
           >
-            <button
-              type="button"
-              @click="initImportGames"
-              class="rounded w-[110px] py-2 justify-center flex gap-2 bg-stone-600 hover:bg-stone-700 transition duration-150"
+            <div
+              class="text-xl text-stone-200"
+              v-if="games.status === Status.SUCCESS && games.data.length > 0"
             >
-              Import Games
-            </button>
+              {{ games.data.length }} game{{ games.data.length > 1 ? "s" : "" }}
+            </div>
           </UserGamesView>
           <UserGamesView
             v-if="currentTab === 'pending'"
@@ -106,7 +105,6 @@
         <Loading class="h-screen" />
       </template>
     </div>
-    <ImportGamesDialog v-model:visible="importGamesDialogVisible" />
   </StandardTemplate>
 </template>
 
@@ -118,12 +116,6 @@ const friends = useFriends();
 const gameStore = useGames();
 const username = useRoute().params.username as string;
 const user = useSupabaseUser();
-
-const importGamesDialogVisible = ref(false);
-
-function initImportGames() {
-  importGamesDialogVisible.value = true;
-}
 
 const me = computed(() => {
   if (!user.value) return null;
