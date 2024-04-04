@@ -4,7 +4,7 @@
     :to="`/@${player.data.username}`"
     class="bg-stone-950 hover:bg-stone-900 transition duration-150 shadow-lg flex flex-col justify-center items-center"
   >
-    <div class="flex items-center w-full p-2 m-auto gap-3">
+    <div class="flex flex-col md:flex-row items-center w-full p-2 m-auto gap-3">
       <Avatar
         :value="player.data.avatar || ''"
         class="border-2 shadow-xl flex-shrink"
@@ -21,7 +21,10 @@
               &nbsp;({{ player.data.pronouns }})
             </span>
           </div>
-          <div v-if="player.data.location" class="text-stone-400 flex gap-2 items-center">
+          <div
+            v-if="player.data.location"
+            class="text-stone-400 flex gap-2 items-center"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="32"
@@ -35,11 +38,14 @@
             </svg>
             <span>{{ player.data.location }}</span>
           </div>
+          <div class="text-stone-400 flex gap-2 items-center">
+            <slot name="extra" />
+          </div>
         </div>
       </div>
-    </div>
-    <div>
-      <slot />
+      <div>
+        <slot />
+      </div>
     </div>
   </nuxt-link>
 </template>

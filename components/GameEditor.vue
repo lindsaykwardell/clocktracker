@@ -148,7 +148,7 @@
                 myCommunities.find((c) => c.id === game.community_id)?.icon
               "
               size="xs"
-              class="border-stone-800 flex-shrink community-icon"
+              class="border-stone-800 flex-shrink"
             />
             <SelectedCommunityInput
               v-model:value="game.community_name"
