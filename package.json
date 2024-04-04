@@ -24,7 +24,7 @@
     "@types/uuid": "^9.0.7",
     "@vite-pwa/nuxt": "^0.4.0",
     "cypress": "^13.6.2",
-    "nuxt": "^3.9.0",
+    "nuxt": "^3.11.2",
     "prisma": "^5.7.1",
     "progress": "^2.0.3",
     "sass": "^1.69.7",
