@@ -136,7 +136,7 @@
                 v-if="game.data.community?.icon"
                 :value="game.data.community.icon"
                 size="xs"
-                class="border-stone-800 flex-shrink community-icon"
+                class="border-stone-800 flex-shrink"
               />
 
               <nuxt-link
