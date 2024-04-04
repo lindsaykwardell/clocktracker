@@ -29,6 +29,7 @@
           </button>
         </div>
         <nuxt-link
+          v-if="isMe"
           to="/charts/editor"
           class="bg-blue-700 hover:bg-blue-800 transition duration-150 px-3 py-2 rounded flex items-center gap-2"
         >
@@ -55,7 +56,7 @@
             v-for="chart in allCharts"
             :games="filteredGames"
             :options="chart"
-            showControls
+            :showControls="isMe"
             @deleteChart="deleteChart"
             class="m-4"
           />
@@ -80,9 +81,19 @@ const props = defineProps<{
 
 const users = useUsers();
 const allGames = useGames();
+const me = useSupabaseUser();
 
 const user = computed(() => {
   return users.getUser(props.username);
+});
+
+const isMe = computed(() => {
+  return (
+    (user.value.status === Status.SUCCESS &&
+      me.value &&
+      me.value.id === user.value.data.user_id) ??
+    false
+  );
 });
 
 const allGamesAreLoaded = computed(() => {
