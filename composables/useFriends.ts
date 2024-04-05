@@ -148,6 +148,9 @@ export const useFriends = defineStore("friends", {
       };
     },
     async fetchRecommended() {
+      // Only fetch recommended once
+      if (this.recommended.status === Status.SUCCESS) return;
+
       const request = await $fetch<User[]>("/api/friends/suggested");
 
       this.recommended = {

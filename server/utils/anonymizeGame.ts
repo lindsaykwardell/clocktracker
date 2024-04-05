@@ -57,26 +57,11 @@ export type GameRecord = Game & {
 
 export async function anonymizeGame(
   game: GameRecord,
-  user: User | null
+  user: User | null,
+  isFriend: boolean
 ): Promise<GameRecord> {
   // If the user is the game creator, we can return the game as is
   if (game.user_id === user?.id) return game;
-
-  // We need to know if the user is a friend of the game creator
-  const isFriend = !!(await prisma.friend.findFirst({
-    where: {
-      OR: [
-        {
-          user_id: game.user_id,
-          friend_id: user?.id || "",
-        },
-        {
-          user_id: user?.id || "",
-          friend_id: game.user_id,
-        },
-      ],
-    },
-  }));
 
   /*
   | User Privacy | Game Privacy | Result                                                          |

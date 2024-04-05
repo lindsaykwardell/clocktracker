@@ -1,4 +1,4 @@
-import { PrismaClient, PrivacySetting } from "@prisma/client";
+import { PrismaClient, PrivacySetting, UserSettings } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
 import naturalOrder from "natural-order";
 
@@ -56,6 +56,11 @@ export default defineEventHandler(async (handler) => {
         select: {
           user_id: true,
           friend_of: {
+            where: {
+              user: {
+                privacy: PrivacySetting.PUBLIC,
+              },
+            },
             select: {
               friend: {
                 select: {
@@ -100,10 +105,46 @@ export default defineEventHandler(async (handler) => {
     }
 
     return acc;
-  }, [] as any[]);
+  }, [] as (Partial<UserSettings> & { frequency: number })[]);
 
-  return naturalOrder(recommendations)
-    .orderBy(["desc", "asc"])
-    .sort(["frequency", "display_name"])
-    .slice(0, 10);
+  const newUsers = await prisma.userSettings.findMany({
+    where: {
+      NOT: {
+        user_id: {
+          in: [
+            user.id,
+            ...friendsWithFriends.map((f) => f.friend.user_id),
+            ...friendsOfFriends.map((f) => f.user_id),
+            ...requestIds,
+          ],
+        },
+      },
+      privacy: PrivacySetting.PUBLIC,
+    },
+    select: {
+      user_id: true,
+      username: true,
+      display_name: true,
+      avatar: true,
+      pronouns: true,
+      bio: true,
+      location: true,
+      privacy: true,
+      charts: true,
+    },
+    orderBy: [
+      {
+        created_at: "desc",
+      },
+    ],
+  });
+
+  return naturalOrder([
+    ...recommendations,
+    ...newUsers.map((user) => ({ ...user, frequency: -1 })),
+  ])
+    .orderBy(["desc", "desc"])
+    .with({ blankAtTop: false })
+    .sort(["frequency", "created_at"])
+    .splice(0, 30);
 });
