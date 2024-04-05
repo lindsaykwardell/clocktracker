@@ -208,7 +208,7 @@
             type="radio"
             v-model="game.win"
             :value="WinStatus.WIN"
-            class="block w-full border border-stone-500 rounded-md p-2"
+            class="border border-stone-500"
           />
           <span class="block whitespace-nowrap">
             <template v-if="game.is_storyteller">Good wins</template>
@@ -220,7 +220,7 @@
             type="radio"
             v-model="game.win"
             :value="WinStatus.LOSS"
-            class="block w-full border border-stone-500 rounded-md p-2"
+            class="border border-stone-500"
           />
           <span class="block whitespace-nowrap">
             <template v-if="game.is_storyteller">Evil wins</template>
@@ -232,7 +232,7 @@
             type="radio"
             v-model="game.win"
             :value="WinStatus.NOT_RECORDED"
-            class="block w-full border border-stone-500 rounded-md p-2"
+            class="border border-stone-500"
           />
           <span class="block whitespace-nowrap"> Not recorded </span>
         </label>
