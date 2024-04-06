@@ -322,7 +322,7 @@ const sortedGames = computed(() => {
             selectedRole.value ||
           (game.is_storyteller && selectedRole.value === "storyteller")) && // filter by role
         (!selectedCommunity.value ||
-          game.community_name === selectedCommunity.value) // filter by community
+          game.community_name.trim() === selectedCommunity.value.trim()) // filter by community
     );
 });
 
