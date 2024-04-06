@@ -44,7 +44,7 @@
               </select>
             </label>
           </div>
-          <label v-if="featureFlags.isEnabled('discord-server-integration')">
+          <label>
             <span class="block">Discord Server ID</span>
             <div class="flex gap-2">
               <input
