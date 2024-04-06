@@ -9,12 +9,13 @@ datasource db {
 }
 
 model FeatureFlag {
-  name        String
-  description String
-  active      Boolean        @default(false)
-  created_at  DateTime       @default(now()) @db.Timestamptz(6)
-  id          Int            @id @default(autoincrement())
-  active_for  UserSettings[] @relation("FeatureFlagToUserSettings")
+  name                   String
+  description            String
+  active                 Boolean        @default(false)
+  created_at             DateTime       @default(now()) @db.Timestamptz(6)
+  id                     Int            @id @default(autoincrement())
+  enabled_for_supporters Boolean        @default(false)
+  active_for             UserSettings[] @relation("FeatureFlagToUserSettings")
 }
 
 model Game {
@@ -54,6 +55,8 @@ model Game {
   associated_script        Script?        @relation(fields: [script_id], references: [id])
   user                     UserSettings   @relation(fields: [user_id], references: [user_id])
   grimoire                 Grimoire[]     @relation("GameToGrimoire")
+
+  @@index([user_id])
 }
 
 model Grimoire {
@@ -125,7 +128,7 @@ model Fabled {
 }
 
 model Script {
-  id          Int    @id @default(autoincrement())
+  id          Int     @id @default(autoincrement())
   name        String
   version     String
   author      String
@@ -133,9 +136,10 @@ model Script {
   json_url    String
   pdf_url     String
   script_id   Int
-  description String @default("")
+  description String  @default("")
+  Event       Event[]
   games       Game[]
-  roles       Role[] @relation("RoleToScript")
+  roles       Role[]  @relation("RoleToScript")
 
   @@unique([script_id, version])
 }
@@ -182,6 +186,7 @@ model UserSettings {
   bgg_username            String?
   enable_bgstats          Boolean                 @default(false)
   discord_id              String?                 @unique
+  opt_into_testing        Boolean                 @default(false)
   charts                  Chart[]
   community_posts         CommunityPost[]
   events                  EventAttendee[]
@@ -222,6 +227,8 @@ model Friend {
   created_at DateTime?    @default(now()) @db.Timestamptz(6)
   friend     UserSettings @relation("Friend", fields: [friend_id], references: [user_id])
   user       UserSettings @relation("FriendOf", fields: [user_id], references: [user_id])
+
+  @@index([user_id])
 }
 
 model Following {
@@ -303,7 +310,13 @@ model Event {
   location_type      LocationType       @default(ONLINE)
   image              String?
   who_can_register   WhoCanRegister     @default(COMMUNITY_MEMBERS)
+  script             String             @default("")
+  script_id          Int?
+  storytellers       String[]
+  game_link          String?
+  short_link         String?            @unique
   community          Community?         @relation(fields: [community_id], references: [id])
+  Script             Script?            @relation(fields: [script_id], references: [id])
   registered_players EventAttendee[]
   EventDiscordPost   EventDiscordPost[]
   waitlists          EventWaitlist[]
@@ -398,6 +411,7 @@ enum ChartType {
   BAR
   PIE
   POLAR_AREA
+  LIST
 }
 
 enum DataField {
@@ -411,4 +425,5 @@ enum DataField {
 enum WhoCanRegister {
   ANYONE
   COMMUNITY_MEMBERS
+  PRIVATE
 }

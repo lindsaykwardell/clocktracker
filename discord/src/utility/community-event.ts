@@ -58,7 +58,8 @@ export async function handleRegisterButtonClick(i) {
     });
   }
 
-  const name = user?.display_name || i.user.username;
+  // ClockTracker username OR server nickname OR Discord display name
+  const name = user?.display_name || i.member.nickname || i.user.globalName;
   const user_id = user?.user_id;
   const discord_user_id = i.user.id;
 
@@ -267,7 +268,13 @@ export async function buildEmbed(guild_id: string, event_id: string) {
         }` +
         (event.player_count ? `/${event.player_count}` : "") +
         ")",
-      value: event.registered_players.map((p) => p.name).join("\n") || "None",
+      value:
+        (event.player_count
+          ? event.registered_players.slice(0, event.player_count)
+          : event.registered_players
+        )
+          .map((p) => p.name)
+          .join("\n") || "None",
       inline: true,
     },
   ];

@@ -11,7 +11,10 @@ const prisma = new PrismaClient();
 
 export const data = new SlashCommandBuilder()
   .setName("get-event")
-  .setDescription("Get an event by its ID")
+  .setDescription(
+    (process.env.NODE_ENV !== "production" ? "[DEV] " : "") +
+      "Get an event by its ID"
+  )
   .addStringOption((option) =>
     option
       .setName("id")
