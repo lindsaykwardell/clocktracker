@@ -820,7 +820,9 @@ const potentialStorytellers = computed(() => {
     return [...friends.getFriends, ...friends.getCommunityMembers]
       .map((f) => ({ ...f, username: `@${f.username}` }))
       .filter(
-        (friend) =>
+        (friend, index, arr) =>
+          // friend is unique
+          arr.findIndex((f) => f.username === friend.username) === index &&
           // friend is not the storyteller, not a co-storyteller, and not found in the grimoire
           friend.username !== props.game.storyteller &&
           !props.game.co_storytellers.includes(friend.username) &&
