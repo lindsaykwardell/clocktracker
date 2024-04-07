@@ -225,10 +225,10 @@ const myRoles = computed(() => {
   return naturalOrder([
     ...new Set(
       props.games.data
-        .map((game) =>
+        .flatMap((game) =>
           game.is_storyteller
-            ? "storyteller"
-            : game.player_characters[game.player_characters.length - 1]?.role_id
+            ? ["storyteller"]
+            : game.player_characters.map((c) => c.role_id)
         )
         .filter((role) => role) as string[]
     ),
@@ -318,11 +318,12 @@ const sortedGames = computed(() => {
         (!selectedTags.value.length ||
           selectedTags.value.every((tag) => game.tags.includes(tag))) && // filter by tags
         (!selectedRole.value ||
-          game.player_characters[game.player_characters.length - 1]?.role_id ===
-            selectedRole.value ||
+          game.player_characters.some(
+            (c) => c.role_id === selectedRole.value
+          ) ||
           (game.is_storyteller && selectedRole.value === "storyteller")) && // filter by role
         (!selectedCommunity.value ||
-          game.community_name === selectedCommunity.value) // filter by community
+          game.community_name.trim() === selectedCommunity.value.trim()) // filter by community
     );
 });
 
