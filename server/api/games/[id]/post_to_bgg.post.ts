@@ -3,7 +3,7 @@ import {
   Alignment,
   PrismaClient,
   PrivacySetting,
-  WinStatus,
+  WinStatus_V2,
 } from "@prisma/client";
 import axios from "axios";
 // @ts-ignore
@@ -96,30 +96,15 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  const parentGameLastAlignment =
-    game.player_characters[game.player_characters.length - 1]?.alignment ||
-    Alignment.NEUTRAL;
-
   for (const token of game.grimoire[game.grimoire.length - 1].tokens) {
     if (token.player_name) {
       players.push({
         username: null,
         name: token.player_name,
-        win: (() => {
-          if (parentGameLastAlignment === Alignment.NEUTRAL) {
-            if (token.alignment === Alignment.GOOD) {
-              return game.win === WinStatus.WIN;
-            } else {
-              return game.win !== WinStatus.WIN;
-            }
-          }
-
-          if (token.alignment === parentGameLastAlignment) {
-            return game.win === WinStatus.WIN;
-          } else {
-            return game.win !== WinStatus.WIN;
-          }
-        })(),
+        win:
+          token.alignment === Alignment.GOOD
+            ? game.win_v2 === WinStatus_V2.GOOD_WINS
+            : game.win_v2 === WinStatus_V2.EVIL_WINS,
         color:
           token.alignment === Alignment.GOOD
             ? "Good - " + token.role?.name

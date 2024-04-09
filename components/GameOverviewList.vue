@@ -71,14 +71,26 @@
               class="w-8 h-8 md:w-12 md:h-12 col-span-auto z-10"
               :src="
                 game.is_storyteller
-                  ? game.win === WinStatus.WIN
+                  ? game.win_v2 === WinStatus_V2.GOOD_WINS
                     ? '/img/role/good.png'
-                    : game.win === WinStatus.LOSS
+                    : game.win_v2 === WinStatus_V2.EVIL_WINS
                     ? '/img/role/evil.png'
                     : '/1x1.png'
-                  : game.win === WinStatus.WIN
+                  : (game.win_v2 === WinStatus_V2.GOOD_WINS &&
+                      game.player_characters[game.player_characters.length - 1]
+                        .alignment === 'GOOD') ||
+                    (game.win_v2 === WinStatus_V2.EVIL_WINS &&
+                      game.player_characters[game.player_characters.length - 1])
                   ? '/img/win.png'
-                  : game.win === WinStatus.LOSS
+                  : !(
+                      game.win_v2 === WinStatus_V2.GOOD_WINS &&
+                      game.player_characters[game.player_characters.length - 1]
+                        .alignment === 'GOOD'
+                    ) &&
+                    !(
+                      game.win_v2 === WinStatus_V2.EVIL_WINS &&
+                      game.player_characters[game.player_characters.length - 1]
+                    )
                   ? '/img/loss.png'
                   : '/1x1.png'
               "
@@ -113,7 +125,7 @@
 </template>
 
 <script setup lang="ts">
-import { WinStatus } from "~/composables/useGames";
+import { WinStatus_V2 } from "~/composables/useGames";
 import { useInfiniteScroll } from "@vueuse/core";
 
 const gamesStore = useGames();

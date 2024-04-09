@@ -17,6 +17,12 @@ export enum WinStatus {
   NOT_RECORDED = "NOT_RECORDED",
 }
 
+export enum WinStatus_V2 {
+  GOOD_WINS = "GOOD_WINS",
+  EVIL_WINS = "EVIL_WINS",
+  NOT_RECORDED = "NOT_RECORDED",
+}
+
 export type FullCharacter = Character & {
   role?: {
     token_url: string;
@@ -39,8 +45,8 @@ export type FullFabled = Fabled & {
   };
 };
 
-export type GameRecord = Omit<Game, "win"> & {
-  win: WinStatus;
+export type GameRecord = Omit<Game, "win_v2"> & {
+  win_v2: WinStatus_V2;
   player_characters: FullCharacter[];
   demon_bluffs: FullDemonBluff[];
   fabled: FullFabled[];
