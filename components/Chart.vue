@@ -49,10 +49,7 @@
       :data="chartData"
       :options="chartOptions"
     />
-    <List
-      v-if="options.type === 'LIST'"
-      :data="chartData"
-    />
+    <List v-if="options.type === 'LIST'" :data="chartData" />
   </div>
 </template>
 
@@ -85,10 +82,10 @@ const colors = {
   teensy: "#ADD8E6",
   small: "#0000FF",
   medium: "#800080",
-  large: "#FF0000"
-}
+  large: "#FF0000",
+};
 
-type DataType = "ROLE" | "ALIGNMENT" | "SCRIPT" | "GAME_SIZE" | "WIN"
+type DataType = "ROLE" | "ALIGNMENT" | "SCRIPT" | "GAME_SIZE" | "WIN";
 
 const props = defineProps<{
   games: GameRecord[];
@@ -184,7 +181,12 @@ const datasets = computed(() => {
                   ?.type === "DEMON"
             ).length,
           ],
-          backgroundColor: [colors.townsfolk, colors.outsider, colors.minion, colors.demon],
+          backgroundColor: [
+            colors.townsfolk,
+            colors.outsider,
+            colors.minion,
+            colors.demon,
+          ],
         },
       ]
     );
@@ -281,7 +283,12 @@ const datasets = computed(() => {
             games.filter((game) => game.player_count && game.player_count > 13)
               .length,
           ],
-          backgroundColor: [colors.teensy, colors.small, colors.medium, colors.large],
+          backgroundColor: [
+            colors.teensy,
+            colors.small,
+            colors.medium,
+            colors.large,
+          ],
         },
       ]
     );
@@ -290,15 +297,59 @@ const datasets = computed(() => {
       getPivot(
         games,
         [
-          (game) => game.win === WinStatus.WIN,
-          (game) => game.win === WinStatus.LOSS,
+          (game) => {
+            const lastAlignment =
+              game.player_characters[game.player_characters.length - 1]
+                ?.alignment;
+
+            return (
+              (lastAlignment === "GOOD" &&
+                game.win_v2 === WinStatus_V2.GOOD_WINS) ||
+              (lastAlignment === "EVIL" &&
+                game.win_v2 === WinStatus_V2.EVIL_WINS)
+            );
+          },
+          (game) => {
+            const lastAlignment =
+              game.player_characters[game.player_characters.length - 1]
+                ?.alignment;
+
+            return (
+              (lastAlignment === "GOOD" &&
+                game.win_v2 === WinStatus_V2.EVIL_WINS) ||
+              (lastAlignment === "EVIL" &&
+                game.win_v2 === WinStatus_V2.GOOD_WINS)
+            );
+          },
         ],
         [colors.win, colors.loss]
       ) ?? [
         {
           data: [
-            games.filter((game) => game.win === WinStatus.WIN).length,
-            games.filter((game) => game.win === WinStatus.LOSS).length,
+            games.filter((game) => {
+              const lastAlignment =
+                game.player_characters[game.player_characters.length - 1]
+                  ?.alignment;
+
+              return (
+                (lastAlignment === "GOOD" &&
+                  game.win_v2 === WinStatus_V2.GOOD_WINS) ||
+                (lastAlignment === "EVIL" &&
+                  game.win_v2 === WinStatus_V2.EVIL_WINS)
+              );
+            }).length,
+            games.filter((game) => {
+              const lastAlignment =
+                game.player_characters[game.player_characters.length - 1]
+                  ?.alignment;
+
+              return (
+                (lastAlignment === "GOOD" &&
+                  game.win_v2 === WinStatus_V2.EVIL_WINS) ||
+                (lastAlignment === "EVIL" &&
+                  game.win_v2 === WinStatus_V2.GOOD_WINS)
+              );
+            }).length,
           ],
           backgroundColor: [colors.win, colors.loss],
         },
@@ -314,11 +365,10 @@ function getPivot(
   validators: ((game: GameRecord) => boolean)[],
   dataColors: string[]
 ) {
-  if (props.options.pivot === null) return null
+  if (props.options.pivot === null) return null;
 
-  const getColor = (categoryColor: string) => props.options.type === "BAR"
-    ? categoryColor
-    : dataColors
+  const getColor = (categoryColor: string) =>
+    props.options.type === "BAR" ? categoryColor : dataColors;
 
   if (props.options.pivot === "ROLE") {
     return [
@@ -435,8 +485,9 @@ function getPivot(
         label: "Custom Script",
         data: validators.map(
           (validator) =>
-            games.filter((game) => !isBaseScript(game.script) && validator(game))
-              .length
+            games.filter(
+              (game) => !isBaseScript(game.script) && validator(game)
+            ).length
         ),
         backgroundColor: getColor(colors.custom),
       },
@@ -500,9 +551,19 @@ function getPivot(
         label: "Win",
         data: validators.map(
           (validator) =>
-            games.filter(
-              (game) => game.win === WinStatus.WIN && validator(game)
-            ).length
+            games.filter((game) => {
+              const lastAlignment =
+                game.player_characters[game.player_characters.length - 1]
+                  ?.alignment;
+
+              return (
+                ((lastAlignment === "GOOD" &&
+                  game.win_v2 === WinStatus_V2.GOOD_WINS) ||
+                  (lastAlignment === "EVIL" &&
+                    game.win_v2 === WinStatus_V2.EVIL_WINS)) &&
+                validator(game)
+              );
+            }).length
         ),
         backgroundColor: getColor(colors.win),
       },
@@ -510,9 +571,19 @@ function getPivot(
         label: "Loss",
         data: validators.map(
           (validator) =>
-            games.filter(
-              (game) => game.win === WinStatus.LOSS && validator(game)
-            ).length
+            games.filter((game) => {
+              const lastAlignment =
+                game.player_characters[game.player_characters.length - 1]
+                  ?.alignment;
+
+              return (
+                ((lastAlignment === "GOOD" &&
+                  game.win_v2 === WinStatus_V2.EVIL_WINS) ||
+                  (lastAlignment === "EVIL" &&
+                    game.win_v2 === WinStatus_V2.GOOD_WINS)) &&
+                validator(game)
+              );
+            }).length
         ),
         backgroundColor: getColor(colors.loss),
       },

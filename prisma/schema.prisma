@@ -35,6 +35,7 @@ model Game {
   traveler_count           Int?
   player_characters        Character[]
   win                      WinStatus
+  win_v2                   WinStatus_V2   @default(NOT_RECORDED)
   notes                    String
   image_urls               String[]
   storyteller              String?
@@ -62,6 +63,12 @@ model Game {
 enum WinStatus {
   WIN
   LOSS
+  NOT_RECORDED
+}
+
+enum WinStatus_V2 {
+  GOOD_WINS
+  EVIL_WINS
   NOT_RECORDED
 }
 

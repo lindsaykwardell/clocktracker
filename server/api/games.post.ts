@@ -163,27 +163,6 @@ export default defineEventHandler(async (handler) => {
     const lastAlignment =
       player_characters[player_characters.length - 1].alignment;
 
-    const win: WinStatus = (() => {
-      if (newGame.win === WinStatus.NOT_RECORDED) {
-        return WinStatus.NOT_RECORDED;
-      }
-      if (parentGameLastAlignment === Alignment.NEUTRAL) {
-        if (lastAlignment === Alignment.GOOD) {
-          return newGame.win === WinStatus.WIN ? WinStatus.WIN : WinStatus.LOSS;
-        } else {
-          return newGame.win === WinStatus.LOSS
-            ? WinStatus.WIN
-            : WinStatus.LOSS;
-        }
-      }
-
-      if (lastAlignment === parentGameLastAlignment) {
-        return newGame.win === WinStatus.WIN ? WinStatus.WIN : WinStatus.LOSS;
-      } else {
-        return newGame.win === WinStatus.LOSS ? WinStatus.WIN : WinStatus.LOSS;
-      }
-    })();
-
     await prisma.game.create({
       data: {
         ...body,
@@ -204,7 +183,7 @@ export default defineEventHandler(async (handler) => {
           create: [...body.fabled],
         },
         notes: "",
-        win,
+        win: WinStatus.NOT_RECORDED,
         // map the already created grimoires to the new game
         grimoire: {
           connect: newGame.grimoire.map((g) => ({ id: g.id })),
