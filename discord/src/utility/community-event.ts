@@ -225,6 +225,8 @@ export async function buildEmbed(guild_id: string, event_id: string) {
     throw new Error("No event found with that ID");
   }
 
+  console.log(event.community.icon);
+
   const embed = new EmbedBuilder()
     .setColor(0x0099ff)
     .setTitle(event.title)
@@ -237,7 +239,9 @@ export async function buildEmbed(guild_id: string, event_id: string) {
     )
     .setAuthor({
       name: event.community.name,
-      iconURL: `https://clocktracker.app${event.community.icon}`,
+      iconURL: event.community.icon.includes("http")
+        ? event.community.icon
+        : `https://clocktracker.app${event.community.icon}`,
       url: `${
         process.env.NODE_ENV === "production"
           ? "https://clocktracker.app"
