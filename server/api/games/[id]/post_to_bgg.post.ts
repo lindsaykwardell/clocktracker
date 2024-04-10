@@ -3,12 +3,14 @@ import {
   Alignment,
   PrismaClient,
   PrivacySetting,
+  WinStatus_V2,
   WinStatus,
 } from "@prisma/client";
 import axios from "axios";
 // @ts-ignore
 import dayjs from "dayjs";
 import { fetchGame } from "~/server/utils/fetchGames";
+import { useFeatureFlags } from "~/server/utils/featureFlags";
 
 const prisma = new PrismaClient();
 
@@ -95,29 +97,35 @@ export default defineEventHandler(async (handler) => {
       color: "Storyteller",
     });
   }
-
   const parentGameLastAlignment =
     game.player_characters[game.player_characters.length - 1]?.alignment ||
     Alignment.NEUTRAL;
-
   for (const token of game.grimoire[game.grimoire.length - 1].tokens) {
     if (token.player_name) {
       players.push({
         username: null,
         name: token.player_name,
-        win: (() => {
-          if (parentGameLastAlignment === Alignment.NEUTRAL) {
-            if (token.alignment === Alignment.GOOD) {
+        win: await (async () => {
+          const featureFlags = await useFeatureFlags(user);
+
+          if (featureFlags.isEnabled("win_status_v2")) {
+            return token.alignment === Alignment.GOOD
+              ? game.win_v2 === WinStatus_V2.GOOD_WINS
+              : game.win_v2 === WinStatus_V2.EVIL_WINS;
+          } else {
+            if (parentGameLastAlignment === Alignment.NEUTRAL) {
+              if (token.alignment === Alignment.GOOD) {
+                return game.win === WinStatus.WIN;
+              } else {
+                return game.win !== WinStatus.WIN;
+              }
+            }
+
+            if (token.alignment === parentGameLastAlignment) {
               return game.win === WinStatus.WIN;
             } else {
               return game.win !== WinStatus.WIN;
             }
-          }
-
-          if (token.alignment === parentGameLastAlignment) {
-            return game.win === WinStatus.WIN;
-          } else {
-            return game.win !== WinStatus.WIN;
           }
         })(),
         color:
