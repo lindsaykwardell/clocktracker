@@ -17,6 +17,12 @@ export enum WinStatus {
   NOT_RECORDED = "NOT_RECORDED",
 }
 
+export enum WinStatus_V2 {
+  GOOD_WINS = "GOOD_WINS",
+  EVIL_WINS = "EVIL_WINS",
+  NOT_RECORDED = "NOT_RECORDED",
+}
+
 export type FullCharacter = Character & {
   role?: {
     token_url: string;
@@ -39,8 +45,9 @@ export type FullFabled = Fabled & {
   };
 };
 
-export type GameRecord = Omit<Game, "win"> & {
+export type GameRecord = Omit<Game, "win" | "win_v2"> & {
   win: WinStatus;
+  win_v2: WinStatus_V2;
   player_characters: FullCharacter[];
   demon_bluffs: FullDemonBluff[];
   fabled: FullFabled[];
@@ -511,3 +518,45 @@ export const useGames = defineStore("games", {
     },
   },
 });
+
+export function displayWinIcon(game: GameRecord) {
+  const featureFlags = useFeatureFlags();
+
+  console.log(featureFlags.isEnabled("win_status_v2"));
+
+  if (featureFlags.isEnabled("win_status_v2")) {
+    return game.is_storyteller
+      ? game.win_v2 === WinStatus_V2.GOOD_WINS
+        ? "/img/role/good.png"
+        : game.win_v2 === WinStatus_V2.EVIL_WINS
+        ? "/img/role/evil.png"
+        : "/1x1.png"
+      : (game.win_v2 === WinStatus_V2.GOOD_WINS &&
+          game.player_characters[game.player_characters.length - 1]
+            .alignment === "GOOD") ||
+        (game.win_v2 === WinStatus_V2.EVIL_WINS &&
+          game.player_characters[game.player_characters.length - 1]
+            .alignment === "EVIL")
+      ? "/img/win.png"
+      : (game.win_v2 === WinStatus_V2.EVIL_WINS &&
+          game.player_characters[game.player_characters.length - 1]
+            .alignment === "GOOD") ||
+        (game.win_v2 === WinStatus_V2.GOOD_WINS &&
+          game.player_characters[game.player_characters.length - 1]
+            .alignment === "EVIL")
+      ? "/img/loss.png"
+      : "/1x1.png";
+  } else {
+    return game.is_storyteller
+      ? game.win === WinStatus.WIN
+        ? "/img/role/good.png"
+        : game.win === WinStatus.LOSS
+        ? "/img/role/evil.png"
+        : "/1x1.png"
+      : game.win === WinStatus.WIN
+      ? "/img/win.png"
+      : game.win === WinStatus.LOSS
+      ? "/img/loss.png"
+      : "/1x1.png";
+  }
+}
