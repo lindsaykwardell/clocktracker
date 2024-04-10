@@ -155,20 +155,35 @@
               }}
               {{ game.data.location ? ` (${game.data.location})` : "" }}
             </label>
-            <label
-              v-if="game.data?.win !== WinStatus.NOT_RECORDED"
-              class="flex gap-3 items-center"
-            >
-              <span class="block">Result</span>
-              <template v-if="game.data.is_storyteller">
+            <template v-if="!featureFlags.isEnabled('win_status_v2')">
+              <label
+                v-if="game.data?.win !== WinStatus.NOT_RECORDED"
+                class="flex gap-3 items-center"
+              >
+                <span class="block">Result</span>
+                <template v-if="game.data.is_storyteller">
+                  {{
+                    game.data?.win === WinStatus.WIN ? "Good wins" : "Evil wins"
+                  }}
+                </template>
+                <template v-else>
+                  {{ game.data?.win === WinStatus.WIN ? "Win" : "Loss" }}
+                </template>
+              </label>
+            </template>
+            <template v-else>
+              <label
+                v-if="game.data?.win_v2 !== WinStatus_V2.NOT_RECORDED"
+                class="flex gap-3 items-center"
+              >
+                <span class="block">Result</span>
                 {{
-                  game.data?.win === WinStatus.WIN ? "Good wins" : "Evil wins"
+                  game.data?.win_v2 === WinStatus_V2.GOOD_WINS
+                    ? "Good Wins"
+                    : "Evil Wins"
                 }}
-              </template>
-              <template v-else>
-                {{ game.data?.win === WinStatus.WIN ? "Win" : "Loss" }}
-              </template>
-            </label>
+              </label>
+            </template>
             <label v-if="game.data.parent_game" class="flex gap-3 items-center">
               <span class="block">Tagged By</span>
               <nuxt-link
@@ -427,7 +442,7 @@
 </template>
 
 <script setup lang="ts">
-import { WinStatus } from "~/composables/useGames";
+import { WinStatus_V2, WinStatus } from "~/composables/useGames";
 import dayjs from "dayjs";
 import VueMarkdown from "vue-markdown-render";
 
@@ -442,6 +457,7 @@ const friends = useFriends();
 const gameId = route.params.id as string;
 const bggInFlight = ref(false);
 const mergeInFlight = ref(false);
+const featureFlags = useFeatureFlags();
 
 const game = computed(() => games.getGame(gameId));
 const player = computed<FetchStatus<User>>(() => {
