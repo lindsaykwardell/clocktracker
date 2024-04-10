@@ -202,7 +202,43 @@
       class="flex flex-col md:flex-row gap-5 border rounded border-stone-500 p-4 my-3"
     >
       <legend>Game Results</legend>
-      <fieldset class="flex gap-4">
+      <fieldset
+        v-if="featureFlags.isEnabled('win_status_v2')"
+        class="flex gap-4"
+      >
+        <label class="flex gap-2 items-center">
+          <input
+            type="radio"
+            v-model="game.win_v2"
+            :value="WinStatus_V2.GOOD_WINS"
+            class="border border-stone-500"
+          />
+          <span class="block whitespace-nowrap"> Good wins </span>
+        </label>
+        <label class="flex gap-2 items-center">
+          <input
+            type="radio"
+            v-model="game.win_v2"
+            :value="WinStatus_V2.EVIL_WINS"
+            class="border border-stone-500"
+          />
+          <span class="block whitespace-nowrap"> Evil wins </span>
+        </label>
+        <label class="flex gap-2 items-center">
+          <input
+            type="radio"
+            v-model="game.win_v2"
+            :value="WinStatus_V2.NOT_RECORDED"
+            class="border border-stone-500"
+          />
+          <span class="block whitespace-nowrap"> Not recorded </span>
+        </label>
+        <label class="flex gap-2 items-center">
+          <input type="checkbox" v-model="game.ignore_for_stats" />
+          <span class="block whitespace-nowrap">Ignore for stats</span>
+        </label>
+      </fieldset>
+      <fieldset v-else class="flex gap-4">
         <label class="flex gap-2 items-center">
           <input
             type="radio"
@@ -679,7 +715,7 @@ import type { RoleType } from "~/composables/useRoles";
 import { v4 as uuid } from "uuid";
 import naturalOrder from "natural-order";
 import { watchDebounced, useLocalStorage } from "@vueuse/core";
-import { WinStatus } from "~/composables/useGames";
+import { WinStatus, WinStatus_V2 } from "~/composables/useGames";
 import { Switch } from "@headlessui/vue";
 
 const tour: Step[] = [
@@ -891,6 +927,7 @@ const props = defineProps<{
       };
     }[];
     win: WinStatus;
+    win_v2: WinStatus_V2;
     notes: string;
     image_urls: string[];
     grimoire: {

@@ -381,6 +381,7 @@ export default defineEventHandler(async (handler) => {
           id: relatedGame.id,
         },
         data: {
+          win_v2: body.win_v2,
           win,
           demon_bluffs: {
             deleteMany: relatedGame.demon_bluffs.map((g) => ({ id: g.id })),

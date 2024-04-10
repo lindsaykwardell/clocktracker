@@ -239,7 +239,9 @@ export default defineEventHandler(async (handler) => {
         if (parentGameLastAlignment === Alignment.GOOD) {
           return newGame.win === WinStatus.WIN ? WinStatus.WIN : WinStatus.LOSS;
         } else {
-          return newGame.win === WinStatus.LOSS ? WinStatus.WIN : WinStatus.LOSS;
+          return newGame.win === WinStatus.LOSS
+            ? WinStatus.WIN
+            : WinStatus.LOSS;
         }
       })();
 
