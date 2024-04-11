@@ -36,9 +36,12 @@ jobs:
 
   fly:
     name: Deploy app
+    needs: deploy
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: deploy
       - uses: superfly/flyctl-actions/setup-flyctl@master
       - run: flyctl deploy --remote-only --build-secret SUPABASE_URL="$SUPABASE_URL" --build-secret SUPABASE_KEY="$SUPABASE_KEY"
         env:
