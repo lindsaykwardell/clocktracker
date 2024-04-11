@@ -1,5 +1,5 @@
 import UAParser from "ua-parser-js";
-import { WinStatus } from "./useGames";
+import { WinStatus_V2, WinStatus } from "./useGames";
 import type { GameRecord } from "./useGames";
 import dayjs from "dayjs";
 import type { FetchStatus } from "./useFetchStatus";
@@ -7,6 +7,7 @@ import type { FetchStatus } from "./useFetchStatus";
 export const useBGStats = (g: ComputedRef<FetchStatus<GameRecord>>) => {
   const user = useSupabaseUser();
   const users = useUsers();
+  const featureFlags = useFeatureFlags();
 
   const canPostToBGStats = computed(() => {
     const me = users.getUserById(user.value?.id || "");
@@ -52,18 +53,24 @@ export const useBGStats = (g: ComputedRef<FetchStatus<GameRecord>>) => {
                 role: `${token.alignment} - ${token.role?.name}`,
                 sourcePlayerId: token.player_name,
                 winner: (() => {
-                  if (parentGameLastAlignment === "NEUTRAL") {
-                    if (token.alignment === "GOOD") {
+                  if (!featureFlags.isEnabled("win_status_v2")) {
+                    if (parentGameLastAlignment === "NEUTRAL") {
+                      if (token.alignment === "GOOD") {
+                        return game.win === WinStatus.WIN;
+                      } else {
+                        return game.win === WinStatus.LOSS;
+                      }
+                    }
+
+                    if (token.alignment === parentGameLastAlignment) {
                       return game.win === WinStatus.WIN;
                     } else {
                       return game.win === WinStatus.LOSS;
                     }
-                  }
-
-                  if (token.alignment === parentGameLastAlignment) {
-                    return game.win === WinStatus.WIN;
                   } else {
-                    return game.win === WinStatus.LOSS;
+                    return token.alignment === "GOOD"
+                      ? game.win_v2 === WinStatus_V2.GOOD_WINS
+                      : game.win_v2 === WinStatus_V2.EVIL_WINS;
                   }
                 })(),
               })),
@@ -93,7 +100,9 @@ export const useBGStats = (g: ComputedRef<FetchStatus<GameRecord>>) => {
                       .name
                   }`,
               sourcePlayerId: game.user.username,
-              winner: game.win === WinStatus.WIN,
+              winner: featureFlags.isEnabled("win_status_v2")
+                ? game.win_v2 === WinStatus_V2.GOOD_WINS
+                : game.win === WinStatus.WIN,
             },
           ]
       ).filter((p) => !!p),

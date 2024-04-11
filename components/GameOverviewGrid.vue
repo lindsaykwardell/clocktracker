@@ -49,19 +49,7 @@
         <div class="absolute w-full top-0 left-0" />
         <img
           class="absolute top-2 right-2 w-8 h-8 md:w-12 md:h-12"
-          :src="
-            game.is_storyteller
-              ? game.win === WinStatus.WIN
-                ? '/img/role/good.png'
-                : game.win === WinStatus.LOSS
-                ? '/img/role/evil.png'
-                : '/1x1.png'
-              : game.win === WinStatus.WIN
-              ? '/img/win.png'
-              : game.win === WinStatus.LOSS
-              ? '/img/loss.png'
-              : '/1x1.png'
-          "
+          :src="displayWinIcon(game)"
         />
       </component>
       <div
@@ -115,7 +103,7 @@
 </template>
 
 <script setup lang="ts">
-import { WinStatus } from "~/composables/useGames";
+import { displayWinIcon } from "~/composables/useGames";
 import { useInfiniteScroll } from "@vueuse/core";
 const gamesStore = useGames();
 
