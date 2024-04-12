@@ -531,20 +531,22 @@ export function displayWinIcon(game: GameRecord) {
         : game.win_v2 === WinStatus_V2.EVIL_WINS
         ? "/img/role/evil.png"
         : "/1x1.png"
-      : (game.win_v2 === WinStatus_V2.GOOD_WINS &&
+      : game.player_characters.length > 0
+      ? (game.win_v2 === WinStatus_V2.GOOD_WINS &&
           game.player_characters[game.player_characters.length - 1]
             .alignment === "GOOD") ||
         (game.win_v2 === WinStatus_V2.EVIL_WINS &&
           game.player_characters[game.player_characters.length - 1]
             .alignment === "EVIL")
-      ? "/img/win.png"
-      : (game.win_v2 === WinStatus_V2.EVIL_WINS &&
-          game.player_characters[game.player_characters.length - 1]
-            .alignment === "GOOD") ||
-        (game.win_v2 === WinStatus_V2.GOOD_WINS &&
-          game.player_characters[game.player_characters.length - 1]
-            .alignment === "EVIL")
-      ? "/img/loss.png"
+        ? "/img/win.png"
+        : (game.win_v2 === WinStatus_V2.EVIL_WINS &&
+            game.player_characters[game.player_characters.length - 1]
+              .alignment === "GOOD") ||
+          (game.win_v2 === WinStatus_V2.GOOD_WINS &&
+            game.player_characters[game.player_characters.length - 1]
+              .alignment === "EVIL")
+        ? "/img/loss.png"
+        : "/1x1.png"
       : "/1x1.png";
   } else {
     return game.is_storyteller
