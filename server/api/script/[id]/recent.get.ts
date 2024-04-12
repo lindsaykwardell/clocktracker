@@ -99,7 +99,7 @@ export default defineEventHandler(async (handler) => {
 
   const returnGames: GameRecord[] = [];
   for (const game of games) {
-    returnGames.push(await anonymizeGame(game as GameRecord, null));
+    returnGames.push(await anonymizeGame(game as GameRecord, null, false)); // always default to anonymous when loading on a role page
   }
 
   return returnGames;

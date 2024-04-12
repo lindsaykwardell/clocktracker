@@ -69,19 +69,7 @@
           <td class="flex gap-1">
             <img
               class="w-8 h-8 md:w-12 md:h-12 col-span-auto z-10"
-              :src="
-                game.is_storyteller
-                  ? game.win === WinStatus.WIN
-                    ? '/img/role/good.png'
-                    : game.win === WinStatus.LOSS
-                    ? '/img/role/evil.png'
-                    : '/1x1.png'
-                  : game.win === WinStatus.WIN
-                  ? '/img/win.png'
-                  : game.win === WinStatus.LOSS
-                  ? '/img/loss.png'
-                  : '/1x1.png'
-              "
+              :src="displayWinIcon(game)"
             />
             <nuxt-link
               v-if="!readonly"
@@ -113,7 +101,7 @@
 </template>
 
 <script setup lang="ts">
-import { WinStatus } from "~/composables/useGames";
+import { displayWinIcon } from "~/composables/useGames";
 import { useInfiniteScroll } from "@vueuse/core";
 
 const gamesStore = useGames();

@@ -9,6 +9,8 @@ export async function fetchGames(
   me: User | null,
   waiting_for_confirmation: boolean = false
 ) {
+  console.log("Starting fetchGames");
+  console.time("fetchGames");
   const games = await prisma.game.findMany({
     where: {
       deleted: false,
@@ -263,8 +265,25 @@ export async function fetchGames(
       },
     ],
   });
+  console.timeLog("fetchGames", "Fetched games");
 
   const anonymizedGames: GameRecord[] = [];
+
+  // We need to know if the user is a friend of the game creator
+  const isFriend = !!(await prisma.friend.findFirst({
+    where: {
+      OR: [
+        {
+          user_id: user_id,
+          friend_id: me?.id || "",
+        },
+        {
+          user_id: me?.id || "",
+          friend_id: user_id,
+        },
+      ],
+    },
+  }));
 
   for (const game of games) {
     anonymizedGames.push(
@@ -275,10 +294,12 @@ export async function fetchGames(
           demon_bluffs: [],
           fabled: [],
         } as GameRecord,
-        me
+        me,
+        isFriend
       )
     );
   }
+  console.timeEnd("fetchGames");
 
   return anonymizedGames;
 }
@@ -497,5 +518,20 @@ export async function fetchGame(
     });
   }
 
-  return anonymizeGame(game as GameRecord, me);
+  const isFriend = !!(await prisma.friend.findFirst({
+    where: {
+      OR: [
+        {
+          user_id: game.user_id,
+          friend_id: me?.id || "",
+        },
+        {
+          user_id: me?.id || "",
+          friend_id: game.user_id,
+        },
+      ],
+    },
+  }));
+
+  return anonymizeGame(game as GameRecord, me, isFriend);
 }

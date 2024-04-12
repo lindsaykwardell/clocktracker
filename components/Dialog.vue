@@ -8,7 +8,7 @@
       'w-11/12 md:w-2/3 lg:w-3/4 xl:w-[900px]': size === 'lg',
     }"
   >
-    <template v-if="visible">
+    <div ref="dialogContent" v-if="visible">
       <div
         class="flex justify-between items-top sticky top-0 bg-stone-900 z-10"
       >
@@ -27,11 +27,12 @@
         </div>
       </div>
       <slot />
-    </template>
+    </div>
   </dialog>
 </template>
 
 <script setup lang="ts">
+import { onClickOutside } from "@vueuse/core";
 const props = defineProps<{
   visible: boolean;
   size?: "sm" | "md" | "lg";
@@ -42,12 +43,14 @@ const emit = defineEmits(["update:visible"]);
 const size = computed(() => props.size ?? "md");
 
 const dialog = ref();
+const dialogContent = ref();
 const visible = computed(() => props.visible);
 const close = () => emit("update:visible", false);
 
+onClickOutside(dialogContent, close);
+
 watch(visible, (val) => {
   if (val) {
-    // do something
     dialog.value.showModal();
   } else {
     dialog.value.close();

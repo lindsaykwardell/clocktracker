@@ -19,7 +19,10 @@
               Download Import Template
             </a>
           </li>
-          <li>Enter your game details into the spreadsheet. Make sure you save it as a CSV!</li>
+          <li>
+            Enter your game details into the spreadsheet. Make sure you save it
+            as a CSV!
+          </li>
           <li>
             <button @click="initiateImport" class="underline">
               Upload the template with your games
@@ -39,7 +42,7 @@ const inFlight = ref(false);
 const props = defineProps<{
   visible: boolean;
 }>();
-const emit = defineEmits(["update:visible"]);
+const emit = defineEmits(["update:visible", "done"]);
 
 const show = computed({
   get: () => props.visible,
@@ -51,6 +54,7 @@ async function initiateImport() {
     await games.importGames(() => (inFlight.value = true));
     show.value = false;
     inFlight.value = false;
+    emit("done");
   } catch {
     inFlight.value = false;
   }

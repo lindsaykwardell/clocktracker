@@ -162,21 +162,22 @@
     </template>
     <div v-else class="flex flex-col items-center gap-6">
       <p class="text-center text-2xl font-dumbledor">No games yet!</p>
-      <nuxt-link
-        v-if="user && user.id === player.user_id"
-        to="/add-game"
-        class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded text-center text-xl m-auto block w-[300px]"
-      >
-        Add Your First Game
-      </nuxt-link>
-      <p>or</p>
-      <button
-        type="button"
-        @click="initImportGames"
-        class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded text-center text-xl m-auto block w-[300px]"
-      >
-        Import Games
-      </button>
+      <template v-if="user && user.id === player.user_id">
+        <nuxt-link
+          to="/add-game"
+          class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded text-center text-xl m-auto block w-[300px]"
+        >
+          Add Your First Game
+        </nuxt-link>
+        <p>or</p>
+        <button
+          type="button"
+          @click="initImportGames"
+          class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded text-center text-xl m-auto block w-[300px]"
+        >
+          Import Games
+        </button>
+      </template>
     </div>
     <ImportGamesDialog v-model:visible="importGamesDialogVisible" />
   </template>
@@ -224,10 +225,10 @@ const myRoles = computed(() => {
   return naturalOrder([
     ...new Set(
       props.games.data
-        .map((game) =>
+        .flatMap((game) =>
           game.is_storyteller
-            ? "storyteller"
-            : game.player_characters[game.player_characters.length - 1]?.role_id
+            ? ["storyteller"]
+            : game.player_characters.map((c) => c.role_id)
         )
         .filter((role) => role) as string[]
     ),
@@ -317,11 +318,12 @@ const sortedGames = computed(() => {
         (!selectedTags.value.length ||
           selectedTags.value.every((tag) => game.tags.includes(tag))) && // filter by tags
         (!selectedRole.value ||
-          game.player_characters[game.player_characters.length - 1]?.role_id ===
-            selectedRole.value ||
+          game.player_characters.some(
+            (c) => c.role_id === selectedRole.value
+          ) ||
           (game.is_storyteller && selectedRole.value === "storyteller")) && // filter by role
         (!selectedCommunity.value ||
-          game.community_name === selectedCommunity.value) // filter by community
+          game.community_name.trim() === selectedCommunity.value.trim()) // filter by community
     );
 });
 

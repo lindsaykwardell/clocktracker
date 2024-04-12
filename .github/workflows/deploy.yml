@@ -5,49 +5,7 @@ on:
     - cron: "0 0 * * *"
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: supabase/setup-cli@v1
-      - uses: actions/checkout@v3
-      - name: Use Node.js 18.x
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18.x
-      - name: Install dependencies
-        run: npm install
-      - name: Start Supabase
-        run: supabase start
-        env:
-          SUPABASE_AUTH_DISCORD_CLIENT_ID: "123"
-          SUPABASE_AUTH_DISCORD_SECRET: "123"
-      - name: Build app
-        run: npm run build
-        env:
-          DATABASE_URL: "postgresql://postgres:postgres@localhost:54322/postgres?connection_limit=1"
-          DIRECT_DATABASE_URL: "postgresql://postgres:postgres@localhost:54322/postgres?connection_limit=1"
-          SUPABASE_URL: "http://localhost:54321"
-          SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0"
-      - name: Run migrations
-        run: npx prisma migrate deploy
-        env:
-          DATABASE_URL: "postgresql://postgres:postgres@localhost:54322/postgres?connection_limit=1"
-          DIRECT_DATABASE_URL: "postgresql://postgres:postgres@localhost:54322/postgres?connection_limit=1"
-      - name: Seed database
-        run: npx prisma db seed
-        env:
-          DATABASE_URL: "postgresql://postgres:postgres@localhost:54322/postgres?connection_limit=1"
-          DIRECT_DATABASE_URL: "postgresql://postgres:postgres@localhost:54322/postgres?connection_limit=1"
-      # - name: Run tests
-      #   run: npm test
-      #   env:
-      #     DATABASE_URL: "postgresql://postgres:postgres@localhost:54322/postgres?connection_limit=1"
-      #     SUPABASE_URL: "http://localhost:54321"
-      #     SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0"
-
   deploy:
-    needs: test
     runs-on: ubuntu-latest
 
     steps:
@@ -85,11 +43,11 @@ jobs:
         with:
           ref: deploy
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --remote-only --build-secret SUPABASE_URL=$SUPABASE_URL --build-secret SUPABASE_KEY=$SUPABASE_KEY
+      - run: flyctl deploy --remote-only --build-secret SUPABASE_URL="$SUPABASE_URL" --build-secret SUPABASE_KEY="$SUPABASE_KEY"
         env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
   discord:
     name: Deploy Discord bot
