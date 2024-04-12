@@ -10,7 +10,10 @@ const prisma = new PrismaClient();
 
 export const data = new SlashCommandBuilder()
   .setName("create-event")
-  .setDescription("Create a ClockTracker event")
+  .setDescription(
+    (process.env.NODE_ENV !== "production" ? "[DEV] " : "") +
+      "Create a ClockTracker event"
+  )
   .addStringOption((option) =>
     option
       .setName("name")

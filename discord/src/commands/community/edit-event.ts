@@ -11,7 +11,10 @@ const prisma = new PrismaClient();
 
 export const data = new SlashCommandBuilder()
   .setName("edit-event")
-  .setDescription("Edit a ClockTracker event")
+  .setDescription(
+    (process.env.NODE_ENV !== "production" ? "[DEV] " : "") +
+      "Edit a ClockTracker event"
+  )
   .addStringOption((option) =>
     option
       .setName("id")

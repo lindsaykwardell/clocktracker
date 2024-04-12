@@ -35,6 +35,7 @@ model Game {
   traveler_count           Int?
   player_characters        Character[]
   win                      WinStatus
+  win_v2                   WinStatus_V2   @default(NOT_RECORDED)
   notes                    String
   image_urls               String[]
   storyteller              String?
@@ -62,6 +63,12 @@ model Game {
 enum WinStatus {
   WIN
   LOSS
+  NOT_RECORDED
+}
+
+enum WinStatus_V2 {
+  GOOD_WINS
+  EVIL_WINS
   NOT_RECORDED
 }
 
@@ -363,7 +370,7 @@ model Event {
   id                 String             @id @default(uuid())
   created_at         DateTime           @default(now()) @db.Timestamptz(6)
   start              DateTime           @default(now()) @db.Timestamptz(6)
-  end                DateTime           @default(dbgenerated("NOW() + interval '1.5 hours'")) @db.Timestamptz(6)
+  end                DateTime           @default(dbgenerated("(now() + '01:30:00'::interval)")) @db.Timestamptz(6)
   title              String
   description        String
   player_count       Int?

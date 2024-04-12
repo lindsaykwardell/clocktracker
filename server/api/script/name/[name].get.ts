@@ -9,7 +9,10 @@ export default defineEventHandler(async (handler) => {
 
   let scripts = await prisma.script.findMany({
     where: {
-      name,
+      name: {
+        contains: name,
+        mode: "insensitive",
+      },
     },
     include: {
       roles: {
@@ -21,6 +24,8 @@ export default defineEventHandler(async (handler) => {
       },
     },
   });
+
+  console.log(name, scripts);
 
   if (scripts.length <= 0) {
     console.error(`Script not found: ${name}`);

@@ -188,6 +188,41 @@ export default defineEventHandler(async (handler) => {
       win = WinStatus.LOSS;
     }
 
+    const win_v2 = (() => {
+      if (is_storyteller) {
+        if (win === "WIN") {
+          return "GOOD_WINS";
+        } else if (win === "LOSS") {
+          return "EVIL_WINS";
+        } else {
+          return "NOT_RECORDED";
+        }
+      } else {
+        const { alignment } =
+          player_characters[player_characters.length - 1];
+
+        if (alignment === "GOOD") {
+          if (win === "WIN") {
+            return "GOOD_WINS";
+          } else if (win === "LOSS") {
+            return "EVIL_WINS";
+          } else {
+            return "NOT_RECORDED";
+          }
+        } else if (alignment === "EVIL") {
+          if (win === "WIN") {
+            return "EVIL_WINS";
+          } else if (win === "LOSS") {
+            return "GOOD_WINS";
+          } else {
+            return "NOT_RECORDED";
+          }
+        } else {
+          return "NOT_RECORDED";
+        }
+      }
+    })();
+
     await prisma.game.create({
       data: {
         user_id: user.id,
@@ -201,6 +236,7 @@ export default defineEventHandler(async (handler) => {
         player_count,
         traveler_count,
         win,
+        win_v2,
         notes: row.notes,
         is_storyteller,
         player_characters: {

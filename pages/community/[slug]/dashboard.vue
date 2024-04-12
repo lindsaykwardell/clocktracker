@@ -6,13 +6,9 @@
         class="flex flex-col md:flex-row gap-4 items-center p-2"
       >
         <div class="flex flex-col items-center">
-          <Avatar
-            :value="community.data.icon"
-            size="lg"
-            class="community-icon"
-          />
+          <Avatar :value="community.data.icon" size="lg" />
           <button
-            @click="toggleChangeIcon"
+            @click="selectCommunityAvatar"
             type="button"
             class="whitespace-nowrap flex gap-1 items-center justify-center py-1 w-[150px] rounded transition duration-150 hover:bg-blue-900 border border-blue-600 text-white"
           >
@@ -48,7 +44,7 @@
               </select>
             </label>
           </div>
-          <label v-if="featureFlags.isEnabled('discord-server-integration')">
+          <label>
             <span class="block">Discord Server ID</span>
             <div class="flex gap-2">
               <input
@@ -248,25 +244,22 @@
         </div>
       </template>
     </div>
-    <TokenDialog
-      v-model:visible="showIconDialog"
-      :availableRoles="[]"
-      :alwaysShowAllRoles="true"
-      @selectRole="updateIcon"
-    />
   </CommunityTemplate>
 </template>
 
 <script setup lang="ts">
+import { v4 as uuid } from "uuid";
+
 definePageMeta({
   middleware: "community-admin",
 });
 
+const supabase = useSupabaseClient();
+const config = useRuntimeConfig();
 const communities = useCommunities();
 const route = useRoute();
 const user = useSupabaseUser();
 const featureFlags = useFeatureFlags();
-const showIconDialog = ref(false);
 
 const slug = route.params.slug as string;
 
@@ -283,13 +276,33 @@ function isMe(id: string) {
   return user.value?.id === id;
 }
 
-function toggleChangeIcon() {
-  showIconDialog.value = true;
+function selectCommunityAvatar() {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/jpg, image/jpeg, image/png";
+  input.onchange = uploadAvatar;
+  input.click();
 }
 
-function updateIcon({ token_url }: { token_url: string }) {
-  communities.updateIcon(slug, token_url);
-  showIconDialog.value = false;
+async function uploadAvatar(event: Event) {
+  const newlyUploadedAvatar = (event.target as HTMLInputElement).files?.[0];
+
+  if (!newlyUploadedAvatar) {
+    return;
+  }
+
+  const { data, error } = await supabase.storage
+    .from("avatars")
+    .upload(`${uuid()}`, newlyUploadedAvatar);
+
+  if (error) {
+    throw error;
+  }
+
+  communities.updateIcon(
+    slug,
+    `${config.public.supabase.url}/storage/v1/object/public/avatars/${data.path}`
+  );
 }
 
 function updateCommunity() {

@@ -9,6 +9,11 @@
 import type { Game } from "@prisma/client";
 import { Line } from "vue-chartjs";
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const { Script } = useScripts();
 const props = defineProps<{
@@ -28,7 +33,7 @@ const colors = {
   bmr: "#F4C43C",
   snv: "#944CAC",
   custom: "#008000",
-}
+};
 
 const data = computed(() => {
   const data: {
@@ -45,7 +50,7 @@ const data = computed(() => {
       !game.ignore_for_stats &&
       validMonths.includes(dayjs(game.date).format("YYYY MMMM"))
   )) {
-    const month = dayjs(game.date).format("MMMM");
+    const month = dayjs(game.date).tz("UTC").format("MMMM");
     if (!data[month]) {
       data[month] = {
         troubleBrewing: 0,

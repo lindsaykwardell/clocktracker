@@ -15,7 +15,10 @@ const prisma = new PrismaClient();
 
 export const data = new SlashCommandBuilder()
   .setName("delete-event")
-  .setDescription("Delete an event by its ID")
+  .setDescription(
+    (process.env.NODE_ENV !== "production" ? "[DEV] " : "") +
+      "Delete an event by its ID"
+  )
   .addStringOption((option) =>
     option
       .setName("id")
