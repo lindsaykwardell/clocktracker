@@ -76,6 +76,13 @@
           </button>
         </li>
       </ul>
+      <button
+        type="button"
+        class="text-stone-400 italic underline"
+        @click="handleUploadScript"
+      >
+        Upload a script
+      </button>
     </section>
   </Dialog>
 </template>
@@ -84,6 +91,7 @@
 import { watchDebounced } from "@vueuse/core";
 
 const games = useGames();
+const { uploadScript } = useScripts();
 
 const props = defineProps<{
   visible: boolean;
@@ -132,4 +140,15 @@ async function searchScripts() {
 }
 
 watchDebounced(potentialScript, searchScripts, { debounce: 500 });
+
+async function handleUploadScript() {
+  const script = (await uploadScript()) as Promise<{
+    id: number;
+    name: string;
+  }>;
+
+  if (script) {
+    emit("selectScript", script);
+  }
+}
 </script>

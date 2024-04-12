@@ -23,7 +23,7 @@
                   By {{ script.author }}
                 </div>
               </div>
-              <div class="flex flex-col md:flex-row gap-2">
+              <div v-if="scripts.some(s => s.version)" class="flex flex-col md:flex-row gap-2">
                 <div class="font-dumbledor text-lg font-bold bottom-[20px]">
                   <select
                     v-model="version"

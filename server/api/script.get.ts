@@ -6,6 +6,7 @@ const prisma = new PrismaClient();
 
 export default defineEventHandler(async (handler) => {
   const me = handler.context.user as User | null;
+  console.log(me);
   const { query, author } = getQuery(handler) as {
     query: string;
     author: string;

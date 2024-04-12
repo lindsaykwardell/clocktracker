@@ -1,10 +1,12 @@
 import { PrismaClient, RoleType } from "@prisma/client";
+import { User } from "@supabase/supabase-js";
 import naturalOrder from "natural-order";
 import { isVersionOne } from "~/server/utils/getScriptVersions";
 
 const prisma = new PrismaClient();
 
 export default defineEventHandler(async (handler) => {
+  const me = handler.context.user as User | null;
   const name = (handler.context.params?.name as string).replace(/_/g, " ");
 
   let scripts = await prisma.script.findMany({
@@ -13,6 +15,16 @@ export default defineEventHandler(async (handler) => {
         contains: name,
         mode: "insensitive",
       },
+      OR: [
+        {
+          user_id: me?.id || "",
+        },
+        {
+          script_id: {
+            not: null,
+          },
+        },
+      ],
     },
     include: {
       roles: {
