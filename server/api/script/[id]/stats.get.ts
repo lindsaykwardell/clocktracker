@@ -144,8 +144,8 @@ export default defineEventHandler(async (handler) => {
       (acc, game) => {
         let win = acc.win;
 
-        if (game.is_storyteller) {
-          const character = game.grimoire[game.grimoire.length - 1].tokens.find(
+        if (game.is_storyteller && game.grimoire.length > 0) {
+          const character = game.grimoire[game.grimoire.length - 1]?.tokens.find(
             (token) =>
               token.role_id === role.id ||
               (token.role && token.role.name === role.name)
