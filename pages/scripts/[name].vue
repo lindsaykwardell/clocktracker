@@ -205,7 +205,7 @@ const scriptName = route.params.name as string;
 const version = ref(route.query.version as string);
 
 const scripts = await $fetch<Array<Script & { roles: Role[] }>>(
-  "/api/script/name/" + scriptName
+  "/api/script/name/" + encodeURIComponent(scriptName)
 );
 
 if (!version.value) {
