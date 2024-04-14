@@ -6,12 +6,22 @@ const prisma = new PrismaClient();
 
 export async function getScriptVersions(script: Script) {
   if (!script.script_id) {
-    return [
-      {
-        id: script.id,
-        version: script.version,
+    // If the script doesn't have a script_id, it's not in the BOTC database.
+    // Assume it's a custom uploaded script for the user, and check if there
+    // are others with the same name.
+
+    const scripts = await prisma.script.findMany({
+      where: {
+        name: script.name,
+        user_id: script.user_id,
       },
-    ];
+      select: {
+        id: true,
+        version: true,
+      },
+    });
+
+    return scripts;
   }
 
   const versions = await prisma.script.findMany({
