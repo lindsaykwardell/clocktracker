@@ -7,12 +7,14 @@ const prisma = new PrismaClient();
 
 export default defineEventHandler(async (handler) => {
   const me = handler.context.user as User | null;
-  const name = (handler.context.params?.name as string).replace(/_/g, " ");
+  const name = decodeURIComponent(
+    handler.context.params?.name as string
+  ).replace(/_/g, " ");
 
   let scripts = await prisma.script.findMany({
     where: {
       name: {
-        contains: name,
+        equals: name,
         mode: "insensitive",
       },
       OR: [
@@ -36,8 +38,6 @@ export default defineEventHandler(async (handler) => {
       },
     },
   });
-
-  console.log(name, scripts);
 
   if (scripts.length <= 0) {
     console.error(`Script not found: ${name}`);
