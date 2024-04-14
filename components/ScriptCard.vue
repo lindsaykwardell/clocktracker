@@ -1,6 +1,6 @@
 <template>
   <nuxt-link
-    :to="`/scripts/${script.name.replaceAll(' ', '_')}`"
+    :to="`/scripts/${encodeURIComponent(script.name.replaceAll(' ', '_'))}`"
     class="bg-stone-950 hover:bg-stone-900 w-full p-2 shadow-lg flex items-center"
   >
     <div class="flex flex-col md:flex-row gap-3 items-top">
