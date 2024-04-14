@@ -6,7 +6,9 @@ const prisma = new PrismaClient();
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
-  const { query } = getQuery(handler) as { query: string };
+  const params = getQuery(handler) as { query: string };
+
+  const query = params.query.trim();
 
   // Don't query if it's too small
   if (query.length < 3) {
