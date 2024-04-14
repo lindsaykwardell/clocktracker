@@ -136,10 +136,18 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
+  const version =
+    (await prisma.script.count({
+      where: {
+        name: script.name,
+        user_id: user.id,
+      },
+    })) + 1;
+
   return await prisma.script.create({
     data: {
       name: script.name,
-      version: "",
+      version: version.toString(),
       author: script.author || "",
       type: "",
       json_url: "",
