@@ -5,10 +5,10 @@ import cheerio from "cheerio";
 const prisma = new PrismaClient();
 
 export async function getScriptVersions(script: Script) {
-  if (!script.script_id) {
-    // If the script doesn't have a script_id, it's not in the BOTC database.
-    // Assume it's a custom uploaded script for the user, and check if there
-    // are others with the same name.
+  if (script.is_custom_script) {
+    // If the script is custom, it's not in the BOTC database.
+    // Check if there are others with the same name belonging
+    // to the same user.
 
     const scripts = await prisma.script.findMany({
       where: {
@@ -81,7 +81,7 @@ export function isVersionOne(version: string): boolean {
 
 const versionOne = ["1.0.0", "0.0.1", "0.0.0"];
 
-async function fetchVersions(id: number) {
+async function fetchVersions(id: string) {
   const response = await axios.get(`https://botcscripts.com/script/${id}`);
   const $ = cheerio.load(response.data);
   // const description = $("div#notes").text();

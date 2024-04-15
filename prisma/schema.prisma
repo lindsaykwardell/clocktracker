@@ -141,20 +141,21 @@ model Fabled {
 }
 
 model Script {
-  id          Int           @id @default(autoincrement())
-  script_id   Int?
-  name        String
-  version     String
-  author      String
-  type        String
-  json_url    String
-  pdf_url     String
-  description String        @default("")
-  user        UserSettings? @relation(fields: [user_id], references: [user_id])
-  user_id     String?
-  roles       Role[]
-  games       Game[]
-  events      Event[]
+  id               Int           @id @default(autoincrement())
+  script_id        String        @default(uuid()) // This is EITHER the botcscripts.com ID, or a custom script ID
+  is_custom_script Boolean       @default(false)
+  name             String
+  version          String
+  author           String
+  type             String
+  json_url         String
+  pdf_url          String
+  description      String        @default("")
+  user             UserSettings? @relation(fields: [user_id], references: [user_id])
+  user_id          String?
+  roles            Role[]
+  games            Game[]
+  events           Event[]
 
   @@unique([script_id, version])
 }

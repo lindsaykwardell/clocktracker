@@ -20,11 +20,10 @@ export default defineEventHandler(async (handler) => {
       OR: [
         {
           user_id: me?.id || "",
+          is_custom_script: true,
         },
         {
-          script_id: {
-            not: null,
-          },
+          is_custom_script: false,
         },
       ],
     },
