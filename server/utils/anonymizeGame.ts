@@ -52,6 +52,7 @@ export type GameRecord = Game & {
     version: string;
     script_id: string;
     is_custom_script: boolean;
+    logo: string | null;
   };
 };
 

@@ -257,7 +257,9 @@
           </div>
         </div>
         <img
-          :src="scriptLogo(game.data.script)"
+          :src="
+            game.data.associated_script?.logo ?? scriptLogo(game.data.script)
+          "
           class="w-48 md:w-64 h-48 md:h-64"
         />
       </div>
@@ -534,7 +536,9 @@ useHead({
     },
     {
       property: "og:image",
-      content: scriptLogo(gameMetadata.data.value!.script as string),
+      content:
+        gameMetadata.data.value?.associated_script?.logo ??
+        scriptLogo(gameMetadata.data.value!.script as string),
     },
     {
       property: "og:url",
@@ -562,7 +566,9 @@ useHead({
     },
     {
       property: "twitter:image",
-      content: scriptLogo(gameMetadata.data.value!.script as string),
+      content:
+        gameMetadata.data.value?.associated_script?.logo ??
+        scriptLogo(gameMetadata.data.value!.script as string),
     },
   ],
 });

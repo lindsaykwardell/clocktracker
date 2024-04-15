@@ -144,6 +144,8 @@ model Script {
   id               Int           @id @default(autoincrement())
   script_id        String        @default(uuid()) // This is EITHER the botcscripts.com ID, or a custom script ID
   is_custom_script Boolean       @default(false)
+  logo             String?
+  website          String?
   name             String
   version          String
   author           String
@@ -151,6 +153,7 @@ model Script {
   json_url         String
   pdf_url          String
   description      String        @default("")
+  json             String?
   user             UserSettings? @relation(fields: [user_id], references: [user_id])
   user_id          String?
   roles            Role[]
