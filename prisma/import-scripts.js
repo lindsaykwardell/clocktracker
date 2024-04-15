@@ -45,7 +45,7 @@ async function main() {
 
       if (!isNaN(script_id)) {
         scriptList.push({
-          script_id,
+          script_id: script_id.toString(),
           name,
           version,
           author,
