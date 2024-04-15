@@ -81,6 +81,8 @@ export type GameRecord = Omit<Game, "win" | "win_v2"> & {
   };
   associated_script?: {
     version: string;
+    script_id: string;
+    is_custom_script: boolean;
   };
 };
 

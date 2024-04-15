@@ -154,6 +154,7 @@ export default defineEventHandler(async (handler) => {
       pdf_url: "",
       user_id: user.id,
       is_custom_script: true,
+      script_id: nanoid(6),
       roles: {
         connect: roles.map((role) => ({
           id: typeof role === "string" ? role : role.id,

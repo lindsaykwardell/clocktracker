@@ -11,6 +11,10 @@ export default defineEventHandler(async (handler) => {
     handler.context.params?.name as string
   ).replace(/_/g, " ");
 
+  const { custom_script_id } = getQuery(handler) as {
+    custom_script_id?: string;
+  };
+
   let scripts = await prisma.script.findMany({
     where: {
       name: {
@@ -19,8 +23,8 @@ export default defineEventHandler(async (handler) => {
       },
       OR: [
         {
-          user_id: me?.id || "",
           is_custom_script: true,
+          script_id: custom_script_id || "",
         },
         {
           is_custom_script: false,
@@ -50,7 +54,7 @@ export default defineEventHandler(async (handler) => {
     const script_ = { ...scripts[0], roles: undefined };
 
     try {
-      await getScriptVersions(script_);
+      await getScriptVersions(script_, me);
 
       scripts = await prisma.script.findMany({
         where: {
