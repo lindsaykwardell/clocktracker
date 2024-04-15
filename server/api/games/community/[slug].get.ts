@@ -92,6 +92,7 @@ export default defineEventHandler(async (handler) => {
           version: true,
           script_id: true,
           is_custom_script: true,
+          logo: true,
         },
       },
     },
