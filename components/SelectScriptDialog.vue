@@ -77,6 +77,7 @@
         </li>
       </ul>
       <button
+        v-if="featureFlags.isEnabled('upload-custom-scripts')"
         type="button"
         class="text-stone-400 italic underline"
         @click="handleUploadScript"
@@ -92,6 +93,7 @@ import { watchDebounced } from "@vueuse/core";
 
 const games = useGames();
 const { uploadScript } = useScripts();
+const featureFlags = useFeatureFlags();
 
 const props = defineProps<{
   visible: boolean;
