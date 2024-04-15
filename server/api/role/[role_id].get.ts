@@ -31,16 +31,6 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  // if the role has any scripts that are not in the database, verify that they are owned by the user
-  for (const script of role.scripts) {
-    if (script.user_id !== me?.id) {
-      throw createError({
-        status: 404,
-        message: "Role not found",
-      });
-    }
-  }
-
   // Fetch all games that have this role
   const games = await prisma.game.findMany({
     where: {
