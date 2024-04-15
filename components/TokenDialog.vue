@@ -61,7 +61,7 @@ const props = defineProps<{
     id: string;
     token_url: string;
     name: string;
-    initial_alignment: Alignment;
+    initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
   }[];
   visible: boolean;
   alwaysShowAllRoles?: boolean;
@@ -97,18 +97,25 @@ const show = computed({
   set: (value) => emit("update:visible", value),
 });
 
+const providedRolesIncludesTravelers = computed(() => {
+  return props.availableRoles.some((role) => role.type === "TRAVELER");
+});
+
 const filteredRoles = computed(() => {
   return naturalOrder(
     [
       ...(showAllRoles.value ? allRoles.value : props.availableRoles).filter(
-        (role) => role.type !== "FABLED" && role.type !== "TRAVELER"
+        (role) => role.type !== "FABLED"
       ),
-      ...(props.hideTravelers && !showAllRoles.value
-        ? []
-        : travelerRoles.value),
+      ...(providedRolesIncludesTravelers.value ? [] : travelerRoles.value),
       ...(showFabled.value || props.alwaysShowFabled ? fabledRoles.value : []),
-    ].filter((role) =>
-      role.name.toLowerCase().includes(roleFilter.value.toLowerCase())
+    ].filter(
+      (role, index, array) =>
+        array.findIndex((r) => r.id === role.id) === index &&
+        role.name.toLowerCase().includes(roleFilter.value.toLowerCase()) &&
+        (props.hideTravelers && !showAllRoles.value
+          ? role.type !== "TRAVELER"
+          : true)
     )
   )
     .orderBy("asc")
