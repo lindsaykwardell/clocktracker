@@ -9,8 +9,6 @@ export async function fetchGames(
   me: User | null,
   waiting_for_confirmation: boolean = false
 ) {
-  console.log("Starting fetchGames");
-  console.time("fetchGames");
   const games = await prisma.game.findMany({
     where: {
       deleted: false,
@@ -268,7 +266,6 @@ export async function fetchGames(
       },
     ],
   });
-  console.timeLog("fetchGames", "Fetched games");
 
   const anonymizedGames: GameRecord[] = [];
 
@@ -302,7 +299,6 @@ export async function fetchGames(
       )
     );
   }
-  console.timeEnd("fetchGames");
 
   return anonymizedGames;
 }
