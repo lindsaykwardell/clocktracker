@@ -163,13 +163,17 @@ export default defineEventHandler(async (handler) => {
         let win = acc.win;
 
         if (featureFlags.isEnabled("win-status-v2")) {
-          const character = game.grimoire[
-            game.grimoire.length - 1
-          ]?.tokens.find(
-            (token) =>
-              token.role_id === role.id ||
-              (token.role && token.role.name === role.name)
-          );
+          const character = (() => {
+            if (game.is_storyteller) {
+              return game.grimoire[game.grimoire.length - 1].tokens.find(
+                (token) =>
+                  token.role_id === role.id ||
+                  (token.role && token.role.name === role.name)
+              );
+            } else {
+              return game.player_characters[game.player_characters.length - 1];
+            }
+          })();
 
           if (!character) return acc;
 
