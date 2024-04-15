@@ -525,8 +525,6 @@ export const useGames = defineStore("games", {
 export function displayWinIcon(game: GameRecord) {
   const featureFlags = useFeatureFlags();
 
-  console.log(featureFlags.isEnabled("win_status_v2"));
-
   if (featureFlags.isEnabled("win_status_v2")) {
     return game.is_storyteller
       ? game.win_v2 === WinStatus_V2.GOOD_WINS
