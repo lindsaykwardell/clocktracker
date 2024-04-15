@@ -3,14 +3,14 @@
   <AnnouncementDialog id="custom-script-uploads1">
     <template #title>
       <h1 class="text-2xl font-bold font-dumbledor">
-        Feature Preview - Custom Scripts
+        Feature Preview - Upload Scripts
       </h1>
       <div class="text-lg text-stone-400">{{ announcementDate }}</div>
     </template>
     <p class="p-2">
       We are excited to announce a new feature that will be rolling out soon:
-      custom script uploads! This feature will allow users to upload their
-      favorite custom scripts for use on ClockTracker.
+      custom script and homebrew uploads! This feature will allow users to
+      upload their favorite scripts for use on ClockTracker.
     </p>
     <img src="/blog/upload-1.webp" alt="Upload a script" />
     <p class="p-2">
@@ -29,9 +29,9 @@
     <p class="p-2">
       Custom uploaded scripts are visible to all ClockTracker users, but they
       are scoped to each individual upload (so if someone else uploads the same
-      custom script, you will each have separate stats). This is to prevent
-      accidental merging of a script. Further work may go into this to make it
-      even better, but this should work for now as an initial approach.
+      script, you will each have separate stats). This is to prevent accidental
+      merging of a script. Further work may go into this to make it even better,
+      but this should work for now as an initial approach.
     </p>
 
     <p class="p-2">
@@ -41,12 +41,12 @@
     </p>
     <img src="/blog/upload-5.webp" alt="Custom script selection" />
     <p class="p-2">
-      Custom script uploading will first roll out to Ko-Fi supporters, with a
+      Script uploading will first roll out to Ko-Fi supporters, with a
       full release after testing is complete. If you are interested in testing
       this feature, please consider supporting ClockTracker on Ko-Fi. If you are
       already a Ko-Fi supporter, head over to
-      <a class="underline" href="/settings/perks">Settings</a> to opt into preview
-      features.
+      <a class="underline" href="/settings/perks">Settings</a> to opt into
+      preview features.
     </p>
   </AnnouncementDialog>
   <VitePwaManifest />
