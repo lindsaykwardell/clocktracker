@@ -1,11 +1,54 @@
 <template>
   <NuxtPage />
-  <!-- <AnnouncementDialog id="announcement-3">
+  <AnnouncementDialog id="custom-script-uploads1">
     <template #title>
-      <h1 class="text-2xl font-bold font-dumbledor">Welcome to ClockTracker</h1>
+      <h1 class="text-2xl font-bold font-dumbledor">
+        Feature Preview - Custom Scripts
+      </h1>
+      <div class="text-lg text-stone-400">{{ announcementDate }}</div>
     </template>
-    <p>This is a cool app, with a cool announcement.</p>
-  </AnnouncementDialog> -->
+    <p class="p-2">
+      We are excited to announce a new feature that will be rolling out soon:
+      custom script uploads! This feature will allow users to upload their
+      favorite custom scripts for use on ClockTracker.
+    </p>
+    <img src="/blog/upload-1.webp" alt="Upload a script" />
+    <p class="p-2">
+      When you are creating a game, you can upload a custom JSON file by
+      selecting "Upload a script". The script can use the official characters,
+      or custom characters (such as Fall of Rome). If a script provides custom
+      images, they will be applied to the grimoire (including a script logo!)
+    </p>
+    <img src="/blog/upload-2.webp" alt="Custom script in action" />
+    <img src="/blog/upload-3.webp" alt="Grimoire for a tagged game" />
+    <p class="p-2">
+      Tagged games work the same as always, and tagged players may now use the
+      script they were tagged in for future games.
+    </p>
+    <img src="/blog/upload-4.webp" alt="User was tagged in a custom game" />
+    <p class="p-2">
+      Custom uploaded scripts are visible to all ClockTracker users, but they
+      are scoped to each individual upload (so if someone else uploads the same
+      custom script, you will each have separate stats). This is to prevent
+      accidental merging of a script. Further work may go into this to make it
+      even better, but this should work for now as an initial approach.
+    </p>
+
+    <p class="p-2">
+      Users may only use a script that they have either uploaded or been tagged
+      in. If you wish to use a custom script, you will need to upload a copy
+      yourself.
+    </p>
+    <img src="/blog/upload-5.webp" alt="Custom script selection" />
+    <p class="p-2">
+      Custom script uploading will first roll out to Ko-Fi supporters, with a
+      full release after testing is complete. If you are interested in testing
+      this feature, please consider supporting ClockTracker on Ko-Fi. If you are
+      already a Ko-Fi supporter, head over to
+      <a class="underline" href="/settings/perks">Settings</a> to opt into preview
+      features.
+    </p>
+  </AnnouncementDialog>
   <VitePwaManifest />
 </template>
 
@@ -25,6 +68,7 @@ import {
   PolarAreaController,
   RadialLinearScale,
 } from "chart.js";
+import { nanoid } from "nanoid";
 
 const friends = useFriends();
 const users = useUsers();
@@ -41,6 +85,12 @@ onMounted(() => {
     friends.fetchRequests();
     // one minute
   }, 1000 * 60);
+});
+
+const announcementDate = computed(() => {
+  return new Intl.DateTimeFormat(navigator.language, {
+    dateStyle: "full",
+  }).format(new Date("2024-04-16"));
 });
 
 useHead({
