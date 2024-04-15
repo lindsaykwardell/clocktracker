@@ -6,6 +6,15 @@
     <div class="p-4">
       <slot />
     </div>
+    <div class="flex justify-center p-4">
+      <a
+        href="https://ko-fi.com/clocktracker"
+        class="text-center text-lg bg-blue-950 hover:bg-blue-800 transition duration-150 text-white font-bold py-2 px-4 rounded flex justify-center gap-4 items-center"
+      >
+        <KoFi />
+        <span>Support ClockTracker on Ko-fi</span>
+      </a>
+    </div>
   </Dialog>
 </template>
 
