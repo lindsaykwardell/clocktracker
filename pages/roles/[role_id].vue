@@ -21,9 +21,13 @@
           <div class="flex flex-wrap py-6 justify-center">
             <a
               v-for="script in role_data.popular_scripts"
-              :href="`/scripts/${script.script.replaceAll(' ', '_')}`"
+              :href="`/scripts/${script.script.replaceAll(' ', '_')}?version=${
+                script.version
+              }${
+                script.custom_script_id ? `&id=${script.custom_script_id}` : ''
+              }`"
               target="_blank"
-              class="script-wrapper hover:underline flex flex-col items-center gap-2 w-[150px] md:w-[200px] lg:w-1/2 xl:w-1/3  text-center p-2"
+              class="script-wrapper hover:underline flex flex-col items-center gap-2 w-[150px] md:w-[200px] lg:w-1/2 xl:w-1/3 text-center p-2"
             >
               <div class="relative flex justify-center items-center">
                 <div
@@ -41,7 +45,7 @@
                 </div>
                 <img
                   class="token relative z-50 w-28 h-28 md:w-40 md:h-40 transition duration-200 rounded-full overflow-visible aspect-square"
-                  :src="scripts.scriptLogo(script.script)"
+                  :src="script.logo ?? scripts.scriptLogo(script.script)"
                 />
               </div>
               <span>{{ script.script }}</span>
@@ -102,7 +106,14 @@
               <tr v-for="script in topTenScripts">
                 <td>
                   <a
-                    :href="`/scripts/${script.script.replaceAll(' ', '_')}`"
+                    :href="`/scripts/${script.script.replaceAll(
+                      ' ',
+                      '_'
+                    )}?version=${script.version}${
+                      script.custom_script_id
+                        ? `&id=${script.custom_script_id}`
+                        : ''
+                    }`"
                     target="_blank"
                     class="hover:underline"
                   >

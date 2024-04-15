@@ -1,10 +1,47 @@
 import { PrivacySetting, PrismaClient, Script } from "@prisma/client";
+import { User } from "@supabase/supabase-js";
 import axios from "axios";
 import cheerio from "cheerio";
 
 const prisma = new PrismaClient();
 
-export async function getScriptVersions(script: Script) {
+export async function getScriptVersions(script: Script, me: User | null) {
+  if (script.is_custom_script) {
+    // If the script is custom, it's not in the BOTC database.
+    // Check if there are others with the same name belonging
+    // to the same user.
+
+    const scripts = await prisma.script.findMany({
+      where: {
+        name: script.name,
+        OR: [
+          // If you own this script
+          {
+            user_id: {
+              equals: me?.id || "",
+            },
+          },
+          // If you have played this script
+          {
+            games: {
+              some: {
+                user_id: {
+                  equals: me?.id || "",
+                },
+              },
+            },
+          },
+        ],
+      },
+      select: {
+        id: true,
+        version: true,
+      },
+    });
+
+    return scripts;
+  }
+
   const versions = await prisma.script.findMany({
     where: {
       script_id: script.script_id,
@@ -23,6 +60,7 @@ export async function getScriptVersions(script: Script) {
       for (const version of fetchedVersions) {
         const versionedScript = {
           ...script,
+          script_id: script.script_id,
           id: undefined,
           version: version,
           json_url: `https://botcscripts.com/script/${script.script_id}/${version}/download`,
@@ -61,7 +99,7 @@ export function isVersionOne(version: string): boolean {
 
 const versionOne = ["1.0.0", "0.0.1", "0.0.0"];
 
-async function fetchVersions(id: number) {
+async function fetchVersions(id: string) {
   const response = await axios.get(`https://botcscripts.com/script/${id}`);
   const $ = cheerio.load(response.data);
   // const description = $("div#notes").text();

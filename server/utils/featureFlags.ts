@@ -48,8 +48,6 @@ export async function getFeatureFlags(me: User | null) {
     },
   });
 
-  console.log(enabledFlags);
-
   const payload: { [key: string]: boolean } = {};
 
   for (const flag of flags) {

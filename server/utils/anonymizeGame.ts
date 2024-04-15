@@ -5,10 +5,8 @@ import type {
   Token,
   ReminderToken,
 } from "@prisma/client";
-import { PrivacySetting, PrismaClient } from "@prisma/client";
+import { PrivacySetting } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
-
-const prisma = new PrismaClient();
 
 export type FullCharacter = Character & {
   role?: {
@@ -52,6 +50,9 @@ export type GameRecord = Game & {
   };
   associated_script?: {
     version: string;
+    script_id: string;
+    is_custom_script: boolean;
+    logo: string | null;
   };
 };
 

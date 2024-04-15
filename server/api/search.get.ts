@@ -84,6 +84,7 @@ export default defineEventHandler(async (handler) => {
           },
         },
       ],
+      is_custom_script: false,
     },
     include: {
       _count: {

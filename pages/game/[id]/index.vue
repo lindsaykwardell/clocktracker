@@ -63,47 +63,46 @@
               "
               class="font-dumbledor text-2xl"
             >
-              <a
-                :href="`/roles/${last_character?.role_id}`"
-                target="_blank"
+              <nuxt-link
+                :to="`/roles/${last_character?.role_id}`"
                 class="hover:underline flex flex-col items-center"
               >
                 <Token :character="last_character" size="md" />
-              </a>
+              </nuxt-link>
             </div>
           </div>
           <div class="flex flex-col md:flex-row gap-4 mt-4">
             <label class="flex gap-3 items-center">
               <span>Script</span>
-              <a
+              <nuxt-link
                 class="hover:underline text-blue-800 hover:text-blue-700"
-                :href="scriptLink(game.data)"
+                :to="scriptLink(game.data)"
               >
                 {{ game.data.script }}
                 <template
                   v-if="
-                    game.data.associated_script &&
+                    game.data.associated_script?.version &&
                     !isBaseScript(game.data.script)
                   "
                 >
                   v{{ game.data.associated_script.version }}
                 </template>
-              </a>
+              </nuxt-link>
             </label>
             <label v-if="storytellers.length" class="flex gap-3 items-center">
               <span>Storyteller{{ storytellers.length === 1 ? "" : "s" }}</span>
               <div>
                 <template v-for="(storyteller, index) in storytellers">
-                  <a
+                  <nuxt-link
                     v-if="
                       isStorytellerAFriend(storyteller) &&
                       storyteller.includes('@')
                     "
                     class="hover:underline text-blue-800 hover:text-blue-700"
-                    :href="`/${storyteller}`"
+                    :to="`/${storyteller}`"
                   >
                     {{ storyteller }}
-                  </a>
+                  </nuxt-link>
                   <template v-else>{{ storyteller }}</template>
                   <template v-if="index !== storytellers.length - 1"
                     >,
@@ -258,7 +257,9 @@
           </div>
         </div>
         <img
-          :src="scriptLogo(game.data.script)"
+          :src="
+            game.data.associated_script?.logo ?? scriptLogo(game.data.script)
+          "
           class="w-48 md:w-64 h-48 md:h-64"
         />
       </div>
@@ -535,7 +536,9 @@ useHead({
     },
     {
       property: "og:image",
-      content: scriptLogo(gameMetadata.data.value!.script as string),
+      content:
+        gameMetadata.data.value?.associated_script?.logo ??
+        scriptLogo(gameMetadata.data.value!.script as string),
     },
     {
       property: "og:url",
@@ -563,7 +566,9 @@ useHead({
     },
     {
       property: "twitter:image",
-      content: scriptLogo(gameMetadata.data.value!.script as string),
+      content:
+        gameMetadata.data.value?.associated_script?.logo ??
+        scriptLogo(gameMetadata.data.value!.script as string),
     },
   ],
 });
@@ -612,10 +617,17 @@ function fullImageUrl(file: string) {
 function scriptLink(game: GameRecord) {
   if (game.script === "Sects & Violets") return "/scripts/Sects_and_Violets";
 
-  if (game.script_id)
-    return `/scripts/${game.script.replaceAll(" ", "_")}?version=${
-      game.associated_script?.version
-    }`;
+  if (game.script_id) {
+    if (game.associated_script?.is_custom_script) {
+      return `/scripts/${game.script.replaceAll(" ", "_")}?version=${
+        game.associated_script.version
+      }&id=${game.associated_script.script_id}`;
+    } else {
+      return `/scripts/${game.script.replaceAll(" ", "_")}?version=${
+        game.associated_script?.version
+      }`;
+    }
+  }
 
   return `https://botcscripts.com/?search=${game.script.replace(
     / /g,
