@@ -84,10 +84,7 @@ export default defineEventHandler(async (handler) => {
           },
         },
       ],
-      user_id: null,
-      script_id: {
-        not: null,
-      },
+      is_custom_script: false,
     },
     include: {
       _count: {

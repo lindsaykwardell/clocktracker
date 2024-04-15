@@ -1,26 +1,14 @@
 import { PrismaClient, WinStatus } from "@prisma/client";
-import { User } from "@supabase/supabase-js";
 import dayjs from "dayjs";
 
 const prisma = new PrismaClient();
 
 export default defineEventHandler(async (handler) => {
-  const me = handler.context.user as User | null;
   const role_id = handler.context.params?.role_id as string;
 
   const role = await prisma.role.findUnique({
     where: {
       id: role_id,
-    },
-    include: {
-      scripts: {
-        select: {
-          user_id: true,
-        },
-        where: {
-          script_id: null,
-        },
-      },
     },
   });
 
