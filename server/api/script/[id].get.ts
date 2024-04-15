@@ -13,11 +13,23 @@ export default defineEventHandler(async (handler) => {
     where: {
       id: +id,
       OR: [
+        // If you own this script
         {
           user_id: {
             equals: me?.id || "",
           },
         },
+        // If you have played this script
+        {
+          games: {
+            some: {
+              user_id: {
+                equals: me?.id || "",
+              },
+            },
+          },
+        },
+        // If this script is public
         {
           user_id: {
             equals: null,

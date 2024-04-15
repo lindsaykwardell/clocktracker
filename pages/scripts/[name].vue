@@ -23,7 +23,10 @@
                   By {{ script.author }}
                 </div>
               </div>
-              <div v-if="scripts.some(s => s.version)" class="flex flex-col md:flex-row gap-2">
+              <div
+                v-if="scripts.some((s) => s.version)"
+                class="flex flex-col md:flex-row gap-2"
+              >
                 <div class="font-dumbledor text-lg font-bold bottom-[20px]">
                   <select
                     v-model="version"
@@ -203,9 +206,12 @@ const allGames = useGames();
 
 const scriptName = route.params.name as string;
 const version = ref(route.query.version as string);
+const script_id = route.query.id as string;
 
 const scripts = await $fetch<Array<Script & { roles: Role[] }>>(
-  "/api/script/name/" + encodeURIComponent(scriptName)
+  `/api/script/name/${encodeURIComponent(
+    scriptName
+  )}?custom_script_id=${script_id}`
 );
 
 if (!version.value) {
@@ -221,7 +227,7 @@ watchEffect(() => {
   // This needs to be
   if (version.value !== route.query.version) {
     // route.query.version = version.value;
-    router.push({ query: { version: version.value } });
+    router.push({ query: { version: version.value, id: script_id } });
   }
 });
 

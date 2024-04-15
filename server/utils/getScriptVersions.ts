@@ -1,10 +1,11 @@
 import { PrivacySetting, PrismaClient, Script } from "@prisma/client";
+import { User } from "@supabase/supabase-js";
 import axios from "axios";
 import cheerio from "cheerio";
 
 const prisma = new PrismaClient();
 
-export async function getScriptVersions(script: Script) {
+export async function getScriptVersions(script: Script, me: User | null) {
   if (script.is_custom_script) {
     // If the script is custom, it's not in the BOTC database.
     // Check if there are others with the same name belonging
@@ -13,7 +14,24 @@ export async function getScriptVersions(script: Script) {
     const scripts = await prisma.script.findMany({
       where: {
         name: script.name,
-        user_id: script.user_id,
+        OR: [
+          // If you own this script
+          {
+            user_id: {
+              equals: me?.id || "",
+            },
+          },
+          // If you have played this script
+          {
+            games: {
+              some: {
+                user_id: {
+                  equals: me?.id || "",
+                },
+              },
+            },
+          },
+        ],
       },
       select: {
         id: true,

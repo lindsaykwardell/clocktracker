@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { User } from "@supabase/supabase-js";
 import { getScriptVersions } from "~/server/utils/getScriptVersions";
 
 const prisma = new PrismaClient();
@@ -6,6 +7,7 @@ const prisma = new PrismaClient();
 // This endpoint is specifically for fetching a script by its ID
 // This is the ClockTracker ID, not the BOTC script db ID.
 export default defineEventHandler(async (handler) => {
+  const me = handler.context.user as User | null;
   const id = handler.context.params?.id as string;
 
   const script = await prisma.script.findUnique({
@@ -22,5 +24,5 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  return getScriptVersions(script);
+  return getScriptVersions(script, me);
 });

@@ -611,10 +611,17 @@ function fullImageUrl(file: string) {
 function scriptLink(game: GameRecord) {
   if (game.script === "Sects & Violets") return "/scripts/Sects_and_Violets";
 
-  if (game.script_id)
-    return `/scripts/${game.script.replaceAll(" ", "_")}?version=${
-      game.associated_script?.version
-    }`;
+  if (game.script_id) {
+    if (game.associated_script?.is_custom_script) {
+      return `/scripts/${game.script.replaceAll(" ", "_")}?version=${
+        game.associated_script.version
+      }&id=${game.associated_script.script_id}`;
+    } else {
+      return `/scripts/${game.script.replaceAll(" ", "_")}?version=${
+        game.associated_script?.version
+      }`;
+    }
+  }
 
   return `https://botcscripts.com/?search=${game.script.replace(
     / /g,

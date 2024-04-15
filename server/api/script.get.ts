@@ -27,9 +27,7 @@ export default defineEventHandler(async (handler) => {
           user_id: me?.id || "",
         },
         {
-          script_id: {
-            not: null,
-          },
+          is_custom_script: false,
         },
       ],
     },
@@ -46,7 +44,7 @@ export default defineEventHandler(async (handler) => {
 
   const results: {
     id: number;
-    script_id: number;
+    script_id: string;
     name: string;
     version: string;
   }[] = [];

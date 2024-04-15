@@ -250,6 +250,8 @@ export async function fetchGames(
       associated_script: {
         select: {
           version: true,
+          script_id: true,
+          is_custom_script: true,
         },
       },
     },
@@ -506,6 +508,8 @@ export async function fetchGame(
       associated_script: {
         select: {
           version: true,
+          script_id: true,
+          is_custom_script: true,
         },
       },
     },
