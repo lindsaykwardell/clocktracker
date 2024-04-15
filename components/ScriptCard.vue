@@ -4,7 +4,10 @@
     class="bg-stone-950 hover:bg-stone-900 w-full p-2 shadow-lg flex items-center"
   >
     <div class="flex flex-col md:flex-row gap-3 items-top">
-      <img :src="scriptLogo(script.name)" class="w-36 md:w-48 h-36 md:h-48" />
+      <img
+        :src="script.logo ?? scriptLogo(script.name)"
+        class="w-36 md:w-48 h-36 md:h-48"
+      />
       <div class="flex-grow flex flex-col gap-2">
         <h2 class="font-dumbledor text-xl lg:text-2xl">
           {{ script.name }}
@@ -38,6 +41,7 @@ defineProps<{
     type: string;
     json_url: string;
     pdf_url: string;
+    logo: string | null;
     characters_last_updated: string | null;
     _count: {
       games: number;

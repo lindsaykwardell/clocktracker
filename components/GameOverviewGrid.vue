@@ -43,7 +43,12 @@
             size="lg"
           />
           <div v-else class="bg-black/25 flex justify-center">
-            <img :src="scripts.scriptLogo(game.script)" class="w-2/3" />
+            <img
+              :src="
+                game.associated_script?.logo ?? scripts.scriptLogo(game.script)
+              "
+              class="w-2/3"
+            />
           </div>
         </div>
         <div class="absolute w-full top-0 left-0" />

@@ -93,6 +93,9 @@ export default defineEventHandler(async (handler) => {
       associated_script: {
         select: {
           version: true,
+          script_id: true,
+          is_custom_script: true,
+          logo: true,
         },
       },
     },

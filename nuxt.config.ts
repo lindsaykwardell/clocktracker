@@ -174,4 +174,12 @@ export default defineNuxtConfig({
       ],
     },
   },
+  routeRules: {
+    "/scripts/**": {
+      ssr: false,
+    },
+    "/roles/**": {
+      ssr: false,
+    },
+  },
 });

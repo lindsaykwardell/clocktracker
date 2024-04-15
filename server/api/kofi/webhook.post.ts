@@ -35,8 +35,6 @@ export default defineEventHandler(async (handler) => {
     body.data = JSON.parse(body.data);
   }
 
-  console.log("KoFi Webhook", body);
-
   if (!body || body.data.verification_token !== process.env.KOFI_TOKEN) {
     console.error("Invalid KoFi Webhook", body?.data);
     throw createError({

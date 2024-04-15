@@ -93,7 +93,35 @@ export default defineEventHandler(async (handler) => {
     },
   });
 
-  const popular_scripts_formatted = popular_scripts.map((script) => {
+  const popular_scripts_formatted = [];
+
+  for (const script of popular_scripts) {
+    let logo: string | null = null;
+    let version: string | null = null;
+    let custom_script_id: string | null = null;
+
+    if (script.script_id) {
+      const associated_script = await prisma.script.findUnique({
+        where: {
+          id: script.script_id,
+        },
+        select: {
+          logo: true,
+          version: true,
+          script_id: true,
+          is_custom_script: true,
+        },
+      });
+
+      if (associated_script) {
+        logo = associated_script.logo;
+        version = associated_script.version;
+        if (associated_script.is_custom_script) {
+          custom_script_id = associated_script.script_id;
+        }
+      }
+    }
+
     let wins = 0;
     let total = 0;
 
@@ -114,14 +142,17 @@ export default defineEventHandler(async (handler) => {
 
     const pct = +((wins / total) * 100).toFixed(2);
 
-    return {
+    popular_scripts_formatted.push({
       script_id: script.script_id,
       script: script.script,
+      version,
+      custom_script_id,
+      logo: logo,
       wins,
       pct,
       count: script._count.script_id,
-    };
-  });
+    });
+  }
 
   return {
     role,
