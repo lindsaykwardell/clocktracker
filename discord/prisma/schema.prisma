@@ -46,6 +46,7 @@ model Game {
   community_name           String         @default("")
   community_id             Int?
   win                      WinStatus
+  win_v2                   WinStatus_V2   @default(NOT_RECORDED)
   player_characters        Character[]
   demon_bluffs             DemonBluff[]
   fabled                   Fabled[]
@@ -128,18 +129,24 @@ model Fabled {
 }
 
 model Script {
-  id          Int     @id @default(autoincrement())
-  name        String
-  version     String
-  author      String
-  type        String
-  json_url    String
-  pdf_url     String
-  script_id   Int
-  description String  @default("")
-  Event       Event[]
-  games       Game[]
-  roles       Role[]  @relation("RoleToScript")
+  id               Int           @id @default(autoincrement())
+  name             String
+  version          String
+  author           String
+  type             String
+  json_url         String
+  pdf_url          String
+  script_id        String
+  description      String        @default("")
+  user_id          String?
+  is_custom_script Boolean       @default(false)
+  json             String?
+  logo             String?
+  website          String?
+  Event            Event[]
+  games            Game[]
+  UserSettings     UserSettings? @relation(fields: [user_id], references: [user_id])
+  roles            Role[]        @relation("RoleToScript")
 
   @@unique([script_id, version])
 }
@@ -150,6 +157,7 @@ model Role {
   initial_alignment Alignment
   token_url         String
   type              RoleType
+  custom_role       Boolean        @default(false)
   related_character Character[]    @relation("RelatedRole")
   character         Character[]
   demon_bluffs      DemonBluff[]
@@ -200,6 +208,7 @@ model UserSettings {
   friend_requests         FriendRequest[]         @relation("Receiver")
   games                   Game[]
   KoFiPayment             KoFiPayment[]
+  Script                  Script[]
   token                   Token[]
   community_admin         Community[]             @relation("CommunityAdmin")
   community_banned        Community[]             @relation("CommunityBanned")
@@ -426,4 +435,10 @@ enum WhoCanRegister {
   ANYONE
   COMMUNITY_MEMBERS
   PRIVATE
+}
+
+enum WinStatus_V2 {
+  GOOD_WINS
+  EVIL_WINS
+  NOT_RECORDED
 }
