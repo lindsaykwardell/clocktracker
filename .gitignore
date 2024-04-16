@@ -25,7 +25,4 @@ logs
 # Local Netlify folder
 .netlify
 
-cypress/videos
-cypress/screenshots
-
 reminders.json
