@@ -8,7 +8,7 @@
       >
         <div class="flex-grow flex flex-col">
           <img
-            :src="scriptLogo(script.name)"
+            :src="script.logo ?? scriptLogo(script.name)"
             class="md:hidden w-48 md:w-64 h-48 md:h-64 m-auto"
           />
           <div class="flex flex-col md:flex-row gap-4 items-center">
@@ -23,7 +23,10 @@
                   By {{ script.author }}
                 </div>
               </div>
-              <div class="flex flex-col md:flex-row gap-2">
+              <div
+                v-if="scripts.some((s) => s.version)"
+                class="flex flex-col md:flex-row gap-2"
+              >
                 <div class="font-dumbledor text-lg font-bold bottom-[20px]">
                   <select
                     v-model="version"
@@ -72,7 +75,7 @@
         </div>
         <div class="flex flex-col gap-1 print:w-full">
           <img
-            :src="scriptLogo(script.name)"
+            :src="script.logo ?? scriptLogo(script.name)"
             class="hidden md:block w-48 md:w-64 h-48 md:h-64 m-auto"
           />
           <hr class="border-stone-400 w-full print:hidden" />
@@ -94,6 +97,7 @@
             </svg>
           </a>
           <a
+            v-if="!script.is_custom_script"
             :href="script.json_url"
             class="flex items-center gap-2 hover:underline hover:text-blue-600 justify-end print:hidden"
           >
@@ -111,6 +115,28 @@
             </svg>
           </a>
           <a
+            v-else-if="script.json"
+            :href="`data:text/json;charset=utf-8,${encodeURIComponent(
+              script.json
+            )}`"
+            :download="`${script.name.toLowerCase().replaceAll(' ', '-')}.json`"
+            class="flex items-center gap-2 hover:underline hover:text-blue-600 justify-end print:hidden"
+          >
+            Download JSON
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="currentColor"
+                d="M5 3h2v2H5v5a2 2 0 0 1-2 2a2 2 0 0 1 2 2v5h2v2H5c-1.07-.27-2-.9-2-2v-4a2 2 0 0 0-2-2H0v-2h1a2 2 0 0 0 2-2V5a2 2 0 0 1 2-2m14 0a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2h1v2h-1a2 2 0 0 0-2 2v4a2 2 0 0 1-2 2h-2v-2h2v-5a2 2 0 0 1 2-2a2 2 0 0 1-2-2V5h-2V3h2m-7 12a1 1 0 0 1 1 1a1 1 0 0 1-1 1a1 1 0 0 1-1-1a1 1 0 0 1 1-1m-4 0a1 1 0 0 1 1 1a1 1 0 0 1-1 1a1 1 0 0 1-1-1a1 1 0 0 1 1-1m8 0a1 1 0 0 1 1 1a1 1 0 0 1-1 1a1 1 0 0 1-1-1a1 1 0 0 1 1-1Z"
+              />
+            </svg>
+          </a>
+          <a
+            v-if="!script.is_custom_script"
             :href="script.pdf_url"
             class="flex items-center gap-2 hover:underline hover:text-blue-600 justify-end print:hidden"
           >
@@ -203,9 +229,12 @@ const allGames = useGames();
 
 const scriptName = route.params.name as string;
 const version = ref(route.query.version as string);
+const script_id = route.query.id as string;
 
 const scripts = await $fetch<Array<Script & { roles: Role[] }>>(
-  "/api/script/name/" + encodeURIComponent(scriptName)
+  `/api/script/name/${encodeURIComponent(
+    scriptName
+  )}?custom_script_id=${script_id}`
 );
 
 if (!version.value) {
@@ -221,7 +250,7 @@ watchEffect(() => {
   // This needs to be
   if (version.value !== route.query.version) {
     // route.query.version = version.value;
-    router.push({ query: { version: version.value } });
+    router.push({ query: { version: version.value, id: script_id } });
   }
 });
 
@@ -243,7 +272,7 @@ useHead({
     },
     {
       property: "og:image",
-      content: scriptLogo(script.value.name),
+      content: script.value.logo ?? scriptLogo(script.value.name),
     },
     {
       property: "og:url",
@@ -267,7 +296,7 @@ useHead({
     },
     {
       property: "twitter:image",
-      content: scriptLogo(script.value.name),
+      content: script.value.logo ?? scriptLogo(script.value.name),
     },
   ],
 });
@@ -434,7 +463,7 @@ const winRatioOptions = computed(() => ({
   },
 }));
 
-const roleWinRateOptions = computed<ChartOptions>(() => ({
+const roleWinRateOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: true,
   plugins: {
@@ -479,10 +508,11 @@ function formatRoleAsCharacter(role: {
 const scriptLink = computed(() => {
   if (script.value.name === "Trouble Brewing")
     return "https://wiki.bloodontheclocktower.com/Trouble_Brewing";
-  if (script.value.name === "Bad Moon Rising")
+  else if (script.value.name === "Bad Moon Rising")
     return "https://wiki.bloodontheclocktower.com/Bad_Moon_Rising";
-  if (script.value.name === "Sects and Violets")
+  else if (script.value.name === "Sects and Violets")
     return "https://wiki.bloodontheclocktower.com/Sects_%26_Violets";
+  else if (script.value.website) return script.value.website;
   else {
     return `https://botcscripts.com/script/${script.value.script_id}/${script.value.version}/`;
   }

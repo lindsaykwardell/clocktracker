@@ -5,6 +5,7 @@
     >
       <h2 class="font-dumbledor text-4xl text-center">Ko-Fi Perks</h2>
       <form
+        v-if="kofiLevel"
         class="flex flex-col gap-4 items-center w-full"
         @submit.prevent="saveSettings"
       >
@@ -42,6 +43,12 @@
           Profile updated successfully!
         </span>
       </form>
+      <div v-else>
+        <p>
+          You must be a Ko-Fi supporter to access these features.
+          <a href="https://ko-fi.com/clocktracker" class="underline">Become a supporter now!</a>
+        </p>
+      </div>
     </section>
   </SettingsTemplate>
 </template>
@@ -58,6 +65,14 @@ const errorMessage = ref<string>();
 const savedSuccessfully = ref(false);
 const users = useUsers();
 const user = useSupabaseUser();
+
+const kofiLevel = computed(() => {
+  const u = users.getUserById(user.value?.id);
+
+  if (u.status !== Status.SUCCESS) return null;
+
+  return u.data.kofi_level;
+});
 
 const settings = await useFetch("/api/settings");
 

@@ -138,6 +138,11 @@ export default defineEventHandler(async (handler) => {
           display_name: true,
         },
       },
+      associated_script: {
+        select: {
+          logo: true,
+        },
+      },
     },
   });
 

@@ -1,9 +1,11 @@
 import { PrismaClient } from "@prisma/client";
+import { User } from "@supabase/supabase-js";
 import naturalOrder from "natural-order";
 
 const prisma = new PrismaClient();
 
 export default defineEventHandler(async (handler) => {
+  const me = handler.context.user as User | null;
   const { query, author } = getQuery(handler) as {
     query: string;
     author: string;
@@ -19,6 +21,14 @@ export default defineEventHandler(async (handler) => {
         contains: author,
         mode: "insensitive",
       },
+      OR: [
+        {
+          user_id: me?.id || "",
+        },
+        {
+          is_custom_script: false,
+        },
+      ],
     },
     orderBy: {
       name: "asc",
@@ -33,7 +43,7 @@ export default defineEventHandler(async (handler) => {
 
   const results: {
     id: number;
-    script_id: number;
+    script_id: string;
     name: string;
     version: string;
   }[] = [];
@@ -47,7 +57,7 @@ export default defineEventHandler(async (handler) => {
     ) {
       results.push({
         id: script.id,
-        script_id: script.script_id,
+        script_id: script.script_id!,
         name: script.name,
         version: script.version,
       });
