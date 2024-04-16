@@ -1,6 +1,6 @@
 <template>
   <NuxtPage />
-  <AnnouncementDialog id="custom-script-uploads1">
+  <AnnouncementDialog id="custom-script-uploads">
     <template #title>
       <h1 class="text-2xl font-bold font-dumbledor">
         Feature Preview - Upload Scripts

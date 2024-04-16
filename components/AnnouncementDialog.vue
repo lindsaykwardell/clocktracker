@@ -31,7 +31,6 @@ onMounted(() => {
   const latestAnnouncement = localStorage.getItem("announcement");
   if (user.value && latestAnnouncement !== props.id) {
     show.value = true;
-    localStorage.setItem("announcement", props.id);
   }
 });
 
@@ -39,6 +38,11 @@ watch(user, () => {
   const latestAnnouncement = localStorage.getItem("announcement");
   if (user.value && latestAnnouncement !== props.id) {
     show.value = true;
+  }
+});
+
+watch(show, (value) => {
+  if (!value) {
     localStorage.setItem("announcement", props.id);
   }
 });
