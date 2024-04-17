@@ -79,6 +79,7 @@ await featureFlags.init();
 
 onMounted(() => {
   users.fetchMe(user.value?.id);
+  friends.fetchFriends();
   friends.fetchRequests();
 
   setInterval(() => {
