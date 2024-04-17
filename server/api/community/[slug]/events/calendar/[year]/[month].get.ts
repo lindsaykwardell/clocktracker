@@ -127,6 +127,9 @@ export default defineEventHandler(async (handler) => {
         },
       },
     },
+    orderBy: {
+      start: "asc",
+    },
   });
 
   if (!event) {
