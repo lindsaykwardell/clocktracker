@@ -1,18 +1,23 @@
 <template>
   <div>
-    <div
-      class="flex justify-center md:justify-around gap-6 py-4"
-      :class="{
-        'text-xl lg:text-2xl': size === 'lg',
-        'text-lg lg:text-xl': size === 'md',
-        'lg:text-lg': size === 'sm',
-      }"
-    >
-      <button @click="backOneMonth">＜</button>
-      <h2 class="font-dumbledor">
-        {{ formattedYearAndMonth }}
-      </h2>
-      <button @click="forwardOneMonth">＞</button>
+    <div class="flex">
+      <div
+        class="flex flex-grow justify-center md:justify-around gap-6 py-4"
+        :class="{
+          'text-xl lg:text-2xl': size === 'lg',
+          'text-lg lg:text-xl': size === 'md',
+          'lg:text-lg': size === 'sm',
+        }"
+      >
+        <button @click="backOneMonth">＜</button>
+        <h2 class="font-dumbledor">
+          {{ formattedYearAndMonth }}
+        </h2>
+        <button @click="forwardOneMonth">＞</button>
+      </div>
+      <div class="flex-shrink">
+        <slot />
+      </div>
     </div>
     <div class="grid grid-cols-7 text-xs md:text-base">
       <template v-for="week in weeks">

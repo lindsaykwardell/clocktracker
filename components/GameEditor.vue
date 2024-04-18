@@ -18,11 +18,11 @@
           <span class="block">Script</span>
           <div class="flex items-center gap-1">
             <div v-if="game.script" class="flex-grow">{{ game.script }}</div>
-            <button
+            <Button
               type="button"
               id="select-script"
               @click="showScriptDialog = !showScriptDialog"
-              class="flex gap-1 bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-1 px-4 rounded justify-center items-center"
+              font-size="md"
               :class="{
                 'w-full': !game.script,
                 'flex-shrink': game.script,
@@ -32,7 +32,7 @@
                 <img src="/img/role/investigator.png" />
               </div>
               <template v-if="game.script === ''">Select Script</template>
-            </button>
+            </Button>
           </div>
           <SelectScriptDialog
             v-model:visible="showScriptDialog"
@@ -182,18 +182,7 @@
           class="w-1/3 md:w-auto flex flex-col gap-2 items-center"
         >
           <span class="block">Record Grimoire</span>
-          <Switch
-            v-model="advancedModeEnabled"
-            :class="advancedModeEnabled ? 'bg-blue-700' : 'bg-blue-950'"
-            class="relative inline-flex h-[24px] w-[60px] shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
-          >
-            <span class="sr-only">Use setting</span>
-            <span
-              aria-hidden="true"
-              :class="advancedModeEnabled ? 'translate-x-9' : 'translate-x-0'"
-              class="pointer-events-none inline-block h-[20px] w-[20px] transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out"
-            />
-          </Switch>
+          <Toggle v-model="advancedModeEnabled" />
         </label>
       </div>
     </fieldset>
@@ -667,13 +656,9 @@
     <fieldset class="border rounded border-stone-500 p-4 my-3">
       <legend>Images</legend>
       <div class="flex flex-col gap-5">
-        <button
-          type="button"
-          @click="uploadFile"
-          class="block w-full bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded"
-        >
-          Select Images
-        </button>
+        <Button type="button" @click="uploadFile" font-size="md" tertiary>
+          Upload Images
+        </Button>
         <div class="flex flex-wrap gap-5">
           <div v-for="file in game.image_urls" :key="file">
             <img
@@ -686,10 +671,11 @@
         </div>
       </div>
     </fieldset>
-    <button
+    <Button
       type="submit"
       id="save-game"
-      class="w-full bg-blue-900 hover:bg-blue-800 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
+      class="w-[300px] m-auto"
+      primary
       :disabled="inFlight"
     >
       <template v-if="inFlight">
@@ -697,7 +683,7 @@
         Saving...
       </template>
       <template v-else>Save Game</template>
-    </button>
+    </Button>
   </form>
   <Tour :steps="tour" tourKey="game-editor" />
   <TokenDialog

@@ -28,13 +28,15 @@
             {{ tag }}
           </button>
         </div>
-        <nuxt-link
+        <Button
+          component="nuxt-link"
           v-if="isMe"
           to="/charts/editor"
-          class="bg-blue-700 hover:bg-blue-800 transition duration-150 px-3 py-2 rounded flex items-center gap-2"
+          primary
+          class="px-3 py-2"
         >
           Add Chart
-        </nuxt-link>
+        </Button>
       </div>
       <div
         class="flex flex-col items-center justify-center sm:flex-row flex-wrap gap-y-12"

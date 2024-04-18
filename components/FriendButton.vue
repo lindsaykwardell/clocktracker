@@ -47,11 +47,11 @@ const friendButtonClass = computed(() => {
     case FriendStatus.FRIENDS:
       return "friends bg-green-950 hover:bg-transparent border border-transparent hover:border-red-950";
     case FriendStatus.REQUEST_SENT:
-      return "request-sent bg-blue-950 hover:bg-blue-900";
+      return "request-sent border border-primary hover:bg-primary-dark";
     case FriendStatus.REQUEST_RECEIVED:
-      return "request-received bg-blue-950 hover:bg-blue-900";
+      return "request-received border border-primary hover:bg-primary-dark";
     case FriendStatus.NOT_FRIENDS:
-      return "not-friends bg-blue-950 hover:bg-blue-900";
+      return "not-friends bg-primary hover:bg-primary-dark";
   }
 });
 

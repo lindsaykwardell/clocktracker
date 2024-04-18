@@ -251,6 +251,14 @@ export default defineEventHandler(async (handler) => {
               created_at: "asc",
             },
           },
+          community: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              icon: true,
+            },
+          },
         },
         where: {
           who_can_register: {

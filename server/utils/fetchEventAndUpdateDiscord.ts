@@ -79,6 +79,7 @@ export async function fetchEventAndUpdateDiscord(event_id: string) {
       },
       community: {
         select: {
+          id: true,
           name: true,
           slug: true,
           icon: true,

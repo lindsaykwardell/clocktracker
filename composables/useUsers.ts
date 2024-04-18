@@ -23,6 +23,9 @@ export type User = {
   enable_bgstats: boolean;
   kofi_level: string;
   opt_into_testing: boolean;
+  community_admin: {
+    id: number;
+  }[];
   communities?: {
     id: number;
     name: string;

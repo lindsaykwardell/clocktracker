@@ -1,14 +1,17 @@
 <template>
   <CommunityTemplate v-slot="{ community, isModerator }">
-    <Calendar size="lg" :events="events" @viewChanged="fetchEvents" />
-    <div v-if="isModerator" class="flex justify-end p-4">
-      <nuxt-link
-        :to="`/community/${community.data.slug}/events/create`"
-        class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
-      >
-        Create Event
-      </nuxt-link>
-    </div>
+    <Calendar size="lg" :events="events" @viewChanged="fetchEvents">
+      <div v-if="isModerator" class="flex justify-end p-4">
+        <Button
+          component="nuxt-link"
+          :to="`/community/${community.data.slug}/events/create`"
+          class="py-2 px-4"
+          primary
+        >
+          Create Event
+        </Button>
+      </div>
+    </Calendar>
   </CommunityTemplate>
 </template>
 
