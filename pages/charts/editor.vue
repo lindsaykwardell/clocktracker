@@ -20,12 +20,13 @@
               v-model="options.title"
             />
           </label>
-          <button
+          <Button
             @click="saveChart"
-            class="bg-green-700 hover:bg-green-800 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
+            primary
+            class="px-3"
           >
             Save
-          </button>
+          </Button>
         </div>
         <div class="flex gap-2 w-full">
           <label class="flex-1 flex items-center gap-1">

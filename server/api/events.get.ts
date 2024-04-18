@@ -97,6 +97,7 @@ export default defineEventHandler(async (handler) => {
       },
       community: {
         select: {
+          id: true,
           name: true,
           slug: true,
           icon: true,

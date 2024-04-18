@@ -17,7 +17,12 @@
             :to="`/community/${event.community.slug}/event/${event.id}`"
             class="w-full"
           >
-            <EventCard :event="event" class="m-auto" />
+            <EventCard
+              :event="event"
+              class="m-auto"
+              :canModifyEvent="canModifyEvent(event)"
+              @deleted="removeEvent"
+            />
           </nuxt-link>
         </div>
       </div>
@@ -40,17 +45,29 @@ const me = computed(() => {
   return users.getUserById(user.value?.id);
 });
 
-const events = await $fetch<Event[]>("/api/events");
+const events = ref(await $fetch<Event[]>("/api/events"));
 const selectedDay = ref<dayjs.Dayjs | null>(dayjs());
 
 function selectDay(val: dayjs.Dayjs) {
   selectedDay.value = val;
 }
 
+function canModifyEvent(event: Event) {
+  if (me.value.status !== Status.SUCCESS) return false;
+
+  return me.value.data.community_admin?.some(
+    (c) => c.id === event.community.id
+  );
+}
+
+function removeEvent(id: string) {
+  events.value = events.value.filter((e) => e.id !== id);
+}
+
 const eventsOnDay = computed(() => {
   if (selectedDay.value === null) return [];
 
-  return events.filter((e) => {
+  return events.value.filter((e) => {
     const start = dayjs(e.start);
     const end = dayjs(e.end);
 

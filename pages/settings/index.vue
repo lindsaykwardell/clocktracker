@@ -61,9 +61,10 @@
             </option>
           </select>
         </label>
-        <button
+        <Button
           type="submit"
-          class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
+          primary
+          class="px-4 py-2"
           :disabled="inFlight"
         >
           <template v-if="inFlight">
@@ -71,7 +72,7 @@
             Saving...
           </template>
           <template v-else>Save Settings</template>
-        </button>
+        </Button>
         <span v-if="errorMessage" class="text-red-600">{{ errorMessage }}</span>
         <span v-if="savedSuccessfully" class="text-green-600">
           Profile updated successfully!

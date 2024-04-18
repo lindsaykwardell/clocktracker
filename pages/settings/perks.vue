@@ -10,26 +10,16 @@
         @submit.prevent="saveSettings"
       >
         <label class="flex gap-2 items-center w-full xl:w-3/4">
-          <Switch
-            v-model="opt_into_testing"
-            :class="opt_into_testing ? 'bg-blue-700' : 'bg-blue-950'"
-            class="relative inline-flex h-[24px] w-[60px] shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
-          >
-            <span class="sr-only">Use setting</span>
-            <span
-              aria-hidden="true"
-              :class="opt_into_testing ? 'translate-x-9' : 'translate-x-0'"
-              class="pointer-events-none inline-block h-[20px] w-[20px] transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out"
-            />
-          </Switch>
+          <Toggle v-model="opt_into_testing" />
           <div>
             Opt into development features. These features may not be finished,
             but provide early access into what's coming next on ClockTracker
           </div>
         </label>
-        <button
+        <Button
           type="submit"
-          class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
+          primary
+          class="px-4 py-2"
           :disabled="inFlight"
         >
           <template v-if="inFlight">
@@ -37,7 +27,7 @@
             Saving...
           </template>
           <template v-else>Save Settings</template>
-        </button>
+        </Button>
         <span v-if="errorMessage" class="text-red-600">{{ errorMessage }}</span>
         <span v-if="savedSuccessfully" class="text-green-600">
           Profile updated successfully!
@@ -46,7 +36,9 @@
       <div v-else>
         <p>
           You must be a Ko-Fi supporter to access these features.
-          <a href="https://ko-fi.com/clocktracker" class="underline">Become a supporter now!</a>
+          <a href="https://ko-fi.com/clocktracker" class="underline"
+            >Become a supporter now!</a
+          >
         </p>
       </div>
     </section>
@@ -54,8 +46,6 @@
 </template>
 
 <script setup lang="ts">
-import { Switch } from "@headlessui/vue";
-
 definePageMeta({
   middleware: "auth",
 });
@@ -76,7 +66,7 @@ const kofiLevel = computed(() => {
 
 const settings = await useFetch("/api/settings");
 
-const opt_into_testing = ref(settings.data.value?.opt_into_testing);
+const opt_into_testing = ref(settings.data.value?.opt_into_testing || false);
 
 async function saveSettings() {
   inFlight.value = true;

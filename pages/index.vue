@@ -5,13 +5,14 @@
     >
       <img src="/logo.png" class="w-2/3 sm:w-[400px]" alt="ClockTracker" />
       <div class="flex flex-col gap-2">
-        <nuxt-link
+        <Button
+          component="nuxt-link"
           to="/login"
-          class="text-center text-lg w-[300px] bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex justify-center gap-4 items-center"
+          class="w-[300px] py-2"
         >
           <Email />
           <span>Login</span>
-        </nuxt-link>
+        </Button>
         <LoginWithDiscord />
       </div>
       <h1
@@ -88,13 +89,14 @@
         What will your story be?
       </h1>
       <div class="flex flex-col gap-2">
-        <nuxt-link
+        <Button
+          component="nuxt-link"
           to="/login"
-          class="text-center text-lg w-[300px] bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex justify-center gap-4 items-center"
+          class="w-[300px] py-2"
         >
           <Email />
           <span>Login</span>
-        </nuxt-link>
+        </Button>
         <LoginWithDiscord />
       </div>
     </main>
