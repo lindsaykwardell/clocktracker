@@ -124,12 +124,14 @@
           class="block w-full border border-stone-500 rounded-md p-2 text-lg bg-stone-600"
           v-model="newReply"
         />
-        <button
+        <Button
           type="submit"
-          class="rounded transition duration-150 bg-blue-800 hover:bg-blue-900 text-white px-4 py-2 mt-2"
+          primary
+          font-size="md"
+          class="px-4 py-2 mt-2"
         >
           Send
-        </button>
+        </Button>
       </form>
     </label>
   </div>

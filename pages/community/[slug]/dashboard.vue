@@ -7,13 +7,14 @@
       >
         <div class="flex flex-col items-center">
           <Avatar :value="community.data.icon" size="lg" />
-          <button
+          <Button
             @click="selectCommunityAvatar"
             type="button"
-            class="whitespace-nowrap flex gap-1 items-center justify-center py-1 w-[150px] rounded transition duration-150 hover:bg-blue-900 border border-blue-600 text-white"
+            class="whitespace-nowrap w-[150px] mt-2"
+            outline
           >
             Change Icon
-          </button>
+          </Button>
         </div>
         <div class="flex-grow w-full flex flex-col gap-3">
           <div class="flex flex-col md:flex-row md:gap-2">
@@ -51,14 +52,16 @@
                 v-model="updatedDiscordServerId"
                 class="block w-full border border-stone-500 bg-stone-600 rounded-md p-2"
               />
-              <a
+              <Button
+                component="a"
                 href="https://discord.com/oauth2/authorize?client_id=1125833336695304323&permissions=549755833344&scope=bot"
                 target="_blank"
-                class="text-center md:text-lg w-[200px] bg-[#5865F2] hover:bg-[#4752C4] transition duration-150 text-white font-bold py-2 px-4 rounded flex justify-center gap-2 items-center"
+                class="w-[200px]"
+                discord
               >
                 <Discord />
                 Add Bot
-              </a>
+            </Button>
             </div>
           </label>
           <label>
@@ -69,10 +72,11 @@
               rows="5"
             ></textarea>
           </label>
-          <button
+          <Button
             type="submit"
             id="save-game"
-            class="w-full bg-blue-700 hover:bg-blue-800 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
+            class="py-2 px-4 w-[300px] m-auto"
+            primary
             :disabled="inFlight"
           >
             <template v-if="inFlight">
@@ -80,7 +84,7 @@
               Saving...
             </template>
             <template v-else>Save Community</template>
-          </button>
+          </Button>
         </div>
       </form>
       <template v-if="community.data.join_requests?.length">

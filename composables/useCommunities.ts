@@ -87,6 +87,7 @@ export type Event = {
     }[];
   }[];
   community: {
+    id: number;
     name: string;
     slug: string;
     icon: string;

@@ -28,23 +28,17 @@
                 required
               />
             </label>
-            <button
-              @click.prevent="connectBoardGameGeek"
-              class="bg-stone-700 hover:bg-stone-900 duration-150 text-white px-4 py-2 rounded-md"
-            >
+            <Button @click.prevent="connectBoardGameGeek" font-size="md">
               Connect
-            </button>
+            </Button>
           </div>
           <div v-if="bgg_username" class="pt-4">
             <p class="pb-2">
               Connected as <strong>{{ bgg_username }}</strong>
             </p>
-            <button
-              @click.prevent="disconnectBoardGameGeek"
-              class="bg-stone-700 hover:bg-stone-900 duration-150 text-white px-4 py-2 rounded-md"
-            >
+            <Button @click.prevent="disconnectBoardGameGeek" font-size="md">
               Disconnect
-            </button>
+            </Button>
           </div>
         </div>
       </div>

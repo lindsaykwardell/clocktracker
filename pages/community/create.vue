@@ -22,18 +22,19 @@
             rows="5"
           ></textarea>
         </label>
-        <button
+        <Button
           type="submit"
           id="save-game"
-          class="w-full bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
+          class="py-2 px-4 w-[300px] m-auto"
           :disabled="inFlight"
+          primary
         >
           <template v-if="inFlight">
             <Spinner />
             Saving...
           </template>
           <template v-else>Create New Community</template>
-        </button>
+        </Button>
         <template v-if="errors">
           <div class="text-red-500 text-center">{{ errors }}</div>
         </template>

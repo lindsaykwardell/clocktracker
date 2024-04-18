@@ -385,6 +385,7 @@ export function findEvent(guild_id: string, event_id: string) {
       },
       community: {
         select: {
+          id: true,
           name: true,
           slug: true,
           icon: true,
