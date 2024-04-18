@@ -689,7 +689,7 @@
     <button
       type="submit"
       id="save-game"
-      class="w-full bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
+      class="w-full bg-blue-900 hover:bg-blue-800 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
       :disabled="inFlight"
     >
       <template v-if="inFlight">
