@@ -33,6 +33,11 @@ export default defineEventHandler(async (handler) => {
       enable_bgstats: true,
       discord_id: true,
       opt_into_testing: true,
+      community_admin: {
+        select: {
+          id: true,
+        },
+      },
       communities: {
         select: {
           id: true,
@@ -168,6 +173,11 @@ export default defineEventHandler(async (handler) => {
       bgg_username: true,
       enable_bgstats: true,
       opt_into_testing: true,
+      community_admin: {
+        select: {
+          id: true,
+        },
+      },
       communities: {
         select: {
           id: true,
@@ -204,5 +214,5 @@ export default defineEventHandler(async (handler) => {
     },
   });
 
-  return addUserKofiLevel({...newSettings});
+  return addUserKofiLevel({ ...newSettings });
 });

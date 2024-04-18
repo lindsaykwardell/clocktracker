@@ -2,12 +2,14 @@
   <StandardTemplate>
     <template v-if="me.status === Status.SUCCESS">
       <div class="flex justify-end items-center p-4">
-        <nuxt-link
+        <Button
+          component="nuxt-link"
           to="/community/create"
-          class="bg-blue-700 hover:bg-blue-800 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
+          class="py-2 px-4"
+          primary
         >
           Create Community
-        </nuxt-link>
+        </Button>
       </div>
       <div class="w-full lg:w-[800px] m-auto flex flex-col items-center gap-4">
         <h1 class="font-dumbledor text-4xl lg:text-3xl">Communities</h1>

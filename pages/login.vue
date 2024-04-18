@@ -25,21 +25,24 @@
           placeholder="Password"
         />
       </label>
-      <button
-        type="submit"
-        class="text-center text-lg w-[300px] bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex justify-center gap-4 items-center"
-      >
-        Login
-      </button>
-      <button
+      <Button type="submit" class="w-[300px] py-2"> Login </Button>
+      <Button
         type="button"
         @click="register"
-        class="text-center text-lg w-[300px] hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex justify-center gap-4 items-center"
+        class="w-[300px] py-2"
+        tertiary
       >
         Register
+      </Button>
+      <button
+        @click.prevent="sendResetPassword"
+        class="hover:underline text-stone-400 text-sm"
+      >
+        Forgot Password?
       </button>
-      <button @click.prevent="sendResetPassword" class="hover:underline text-stone-400 text-sm">Forgot Password?</button>
-      <span v-if="resetPasswordSent" class="text-green-500">An email has been sent to reset your password</span>
+      <span v-if="resetPasswordSent" class="text-green-500"
+        >An email has been sent to reset your password</span
+      >
       <span class="text-red-500">{{ errorMessage }}</span>
     </form>
     <hr class="border border-stone-100 w-full max-w-[500px]" />

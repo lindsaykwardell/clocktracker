@@ -1,9 +1,16 @@
 <template>
   <CommunityTemplate v-slot="{ isModerator, isMember }">
-    <EventCard v-if="event" :event="event" class="m-auto my-6">
+    <EventCard
+      v-if="event"
+      :event="event"
+      class="m-auto my-6"
+      :canModifyEvent="isModerator"
+      @deleted="router.push(`/community/${slug}/events`)"
+    >
       <template #register>
-        <button
-          class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
+        <Button
+          class="py-2 px-4"
+          font-size="md"
           @click="getShareLink"
           v-tooltip="{
             content: 'Copied!',
@@ -12,17 +19,20 @@
           }"
         >
           Share
-        </button>
-        <button
+        </Button>
+        <Button
           v-if="event.who_can_register === 'ANYONE' ? true : isMember"
           :disabled="inFlight"
           @click="initRegister()"
-          class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
+          class="py-2 px-4"
+          font-size="md"
+          :primary="!alreadyRegistered"
+          :outline="alreadyRegistered"
         >
           <template v-if="inFlight"><Spinner /></template>
           <template v-else-if="alreadyRegistered">Unregister</template>
           <template v-else>Register</template>
-        </button>
+        </Button>
       </template>
       <template #footer>
         <div class="flex flex-col md:flex-row gap-4">
@@ -155,29 +165,6 @@
         </div>
       </template>
     </EventCard>
-    <div class="flex justify-end gap-4 p-4">
-      <nuxt-link
-        v-if="isModerator"
-        :to="`/community/${slug}/event/${eventId}/edit`"
-        class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
-      >
-        Edit Event
-      </nuxt-link>
-      <nuxt-link
-        v-if="isModerator"
-        :to="`/community/${slug}/events/create?duplicate=${eventId}`"
-        class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
-      >
-        Duplicate Event
-      </nuxt-link>
-      <button
-        v-if="isModerator"
-        @click="deleteEvent"
-        class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
-      >
-        Delete Event
-      </button>
-    </div>
     <Dialog v-model:visible="showRegisterDialog" size="sm">
       <h3 class="font-dumbledor text-xl lg:text-2xl mb-4 text-center">
         Register
@@ -302,16 +289,6 @@ async function register(name: string, waitlistId?: number) {
     attendeeName.value = "";
   }
   inFlight.value = false;
-}
-
-function deleteEvent() {
-  if (confirm("Are you sure you want to delete this event?")) {
-    $fetch(`/api/community/${slug}/event/${eventId}`, {
-      method: "DELETE",
-    }).then(() => {
-      router.push(`/community/${slug}/events`);
-    });
-  }
 }
 
 const showShareTooltip = ref(false);
