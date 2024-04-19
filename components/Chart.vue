@@ -657,7 +657,7 @@ const chartOptions = computed(() => ({
 
 <style scoped>
 .chart-container {
-  width: v-bind(width);
-  height: v-bind(height);
+  max-width: v-bind(width);
+  max-height: v-bind(height);
 }
 </style>

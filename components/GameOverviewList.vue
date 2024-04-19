@@ -92,17 +92,10 @@
       </tbody>
     </table>
   </div>
-  <div v-if="infiniteScroll">
-    <div v-if="!pingedLoadMore" ref="loadMore" />
-    <div v-else class="flex justify-center items-center py-6 w-full">
-      <Loading />
-    </div>
-  </div>
 </template>
 
 <script setup lang="ts">
 import { displayWinIcon } from "~/composables/useGames";
-import { useInfiniteScroll } from "@vueuse/core";
 
 const gamesStore = useGames();
 const { isBaseScript } = useScripts();
@@ -119,29 +112,6 @@ function formatDate(date: Date) {
     timeZone: "UTC",
   }).format(new Date(date));
 }
-
-const loadMore = ref();
-const pingedLoadMore = ref(false);
-
-useInfiniteScroll(
-  loadMore,
-  () => {
-    if (props.infiniteScroll) {
-      if (!pingedLoadMore.value) {
-        props.infiniteScroll(props.games.length);
-        pingedLoadMore.value = true;
-        return;
-      }
-    }
-  },
-  {
-    distance: 30,
-  }
-);
-
-watchEffect(() => {
-  if (props.games.length) pingedLoadMore.value = false;
-});
 </script>
 
 <style scoped>

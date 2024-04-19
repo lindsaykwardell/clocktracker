@@ -10,16 +10,16 @@
         class="border-2 shadow-xl flex-shrink"
         size="md"
       />
-      <div class="flex flex-col md:flex-row items-center gap-3 w-full">
+      <div class="flex flex-col md:flex-row md:items-center gap-3 w-full">
         <div class="flex-grow flex flex-col">
           <h3 class="font-dumbledor text-xl">
             {{ player.data.display_name }}
           </h3>
-          <div class="text-stone-400 flex">
-            <span>{{ player.data.username }}</span>
-            <span v-if="player.data.pronouns">
-              &nbsp;({{ player.data.pronouns }})
-            </span>
+          <div class="text-stone-400">
+            {{ player.data.username }}
+          </div>
+          <div class="text-stone-400">
+            {{ player.data.pronouns }}
           </div>
           <div
             v-if="player.data.location"
