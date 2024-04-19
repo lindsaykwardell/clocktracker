@@ -1,7 +1,7 @@
 <template>
   <div class="bg-stone-950 shadow-lg">
     <div
-      class="flex flex-col items-center p-2 w-full md:w-3/4 lg:w-2/3 xl:w-1/2 m-auto"
+      class="flex flex-col items-center w-full md:w-3/4 lg:w-2/3 xl:w-1/2 m-auto pt-4"
     >
       <div class="flex flex-col lg:flex-row items-center gap-3 w-full">
         <Avatar
@@ -9,7 +9,7 @@
           class="border-2 shadow-xl flex-shrink"
           size="lg"
         />
-        <div class="flex-grow flex flex-col items-center md:items-start">
+        <div class="flex-grow flex flex-col md:items-start">
           <h3 class="font-dumbledor text-2xl lg:text-3xl">
             {{ player.display_name }}
           </h3>
@@ -54,7 +54,7 @@
         />
       </div>
       <hr v-if="player.bio" class="border-stone-100 w-full my-4" />
-      <p class="whitespace-pre-wrap text-left w-full py-4">
+      <p class="whitespace-pre-wrap text-left w-full p-4">
         {{ player.bio }}
       </p>
       <slot />
