@@ -711,7 +711,7 @@ async function deleteGame() {
 
     games.games.delete(gameId);
 
-    router.push(`/@${route.params.username}`);
+    router.push(`/`);
   }
 }
 

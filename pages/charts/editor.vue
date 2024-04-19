@@ -4,13 +4,10 @@
       <Loading class="h-screen" />
     </template>
     <div v-else class="flex flex-col h-screen">
-      <div class="p-6">
-        <button @click="goBack" class="text-lg text-stone-400 hover:text-stone-300">← Back</button>
-      </div>
       <div class="flex-grow flex justify-center items-center">
         <Chart class="py-6 m-auto" :games="myGames.data" :options="options" />
       </div>
-      <div class="p-6 m-6 bg-stone-950">
+      <div class="p-6 m-6 bg-stone-950 flex flex-col gap-2">
         <div class="flex gap-2">
           <label class="flex items-center gap-1 flex-grow">
             Title
@@ -20,17 +17,10 @@
               v-model="options.title"
             />
           </label>
-          <Button
-            @click="saveChart"
-            primary
-            class="px-3"
-          >
-            Save
-          </Button>
         </div>
-        <div class="flex gap-2 w-full">
+        <div class="flex flex-col md:flex-row gap-2 w-full">
           <label class="flex-1 flex items-center gap-1">
-            Chart Type
+            <span class="w-[150px] md:w-auto">Chart Type</span>
             <select
               class="block border w-full border-stone-500 rounded-md p-2"
               v-model="options.type"
@@ -42,7 +32,7 @@
             </select>
           </label>
           <label class="flex-1 flex items-center gap-1">
-            Data Field
+            <span class="w-[150px] md:w-auto">Data Field</span>
             <select
               class="block border w-full border-stone-500 rounded-md p-2"
               v-model="options.data"
@@ -56,7 +46,7 @@
           </label>
           <!-- refactor the below radio buttons into a select dropdown -->
           <label class="flex-1 flex items-center gap-1">
-            Pivot
+            <span class="w-[150px] md:w-auto">Pivot Field</span>
             <select
               class="block border w-full border-stone-500 rounded-md p-2"
               v-model="options.pivot"
@@ -70,7 +60,7 @@
             </select>
           </label>
           <label class="flex-1 flex items-center gap-1">
-            Width
+            <span class="w-[150px] md:w-auto">Width</span>
             <input
               type="number"
               class="block border w-full border-stone-500 rounded-md p-2"
@@ -79,7 +69,7 @@
             />
           </label>
           <label class="flex-1 flex items-center gap-1">
-            Height
+            <span class="w-[150px] md:w-auto">Height</span>
             <input
               type="number"
               class="block border w-full border-stone-500 rounded-md p-2"
@@ -88,9 +78,9 @@
             />
           </label>
         </div>
-        <div class="flex justify-between">
+        <div class="flex flex-col md:flex-row gap-2 justify-between">
           <div class="flex-1 flex gap-1">
-            <select v-model="selectedIncludeTag" class="">
+            <select v-model="selectedIncludeTag" class="rounded p-1 w-[120px]">
               <option :value="null">Include Tag</option>
               <option
                 v-for="tag in myTags.filter(
@@ -113,7 +103,7 @@
             </div>
           </div>
           <div class="flex-1 flex gap-1">
-            <select v-model="selectedExcludeTag" class="">
+            <select v-model="selectedExcludeTag" class="rounded p-1 w-[120px]">
               <option :value="null">Exclude Tag</option>
               <option
                 v-for="tag in myTags.filter(
@@ -136,6 +126,9 @@
             </div>
           </div>
         </div>
+        <Button @click="saveChart" primary class="px-3 md:w-[300px] md:m-auto">
+          Save
+        </Button>
       </div>
     </div>
   </StandardTemplate>
@@ -187,8 +180,8 @@ const options = reactive<{
   data: "WIN",
   include_tags: [],
   exclude_tags: [],
-  width: 500,
-  height: 500,
+  width: 300,
+  height: 300,
 });
 
 const selectedIncludeTag = ref<string | null>(null);
@@ -221,14 +214,6 @@ async function saveChart() {
     });
   }
 
-  if (me.value.status === Status.SUCCESS) {
-    router.push(`/@${me.value.data.username}?view=charts`);
-  } else {
-    router.push("/");
-  }
-}
-
-function goBack() {
   if (me.value.status === Status.SUCCESS) {
     router.push(`/@${me.value.data.username}?view=charts`);
   } else {
