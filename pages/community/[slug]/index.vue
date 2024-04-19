@@ -36,7 +36,12 @@
           :to="`${community.data.slug}/event/${community.data.events[0].id}`"
           class="w-full md:w-[600px]"
         >
-          <EventCard :event="community.data.events[0]" class="mt-6 m-auto">
+          <EventCard
+            :event="community.data.events[0]"
+            class="mt-6 m-auto"
+            :canModifyEvent="isModerator"
+            @deleted="reloadCommunity"
+          >
             <template #footer="{ event }">
               <div class="flex flex-wrap w-11/12 m-auto pb-2">
                 <template v-for="player in allEventAttendees(event)">
@@ -81,12 +86,14 @@
                 class="block w-full border border-stone-500 rounded-md p-2 text-lg bg-stone-600"
                 v-model="message"
               />
-              <button
+              <Button
                 type="submit"
-                class="rounded transition duration-150 bg-blue-800 hover:bg-blue-900 text-white px-4 py-2 mt-2"
+                class="px-4 py-2 mt-2"
+                primary
+                font-size="md"
               >
                 Send
-              </button>
+              </Button>
             </form>
           </label>
         </div>
@@ -149,6 +156,10 @@ function allEventAttendees(event: Event) {
     ...event.registered_players,
     ...(event.waitlists?.flatMap((w) => w.users) ?? []),
   ];
+}
+
+function reloadCommunity() {
+  location.reload();
 }
 
 onMounted(() => {

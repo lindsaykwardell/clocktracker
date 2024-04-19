@@ -75,8 +75,8 @@
             <div class="flex-grow"></div>
             <div class="flex gap-2 items-center justify-end">
               <slot />
-              <button
-                class="rounded w-[100px] py-1 justify-center text-lg flex gap-2 bg-stone-600 hover:bg-stone-700 transition duration-150"
+              <Button
+                class="w-[100px]"
                 :class="{
                   'bg-stone-600': gameView !== 'grid',
                   'bg-stone-700': gameView === 'grid',
@@ -96,9 +96,9 @@
                   />
                 </svg>
                 Grid
-              </button>
-              <button
-                class="rounded w-[100px] py-1 justify-center text-lg flex gap-2 bg-stone-600 hover:bg-stone-700 transition duration-150"
+              </Button>
+              <Button
+                class="w-[100px]"
                 :class="{
                   'bg-stone-600': gameView !== 'table',
                   'bg-stone-700': gameView === 'table',
@@ -122,18 +122,18 @@
                   />
                 </svg>
                 Table
-              </button>
+              </Button>
             </div>
           </div>
           <div class="flex flex-col md:flex-row gap-3 px-4">
             <div class="flex flex-wrap gap-2">
-              <button
+              <Button
                 v-for="(tag, index) in selectedTags"
-                class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
+                font-size="md"
                 @click.prevent="selectedTags.splice(index, 1)"
               >
                 {{ tag }}
-              </button>
+              </Button>
             </div>
           </div>
           <div class="w-screen md:w-auto overflow-hidden">
@@ -163,12 +163,15 @@
     <div v-else class="flex flex-col items-center gap-6">
       <p class="text-center text-2xl font-dumbledor">No games yet!</p>
       <template v-if="user && user.id === player.user_id">
-        <nuxt-link
+        <Button
+          component="nuxt-link"
           to="/add-game"
-          class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded text-center text-xl m-auto block w-[300px]"
+          class="w-[300px] py-2"
+          font-size="xl"
+          primary
         >
           Add Your First Game
-        </nuxt-link>
+        </Button>
         <p>or</p>
         <button
           type="button"
