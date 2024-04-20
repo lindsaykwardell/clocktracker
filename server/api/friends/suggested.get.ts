@@ -140,7 +140,8 @@ export default defineEventHandler(async (handler) => {
   });
 
   return naturalOrder([
-    ...recommendations,
+    // No more than 20 people with mutual friends
+    ...recommendations.splice(0, 20),
     ...newUsers.map((user) => ({ ...user, frequency: -1 })),
   ])
     .orderBy(["desc", "desc"])

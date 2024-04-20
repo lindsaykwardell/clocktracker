@@ -33,7 +33,8 @@
           v-if="isMe"
           to="/charts/editor"
           primary
-          class="px-3 py-2"
+          font-size="md"
+          class="px-3 py-2 mb-2 md:mb-0"
         >
           Add Chart
         </Button>
