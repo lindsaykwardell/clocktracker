@@ -4,16 +4,11 @@ import { anonymizeGame, GameRecord } from "~/server/utils/anonymizeGame";
 
 const prisma = new PrismaClient();
 
-export async function fetchGames(
-  user_id: string,
-  me: User | null,
-  waiting_for_confirmation: boolean = false
-) {
+export async function fetchGames(user_id: string, me: User | null) {
   const games = await prisma.game.findMany({
     where: {
       deleted: false,
       user_id,
-      waiting_for_confirmation,
       OR: [
         // PUBLIC PROFILE
         // PUBLIC GAME
