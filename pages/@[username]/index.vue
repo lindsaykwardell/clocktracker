@@ -207,7 +207,6 @@ onMounted(() => {
     });
   });
   gameStore.fetchPlayerGames(username);
-  gameStore.fetchPlayerGames(username, { show_tagged_games: true });
 });
 
 useHead({
