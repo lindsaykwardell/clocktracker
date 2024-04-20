@@ -7,8 +7,6 @@ const prisma = new PrismaClient();
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
   const username = handler.context.params?.username as string;
-  const waiting_for_confirmation =
-    getQuery(handler)?.show_tagged_games === "true";
 
   const user = await prisma.userSettings.findUnique({
     where: {
@@ -27,5 +25,5 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  return await fetchGames(user.user_id, me, waiting_for_confirmation);
+  return await fetchGames(user.user_id, me);
 });
