@@ -7,12 +7,7 @@
       <div class="w-full flex flex-col md:flex-row gap-5">
         <label class="flex-1">
           <span class="block">Date</span>
-          <input
-            type="date"
-            v-model="game.date"
-            class="block w-full border border-stone-500 rounded-md p-2"
-            required
-          />
+          <Input type="date" v-model="game.date" required />
         </label>
         <label class="flex-1">
           <span class="block">Script</span>
@@ -48,21 +43,16 @@
         >
           <label>
             <span class="block">Script Version</span>
-            <select
+            <Input
+              mode="select"
               v-if="!fetchingScriptVersions"
               v-model="game.script_id"
-              class="block w-full border border-stone-500 rounded-md p-2"
             >
               <option v-for="version in scriptVersions" :value="version.id">
                 {{ version.version }}
               </option>
-            </select>
-            <div
-              v-else
-              class="block w-full border border-stone-500 rounded-md p-2"
-            >
-              Loading...
-            </div>
+            </Input>
+            <div v-else>Loading...</div>
           </label>
         </div>
         <div class="flex-1 flex flex-col justify-start">
@@ -71,7 +61,6 @@
             <TaggedUserInput
               v-model:value="game.storyteller"
               :users="potentialStorytellers"
-              inputClass="w-full border border-stone-500 rounded-md p-2 h-[2.5rem] text-lg bg-stone-600 disabled:bg-stone-700"
             />
           </label>
           <label class="flex whitespace-nowrap items-center gap-2">
@@ -84,7 +73,6 @@
             <TaggedUserInput
               v-model:value="game.co_storytellers[index]"
               :users="potentialStorytellers"
-              inputClass="w-full border border-stone-500 rounded-md p-2 h-[2.5rem] text-lg bg-stone-600 disabled:bg-stone-700"
             />
             <button
               type="button"
@@ -105,36 +93,25 @@
       <div class="w-full flex flex-wrap gap-5">
         <label class="w-full md:w-auto">
           <span class="block">Privacy</span>
-          <select
-            v-model="game.privacy"
-            class="block w-full border border-stone-500 rounded-md p-2"
-          >
+          <Input mode="select" v-model="game.privacy">
             <option value="PUBLIC">Public</option>
             <option value="PRIVATE">Private</option>
             <option value="FRIENDS_ONLY">Friends Only</option>
-          </select>
+          </Input>
         </label>
         <label class="w-full md:w-auto">
           <span class="block">Location Type</span>
-          <select
-            v-model="game.location_type"
-            class="block w-full border border-stone-500 rounded-md p-2"
-          >
+          <Input mode="select" v-model="game.location_type">
             <option value="ONLINE">Online</option>
             <option value="IN_PERSON">In Person</option>
-          </select>
+          </Input>
         </label>
         <label
           v-if="game.location_type === 'IN_PERSON'"
           class="w-full md:w-auto md:flex-1"
         >
           <span class="block">Location</span>
-          <input
-            type="text"
-            v-model="game.location"
-            class="block w-full border border-stone-500 rounded-md p-2"
-            list="locations"
-          />
+          <Input type="text" v-model="game.location" list="locations" />
           <datalist id="locations">
             <option v-for="location in myLocations" :value="location"></option>
           </datalist>
@@ -159,23 +136,17 @@
         </label>
         <label class="w-1/3 md:w-auto">
           <span class="block">Players</span>
-          <select
-            v-model="game.player_count"
-            class="block w-full border border-stone-500 rounded-md p-2"
-          >
+          <Input mode="select" v-model="game.player_count">
             <option :value="null"></option>
             <option v-for="i in 11" :value="i + 4">{{ i + 4 }}</option>
-          </select>
+          </Input>
         </label>
         <label class="w-1/3 md:w-auto">
           <span class="block">Travelers</span>
-          <select
-            v-model="game.traveler_count"
-            class="block w-full border border-stone-500 rounded-md p-2"
-          >
+          <Input mode="select" v-model="game.traveler_count">
             <option :value="null"></option>
             <option v-for="i in 5" :value="i">{{ i }}</option>
-          </select>
+          </Input>
         </label>
         <label
           v-if="featureFlags.isEnabled('advanced-editor')"
@@ -229,7 +200,7 @@
       </fieldset>
       <fieldset v-else class="flex gap-4">
         <label class="flex gap-2 items-center">
-          <input
+          <Input
             type="radio"
             v-model="game.win"
             :value="WinStatus.WIN"
@@ -241,7 +212,7 @@
           </span>
         </label>
         <label class="flex gap-2 items-center">
-          <input
+          <Input
             type="radio"
             v-model="game.win"
             :value="WinStatus.LOSS"
@@ -253,7 +224,7 @@
           </span>
         </label>
         <label class="flex gap-2 items-center">
-          <input
+          <Input
             type="radio"
             v-model="game.win"
             :value="WinStatus.NOT_RECORDED"
@@ -262,7 +233,7 @@
           <span class="block whitespace-nowrap"> Not recorded </span>
         </label>
         <label class="flex gap-2 items-center">
-          <input type="checkbox" v-model="game.ignore_for_stats" />
+          <Input type="checkbox" v-model="game.ignore_for_stats" />
           <span class="block whitespace-nowrap">Ignore for stats</span>
         </label>
       </fieldset>
@@ -344,7 +315,9 @@
             ) === -1,
         }"
       >
-        <div class="font-dumbledor bg-black/75 p-4 text-xl rounded shadow-md">
+        <div
+          class="font-dumbledor text-white bg-black/75 p-4 text-xl rounded shadow-md"
+        >
           Select player count to begin
         </div>
       </div>
@@ -361,10 +334,10 @@
             ) === -1,
         }"
       >
-        <button
+        <Button
           v-if="game.grimoire.length > 1"
           @click.prevent="deletePage"
-          class="absolute top-1 right-1 bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial z-10"
+          class="absolute top-1 right-1 z-10"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -381,34 +354,29 @@
             <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
           </svg>
           <span class="hidden md:inline">Delete page</span>
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           @click="pageBackward"
           v-if="grimPage !== 0"
-          class="absolute bottom-0 left-1 flex items-center font-dumbledor"
+          class="absolute bottom-1 left-1 font-dumbledor"
+          font-size="sm"
         >
-          <span
-            class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded"
-          >
-            {{ "<" }} Previous page
-          </span>
-        </button>
-        <button
+          <span> {{ "<" }} Previous page </span>
+        </Button>
+        <Button
           type="button"
           @click="pageForward"
-          class="absolute bottom-0 right-1 flex items-center font-dumbledor"
+          class="absolute bottom-1 right-1 font-dumbledor"
+          font-size="sm"
         >
-          <span
-            v-if="grimPage <= game.grimoire.length - 1"
-            class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded"
-          >
+          <span v-if="grimPage <= game.grimoire.length - 1">
             {{
               grimPage === game.grimoire.length - 1 ? "Add page" : "Next page"
             }}
             {{ ">" }}
           </span>
-        </button>
+        </Button>
         <div class="w-screen md:w-auto overflow-scroll">
           <Grimoire
             :tokens="game.grimoire[grimPage].tokens"
@@ -418,7 +386,7 @@
           />
         </div>
         <div
-          class="text-center bg-gradient-to-b from-transparent via-stone-800 to-stone-800"
+          class="text-center bg-gradient-to-b from-transparent via-stone-800 to-stone-800 text-white"
         >
           Page {{ grimPage + 1 }} of {{ game.grimoire.length }}
         </div>
@@ -438,7 +406,7 @@
       >
         <summary class="cursor-pointer">Grimoire</summary>
         <div
-          class="pt-3 relative bg-center bg-cover"
+          class="pt-3 relative bg-center bg-cover w-full"
           :class="{
             'trouble-brewing': game.script === 'Trouble Brewing',
             'sects-and-violets': game.script === 'Sects and Violets',
@@ -451,10 +419,10 @@
               ].indexOf(game.script) === -1,
           }"
         >
-          <button
+          <Button
             v-if="game.grimoire.length > 1"
             @click.prevent="deletePage"
-            class="absolute top-1 right-1 bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial z-10"
+            class="absolute top-1 right-1 z-10"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -471,34 +439,29 @@
               <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
             </svg>
             <span class="hidden md:inline">Delete page</span>
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             @click="pageBackward"
             v-if="grimPage !== 0"
-            class="absolute bottom-0 left-1 flex items-center font-dumbledor"
+            class="absolute bottom-1 left-1 font-dumbledor"
+            font-size="sm"
           >
-            <span
-              class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded"
-            >
-              {{ "<" }} Previous page
-            </span>
-          </button>
-          <button
+            <span> {{ "<" }} Previous page </span>
+          </Button>
+          <Button
             type="button"
             @click="pageForward"
-            class="absolute bottom-0 right-1 flex items-center font-dumbledor"
+            class="absolute bottom-1 right-1 font-dumbledor"
+            font-size="sm"
           >
-            <span
-              v-if="grimPage <= game.grimoire.length - 1"
-              class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded"
-            >
+            <span v-if="grimPage <= game.grimoire.length - 1">
               {{
                 grimPage === game.grimoire.length - 1 ? "Add page" : "Next page"
               }}
               {{ ">" }}
             </span>
-          </button>
+          </Button>
           <div class="w-screen md:w-auto overflow-scroll">
             <Grimoire
               :tokens="game.grimoire[grimPage].tokens"
@@ -508,7 +471,7 @@
             />
           </div>
           <div
-            class="text-center bg-gradient-to-b from-transparent via-stone-800 to-stone-800"
+            class="text-center bg-gradient-to-b from-transparent via-stone-800 to-stone-800 text-white"
           >
             Page {{ grimPage + 1 }} of {{ game.grimoire.length }}
           </div>
@@ -628,10 +591,9 @@
       />
       <label class="block py-2">
         <span class="block">Add Tag</span>
-        <input
+        <Input
           type="text"
           v-model="tagsInput"
-          class="block w-full border border-stone-500 rounded-md p-2"
           @keydown.enter.prevent="addTag"
           list="tags"
           placeholder="Enter a tag, then press enter"
@@ -644,13 +606,13 @@
         </datalist>
       </label>
       <div class="flex flex-wrap gap-2">
-        <button
+        <Button
           v-for="(tag, index) in game.tags"
-          class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
+          font-size="sm"
           @click.prevent="game.tags.splice(index, 1)"
         >
           {{ tag }}
-        </button>
+        </Button>
       </div>
     </fieldset>
     <fieldset class="border rounded border-stone-500 p-4 my-3">
@@ -1407,25 +1369,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-input,
-select {
-  height: 2.5rem;
-  @apply text-lg bg-stone-600;
-
-  &:disabled {
-    @apply bg-stone-700;
-  }
-
-  &.co-storyteller {
-    height: 2rem;
-    @apply text-base;
-  }
-}
-
-textarea {
-  @apply text-lg bg-stone-600;
-}
-
 .trouble-brewing {
   background-image: url("/img/trouble-brewing-bg.webp");
 }

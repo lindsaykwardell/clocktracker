@@ -1,7 +1,7 @@
 <template>
   <component
     :is="is"
-    class="text-center transition duration-150 text-white font-bold rounded flex justify-center gap-4 items-center cursor-pointer p-1"
+    class="text-center transition duration-150 dark:text-white font-bold rounded flex justify-center gap-4 items-center cursor-pointer p-1"
     :class="computedClasses"
   >
     <slot />
@@ -33,12 +33,12 @@ const is = computed(() => {
   }
 });
 
-const primary = "bg-primary hover:bg-primary-dark border border-transparent";
-const outline = "border border-primary  hover:bg-primary-dark";
+const primary = "bg-purple-500 dark:bg-purple-800 hover:bg-purple-600 dark:hover:bg-purple-900-dark border border-transparent text-white";
+const outline = "border border-purple-500 dark:border-purple-800  hover:bg-purple-600 dark:hover:bg-purple-900";
 const secondary =
-  "bg-secondary hover:bg-secondary-dark border border-transparent";
-const tertiary = "border border-transparent hover:bg-secondary-dark";
-const danger = "border border-danger bg-danger hover:bg-danger-dark";
+  "bg-stone-300 dark:bg-stone-600 hover:bg-stone-400 dark:hover:bg-stone-700 border border-transparent";
+const tertiary = "border border-transparent hover:bg-stone-400 dark:hover:bg-stone-700";
+const danger = "border border-red-500 dark:border-red-900 hover:bg-red-600 dark:hover:bg-red-950";
 const discord = "bg-discord hover:bg-discord-dark";
 
 const colorScheme = computed(() => {

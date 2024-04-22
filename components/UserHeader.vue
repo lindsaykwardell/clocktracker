@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-stone-950 shadow-lg">
+  <div class="bg-stone-300 dark:bg-stone-950 shadow-lg">
     <div
       class="flex flex-col items-center w-full md:w-3/4 lg:w-2/3 xl:w-1/2 m-auto pt-4"
     >
@@ -13,7 +13,7 @@
           <h3 class="font-dumbledor text-2xl lg:text-3xl">
             {{ player.display_name }}
           </h3>
-          <div class="md:text-lg text-stone-400">
+          <div class="md:text-lg dark:text-stone-400">
             <h4>{{ player.username }}</h4>
             <template v-if="player.pronouns">
               <span>{{ player.pronouns }}</span>
@@ -21,7 +21,7 @@
           </div>
           <div
             v-if="player.location"
-            class="md:text-lg text-stone-400 flex gap-2 items-center"
+            class="md:text-lg dark:text-stone-400 flex gap-2 items-center"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -38,7 +38,7 @@
           </div>
           <div
             v-if="player.kofi_level"
-            class="md:text-lg text-stone-400 flex gap-2 items-center"
+            class="md:text-lg dark:text-stone-400 flex gap-2 items-center"
           >
             <KoFi />
             <span v-if="player.kofi_level === 'ONE_TIME'">Supporter</span>

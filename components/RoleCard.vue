@@ -1,7 +1,7 @@
 <template>
   <nuxt-link
     :to="`/roles/${role.id}`"
-    class="bg-stone-950 hover:bg-stone-900 w-full p-2 shadow-lg flex items-center"
+    class="bg-stone-300 dark:bg-stone-950 hover:bg-stone-200 dark:hover:bg-stone-900 w-full p-2 shadow-lg flex items-center"
   >
     <div class="flex flex-col md:flex-row gap-3 items-top">
       <Token :character="character" size="lg" />
