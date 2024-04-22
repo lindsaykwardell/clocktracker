@@ -20,57 +20,43 @@
           <div class="flex flex-col md:flex-row md:gap-2">
             <label class="block flex-grow">
               <span class="block">Name</span>
-              <input
-                v-model="updatedName"
-                class="block w-full border border-stone-500 bg-stone-600 rounded-md p-2"
-                required
-              />
+              <Input v-model="updatedName" required />
             </label>
             <label class="block">
               <span class="block">Slug</span>
-              <input
-                v-model="updatedSlug"
-                class="block w-full border border-stone-500 bg-stone-600 rounded-md p-2"
-                required
-              />
+              <Input v-model="updatedSlug" required />
             </label>
             <label class="block">
               <span class="block">Privacy</span>
-              <select
-                v-model="updatedPrivacy"
-                class="block w-full border border-stone-500 bg-stone-600 rounded-md p-2 h-[42px]"
-              >
+              <Input mode="select" v-model="updatedPrivacy">
                 <option :value="false">Public</option>
                 <option :value="true">Private</option>
-              </select>
+              </Input>
             </label>
           </div>
           <label>
             <span class="block">Discord Server ID</span>
             <div class="flex gap-2">
-              <input
-                v-model="updatedDiscordServerId"
-                class="block w-full border border-stone-500 bg-stone-600 rounded-md p-2"
-              />
+              <Input v-model="updatedDiscordServerId" />
               <Button
                 component="a"
                 href="https://discord.com/oauth2/authorize?client_id=1125833336695304323&permissions=549755833344&scope=bot"
                 target="_blank"
-                class="w-[200px]"
+                class="w-[200px] text-white"
                 discord
               >
                 <Discord />
                 Add Bot
-            </Button>
+              </Button>
             </div>
           </label>
           <label>
             <span class="block">Description</span>
-            <textarea
+            <Input
+              mode="textarea"
               v-model="updatedDescription"
-              class="block w-full border border-stone-500 text-white bg-stone-600 rounded-md p-2"
               rows="5"
-            ></textarea>
+            ></Input>
           </label>
           <Button
             type="submit"
@@ -176,7 +162,7 @@
                   <button
                     v-if="!isMe(member.user_id)"
                     @click="toggleAdmin(member.user_id)"
-                    class="flex-1 whitespace-nowrap rounded transition duration-150 border border-green-800 hover:bg-green-900 text-white px-4 py-2 mt-2"
+                    class="flex-1 whitespace-nowrap rounded transition duration-150 border border-green-800 hover:bg-green-900 hover:text-white dark:text-white px-4 py-2 mt-2"
                   >
                     <template
                       v-if="
@@ -195,7 +181,7 @@
                   />
                   <button
                     @click="removeUser(member.user_id)"
-                    class="flex-1 whitespace-nowrap rounded transition duration-150 border border-red-800 hover:bg-red-900 text-white px-4 py-2 mt-2"
+                    class="flex-1 whitespace-nowrap rounded transition duration-150 border border-red-800 hover:bg-red-900 hover:text-white dark:text-white px-4 py-2 mt-2"
                   >
                     Remove
                   </button>

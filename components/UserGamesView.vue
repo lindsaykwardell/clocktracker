@@ -8,7 +8,7 @@
               <label class="flex gap-2 items-center">
                 <select
                   v-model="sortBy"
-                  class="w-full rounded p-1 text-lg bg-stone-600"
+                  class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
                 >
                   <option value="date">Sort by Date</option>
                   <option value="character">Sort by Character</option>
@@ -21,7 +21,7 @@
               <label class="flex gap-2 items-center">
                 <select
                   v-model="orderBy"
-                  class="w-full rounded p-1 text-lg bg-stone-600"
+                  class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
                 >
                   <option value="asc">Ascending</option>
                   <option value="desc">Descending</option>
@@ -30,7 +30,7 @@
               <label class="flex gap-2 items-center">
                 <select
                   v-model="selectedRole"
-                  class="w-full rounded p-1 text-lg bg-stone-600"
+                  class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
                   aria-label="Role"
                 >
                   <option :value="null">Filter by role</option>
@@ -45,7 +45,7 @@
               >
                 <select
                   v-model="selectedCommunity"
-                  class="w-full rounded p-1 text-lg bg-stone-600"
+                  class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
                   aria-label="Community"
                 >
                   <option :value="null">Filter by community</option>
@@ -57,7 +57,7 @@
               <label class="flex gap-2 items-center">
                 <select
                   v-model="selectedTag"
-                  class="w-full rounded p-1 text-lg bg-stone-600"
+                  class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
                   aria-label="Tags"
                 >
                   <option :value="null">Filter by tag</option>
@@ -78,8 +78,9 @@
               <Button
                 class="w-[100px]"
                 :class="{
-                  'bg-stone-600': gameView !== 'grid',
-                  'bg-stone-700': gameView === 'grid',
+                  'bg-stone-200 dark:bg-stone-600': gameView !== 'grid',
+                  'bg-stone-300 dark:bg-stone-700 text-stone-400 dark:text-stone-500 hover:text-inherit':
+                    gameView !== 'grid',
                 }"
                 @click="gameView = 'grid'"
                 :disabled="gameView === 'grid'"
@@ -100,8 +101,9 @@
               <Button
                 class="w-[100px]"
                 :class="{
-                  'bg-stone-600': gameView !== 'table',
-                  'bg-stone-700': gameView === 'table',
+                  'bg-stone-200 dark:bg-stone-600': gameView !== 'table',
+                  'bg-stone-300 dark:bg-stone-700 text-stone-400 dark:text-stone-500 hover:text-inherit':
+                    gameView !== 'table',
                 }"
                 @click="gameView = 'table'"
                 :disabled="gameView === 'table'"
@@ -141,14 +143,12 @@
               v-if="gameView === 'grid'"
               :games="sortedGames"
               :readonly="!myPage"
-              :infiniteScroll="allGamesLoaded ? undefined : infiniteScroll"
             />
             <GameOverviewList
               v-if="gameView === 'table'"
               :games="sortedGames"
               :username="player.username"
               :readonly="!myPage"
-              :infiniteScroll="allGamesLoaded ? undefined : infiniteScroll"
             />
             <p
               v-if="!sortedGames.length"
@@ -387,16 +387,6 @@ watch(
     localStorage.setItem("lastSelectedRole", value || "");
   }
 );
-
-const allGamesLoaded = computed(() =>
-  allGames.allGamesLoadedForPlayer(props.player?.username || "")
-);
-
-function infiniteScroll(skip: number) {
-  if (props.games.status === Status.SUCCESS) {
-    allGames.fetchPlayerGames(props.player?.username || "", { skip });
-  }
-}
 
 function initImportGames() {
   importGamesDialogVisible.value = true;

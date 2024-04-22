@@ -47,11 +47,11 @@ const friendButtonClass = computed(() => {
     case FriendStatus.FRIENDS:
       return "friends bg-green-950 hover:bg-transparent border border-transparent hover:border-red-950";
     case FriendStatus.REQUEST_SENT:
-      return "request-sent border border-primary hover:bg-primary-dark";
+      return "request-sent border border-purple-500 dark:border-purple-800 hover:bg-purple-600 dark:hover:bg-purple-900";
     case FriendStatus.REQUEST_RECEIVED:
-      return "request-received border border-primary hover:bg-primary-dark";
+      return "request-received border border-purple-500 dark:border-purple-800 hover:bg-purple-600 dark:hover:bg-purple-900";
     case FriendStatus.NOT_FRIENDS:
-      return "not-friends bg-primary hover:bg-primary-dark";
+      return "not-friends bg-purple-500 dark:bg-purple-800 hover:bg-purple-600 dark:hover:bg-purple-900-dark";
   }
 });
 

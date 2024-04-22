@@ -66,6 +66,15 @@ export default defineNuxtConfig({
           async: true,
           src: "//gc.zgo.at/count.js",
         },
+        {
+          children: `
+          if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark')
+          } else {
+            document.documentElement.classList.remove('dark')
+          }
+          `
+        }
       ],
       meta: [
         {

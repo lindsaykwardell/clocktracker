@@ -2,7 +2,7 @@
   <StandardTemplate>
     <section
       v-if="game.status === Status.SUCCESS && player.status === Status.SUCCESS"
-      class="flex flex-col gap-4 bg-gradient-to-b from-stone-100 to-stone-300 text-black w-full lg:w-4/5 m-auto my-4 rounded shadow-lg relative"
+      class="flex flex-col gap-4 bg-gradient-to-b from-stone-200 to-stone-400 dark:from-stone-100 dark:to-stone-300 text-black w-full lg:w-4/5 m-auto my-4 rounded shadow-lg relative"
     >
       <div
         class="metadata flex flex-col-reverse md:flex-row items-center md:items-start px-4 pt-4"
@@ -379,13 +379,18 @@
             leave-to-class="transform scale-95 opacity-0"
           >
             <MenuItems
-              class="absolute right-0 z-10 bg-stone-900 rounded shadow-md whitespace-nowrap flex flex-col items-start min-w-[150px] divide-y divide-stone-700 overflow-hidden"
+              class="absolute right-0 z-10 bg-stone-100 dark:bg-stone-900 rounded shadow-md whitespace-nowrap flex flex-col items-start min-w-[150px] divide-y divide-stone-500 dark:divide-stone-700 overflow-hidden"
             >
-              <div class="w-full">
+              <div
+                v-if="
+                  game.data.waiting_for_confirmation || similarGames.length > 0
+                "
+                class="w-full"
+              >
                 <MenuItem v-if="game.data.waiting_for_confirmation">
                   <button
                     @click="confirmGame"
-                    class="flex gap-1 w-full items-center text-white text-sm px-2 min-h-[32px]"
+                    class="flex gap-1 w-full items-center dark:text-white text-sm px-2 min-h-[32px]"
                   >
                     Add game to my Profile
                   </button>
@@ -394,7 +399,7 @@
                   <button
                     @click="showSimilarGamesDialog = true"
                     :disabled="mergeInFlight"
-                    class="flex gap-1 w-full items-center text-white text-sm px-2 min-h-[32px]"
+                    class="flex gap-1 w-full items-center dark:text-white text-sm px-2 min-h-[32px]"
                   >
                     Merge with similar game
                   </button>
@@ -403,7 +408,7 @@
               <div class="w-full">
                 <MenuItem v-if="!game.data.waiting_for_confirmation">
                   <nuxt-link
-                    class="flex gap-1 w-full items-center text-white text-sm px-2"
+                    class="flex gap-1 w-full items-center dark:text-white text-sm px-2"
                     :to="`/game/${route.params.id}/edit`"
                     id="edit-game"
                   >
@@ -425,7 +430,7 @@
                 <MenuItem>
                   <button
                     @click="deleteGame"
-                    class="flex gap-1 w-full items-center text-white text-sm px-2"
+                    class="flex gap-1 w-full items-center dark:text-white text-sm px-2"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -458,7 +463,7 @@
               <div class="w-full">
                 <MenuItem v-if="canPostToBGG">
                   <button
-                    class="bg-[#3f3a60] transition duration-150 text-white flex items-center w-full text-sm min-h-[32px]"
+                    class="bg-[#3f3a60] hover:bg-[#2e2950] transition duration-150 text-white flex items-center w-full text-sm min-h-[32px]"
                     @click="postToBGG"
                     :disabled="bggInFlight"
                   >
@@ -476,7 +481,7 @@
                 <MenuItem v-if="canPostToBGStats">
                   <a
                     :href="bgStatsLink"
-                    class="bg-[#333] transition duration-150 text-white flex items-center w-full gap-1 text-sm min-h-[32px]"
+                    class="bg-[#333] transition duration-150 dark:text-white flex items-center w-full gap-1 text-sm min-h-[32px]"
                   >
                     <img
                       src="https://clocktracker.app/img/bgstats.png"
@@ -488,7 +493,7 @@
                 <button
                   v-if="game.data.waiting_for_confirmation"
                   @click="confirmGame"
-                  class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial"
+                  class="bg-stone-600 hover:bg-stone-700 transition duration-150 dark:text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial"
                 >
                   Add game to my Profile
                 </button>
