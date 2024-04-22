@@ -1,14 +1,14 @@
 <template>
   <template v-if="!user">
     <main
-      class="w-full flex flex-col items-center justify-center gap-12 py-12 bg-gradient-to-b from-stone-800 via-stone-800 to-stone-950"
+      class="w-full flex flex-col items-center justify-center gap-12 py-12 bg-gradient-to-b from-stone-800 via-stone-800 to-stone-950 text-white"
     >
       <img src="/logo.png" class="w-2/3 sm:w-[400px]" alt="ClockTracker" />
       <div class="flex flex-col gap-2">
         <Button
           component="nuxt-link"
           to="/login"
-          class="w-[300px] py-2"
+          class="w-[300px] py-2 bg-stone-600 hover:bg-stone-700"
         >
           <Email />
           <span>Login</span>
@@ -92,7 +92,7 @@
         <Button
           component="nuxt-link"
           to="/login"
-          class="w-[300px] py-2"
+          class="w-[300px] py-2 bg-stone-600 hover:bg-stone-700"
         >
           <Email />
           <span>Login</span>
