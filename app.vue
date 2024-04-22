@@ -73,9 +73,6 @@ const friends = useFriends();
 const users = useUsers();
 const user = useSupabaseUser();
 const featureFlags = useFeatureFlags();
-import { useDark } from "@vueuse/core";
-
-useDark();
 
 await featureFlags.init();
 
