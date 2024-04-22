@@ -73,7 +73,7 @@
             />
             <nuxt-link
               v-if="!readonly"
-              class="text-white font-bold px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial z-10"
+              class="dark:text-white font-bold px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial z-10"
               :to="`/game/${game.id}/edit`"
               ><svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -104,7 +104,6 @@ const props = defineProps<{
   games: GameRecord[];
   readonly?: boolean;
   username: string;
-  infiniteScroll?: (skip: number) => void;
 }>();
 
 function formatDate(date: Date) {
@@ -119,42 +118,108 @@ th {
   @apply cursor-pointer select-none;
 }
 
+.dark {
+  .trouble-brewing {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+      url("/img/trouble-brewing-bg.webp");
+
+    &:hover {
+      background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
+        url("/img/trouble-brewing-bg.webp");
+    }
+  }
+
+  .sects-and-violets {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+      url("/img/sects-and-violets-bg.webp");
+
+    &:hover {
+      background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
+        url("/img/sects-and-violets-bg.webp");
+    }
+  }
+
+  .bad-moon-rising {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+      url("/img/bad-moon-rising-bg.webp");
+
+    &:hover {
+      background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
+        url("/img/bad-moon-rising-bg.webp");
+    }
+  }
+
+  .custom-script {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+      url("/img/custom-script-bg.webp");
+
+    &:hover {
+      background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
+        url("/img/custom-script-bg.webp");
+    }
+  }
+}
+
 .trouble-brewing {
-  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+  background-image: linear-gradient(
+      rgba(255, 255, 255, 0.7),
+      rgba(255, 255, 255, 0.7)
+    ),
     url("/img/trouble-brewing-bg.webp");
 
   &:hover {
-    background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
+    background-image: linear-gradient(
+        rgba(255, 255, 255, 0.5),
+        rgba(255, 255, 255, 0.5)
+      ),
       url("/img/trouble-brewing-bg.webp");
   }
 }
 
 .sects-and-violets {
-  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+  background-image: linear-gradient(
+      rgba(255, 255, 255, 0.7),
+      rgba(255, 255, 255, 0.7)
+    ),
     url("/img/sects-and-violets-bg.webp");
 
   &:hover {
-    background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
+    background-image: linear-gradient(
+        rgba(255, 255, 255, 0.5),
+        rgba(255, 255, 255, 0.5)
+      ),
       url("/img/sects-and-violets-bg.webp");
   }
 }
 
 .bad-moon-rising {
-  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+  background-image: linear-gradient(
+      rgba(255, 255, 255, 0.7),
+      rgba(255, 255, 255, 0.7)
+    ),
     url("/img/bad-moon-rising-bg.webp");
 
   &:hover {
-    background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
+    background-image: linear-gradient(
+        rgba(255, 255, 255, 0.5),
+        rgba(255, 255, 255, 0.5)
+      ),
       url("/img/bad-moon-rising-bg.webp");
   }
 }
 
 .custom-script {
-  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+  background-image: linear-gradient(
+      rgba(255, 255, 255, 0.7),
+      rgba(255, 255, 255, 0.7)
+    ),
     url("/img/custom-script-bg.webp");
 
   &:hover {
-    background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
+    background-image: linear-gradient(
+        rgba(255, 255, 255, 0.5),
+        rgba(255, 255, 255, 0.5)
+      ),
       url("/img/custom-script-bg.webp");
   }
 }

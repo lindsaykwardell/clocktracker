@@ -1,19 +1,19 @@
 <template>
-  <div class="shadow p-3 rounded my-1 bg-stone-900 text-stone-300 text-sm">
+  <div class="shadow p-3 rounded my-1 bg-stone-200 dark:bg-stone-900 dark:text-stone-300 text-sm">
     <div class="flex items-start">
       <div class="flex flex-grow flex-wrap items-center gap-4 md:h-12">
         <Avatar :value="post.user.avatar" size="xs" />
         <div class="flex flex-col flex-grow">
           <div
             :class="{
-              'text-green-500': isUserModerator(post.user.user_id),
+              'text-green-600 dark:text-green-500': isUserModerator(post.user.user_id),
             }"
           >
             {{ post.user.display_name }}
           </div>
           <div class="text-sm">
             <a href="#" class="decoration-stone-400">
-              <span class="text-stone-400">
+              <span class="text-stone-500 dark:text-stone-400">
                 {{ post.user.username }}
               </span>
             </a>
@@ -43,7 +43,7 @@
       </div>
     </div>
     <VueMarkdown class="post" :source="post.content" />
-    <div class="text-sm flex gap-4 px-4 pt-3 text-stone-400">
+    <div class="text-sm flex gap-4 px-4 pt-3 text-stone-500 dark:text-stone-400">
       <div class="flex gap-4 md:gap-12 flex-grow">
         <div class="flex gap-3 items-center">
           <button @click="toggleReply">
@@ -58,13 +58,13 @@
         </div>
       </div>
       <div class="flex gap-2 md:gap-4 flex-shrink items-center">
-        <time class="text-stone-400">{{ formatDate(post.created_at) }}</time>
+        <time class="text-stone-500 dark:text-stone-400">{{ formatDate(post.created_at) }}</time>
       </div>
     </div>
     <div v-if="post.replies.length > 0" class="mt-4 ml-12">
       <div
         v-for="reply in post.replies"
-        class="shadow rounded my-4 bg-stone-900 text-stone-300 text-sm"
+        class="shadow rounded my-4 bg-stone-300 dark:bg-stone-800 dark:text-stone-300 text-sm p-2"
       >
         <div class="flex items-start">
           <div class="flex flex-grow flex-wrap items-center gap-4 md:h-12">
@@ -72,14 +72,14 @@
             <div class="flex flex-col flex-grow">
               <div
                 :class="{
-                  'text-green-500': isUserModerator(reply.user.user_id),
+                  'text-green-600 dark:text-green-500': isUserModerator(reply.user.user_id),
                 }"
               >
                 {{ reply.user.display_name }}
               </div>
               <div class="text-sm">
                 <a href="#" class="decoration-stone-400">
-                  <span class="text-stone-400">
+                  <span class="text-stone-500 dark:text-stone-400">
                     {{ reply.user.username }}
                   </span>
                 </a>
@@ -112,7 +112,7 @@
         <div
           class="flex justify-end px-4 gap-2 md:gap-4 flex-shrink items-center"
         >
-          <time class="text-stone-400">
+          <time class="text-stone-500 dark:text-stone-400">
             {{ formatDate(reply.created_at) }}
           </time>
         </div>
@@ -121,7 +121,7 @@
     <label v-if="showReply" class="block pt-4">
       <form @submit.prevent="submitReply">
         <ExpandingTextarea
-          class="block w-full border border-stone-500 rounded-md p-2 text-lg bg-stone-600"
+          
           v-model="newReply"
         />
         <Button

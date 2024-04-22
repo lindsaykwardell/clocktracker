@@ -113,7 +113,6 @@ const props = defineProps<{
   readonly?: boolean;
   cardWidth?: string;
   onCardClick?: (game: GameRecord) => void;
-  infiniteScroll?: (skip: number) => void;
 }>();
 
 const componentIs = computed(() => {

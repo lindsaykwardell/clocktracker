@@ -13,7 +13,7 @@
           >
             <nuxt-link
               :to="`/@${username}`"
-              class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-700"
+              class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-200 dark:hover:bg-stone-700"
               :class="currentTabClass('dashboard')"
             >
               Games
@@ -25,7 +25,7 @@
                 pendingGames.data.length
               "
               :to="`/@${username}?view=pending`"
-              class="relative font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-700"
+              class="relative font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-200 dark:hover:bg-stone-700"
               :class="currentTabClass('pending')"
             >
               <span
@@ -37,7 +37,7 @@
             </nuxt-link>
             <nuxt-link
               :to="`/@${username}?view=charts`"
-              class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-700"
+              class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-200 dark:hover:bg-stone-700"
               :class="currentTabClass('charts')"
             >
               Charts
@@ -62,7 +62,7 @@
             :games="games"
           >
             <div
-              class="text-xl text-stone-200"
+              class="text-xl dark:text-stone-200"
               v-if="games.status === Status.SUCCESS && games.data.length > 0"
             >
               {{ games.data.length }} game{{ games.data.length > 1 ? "s" : "" }}

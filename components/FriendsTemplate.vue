@@ -6,25 +6,25 @@
           class="flex flex-col md:w-[300px] w-[100px] min-w-[100px] md:min-w-[300px] items-center"
         >
           <ul class="w-full sticky top-16 md:top-4">
-            <li class="w-full">
+            <li class="w-full bg-stone-300 dark:bg-stone-700">
               <nuxt-link
                 to="/friends"
-                class="block w-full p-2 bg-stone-700 hover:bg-stone-900 duration-150"
-                active-class="bg-stone-900 hover:bg-stone-950 hover:bg-black"
+                class="block w-full p-2 hover:bg-stone-200 dark:hover:bg-stone-900 duration-150"
+                active-class="bg-stone-200 dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-950"
               >
                 My Friends
               </nuxt-link>
               <nuxt-link
                 to="/friends/requests"
-                class="block w-full p-2 bg-stone-700 hover:bg-stone-900 duration-150"
-                active-class="bg-stone-950 hover:bg-black"
+                class="block w-full p-2 hover:bg-stone-200 dark:hover:bg-stone-900 duration-150"
+                active-class="bg-stone-200 dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-950"
               >
                 Friend Requests
               </nuxt-link>
               <nuxt-link
                 to="/friends/suggested"
-                class="block w-full p-2 bg-stone-700 hover:bg-stone-900 duration-150"
-                active-class="bg-stone-950 hover:bg-black"
+                class="block w-full p-2 hover:bg-stone-200 dark:hover:bg-stone-900 duration-150"
+                active-class="bg-stone-200 dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-950"
               >
                 Suggested Friends
               </nuxt-link>

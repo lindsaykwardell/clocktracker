@@ -1,7 +1,7 @@
 <template>
   <nuxt-link
     :to="`/scripts/${encodeURIComponent(script.name.replaceAll(' ', '_'))}`"
-    class="bg-stone-950 hover:bg-stone-900 w-full p-2 shadow-lg flex items-center"
+    class="bg-stone-300 dark:bg-stone-950 hover:bg-stone-200 dark:hover:bg-stone-900 w-full p-2 shadow-lg flex items-center"
   >
     <div class="flex flex-col md:flex-row gap-3 items-top">
       <img
@@ -12,7 +12,7 @@
         <h2 class="font-dumbledor text-xl lg:text-2xl">
           {{ script.name }}
         </h2>
-        <p class="text-stone-200 text-sm lg:text-base">
+        <p class="dark:text-stone-200 text-sm lg:text-base">
           By {{ script.author }}
         </p>
         <section class="flex gap-6 text-stone-600">

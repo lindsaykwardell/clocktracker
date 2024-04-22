@@ -1,7 +1,7 @@
 <template>
   <StandardTemplate>
     <template v-if="community.status === Status.SUCCESS">
-      <div class="bg-stone-950 shadow-lg">
+      <div class="bg-stone-300 dark:bg-stone-950 shadow-lg">
         <div
           class="flex flex-col items-center w-full md:w-3/4 lg:w-2/3 xl:w-1/2 m-auto"
         >
@@ -44,14 +44,14 @@
           >
             <nuxt-link
               :to="`/community/${community.data.slug}`"
-              class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-700"
+              class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-200 dark:hover:bg-stone-700"
               :class="currentTabClass('')"
             >
               Home
             </nuxt-link>
             <nuxt-link
               :to="`/community/${community.data.slug}/events`"
-              class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-700"
+              class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-200 dark:hover:bg-stone-700"
               :class="currentTabClass('events')"
             >
               Events
@@ -59,7 +59,7 @@
             <nuxt-link
               v-if="isModerator"
               :to="`/community/${community.data.slug}/dashboard`"
-              class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-700"
+              class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-200 dark:hover:bg-stone-700"
               :class="currentTabClass('dashboard')"
             >
               Moderator Dashboard

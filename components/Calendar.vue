@@ -25,13 +25,13 @@
           <div
             v-if="day"
             @click="emit('selectDay', day)"
-            class="p-1 hover:bg-stone-700 overflow-hidden"
+            class="p-1 hover:bg-stone-300 dark:hover:bg-stone-700 overflow-hidden"
             :class="{
               'min-h-[100px] md:min-h-[150px]': size !== 'sm',
               'h-[40px] md:h-[75px]': size === 'sm',
               'cursor-pointer': clickableDays,
               'border border-yellow-500': day.isSame(today, 'day'),
-              'bg-stone-700': day.isSame(selectedDay, 'day'),
+              'bg-stone-200 dark:bg-stone-700': selectedDay && day.isSame(selectedDay, 'day'),
             }"
           >
             <div
