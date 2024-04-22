@@ -15,32 +15,32 @@
           {{ displayName }}
         </h1>
         <ul class="w-full py-4">
-          <li class="w-full">
+          <li class="w-full bg-stone-300 dark:bg-stone-700">
             <nuxt-link
               to="/settings"
-              class="block w-full p-2 bg-stone-700 hover:bg-stone-900 duration-150"
-              active-class="bg-stone-900 hover:bg-stone-950 hover:bg-black"
+              class="block w-full p-2 hover:bg-stone-200 dark:hover:bg-stone-900 duration-150"
+              active-class="bg-stone-200 dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-950"
             >
               Profile
             </nuxt-link>
             <nuxt-link
               to="/settings/password"
-              class="block w-full p-2 bg-stone-700 hover:bg-stone-900 duration-150"
-              active-class="bg-stone-950 hover:bg-black"
+              class="block w-full p-2 hover:bg-stone-200 dark:hover:bg-stone-900 duration-150"
+              active-class="bg-stone-200 dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-950"
             >
               Password
             </nuxt-link>
             <nuxt-link
               to="/settings/integrations"
-              class="block w-full p-2 bg-stone-700 hover:bg-stone-900 duration-150"
-              active-class="bg-stone-950 hover:bg-black"
+              class="block w-full p-2 hover:bg-stone-200 dark:hover:bg-stone-900 duration-150"
+              active-class="bg-stone-200 dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-950"
             >
               Integrations
             </nuxt-link>
             <nuxt-link
               to="/settings/perks"
-              class="flex gap-2 w-full p-2 bg-stone-700 hover:bg-stone-900 duration-150"
-              active-class="bg-stone-950 hover:bg-black"
+              class="flex gap-2 w-full p-2 hover:bg-stone-200 dark:hover:bg-stone-900 duration-150"
+              active-class="bg-stone-200 dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-950"
             >
               <KoFi class="w-6 h-6" />
               <span>Perks</span>

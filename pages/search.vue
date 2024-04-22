@@ -6,11 +6,10 @@
           <label>
             <span class="block">Search</span>
             <div class="relative">
-              <input
+              <Input
                 v-model="query"
                 type="search"
                 spellcheck="false"
-                class="block w-full border border-stone-500 rounded-md p-2 text-lg bg-stone-600"
                 placeholder="Type in a user or community name"
               />
               <div
@@ -30,24 +29,25 @@
         </div>
         <template v-else>
           <div class="flex gap-4">
-            <button
+            <Button
+              font-size="md"
               @click="showUsers = !showUsers"
-              class="transition duration-150 px-2 py-1 rounded flex items-center gap-2"
               :class="{
-                'bg-stone-600 hover:bg-stone-700': showUsers,
-                'bg-stone-700 hover:bg-stone-600 text-stone-400': !showUsers,
+                'bg-stone-200 dark:bg-stone-600': showUsers,
+                'bg-stone-300 dark:bg-stone-700 text-stone-400 dark:text-stone-500 hover:text-inherit':
+                  !showUsers,
               }"
             >
               <h2>
                 {{ users.length }} User{{ users.length === 1 ? "" : "s" }}
               </h2>
-            </button>
-            <button
+            </Button>
+            <Button
+              font-size="md"
               @click="showCommunities = !showCommunities"
-              class="transition duration-150 px-2 py-1 rounded flex items-center gap-2"
               :class="{
-                'bg-stone-600 hover:bg-stone-700': showCommunities,
-                'bg-stone-700 hover:bg-stone-600 text-stone-400':
+                'bg-stone-200 dark:bg-stone-600': showCommunities,
+                'bg-stone-300 dark:bg-stone-700 text-stone-400 dark:text-stone-500 hover:text-inherit':
                   !showCommunities,
               }"
             >
@@ -56,31 +56,33 @@
                   communities.length === 1 ? "y" : "ies"
                 }}
               </h2>
-            </button>
-            <button
+            </Button>
+            <Button
+              font-size="md"
               @click="showScripts = !showScripts"
-              class="transition duration-150 px-2 py-1 rounded flex items-center gap-2"
               :class="{
-                'bg-stone-600 hover:bg-stone-700': showScripts,
-                'bg-stone-700 hover:bg-stone-600 text-stone-400': !showScripts,
+                'bg-stone-200 dark:bg-stone-600': showScripts,
+                'bg-stone-300 dark:bg-stone-700 text-stone-400 dark:text-stone-500 hover:text-inherit':
+                  !showScripts,
               }"
             >
               <h2>
                 {{ scripts.length }} Script{{ scripts.length === 1 ? "" : "s" }}
               </h2>
-            </button>
-            <button
+            </Button>
+            <Button
+              font-size="md"
               @click="showRoles = !showRoles"
-              class="transition duration-150 px-2 py-1 rounded flex items-center gap-2"
               :class="{
-                'bg-stone-600 hover:bg-stone-700': showRoles,
-                'bg-stone-700 hover:bg-stone-600 text-stone-400': !showRoles,
+                'bg-stone-200 dark:bg-stone-600': showRoles,
+                'bg-stone-300 dark:bg-stone-700 text-stone-400 dark:text-stone-500 hover:text-inherit':
+                  !showRoles,
               }"
             >
               <h2>
                 {{ roles.length }} Role{{ roles.length === 1 ? "" : "s" }}
               </h2>
-            </button>
+            </Button>
           </div>
           <template v-if="showUsers">
             <UserCard v-for="user in users" :username="user.username" />

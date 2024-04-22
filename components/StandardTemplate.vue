@@ -1,7 +1,7 @@
 <template>
   <div class="flex relative">
     <nav
-      class="flex flex-col gap-3 p-2 rounded md:rounded-none rounded-l-none md:pb-0 fixed md:sticky top-0 md:h-screen bg-stone-900 md:w-[175px] z-50"
+      class="flex flex-col gap-3 p-2 rounded md:rounded-none rounded-l-none md:pb-0 fixed md:sticky top-0 md:h-screen bg-stone-400 dark:bg-stone-900 md:w-[175px] z-50"
       :class="{
         'h-screen w-screen': showMenu,
       }"
@@ -75,7 +75,7 @@
           <a
             id="discord"
             href="https://discord.gg/KwMz8ThamT"
-            class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
+            class="text-stone-200 hover:text-stone-300 dark:text-stone-200 dark:hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
             aria-label="Join the ClockTracker Discord server"
           >
             <div class="w-[50px] flex justify-center">
@@ -85,7 +85,7 @@
           <a
             id="kofi"
             href="https://ko-fi.com/clocktracker"
-            class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
+            class="text-stone-200 hover:text-stone-300 dark:text-stone-200 dark:hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
             aria-label="Donate to ClockTracker"
           >
             <div class="w-[50px] flex justify-center">
@@ -94,7 +94,7 @@
           </a>
           <a
             href="https://github.com/lindsaykwardell/clocktracker"
-            class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
+            class="text-stone-200 hover:text-stone-300 dark:text-stone-200 dark:hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
             aria-label="View the ClockTracker source code"
           >
             <div class="w-[50px] flex justify-center">

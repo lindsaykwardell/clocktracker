@@ -1,7 +1,7 @@
 <template>
   <Switch
     v-model="value"
-    :class="value ? 'bg-primary' : 'bg-primary-darkest'"
+    :class="value ? 'bg-purple-500 dark:bg-purple-800' : 'bg-purple-900 dark:bg-purple-950'"
     class="relative inline-flex h-[24px] w-[60px] shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75"
   >
     <span class="sr-only">Use setting</span>

@@ -1,6 +1,6 @@
 <template>
   <Button
-    class="w-[300px] py-2"
+    class="w-[300px] py-2 text-white"
     discord
     @click="login"
   >

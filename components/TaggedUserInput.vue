@@ -4,11 +4,12 @@
       <ComboboxInput
         @focus="emit('inputFocused')"
         @change="value = $event.target.value"
+        class="block w-full border bg-stone-200 dark:bg-stone-600 disabled:bg-stone-300 dark:disabled:bg-stone-700 border-stone-100 dark:border-stone-500 rounded-md p-2 h-[2.5rem] text-lg"
         :class="inputClass"
       />
       <ComboboxOptions
         v-if="filteredPeople.length > 0"
-        class="absolute text-sm bg-stone-900 border border-stone-500 max-h-[150px] min-w-[200px] w-full overflow-y-scroll overflow-x-hidden z-10"
+        class="absolute text-sm bg-stone-200 dark:bg-stone-900 border border-stone-300 dark:border-stone-500 max-h-[150px] min-w-[200px] w-full overflow-y-scroll overflow-x-hidden z-10"
         :class="{
           'bottom-8': renderListOnTop,
         }"
@@ -79,6 +80,6 @@ const filteredPeople = computed(() =>
 
 <style>
 [data-headlessui-state="active"] {
-  @apply bg-stone-700;
+  @apply bg-stone-300 dark:bg-stone-700;
 }
 </style>

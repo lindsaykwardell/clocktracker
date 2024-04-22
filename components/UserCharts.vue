@@ -3,9 +3,10 @@
     <div class="flex flex-col md:flex-row gap-3 px-4">
       <label class="flex gap-2 items-center">
         <span class="block whitespace-nowrap w-20 md:w-auto">Tags</span>
-        <select
+        <Input
+          mode="select"
           v-model="selectedTag"
-          class="w-full rounded p-1 text-lg bg-stone-600"
+          
         >
           <option :value="null">Filter by tag</option>
           <option
@@ -14,16 +15,16 @@
           >
             {{ tag }}
           </option>
-        </select>
+        </Input>
       </label>
       <div class="flex flex-wrap gap-2 flex-grow">
-        <button
+        <Button
           v-for="(tag, index) in selectedTags"
-          class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
+          class="px-2"
           @click.prevent="selectedTags.splice(index, 1)"
         >
           {{ tag }}
-        </button>
+        </Button>
       </div>
       <Button
         component="nuxt-link"

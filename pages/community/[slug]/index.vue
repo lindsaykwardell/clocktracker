@@ -78,12 +78,12 @@
       <div
         class="w-full md:w-11/12 lg:max-w-[800px] m-auto flex flex-col gap-3 mt-8"
       >
-        <div v-if="isMember" class="bg-stone-900 p-4">
+        <div v-if="isMember" class="bg-stone-200 dark:bg-stone-900 p-4">
           <label>
             Add to the conversation
             <form @submit.prevent="submitPost">
               <ExpandingTextarea
-                class="block w-full border border-stone-500 rounded-md p-2 text-lg bg-stone-600"
+                
                 v-model="message"
               />
               <Button

@@ -1,5 +1,5 @@
 <template>
-  <div id="grimoire" class="container m-auto" :style="`--m: ${tokens.length}`">
+  <div id="grimoire" class="container m-auto " :style="`--m: ${tokens.length}`">
     <div v-for="(token, index) in orderedTokens" :style="`--i: ${index}`">
       <div
         class="token-seat relative flex flex-col"
