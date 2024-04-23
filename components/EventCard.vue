@@ -1,12 +1,14 @@
 <template>
-  <section class="max-w-[600px] bg-stone-900 rounded shadow">
+  <section class="max-w-[600px] bg-stone-200 dark:bg-stone-900 rounded shadow">
     <img
       v-if="event.image"
       :src="event.image"
       class="w-full md:w-[600px] object-cover h-[150px] md:h-[250px]"
     />
     <div class="p-3 flex flex-col gap-2">
-      <div class="flex flex-col md:flex-row text-stone-400 items-center">
+      <div
+        class="flex flex-col md:flex-row text-stone-500 dark:text-stone-400 items-center"
+      >
         <div class="flex-grow">
           <ClientOnly>
             <time
@@ -47,12 +49,12 @@
               leave-to-class="transform scale-95 opacity-0"
             >
               <MenuItems
-                class="absolute right-0 z-10 bg-stone-800 rounded shadow-md whitespace-nowrap flex flex-col items-start min-w-[150px]overflow-hidden"
+                class="absolute right-0 z-10 bg-stone-100 dark:bg-stone-900 rounded shadow-md whitespace-nowrap flex flex-col items-start min-w-[150px]"
               >
                 <MenuItem>
                   <nuxt-link
                     :to="`/community/${event.community.slug}/event/${event.id}/edit`"
-                    class="flex gap-1 w-full items-center text-white text-sm px-2 min-h-[32px]"
+                    class="flex gap-1 w-full items-center text-black dark:text-white text-sm px-2 min-h-[32px]"
                   >
                     Edit Event
                   </nuxt-link>
@@ -60,7 +62,7 @@
                 <MenuItem>
                   <nuxt-link
                     :to="`/community/${event.community.slug}/events/create?duplicate=${event.id}`"
-                    class="flex gap-1 w-full items-center text-white text-sm px-2 min-h-[32px]"
+                    class="flex gap-1 w-full items-center text-black dark:text-white text-sm px-2 min-h-[32px]"
                   >
                     Duplicate Event
                   </nuxt-link>
@@ -68,7 +70,7 @@
                 <MenuItem>
                   <button
                     @click="deleteEvent"
-                    class="flex gap-1 w-full items-center text-white text-sm px-2 min-h-[32px]"
+                    class="flex gap-1 w-full items-center text-black dark:text-white text-sm px-2 min-h-[32px]"
                   >
                     Delete Event
                   </button>
@@ -83,8 +85,10 @@
         class="post text-sm md:text-base"
         :source="event.description"
       />
-      <div class="flex gap-3">
-        <span class="text-sm text-stone-500">Game Link</span>
+      <div v-if="event.game_link" class="flex gap-3">
+        <span class="text-sm text-stone-500 dark:text-stone-400"
+          >Game Link</span
+        >
         <a
           v-if="event.game_link"
           :href="event.game_link"
@@ -98,7 +102,7 @@
           class="flex-1 flex gap-3 items-center"
           v-if="event.storytellers.length"
         >
-          <span class="text-sm text-stone-500"
+          <span class="text-sm text-stone-500 dark:text-stone-400"
             >Storyteller{{ event.storytellers.length === 1 ? "" : "s" }}</span
           >
           <div>
@@ -111,7 +115,7 @@
           </div>
         </div>
         <div class="flex-1 flex gap-3 items-center" v-if="event.script">
-          <span class="text-sm text-stone-500">Script</span>
+          <span class="text-sm text-stone-500 dark:text-stone-400">Script</span>
           <a class="hover:underline" :href="scriptLink(event)" target="">
             {{ event.script }}
           </a>
@@ -119,7 +123,7 @@
       </div>
       <div class="flex flex-col md:flex-row justify-between gap-2 items-center">
         <div>
-          <span class="text-stone-400">
+          <span class="text-stone-500 dark:text-stone-400">
             <template v-if="event.player_count">
               {{ registeredPlayerCount }}/{{ event.player_count }}
             </template>
@@ -129,7 +133,9 @@
             players registered
           </span>
           <template v-if="waitlistCount > 0">
-            <span class="text-stone-400">({{ waitlistCount }} waiting)</span>
+            <span class="text-stone-500 dark:text-stone-400"
+              >({{ waitlistCount }} waiting)</span
+            >
           </template>
         </div>
         <div class="flex gap-2 justify-end">

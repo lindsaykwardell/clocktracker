@@ -1,12 +1,12 @@
 <template>
   <div class="flex relative">
     <nav
-      class="flex flex-col gap-3 p-2 rounded md:rounded-none rounded-l-none md:pb-0 fixed md:sticky top-0 md:h-screen bg-stone-900 md:w-[175px] z-50"
+      class="flex flex-col gap-3 p-2 rounded md:rounded-none rounded-l-none md:pb-0 fixed md:sticky top-0 md:h-screen bg-stone-400 dark:bg-stone-900 md:w-[175px] md:min-w-[175px] z-50 min-w-[42px] min-h-[42px]"
       :class="{
         'h-screen w-screen': showMenu,
       }"
     >
-      <button id="show-navbar" @click="showMenu = !showMenu" class="md:hidden">
+      <button id="show-navbar" @click="showMenu = !showMenu" class="md:hidden absolute top-1 left-1">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="32"
@@ -71,36 +71,43 @@
           <NavLink to="/login" icon="balloonist"> Login </NavLink>
         </template>
         <div class="flex-grow" />
-        <div class="flex justify-around">
-          <a
-            id="discord"
-            href="https://discord.gg/KwMz8ThamT"
-            class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
-            aria-label="Join the ClockTracker Discord server"
-          >
-            <div class="w-[50px] flex justify-center">
-              <Discord />
-            </div>
-          </a>
-          <a
-            id="kofi"
-            href="https://ko-fi.com/clocktracker"
-            class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
-            aria-label="Donate to ClockTracker"
-          >
-            <div class="w-[50px] flex justify-center">
-              <KoFi />
-            </div>
-          </a>
-          <a
-            href="https://github.com/lindsaykwardell/clocktracker"
-            class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
-            aria-label="View the ClockTracker source code"
-          >
-            <div class="w-[50px] flex justify-center">
-              <Github />
-            </div>
-          </a>
+        <div class="flex flex-col items-center">
+          <div v-if="dark !== null" class="flex gap-2 items-center">
+            ☀️
+            <Toggle v-model="dark" size="sm" />
+            🌙
+          </div>
+          <div class="flex justify-around">
+            <a
+              id="discord"
+              href="https://discord.gg/KwMz8ThamT"
+              class="text-stone-200 hover:text-stone-300 dark:text-stone-200 dark:hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
+              aria-label="Join the ClockTracker Discord server"
+            >
+              <div class="w-[50px] flex justify-center">
+                <Discord />
+              </div>
+            </a>
+            <a
+              id="kofi"
+              href="https://ko-fi.com/clocktracker"
+              class="text-stone-200 hover:text-stone-300 dark:text-stone-200 dark:hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
+              aria-label="Donate to ClockTracker"
+            >
+              <div class="w-[50px] flex justify-center">
+                <KoFi />
+              </div>
+            </a>
+            <a
+              href="https://github.com/lindsaykwardell/clocktracker"
+              class="text-stone-200 hover:text-stone-300 dark:text-stone-200 dark:hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
+              aria-label="View the ClockTracker source code"
+            >
+              <div class="w-[50px] flex justify-center">
+                <Github />
+              </div>
+            </a>
+          </div>
         </div>
       </section>
     </nav>
@@ -122,6 +129,20 @@ const friends = useFriends();
 const featureFlags = useFeatureFlags();
 
 const showMenu = ref(false);
+
+const dark = ref<boolean | null>(null);
+
+watch(dark, () => {
+  if (dark.value) {
+    useDarkMode();
+  } else {
+    useLightMode();
+  }
+});
+
+onMounted(() => {
+  dark.value = themeIsDark();
+});
 
 const tour: Step[] = [
   {

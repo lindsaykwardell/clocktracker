@@ -41,9 +41,9 @@
     </p>
     <img src="/blog/upload-5.webp" alt="Custom script selection" />
     <p class="p-2">
-      Script uploading will first roll out to Ko-Fi supporters, with a
-      full release after testing is complete. If you are interested in testing
-      this feature, please consider supporting ClockTracker on Ko-Fi. If you are
+      Script uploading will first roll out to Ko-Fi supporters, with a full
+      release after testing is complete. If you are interested in testing this
+      feature, please consider supporting ClockTracker on Ko-Fi. If you are
       already a Ko-Fi supporter, head over to
       <a class="underline" href="/settings/perks">Settings</a> to opt into
       preview features.
@@ -68,7 +68,6 @@ import {
   PolarAreaController,
   RadialLinearScale,
 } from "chart.js";
-import { nanoid } from "nanoid";
 
 const friends = useFriends();
 const users = useUsers();
@@ -118,7 +117,7 @@ ChartJS.register(
 
 <style>
 body {
-  @apply bg-stone-800 font-gothic text-stone-100;
+  @apply bg-stone-50 dark:bg-stone-800 font-gothic dark:text-stone-100;
 }
 
 :root {

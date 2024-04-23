@@ -2,7 +2,7 @@
   <nuxt-link
     v-if="player.status === Status.SUCCESS"
     :to="`/@${player.data.username}`"
-    class="bg-stone-950 hover:bg-stone-900 transition duration-150 shadow-lg flex flex-col justify-center items-center"
+    class="bg-stone-300 dark:bg-stone-950 hover:bg-stone-200 dark:hover:bg-stone-900 transition duration-150 shadow-lg flex flex-col justify-center items-center"
   >
     <div class="flex flex-col md:flex-row items-center w-full p-2 m-auto gap-3">
       <Avatar
@@ -15,15 +15,15 @@
           <h3 class="font-dumbledor text-xl">
             {{ player.data.display_name }}
           </h3>
-          <div class="text-stone-400">
+          <div class="dark:text-stone-400">
             {{ player.data.username }}
           </div>
-          <div class="text-stone-400">
+          <div class="dark:text-stone-400">
             {{ player.data.pronouns }}
           </div>
           <div
             v-if="player.data.location"
-            class="text-stone-400 flex gap-2 items-center"
+            class="dark:text-stone-400 flex gap-2 items-center"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -38,7 +38,7 @@
             </svg>
             <span>{{ player.data.location }}</span>
           </div>
-          <div class="text-stone-400 flex gap-2 items-center">
+          <div class="dark:text-stone-400 flex gap-2 items-center">
             <slot name="extra" />
           </div>
         </div>

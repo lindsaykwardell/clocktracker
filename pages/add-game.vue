@@ -6,7 +6,7 @@
         Adding more than one game?
         <button
           @click="initImportGames"
-          class="underline italic hover:text-white"
+          class="underline italic dark:hover:text-white hover:text-black"
         >
           Import multiple games
         </button>

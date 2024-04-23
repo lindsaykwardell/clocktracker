@@ -1,7 +1,7 @@
 <template>
   <nuxt-link
     :to="to"
-    class="text-stone-200 hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full"
+    class="text-stone-900 hover:text-stone-800 dark:text-stone-200 dark:hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full"
   >
     <div class="relative">
       <div class="w-[50px] overflow-hidden">
