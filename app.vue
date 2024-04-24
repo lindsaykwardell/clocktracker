@@ -1,52 +1,17 @@
 <template>
   <NuxtPage />
-  <AnnouncementDialog id="custom-script-uploads">
+  <AnnouncementDialog id="maintenance-window">
     <template #title>
       <h1 class="text-2xl font-bold font-dumbledor">
-        Feature Preview - Upload Scripts
+        Upcoming Scheduled Maintenance
       </h1>
       <div class="text-lg text-stone-400">{{ announcementDate }}</div>
     </template>
     <p class="p-2">
-      We are excited to announce a new feature that will be rolling out soon:
-      custom script and homebrew uploads! This feature will allow users to
-      upload their favorite scripts for use on ClockTracker.
-    </p>
-    <img src="/blog/upload-1.webp" alt="Upload a script" />
-    <p class="p-2">
-      When you are creating a game, you can upload a custom JSON file by
-      selecting "Upload a script". The script can use the official characters,
-      or custom characters (such as Fall of Rome). If a script provides custom
-      images, they will be applied to the grimoire (including a script logo!)
-    </p>
-    <img src="/blog/upload-2.webp" alt="Custom script in action" />
-    <img src="/blog/upload-3.webp" alt="Grimoire for a tagged game" />
-    <p class="p-2">
-      Tagged games work the same as always, and tagged players may now use the
-      script they were tagged in for future games.
-    </p>
-    <img src="/blog/upload-4.webp" alt="User was tagged in a custom game" />
-    <p class="p-2">
-      Custom uploaded scripts are visible to all ClockTracker users, but they
-      are scoped to each individual upload (so if someone else uploads the same
-      script, you will each have separate stats). This is to prevent accidental
-      merging of a script. Further work may go into this to make it even better,
-      but this should work for now as an initial approach.
-    </p>
-
-    <p class="p-2">
-      Users may only use a script that they have either uploaded or been tagged
-      in. If you wish to use a custom script, you will need to upload a copy
-      yourself.
-    </p>
-    <img src="/blog/upload-5.webp" alt="Custom script selection" />
-    <p class="p-2">
-      Script uploading will first roll out to Ko-Fi supporters, with a full
-      release after testing is complete. If you are interested in testing this
-      feature, please consider supporting ClockTracker on Ko-Fi. If you are
-      already a Ko-Fi supporter, head over to
-      <a class="underline" href="/settings/perks">Settings</a> to opt into
-      preview features.
+      We will be performing maintenance on our server on {{ maintenanceDate }}.
+      During this time, you may experience some downtime. We apologize for any
+      inconvenience this may cause. During this time, please see our Discord
+      community for updates.
     </p>
   </AnnouncementDialog>
   <VitePwaManifest />
@@ -68,6 +33,12 @@ import {
   PolarAreaController,
   RadialLinearScale,
 } from "chart.js";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const friends = useFriends();
 const users = useUsers();
@@ -90,7 +61,13 @@ onMounted(() => {
 const announcementDate = computed(() => {
   return new Intl.DateTimeFormat(navigator.language, {
     dateStyle: "full",
-  }).format(new Date("2024-04-16"));
+  }).format(dayjs.tz("2024-04-24", "America/Los_Angeles").toDate());
+});
+
+const maintenanceDate = computed(() => {
+  return new Intl.DateTimeFormat(navigator.language, {
+    dateStyle: "full",
+  }).format(dayjs.tz("2024-04-29", "America/Los_Angeles").toDate());
 });
 
 useHead({
