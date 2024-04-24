@@ -10,7 +10,8 @@
     <p class="p-2">
       We will be performing maintenance on our server on {{ maintenanceDate }}.
       During this time, you may experience some downtime. We apologize for any
-      inconvenience this may cause.
+      inconvenience this may cause. During this time, please see our Discord
+      community for updates.
     </p>
   </AnnouncementDialog>
   <VitePwaManifest />
