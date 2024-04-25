@@ -35,7 +35,7 @@
                 >
                   <option :value="null">Filter by role</option>
                   <option v-for="role in myRoles" :key="role" :value="role">
-                    {{ roleName(role) }}
+                    {{ role }}
                   </option>
                 </select>
               </label>
@@ -230,19 +230,13 @@ const myRoles = computed(() => {
       props.games.data
         .flatMap((game) =>
           game.is_storyteller
-            ? ["storyteller"]
-            : game.player_characters.map((c) => c.role_id)
+            ? ["Storyteller"]
+            : game.player_characters.map((c) => c.name)
         )
         .filter((role) => role) as string[]
     ),
   ]).sort();
 });
-
-function roleName(roleId: string) {
-  if (roleId === "storyteller") return "Storyteller";
-
-  return roles.getRole(roleId)?.name || "";
-}
 
 const myCommunities = computed(() => {
   if (!props.player) {
@@ -322,9 +316,9 @@ const sortedGames = computed(() => {
           selectedTags.value.every((tag) => game.tags.includes(tag))) && // filter by tags
         (!selectedRole.value ||
           game.player_characters.some(
-            (c) => c.role_id === selectedRole.value
+            (c) => c.name === selectedRole.value
           ) ||
-          (game.is_storyteller && selectedRole.value === "storyteller")) && // filter by role
+          (game.is_storyteller && selectedRole.value === "Storyteller")) && // filter by role
         (!selectedCommunity.value ||
           game.community_name.trim() === selectedCommunity.value.trim()) // filter by community
     );
