@@ -7,7 +7,16 @@ import {
   EmbedBuilder,
   User,
 } from "discord.js";
-import { LocationType, PrismaClient, UserSettings } from "@prisma/client";
+import {
+  Community,
+  Event,
+  EventAttendee,
+  EventWaitlist,
+  EventWaitlistAttendee,
+  LocationType,
+  PrismaClient,
+  UserSettings,
+} from "@prisma/client";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
@@ -225,8 +234,18 @@ export async function buildEmbed(guild_id: string, event_id: string) {
     throw new Error("No event found with that ID");
   }
 
-  console.log(event.community.icon);
+  return generateEmbed(event);
+}
 
+export function generateEmbed(
+  event: Event & {
+    community: Partial<Community>;
+    registered_players: Partial<EventAttendee>[];
+    waitlists: (Partial<EventWaitlist> & {
+      users: Partial<EventWaitlistAttendee>[];
+    })[];
+  }
+) {
   const embed = new EmbedBuilder()
     .setColor(0x0099ff)
     .setTitle(event.title)
@@ -261,27 +280,51 @@ export async function buildEmbed(guild_id: string, event_id: string) {
     embed.setImage(event.image);
   }
 
-  const fields = [
-    {
-      name:
-        `Players (${
-          event.player_count &&
-          event.registered_players.length > event.player_count
-            ? event.player_count
-            : event.registered_players.length
-        }` +
-        (event.player_count ? `/${event.player_count}` : "") +
-        ")",
-      value:
-        (event.player_count
-          ? event.registered_players.slice(0, event.player_count)
-          : event.registered_players
-        )
-          .map((p) => p.name)
-          .join("\n") || "None",
-      inline: true,
-    },
-  ];
+  const fields = [];
+
+  if (event.game_link.length > 0) {
+    fields.push({
+      name: "Game Link",
+      value: event.game_link,
+      inline: false,
+    });
+  }
+
+  if (event.script.length > 0) {
+    fields.push({
+      name: "Script",
+      value: event.script,
+      inline: false,
+    });
+  }
+
+  if (event.storytellers.length > 0) {
+    fields.push({
+      name: event.storytellers.length === 1 ? "Storyteller" : "Storytellers",
+      value: event.storytellers.map((s) => s).join(", "),
+      inline: false,
+    });
+  }
+
+  fields.push({
+    name:
+      `Players (${
+        event.player_count &&
+        event.registered_players.length > event.player_count
+          ? event.player_count
+          : event.registered_players.length
+      }` +
+      (event.player_count ? `/${event.player_count}` : "") +
+      ")",
+    value:
+      (event.player_count
+        ? event.registered_players.slice(0, event.player_count)
+        : event.registered_players
+      )
+        .map((p) => p.name)
+        .join("\n") || "None",
+    inline: true,
+  });
 
   if (
     event.player_count &&
@@ -407,6 +450,9 @@ export function formatInputs(interaction, allowBlankDates = false) {
   const location_type_input = interaction.options.get("location_type")
     ?.value as string;
   const player_count = interaction.options.get("player_count")?.value as number;
+  const game_link = interaction.options.get("game_link")?.value as string;
+  const storytellers = interaction.options.get("storytellers")?.value as string;
+  const script = interaction.options.get("script")?.value as string;
   const image = interaction.options.get("image")?.value as string;
   const waitlist_1 = interaction.options.get("waitlist_1")?.value as string;
   const waitlist_2 = interaction.options.get("waitlist_2")?.value as string;
@@ -513,6 +559,20 @@ export function formatInputs(interaction, allowBlankDates = false) {
     }
   })();
 
+  const formatted_storytellers: string[] | undefined = storytellers
+    ?.split(",")
+    .map((s) => s.trim());
+  const split_script: string[] | undefined = script
+    ?.split("::")
+    .map((s) => s.trim());
+  const formatted_script: { name: string; id: number | null } | null =
+    split_script
+      ? {
+          name: split_script[0],
+          id: +split_script[1] === 0 ? null : +split_script[1],
+        }
+      : null;
+
   return {
     id,
     name,
@@ -522,6 +582,9 @@ export function formatInputs(interaction, allowBlankDates = false) {
     location,
     location_type,
     player_count,
+    game_link,
+    storytellers: formatted_storytellers,
+    script: formatted_script,
     image,
     waitlists,
     removedWaitlists,
