@@ -69,7 +69,7 @@
           <NavLink id="settings" to="/settings" icon="tinker">
             Settings
           </NavLink>
-          <NavLink to="/logout" icon="balloonist"> Logout </NavLink>
+          <NavLink to="/logout" icon="steward"> Logout </NavLink>
         </template>
         <template v-else>
           <NavLink id="home" to="/" icon="innkeeper">
@@ -78,7 +78,7 @@
           <NavLink id="search" to="/search" icon="investigator">
             Search
           </NavLink>
-          <NavLink to="/login" icon="balloonist"> Login </NavLink>
+          <NavLink to="/login" icon="steward"> Login </NavLink>
         </template>
         <div class="hidden md:block flex-grow" />
         <div class="flex flex-col items-center">
