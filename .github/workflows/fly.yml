@@ -6,8 +6,22 @@ on:
       - deploy
 
 jobs:
+  discord:
+    name: Deploy Discord bot
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: deploy
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: cd discord
+      - run: flyctl deploy --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
   fly:
     name: Deploy app
+    needs: discord
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -18,18 +32,4 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-
-  discord:
-    name: Deploy Discord bot
-    needs: fly
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          ref: deploy
-      - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: cd discord
-      - run: flyctl deploy --remote-only
-        env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
