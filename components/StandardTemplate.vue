@@ -80,8 +80,8 @@
           </NavLink>
           <NavLink to="/login" icon="steward"> Login </NavLink>
         </template>
-        <div class="hidden md:block flex-grow" />
-        <div class="flex flex-col items-center">
+        <div class="py-4 md:flex-grow" />
+        <div class="flex flex-col gap-4 items-center">
           <div v-if="dark !== null" class="flex gap-2 items-center">
             ☀️
             <Toggle v-model="dark" size="sm" />
