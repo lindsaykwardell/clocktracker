@@ -282,7 +282,7 @@ export function generateEmbed(
 
   const fields = [];
 
-  if (event.game_link.length > 0) {
+  if (event.game_link?.length > 0) {
     fields.push({
       name: "Game Link",
       value: event.game_link,
@@ -299,9 +299,11 @@ export function generateEmbed(
   }
 
   if (event.storytellers.length > 0) {
+    const real_storytellers = event.storytellers.filter((s) => s.length > 0);
+
     fields.push({
-      name: event.storytellers.length === 1 ? "Storyteller" : "Storytellers",
-      value: event.storytellers.map((s) => s).join(", "),
+      name: real_storytellers.length === 1 ? "Storyteller" : "Storytellers",
+      value: real_storytellers.map((s) => s).join(", "),
       inline: false,
     });
   }
