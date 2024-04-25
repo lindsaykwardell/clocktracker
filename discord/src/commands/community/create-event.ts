@@ -5,6 +5,7 @@ import {
   handleRegisterButtonClick,
 } from "../../utility/community-event";
 import { PrismaClient } from "@prisma/client";
+import naturalOrder from "natural-order";
 
 const prisma = new PrismaClient();
 
@@ -71,6 +72,25 @@ export const data = new SlashCommandBuilder()
   )
   .addStringOption((option) =>
     option
+      .setName("game_link")
+      .setDescription("A link to the game")
+      .setRequired(false)
+  )
+  .addStringOption((option) =>
+    option
+      .setName("storytellers")
+      .setDescription("The storytellers for the event (comma separated)")
+      .setRequired(false)
+  )
+  .addStringOption((option) =>
+    option
+      .setName("script")
+      .setDescription("The script for the event")
+      .setRequired(false)
+      .setAutocomplete(true)
+  )
+  .addStringOption((option) =>
+    option
       .setName("image")
       .setDescription("A URL to an image for the event")
       .setRequired(false)
@@ -107,15 +127,73 @@ export const data = new SlashCommandBuilder()
   );
 
 export async function autocomplete(interaction) {
-  const focusedValue = interaction.options.getFocused().toLowerCase();
-  const choices = Intl.supportedValuesOf("timeZone");
-  const filtered = choices
-    .filter((choice) => choice.toLowerCase().includes(focusedValue))
-    .slice(0, 25);
+  const focusedValue: { name: string; value: string } =
+    interaction.options.getFocused(true);
 
-  await interaction.respond(
-    filtered.map((choice) => ({ name: choice, value: choice }))
-  );
+  if (focusedValue.name === "timezone") {
+    const choices = Intl.supportedValuesOf("timeZone");
+    const filtered = choices
+      .filter((choice) => choice.toLowerCase().includes(focusedValue.value))
+      .slice(0, 25);
+
+    await interaction.respond(
+      filtered.map((choice) => ({ name: choice, value: choice }))
+    );
+  } else if (focusedValue.name === "script") {
+    const scripts = await prisma.script.findMany({
+      where: {
+        name: {
+          contains: focusedValue.value,
+          mode: "insensitive",
+        },
+        is_custom_script: false,
+      },
+      orderBy: {
+        name: "asc",
+      },
+      select: {
+        id: true,
+        script_id: true,
+        name: true,
+      },
+    });
+
+    const results: {
+      id: number;
+      script_id: string;
+      name: string;
+    }[] = [];
+
+    for (const script of naturalOrder(scripts)
+      .orderBy("desc")
+      .sort(["version", "name"])) {
+      if (
+        results.length < 10 &&
+        !results.some((s) => s.script_id === script.script_id)
+      ) {
+        results.push({
+          id: script.id,
+          name: script.name,
+          script_id: script.script_id!,
+        });
+      }
+    }
+
+    if (focusedValue.value !== "") {
+      results.push({
+        id: 0,
+        name: `${focusedValue.value} (Use custom script)`,
+        script_id: "custom",
+      });
+    }
+
+    await interaction.respond(
+      results.map((script) => ({
+        name: script.name,
+        value: `${script.name}::${script.id}`,
+      }))
+    );
+  }
 }
 
 export async function execute(interaction: CommandInteraction<CacheType>) {
@@ -147,6 +225,9 @@ export async function execute(interaction: CommandInteraction<CacheType>) {
     location,
     location_type,
     player_count,
+    game_link,
+    storytellers,
+    script,
     image,
     waitlists,
     guild_id,
@@ -168,6 +249,10 @@ export async function execute(interaction: CommandInteraction<CacheType>) {
       location: location || "",
       location_type: location_type,
       player_count: player_count || null,
+      game_link: game_link || "",
+      storytellers: storytellers || [],
+      script_id: script ? script.id : null,
+      script: script ? script.name : "",
       image,
       waitlists: {
         createMany: {
