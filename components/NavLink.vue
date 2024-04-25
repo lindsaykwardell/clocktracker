@@ -12,7 +12,7 @@
         >
           {{ notificationCount }}
         </span>
-        <img :src="`/img/role/${icon}.png`" class="max-w-[125%]" alt="" />
+        <img :src="`/img/role/${icon}.png`" class="md:max-w-[125%]" alt="" />
       </div>
     </div>
     <span class="">
