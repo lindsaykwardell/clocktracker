@@ -69,13 +69,19 @@
           <NavLink id="settings" to="/settings" icon="tinker">
             Settings
           </NavLink>
-          <NavLink to="/logout" icon="balloonist"> Logout </NavLink>
+          <NavLink to="/logout" icon="steward"> Logout </NavLink>
         </template>
         <template v-else>
-          <NavLink to="/login" icon="balloonist"> Login </NavLink>
+          <NavLink id="home" to="/" icon="innkeeper">
+            Home
+          </NavLink>
+          <NavLink id="search" to="/search" icon="investigator">
+            Search
+          </NavLink>
+          <NavLink to="/login" icon="steward"> Login </NavLink>
         </template>
-        <div class="flex-grow" />
-        <div class="flex flex-col items-center">
+        <div class="py-4 md:flex-grow" />
+        <div class="flex flex-col gap-4 items-center">
           <div v-if="dark !== null" class="flex gap-2 items-center">
             ☀️
             <Toggle v-model="dark" size="sm" />
@@ -116,7 +122,10 @@
       </section>
     </nav>
     <main class="flex-grow">
-      <div v-if="isInMaintenanceWindow" class="bg-purple-400 dark:bg-purple-950 p-2 min-h-[42px]">
+      <div
+        v-if="isInMaintenanceWindow"
+        class="bg-purple-400 dark:bg-purple-950 p-2 min-h-[42px]"
+      >
         <p class="ml-[42px] md:ml-0">
           We are performing maintenance on our server. During this time, you may
           experience some downtime. Please see our Discord community for
@@ -147,7 +156,10 @@ const friends = useFriends();
 const featureFlags = useFeatureFlags();
 
 const showMenu = ref(false);
-const maintenanceStart = dayjs.tz("2024-04-29T00:00:00Z", "America/Los_Angeles");
+const maintenanceStart = dayjs.tz(
+  "2024-04-29T00:00:00Z",
+  "America/Los_Angeles"
+);
 const maintenanceEnd = maintenanceStart.add(24, "hours");
 const now = new Date();
 

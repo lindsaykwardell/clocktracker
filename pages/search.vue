@@ -1,16 +1,16 @@
 <template>
   <StandardTemplate>
     <div class="max-w-[1000px] w-5/6 py-4 m-auto">
-      <div>
+      <div class="pt-8">
         <form @submit.prevent.stop role="search">
           <label>
-            <span class="block">Search</span>
+            <h1 class="font-dumbledor text-2xl text-center">Search</h1>
             <div class="relative">
               <Input
                 v-model="query"
                 type="search"
                 spellcheck="false"
-                placeholder="Type in a user or community name"
+                placeholder="Type in a query to begin"
               />
               <div
                 class="absolute right-2 -top-2 w-16 h-16"
@@ -28,61 +28,75 @@
           Searching...
         </div>
         <template v-else>
-          <div class="flex gap-4">
-            <Button
-              font-size="md"
-              @click="showUsers = !showUsers"
-              :class="{
-                'bg-stone-200 dark:bg-stone-600': showUsers,
-                'bg-stone-300 dark:bg-stone-700 text-stone-400 dark:text-stone-500 hover:text-inherit':
-                  !showUsers,
-              }"
-            >
-              <h2>
-                {{ users.length }} User{{ users.length === 1 ? "" : "s" }}
-              </h2>
-            </Button>
-            <Button
-              font-size="md"
-              @click="showCommunities = !showCommunities"
-              :class="{
-                'bg-stone-200 dark:bg-stone-600': showCommunities,
-                'bg-stone-300 dark:bg-stone-700 text-stone-400 dark:text-stone-500 hover:text-inherit':
-                  !showCommunities,
-              }"
-            >
-              <h2>
-                {{ communities.length }} Communit{{
-                  communities.length === 1 ? "y" : "ies"
-                }}
-              </h2>
-            </Button>
-            <Button
-              font-size="md"
-              @click="showScripts = !showScripts"
-              :class="{
-                'bg-stone-200 dark:bg-stone-600': showScripts,
-                'bg-stone-300 dark:bg-stone-700 text-stone-400 dark:text-stone-500 hover:text-inherit':
-                  !showScripts,
-              }"
-            >
-              <h2>
-                {{ scripts.length }} Script{{ scripts.length === 1 ? "" : "s" }}
-              </h2>
-            </Button>
-            <Button
-              font-size="md"
-              @click="showRoles = !showRoles"
-              :class="{
-                'bg-stone-200 dark:bg-stone-600': showRoles,
-                'bg-stone-300 dark:bg-stone-700 text-stone-400 dark:text-stone-500 hover:text-inherit':
-                  !showRoles,
-              }"
-            >
-              <h2>
-                {{ roles.length }} Role{{ roles.length === 1 ? "" : "s" }}
-              </h2>
-            </Button>
+          <div class="flex flex-wrap md:flex-nowrap">
+            <div class="w-1/2 md:w-auto p-1">
+              <Button
+                font-size="md"
+                @click="showUsers = !showUsers"
+                class="w-full md:w-auto"
+                :class="{
+                  'bg-stone-200 dark:bg-stone-600': showUsers,
+                  'bg-stone-300 dark:bg-stone-700 text-stone-400 dark:text-stone-500 hover:text-inherit':
+                    !showUsers,
+                }"
+              >
+                <h2>
+                  {{ users.length }} User{{ users.length === 1 ? "" : "s" }}
+                </h2>
+              </Button>
+            </div>
+            <div class="w-1/2 md:w-auto p-1">
+              <Button
+                font-size="md"
+                @click="showCommunities = !showCommunities"
+                class="w-full md:w-auto"
+                :class="{
+                  'bg-stone-200 dark:bg-stone-600': showCommunities,
+                  'bg-stone-300 dark:bg-stone-700 text-stone-400 dark:text-stone-500 hover:text-inherit':
+                    !showCommunities,
+                }"
+              >
+                <h2>
+                  {{ communities.length }} Communit{{
+                    communities.length === 1 ? "y" : "ies"
+                  }}
+                </h2>
+              </Button>
+            </div>
+            <div class="w-1/2 md:w-auto p-1">
+              <Button
+                font-size="md"
+                @click="showScripts = !showScripts"
+                class="w-full md:w-auto"
+                :class="{
+                  'bg-stone-200 dark:bg-stone-600': showScripts,
+                  'bg-stone-300 dark:bg-stone-700 text-stone-400 dark:text-stone-500 hover:text-inherit':
+                    !showScripts,
+                }"
+              >
+                <h2>
+                  {{ scripts.length }} Script{{
+                    scripts.length === 1 ? "" : "s"
+                  }}
+                </h2>
+              </Button>
+            </div>
+            <div class="w-1/2 md:w-auto p-1">
+              <Button
+                font-size="md"
+                @click="showRoles = !showRoles"
+                class="w-full md:w-auto"
+                :class="{
+                  'bg-stone-200 dark:bg-stone-600': showRoles,
+                  'bg-stone-300 dark:bg-stone-700 text-stone-400 dark:text-stone-500 hover:text-inherit':
+                    !showRoles,
+                }"
+              >
+                <h2>
+                  {{ roles.length }} Role{{ roles.length === 1 ? "" : "s" }}
+                </h2>
+              </Button>
+            </div>
           </div>
           <template v-if="showUsers">
             <UserCard v-for="user in users" :username="user.username" />

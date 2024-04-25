@@ -33,32 +33,3 @@ jobs:
           from_branch: main
           target_branch: deploy
           github_token: ${{ secrets.GITHUB_TOKEN }}
-
-  fly:
-    name: Deploy app
-    needs: deploy
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          ref: deploy
-      - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --remote-only --build-secret SUPABASE_URL="$SUPABASE_URL" --build-secret SUPABASE_KEY="$SUPABASE_KEY"
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-
-  discord:
-    name: Deploy Discord bot
-    needs: deploy
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          ref: deploy
-      - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: cd discord
-      - run: flyctl deploy --remote-only
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
