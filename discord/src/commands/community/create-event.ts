@@ -5,7 +5,7 @@ import {
   handleRegisterButtonClick,
 } from "../../utility/community-event";
 import { PrismaClient } from "@prisma/client";
-import naturalOrder from "natural-order";
+import naturalOrder from "natural-order/dist/natural-order.umd";
 
 const prisma = new PrismaClient();
 
