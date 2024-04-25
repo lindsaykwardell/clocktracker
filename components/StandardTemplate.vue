@@ -41,7 +41,7 @@
             alt="ClockTracker"
           />
         </nuxt-link>
-        <template v-if="!user">
+        <template v-if="user">
           <NavLink id="my-profile" to="/" icon="innkeeper">
             <template v-if="featureFlags.isEnabled('dashboard')">
               Dashboard
@@ -58,7 +58,7 @@
             id="friends"
             to="/friends"
             icon="eviltwin"
-            x:notificationCount="friends.getRequestCount(user.id)"
+            :notificationCount="friends.getRequestCount(user.id)"
           >
             Friends
           </NavLink>
@@ -69,10 +69,16 @@
           <NavLink id="settings" to="/settings" icon="tinker">
             Settings
           </NavLink>
-          <NavLink to="/logout" icon="balloonist"> Logout </NavLink>
+          <NavLink to="/logout" icon="steward"> Logout </NavLink>
         </template>
         <template v-else>
-          <NavLink to="/login" icon="balloonist"> Login </NavLink>
+          <NavLink id="home" to="/" icon="innkeeper">
+            Home
+          </NavLink>
+          <NavLink id="search" to="/search" icon="investigator">
+            Search
+          </NavLink>
+          <NavLink to="/login" icon="steward"> Login </NavLink>
         </template>
         <div class="hidden md:block flex-grow" />
         <div class="flex flex-col items-center">
