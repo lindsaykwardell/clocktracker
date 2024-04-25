@@ -7,6 +7,7 @@ import {
   EmbedBuilder,
   GatewayIntentBits,
 } from "discord.js";
+import { generateEmbed } from "~/discord/src/utility/community-event";
 
 const prisma = new PrismaClient();
 
@@ -124,96 +125,7 @@ export async function fetchEventAndUpdateDiscord(event_id: string) {
 
       for (const message of messages) {
         if (message[1].embeds[0]?.footer?.text === event.id) {
-          const embed = new EmbedBuilder()
-            .setColor(0x0099ff)
-            .setTitle(event.title)
-            .setURL(
-              `https://clocktracker.app/community/${
-                event.community!.slug
-              }/event/${event.id}`
-            )
-            .setAuthor({
-              name: event.community!.name,
-              iconURL: `https://clocktracker.app${event.community!.icon}`,
-              url: `https://clocktracker.app/community/${
-                event.community!.slug
-              }`,
-            })
-            // .setThumbnail(`https://clocktracker.app${event.community.icon}`)
-            .setTimestamp(event.start)
-            .setFooter({ text: event.id })
-            .setDescription(
-              `<t:${event.start.getTime() / 1000}:f>\n\n${
-                event.description ?? ""
-              }`
-            );
-
-          if (event.image) {
-            embed.setImage(event.image);
-          }
-
-          const fields = [
-            {
-              name:
-                `Players (${
-                  event.player_count &&
-                  event.registered_players.length > event.player_count
-                    ? event.player_count
-                    : event.registered_players.length
-                }` +
-                (event.player_count ? `/${event.player_count}` : "") +
-                ")",
-              value:
-                event.registered_players.map((p) => p.name).join("\n") ||
-                "None",
-              inline: true,
-            },
-          ];
-
-          if (
-            event.player_count &&
-            event.registered_players.length > event.player_count
-          ) {
-            fields.push({
-              name: `Waitlist (${
-                event.registered_players.length - event.player_count
-              })`,
-              value:
-                event.registered_players
-                  .slice(event.player_count)
-                  .map((p) => p.name)
-                  .join("\n") || "None",
-              inline: true,
-            });
-          }
-
-          if (event.waitlists) {
-            for (const waitlist of event.waitlists) {
-              fields.push({
-                name: `${waitlist.name} (${waitlist.users.length})`,
-                value: waitlist.users.map((u) => u.name).join("\n") || "None",
-                inline: true,
-              });
-            }
-          }
-
-          embed.addFields(fields);
-
-          const registerButton = new ButtonBuilder()
-            .setCustomId("register")
-            .setLabel("Register")
-            .setStyle(ButtonStyle.Primary);
-
-          const row = new ActionRowBuilder().addComponents(registerButton);
-
-          for (const waitlist of event.waitlists) {
-            const waitlistButton = new ButtonBuilder()
-              .setCustomId(`${waitlist.id}`)
-              .setLabel(`${waitlist.name}`)
-              .setStyle(ButtonStyle.Secondary);
-
-            row.addComponents(waitlistButton);
-          }
+          const { embed, row } = generateEmbed(event as any);
 
           await message[1].edit({
             embeds: [embed],

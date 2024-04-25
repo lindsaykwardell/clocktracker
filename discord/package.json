@@ -15,7 +15,8 @@
     "@supabase/supabase-js": "^2.42.4",
     "dayjs": "^1.11.10",
     "discord.js": "^14.14.1",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "natural-order": "^2.0.2"
   },
   "devDependencies": {
     "@flydotio/dockerfile": "^0.5.5",
