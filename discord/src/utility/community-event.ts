@@ -298,9 +298,11 @@ export function generateEmbed(
     });
   }
 
-  if (event.storytellers.length > 0) {
-    const real_storytellers = event.storytellers.filter((s) => s.length > 0);
+  const real_storytellers = event.storytellers.filter((s) => s.length > 0);
 
+  console.log(real_storytellers);
+
+  if (real_storytellers.length > 0) {
     fields.push({
       name: real_storytellers.length === 1 ? "Storyteller" : "Storytellers",
       value: real_storytellers.map((s) => s).join(", "),
