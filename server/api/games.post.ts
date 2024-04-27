@@ -6,7 +6,6 @@ import {
   Token,
   Grimoire,
   Alignment,
-  WinStatus,
   DemonBluff,
   Fabled,
 } from "@prisma/client";
@@ -166,27 +165,6 @@ export default defineEventHandler(async (handler) => {
     const lastAlignment =
       player_characters[player_characters.length - 1].alignment;
 
-    const win: WinStatus = (() => {
-      if (newGame.win === WinStatus.NOT_RECORDED) {
-        return WinStatus.NOT_RECORDED;
-      }
-      if (parentGameLastAlignment === Alignment.NEUTRAL) {
-        if (lastAlignment === Alignment.GOOD) {
-          return newGame.win === WinStatus.WIN ? WinStatus.WIN : WinStatus.LOSS;
-        } else {
-          return newGame.win === WinStatus.LOSS
-            ? WinStatus.WIN
-            : WinStatus.LOSS;
-        }
-      }
-
-      if (lastAlignment === parentGameLastAlignment) {
-        return newGame.win === WinStatus.WIN ? WinStatus.WIN : WinStatus.LOSS;
-      } else {
-        return newGame.win === WinStatus.LOSS ? WinStatus.WIN : WinStatus.LOSS;
-      }
-    })();
-
     await prisma.game.create({
       data: {
         ...body,
@@ -207,7 +185,6 @@ export default defineEventHandler(async (handler) => {
           create: [...body.fabled],
         },
         notes: "",
-        win,
         // map the already created grimoires to the new game
         grimoire: {
           connect: newGame.grimoire.map((g) => ({ id: g.id })),
@@ -235,19 +212,6 @@ export default defineEventHandler(async (handler) => {
         },
       });
 
-      const win = (() => {
-        if (newGame.win === WinStatus.NOT_RECORDED) {
-          return WinStatus.NOT_RECORDED;
-        }
-        if (parentGameLastAlignment === Alignment.GOOD) {
-          return newGame.win === WinStatus.WIN ? WinStatus.WIN : WinStatus.LOSS;
-        } else {
-          return newGame.win === WinStatus.LOSS
-            ? WinStatus.WIN
-            : WinStatus.LOSS;
-        }
-      })();
-
       if (friend !== null) {
         await prisma.game.create({
           data: {
@@ -263,7 +227,6 @@ export default defineEventHandler(async (handler) => {
               create: [...body.fabled],
             },
             notes: "",
-            win,
             grimoire: {
               connect: newGame.grimoire.map((g) => ({ id: g.id })),
             },

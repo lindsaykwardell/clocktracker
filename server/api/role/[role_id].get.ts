@@ -1,4 +1,4 @@
-import { PrismaClient, WinStatus } from "@prisma/client";
+import { PrismaClient, Alignment, WinStatus_V2 } from "@prisma/client";
 import dayjs from "dayjs";
 
 const prisma = new PrismaClient();
@@ -44,9 +44,14 @@ export default defineEventHandler(async (handler) => {
       game.player_characters[game.player_characters.length - 1];
 
     if (lastCharacter.role_id === role_id) {
-      if (game.win === WinStatus.WIN) {
+      if (
+        (lastCharacter.alignment === Alignment.GOOD &&
+          game.win_v2 === WinStatus_V2.GOOD_WINS) ||
+        (lastCharacter.alignment === Alignment.EVIL &&
+          game.win_v2 === WinStatus_V2.EVIL_WINS)
+      ) {
         win_loss.wins++;
-      } else {
+      } else if (game.win_v2 !== WinStatus_V2.NOT_RECORDED) {
         win_loss.losses++;
       }
     }
@@ -134,7 +139,12 @@ export default defineEventHandler(async (handler) => {
         game.script_id === script.script_id
       ) {
         total++;
-        if (game.win === WinStatus.WIN) {
+        if (
+          (lastCharacter.alignment === Alignment.GOOD &&
+            game.win_v2 === WinStatus_V2.GOOD_WINS) ||
+          (lastCharacter.alignment === Alignment.EVIL &&
+            game.win_v2 === WinStatus_V2.EVIL_WINS)
+        ) {
           wins++;
         }
       }
