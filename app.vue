@@ -1,17 +1,25 @@
 <template>
   <NuxtPage />
-  <AnnouncementDialog id="maintenance-window">
+  <AnnouncementDialog id="db-outage">
     <template #title>
       <h1 class="text-2xl font-bold font-dumbledor">
-        Upcoming Scheduled Maintenance
+        Unexpected Database Outage
       </h1>
       <div class="text-lg text-stone-400">{{ announcementDate }}</div>
     </template>
     <p class="p-2">
-      We will be performing maintenance on our server on {{ maintenanceDate }}.
-      During this time, you may experience some downtime. We apologize for any
-      inconvenience this may cause. During this time, please see our Discord
-      community for updates.
+      There was an unexpected database outage on {{ announcementDate }}. The
+      issue has been resolved, but any games or other data created during this
+      time may have been lost.
+    </p>
+    <p class="p-2">
+      As a reminder, we will be performing scheduled maintenance on our server
+      on {{ maintenanceDate }}. During this time, you may experience some
+      downtime. We apologize for any inconvenience this may cause.
+    </p>
+    <p class="p-2">
+      Please join our Discord server for any updates and further announcements.
+      Thank you!
     </p>
   </AnnouncementDialog>
   <VitePwaManifest />
@@ -61,7 +69,7 @@ onMounted(() => {
 const announcementDate = computed(() => {
   return new Intl.DateTimeFormat(navigator.language, {
     dateStyle: "full",
-  }).format(dayjs.tz("2024-04-24", "America/Los_Angeles").toDate());
+  }).format(dayjs.tz("2024-04-27", "America/Los_Angeles").toDate());
 });
 
 const maintenanceDate = computed(() => {
