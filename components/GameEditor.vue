@@ -162,10 +162,7 @@
       class="flex flex-col md:flex-row gap-5 border rounded border-stone-500 p-4 my-3"
     >
       <legend>Game Results</legend>
-      <fieldset
-        v-if="featureFlags.isEnabled('win_status_v2')"
-        class="flex gap-4"
-      >
+      <fieldset class="flex gap-4">
         <label class="flex gap-2 items-center">
           <input
             type="radio"
@@ -195,45 +192,6 @@
         </label>
         <label class="flex gap-2 items-center">
           <input type="checkbox" v-model="game.ignore_for_stats" />
-          <span class="block whitespace-nowrap">Ignore for stats</span>
-        </label>
-      </fieldset>
-      <fieldset v-else class="flex gap-4">
-        <label class="flex gap-2 items-center">
-          <Input
-            type="radio"
-            v-model="game.win"
-            :value="WinStatus.WIN"
-            class="border border-stone-500"
-          />
-          <span class="block whitespace-nowrap">
-            <template v-if="game.is_storyteller">Good wins</template>
-            <template v-else>Win</template>
-          </span>
-        </label>
-        <label class="flex gap-2 items-center">
-          <Input
-            type="radio"
-            v-model="game.win"
-            :value="WinStatus.LOSS"
-            class="border border-stone-500"
-          />
-          <span class="block whitespace-nowrap">
-            <template v-if="game.is_storyteller">Evil wins</template>
-            <template v-else>Loss</template>
-          </span>
-        </label>
-        <label class="flex gap-2 items-center">
-          <Input
-            type="radio"
-            v-model="game.win"
-            :value="WinStatus.NOT_RECORDED"
-            class="border border-stone-500"
-          />
-          <span class="block whitespace-nowrap"> Not recorded </span>
-        </label>
-        <label class="flex gap-2 items-center">
-          <Input type="checkbox" v-model="game.ignore_for_stats" />
           <span class="block whitespace-nowrap">Ignore for stats</span>
         </label>
       </fieldset>
@@ -662,9 +620,8 @@ import type { Alignment } from "@prisma/client";
 import type { RoleType } from "~/composables/useRoles";
 import { v4 as uuid } from "uuid";
 import naturalOrder from "natural-order";
-import { watchDebounced, useLocalStorage } from "@vueuse/core";
-import { WinStatus, WinStatus_V2 } from "~/composables/useGames";
-import { Switch } from "@headlessui/vue";
+import { useLocalStorage } from "@vueuse/core";
+import { WinStatus_V2 } from "~/composables/useGames";
 
 const tour: Step[] = [
   {
@@ -874,7 +831,6 @@ const props = defineProps<{
         token_url: string;
       };
     }[];
-    win: WinStatus;
     win_v2: WinStatus_V2;
     notes: string;
     image_urls: string[];

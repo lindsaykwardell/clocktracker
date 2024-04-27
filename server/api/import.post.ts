@@ -5,7 +5,7 @@ import {
   LocationType,
   PrismaClient,
   Role,
-  WinStatus,
+  WinStatus_V2,
 } from "@prisma/client";
 import papaparse from "papaparse";
 
@@ -106,7 +106,7 @@ export default defineEventHandler(async (handler) => {
     let location_type: LocationType = LocationType.ONLINE;
     let player_count: number | null = null;
     let traveler_count: number | null = null;
-    let win: WinStatus = WinStatus.NOT_RECORDED;
+    let win: "WIN" | "LOSS" | "NOT_RECORDED" = "NOT_RECORDED";
     const player_characters: Partial<Character>[] = [];
 
     if (row.starting_role) {
@@ -183,42 +183,41 @@ export default defineEventHandler(async (handler) => {
     }
 
     if (row.win.toLowerCase() === "win") {
-      win = WinStatus.WIN;
+      win = "WIN";
     } else if (row.win.toLowerCase() === "loss") {
-      win = WinStatus.LOSS;
+      win = "LOSS";
     }
 
     const win_v2 = (() => {
       if (is_storyteller) {
         if (win === "WIN") {
-          return "GOOD_WINS";
+          return WinStatus_V2.GOOD_WINS;
         } else if (win === "LOSS") {
-          return "EVIL_WINS";
+          return WinStatus_V2.EVIL_WINS;
         } else {
-          return "NOT_RECORDED";
+          return WinStatus_V2.NOT_RECORDED;
         }
       } else {
-        const { alignment } =
-          player_characters[player_characters.length - 1];
+        const { alignment } = player_characters[player_characters.length - 1];
 
-        if (alignment === "GOOD") {
+        if (alignment === Alignment.GOOD) {
           if (win === "WIN") {
-            return "GOOD_WINS";
+            return WinStatus_V2.GOOD_WINS;
           } else if (win === "LOSS") {
-            return "EVIL_WINS";
+            return WinStatus_V2.EVIL_WINS;
           } else {
-            return "NOT_RECORDED";
+            return WinStatus_V2.NOT_RECORDED;
           }
-        } else if (alignment === "EVIL") {
+        } else if (alignment === Alignment.EVIL) {
           if (win === "WIN") {
-            return "EVIL_WINS";
+            return WinStatus_V2.EVIL_WINS;
           } else if (win === "LOSS") {
-            return "GOOD_WINS";
+            return WinStatus_V2.GOOD_WINS;
           } else {
-            return "NOT_RECORDED";
+            return WinStatus_V2.NOT_RECORDED;
           }
         } else {
-          return "NOT_RECORDED";
+          return WinStatus_V2.NOT_RECORDED;
         }
       }
     })();
@@ -235,7 +234,6 @@ export default defineEventHandler(async (handler) => {
         community_name: row.community,
         player_count,
         traveler_count,
-        win,
         win_v2,
         notes: row.notes,
         is_storyteller,

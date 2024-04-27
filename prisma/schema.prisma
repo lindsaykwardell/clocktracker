@@ -34,7 +34,6 @@ model Game {
   player_count             Int?
   traveler_count           Int?
   player_characters        Character[]
-  win                      WinStatus
   win_v2                   WinStatus_V2   @default(NOT_RECORDED)
   notes                    String
   image_urls               String[]
@@ -58,12 +57,6 @@ model Game {
   fabled                   Fabled[]
 
   @@index([user_id])
-}
-
-enum WinStatus {
-  WIN
-  LOSS
-  NOT_RECORDED
 }
 
 enum WinStatus_V2 {
