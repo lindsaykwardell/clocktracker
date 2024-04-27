@@ -57,11 +57,11 @@
 import { Bar, Pie, PolarArea } from "vue-chartjs";
 import { colord, extend } from "colord";
 import mixPlugin from "colord/plugins/mix";
+import { WinStatus_V2 } from "~/composables/useGames";
 
 extend([mixPlugin]);
 
 const { Script, isBaseScript } = useScripts();
-const featureFlags = useFeatureFlags();
 
 const colors = {
   townsfolk: "#3297F4",
@@ -299,7 +299,35 @@ const datasets = computed(() => {
         games,
         [
           (game) => {
-            if (featureFlags.isEnabled("win_status_v2")) {
+            const lastAlignment =
+              game.player_characters[game.player_characters.length - 1]
+                ?.alignment;
+
+            return (
+              (lastAlignment === "GOOD" &&
+                game.win_v2 === WinStatus_V2.GOOD_WINS) ||
+              (lastAlignment === "EVIL" &&
+                game.win_v2 === WinStatus_V2.EVIL_WINS)
+            );
+          },
+          (game) => {
+            const lastAlignment =
+              game.player_characters[game.player_characters.length - 1]
+                ?.alignment;
+
+            return (
+              (lastAlignment === "GOOD" &&
+                game.win_v2 === WinStatus_V2.EVIL_WINS) ||
+              (lastAlignment === "EVIL" &&
+                game.win_v2 === WinStatus_V2.GOOD_WINS)
+            );
+          },
+        ],
+        [colors.win, colors.loss]
+      ) ?? [
+        {
+          data: [
+            games.filter((game) => {
               const lastAlignment =
                 game.player_characters[game.player_characters.length - 1]
                   ?.alignment;
@@ -310,12 +338,8 @@ const datasets = computed(() => {
                 (lastAlignment === "EVIL" &&
                   game.win_v2 === WinStatus_V2.EVIL_WINS)
               );
-            } else {
-              return game.win === WinStatus.WIN;
-            }
-          },
-          (game) => {
-            if (featureFlags.isEnabled("win_status_v2")) {
+            }).length,
+            games.filter((game) => {
               const lastAlignment =
                 game.player_characters[game.player_characters.length - 1]
                   ?.alignment;
@@ -326,46 +350,6 @@ const datasets = computed(() => {
                 (lastAlignment === "EVIL" &&
                   game.win_v2 === WinStatus_V2.GOOD_WINS)
               );
-            } else {
-              return game.win === WinStatus.LOSS;
-            }
-          },
-        ],
-        [colors.win, colors.loss]
-      ) ?? [
-        {
-          data: [
-            games.filter((game) => {
-              if (featureFlags.isEnabled("win_status_v2")) {
-                const lastAlignment =
-                  game.player_characters[game.player_characters.length - 1]
-                    ?.alignment;
-
-                return (
-                  (lastAlignment === "GOOD" &&
-                    game.win_v2 === WinStatus_V2.GOOD_WINS) ||
-                  (lastAlignment === "EVIL" &&
-                    game.win_v2 === WinStatus_V2.EVIL_WINS)
-                );
-              } else {
-                return game.win === WinStatus.WIN;
-              }
-            }).length,
-            games.filter((game) => {
-              if (featureFlags.isEnabled("win_status_v2")) {
-                const lastAlignment =
-                  game.player_characters[game.player_characters.length - 1]
-                    ?.alignment;
-
-                return (
-                  (lastAlignment === "GOOD" &&
-                    game.win_v2 === WinStatus_V2.EVIL_WINS) ||
-                  (lastAlignment === "EVIL" &&
-                    game.win_v2 === WinStatus_V2.GOOD_WINS)
-                );
-              } else {
-                return game.win === WinStatus.LOSS;
-              }
             }).length,
           ],
           backgroundColor: [colors.win, colors.loss],
@@ -569,21 +553,17 @@ function getPivot(
         data: validators.map(
           (validator) =>
             games.filter((game) => {
-              if (featureFlags.isEnabled("win_status_v2")) {
-                const lastAlignment =
-                  game.player_characters[game.player_characters.length - 1]
-                    ?.alignment;
+              const lastAlignment =
+                game.player_characters[game.player_characters.length - 1]
+                  ?.alignment;
 
-                return (
-                  ((lastAlignment === "GOOD" &&
-                    game.win_v2 === WinStatus_V2.GOOD_WINS) ||
-                    (lastAlignment === "EVIL" &&
-                      game.win_v2 === WinStatus_V2.EVIL_WINS)) &&
-                  validator(game)
-                );
-              } else {
-                return game.win === WinStatus.WIN && validator(game);
-              }
+              return (
+                ((lastAlignment === "GOOD" &&
+                  game.win_v2 === WinStatus_V2.GOOD_WINS) ||
+                  (lastAlignment === "EVIL" &&
+                    game.win_v2 === WinStatus_V2.EVIL_WINS)) &&
+                validator(game)
+              );
             }).length
         ),
         backgroundColor: getColor(colors.win),
@@ -593,21 +573,17 @@ function getPivot(
         data: validators.map(
           (validator) =>
             games.filter((game) => {
-              if (featureFlags.isEnabled("win_status_v2")) {
-                const lastAlignment =
-                  game.player_characters[game.player_characters.length - 1]
-                    ?.alignment;
+              const lastAlignment =
+                game.player_characters[game.player_characters.length - 1]
+                  ?.alignment;
 
-                return (
-                  ((lastAlignment === "GOOD" &&
-                    game.win_v2 === WinStatus_V2.EVIL_WINS) ||
-                    (lastAlignment === "EVIL" &&
-                      game.win_v2 === WinStatus_V2.GOOD_WINS)) &&
-                  validator(game)
-                );
-              } else {
-                return game.win === WinStatus.LOSS && validator(game);
-              }
+              return (
+                ((lastAlignment === "GOOD" &&
+                  game.win_v2 === WinStatus_V2.EVIL_WINS) ||
+                  (lastAlignment === "EVIL" &&
+                    game.win_v2 === WinStatus_V2.GOOD_WINS)) &&
+                validator(game)
+              );
             }).length
         ),
         backgroundColor: getColor(colors.loss),
