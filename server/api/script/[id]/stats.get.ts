@@ -1,22 +1,11 @@
-import {
-  PrismaClient,
-  Alignment,
-  Role,
-  WinStatus,
-  WinStatus_V2,
-} from "@prisma/client";
-import naturalOrder from "natural-order";
+import { PrismaClient, Alignment, WinStatus_V2 } from "@prisma/client";
 // @ts-ignore
 import dayjs from "dayjs";
-import { User } from "@supabase/supabase-js";
 
 const prisma = new PrismaClient();
 
 export default defineEventHandler(async (handler) => {
-  const me = handler.context.user as User | null;
   const script_id = +handler.context.params!.id;
-
-  const featureFlags = await useFeatureFlags(me);
 
   const script = await prisma.script.findFirst({
     where: {
@@ -116,23 +105,9 @@ export default defineEventHandler(async (handler) => {
   const good_win_count = games.reduce(
     (acc, game) => {
       let win = acc.win;
-      if (featureFlags.isEnabled("win-status-v2")) {
-        if (game.win_v2 === WinStatus_V2.GOOD_WINS) {
-          win = acc.win + 1;
-        }
-      } else {
-        if (game.is_storyteller) {
-          win = game.win === WinStatus.WIN ? acc.win + 1 : acc.win;
-        } else {
-          const last_character =
-            game.player_characters[game.player_characters.length - 1];
-          if (last_character) {
-            win =
-              last_character.alignment === Alignment.GOOD
-                ? acc.win + 1
-                : acc.win;
-          }
-        }
+
+      if (game.win_v2 === WinStatus_V2.GOOD_WINS) {
+        win = acc.win + 1;
       }
 
       return { total: acc.total + 1, win };
@@ -162,67 +137,30 @@ export default defineEventHandler(async (handler) => {
       (acc, game) => {
         let win = acc.win;
 
-        if (featureFlags.isEnabled("win-status-v2")) {
-          const character = (() => {
-            if (game.is_storyteller) {
-              return game.grimoire[game.grimoire.length - 1].tokens.find(
-                (token) =>
-                  token.role_id === role.id ||
-                  (token.role && token.role.name === role.name)
-              );
-            } else {
-              return game.player_characters[game.player_characters.length - 1];
-            }
-          })();
-
-          if (!character) return acc;
-
-          if (
-            game.win_v2 === WinStatus_V2.GOOD_WINS &&
-            character.alignment === Alignment.GOOD
-          ) {
-            win++;
-          } else if (
-            game.win_v2 === WinStatus_V2.EVIL_WINS &&
-            character.alignment === Alignment.EVIL
-          ) {
-            win++;
-          }
-        } else {
-          if (game.is_storyteller && game.grimoire.length > 0) {
-            const character = game.grimoire[
-              game.grimoire.length - 1
-            ]?.tokens.find(
+        const character = (() => {
+          if (game.is_storyteller) {
+            return game.grimoire[game.grimoire.length - 1].tokens.find(
               (token) =>
                 token.role_id === role.id ||
                 (token.role && token.role.name === role.name)
             );
-
-            if (!character) return acc;
-
-            if (
-              game.win === WinStatus.WIN &&
-              character.alignment === Alignment.GOOD
-            ) {
-              win++;
-            } else if (
-              game.win === WinStatus.LOSS &&
-              character.alignment === Alignment.EVIL
-            ) {
-              win++;
-            }
           } else {
-            const character =
-              game.player_characters[game.player_characters.length - 1];
-
-            if (
-              !character ||
-              !(character.role_id === role.id || character.name === role.name)
-            )
-              return acc;
-
-            win = game.win === WinStatus.WIN ? win + 1 : win;
+            return game.player_characters[game.player_characters.length - 1];
           }
+        })();
+
+        if (!character) return acc;
+
+        if (
+          game.win_v2 === WinStatus_V2.GOOD_WINS &&
+          character.alignment === Alignment.GOOD
+        ) {
+          win++;
+        } else if (
+          game.win_v2 === WinStatus_V2.EVIL_WINS &&
+          character.alignment === Alignment.EVIL
+        ) {
+          win++;
         }
 
         return { total: acc.total + 1, win };
