@@ -1,5 +1,5 @@
 import type { Config } from "tailwindcss";
-import * as colors from "tailwindcss/colors";
+import colors from "tailwindcss/colors";
 
 export default <Partial<Config>>{
   darkMode: "selector",
