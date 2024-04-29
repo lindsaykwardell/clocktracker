@@ -1,6 +1,6 @@
 <template>
   <NuxtPage />
-  <AnnouncementDialog id="db-outage">
+  <!-- <AnnouncementDialog id="db-outage">
     <template #title>
       <h1 class="text-2xl font-bold font-dumbledor">
         Unexpected Database Outage
@@ -21,7 +21,7 @@
       Please join our Discord server for any updates and further announcements.
       Thank you!
     </p>
-  </AnnouncementDialog>
+  </AnnouncementDialog> -->
   <VitePwaManifest />
 </template>
 
