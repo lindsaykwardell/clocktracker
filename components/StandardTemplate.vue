@@ -122,7 +122,7 @@
       </section>
     </nav>
     <main class="flex-grow">
-      <div
+      <!-- <div
         v-if="isInMaintenanceWindow"
         class="bg-purple-400 dark:bg-purple-950 p-2 min-h-[42px]"
       >
@@ -131,7 +131,7 @@
           experience some downtime. Please see our Discord community for
           updates.
         </p>
-      </div>
+      </div> -->
       <slot />
     </main>
   </div>
