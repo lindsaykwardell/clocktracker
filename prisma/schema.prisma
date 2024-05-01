@@ -364,28 +364,29 @@ model CommunityPost {
 }
 
 model Event {
-  id                 String             @id @default(uuid())
-  created_at         DateTime           @default(now()) @db.Timestamptz(6)
-  start              DateTime           @default(now()) @db.Timestamptz(6)
-  end                DateTime           @default(dbgenerated("(now() + '01:30:00'::interval)")) @db.Timestamptz(6)
-  title              String
-  description        String
-  player_count       Int?
-  location_type      LocationType       @default(ONLINE)
-  location           String
-  image              String?
-  storytellers       String[]
-  script             String             @default("")
-  script_id          Int?
-  associated_script  Script?            @relation(fields: [script_id], references: [id])
-  game_link          String?
-  short_link         String?            @unique
-  registered_players EventAttendee[]
-  community          Community?         @relation(fields: [community_id], references: [id])
-  community_id       Int?
-  who_can_register   WhoCanRegister     @default(COMMUNITY_MEMBERS)
-  waitlists          EventWaitlist[]
-  discord_posts      EventDiscordPost[]
+  id                   String                  @id @default(uuid())
+  created_at           DateTime                @default(now()) @db.Timestamptz(6)
+  start                DateTime                @default(now()) @db.Timestamptz(6)
+  end                  DateTime                @default(dbgenerated("(now() + '01:30:00'::interval)")) @db.Timestamptz(6)
+  title                String
+  description          String
+  player_count         Int?
+  location_type        LocationType            @default(ONLINE)
+  location             String
+  image                String?
+  storytellers         String[]
+  script               String                  @default("")
+  script_id            Int?
+  associated_script    Script?                 @relation(fields: [script_id], references: [id])
+  game_link            String?
+  short_link           String?                 @unique
+  registered_players   EventAttendee[]
+  community            Community?              @relation(fields: [community_id], references: [id])
+  community_id         Int?
+  who_can_register     WhoCanRegister          @default(COMMUNITY_MEMBERS)
+  waitlists            EventWaitlist[]
+  discord_posts        EventDiscordPost[]
+  restricted_attendees EventRegistrationSpam[]
 }
 
 model EventDiscordPost {
@@ -436,4 +437,17 @@ model EventWaitlistAttendee {
   discord_user_id String?
   created_at      DateTime      @default(now()) @db.Timestamptz(6)
   ip_address      String?
+}
+
+// Model for any IP address of an anonymous user who has registered for an event
+// too many times.
+model EventRegistrationSpam {
+  id         Int      @id @default(autoincrement())
+  ip_address String
+  name       String
+  event_id   String
+  event      Event    @relation(fields: [event_id], references: [id])
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([ip_address, event_id])
 }
