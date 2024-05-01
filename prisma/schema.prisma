@@ -413,6 +413,7 @@ model EventAttendee {
   user_id         String?
   discord_user_id String?
   created_at      DateTime      @default(now()) @db.Timestamptz(6)
+  ip_address      String?
 }
 
 model EventWaitlist {
@@ -434,4 +435,5 @@ model EventWaitlistAttendee {
   user_id         String?
   discord_user_id String?
   created_at      DateTime      @default(now()) @db.Timestamptz(6)
+  ip_address      String?
 }
