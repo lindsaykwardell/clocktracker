@@ -39,6 +39,28 @@ export default defineEventHandler(async (handler) => {
         // The number of minutes is based on the number of requests made, with a minimum of 5 minutes.
         // For example, if the user has made 6 requests, they must wait 30 minutes before trying again.
         if (diffMinutes < required_cooldown && registered_at.requests >= 5) {
+          // Reject the user
+          // Log who they are
+
+          const existing_record = await prisma.eventRegistrationSpam.findUnique({
+            where: {
+              ip_address_event_id: {
+                event_id,
+                ip_address,
+              },
+            },
+          });
+
+          if (!existing_record) {
+            await prisma.eventRegistrationSpam.create({
+              data: {
+                ip_address,
+                event_id,
+                name: body?.name || "",
+              },
+            });
+          }
+
           throw createError({
             status: 429,
             statusMessage:
