@@ -266,27 +266,31 @@ function initRegister(waitlistId?: number) {
 
 async function register(name: string, waitlistId?: number) {
   inFlight.value = true;
-  if (alreadyRegistered.value) {
-    event.value = await $fetch<EventView>(
-      `/api/community/${slug}/event/${eventId}/register`,
-      {
-        method: "DELETE",
-      }
-    );
-  } else {
-    event.value = await $fetch<EventView>(
-      `/api/community/${slug}/event/${eventId}/register`,
-      {
-        method: "POST",
-        body: JSON.stringify({
-          name,
-          waitlist_id: waitlistId,
-        }),
-      }
-    );
+  try {
+    if (alreadyRegistered.value) {
+      event.value = await $fetch<EventView>(
+        `/api/community/${slug}/event/${eventId}/register`,
+        {
+          method: "DELETE",
+        }
+      );
+    } else {
+      event.value = await $fetch<EventView>(
+        `/api/community/${slug}/event/${eventId}/register`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            name,
+            waitlist_id: waitlistId,
+          }),
+        }
+      );
 
-    showRegisterDialog.value = false;
-    attendeeName.value = "";
+      showRegisterDialog.value = false;
+      attendeeName.value = "";
+    }
+  } catch (e) {
+    alert((e as { statusMessage: string }).statusMessage);
   }
   inFlight.value = false;
 }
