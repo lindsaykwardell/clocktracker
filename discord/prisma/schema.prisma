@@ -45,7 +45,6 @@ model Game {
   privacy                  PrivacySetting @default(PUBLIC)
   community_name           String         @default("")
   community_id             Int?
-  win                      WinStatus
   win_v2                   WinStatus_V2   @default(NOT_RECORDED)
   player_characters        Character[]
   demon_bluffs             DemonBluff[]
@@ -307,28 +306,29 @@ model CommunityPost {
 }
 
 model Event {
-  id                 String             @id @default(uuid())
-  created_at         DateTime           @default(now()) @db.Timestamptz(6)
-  start              DateTime           @default(now()) @db.Timestamptz(6)
-  end                DateTime           @default(dbgenerated("(now() + '01:30:00'::interval)")) @db.Timestamptz(6)
-  title              String
-  description        String
-  player_count       Int?
-  community_id       Int?
-  location           String
-  location_type      LocationType       @default(ONLINE)
-  image              String?
-  who_can_register   WhoCanRegister     @default(COMMUNITY_MEMBERS)
-  script             String             @default("")
-  script_id          Int?
-  storytellers       String[]
-  game_link          String?
-  short_link         String?            @unique
-  community          Community?         @relation(fields: [community_id], references: [id])
-  Script             Script?            @relation(fields: [script_id], references: [id])
-  registered_players EventAttendee[]
-  EventDiscordPost   EventDiscordPost[]
-  waitlists          EventWaitlist[]
+  id                    String                  @id @default(uuid())
+  created_at            DateTime                @default(now()) @db.Timestamptz(6)
+  start                 DateTime                @default(now()) @db.Timestamptz(6)
+  end                   DateTime                @default(dbgenerated("(now() + '01:30:00'::interval)")) @db.Timestamptz(6)
+  title                 String
+  description           String
+  player_count          Int?
+  community_id          Int?
+  location              String
+  location_type         LocationType            @default(ONLINE)
+  image                 String?
+  who_can_register      WhoCanRegister          @default(COMMUNITY_MEMBERS)
+  script                String                  @default("")
+  script_id             Int?
+  storytellers          String[]
+  game_link             String?
+  short_link            String?                 @unique
+  community             Community?              @relation(fields: [community_id], references: [id])
+  Script                Script?                 @relation(fields: [script_id], references: [id])
+  registered_players    EventAttendee[]
+  EventDiscordPost      EventDiscordPost[]
+  EventRegistrationSpam EventRegistrationSpam[]
+  waitlists             EventWaitlist[]
 }
 
 model EventAttendee {
@@ -338,6 +338,7 @@ model EventAttendee {
   user_id         String?
   created_at      DateTime      @default(now()) @db.Timestamptz(6)
   discord_user_id String?
+  ip_address      String?
   event           Event         @relation(fields: [event_id], references: [id], onDelete: Cascade)
   user            UserSettings? @relation(fields: [user_id], references: [user_id])
 }
@@ -359,6 +360,7 @@ model EventWaitlistAttendee {
   user_id         String?
   created_at      DateTime      @default(now()) @db.Timestamptz(6)
   discord_user_id String?
+  ip_address      String?
   user            UserSettings? @relation(fields: [user_id], references: [user_id])
   waitlist        EventWaitlist @relation(fields: [waitlist_id], references: [id], onDelete: Cascade)
 }
@@ -383,10 +385,15 @@ model KoFiPayment {
   UserSettings            UserSettings? @relation(fields: [user_id], references: [user_id])
 }
 
-enum WinStatus {
-  WIN
-  LOSS
-  NOT_RECORDED
+model EventRegistrationSpam {
+  id         Int      @id @default(autoincrement())
+  ip_address String
+  name       String
+  event_id   String
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  Event      Event    @relation(fields: [event_id], references: [id])
+
+  @@unique([ip_address, event_id])
 }
 
 enum Alignment {
