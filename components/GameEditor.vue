@@ -675,6 +675,7 @@ const games = useGames();
 const friends = useFriends();
 const { isBaseScript, fetchScriptVersions } = useScripts();
 const featureFlags = useFeatureFlags();
+const allRoles = useRoles();
 
 const advancedModeEnabled_ = useLocalStorage("advancedModeEnabled", "false");
 
@@ -1013,16 +1014,7 @@ watchEffect(async () => {
     scriptVersions.value = await fetchScriptVersions(props.game.script_id);
     fetchingScriptVersions.value = false;
   } else {
-    const result = await $fetch<
-      {
-        type: RoleType;
-        id: string;
-        token_url: string;
-        name: string;
-        initial_alignment: Alignment;
-      }[]
-    >("/api/roles");
-    roles.value = result ?? [];
+    roles.value = allRoles.getAllRoles();
   }
 });
 
