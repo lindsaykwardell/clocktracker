@@ -129,6 +129,38 @@ export async function handleRegisterButtonClick(i) {
     }
   }
 
+  if (selection === "unregister") {
+    await prisma.eventAttendee.deleteMany({
+      where: {
+        event_id: event.id,
+        OR: [
+          {
+            user_id,
+          },
+          {
+            discord_user_id,
+          },
+        ],
+      },
+    });
+
+    await prisma.eventWaitlistAttendee.deleteMany({
+      where: {
+        waitlist: {
+          event_id: event.id,
+        },
+        OR: [
+          {
+            user_id,
+          },
+          {
+            discord_user_id,
+          },
+        ],
+      },
+    });
+  }
+
   if (event.waitlists) {
     for (const waitlist of event.waitlists) {
       if (+selection === waitlist.id) {
@@ -362,6 +394,11 @@ export function generateEmbed(
     .setLabel("Register")
     .setStyle(ButtonStyle.Primary);
 
+  const unregisterButton = new ButtonBuilder()
+    .setCustomId("unregister")
+    .setLabel("Unregister")
+    .setStyle(ButtonStyle.Danger);
+
   const row = new ActionRowBuilder().addComponents(registerButton);
 
   for (const waitlist of event.waitlists) {
@@ -372,6 +409,8 @@ export function generateEmbed(
 
     row.addComponents(waitlistButton);
   }
+
+  row.addComponents(unregisterButton);
 
   return { embed, row };
 }
