@@ -411,7 +411,7 @@
                 </MenuItem>
                 <MenuItem>
                   <button
-                    @click="deleteGame"
+                    @click="deleteGame(false)"
                     class="flex gap-1 w-full items-center dark:text-white text-sm px-2"
                   >
                     <svg
@@ -439,6 +439,35 @@
                       >Ignore</template
                     >
                     <template v-else>Delete</template>
+                  </button>
+                </MenuItem>
+                <MenuItem v-if="game.data.waiting_for_confirmation">
+                  <button
+                    @click="deleteGame(true)"
+                    class="flex gap-1 w-full items-center dark:text-white text-sm px-2"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="32"
+                      height="32"
+                      viewBox="0 0 512 512"
+                      class="w-4"
+                    >
+                      <path
+                        d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
+                        fill="currentColor"
+                      />
+                      <path d="M249 160h14v241h-14z" fill="currentColor" />
+                      <path
+                        d="M320 160h-14.6l-10.7 241h14.6z"
+                        fill="currentColor"
+                      />
+                      <path
+                        d="M206.5 160H192l10.7 241h14.6z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                    Ignore and Untag Myself
                   </button>
                 </MenuItem>
               </div>
@@ -472,13 +501,6 @@
                     Post to BGStats
                   </a>
                 </MenuItem>
-                <button
-                  v-if="game.data.waiting_for_confirmation"
-                  @click="confirmGame"
-                  class="bg-stone-600 hover:bg-stone-700 transition duration-150 dark:text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial"
-                >
-                  Add game to my Profile
-                </button>
               </div>
             </MenuItems>
           </transition>
@@ -689,9 +711,15 @@ function scriptLink(game: GameRecord) {
   )}&script_type=&include=&exclude=&edition=&author=`;
 }
 
-async function deleteGame() {
-  if (confirm("Are you sure you want to delete this game?")) {
-    const result = await $fetch(`/api/games/${route.params.id}`, {
+async function deleteGame(alsoUntagMyself: boolean) {
+  if (
+    confirm(
+      `Are you sure you want to delete this game${
+        alsoUntagMyself ? " and untag yourself" : ""
+      }?`
+    )
+  ) {
+    const result = await $fetch(`/api/games/${route.params.id}?untag=${alsoUntagMyself}`, {
       method: "delete",
     });
 
