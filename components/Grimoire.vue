@@ -1,5 +1,5 @@
 <template>
-  <div id="grimoire" class="container m-auto " :style="`--m: ${tokens.length}`">
+  <div id="grimoire" class="container m-auto" :style="`--m: ${tokens.length}`">
     <div v-for="(token, index) in orderedTokens" :style="`--i: ${index}`">
       <div
         class="token-seat relative flex flex-col"
@@ -268,11 +268,11 @@ const orderedTokens = computed(() =>
 );
 
 const reminders = computed(() => {
-  const travelers = roles.getRoleByType(RoleType.TRAVELER);
   const fabled = roles.getRoleByType(RoleType.FABLED);
   return roles.getRemindersForRoles([
-    ...(props.availableRoles?.map((r) => r.id) ?? []),
-    ...travelers.map((r) => r.id),
+    ...(props.availableRoles
+      ?.filter((r) => props.tokens.map((t) => t.role_id).includes(r.id))
+      .map((r) => r.id) ?? []),
     ...fabled.map((r) => r.id),
   ]);
 });
