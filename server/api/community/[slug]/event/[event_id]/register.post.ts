@@ -5,13 +5,94 @@ import { fetchEventAndUpdateDiscord } from "~/server/utils/fetchEventAndUpdateDi
 const prisma = new PrismaClient();
 
 export default defineEventHandler(async (handler) => {
+  const storage = useStorage();
+  const ip_address = getRequestIP(handler, { xForwardedFor: true });
+  const event_id = handler.context.params!.event_id;
   const me: User | null = handler.context.user;
   const slug = handler.context.params!.slug;
-  const event_id = handler.context.params!.event_id;
   const body = await readBody<{
     name: string;
     waitlist_id?: number;
   } | null>(handler);
+
+  // Only implement spam protection if the user is not logged in.
+  // This is _specifically_ for the case where a user is not logged in and is spamming the registration
+  // endpoint.
+  if (ip_address && !me) {
+    if (await storage.hasItem(ip_address)) {
+      const registered_at = await storage.getItem<{
+        last: string;
+        requests: number;
+      }>(ip_address);
+
+      if (registered_at) {
+        const registered_at_date = new Date(registered_at.last);
+        const now = new Date();
+
+        const diff = now.getTime() - registered_at_date.getTime();
+        const diffMinutes = Math.floor(diff / 60000);
+
+        const required_cooldown =
+          5 * (registered_at.requests <= 5 ? 1 : registered_at.requests - 5);
+
+        // If the user has registered too many times in the last n minutes, throw a 429.
+        // The number of minutes is based on the number of requests made, with a minimum of 5 minutes.
+        // For example, if the user has made 6 requests, they must wait 30 minutes before trying again.
+        if (diffMinutes < required_cooldown && registered_at.requests >= 5) {
+          // Reject the user
+          // Log who they are
+
+          const existing_record = await prisma.eventRegistrationSpam.findUnique({
+            where: {
+              ip_address_event_id: {
+                event_id,
+                ip_address,
+              },
+            },
+          });
+
+          if (!existing_record) {
+            await prisma.eventRegistrationSpam.create({
+              data: {
+                ip_address,
+                event_id,
+                name: body?.name || "",
+              },
+            });
+          }
+
+          throw createError({
+            status: 429,
+            statusMessage:
+              "You have attempted to register too many times. Please wait a few minutes and try again.",
+          });
+        }
+        // If the user has registered more than 5 times, but it's been more than 5 times the number
+        // of requests since the last registration times 2, reset the count.
+        else if (diffMinutes >= required_cooldown * 2) {
+          storage.setItem(ip_address, {
+            last: new Date().toISOString(),
+            requests: 1,
+          });
+        } else {
+          storage.setItem(ip_address, {
+            last: registered_at.last,
+            requests: registered_at.requests + 1,
+          });
+        }
+      } else {
+        storage.setItem(ip_address, {
+          last: new Date().toISOString(),
+          requests: 1,
+        });
+      }
+    } else {
+      storage.setItem(ip_address, {
+        last: new Date().toISOString(),
+        requests: 1,
+      });
+    }
+  }
 
   if (!body) {
     throw createError({
@@ -42,7 +123,7 @@ export default defineEventHandler(async (handler) => {
         },
         {
           who_can_register: WhoCanRegister.PRIVATE,
-        }
+        },
       ],
     },
     select: {
@@ -95,6 +176,7 @@ export default defineEventHandler(async (handler) => {
         waitlist_id: body.waitlist_id,
         user_id: me?.id || null,
         name: body.name,
+        ip_address,
       },
     });
   } else if (!event.player_count) {
@@ -104,6 +186,7 @@ export default defineEventHandler(async (handler) => {
         event_id: event.id,
         user_id: me?.id || null,
         name: body.name,
+        ip_address,
       },
     });
   } else if (event.registered_players.length < event.player_count) {
@@ -113,6 +196,7 @@ export default defineEventHandler(async (handler) => {
         event_id: event.id,
         user_id: me?.id || null,
         name: body.name,
+        ip_address,
       },
     });
   } else if (event.waitlists.find((w) => w.default)) {
@@ -122,6 +206,7 @@ export default defineEventHandler(async (handler) => {
         waitlist_id: event.waitlists.find((w) => w.default)!.id,
         user_id: me?.id || null,
         name: body.name,
+        ip_address,
       },
     });
   } else {
@@ -131,6 +216,7 @@ export default defineEventHandler(async (handler) => {
         event_id: event.id,
         user_id: me?.id || null,
         name: body.name,
+        ip_address,
       },
     });
   }
