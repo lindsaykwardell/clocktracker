@@ -354,12 +354,22 @@ export default defineEventHandler(async (handler) => {
         },
       });
     } else {
-      console.log(relatedGame.demon_bluffs.map((g) => ({ id: g.id })));
       await prisma.game.update({
         where: {
           id: relatedGame.id,
         },
         data: {
+          date: body.date,
+          script: body.script,
+          script_id: body.script_id,
+          location_type: body.location_type,
+          location: body.location,
+          community_name: body.community_name,
+          community_id: body.community_id,
+          player_count: body.player_count,
+          traveler_count: body.traveler_count,
+          storyteller: body.storyteller,
+          co_storytellers: body.co_storytellers,
           win_v2: body.win_v2,
           demon_bluffs: {
             deleteMany: relatedGame.demon_bluffs.map((g) => ({ id: g.id })),
@@ -441,6 +451,18 @@ export default defineEventHandler(async (handler) => {
               id: childGame.id,
             },
             data: {
+              date: body.date,
+              script: body.script,
+              script_id: body.script_id,
+              location_type: body.location_type,
+              location: body.location,
+              community_name: body.community_name,
+              community_id: body.community_id,
+              player_count: body.player_count,
+              traveler_count: body.traveler_count,
+              storyteller: body.storyteller,
+              co_storytellers: body.co_storytellers,
+              win_v2: body.win_v2,
               demon_bluffs: {
                 deleteMany: childGame.demon_bluffs.map((g) => ({ id: g.id })),
                 create: game.demon_bluffs.map((g) => ({
