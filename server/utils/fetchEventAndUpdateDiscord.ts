@@ -243,6 +243,11 @@ export async function fetchEventAndUpdateDiscord(event_id: string) {
             .setLabel("Register")
             .setStyle(ButtonStyle.Primary);
 
+          const unregisterButton = new ButtonBuilder()
+            .setCustomId("unregister")
+            .setLabel("Unregister")
+            .setStyle(ButtonStyle.Danger);
+
           const row = new ActionRowBuilder().addComponents(registerButton);
 
           for (const waitlist of event.waitlists) {
@@ -253,6 +258,8 @@ export async function fetchEventAndUpdateDiscord(event_id: string) {
 
             row.addComponents(waitlistButton);
           }
+
+          row.addComponents(unregisterButton);
 
           await message[1].edit({
             embeds: [embed],

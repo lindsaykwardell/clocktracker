@@ -121,10 +121,6 @@ export default defineEventHandler(async (handler) => {
     },
   });
 
-  const parentGameLastAlignment =
-    newGame.player_characters[newGame.player_characters.length - 1]
-      ?.alignment || Alignment.NEUTRAL;
-
   const taggedPlayers = new Set(
     newGame.grimoire.flatMap((g) => g.tokens?.map((t) => t.player_id))
   );
@@ -161,9 +157,6 @@ export default defineEventHandler(async (handler) => {
 
       return acc;
     }, [] as { name: string; alignment: Alignment; related: string; role_id: string | null; related_role_id: string | null }[]);
-
-    const lastAlignment =
-      player_characters[player_characters.length - 1].alignment;
 
     await prisma.game.create({
       data: {

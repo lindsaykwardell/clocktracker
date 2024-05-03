@@ -20,7 +20,6 @@ jobs:
 
   fly:
     name: Deploy app
-    needs: discord
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
