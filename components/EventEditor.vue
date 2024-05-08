@@ -212,6 +212,16 @@
       >
         Upload Image
       </Button>
+      <Button
+        v-if="event.image"
+        type="button"
+        @click="removeFile"
+        tertiary
+        class="w-full mt-2"
+        font-size="sm"
+      >
+        Remove Image
+      </Button>
     </div>
     <Button type="submit" id="save-game" :disabled="inFlight" primary>
       <template v-if="inFlight">
@@ -277,6 +287,10 @@ function uploadFile() {
   input.accept = "image/jpg, image/jpeg, image/png";
   input.onchange = selectFiles;
   input.click();
+}
+
+function removeFile() {
+  props.event.image = null;
 }
 
 async function selectFiles(e: Event) {
