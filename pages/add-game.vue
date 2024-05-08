@@ -13,6 +13,16 @@
       </p>
       <ClientOnly>
         <GameEditor :game="game" @submit="submitGame" :inFlight="inFlight" />
+        <Button
+          @click="resetGame"
+          type="button"
+          id="reset-game"
+          class="w-[300px] m-auto"
+          secondary
+          :disabled="inFlight"
+        >
+          Reset Game
+        </Button>
       </ClientOnly>
     </section>
   </StandardTemplate>
@@ -180,6 +190,17 @@ const game = reactive<{
   privacy: userSettings.data.value?.privacy || "PUBLIC",
 });
 
+watch(game, () => {
+  localStorage.setItem("draftGame", JSON.stringify(game));
+});
+
+onMounted(() => {
+  const draftGame = localStorage.getItem("draftGame");
+  if (draftGame) {
+    Object.assign(game, JSON.parse(draftGame));
+  }
+});
+
 const formattedGame = computed(() => ({
   ...game,
   player_count: game.player_count || null,
@@ -226,8 +247,78 @@ async function submitGame() {
       inFlight.value = false;
       console.error(error.value);
     } else {
+      localStorage.removeItem("draftGame");
       router.push(`/game/${data.value?.id}`);
     }
+  }
+}
+
+function resetGame() {
+  if (confirm("Are you sure you want to reset your game details?")) {
+    localStorage.removeItem("draftGame");
+    Object.assign(game, {
+      date: dayjs().format("YYYY-MM-DD"),
+      script: "",
+      script_id: null,
+      storyteller: "",
+      co_storytellers: [],
+      is_storyteller: false,
+      location_type: "ONLINE",
+      location: "",
+      community_name: "",
+      community_id: null,
+      player_count: null,
+      traveler_count: null,
+      player_characters: [
+        {
+          name: "",
+          alignment: "NEUTRAL",
+          related: "",
+          showRelated: false,
+          role_id: null,
+          related_role_id: null,
+          role: {
+            token_url: "/1x1.png",
+            name: "",
+            type: "",
+            initial_alignment: "NEUTRAL",
+          },
+          related_role: {
+            token_url: "/1x1.png",
+          },
+        },
+      ],
+      demon_bluffs: [
+        // {
+        //   name: "",
+        //   role_id: null,
+        //   role: {
+        //     token_url: "/1x1.png",
+        //     type: "",
+        //   },
+        // },
+      ],
+      fabled: [
+        // {
+        //   name: "",
+        //   role_id: null,
+        //   role: {
+        //     token_url: "/1x1.png",
+        //   },
+        // },
+      ],
+      win_v2: WinStatus_V2.NOT_RECORDED,
+      notes: "",
+      image_urls: [],
+      grimoire: [
+        {
+          tokens: [],
+        },
+      ],
+      ignore_for_stats: false,
+      tags: [],
+      privacy: userSettings.data.value?.privacy || "PUBLIC",
+    });
   }
 }
 </script>
