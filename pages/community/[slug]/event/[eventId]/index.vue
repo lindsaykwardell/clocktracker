@@ -9,6 +9,7 @@
     >
       <template #register>
         <Button
+          v-if="shareIsSupported || copyIsSupported"
           class="py-2 px-4"
           font-size="md"
           @click="getShareLink"
@@ -198,6 +199,7 @@
 <script setup lang="ts">
 import type { Event } from "~/composables/useCommunities";
 import dayjs from "dayjs";
+import { useShare, useClipboard } from "@vueuse/core";
 
 type EventView = Event & {
   community: {
@@ -219,6 +221,21 @@ const inFlight = ref(false);
 const event = ref<EventView>(
   await $fetch<EventView>(`/api/community/${slug}/event/${eventId}`)
 );
+
+const shareDetails = ref({
+  title: event.value.title,
+  text: event.value.description,
+  url: "",
+});
+
+const copySource = computed(() => shareDetails.value.url);
+
+const { share, isSupported: shareIsSupported } = useShare(shareDetails);
+const {
+  copy,
+  copied,
+  isSupported: copyIsSupported,
+} = useClipboard({ source: copySource, legacy: true });
 
 let poll: NodeJS.Timeout | null = null;
 
@@ -298,12 +315,19 @@ async function register(name: string, waitlistId?: number) {
 const showShareTooltip = ref(false);
 
 async function getShareLink() {
-  const short_link = await $fetch(`/api/events/${eventId}/share`);
-  navigator.clipboard.writeText(short_link);
-  showShareTooltip.value = true;
-  setTimeout(() => {
-    showShareTooltip.value = false;
-  }, 2000);
+  shareDetails.value.url = await $fetch(`/api/events/${eventId}/share`);
+
+  if (shareIsSupported.value) {
+    await share();
+  } else if (copyIsSupported.value) {
+    await copy();
+    if (copied.value) {
+      showShareTooltip.value = true;
+      setTimeout(() => {
+        showShareTooltip.value = false;
+      }, 2000);
+    }
+  }
 }
 
 useHead({
