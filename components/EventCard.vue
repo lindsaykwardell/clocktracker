@@ -7,18 +7,17 @@
     />
     <div class="p-3 flex flex-col gap-2">
       <div
-        class="flex flex-col md:flex-row text-stone-500 dark:text-stone-400 items-center"
+        class="flex flex-row text-stone-500 dark:text-stone-400 items-center"
       >
         <div class="flex-grow">
           <ClientOnly>
             <time
-              >{{ formatDate(event.start) }} ﹒
-              {{ formatTime(event.start) }}</time
+              >{{ formatDate(event.start) }} {{ formatTime(event.start) }}</time
             >
             - <time>{{ formatTime(event.end) }}</time>
           </ClientOnly>
         </div>
-        <div>
+        <div class="hidden md:block">
           <template v-if="event.location_type === 'ONLINE'"> Online </template>
           <template v-else>
             {{ event.location }}
@@ -49,7 +48,7 @@
               leave-to-class="transform scale-95 opacity-0"
             >
               <MenuItems
-                class="absolute right-0 z-10 bg-stone-100 dark:bg-stone-900 rounded shadow-md whitespace-nowrap flex flex-col items-start min-w-[150px]"
+                class="absolute right-0 z-10 bg-stone-100 dark:bg-stone-800 rounded shadow-md whitespace-nowrap flex flex-col items-start min-w-[150px]"
               >
                 <MenuItem>
                   <nuxt-link
@@ -79,6 +78,12 @@
             </transition>
           </Menu>
         </div>
+      </div>
+      <div class="block md:hidden text-stone-500 dark:text-stone-400">
+        <template v-if="event.location_type === 'ONLINE'"> Online </template>
+        <template v-else>
+          {{ event.location }}
+        </template>
       </div>
       <h2 class="font-dumbledor text-lg lg:text-xl">{{ event.title }}</h2>
       <VueMarkdown
