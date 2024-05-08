@@ -7,95 +7,76 @@
       <div class="flex-grow flex justify-center items-center">
         <Chart class="py-6 m-auto" :games="myGames.data" :options="options" />
       </div>
-      <div class="p-6 m-6 bg-stone-950 flex flex-col gap-2">
+      <div
+        class="p-6 m-6 border border-black rounded dark:border-transparent dark:bg-stone-950 flex flex-col gap-2"
+      >
         <div class="flex gap-2">
           <label class="flex items-center gap-1 flex-grow">
             Title
-            <input
-              type="text"
-              class="flex-grow block border border-stone-500 rounded-md p-2"
-              v-model="options.title"
-            />
+            <Input type="text" v-model="options.title" />
           </label>
         </div>
         <div class="flex flex-col md:flex-row gap-2 w-full">
           <label class="flex-1 flex items-center gap-1">
             <span class="w-[150px] md:w-auto">Chart Type</span>
-            <select
-              class="block border w-full border-stone-500 rounded-md p-2"
-              v-model="options.type"
-            >
+            <Input mode="select" v-model="options.type">
               <option value="LIST">List</option>
               <option value="BAR">Bar</option>
               <option value="PIE">Pie</option>
               <option value="POLAR_AREA">Polar Area</option>
-            </select>
+            </Input>
           </label>
           <label class="flex-1 flex items-center gap-1">
             <span class="w-[150px] md:w-auto">Data Field</span>
-            <select
-              class="block border w-full border-stone-500 rounded-md p-2"
-              v-model="options.data"
-            >
+            <Input mode="select" v-model="options.data">
               <option value="ALIGNMENT">Alignment</option>
               <option value="GAME_SIZE">Game Size</option>
               <option value="ROLE">Role</option>
               <option value="SCRIPT">Script</option>
               <option value="WIN">Win</option>
-            </select>
+            </Input>
           </label>
           <!-- refactor the below radio buttons into a select dropdown -->
           <label class="flex-1 flex items-center gap-1">
             <span class="w-[150px] md:w-auto">Pivot Field</span>
-            <select
-              class="block border w-full border-stone-500 rounded-md p-2"
-              v-model="options.pivot"
-            >
+            <Input mode="select" v-model="options.pivot">
               <option :value="null">Do not pivot</option>
               <option value="ALIGNMENT">Alignment</option>
               <option value="GAME_SIZE">Game Size</option>
               <option value="ROLE">Role</option>
               <option value="SCRIPT">Script</option>
               <option value="WIN">Win</option>
-            </select>
+            </Input>
           </label>
           <label class="flex-1 flex items-center gap-1">
             <span class="w-[150px] md:w-auto">Width</span>
-            <input
-              type="number"
-              class="block border w-full border-stone-500 rounded-md p-2"
-              v-model="options.width"
-              placeholder="250"
-            />
+            <Input type="number" v-model="options.width" placeholder="250" />
           </label>
           <label class="flex-1 flex items-center gap-1">
             <span class="w-[150px] md:w-auto">Height</span>
-            <input
-              type="number"
-              class="block border w-full border-stone-500 rounded-md p-2"
-              v-model="options.height"
-              placeholder="250"
-            />
+            <Input type="number" v-model="options.height" placeholder="250" />
           </label>
         </div>
         <div class="flex flex-col md:flex-row gap-2 justify-between">
           <div class="flex-1 flex gap-1">
-            <select v-model="selectedIncludeTag" class="rounded p-1 w-[120px]">
-              <option :value="null">Include Tag</option>
-              <option
-                v-for="tag in myTags.filter(
-                  (tag) =>
-                    !options.include_tags.includes(tag) &&
-                    !options.exclude_tags.includes(tag)
-                )"
-              >
-                {{ tag }}
-              </option>
-            </select>
+            <div class="w-[120px]">
+              <Input mode="select" v-model="selectedIncludeTag">
+                <option :value="null">Include Tag</option>
+                <option
+                  v-for="tag in myTags.filter(
+                    (tag) =>
+                      !options.include_tags.includes(tag) &&
+                      !options.exclude_tags.includes(tag)
+                  )"
+                >
+                  {{ tag }}
+                </option>
+              </Input>
+            </div>
             <div class="flex flex-wrap gap-2">
               <button
                 v-for="(tag, index) in options.include_tags"
-                class="bg-blue-600 hover:bg-blue-700 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
+                class="bg-blue-200 hover:bg-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
                 @click.prevent="options.include_tags.splice(index, 1)"
               >
                 {{ tag }}
@@ -103,22 +84,24 @@
             </div>
           </div>
           <div class="flex-1 flex gap-1">
-            <select v-model="selectedExcludeTag" class="rounded p-1 w-[120px]">
-              <option :value="null">Exclude Tag</option>
-              <option
-                v-for="tag in myTags.filter(
-                  (tag) =>
-                    !options.include_tags.includes(tag) &&
-                    !options.exclude_tags.includes(tag)
-                )"
-              >
-                {{ tag }}
-              </option>
-            </select>
+            <div class="w-[120px]">
+              <Input mode="select" v-model="selectedExcludeTag">
+                <option :value="null">Exclude Tag</option>
+                <option
+                  v-for="tag in myTags.filter(
+                    (tag) =>
+                      !options.include_tags.includes(tag) &&
+                      !options.exclude_tags.includes(tag)
+                  )"
+                >
+                  {{ tag }}
+                </option>
+              </Input>
+            </div>
             <div class="flex flex-wrap gap-2">
               <button
                 v-for="(tag, index) in options.exclude_tags"
-                class="bg-red-600 hover:bg-red-700 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
+                class="bg-red-200 hover:bg-red-300 dark:bg-red-600 dark:hover:bg-red-700 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
                 @click.prevent="options.exclude_tags.splice(index, 1)"
               >
                 {{ tag }}
@@ -238,15 +221,3 @@ onMounted(async () => {
   }
 });
 </script>
-
-<style scoped>
-input,
-select {
-  height: 2.5rem;
-  @apply text-lg bg-stone-600;
-}
-
-textarea {
-  @apply text-lg bg-stone-600;
-}
-</style>
