@@ -268,6 +268,9 @@ export default defineEventHandler(async (handler) => {
             gte: new Date(),
           },
         },
+        orderBy: {
+          start: "asc",
+        }
       },
     },
   });
