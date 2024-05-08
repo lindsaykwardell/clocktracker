@@ -747,9 +747,11 @@ async function confirmMergeGame(game: GameRecord) {
       body: game,
     });
 
-    games.games.delete(gameId);
+    games.games.delete(game.id);
 
-    router.push(`/game/${result.id}`);
+    games.games.set(gameId, { status: Status.SUCCESS, data: result });
+    mergeInFlight.value = false;
+    showSimilarGamesDialog.value = false;
   }
 }
 
