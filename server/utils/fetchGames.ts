@@ -213,17 +213,17 @@ export async function fetchGames(user_id: string, me: User | null) {
       //     },
       //   },
       // },
-      // grimoire: {
-      //   include: {
-      //     tokens: {
-      //       include: {
-      //         role: true,
-      //         related_role: true,
-      //         reminders: true,
-      //       },
-      //     },
-      //   },
-      // },
+      grimoire: {
+        include: {
+          tokens: {
+            include: {
+              role: true,
+              related_role: true,
+              reminders: true,
+            },
+          },
+        },
+      },
       // parent_game: {
       //   select: {
       //     user: {
@@ -285,7 +285,7 @@ export async function fetchGames(user_id: string, me: User | null) {
       await anonymizeGame(
         {
           ...game,
-          grimoire: [],
+          // grimoire: [],
           demon_bluffs: [],
           fabled: [],
         } as GameRecord,
