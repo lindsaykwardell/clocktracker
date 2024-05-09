@@ -71,6 +71,23 @@
                   </option>
                 </select>
               </label>
+              <label class="flex gap-2 items-center">
+                <select
+                  v-model="selectedPlayer"
+                  class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
+                  aria-label="Tags"
+                >
+                  <option :value="null">Filter by player</option>
+                  <option
+                    v-for="player in mySelectedPlayers.filter(
+                      (player) => !selectedPlayers.includes(player)
+                    )"
+                    :key="player"
+                  >
+                    {{ player }}
+                  </option>
+                </select>
+              </label>
             </div>
             <div class="flex-grow"></div>
             <div class="flex gap-2 items-center justify-end">
@@ -129,6 +146,13 @@
           </div>
           <div class="flex flex-col md:flex-row gap-3 px-4">
             <div class="flex flex-wrap gap-2">
+              <Button
+                v-for="(player, index) in selectedPlayers"
+                font-size="md"
+                @click.prevent="selectedPlayers.splice(index, 1)"
+              >
+                {{ player }}
+              </Button>
               <Button
                 v-for="(tag, index) in selectedTags"
                 font-size="md"
@@ -221,6 +245,22 @@ const myTags = computed(() => {
   }
 });
 
+const mySelectedPlayers = computed(() => {
+  if (props.games.status === Status.SUCCESS) {
+    return [
+      ...new Set(
+        naturalOrder(
+          props.games.data.flatMap((game) =>
+            game.grimoire.flatMap((g) => g.tokens.map((t) => t.player_name))
+          )
+        ).sort()
+      ),
+    ];
+  } else {
+    return [];
+  }
+});
+
 const myRoles = computed(() => {
   if (props.games.status !== Status.SUCCESS) {
     return [];
@@ -254,6 +294,8 @@ const sortBy = ref<
 const orderBy = ref<"asc" | "desc">("desc");
 const selectedTag = ref<string | null>(null);
 const selectedTags = ref<string[]>([]);
+const selectedPlayer = ref<string | null>(null);
+const selectedPlayers = ref<string[]>([]);
 const selectedRole = ref<string | null>(null);
 const selectedCommunity = ref<string | null>(null);
 
@@ -261,6 +303,13 @@ watchEffect(() => {
   if (selectedTag.value) {
     selectedTags.value.push(selectedTag.value);
     selectedTag.value = null;
+  }
+});
+
+watchEffect(() => {
+  if (selectedPlayer.value) {
+    selectedPlayers.value.push(selectedPlayer.value);
+    selectedPlayer.value = null;
   }
 });
 
@@ -314,10 +363,14 @@ const sortedGames = computed(() => {
       (game) =>
         (!selectedTags.value.length ||
           selectedTags.value.every((tag) => game.tags.includes(tag))) && // filter by tags
+        (!selectedPlayers.value.length ||
+          selectedPlayers.value.every((tag) =>
+            game.grimoire
+              .flatMap((g) => g.tokens.map((t) => t.player_name))
+              .includes(tag)
+          )) && // filter by tags
         (!selectedRole.value ||
-          game.player_characters.some(
-            (c) => c.name === selectedRole.value
-          ) ||
+          game.player_characters.some((c) => c.name === selectedRole.value) ||
           (game.is_storyteller && selectedRole.value === "Storyteller")) && // filter by role
         (!selectedCommunity.value ||
           game.community_name.trim() === selectedCommunity.value.trim()) // filter by community
@@ -331,6 +384,7 @@ onMounted(() => {
   const lastOrderBy = localStorage.getItem("lastOrderBy");
   const lastGameView = localStorage.getItem("lastGameView");
   const lastSelectedTags = localStorage.getItem("lastSelectedTags");
+  const lastSelectedPlayers = localStorage.getItem("lastSelectedPlayers");
   const lastSelectedRole = localStorage.getItem("lastSelectedRole");
   if (lastSortBy) {
     sortBy.value = lastSortBy as any;
@@ -343,6 +397,9 @@ onMounted(() => {
   }
   if (lastSelectedTags) {
     selectedTags.value = JSON.parse(lastSelectedTags);
+  }
+  if (lastSelectedPlayers) {
+    selectedPlayers.value = JSON.parse(lastSelectedPlayers);
   }
   if (lastSelectedRole) {
     selectedRole.value = lastSelectedRole;
@@ -372,6 +429,13 @@ watch(
   () => selectedTags.value,
   (value) => {
     localStorage.setItem("lastSelectedTags", JSON.stringify(value));
+  },
+  { deep: true }
+);
+watch(
+  () => selectedPlayers.value,
+  (value) => {
+    localStorage.setItem("lastSelectedPlayers", JSON.stringify(value));
   },
   { deep: true }
 );
