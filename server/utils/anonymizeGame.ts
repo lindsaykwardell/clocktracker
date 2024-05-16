@@ -35,6 +35,7 @@ export type GameRecord = Game & {
       reminders: ReminderToken[];
       player?: {
         username: string;
+        display_name: string;
       };
     })[];
   })[];
@@ -59,7 +60,7 @@ export type GameRecord = Game & {
 export async function anonymizeGame(
   game: GameRecord,
   user: User | null,
-  isFriend: boolean
+  isFriend: boolean,
 ): Promise<GameRecord> {
   // If the user is the game creator, we can return the game as is
   if (game.user_id === user?.id) return game;
@@ -71,10 +72,10 @@ export async function anonymizeGame(
   | PUBLIC       | PRIVATE      | Game is only visible to friends and people with the direct URL  |
   | PUBLIC       | FRIENDS ONLY | Game is only visible to friends.                                |
   | PRIVATE      | PUBLIC       | Game is discoverable and visible, but anonymized to non-friends |
-  | PRIVATE      | PRIVATE      | Game is only visible to friends and people with the direct URL  | 
-  | PRIVATE      | FRIENDS ONLY | Game is only visible to friends                                 | 
+  | PRIVATE      | PRIVATE      | Game is only visible to friends and people with the direct URL  |
+  | PRIVATE      | FRIENDS ONLY | Game is only visible to friends                                 |
   | FRIENDS ONLY | PUBLIC       | Game is discoverable and visible, but anonymized to non-friends |
-  | FRIENDS ONLY | PRIVATE      | Game is visible to friends and via URL, but anonymized          | 
+  | FRIENDS ONLY | PRIVATE      | Game is visible to friends and via URL, but anonymized          |
   | FRIENDS ONLY | FRIENDS ONLY | Game is only visible to friends                                 |
   */
 
@@ -113,7 +114,7 @@ export async function anonymizeGame(
         if (t.player_name) {
           t.player_name = shortenName(t.player_name);
         }
-      })
+      }),
     );
   }
 
