@@ -461,7 +461,7 @@ export default defineEventHandler(async (handler) => {
               id: childGame.id,
             },
             data: {
-              date: body.date,
+              date: new Date(body.date),
               script: body.script,
               script_id: body.script_id,
               location_type: body.location_type,
