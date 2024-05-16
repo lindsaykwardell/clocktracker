@@ -16,12 +16,7 @@
             but provide early access into what's coming next on ClockTracker
           </div>
         </label>
-        <Button
-          type="submit"
-          primary
-          class="px-4 py-2"
-          :disabled="inFlight"
-        >
+        <Button type="submit" primary class="px-4 py-2" :disabled="inFlight">
           <template v-if="inFlight">
             <Spinner />
             Saving...
@@ -36,9 +31,13 @@
       <div v-else>
         <p>
           You must be a Ko-Fi supporter to access these features.
-          <a href="https://ko-fi.com/clocktracker" class="underline"
-            >Become a supporter now!</a
+          <a
+            href="https://ko-fi.com/clocktracker"
+            class="underline"
+            target="_blank"
           >
+            Become a supporter now!
+          </a>
         </p>
       </div>
     </section>
