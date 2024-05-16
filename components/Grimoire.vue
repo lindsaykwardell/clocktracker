@@ -131,7 +131,7 @@
           }`"
           class="bg-green-800 rounded p-1 border-2 border-green-700 text-center text-ellipsis text-xs md:text-sm max-w-[5rem] md:max-w-[7rem] overflow-hidden whitespace-nowrap hover:bg-blue-800 hover:border-blue-700 transition duration-150 hover:underline"
         >
-          {{ token.player_name }}
+          {{ token.player?.display_name || token.player_name }}
         </nuxt-link>
         <span
           v-else-if="token.player_name"
@@ -178,6 +178,7 @@ type Token = {
   player_id?: string | null;
   player?: {
     username: string;
+    display_name: string;
   };
 };
 
@@ -200,8 +201,8 @@ const me = computed(() => {
 const communityMembersWhoArentFriends = computed(() =>
   friends.getCommunityMembers.filter(
     (member) =>
-      !friends.getFriends.find((friend) => friend.user_id === member.user_id)
-  )
+      !friends.getFriends.find((friend) => friend.user_id === member.user_id),
+  ),
 );
 
 const potentiallyTaggedPlayers = computed(() => {
@@ -220,7 +221,7 @@ const filteredTaggablePlayers = computed(() => {
     (player) =>
       !player ||
       (!props.tokens.find((token) => token.player_name === player.username) &&
-        !props.excludePlayers?.includes(player.username))
+        !props.excludePlayers?.includes(player.username)),
   );
 });
 
@@ -243,8 +244,8 @@ const allTaggablePlayers = computed(() => {
     (player, index, array) =>
       player &&
       array.findIndex(
-        (p) => p.user_id === player.user_id && p.username === player.username
-      ) === index
+        (p) => p.user_id === player.user_id && p.username === player.username,
+      ) === index,
   );
 });
 
@@ -264,7 +265,7 @@ const props = defineProps<{
 const emit = defineEmits(["selectedMe"]);
 
 const orderedTokens = computed(() =>
-  props.tokens.sort((a, b) => a.order - b.order)
+  props.tokens.sort((a, b) => a.order - b.order),
 );
 
 const reminders = computed(() => {
@@ -349,7 +350,7 @@ watch(
       checkIfPlayerNameIsFriend(token);
     });
   },
-  { immediate: true, deep: true }
+  { immediate: true, deep: true },
 );
 
 function checkIfPlayerNameIsFriend(token: Token) {
@@ -363,7 +364,7 @@ function checkIfPlayerNameIsFriend(token: Token) {
 
   if (token.player_name.startsWith("@")) {
     const player = potentiallyTaggedPlayers.value.find(
-      (player) => player?.username.slice(1) === token.player_name.slice(1)
+      (player) => player?.username.slice(1) === token.player_name.slice(1),
     );
     if (player) {
       if (token.player_id !== player.user_id) {
@@ -378,7 +379,7 @@ function checkIfPlayerNameIsFriend(token: Token) {
   } else {
     if (token.player_id) {
       const player = potentiallyTaggedPlayers.value.find(
-        (player) => player?.user_id === token.player_id
+        (player) => player?.user_id === token.player_id,
       );
 
       if (!player || player.display_name !== token.player_name) {
@@ -405,11 +406,11 @@ function selectReminder(reminder: { reminder: string; token_url: string }) {
 
 function removeReminder(
   token: Token,
-  reminder: { reminder: string; token_url: string }
+  reminder: { reminder: string; token_url: string },
 ) {
   token.reminders = token.reminders.filter(
     (r) =>
-      r.reminder !== reminder.reminder && r.token_url !== reminder.token_url
+      r.reminder !== reminder.reminder && r.token_url !== reminder.token_url,
   );
 }
 

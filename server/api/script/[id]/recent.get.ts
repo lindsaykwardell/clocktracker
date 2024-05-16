@@ -73,8 +73,9 @@ export default defineEventHandler(async (handler) => {
               player: {
                 select: {
                   username: true,
-                }
-              }
+                  display_name: true,
+                },
+              },
             },
           },
         },
