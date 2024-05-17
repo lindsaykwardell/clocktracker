@@ -104,6 +104,7 @@ export default defineEventHandler(async (handler) => {
               player: {
                 select: {
                   username: true,
+                  display_name: true,
                 },
               },
             },
@@ -122,41 +123,50 @@ export default defineEventHandler(async (handler) => {
   });
 
   const taggedPlayers = new Set(
-    newGame.grimoire.flatMap((g) => g.tokens?.map((t) => t.player_id))
+    newGame.grimoire.flatMap((g) => g.tokens?.map((t) => t.player_id)),
   );
 
   for (const id of taggedPlayers) {
     if (!id || id === user.id) continue;
 
     // Reduce grimoire to find all tokens that have this player_id
-    const player_characters = newGame.grimoire.reduce((acc, g) => {
-      const tokens = g.tokens?.filter((t) => t.player_id === id);
-      if (tokens) {
-        for (const token of tokens) {
-          // Don't add the token if it's identical to the last token
-          // in the player_characters array
+    const player_characters = newGame.grimoire.reduce(
+      (acc, g) => {
+        const tokens = g.tokens?.filter((t) => t.player_id === id);
+        if (tokens) {
+          for (const token of tokens) {
+            // Don't add the token if it's identical to the last token
+            // in the player_characters array
 
-          const lastToken = acc[acc.length - 1];
-          if (
-            lastToken &&
-            lastToken.role_id === token.role_id &&
-            lastToken.related_role_id === token.related_role_id
-          ) {
-            continue;
+            const lastToken = acc[acc.length - 1];
+            if (
+              lastToken &&
+              lastToken.role_id === token.role_id &&
+              lastToken.related_role_id === token.related_role_id
+            ) {
+              continue;
+            }
+
+            acc.push({
+              name: token.role?.name || "",
+              alignment: token.alignment,
+              related: token.related_role?.name || "",
+              role_id: token.role_id,
+              related_role_id: token.related_role_id,
+            });
           }
-
-          acc.push({
-            name: token.role?.name || "",
-            alignment: token.alignment,
-            related: token.related_role?.name || "",
-            role_id: token.role_id,
-            related_role_id: token.related_role_id,
-          });
         }
-      }
 
-      return acc;
-    }, [] as { name: string; alignment: Alignment; related: string; role_id: string | null; related_role_id: string | null }[]);
+        return acc;
+      },
+      [] as {
+        name: string;
+        alignment: Alignment;
+        related: string;
+        role_id: string | null;
+        related_role_id: string | null;
+      }[],
+    );
 
     await prisma.game.create({
       data: {

@@ -16,12 +16,7 @@
             but provide early access into what's coming next on ClockTracker
           </div>
         </label>
-        <Button
-          type="submit"
-          primary
-          class="px-4 py-2"
-          :disabled="inFlight"
-        >
+        <Button type="submit" primary class="px-4 py-2" :disabled="inFlight">
           <template v-if="inFlight">
             <Spinner />
             Saving...
@@ -36,11 +31,65 @@
       <div v-else>
         <p>
           You must be a Ko-Fi supporter to access these features.
-          <a href="https://ko-fi.com/clocktracker" class="underline"
-            >Become a supporter now!</a
+          <a
+            href="https://ko-fi.com/clocktracker"
+            class="underline"
+            target="_blank"
           >
+            Become a supporter now!
+          </a>
         </p>
       </div>
+      <h2 class="font-dumbledor text-4xl text-center">
+        Current Supporter Perks
+      </h2>
+      <section>
+        <h3 class="font-dumbledor text-2xl">Uploading Custom Scripts</h3>
+        <p class="p-2">
+          When you are creating a game, you can upload a custom JSON file by
+          selecting "Upload a script". The script can use the official
+          characters, or custom characters (such as Fall of Rome). If a script
+          provides custom images, they will be applied to the grimoire
+          (including a script logo!)
+        </p>
+        <img src="/img/perks/custom-script-1.webp" />
+        <img src="/img/perks/custom-script-2.webp" />
+        <p class="p-2">
+          Tagged games work the same as always, and tagged players may now use
+          the script they were tagged in for future games.
+        </p>
+
+        <img src="/img/perks/custom-script-3.webp" />
+        <img src="/img/perks/custom-script-4.webp" />
+        <p class="p-2">
+          Custom uploaded scripts are visible to all ClockTracker users, but
+          they are scoped to each individual upload (so if someone else uploads
+          the same custom script, you will each have separate stats). This is to
+          prevent accidental merging of a script. Further work may go into this
+          to make it even better, but this should work for now as an initial
+          approach.
+        </p>
+
+        <p class="p-2">
+          Users may only use a script that they have either uploaded or been
+          tagged in. If you wish to use a custom script, you will need to upload
+          a copy yourself.
+        </p>
+
+        <img src="/img/perks/custom-script-5.webp" />
+      </section>
+      <section>
+        <h3 class="font-dumbledor text-2xl">Advanced Game Editor</h3>
+        <p class="p-2">
+          I have been working on some adjustments to the game editor. The most
+          obvious change is to how the grimoire is entered. Since Clocktracker
+          is already able to determine which roles you were assigned based on
+          the grimoire, this change allows you to either enter individual roles
+          OR the grimoire, but without forcing you to look at both.
+        </p>
+        <img src="/img/perks/advanced-editor-1.webp" />
+        <img src="/img/perks/advanced-editor-2.webp" />
+      </section>
     </section>
   </SettingsTemplate>
 </template>

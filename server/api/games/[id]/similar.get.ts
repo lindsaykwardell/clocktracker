@@ -27,8 +27,8 @@ export default defineEventHandler(async (handler) => {
   const player_names: string[] = [
     ...new Set(
       game.grimoire.flatMap(({ tokens }) =>
-        tokens.map((token) => token.player_name)
-      )
+        tokens.map((token) => token.player_name),
+      ),
     ),
   ];
 
@@ -157,8 +157,9 @@ export default defineEventHandler(async (handler) => {
               player: {
                 select: {
                   username: true,
-                }
-              }
+                  display_name: true,
+                },
+              },
             },
           },
         },
