@@ -223,9 +223,9 @@ async function submitGame() {
     });
 
     router.push(`/game/${savedGame.data.value?.id}`);
-  } catch (err) {
+  } catch (err: any) {
     inFlight.value = false;
-    console.error(err);
+    alert(err.statusMessage);
   }
 }
 </script>
