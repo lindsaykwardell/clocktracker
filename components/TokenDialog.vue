@@ -83,11 +83,11 @@ const showAllRoles = ref(props.alwaysShowAllRoles || false);
 const hideAllRolesToggle = computed(
   () =>
     props.alwaysShowAllRoles ||
-    props.availableRoles.length === roles.getAllRoles.length
+    props.availableRoles.length === roles.getAllRoles().length
 );
 const showFabled = ref(false);
 
-const allRoles = computed(() => roles.getAllRoles);
+const allRoles = computed(() => roles.getAllRoles());
 const travelerRoles = computed(() => roles.getRoleByType(RoleType.TRAVELER));
 const fabledRoles = computed(() => roles.getRoleByType(RoleType.FABLED));
 
