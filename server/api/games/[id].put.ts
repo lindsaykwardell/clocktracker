@@ -408,7 +408,10 @@ export default defineEventHandler(async (handler) => {
       }
     } catch (err: any) {
       const messageLines = err.message.split("\n");
-      const message = messageLines[messageLines.length - 1];
+      const message =
+        messageLines[messageLines.length - 1].length > 0
+          ? messageLines[messageLines.length - 1]
+          : err.message;
       // get the name from the game.grimoire
       const taggedPlayer =
         game.grimoire.flatMap((g) => g.tokens).find((t) => t.player_id === id)
