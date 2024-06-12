@@ -15,6 +15,23 @@ export default defineEventHandler(async (handler) => {
     waitlist_id?: number;
   } | null>(handler);
 
+  // If the IP is banned, throw a 403.
+  if (ip_address) {
+    const banned = await prisma.eventRegistrationSpam.findFirst({
+      where: {
+        ip_address,
+        is_banned: true
+      }
+    })
+
+    if (banned) {
+      throw createError({
+        status: 403,
+        statusMessage: "Forbidden"
+      })
+    }
+  }
+
   // Only implement spam protection if the user is not logged in.
   // This is _specifically_ for the case where a user is not logged in and is spamming the registration
   // endpoint.
