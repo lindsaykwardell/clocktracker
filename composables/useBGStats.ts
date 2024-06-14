@@ -48,6 +48,7 @@ export const useBGStats = (g: ComputedRef<FetchStatus<GameRecord>>) => {
             ...game.grimoire[game.grimoire.length - 1].tokens
               .filter((token) => token.player_name)
               .map((token) => ({
+                startPlayer: false,
                 name: token.player_name.replace("@", ""),
                 role: `${token.alignment} - ${token.role?.name}`,
                 sourcePlayerId: token.player_name,
