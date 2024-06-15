@@ -39,7 +39,7 @@ export const useBGStats = (g: ComputedRef<FetchStatus<GameRecord>>) => {
         highestWins: false,
         name: "Blood on the Clocktower",
         noPoints: true,
-        sourceGameid: 240980,
+        sourceGameId: 240980,
       },
       board: game.script,
       playDate: dayjs(game.date).format("YYYY-MM-DD HH:mm:ss"),
