@@ -60,6 +60,7 @@ export const useBGStats = (g: ComputedRef<FetchStatus<GameRecord>>) => {
               })),
             game.is_storyteller || game.storyteller?.length
               ? {
+                  startPlayer: false,
                   name: game.is_storyteller
                     ? game.user.username
                     : game.storyteller?.replace("@", "") || "",
@@ -73,6 +74,7 @@ export const useBGStats = (g: ComputedRef<FetchStatus<GameRecord>>) => {
           ]
         : [
             {
+              startPlayer: false,
               name: game.user.username,
               role: game.is_storyteller
                 ? "Storyteller"
