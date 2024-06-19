@@ -9,7 +9,7 @@
           <th>Script</th>
           <th class="hidden md:table-cell">Location</th>
           <th class="hidden md:table-cell">Community</th>
-          <th class="hidden md:table-cell">Players</th>
+          <th class="hidden md:table-cell">Players (+Travelers)</th>
           <th>Win/Loss</th>
         </tr>
       </thead>
