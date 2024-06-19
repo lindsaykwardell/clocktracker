@@ -6,83 +6,51 @@
     <div class="flex gap-4">
       <label class="flex-grow">
         <span class="block">Title</span>
-        <input
-          v-model="event.title"
-          class="block w-full border border-stone-500 rounded-md p-2"
-          required
-        />
+        <Input v-model="event.title" required />
       </label>
       <label>
         <span class="block">Who Can Register</span>
-        <select
-          v-model="event.who_can_register"
-          class="block w-full border border-stone-500 rounded-md p-2"
-        >
+        <Input mode="select" v-model="event.who_can_register">
           <option value="COMMUNITY_MEMBERS">Community Members</option>
           <option value="PRIVATE">Anyone with the event link</option>
           <option value="ANYONE">Anyone</option>
-        </select>
+        </Input>
       </label>
     </div>
     <div class="flex gap-4">
       <label class="flex-1">
         <span class="block">Start Date</span>
-        <input
-          v-model="event.start"
-          type="datetime-local"
-          class="block w-full border border-stone-500 rounded-md p-2"
-          required
-        />
+        <Input v-model="event.start" type="datetime-local" required />
       </label>
       <label class="flex-1">
         <span class="block">End Date</span>
-        <input
-          v-model="event.end"
-          type="datetime-local"
-          class="block w-full border border-stone-500 rounded-md p-2"
-          required
-        />
+        <Input v-model="event.end" type="datetime-local" required />
       </label>
       <label class="flex-1">
         <span class="block">Location Type</span>
-        <select
-          v-model="event.location_type"
-          class="block w-full border border-stone-500 rounded-md p-2"
-        >
+        <Input mode="select" v-model="event.location_type">
           <option value="ONLINE">Online</option>
           <option value="IN_PERSON">In Person</option>
-        </select>
+        </Input>
       </label>
       <label v-if="event.location_type === 'IN_PERSON'" class="flex-1">
         <span class="block">Location</span>
-        <input
-          type="text"
-          v-model="event.location"
-          class="block w-full border border-stone-500 rounded-md p-2"
-          list="locations"
-        />
+        <Input type="text" v-model="event.location" list="locations" />
         <datalist id="locations">
           <option v-for="location in myLocations" :value="location"></option>
         </datalist>
       </label>
       <label class="flex-1">
         <span class="block">Player Count</span>
-        <input
-          v-model="event.player_count"
-          type="number"
-          max="20"
-          min="5"
-          class="block w-full border border-stone-500 rounded-md p-2"
-        />
+        <Input v-model="event.player_count" type="number" max="20" min="5" />
       </label>
     </div>
     <div class="flex gap-4">
       <label class="flex-1">
         <span class="block">Game Link</span>
-        <input
+        <Input
           v-model="event.game_link"
           type="text"
-          class="block w-full border border-stone-500 rounded-md p-2"
           placeholder="https://online.bloodontheclocktower.com/join/12345"
           pattern="[Hh][Tt][Tt][Pp][Ss]?:\/\/(?:(?:[a-zA-Z\u00a1-\uffff0-9]+-?)*[a-zA-Z\u00a1-\uffff0-9]+)(?:\.(?:[a-zA-Z\u00a1-\uffff0-9]+-?)*[a-zA-Z\u00a1-\uffff0-9]+)*(?:\.(?:[a-zA-Z\u00a1-\uffff]{2,}))(?::\d{2,5})?(?:\/[^\s]*)?"
           title="Please enter a valid URL"
@@ -98,11 +66,7 @@
             :key="index"
             class="flex gap-1"
           >
-            <input
-              v-model="event.storytellers[index]"
-              type="text"
-              class="block w-full border border-stone-500 rounded-md p-2"
-            />
+            <Input v-model="event.storytellers[index]" type="text" />
             <button
               type="button"
               @click="event.storytellers.splice(index, 1)"
@@ -120,21 +84,21 @@
         <span class="block">Script</span>
         <div class="flex items-center gap-1">
           <div v-if="event.script" class="flex-grow">{{ event.script }}</div>
-          <button
+          <Button
             type="button"
             id="select-script"
             @click="showScriptDialog = !showScriptDialog"
-            class="flex gap-1 bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-1 px-4 rounded justify-center items-center"
             :class="{
               'w-full': !event.script,
               'flex-shrink': event.script,
             }"
+            font-size="md"
           >
             <div class="w-[30px] overflow-hidden">
               <img src="/img/role/investigator.png" />
             </div>
             <template v-if="event.script === ''">Select Script</template>
-          </button>
+          </Button>
         </div>
         <SelectScriptDialog
           v-model:visible="showScriptDialog"
@@ -144,11 +108,7 @@
     </div>
     <label>
       <span class="block">Description</span>
-      <textarea
-        v-model="event.description"
-        class="block w-full border border-stone-500 rounded-md p-2 text-black"
-        rows="5"
-      ></textarea>
+      <Input mode="textarea" v-model="event.description" rows="5" />
     </label>
     <div>
       <label>
@@ -174,15 +134,11 @@
               class="m-2"
             />
           </label>
-          <input
-            v-model="waitlist.name"
-            type="text"
-            class="block flex-grow border border-stone-500 rounded-md p-2"
-          />
+          <Input v-model="waitlist.name" type="text" />
           <button
             type="button"
             @click.stop.prevent="event.waitlists.splice(index, 1)"
-            class="block transition duration-150 text-white font-bold py-2 px-4 rounded"
+            class="block transition duration-150 dark:text-white font-bold py-2 px-4 rounded"
           >
             Remove
           </button>
@@ -190,7 +146,7 @@
         <button
           type="button"
           @click="event.waitlists.push({ name: '', default: false })"
-          class="transition duration-150 text-white font-bold py-2 px-4 rounded"
+          class="transition duration-150 dark:text-white font-bold py-2 px-4 rounded"
         >
           Add Waitlist
         </button>
@@ -351,19 +307,3 @@ function selectScript(script: { name: string; id: number | null }) {
   showScriptDialog.value = false;
 }
 </script>
-
-<style scoped>
-input,
-select {
-  height: 2.5rem;
-  @apply text-lg bg-stone-600 text-white;
-
-  &:disabled {
-    @apply bg-stone-700;
-  }
-}
-
-textarea {
-  @apply text-lg bg-stone-600 text-white;
-}
-</style>

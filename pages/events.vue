@@ -2,7 +2,7 @@
   <StandardTemplate>
     <template v-if="me.status === Status.SUCCESS">
       <div class="flex flex-col lg:flex-row gap-4 relative">
-        <div class="w-full lg:w-1/2 sticky top-0 bg-stone-800">
+        <div class="w-full lg:w-1/2 sticky top-0">
           <Calendar
             size="sm"
             :events="events"
