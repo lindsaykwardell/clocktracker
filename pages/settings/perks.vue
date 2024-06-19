@@ -44,41 +44,6 @@
         Current Supporter Perks
       </h2>
       <section>
-        <h3 class="font-dumbledor text-2xl">Uploading Custom Scripts</h3>
-        <p class="p-2">
-          When you are creating a game, you can upload a custom JSON file by
-          selecting "Upload a script". The script can use the official
-          characters, or custom characters (such as Fall of Rome). If a script
-          provides custom images, they will be applied to the grimoire
-          (including a script logo!)
-        </p>
-        <img src="/img/perks/custom-script-1.webp" />
-        <img src="/img/perks/custom-script-2.webp" />
-        <p class="p-2">
-          Tagged games work the same as always, and tagged players may now use
-          the script they were tagged in for future games.
-        </p>
-
-        <img src="/img/perks/custom-script-3.webp" />
-        <img src="/img/perks/custom-script-4.webp" />
-        <p class="p-2">
-          Custom uploaded scripts are visible to all ClockTracker users, but
-          they are scoped to each individual upload (so if someone else uploads
-          the same custom script, you will each have separate stats). This is to
-          prevent accidental merging of a script. Further work may go into this
-          to make it even better, but this should work for now as an initial
-          approach.
-        </p>
-
-        <p class="p-2">
-          Users may only use a script that they have either uploaded or been
-          tagged in. If you wish to use a custom script, you will need to upload
-          a copy yourself.
-        </p>
-
-        <img src="/img/perks/custom-script-5.webp" />
-      </section>
-      <section>
         <h3 class="font-dumbledor text-2xl">Advanced Game Editor</h3>
         <p class="p-2">
           I have been working on some adjustments to the game editor. The most
