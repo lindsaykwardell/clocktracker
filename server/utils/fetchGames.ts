@@ -239,12 +239,12 @@ export async function fetchGames(user_id: string, me: User | null) {
       //     },
       //   },
       // },
-      // community: {
-      //   select: {
-      //     slug: true,
-      //     icon: true,
-      //   },
-      // },
+      community: {
+        select: {
+          slug: true,
+          icon: true,
+        },
+      },
       associated_script: {
         select: {
           version: true,
@@ -295,8 +295,8 @@ export async function fetchGames(user_id: string, me: User | null) {
           fabled: [],
         } as GameRecord,
         me,
-        isFriend,
-      ),
+        isFriend
+      )
     );
   }
 
@@ -306,7 +306,7 @@ export async function fetchGames(user_id: string, me: User | null) {
 export async function fetchGame(
   id: string,
   me: User | null,
-  my_game: boolean = false,
+  my_game: boolean = false
 ) {
   const game = await prisma.game.findUnique({
     where: {
