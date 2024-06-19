@@ -1,9 +1,8 @@
 <template>
   <div>
     <h3 class="font-dumbledor text-2xl text-center">Top Characters</h3>
-    <ul>
-      <li v-for="(character, i) in characters" :key="character.name">
-        {{ i + 1 }}.
+    <ol class="list-decimal columns-2 list-inside">
+      <li v-for="character in characters" :key="character.name">
         <a
           :href="`/roles/${character.name.toLowerCase().replace(/ /g, '_')}`"
           target="_blank"
@@ -12,7 +11,7 @@
         >
         ({{ character.count }})
       </li>
-    </ul>
+    </ol>
   </div>
 </template>
 
@@ -32,7 +31,7 @@ const characters = computed(() => {
   const allPlayedCharacters = props.games
     .filter((game) => !game.ignore_for_stats)
     .flatMap((game) => game.player_characters)
-    .filter((character) => character.name && character.name !== "Storyteller");
+    .filter((character) => character.name);
 
   const characterCounts = allPlayedCharacters.reduce((acc, character) => {
     if (acc[character.name]) {
@@ -47,7 +46,7 @@ const characters = computed(() => {
     (a, b) => b[1] - a[1]
   );
 
-  return sortedCharacters.slice(0, 5).map((character) => ({
+  return sortedCharacters.slice(0, 10).map((character) => ({
     name: character[0],
     count: character[1],
   }));
