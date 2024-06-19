@@ -8,19 +8,15 @@
       >
         <label>
           <span class="block">Name</span>
-          <input
-            v-model="community.name"
-            class="block w-full border border-stone-500 rounded-md p-2"
-            required
-          />
+          <Input v-model="community.name" required />
         </label>
         <label>
           <span class="block">Description</span>
-          <textarea
+          <Input
+            mode="textarea"
             v-model="community.description"
-            class="block w-full border border-stone-500 rounded-md p-2 text-black"
             rows="5"
-          ></textarea>
+          ></Input>
         </label>
         <Button
           type="submit"
@@ -78,19 +74,3 @@ async function createCommunity() {
   }
 }
 </script>
-
-<style scoped>
-input,
-select {
-  height: 2.5rem;
-  @apply text-lg bg-stone-600 text-white;
-
-  &:disabled {
-    @apply bg-stone-700;
-  }
-}
-
-textarea {
-  @apply text-lg bg-stone-600 text-white;
-}
-</style>
