@@ -65,7 +65,12 @@
             <template v-else> Online </template>
           </td>
           <td class="hidden md:table-cell">{{ game.community_name }}</td>
-          <td class="hidden md:table-cell">{{ game.player_count }}</td>
+          <td class="hidden md:table-cell">
+            {{ game.player_count }}
+            <template v-if="game.traveler_count && game.traveler_count > 0">
+              (+{{ game.traveler_count }})
+            </template>
+          </td>
           <td class="flex gap-1">
             <img
               class="w-8 h-8 md:w-12 md:h-12 col-span-auto z-10"
