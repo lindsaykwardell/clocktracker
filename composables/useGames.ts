@@ -326,7 +326,7 @@ export const useGames = defineStore("games", {
 
         if (
           !scriptList.some(
-            (s) => s.name === game.script && s.id === game.script_id,
+            (s) => s.name === game.script && s.id === game.script_id
           )
         ) {
           scriptList.push({
@@ -388,7 +388,7 @@ export const useGames = defineStore("games", {
     },
     async fetchRecentGamesForScript(scriptId: number) {
       const games = await $fetch<RecentGameRecord[]>(
-        `/api/script/${scriptId}/recent`,
+        `/api/script/${scriptId}/recent`
       );
 
       for (const game of games) {
@@ -402,7 +402,7 @@ export const useGames = defineStore("games", {
     },
     async fetchRecentGamesForRole(role_id: string) {
       const games = await $fetch<RecentGameRecord[]>(
-        `/api/role/${role_id}/recent`,
+        `/api/role/${role_id}/recent`
       );
 
       for (const game of games) {
@@ -423,7 +423,7 @@ export const useGames = defineStore("games", {
         this.similar.set(gameId, { status: Status.LOADING });
 
       const similar = await $fetch<GameRecord[]>(
-        `/api/games/${gameId}/similar`,
+        `/api/games/${gameId}/similar`
       );
 
       this.similar.set(gameId, {
@@ -472,19 +472,24 @@ export const useGames = defineStore("games", {
           }
 
           async function uploadImportedGames(csv: string) {
-            const games = await $fetch<GameRecord[]>("/api/import", {
-              method: "POST",
-              body: JSON.stringify({ csv }),
-            });
-
-            for (const game of games) {
-              this_.games.set(game.id, {
-                status: Status.SUCCESS,
-                data: game,
+            try {
+              const games = await $fetch<GameRecord[]>("/api/import", {
+                method: "POST",
+                body: JSON.stringify({ csv }),
               });
-            }
 
-            resolve(games);
+              for (const game of games) {
+                this_.games.set(game.id, {
+                  status: Status.SUCCESS,
+                  data: game,
+                });
+              }
+
+              resolve(games);
+            } catch (err) {
+              console.error(err);
+              reject(err);
+            }
           }
 
           const input = document.createElement("input");
@@ -507,23 +512,23 @@ export function displayWinIcon(game: GameRecord) {
     ? game.win_v2 === WinStatus_V2.GOOD_WINS
       ? "/img/role/good.png"
       : game.win_v2 === WinStatus_V2.EVIL_WINS
-        ? "/img/role/evil.png"
-        : "/1x1.png"
+      ? "/img/role/evil.png"
+      : "/1x1.png"
     : game.player_characters.length > 0
-      ? (game.win_v2 === WinStatus_V2.GOOD_WINS &&
+    ? (game.win_v2 === WinStatus_V2.GOOD_WINS &&
+        game.player_characters[game.player_characters.length - 1].alignment ===
+          "GOOD") ||
+      (game.win_v2 === WinStatus_V2.EVIL_WINS &&
+        game.player_characters[game.player_characters.length - 1].alignment ===
+          "EVIL")
+      ? "/img/win.png"
+      : (game.win_v2 === WinStatus_V2.EVIL_WINS &&
           game.player_characters[game.player_characters.length - 1]
             .alignment === "GOOD") ||
-        (game.win_v2 === WinStatus_V2.EVIL_WINS &&
+        (game.win_v2 === WinStatus_V2.GOOD_WINS &&
           game.player_characters[game.player_characters.length - 1]
             .alignment === "EVIL")
-        ? "/img/win.png"
-        : (game.win_v2 === WinStatus_V2.EVIL_WINS &&
-              game.player_characters[game.player_characters.length - 1]
-                .alignment === "GOOD") ||
-            (game.win_v2 === WinStatus_V2.GOOD_WINS &&
-              game.player_characters[game.player_characters.length - 1]
-                .alignment === "EVIL")
-          ? "/img/loss.png"
-          : "/1x1.png"
-      : "/1x1.png";
+      ? "/img/loss.png"
+      : "/1x1.png"
+    : "/1x1.png";
 }

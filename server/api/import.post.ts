@@ -108,6 +108,7 @@ export default defineEventHandler(async (handler) => {
     let traveler_count: number | null = null;
     let win: "WIN" | "LOSS" | "NOT_RECORDED" = "NOT_RECORDED";
     const player_characters: Partial<Character>[] = [];
+    let date = row.date ? new Date(row.date) : new Date();
 
     if (row.starting_role) {
       player_characters.push(
@@ -120,21 +121,36 @@ export default defineEventHandler(async (handler) => {
     }
 
     if (row.ending_role) {
-      player_characters.push(
-        await normalizePlayerCharacter(
-          row.ending_role,
-          row.ending_related_role,
-          row.ending_alignment
-        )
+      const endCharacter = await normalizePlayerCharacter(
+        row.ending_role,
+        row.ending_related_role,
+        row.ending_alignment
       );
+
+      // If the ending character is different from the starting character, add it to the list
+      if (
+        !(
+          endCharacter.name === player_characters[0]?.name &&
+          endCharacter.related === player_characters[0]?.related &&
+          endCharacter.alignment === player_characters[0]?.alignment
+        )
+      ) {
+        player_characters.push(
+          await normalizePlayerCharacter(
+            row.ending_role,
+            row.ending_related_role,
+            row.ending_alignment
+          )
+        );
+      }
     }
 
-    if (row.storyteller.toLowerCase() === "me") {
+    if (row.storyteller?.toLowerCase() === "me") {
       row.storyteller = "";
       is_storyteller = true;
     }
 
-    if (row.script.toLowerCase() === "sects & violets") {
+    if (row.script?.toLowerCase() === "sects & violets") {
       row.script = "Sects and Violets";
     }
 
@@ -169,7 +185,7 @@ export default defineEventHandler(async (handler) => {
       row.script = script.name;
     }
 
-    if (row.location_type.toLowerCase() === "in person") {
+    if (row.location_type?.toLowerCase() === "in person") {
       location_type = LocationType.IN_PERSON;
     }
 
@@ -182,9 +198,9 @@ export default defineEventHandler(async (handler) => {
       traveler_count = null;
     }
 
-    if (row.win.toLowerCase() === "win") {
+    if (row.win?.toLowerCase() === "win") {
       win = "WIN";
-    } else if (row.win.toLowerCase() === "loss") {
+    } else if (row.win?.toLowerCase() === "loss") {
       win = "LOSS";
     }
 
@@ -197,6 +213,8 @@ export default defineEventHandler(async (handler) => {
         } else {
           return WinStatus_V2.NOT_RECORDED;
         }
+      } else if (player_characters.length <= 0) {
+        return WinStatus_V2.NOT_RECORDED;
       } else {
         const { alignment } = player_characters[player_characters.length - 1];
 
@@ -225,17 +243,17 @@ export default defineEventHandler(async (handler) => {
     await prisma.game.create({
       data: {
         user_id: user.id,
-        date: new Date(row.date),
+        date,
         script: row.script,
         script_id,
         storyteller: row.storyteller,
         location_type,
-        location: row.location,
+        location: row.location ?? "",
         community_name: row.community,
         player_count,
         traveler_count,
         win_v2,
-        notes: row.notes,
+        notes: row.notes ?? "",
         is_storyteller,
         player_characters: {
           create: player_characters.map((character) => ({
@@ -264,6 +282,10 @@ async function normalizePlayerCharacter(
   related_role_id: string | null;
   alignment: Alignment;
 }> {
+  if (role_input?.toLowerCase() === 'pit hag') {
+    role_input = 'Pit-Hag';
+  }
+
   let role: Role | null = null;
   let related_role: Role | null = null;
   let alignment: Alignment = Alignment.NEUTRAL;
