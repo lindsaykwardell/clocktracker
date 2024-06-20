@@ -198,9 +198,11 @@ export default defineEventHandler(async (handler) => {
       traveler_count = null;
     }
 
-    if (row.win?.toLowerCase() === "win") {
+    if (["win", "won", "yes", "true"].includes(row.win?.toLowerCase())) {
       win = "WIN";
-    } else if (row.win?.toLowerCase() === "loss") {
+    } else if (
+      ["loss", "lost", "no", "false"].includes(row.win?.toLowerCase())
+    ) {
       win = "LOSS";
     }
 
@@ -282,8 +284,8 @@ async function normalizePlayerCharacter(
   related_role_id: string | null;
   alignment: Alignment;
 }> {
-  if (role_input?.toLowerCase() === 'pit hag') {
-    role_input = 'Pit-Hag';
+  if (role_input?.toLowerCase() === "pit hag") {
+    role_input = "Pit-Hag";
   }
 
   let role: Role | null = null;
