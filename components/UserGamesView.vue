@@ -63,7 +63,7 @@
                   <option :value="null">Filter by tag</option>
                   <option
                     v-for="tag in myTags.filter(
-                      (tag) => !selectedTags.includes(tag),
+                      (tag) => !selectedTags.includes(tag)
                     )"
                     :key="tag"
                   >
@@ -80,7 +80,7 @@
                   <option :value="null">Filter by player</option>
                   <option
                     v-for="player in mySelectedPlayers.filter(
-                      (player) => !selectedPlayers.includes(player),
+                      (player) => !selectedPlayers.includes(player)
                     )"
                     :key="player"
                   >
@@ -252,12 +252,12 @@ const mySelectedPlayers = computed(() => {
         naturalOrder(
           props.games.data.flatMap((game) =>
             game.grimoire.flatMap((g) =>
-              g.tokens.map((t) => t.player?.display_name || t.player_name),
-            ),
-          ),
+              g.tokens.map((t) => t.player?.display_name || t.player_name)
+            )
+          )
         )
           .sort()
-          .filter((n) => n !== ""),
+          .filter((n) => n !== "")
       ),
     ];
   } else {
@@ -275,9 +275,9 @@ const myRoles = computed(() => {
         .flatMap((game) =>
           game.is_storyteller
             ? ["Storyteller"]
-            : game.player_characters.map((c) => c.name),
+            : game.player_characters.map((c) => c.name)
         )
-        .filter((role) => role) as string[],
+        .filter((role) => role) as string[]
     ),
   ]).sort();
 });
@@ -337,10 +337,11 @@ const sortedGames = computed(() => {
   return naturalOrder(
     props.games.data.map((g) => ({
       ...g,
+      total_players: (g.player_count ?? 0) + (g.traveler_count ?? 0) || -1,
       last_character: g.is_storyteller
         ? "Storyteller"
         : g.player_characters[g.player_characters.length - 1]?.name,
-    })),
+    }))
   )
     .orderBy(orderBy.value)
     .sort(
@@ -349,19 +350,19 @@ const sortedGames = computed(() => {
           case "date":
             return ["date", "created_at"];
           case "character":
-            return ["last_character"]; // TODO implement sorting by last character
+            return ["last_character", "date", "created_at"];
           case "script":
-            return ["script"];
+            return ["script", "date", "created_at"];
           case "location":
-            return ["location_type", "location"];
+            return ["location_type", "location", "date", "created_at"];
           case "community_name":
-            return ["community_name"];
+            return ["community_name", "date", "created_at"];
           case "players":
-            return ["player_count"];
+            return ["total_players", "date", "created_at"];
           default:
-            return [];
+            return ["created_at"];
         }
-      })(),
+      })()
     )
     .filter(
       (game) =>
@@ -372,18 +373,16 @@ const sortedGames = computed(() => {
             game.grimoire
               .flatMap((g) =>
                 g.tokens.map((t) =>
-                  t.player?.display_name
-                    ? t.player.display_name
-                    : t.player_name,
-                ),
+                  t.player?.display_name ? t.player.display_name : t.player_name
+                )
               )
-              .includes(tag),
+              .includes(tag)
           )) && // filter by tags
         (!selectedRole.value ||
           game.player_characters.some((c) => c.name === selectedRole.value) ||
           (game.is_storyteller && selectedRole.value === "Storyteller")) && // filter by role
         (!selectedCommunity.value ||
-          game.community_name.trim() === selectedCommunity.value.trim()), // filter by community
+          game.community_name.trim() === selectedCommunity.value.trim()) // filter by community
     );
 });
 
@@ -421,39 +420,39 @@ watch(
   () => sortBy.value,
   (value) => {
     localStorage.setItem("lastSortBy", value);
-  },
+  }
 );
 watch(
   () => orderBy.value,
   (value) => {
     localStorage.setItem("lastOrderBy", value);
-  },
+  }
 );
 watch(
   () => gameView.value,
   (value) => {
     localStorage.setItem("lastGameView", value);
-  },
+  }
 );
 watch(
   () => selectedTags.value,
   (value) => {
     localStorage.setItem("lastSelectedTags", JSON.stringify(value));
   },
-  { deep: true },
+  { deep: true }
 );
 watch(
   () => selectedPlayers.value,
   (value) => {
     localStorage.setItem("lastSelectedPlayers", JSON.stringify(value));
   },
-  { deep: true },
+  { deep: true }
 );
 watch(
   () => selectedRole.value,
   (value) => {
     localStorage.setItem("lastSelectedRole", value || "");
-  },
+  }
 );
 
 function initImportGames() {

@@ -83,6 +83,8 @@ if (route.query.duplicate) {
       name: w.name,
       default: w.default,
     }));
+    event.start = dayjs(previousEvent.start).format("YYYY-MM-DDTHH:mm");
+    event.end = dayjs(previousEvent.end).format("YYYY-MM-DDTHH:mm");
   } catch {
     // ignore
   }

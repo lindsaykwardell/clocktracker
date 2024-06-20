@@ -105,7 +105,9 @@
       <div class="flex flex-col md:flex-row gap-2 items-top justify-between">
         <div
           class="flex-1 flex gap-3 items-center"
-          v-if="event.storytellers.length"
+          v-if="
+            event.storytellers.length > 0 && event.storytellers[0].length > 0
+          "
         >
           <span class="text-sm text-stone-500 dark:text-stone-400"
             >Storyteller{{ event.storytellers.length === 1 ? "" : "s" }}</span
