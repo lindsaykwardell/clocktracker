@@ -14,8 +14,8 @@ const roles = [
     name: "Dawn",
     firstNightReminder: "Wait for a few seconds. End the Night Phase.",
     otherNightReminder: "Wait for a few seconds. End the Night Phase.",
-    firstNight: 66,
-    otherNight: 85,
+    firstNight: 67,
+    otherNight: 86,
   },
   {
     id: "minioninfo",
@@ -105,7 +105,7 @@ const roles = [
     ability:
       "Each night, you learn how many of your 2 alive neighbors are evil.",
     firstNight: 45,
-    otherNight: 64,
+    otherNight: 65,
   },
   {
     id: "fortuneteller",
@@ -121,7 +121,7 @@ const roles = [
     ability:
       "Each night, choose 2 players: you learn if either is a Demon. There is a good player that registers as a Demon to you.",
     firstNight: 46,
-    otherNight: 65,
+    otherNight: 66,
   },
   {
     id: "undertaker",
@@ -135,7 +135,7 @@ const roles = [
     setup: false,
     ability: "Each night*, you learn which character died by execution today.",
     firstNight: 0,
-    otherNight: 66,
+    otherNight: 67,
   },
   {
     id: "monk",
@@ -164,7 +164,7 @@ const roles = [
     ability:
       "If you die at night, you are woken to choose a player: you learn their character.",
     firstNight: 0,
-    otherNight: 63,
+    otherNight: 64,
   },
   {
     id: "virgin",
@@ -233,14 +233,7 @@ const roles = [
     ability:
       "Each night, choose a player (not yourself): tomorrow, you may only vote if they are voting too.",
     firstNight: 47,
-    otherNight: 79,
-    jinxes: [
-      {
-        id: "cannibal",
-        reason:
-          "If the Cannibal gains the Butler ability, the Cannibal learns this.",
-      },
-    ],
+    otherNight: 80,
   },
   {
     id: "drunk",
@@ -255,14 +248,8 @@ const roles = [
     ability:
       "You do not know you are the Drunk. You think you are a Townsfolk character, but you are not.",
     special: [
-      {
-        type: "selection",
-        name: "bag-disabled",
-      },
-      {
-        type: "reveal",
-        name: "replace-character",
-      },
+      { type: "selection", name: "bag-disabled" },
+      { type: "reveal", name: "replace-character" },
     ],
     firstNight: 0,
     otherNight: 0,
@@ -316,17 +303,11 @@ const roles = [
     otherNightReminder: "Show the Grimoire for as long as the Spy needs.",
     reminders: [],
     setup: false,
-    special: [
-      {
-        type: "signal",
-        name: "grimoire",
-        time: "night",
-      },
-    ],
+    special: [{ type: "signal", name: "grimoire", time: "night" }],
     ability:
       "Each night, you see the Grimoire. You might register as good & as a Townsfolk or Outsider, even if dead.",
     firstNight: 61,
-    otherNight: 80,
+    otherNight: 81,
     jinxes: [
       {
         id: "alchemist",
@@ -349,12 +330,10 @@ const roles = [
       },
       {
         id: "damsel",
-        reason: "Only 1 jinxed character can be in play.",
+        reason: "If the Spy is (or has been) in play, the Damsel is poisoned.",
       },
-      {
-        id: "heretic",
-        reason: "Only 1 jinxed character can be in play.",
-      },
+      { id: "heretic", reason: "Only 1 jinxed character can be in play." },
+      { id: "ogre", reason: "The Spy registers as evil to the Ogre." },
     ],
   },
   {
@@ -368,7 +347,7 @@ const roles = [
     reminders: ["Is The Demon"],
     setup: false,
     ability:
-      "If there are 5 or more players alive & the Demon dies, you become the Demon. (Travellers don’t count)",
+      "If there are 5 or more players alive & the Demon dies, you become the Demon. (Travellers don't count.)",
     firstNight: 0,
     otherNight: 25,
     jinxes: [
@@ -392,10 +371,7 @@ const roles = [
     firstNight: 0,
     otherNight: 0,
     jinxes: [
-      {
-        id: "heretic",
-        reason: "The Baron might only add 1 Outsider, not 2.",
-      },
+      { id: "heretic", reason: "The Baron might only add 1 Outsider, not 2." },
       {
         id: "plaguedoctor",
         reason:
@@ -429,13 +405,7 @@ const roles = [
     setup: false,
     ability:
       "Each night, choose a player (not yourself): their vote counts as 3 votes tomorrow.",
-    special: [
-      {
-        type: "vote",
-        name: "multiplier",
-        value: 3,
-      },
-    ],
+    special: [{ type: "vote", name: "multiplier", value: 3 }],
     firstNight: 4,
     otherNight: 4,
   },
@@ -450,13 +420,7 @@ const roles = [
     setup: false,
     ability:
       "Each night, choose a player (not yourself): their vote counts negatively tomorrow.",
-    special: [
-      {
-        type: "vote",
-        name: "multiplier",
-        value: -1,
-      },
-    ],
+    special: [{ type: "vote", name: "multiplier", value: -1 }],
     firstNight: 5,
     otherNight: 6,
   },
@@ -516,7 +480,7 @@ const roles = [
     ability:
       "You start knowing a good player & their character. If the Demon kills them, you die too.",
     firstNight: 48,
-    otherNight: 62,
+    otherNight: 63,
   },
   {
     id: "sailor",
@@ -545,8 +509,8 @@ const roles = [
     setup: false,
     ability:
       "Each night, choose 2 alive players (not yourself): you learn how many woke tonight due to their ability.",
-    firstNight: 64,
-    otherNight: 83,
+    firstNight: 65,
+    otherNight: 84,
     jinxes: [
       {
         id: "mathematician",
@@ -644,7 +608,7 @@ const roles = [
     ability:
       "Once per game, at night*, choose a dead player: if they are a Townsfolk, they are resurrected.",
     firstNight: 0,
-    otherNight: 54,
+    otherNight: 55,
   },
   {
     id: "minstrel",
@@ -710,7 +674,7 @@ const roles = [
     setup: false,
     ability: "You might die at any time.",
     firstNight: 0,
-    otherNight: 60,
+    otherNight: 61,
   },
   {
     id: "moonchild",
@@ -725,7 +689,7 @@ const roles = [
     ability:
       "When you learn that you died, publicly choose 1 alive player. Tonight, if it was a good player, they die.",
     firstNight: 0,
-    otherNight: 61,
+    otherNight: 62,
   },
   {
     id: "goon",
@@ -779,10 +743,7 @@ const roles = [
     firstNight: 28,
     otherNight: 47,
     jinxes: [
-      {
-        id: "heretic",
-        reason: "Only 1 jinxed character can be in play.",
-      },
+      { id: "heretic", reason: "Only 1 jinxed character can be in play." },
     ],
   },
   {
@@ -829,6 +790,13 @@ const roles = [
       "If the Demon dies by execution (ending the game), play for 1 more day. If a player is then executed, their team loses.",
     firstNight: 0,
     otherNight: 0,
+    jinxes: [
+      {
+        id: "alhadikhia",
+        reason:
+          "If the Al-Hadikhia dies by execution, and the Mastermind is alive, the Al-Hadikhia chooses 3 good players tonight: if all 3 choose to live, evil wins. Otherwise, good wins.",
+      },
+    ],
   },
   {
     id: "zombuul",
@@ -902,13 +870,7 @@ const roles = [
     setup: false,
     ability:
       "On your 1st night, you gain a Townsfolk ability (if good), or a Minion ability (if evil).",
-    special: [
-      {
-        type: "signal",
-        name: "grimoire",
-        time: "night",
-      },
-    ],
+    special: [{ type: "signal", name: "grimoire", time: "night" }],
     firstNight: 2,
     otherNight: 0,
   },
@@ -996,7 +958,7 @@ const roles = [
     ability:
       "Each night, choose a player (not yourself or Travellers): you learn 1 good and 1 evil character, 1 of which is correct.",
     firstNight: 50,
-    otherNight: 67,
+    otherNight: 68,
   },
   {
     id: "snakecharmer",
@@ -1025,8 +987,8 @@ const roles = [
     setup: false,
     ability:
       "Each night, you learn how many players’ abilities worked abnormally (since dawn) due to another character's ability.",
-    firstNight: 65,
-    otherNight: 84,
+    firstNight: 66,
+    otherNight: 85,
   },
   {
     id: "flowergirl",
@@ -1039,7 +1001,7 @@ const roles = [
     setup: false,
     ability: "Each night*, you learn if a Demon voted today.",
     firstNight: 0,
-    otherNight: 68,
+    otherNight: 69,
   },
   {
     id: "towncrier",
@@ -1052,7 +1014,7 @@ const roles = [
     setup: false,
     ability: "Each night*, you learn if a Minion nominated today.",
     firstNight: 0,
-    otherNight: 69,
+    otherNight: 70,
   },
   {
     id: "oracle",
@@ -1065,7 +1027,7 @@ const roles = [
     setup: false,
     ability: "Each night*, you learn how many dead players are evil.",
     firstNight: 0,
-    otherNight: 70,
+    otherNight: 71,
   },
   {
     id: "savant",
@@ -1095,7 +1057,7 @@ const roles = [
     ability:
       "Once per game, at night, choose 2 players (not yourself): you learn if they are the same alignment.",
     firstNight: 51,
-    otherNight: 71,
+    otherNight: 72,
   },
   {
     id: "philosopher",
@@ -1111,14 +1073,16 @@ const roles = [
     setup: false,
     ability:
       "Once per game, at night, choose a good character: gain that ability. If this character is in play, they are drunk.",
-    special: [
-      {
-        type: "reveal",
-        name: "replace-character",
-      },
-    ],
+    special: [{ type: "reveal", name: "replace-character" }],
     firstNight: 6,
     otherNight: 7,
+    jinxes: [
+      {
+        id: "bountyhunter",
+        reason:
+          "If the Philosopher gains the Bounty Hunter ability, a Townsfolk might turn evil.",
+      },
+    ],
   },
   {
     id: "artist",
@@ -1146,7 +1110,7 @@ const roles = [
     ability:
       "On your 1st day, publicly guess up to 5 players' characters. That night, you learn how many you got correct.",
     firstNight: 0,
-    otherNight: 72,
+    otherNight: 73,
   },
   {
     id: "sage",
@@ -1292,10 +1256,7 @@ const roles = [
     firstNight: 0,
     otherNight: 21,
     jinxes: [
-      {
-        id: "heretic",
-        reason: "A Pit-Hag can not create a Heretic.",
-      },
+      { id: "heretic", reason: "A Pit-Hag can not create a Heretic." },
       {
         id: "damsel",
         reason:
@@ -1303,12 +1264,28 @@ const roles = [
       },
       {
         id: "politician",
-        reason: "A Pit-Hag can not create an evil Politician.",
+        reason:
+          "If the Pit-Hag turns an evil player into the Politician, they can't turn good due to their own ability.",
       },
       {
         id: "villageidiot",
         reason:
           "If there is a spare token, the Pit-Hag can create an extra Village Idiot. If so, the drunk Village Idiot might change.",
+      },
+      {
+        id: "cultleader",
+        reason:
+          "If the Pit-Hag turns an evil player into the Cult Leader, they can't turn good due to their own ability.",
+      },
+      {
+        id: "goon",
+        reason:
+          "If the Pit-Hag turns an evil player into the Goon, they can't turn good due to their own ability.",
+      },
+      {
+        id: "ogre",
+        reason:
+          "If the Pit-Hag turns an evil player into the Ogre, they can't turn good due to their own ability.",
       },
     ],
   },
@@ -1384,6 +1361,13 @@ const roles = [
       "Each night*, choose a player: they die. Townsfolk abilities yield false info. Each day, if no-one is executed, evil wins.",
     firstNight: 0,
     otherNight: 38,
+    jinxes: [
+      {
+        id: "banshee",
+        reason:
+          "If the Vortox is in play and the Demon kills the Banshee, the players still learn that the Banshee has died.",
+      },
+    ],
   },
   {
     id: "barista",
@@ -1483,7 +1467,7 @@ const roles = [
     ability:
       "You start knowing 1 evil player. If the player you know dies, you learn another evil player tonight. [1 Townsfolk is evil]",
     firstNight: 58,
-    otherNight: 76,
+    otherNight: 77,
   },
   {
     id: "pixie",
@@ -1510,8 +1494,8 @@ const roles = [
     setup: false,
     ability:
       "Each night, you learn which alignment the Storyteller believes is winning: good, evil, or neither.",
-    firstNight: 63,
-    otherNight: 82,
+    firstNight: 64,
+    otherNight: 83,
   },
   {
     id: "preacher",
@@ -1537,28 +1521,28 @@ const roles = [
     firstNightReminder:
       "Wake the Demon. Show the *THIS PLAYER IS* token and the King token, then point to the King.",
     otherNightReminder:
-      "If the dead outnumber the living, show the character token of an alive player.",
+      "If the dead equal or outnumber the living, show the character token of an alive player.",
     reminders: [],
     setup: false,
     ability:
-      "Each night, if the dead outnumber the living, you learn 1 alive character. The Demon knows who you are.",
+      "Each night, if the dead equal or outnumber the living, you learn 1 alive character. The Demon knows who you are.",
     firstNight: 17,
-    otherNight: 75,
+    otherNight: 76,
   },
   {
     id: "balloonist",
     name: "Balloonist",
     edition: "",
     team: "townsfolk",
-    firstNightReminder: "Show any player :reminder:",
+    firstNightReminder: "Show any player. :reminder:",
     otherNightReminder:
-      "Show a player with a different character type to previously :reminder:",
-    reminders: ["Seen Townsfolk", "Seen Outsider", "Seen Minion", "Seen Demon"],
+      "Show a player with a different character type to previously. :reminder:",
+    reminders: ["Know"],
     setup: true,
     ability:
-      "Each night, you learn 1 player of each character type, until there are no more types to learn. [+1 Outsider]",
+      "Each night, you learn a player of a different character type than last night. [+0 or +1 Outsider]",
     firstNight: 55,
-    otherNight: 73,
+    otherNight: 74,
   },
   {
     id: "cultleader",
@@ -1574,7 +1558,7 @@ const roles = [
     ability:
       "Each night, you become the alignment of an alive neighbor. If all good players choose to join your cult, your team wins.",
     firstNight: 60,
-    otherNight: 78,
+    otherNight: 79,
   },
   {
     id: "lycanthrope",
@@ -1609,7 +1593,7 @@ const roles = [
     ability:
       "You do not know what your ability is. Each day, privately guess what it is: you learn how accurate you are.",
     firstNight: 40,
-    otherNight: 58,
+    otherNight: 59,
   },
   {
     id: "nightwatchman",
@@ -1625,7 +1609,7 @@ const roles = [
     ability:
       "Once per game, at night, choose a player: they learn who you are.",
     firstNight: 59,
-    otherNight: 77,
+    otherNight: 78,
   },
   {
     id: "engineer",
@@ -1671,7 +1655,7 @@ const roles = [
     ability:
       "Once per game, at night, choose a living player: the Damsel, if chosen, becomes a not-in-play Townsfolk. [+the Damsel]",
     firstNight: 38,
-    otherNight: 56,
+    otherNight: 57,
   },
   {
     id: "alchemist",
@@ -1685,12 +1669,7 @@ const roles = [
     remindersGlobal: ["Is The Alchemist"],
     setup: false,
     ability: "You have a not-in-play Minion ability.",
-    special: [
-      {
-        type: "reveal",
-        name: "replace-character",
-      },
-    ],
+    special: [{ type: "reveal", name: "replace-character" }],
     firstNight: 8,
     otherNight: 0,
   },
@@ -1706,7 +1685,7 @@ const roles = [
     setup: false,
     ability: "If you die at night, an alive good player becomes a Farmer.",
     firstNight: 0,
-    otherNight: 59,
+    otherNight: 60,
   },
   {
     id: "magician",
@@ -1736,7 +1715,7 @@ const roles = [
     ability:
       "If the Demon kills the King, you learn which player is the Demon. [+ the King]",
     firstNight: 0,
-    otherNight: 55,
+    otherNight: 56,
   },
   {
     id: "poppygrower",
@@ -1765,12 +1744,7 @@ const roles = [
     setup: true,
     ability:
       "The Storyteller can break the game rules & if executed, good wins, even if you are dead. [No evil characters]",
-    special: [
-      {
-        type: "selection",
-        name: "bag-duplicate",
-      },
-    ],
+    special: [{ type: "selection", name: "bag-duplicate" }],
     firstNight: 0,
     otherNight: 0,
   },
@@ -1788,6 +1762,18 @@ const roles = [
       "You have the ability of the recently killed executee. If they are evil, you are poisoned until a good player dies by execution.",
     firstNight: 0,
     otherNight: 0,
+    jinxes: [
+      {
+        id: "butler",
+        reason:
+          "If the Cannibal gains the Butler ability, the Cannibal learns this.",
+      },
+      {
+        id: "juggler",
+        reason:
+          "If the Juggler guesses on their first day and dies by execution, tonight the living Cannibal learns how many guesses the Juggler got correct.",
+      },
+    ],
   },
   {
     id: "snitch",
@@ -1858,7 +1844,7 @@ const roles = [
     ability:
       "All Minions know you are in play. If a Minion publicly guesses you (once), your team loses.",
     firstNight: 39,
-    otherNight: 57,
+    otherNight: 58,
   },
   {
     id: "golem",
@@ -1899,13 +1885,7 @@ const roles = [
     reminders: ["Poisoned"],
     remindersGlobal: ["Knows"],
     setup: false,
-    special: [
-      {
-        name: "grimoire",
-        type: "signal",
-        time: "night",
-      },
-    ],
+    special: [{ name: "grimoire", type: "signal", time: "night" }],
     ability:
       "On your 1st night, look at the Grimoire and choose a player: they are poisoned. 1 good player knows a Widow is in play.",
     firstNight: 25,
@@ -1927,12 +1907,10 @@ const roles = [
       },
       {
         id: "damsel",
-        reason: "Only 1 jinxed character can be in play.",
+        reason:
+          "If the Widow is (or has been) in play, the Damsel is poisoned.",
       },
-      {
-        id: "heretic",
-        reason: "Only 1 jinxed character can be in play.",
-      },
+      { id: "heretic", reason: "Only 1 jinxed character can be in play." },
     ],
   },
   {
@@ -2022,14 +2000,8 @@ const roles = [
     ability:
       "You think you are a good character but you are not. The Demon knows who you are. [You neighbor the Demon]",
     special: [
-      {
-        type: "selection",
-        name: "bag-disabled",
-      },
-      {
-        type: "reveal",
-        name: "replace-character",
-      },
+      { type: "selection", name: "bag-disabled" },
+      { type: "reveal", name: "replace-character" },
     ],
     firstNight: 19,
     otherNight: 0,
@@ -2061,7 +2033,7 @@ const roles = [
       {
         id: "plaguedoctor",
         reason:
-          "If the Demon has a neighbour who is alive and a Townsfolk or Outsider when the Plague Doctor dies, that player becomes an evil Marionette. If there is already an extra evil player, this does not happen.",
+          "If the Demon has a neighbor who is alive and a Townsfolk or Outsider when the Plague Doctor dies, that player becomes an evil Marionette. If there is already an extra evil player, this does not happen.",
       },
       {
         id: "huntsman",
@@ -2081,13 +2053,7 @@ const roles = [
     setup: false,
     ability:
       "If you are executed, all but 3 players die. 1 minute later, the player with the most players pointing at them dies.",
-    special: [
-      {
-        type: "ability",
-        name: "pointing",
-        time: "day",
-      },
-    ],
+    special: [{ type: "ability", name: "pointing", time: "day" }],
     firstNight: 0,
     otherNight: 0,
     jinxes: [
@@ -2111,18 +2077,10 @@ const roles = [
     remindersGlobal: ["Is The Demon", "Dead"],
     setup: true,
     ability:
-      "Each night, Minions choose who babysits Lil' Monsta's token & \"is the Demon\". A player dies each night*. [+1 Minion]",
+      'Each night, Minions choose who babysits Lil\' Monsta & "is the Demon". Each night*, a player might die. [+1 Minion]',
     special: [
-      {
-        type: "ability",
-        name: "pointing",
-        time: "night",
-        global: "minion",
-      },
-      {
-        type: "selection",
-        name: "bag-disabled",
-      },
+      { type: "ability", name: "pointing", time: "night", global: "minion" },
+      { type: "selection", name: "bag-disabled" },
     ],
     firstNight: 22,
     otherNight: 43,
@@ -2134,7 +2092,8 @@ const roles = [
       },
       {
         id: "magician",
-        reason: "Only 1 jinxed character can be in play.",
+        reason:
+          "Each night, the Magician chooses a Minion: if that Minion & Lil' Monsta are alive, that Minion babysits Lil’ Monsta.",
       },
       {
         id: "scarletwoman",
@@ -2208,11 +2167,6 @@ const roles = [
         reason:
           "If there are two living Al-Hadikhias, the Scarlet Woman Al-Hadikhia becomes the Scarlet Woman again.",
       },
-      {
-        id: "mastermind",
-        reason:
-          "Only 1 jinxed character can be in play. Evil players start knowing which player and character it is.",
-      },
     ],
   },
   {
@@ -2226,33 +2180,29 @@ const roles = [
     setup: true,
     ability:
       "Each night*, a player might die. Executions fail if only evil voted. You register as a Minion too. [Most players are Legion]",
-    special: [
-      {
-        type: "selection",
-        name: "bag-duplicate",
-      },
-    ],
+    special: [{ type: "selection", name: "bag-duplicate" }],
     firstNight: 0,
     otherNight: 30,
     jinxes: [
       {
         id: "engineer",
         reason:
-          "Legion and the Engineer can not both be in play at the start of the game.\nIf the Engineer creates Legion, most players (including all evil players) become evil Legion.",
+          "Legion and the Engineer can not both be in play at the start of the game. If the Engineer creates Legion, most players (including all evil players) become evil Legion.",
       },
       {
         id: "preacher",
-        reason: "Only 1 jinxed character can be in play.",
+        reason:
+          "If the Preacher chooses Legion, Legion keeps their ability, but the Preacher might learn they are Legion.",
+      },
+      {
+        id: "minstrel",
+        reason:
+          "If Legion died by execution today, Legion keeps their ability, but the Minstrel might learn they are Legion.",
       },
       {
         id: "hatter",
         reason:
           "If the Hatter dies and Legion is in play, nothing happens. If the Hatter dies and an evil player chooses Legion, all current evil players become Legion.",
-      },
-      {
-        id: "summoner",
-        reason:
-          "If the Summoner creates Legion, most players (including all evil players) become evil Legion.",
       },
     ],
   },
@@ -2276,8 +2226,8 @@ const roles = [
     setup: false,
     ability:
       "If more than 1 good player is executed, evil wins. All players know you are in play. After day 5, evil wins.",
-    firstNight: 67,
-    otherNight: 86,
+    firstNight: 68,
+    otherNight: 87,
     jinxes: [
       {
         id: "soldier",
@@ -2297,12 +2247,17 @@ const roles = [
       {
         id: "ravenkeeper",
         reason:
-          "If Leviathan is in play & the Ravenkeeper dies by execution, they wake that night to use their ability.",
+          "If Leviathan is in play & the Ravenkeeper dies by execution, they wake that night to use their ability. They are drunk if their nominator was good.",
+      },
+      {
+        id: "banshee",
+        reason:
+          "If Leviathan is in play, and the Banshee dies by execution, all players learn that the Banshee has died, and the Banshee gains their ability.",
       },
       {
         id: "sage",
         reason:
-          "If Leviathan is in play & the Sage dies by execution, they wake that night to use their ability.",
+          "If Leviathan is in play & the Sage dies by execution, they wake that night to use their ability. They are drunk if their nominator was good.",
       },
       {
         id: "farmer",
@@ -2336,23 +2291,18 @@ const roles = [
     setup: true,
     ability:
       "Nominees die, but may nominate again immediately (on day 3, they must). After day 3, evil wins. [All Minions are Riot]",
-    special: [
-      {
-        type: "selection",
-        name: "bag-duplicate",
-      },
-    ],
+    special: [{ type: "selection", name: "bag-duplicate" }],
     firstNight: 0,
     otherNight: 0,
     jinxes: [
       {
         id: "engineer",
         reason:
-          "Riot and the Engineer can not both be in play at the start of the game. \nIf the Engineer creates Riot, the evil players become Riot.",
+          "Riot and the Engineer can not both be in play at the start of the game. If the Engineer creates Riot, the evil players become Riot.",
       },
       {
         id: "golem",
-        reason: "If The Golem nominates Riot, the Riot player does not die.",
+        reason: "If the Golem nominates Riot, the Riot player does not die.",
       },
       {
         id: "snitch",
@@ -2364,14 +2314,11 @@ const roles = [
         reason:
           "If a good player nominates and kills the Saint, the Saint's team loses.",
       },
-      {
-        id: "butler",
-        reason: "The Butler can not nominate their master.",
-      },
+      { id: "butler", reason: "The Butler can not nominate their master." },
       {
         id: "pithag",
         reason:
-          "If the Pit-Hag creates Riot, all evil players become Riot. \nIf the Pit-Hag creates Riot after day 3, the game continues for one more day.",
+          "If the Pit-Hag creates Riot, all evil players become Riot. If the Pit-Hag creates Riot after day 3, the game continues for one more day.",
       },
       {
         id: "mayor",
@@ -2399,6 +2346,11 @@ const roles = [
           "If a Riot player nominates and kills a Sage, the Sage uses their ability tonight.",
       },
       {
+        id: "banshee",
+        reason:
+          "If Riot nominates and kills the Banshee, all players learn that the Banshee has died, and the Banshee may nominate two players immediately.",
+      },
+      {
         id: "ravenkeeper",
         reason:
           "If a Riot player nominates and kills the Ravenkeeper, the Ravenkeeper uses their ability tonight.",
@@ -2418,18 +2370,9 @@ const roles = [
         reason:
           "If a Riot player nominates and kills the King and the Choirboy is alive, the Choirboy uses their ability tonight.",
       },
-      {
-        id: "exorcist",
-        reason: "Only 1 jinxed character can be in play.",
-      },
-      {
-        id: "minstrel",
-        reason: "Only 1 jinxed character can be in play.",
-      },
-      {
-        id: "flowergirl",
-        reason: "Only 1 jinxed character can be in play.",
-      },
+      { id: "exorcist", reason: "Only 1 jinxed character can be in play." },
+      { id: "minstrel", reason: "Only 1 jinxed character can be in play." },
+      { id: "flowergirl", reason: "Only 1 jinxed character can be in play." },
       {
         id: "undertaker",
         reason:
@@ -2451,11 +2394,6 @@ const roles = [
           "Players that die by nomination register as being executed to the Devil's Advocate.",
       },
       {
-        id: "summoner",
-        reason:
-          "If the Summoner creates Riot, the chosen player and all evil players become Riot. The chosen player must be one of the Summoner's living good neighbours.",
-      },
-      {
         id: "investigator",
         reason: "Riot registers as a Minion to the Investigator.",
       },
@@ -2467,14 +2405,8 @@ const roles = [
         id: "towncrier",
         reason: "Riot registers as a Minion to the Town Crier.",
       },
-      {
-        id: "damsel",
-        reason: "Riot registers as a Minion to the Damsel.",
-      },
-      {
-        id: "preacher",
-        reason: "Riot registers as a Minion to the Preacher.",
-      },
+      { id: "damsel", reason: "Riot registers as a Minion to the Damsel." },
+      { id: "preacher", reason: "Riot registers as a Minion to the Preacher." },
       {
         id: "hatter",
         reason:
@@ -2507,12 +2439,7 @@ const roles = [
     setup: false,
     ability:
       "All players keep their eyes closed when voting & the vote tally is secret. Votes for you only count if you vote.",
-    special: [
-      {
-        type: "vote",
-        name: "hidden",
-      },
-    ],
+    special: [{ type: "vote", name: "hidden" }],
     firstNight: 0,
     otherNight: 0,
     jinxes: [
@@ -2522,19 +2449,14 @@ const roles = [
           "If the Organ Grinder is causing eyes closed voting, the Butler may raise their hand to vote but their vote is only counted if their master voted too.",
       },
       {
-        id: "flowergirl",
-        reason:
-          "If players' eyes were closed during the nominations, the Flowergirl learns how many times the Demon voted.",
-      },
-      {
         id: "minstrel",
         reason:
-          "Only 1 jinxed character can be in play. Evil players start knowing which player and character it is.",
+          "If the Minstrel makes everyone drunk, the Organ Grinder keeps their ability but the Minstrel keeps their eyes open when voting.",
       },
       {
         id: "preacher",
         reason:
-          "Only 1 jinxed character can be in play. Evil players start knowing which player and character it is.",
+          "If the Preacher removes the Organ Grinder ability, the Organ Grinder keeps their ability but the Preacher keeps their eyes open when voting.",
       },
     ],
   },
@@ -2548,7 +2470,7 @@ const roles = [
     setup: false,
     ability:
       "All players know who you are. You can not die during the day. If good voted, you may choose to execute immediately.",
-    firstNight: 68,
+    firstNight: 69,
     otherNight: 0,
     jinxes: [
       {
@@ -2574,12 +2496,21 @@ const roles = [
       {
         id: "magician",
         reason:
-          "Only 1 jinxed character can be in play. Evil players start knowing which player and character it is.",
+          "If the Vizier and Magician are both in play, the Demon does not learn the Minions.",
       },
       {
         id: "fearmonger",
         reason:
           "The Vizier wakes with the Fearmonger, learns who they choose and cannot choose to immediately execute that player.",
+      },
+      {
+        id: "politician",
+        reason: "The Politician might register as evil to the Vizier.",
+      },
+      {
+        id: "alsaahir",
+        reason:
+          "If the Vizier is in play, the Alsaahir must also guess which Demon(s) are in play.",
       },
     ],
   },
@@ -2618,8 +2549,8 @@ const roles = [
     setup: false,
     ability:
       "Each night, learn which player the Storyteller believes you should talk to most.",
-    firstNight: 62,
-    otherNight: 81,
+    firstNight: 63,
+    otherNight: 82,
   },
   {
     id: "harpy",
@@ -2633,7 +2564,7 @@ const roles = [
     reminders: ["Mad", "2nd"],
     setup: false,
     ability:
-      "Each night, choose 2 players: tomorrow, the 1st player is mad that the 2nd is evil, or both might die.",
+      "Each night, choose 2 players: tomorrow, the 1st player is mad that the 2nd is evil, or one or both might die.",
     firstNight: 34,
     otherNight: 23,
   },
@@ -2644,9 +2575,9 @@ const roles = [
     edition: "",
     firstNightReminder: "",
     otherNightReminder: "",
-    reminders: ["Storyteller ability"],
+    reminders: ["Duplicate"],
     setup: false,
-    ability: "If you die, the Storyteller gains a not-in-play Minion ability.",
+    ability: "If you die, the Storyteller gains a Minion ability.",
     firstNight: 0,
     otherNight: 0,
   },
@@ -2720,7 +2651,7 @@ const roles = [
       {
         id: "marionette",
         reason:
-          "If the Kazali chooses to create a Marionette, they must choose one of their neighbours.",
+          "If the Kazali chooses to create a Marionette, they must choose one of their neighbors.",
       },
       {
         id: "huntsman",
@@ -2733,8 +2664,9 @@ const roles = [
           "The Kazali can not choose the King to become a Minion if a Choirboy is in play.",
       },
       {
-        id: "summoner",
-        reason: "The Kazali can not choose to create a Summoner.",
+        id: "soldier",
+        reason:
+          "If the Kazali turns the Soldier into a Minion, the Soldier chooses which not-in-play Minion to become.",
       },
     ],
   },
@@ -2751,14 +2683,9 @@ const roles = [
     setup: true,
     ability:
       "Each night, choose a player: you learn their alignment. [+0 to +2 Village Idiots. 1 of the extras is drunk]",
-    special: [
-      {
-        type: "selection",
-        name: "bag-duplicate",
-      },
-    ],
+    special: [{ type: "selection", name: "bag-duplicate" }],
     firstNight: 57,
-    otherNight: 74,
+    otherNight: 75,
   },
   {
     id: "yaggababble",
@@ -2817,9 +2744,105 @@ const roles = [
       {
         id: "marionette",
         reason:
-          "The Marionette neighbours the Summoner. The Summoner knows who the Marionette is.",
+          "The Marionette neighbors the Summoner. The Summoner knows who the Marionette is.",
+      },
+      {
+        id: "pithag",
+        reason:
+          "The Summoner cannot create an in-play Demon. If the Summoner creates a not-in-play Demon, deaths tonight are arbitrary.",
+      },
+      {
+        id: "hatter",
+        reason:
+          "The Summoner cannot create an in-play Demon. If the Summoner creates a not-in-play Demon, deaths tonight are arbitrary.",
+      },
+      {
+        id: "courtier",
+        reason:
+          "If the Summoner is drunk on the 3rd night, the Summoner chooses which Demon, but the Storyteller chooses which player.",
+      },
+      {
+        id: "engineer",
+        reason:
+          "If the Engineer removes a Summoner from play before that Summoner uses their ability, the Summoner uses their ability immediately.",
+      },
+      {
+        id: "zombuul",
+        reason:
+          "If the Summoner turns a dead player into the Zombuul, the Storyteller treats that player as a Zombuul that has died once.",
+      },
+      {
+        id: "pukka",
+        reason:
+          "The Summoner may choose a player to become the Pukka on the 2nd night.",
+      },
+      {
+        id: "riot",
+        reason: "If the Summoner creates Riot, all Minions also become Riot.",
+      },
+      {
+        id: "legion",
+        reason:
+          "If the Summoner creates Legion, most players (including all evil players) become evil Legion.",
+      },
+      {
+        id: "kazali",
+        reason:
+          "The Summoner cannot create an in-play Demon. If the Summoner creates a not-in-play Demon, deaths tonight are arbitrary.",
+      },
+      {
+        id: "preacher",
+        reason:
+          "If the Preacher chose the Summoner on or before the 3rd night, the Summoner chooses which Demon, but the Storyteller chooses which player.",
       },
     ],
+  },
+  {
+    id: "banshee",
+    name: "Banshee",
+    team: "townsfolk",
+    edition: "",
+    firstNightReminder: "",
+    otherNightReminder:
+      "If the Banshee was killed by the Demon tonight, announce to all players that the Banshee has died. :reminder:",
+    reminders: ["Has Ability"],
+    setup: false,
+    ability:
+      "If the Demon kills you, all players learn this. From now on, you may nominate twice per day and vote twice per nomination.",
+    firstNight: 0,
+    otherNight: 54,
+  },
+  {
+    id: "ogre",
+    name: "Ogre",
+    team: "outsider",
+    edition: "",
+    firstNightReminder: "The Ogre points to a player.",
+    reminders: ["Friend"],
+    setup: false,
+    ability:
+      "On your 1st night, choose a player (not yourself): you become their alignment (you don't know which) even if drunk or poisoned.",
+    firstNight: 62,
+    otherNight: 0,
+    jinxes: [
+      {
+        id: "recluse",
+        reason:
+          "If the Recluse registers as evil to the Ogre, the Ogre learns that they are evil.",
+      },
+    ],
+  },
+  {
+    id: "alsaahir",
+    name: "Alsaahir",
+    team: "townsfolk",
+    edition: "",
+    reminders: [],
+    setup: false,
+    ability:
+      "Once per day, if you publicly guess which players are Minion(s) and which are Demon(s), good wins.",
+    firstNight: 0,
+    otherNight: 0,
   },
   {
     id: "doomsayer",
@@ -2895,13 +2918,7 @@ const roles = [
     edition: "fabled",
     ability:
       "Once per game, the Demon secretly chooses an opposing player: all players choose which of these 2 players win.",
-    special: [
-      {
-        name: "pointing",
-        type: "ability",
-        time: "day",
-      },
-    ],
+    special: [{ name: "pointing", type: "ability", time: "day" }],
   },
   {
     id: "toymaker",
@@ -3001,13 +3018,7 @@ const roles = [
     team: "fabled",
     edition: "fabled",
     ability: "The Storyteller assigns 1 or more players' characters.",
-    special: [
-      {
-        name: "distribute-roles",
-        type: "ability",
-        time: "pregame",
-      },
-    ],
+    special: [{ name: "distribute-roles", type: "ability", time: "pregame" }],
   },
   {
     id: "bootlegger",
@@ -3030,13 +3041,7 @@ const roles = [
     team: "fabled",
     edition: "fabled",
     ability: "On the final day, all dead players regain their vote token.",
-    special: [
-      {
-        name: "ghost-votes",
-        type: "ability",
-        time: "day",
-      },
-    ],
+    special: [{ name: "ghost-votes", type: "ability", time: "day" }],
   },
 ];
 
