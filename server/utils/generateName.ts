@@ -111,6 +111,7 @@ const townsfolk = [
   "Shugenja",
   "Village Idiot",
   "Banshee",
+  "Alsaahir",
 ];
 
 const outsiders = [
