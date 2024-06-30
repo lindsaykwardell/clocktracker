@@ -81,6 +81,7 @@ const townsfolk = [
   "Shugenja",
   "Village Idiot",
   "Banshee",
+  "Alsaahir",
 ];
 
 const outsiders = [
@@ -673,19 +674,7 @@ const reminders = [
   },
   {
     role_id: "balloonist",
-    reminder: "Seen Townsfolk",
-  },
-  {
-    role_id: "balloonist",
-    reminder: "Seen Outsider",
-  },
-  {
-    role_id: "balloonist",
-    reminder: "Seen Minion",
-  },
-  {
-    role_id: "balloonist",
-    reminder: "Seen Demon",
+    reminder: "Know",
   },
   {
     role_id: "lycanthrope",
@@ -849,7 +838,7 @@ const reminders = [
   },
   {
     role_id: "plague_doctor",
-    reminder: "Storyteller ability",
+    reminder: "Duplicate",
   },
   {
     role_id: "ojo",
@@ -890,6 +879,14 @@ const reminders = [
   {
     role_id: "summoner",
     reminder: "Night 3",
+  },
+  {
+    role_id: "banshee",
+    reminder: "Has Ability",
+  },
+  {
+    role_id: "ogre",
+    reminder: "Friend",
   },
   {
     role_id: "angel",
