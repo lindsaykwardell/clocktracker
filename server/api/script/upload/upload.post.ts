@@ -15,7 +15,7 @@ type UploadedScript = [
   ...(
     | {
         id: string;
-        image?: string;
+        image?: string | string[];
         reminders?: string[];
         name: string;
         team?:
@@ -113,8 +113,24 @@ export default defineEventHandler(async (handler) => {
     })();
 
     const token_url = (() => {
-      if (role.image) {
-        return role.image;
+      if (role.image && role.image.length > 0) {
+        if (typeof role.image === "string") {
+          return role.image;
+        } else if (role.image.length === 1) {
+          return role.image[0];
+        } else {
+          // Get the correct image for the role type
+          switch (role_type) {
+            case RoleType.TOWNSFOLK:
+            case RoleType.OUTSIDER:
+              return role.image[0];
+            case RoleType.MINION:
+            case RoleType.DEMON:
+              return role.image[1];
+            default:
+              return role.image[0];
+          }
+        }
       }
       if (initial_alignment === Alignment.GOOD) {
         return "/img/role/good.png";
