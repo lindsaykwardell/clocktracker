@@ -27,67 +27,130 @@
                   <option value="desc">Descending</option>
                 </select>
               </label>
-              <label class="flex gap-2 items-center">
-                <select
-                  v-model="selectedRole"
-                  class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
-                  aria-label="Role"
-                >
-                  <option :value="null">Filter by role</option>
-                  <option v-for="role in myRoles" :key="role" :value="role">
-                    {{ role }}
-                  </option>
-                </select>
-              </label>
-              <label
-                v-if="myCommunities.length"
-                class="flex gap-2 items-center"
-              >
-                <select
-                  v-model="selectedCommunity"
-                  class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
-                  aria-label="Community"
-                >
-                  <option :value="null">Filter by community</option>
-                  <option v-for="community in myCommunities" :key="community">
-                    {{ community }}
-                  </option>
-                </select>
-              </label>
-              <label class="flex gap-2 items-center">
-                <select
-                  v-model="selectedTag"
-                  class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
-                  aria-label="Tags"
-                >
-                  <option :value="null">Filter by tag</option>
-                  <option
-                    v-for="tag in myTags.filter(
-                      (tag) => !selectedTags.includes(tag)
-                    )"
-                    :key="tag"
+              <div class="relative w-full md:w-auto">
+                <Menu>
+                  <MenuButton class="relative w-full md:w-auto">
+                    <span
+                      v-if="activeFilters.length"
+                      class="absolute -top-2 -right-2 text-stone-200 bg-red-800 rounded-full px-2 py-1 text-xs font-bold aspect-square"
+                      aria-label="Unread notifications"
+                    >
+                      {{ activeFilters.length }}
+                    </span>
+                    <Button class="py-0 md:mt-1 font-normal w-full">
+                      <div
+                        class="w-full flex gap-2 items-center md:justify-center"
+                      >
+                        Filter Games
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="32"
+                          height="32"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            fill="currentColor"
+                            d="M10 18v-2h4v2zm-4-5v-2h12v2zM3 8V6h18v2z"
+                          />
+                        </svg>
+                      </div>
+                    </Button>
+                  </MenuButton>
+                  <transition
+                    enter-active-class="transition duration-100 ease-out"
+                    enter-from-class="transform scale-95 opacity-0"
+                    enter-to-class="transform scale-100 opacity-100"
+                    leave-active-class="transition duration-75 ease-out"
+                    leave-from-class="transform scale-100 opacity-100"
+                    leave-to-class="transform scale-95 opacity-0"
                   >
-                    {{ tag }}
-                  </option>
-                </select>
-              </label>
-              <label class="flex gap-2 items-center">
-                <select
-                  v-model="selectedPlayer"
-                  class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
-                  aria-label="Tags"
-                >
-                  <option :value="null">Filter by player</option>
-                  <option
-                    v-for="player in mySelectedPlayers.filter(
-                      (player) => !selectedPlayers.includes(player)
-                    )"
-                    :key="player"
-                  >
-                    {{ player }}
-                  </option>
-                </select>
-              </label>
+                    <MenuItems
+                      class="absolute top-[100%] z-20 bg-stone-950 p-2 rounded shadow-md whitespace-nowrap flex flex-col gap-2 items-start w-full md:w-[300px]"
+                    >
+                      <MenuItem>
+                        <label class="w-full">
+                          <select
+                            v-model="selectedRole"
+                            @click.stop
+                            class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
+                            aria-label="Role"
+                          >
+                            <option :value="null">Filter by role</option>
+                            <option
+                              v-for="role in myRoles"
+                              :key="role"
+                              :value="role"
+                            >
+                              {{ role }}
+                            </option>
+                          </select>
+                        </label>
+                      </MenuItem>
+                      <MenuItem>
+                        <label
+                          v-if="myCommunities.length"
+                          class="flex gap-2 items-center w-full"
+                        >
+                          <select
+                            v-model="selectedCommunity"
+                            @click.stop
+                            class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
+                            aria-label="Community"
+                          >
+                            <option :value="null">Filter by community</option>
+                            <option
+                              v-for="community in myCommunities"
+                              :key="community"
+                            >
+                              {{ community }}
+                            </option>
+                          </select>
+                        </label>
+                      </MenuItem>
+                      <MenuItem>
+                        <label class="w-full">
+                          <select
+                            v-model="selectedTag"
+                            @click.stop
+                            class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
+                            aria-label="Tags"
+                          >
+                            <option :value="null">Filter by tag</option>
+                            <option
+                              v-for="tag in myTags.filter(
+                                (tag) => !selectedTags.includes(tag)
+                              )"
+                              :key="tag"
+                            >
+                              {{ tag }}
+                            </option>
+                          </select>
+                        </label>
+                      </MenuItem>
+                      <MenuItem>
+                        <label class="w-full">
+                          <select
+                            v-model="selectedPlayer"
+                            @click.stop
+                            class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
+                            aria-label="Tags"
+                          >
+                            <option :value="null">Filter by player</option>
+                            <option
+                              v-for="player in mySelectedPlayers.filter(
+                                (player) => !selectedPlayers.includes(player)
+                              )"
+                              :key="player"
+                            >
+                              {{ player }}
+                            </option>
+                          </select>
+                        </label>
+                      </MenuItem>
+                    </MenuItems>
+                  </transition>
+                </Menu>
+              </div>
             </div>
             <div class="flex-grow"></div>
             <div class="flex gap-2 items-center justify-end">
@@ -151,14 +214,14 @@
                 font-size="md"
                 @click.prevent="selectedPlayers.splice(index, 1)"
               >
-                {{ player }}
+                Player: {{ player }}
               </Button>
               <Button
                 v-for="(tag, index) in selectedTags"
                 font-size="md"
                 @click.prevent="selectedTags.splice(index, 1)"
               >
-                {{ tag }}
+                Tag: {{ tag }}
               </Button>
             </div>
           </div>
@@ -185,26 +248,30 @@
       </section>
     </template>
     <div v-else class="flex flex-col items-center gap-6">
-      <p class="text-center text-2xl font-dumbledor">No games yet!</p>
-      <template v-if="user && user.id === player.user_id">
-        <Button
-          component="nuxt-link"
-          to="/add-game"
-          class="w-[300px] py-2"
-          font-size="xl"
-          primary
-        >
-          Add Your First Game
-        </Button>
-        <p>or</p>
-        <button
-          type="button"
-          @click="initImportGames"
-          class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded text-center text-xl m-auto block w-[300px]"
-        >
-          Import Games
-        </button>
-      </template>
+      <slot name="no-content">
+        <div class="flex flex-col items-center gap-6">
+          <p class="text-center text-2xl font-dumbledor">No games yet!</p>
+          <template v-if="user && user.id === player.user_id">
+            <Button
+              component="nuxt-link"
+              to="/add-game"
+              class="w-[300px] py-2"
+              font-size="xl"
+              primary
+            >
+              Add Your First Game
+            </Button>
+            <p>or</p>
+            <button
+              type="button"
+              @click="initImportGames"
+              class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded text-center text-xl m-auto block w-[300px]"
+            >
+              Import Games
+            </button>
+          </template>
+        </div>
+      </slot>
     </div>
     <ImportGamesDialog v-model:visible="importGamesDialogVisible" />
   </template>
@@ -215,6 +282,7 @@
 
 <script setup lang="ts">
 import naturalOrder from "natural-order";
+import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
 
 const user = useSupabaseUser();
 const users = useUsers();
@@ -329,6 +397,22 @@ const props = defineProps<{
   } | null;
   games: FetchStatus<GameRecord[]>;
 }>();
+
+const activeFilters = computed(() => {
+  return [
+    ...selectedTags.value.map((tag) => ({ type: "tag", value: tag })),
+    ...selectedPlayers.value.map((player) => ({
+      type: "player",
+      value: player,
+    })),
+    ...(selectedRole.value
+      ? [{ type: "role", value: selectedRole.value }]
+      : []),
+    ...(selectedCommunity.value
+      ? [{ type: "community", value: selectedCommunity.value }]
+      : []),
+  ];
+});
 
 const sortedGames = computed(() => {
   if (props.games.status !== Status.SUCCESS) {
