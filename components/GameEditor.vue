@@ -200,7 +200,7 @@
       v-if="!advancedModeEnabled && !game.is_storyteller"
       class="flex justify-center md:justify-normal flex-wrap gap-5 border rounded border-stone-500 p-4 my-3"
     >
-      <legend>Player Roles</legend>
+      <legend>Your Roles</legend>
 
       <div
         v-for="(character, i) in game.player_characters"
