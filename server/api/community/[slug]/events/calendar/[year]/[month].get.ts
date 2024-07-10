@@ -13,7 +13,7 @@ export default defineEventHandler(async (handler) => {
   // Get the first day of the month
   const start = dayjs(`${year}-${month}-01`).toDate();
   // Get the first day of the next month
-  const end = dayjs(start).add(1, "month").toDate();
+  const end = dayjs(start).add(1, "month").add(1, "day").toDate();
 
   const event = await prisma.event.findMany({
     where: {
