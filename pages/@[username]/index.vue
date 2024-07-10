@@ -19,16 +19,16 @@
               Games
             </nuxt-link>
             <nuxt-link
-              v-if="
-                me?.username === username &&
-                pendingGames.status === Status.SUCCESS &&
-                pendingGames.data.length
-              "
+              v-if="me?.username === username"
               :to="`/@${username}?view=pending`"
               class="relative font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-200 dark:hover:bg-stone-700"
               :class="currentTabClass('pending')"
             >
               <span
+                v-if="
+                  pendingGames.status === Status.SUCCESS &&
+                  pendingGames.data.length
+                "
                 class="text-stone-200 bg-red-800 rounded-full px-2 py-1 text-xs font-bold aspect-square"
               >
                 {{ pendingGames.data.length }}
@@ -73,17 +73,29 @@
             :player="player"
             :games="pendingGames"
           >
-            <button
-              type="button"
-              class="rounded py-1 justify-center text-lg flex gap-2 bg-green-800 hover:bg-green-900 transition duration-150 px-2"
-              @click="addTaggedGamesToProfile"
-              :disabled="inFlight"
-            >
-              <template v-if="inFlight">
-                <Spinner class="m-auto" />
-              </template>
-              <template v-else> Add all games to profile </template>
-            </button>
+            <template #default>
+              <button
+                v-if="
+                  pendingGames.status === Status.SUCCESS &&
+                  pendingGames.data.length > 0
+                "
+                type="button"
+                class="rounded py-1 justify-center text-lg flex gap-2 bg-green-800 hover:bg-green-900 transition duration-150 px-2"
+                @click="addTaggedGamesToProfile"
+                :disabled="inFlight"
+              >
+                <template v-if="inFlight">
+                  <Spinner class="m-auto" />
+                </template>
+                <template v-else> Add all games to profile </template>
+              </button>
+            </template>
+
+            <template #no-content>
+              <p class="text-center text-2xl my-4 font-dumbledor">
+                No tagged games
+              </p>
+            </template>
           </UserGamesView>
         </template>
         <template v-else>
