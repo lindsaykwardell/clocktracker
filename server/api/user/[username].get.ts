@@ -119,14 +119,14 @@ export default defineEventHandler(async (handler) => {
       location: true,
       privacy: true,
       charts: true,
-      // communities: {
-      //   select: {
-      //     id: true,
-      //     name: true,
-      //     slug: true,
-      //     description: true,
-      //   },
-      // },
+      communities: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          icon: true,
+        },
+      },
     },
   });
 
@@ -136,6 +136,23 @@ export default defineEventHandler(async (handler) => {
       status: 404,
       statusMessage: "Not Found",
     });
+  }
+
+  if (
+    user.privacy === PrivacySetting.PRIVATE ||
+    user.privacy === PrivacySetting.FRIENDS_ONLY
+  ) {
+    // Check if the user is friends with the user
+    const isFriend = await prisma.friend.findFirst({
+      where: {
+        user_id: me?.id || "",
+        friend_id: user.user_id,
+      },
+    });
+
+    if (!isFriend) {
+      user.communities = [];
+    }
   }
 
   return addUserKofiLevel(user);
