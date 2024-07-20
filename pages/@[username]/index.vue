@@ -221,6 +221,12 @@ onMounted(() => {
   gameStore.fetchPlayerGames(username);
 });
 
+watchEffect(() => {
+  if (me.value?.finished_welcome === false) {
+    router.push("/welcome");
+  }
+});
+
 useHead({
   title: username,
   meta: [
