@@ -143,6 +143,8 @@ export default defineEventHandler(async (handler) => {
 
     role.id = role.id + "-" + nanoid(6);
 
+    console.log(role.id);
+
     await prisma.role.create({
       data: {
         id: role.id,
@@ -152,9 +154,14 @@ export default defineEventHandler(async (handler) => {
         type: role_type,
         custom_role: true,
         reminders: {
-          create: role.reminders?.map((reminder) => ({
-            reminder,
-          })),
+          create: role.reminders
+            ?.filter(
+              (reminder, index, arr) =>
+                arr.findIndex((r) => r === reminder) === index
+            )
+            .map((reminder) => ({
+              reminder,
+            })),
         },
       },
     });
