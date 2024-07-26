@@ -107,6 +107,7 @@ const outsiders = [
   "Plague Doctor",
   "Hatter",
   "Ogre",
+  "Zealot",
 ];
 
 const minions = [
