@@ -86,11 +86,8 @@
                           </select>
                         </label>
                       </MenuItem>
-                      <MenuItem>
-                        <label
-                          v-if="myCommunities.length"
-                          class="flex gap-2 items-center w-full"
-                        >
+                      <MenuItem v-if="myCommunities.length">
+                        <label class="flex gap-2 items-center w-full">
                           <select
                             v-model="selectedCommunity"
                             @click.stop
