@@ -102,14 +102,14 @@
           v-if="player.communities?.length"
           class="flex flex-wrap justify-start row-start-4 col-span-3"
         >
-          <a v-for="community in player.communities" :href="community.slug">
+          <nuxt-link v-for="community in player.communities" :to="`/community/${community.slug}`">
             <Avatar
               :value="community.icon"
               size="xs"
               class="flex-shrink bg-stone-300 dark:bg-stone-950"
               v-tooltip="community.name"
             />
-          </a>
+          </nuxt-link>
         </div>
       </div>
       <hr v-if="player.bio" class="border-stone-100 w-full my-4" />
