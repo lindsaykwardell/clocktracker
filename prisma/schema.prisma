@@ -346,6 +346,7 @@ model Community {
   is_private        Boolean         @default(false)
   events            Event[]
   discord_server_id String?
+  time_zone         String          @default("UTC")
 }
 
 model CommunityPost {

@@ -13,6 +13,7 @@ export default defineEventHandler(async (handler) => {
     icon?: string;
     is_private?: boolean;
     discord_server_id?: string;
+    time_zone?: string;
   }>(handler);
 
   if (!me) {
@@ -60,6 +61,7 @@ export default defineEventHandler(async (handler) => {
       icon: body.icon ?? community.icon,
       is_private: body.is_private ?? community.is_private,
       discord_server_id: body.discord_server_id ?? community.discord_server_id,
+      time_zone: body.time_zone ?? community.time_zone,
     },
     select: {
       id: true,
@@ -68,6 +70,7 @@ export default defineEventHandler(async (handler) => {
       description: true,
       icon: true,
       discord_server_id: true,
+      time_zone: true,
       members: {
         select: {
           user_id: true,
