@@ -60,14 +60,7 @@
             v-if="currentTab === 'dashboard'"
             :player="player"
             :games="games"
-          >
-            <div
-              class="text-xl dark:text-stone-200"
-              v-if="games.status === Status.SUCCESS && games.data.length > 0"
-            >
-              {{ games.data.length }} game{{ games.data.length > 1 ? "s" : "" }}
-            </div>
-          </UserGamesView>
+          />
           <UserGamesView
             v-if="currentTab === 'pending'"
             :player="player"
