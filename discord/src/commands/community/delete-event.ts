@@ -7,7 +7,11 @@ import {
   ActionRowBuilder,
   EmbedBuilder,
 } from "discord.js";
-import { buildEmbed, findEvent } from "../../utility/community-event";
+import {
+  buildEmbed,
+  findEvent,
+  findEvents,
+} from "../../utility/community-event";
 import { PrismaClient } from "@prisma/client";
 import dayjs from "dayjs";
 
@@ -31,38 +35,7 @@ export async function autocomplete(interaction) {
   const guild_id = interaction.guildId;
   const focusedValue = interaction.options.getFocused().toLowerCase();
 
-  const choices = await prisma.event.findMany({
-    where: {
-      community: {
-        discord_server_id: guild_id,
-      },
-      end: {
-        gte: new Date(),
-      },
-      title: {
-        contains: focusedValue,
-        mode: "insensitive",
-      },
-    },
-    take: 25,
-    orderBy: {
-      start: "asc",
-    },
-    select: {
-      id: true,
-      title: true,
-      start: true,
-    },
-  });
-
-  await interaction.respond(
-    choices.map((choice) => ({
-      name: `${choice.title} - ${dayjs(choice.start).format(
-        "YYYY-MM-DD HH:mm"
-      )}`,
-      value: choice.id,
-    }))
-  );
+  await interaction.respond(await findEvents(guild_id, focusedValue));
 }
 
 export async function execute(interaction: CommandInteraction<CacheType>) {
