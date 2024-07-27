@@ -390,6 +390,7 @@ export const useCommunities = defineStore("communities", {
         description: string;
         is_private: boolean;
         discord_server_id: string | null;
+        time_zone: string | null;
       }
     ) {
       const user = useSupabaseUser();
