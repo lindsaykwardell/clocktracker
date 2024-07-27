@@ -33,6 +33,14 @@
                 <option :value="true">Private</option>
               </Input>
             </label>
+            <label class="block">
+              <span class="block">Time Zone</span>
+              <Input mode="select" v-model="updatedTimeZone">
+                <option v-for="tz in Intl.supportedValuesOf('timeZone')">
+                  {{ tz }}
+                </option>
+              </Input>
+            </label>
           </div>
           <label>
             <span class="block">Discord Server ID</span>
@@ -260,6 +268,7 @@ const updatedDescription = ref(community.description);
 const updatedSlug = ref(community.slug);
 const updatedPrivacy = ref(community.is_private);
 const updatedDiscordServerId = ref<string | null>(community.discord_server_id);
+const updatedTimeZone = ref<string | null>(community.time_zone);
 const inFlight = ref(false);
 
 function isMe(id: string) {
@@ -303,6 +312,7 @@ function updateCommunity() {
     slug: updatedSlug.value,
     is_private: updatedPrivacy.value,
     discord_server_id: updatedDiscordServerId.value,
+    time_zone: updatedTimeZone.value,
   });
   inFlight.value = false;
 }

@@ -415,6 +415,62 @@ export function generateEmbed(
   return { embed, row };
 }
 
+export async function findEvents(guild_id: string, focusedValue: string) {
+  const { time_zone } = await prisma.community
+    .findFirst({
+      where: {
+        discord_server_id: guild_id,
+      },
+      select: {
+        time_zone: true,
+      },
+    })
+    .catch(() => ({ time_zone: "UTC" }));
+
+  const choices = await prisma.event.findMany({
+    where: {
+      community: {
+        discord_server_id: guild_id,
+      },
+      end: {
+        gte: new Date(),
+      },
+      title: {
+        contains: focusedValue,
+        mode: "insensitive",
+      },
+    },
+    take: 25,
+    orderBy: {
+      start: "asc",
+    },
+    select: {
+      id: true,
+      title: true,
+      start: true,
+    },
+  });
+
+  return choices.map((choice) => {
+    let title = choice.title;
+    const start = ` (${dayjs(choice.start)
+      .tz(time_zone)
+      .format("YYYY-MM-DD HH:mm")})`;
+
+    if (title.length + start.length > 100) {
+      // Truncate the title if it's too long
+      title = title.slice(0, 100 - start.length - 3) + "...";
+    }
+
+    const name = title + start;
+
+    return {
+      name,
+      value: choice.id,
+    };
+  });
+}
+
 export function findEvent(guild_id: string, event_id: string) {
   return prisma.event.findUnique({
     where: {
