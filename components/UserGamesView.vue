@@ -151,7 +151,13 @@
             </div>
             <div class="flex-grow"></div>
             <div class="flex gap-2 items-center justify-end">
-              <slot />
+              <slot>
+                <div class="text-xl dark:text-stone-200">
+                  {{ sortedGames.length }} game{{
+                    sortedGames.length !== 1 ? "s" : ""
+                  }}
+                </div>
+              </slot>
               <Button
                 class="w-[100px]"
                 :class="{
