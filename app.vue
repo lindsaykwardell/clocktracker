@@ -49,6 +49,9 @@
         Add a list of all roles and which ones have been played to the Stats tab.
       </li>
       <li>
+        Show travelers on the stats tab
+      </li>
+      <li>
         Fixed a bug where users who sign up with email skip the onboarding step
       </li>
       <li>
