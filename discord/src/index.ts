@@ -12,6 +12,7 @@ import {
 } from "discord.js";
 import fs from "fs";
 import path from "path";
+import { CronJob } from "cron";
 
 const file_extension = process.env.NODE_ENV === "production" ? "js" : "ts";
 
@@ -106,6 +107,19 @@ const main = async () => {
       client.once(event.name, (...args) => event.execute(...args));
     } else {
       client.on(event.name, (...args) => event.execute(...args));
+    }
+  }
+
+  const cronPath = path.join(__dirname, "cron");
+  const cronFiles = fs
+    .readdirSync(cronPath)
+    .filter((file) => file.endsWith(file_extension));
+
+  for (const file of cronFiles) {
+    const filePath = path.join(cronPath, file);
+    const cron = require(filePath);
+    if (cron.schedule) {
+      new CronJob(cron.schedule, () => cron.execute(client)).start();
     }
   }
 
