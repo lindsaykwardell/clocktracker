@@ -324,6 +324,7 @@ model Event {
   storytellers          String[]
   game_link             String?
   short_link            String?                 @unique
+  has_pinged_discord    Boolean                 @default(false)
   community             Community?              @relation(fields: [community_id], references: [id])
   Script                Script?                 @relation(fields: [script_id], references: [id])
   registered_players    EventAttendee[]
