@@ -346,6 +346,7 @@ model Community {
   is_private        Boolean         @default(false)
   events            Event[]
   discord_server_id String?
+  time_zone         String          @default("UTC")
 }
 
 model CommunityPost {
@@ -387,6 +388,7 @@ model Event {
   waitlists            EventWaitlist[]
   discord_posts        EventDiscordPost[]
   restricted_attendees EventRegistrationSpam[]
+  has_pinged_discord   Boolean                 @default(false)
 }
 
 model EventDiscordPost {

@@ -68,6 +68,7 @@ const colors = {
   outsider: "#ADC9FA",
   minion: "#D08C7F",
   demon: "#8C0E12",
+  traveler: "#6b21a8",
 
   good: "#3297F4",
   evil: "#8C0E12",
@@ -111,7 +112,7 @@ const height = computed(() => (props.options.height || 250) + "px");
 
 const labels = computed(() => {
   if (props.options.data === "ROLE") {
-    return ["Townsfolk", "Outsider", "Minion", "Demon"];
+    return ["Townsfolk", "Outsider", "Minion", "Demon", "Traveler"];
   } else if (props.options.data === "ALIGNMENT") {
     return ["Good", "Evil"];
   } else if (props.options.data === "SCRIPT") {
@@ -156,6 +157,9 @@ const datasets = computed(() => {
           (game) =>
             game.player_characters[game.player_characters.length - 1]?.role
               ?.type === "DEMON",
+          (game) =>
+            game.player_characters[game.player_characters.length - 1]?.role
+              ?.type === "TRAVELER",
         ],
         [colors.townsfolk, colors.outsider, colors.minion, colors.demon]
       ) ?? [
@@ -181,12 +185,18 @@ const datasets = computed(() => {
                 game.player_characters[game.player_characters.length - 1]?.role
                   ?.type === "DEMON"
             ).length,
+            games.filter(
+              (game) =>
+                game.player_characters[game.player_characters.length - 1]?.role
+                  ?.type === "TRAVELER"
+            ).length,
           ],
           backgroundColor: [
             colors.townsfolk,
             colors.outsider,
             colors.minion,
             colors.demon,
+            colors.traveler,
           ],
         },
       ]
@@ -420,6 +430,18 @@ function getPivot(
             ).length
         ),
         backgroundColor: getColor(colors.demon),
+      },
+      {
+        label: "Traveler",
+        data: validators.map(
+          (validator) =>
+            games.filter(
+              (game) =>
+                game.player_characters[game.player_characters.length - 1]?.role
+                  ?.type === "TRAVELER" && validator(game)
+            ).length
+        ),
+        backgroundColor: getColor(colors.traveler),
       },
     ];
   } else if (props.options.pivot === "ALIGNMENT") {

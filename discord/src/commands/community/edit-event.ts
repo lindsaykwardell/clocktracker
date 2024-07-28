@@ -1,11 +1,11 @@
 import { CacheType, CommandInteraction, SlashCommandBuilder } from "discord.js";
 import {
   buildEmbed,
+  findEvents,
   formatInputs,
   handleRegisterButtonClick,
 } from "../../utility/community-event";
 import { PrismaClient } from "@prisma/client";
-import dayjs from "dayjs";
 import naturalOrder from "natural-order/dist/natural-order.umd";
 
 const prisma = new PrismaClient();
@@ -177,32 +177,7 @@ export async function autocomplete(interaction) {
   } else if (focusedValue.name === "id") {
     const guild_id = interaction.guildId;
 
-    choices = (
-      await prisma.event.findMany({
-        where: {
-          community: {
-            discord_server_id: guild_id,
-          },
-          end: {
-            gte: new Date(),
-          },
-        },
-        take: 25,
-        orderBy: {
-          start: "asc",
-        },
-        select: {
-          id: true,
-          title: true,
-          start: true,
-        },
-      })
-    ).map((choice) => ({
-      name: `${choice.title} - ${dayjs(choice.start).format(
-        "YYYY-MM-DD HH:mm"
-      )}`,
-      value: choice.id,
-    }));
+    choices = await findEvents(guild_id, focusedValue.value);
   } else if (focusedValue.name === "script") {
     const scripts = await prisma.script.findMany({
       where: {

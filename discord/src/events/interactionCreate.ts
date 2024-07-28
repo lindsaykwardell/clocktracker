@@ -1,5 +1,4 @@
 import { Events } from "discord.js";
-import { handleRegisterButtonClick } from "../utility/community-event";
 
 export const name = Events.InteractionCreate;
 export async function execute(interaction) {

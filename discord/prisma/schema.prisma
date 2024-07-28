@@ -281,6 +281,7 @@ model Community {
   icon              String          @default("/img/default.png")
   is_private        Boolean         @default(false)
   discord_server_id String?
+  time_zone         String          @default("UTC")
   posts             CommunityPost[]
   events            Event[]
   games             Game[]
@@ -323,6 +324,7 @@ model Event {
   storytellers          String[]
   game_link             String?
   short_link            String?                 @unique
+  has_pinged_discord    Boolean                 @default(false)
   community             Community?              @relation(fields: [community_id], references: [id])
   Script                Script?                 @relation(fields: [script_id], references: [id])
   registered_players    EventAttendee[]
@@ -391,6 +393,7 @@ model EventRegistrationSpam {
   name       String
   event_id   String
   created_at DateTime @default(now()) @db.Timestamptz(6)
+  is_banned  Boolean  @default(false)
   Event      Event    @relation(fields: [event_id], references: [id])
 
   @@unique([ip_address, event_id])
