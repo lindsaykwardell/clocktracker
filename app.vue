@@ -52,6 +52,9 @@
         Show travelers on the stats tab
       </li>
       <li>
+        The Discord bot will now ping users 15 minutes prior to the start of an event they are registered for
+      </li>
+      <li>
         Fixed a bug where users who sign up with email skip the onboarding step
       </li>
       <li>
