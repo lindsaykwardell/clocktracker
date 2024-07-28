@@ -13,10 +13,13 @@
   "dependencies": {
     "@prisma/client": "^5.12.1",
     "@supabase/supabase-js": "^2.42.4",
+    "cron": "^3.1.7",
     "dayjs": "^1.11.10",
     "discord.js": "^14.14.1",
     "dotenv": "^16.4.5",
-    "natural-order": "^2.0.2"
+    "i": "^0.3.7",
+    "natural-order": "^2.0.2",
+    "npm": "^10.8.2"
   },
   "devDependencies": {
     "@flydotio/dockerfile": "^0.5.5",

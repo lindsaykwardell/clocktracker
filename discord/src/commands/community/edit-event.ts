@@ -6,7 +6,6 @@ import {
   handleRegisterButtonClick,
 } from "../../utility/community-event";
 import { PrismaClient } from "@prisma/client";
-import dayjs from "dayjs";
 import naturalOrder from "natural-order/dist/natural-order.umd";
 
 const prisma = new PrismaClient();
