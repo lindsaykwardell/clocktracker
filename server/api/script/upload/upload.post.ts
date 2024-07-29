@@ -59,18 +59,41 @@ export default defineEventHandler(async (handler) => {
 
   const [script, ...roles] = body;
 
+  const baseRoles = await prisma.role.findMany({
+    where: {
+      custom_role: false,
+    },
+  });
+
+  const existingRoleIds = baseRoles.map((role) => ({
+    id: role.id,
+    map_id: role.id,
+  }));
+
+  baseRoles.forEach((role) => {
+    if (role.id.includes("_")) {
+      existingRoleIds.push({
+        id: role.id.replaceAll("_", ""),
+        map_id: role.id,
+      });
+    }
+  });
+
   for (const role of roles) {
     if (typeof role === "string") {
       continue;
     }
 
-    const existingRole = await prisma.role.findFirst({
-      where: {
-        id: role.id,
-      },
-    });
+    const existingRoleId = existingRoleIds.find(
+      (existingRole) => existingRole.id === role.id
+    );
+
+    const existingRole = baseRoles.find(
+      (role) => role.id === existingRoleId?.map_id
+    );
 
     if (existingRole) {
+      role.id = existingRole.id;
       continue;
     }
 
@@ -143,8 +166,6 @@ export default defineEventHandler(async (handler) => {
 
     role.id = role.id + "-" + nanoid(6);
 
-    console.log(role.id);
-
     await prisma.role.create({
       data: {
         id: role.id,
@@ -166,6 +187,8 @@ export default defineEventHandler(async (handler) => {
       },
     });
   }
+
+  console.log(roles);
 
   const version =
     (await prisma.script.count({
