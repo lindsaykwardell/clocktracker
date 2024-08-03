@@ -1,5 +1,6 @@
 import { PrismaClient, Event } from "@prisma/client";
 import { Client } from "discord.js";
+import dayjs from "dayjs";
 
 const prisma = new PrismaClient();
 
@@ -11,7 +12,7 @@ export async function execute(client: Client) {
       has_pinged_discord: false,
       start: {
         gte: new Date(),
-        lt: new Date(Date.now() + 15 * 60 * 1000),
+        lt: dayjs().add(15, "minute").toDate(),
       },
     },
     select: {
