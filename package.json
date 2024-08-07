@@ -26,6 +26,9 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.623.0",
+    "@aws-sdk/lib-storage": "^3.623.0",
+    "@aws-sdk/s3-request-presigner": "^3.623.0",
     "@faker-js/faker": "^8.4.1",
     "@globalhive/vuejs-tour": "^1.6.0",
     "@headlessui/vue": "^1.7.20",
@@ -43,6 +46,7 @@
     "dayjs": "^1.11.10",
     "discord.js": "^14.14.1",
     "floating-vue": "^5.2.2",
+    "jimp": "^0.22.12",
     "nanoid": "^5.0.7",
     "natural-order": "^2.0.2",
     "papaparse": "^5.4.1",
