@@ -666,8 +666,6 @@ type Character = {
   related_role?: { token_url: string };
 };
 
-const supabase = useSupabaseClient();
-const config = useRuntimeConfig();
 const user = useSupabaseUser();
 const users = useUsers();
 const games = useGames();
