@@ -193,7 +193,6 @@
 </template>
 
 <script setup lang="ts">
-import { v4 as uuid } from "uuid";
 import dayjs from "dayjs";
 
 const props = defineProps<{

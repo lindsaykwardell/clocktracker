@@ -58,9 +58,6 @@
 <script setup lang="ts">
 const user = useSupabaseUser();
 const users = useUsers();
-const supabase = useSupabaseClient();
-import { v4 as uuid } from "uuid";
-const config = useRuntimeConfig();
 
 const avatar = computed(() => {
   const u = users.getUserById(user.value?.id);

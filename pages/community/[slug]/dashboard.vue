@@ -246,8 +246,6 @@
 </template>
 
 <script setup lang="ts">
-import { v4 as uuid } from "uuid";
-
 definePageMeta({
   middleware: "community-admin",
 });
