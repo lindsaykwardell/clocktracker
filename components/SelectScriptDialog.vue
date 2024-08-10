@@ -77,7 +77,6 @@
         </li>
       </ul>
       <button
-        v-if="featureFlags.isEnabled('upload-custom-scripts')"
         type="button"
         class="text-stone-400 italic underline"
         @click="handleUploadScript"

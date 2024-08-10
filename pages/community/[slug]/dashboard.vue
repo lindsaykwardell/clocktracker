@@ -250,12 +250,9 @@ definePageMeta({
   middleware: "community-admin",
 });
 
-const supabase = useSupabaseClient();
-const config = useRuntimeConfig();
 const communities = useCommunities();
 const route = useRoute();
 const user = useSupabaseUser();
-const featureFlags = useFeatureFlags();
 
 const slug = route.params.slug as string;
 
