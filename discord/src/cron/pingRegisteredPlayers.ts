@@ -42,7 +42,7 @@ export async function execute(client: Client) {
   });
 
   // Send a message to all registered players with discord IDs
-  events.forEach((event) => {
+  for (const event of events) {
     event.registered_players.forEach((player) => {
       client.users.fetch(player.discord_user_id).then((user) => {
         sendMessage(user, event);
@@ -58,7 +58,7 @@ export async function execute(client: Client) {
       });
     });
 
-    prisma.event.update({
+    await prisma.event.update({
       where: {
         id: event.id,
       },
@@ -66,7 +66,7 @@ export async function execute(client: Client) {
         has_pinged_discord: true,
       },
     });
-  });
+  }
 }
 
 function sendMessage(user, event) {
