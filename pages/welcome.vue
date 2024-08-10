@@ -85,10 +85,8 @@ const router = useRouter();
 const inFlight = ref(false);
 const errorMessage = ref<string>();
 
-const supabase = useSupabaseClient();
 const user = useSupabaseUser();
 const settings = await useFetch("/api/settings");
-const config = useRuntimeConfig();
 
 if (settings.data.value?.finished_welcome) {
   router.push("/");
