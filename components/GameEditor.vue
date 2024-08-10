@@ -618,7 +618,6 @@
 <script setup lang="ts">
 import type { Alignment } from "@prisma/client";
 import type { RoleType } from "~/composables/useRoles";
-import { v4 as uuid } from "uuid";
 import naturalOrder from "natural-order";
 import { useLocalStorage } from "@vueuse/core";
 import { WinStatus_V2 } from "~/composables/useGames";
