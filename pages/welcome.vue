@@ -76,8 +76,6 @@
 </template>
 
 <script setup lang="ts">
-import { v4 as uuid } from "uuid";
-
 definePageMeta({
   middleware: "auth",
 });
@@ -122,16 +120,17 @@ async function uploadAvatar(event: Event) {
     return;
   }
 
-  const { data, error } = await supabase.storage
-    .from("avatars")
-    .upload(`${uuid()}`, newlyUploadedAvatar);
+  const formData = new FormData();
+  formData.append("file", newlyUploadedAvatar);
 
-  if (error) {
-    inFlight.value = false;
-    throw error;
-  }
+  const url = (
+    await $fetch(`/api/storage/avatars`, {
+      method: "POST",
+      body: formData,
+    })
+  )[0];
 
-  avatar.value = `${config.public.supabase.url}/storage/v1/object/public/avatars/${data.path}`;
+  avatar.value = url;
 }
 
 async function saveSettings() {

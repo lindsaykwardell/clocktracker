@@ -618,7 +618,6 @@
 <script setup lang="ts">
 import type { Alignment } from "@prisma/client";
 import type { RoleType } from "~/composables/useRoles";
-import { v4 as uuid } from "uuid";
 import naturalOrder from "natural-order";
 import { useLocalStorage } from "@vueuse/core";
 import { WinStatus_V2 } from "~/composables/useGames";
@@ -947,7 +946,7 @@ function uploadFile() {
   const input = document.createElement("input");
   input.type = "file";
   input.multiple = true;
-  input.accept = "image/*";
+  input.accept = "image/jpg, image/jpeg, image/png";
   input.onchange = selectFiles;
   input.click();
 }
@@ -957,34 +956,21 @@ async function selectFiles(event: Event) {
   if (!uploadedFiles) return;
 
   const files = Array.from(uploadedFiles);
-  const urls = [];
 
-  for (const file of files) {
-    const { data, error } = await supabase.storage
-      .from("game-attachments")
-      .upload(`${uuid()}`, file);
+  const formData = new FormData();
+  files.forEach((file) => {
+    formData.append("file", file);
+  });
 
-    if (error) {
-      continue;
-    }
-
-    urls.push(
-      `${config.public.supabase.url}/storage/v1/object/public/game-attachments/${data.path}`
-    );
-  }
+  const urls = await $fetch(`/api/storage/game-attachments`, {
+    method: "POST",
+    body: formData,
+  });
 
   props.game.image_urls.push(...urls);
 }
 
 async function removeFile(name: string) {
-  const { error } = await supabase.storage
-    .from("game-attachments")
-    .remove([name]);
-
-  if (error) {
-    throw error;
-  }
-
   props.game.image_urls = props.game.image_urls.filter((file) => file !== name);
 }
 
