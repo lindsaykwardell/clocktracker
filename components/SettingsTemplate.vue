@@ -58,9 +58,6 @@
 <script setup lang="ts">
 const user = useSupabaseUser();
 const users = useUsers();
-const supabase = useSupabaseClient();
-import { v4 as uuid } from "uuid";
-const config = useRuntimeConfig();
 
 const avatar = computed(() => {
   const u = users.getUserById(user.value?.id);
@@ -93,18 +90,20 @@ async function uploadAvatar(event: Event) {
     return;
   }
 
-  const { data, error } = await supabase.storage
-    .from("avatars")
-    .upload(`${uuid()}`, newlyUploadedAvatar);
+  const formData = new FormData();
+  formData.append("file", newlyUploadedAvatar);
 
-  if (error) {
-    throw error;
-  }
+  const url = (
+    await $fetch(`/api/storage/avatars`, {
+      method: "POST",
+      body: formData,
+    })
+  )[0];
 
   await $fetch("/api/settings", {
     method: "POST",
     body: JSON.stringify({
-      avatar: `${config.public.supabase.url}/storage/v1/object/public/avatars/${data.path}`,
+      avatar: url,
     }),
   });
 

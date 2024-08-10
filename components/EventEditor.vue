@@ -193,7 +193,6 @@
 </template>
 
 <script setup lang="ts">
-import { v4 as uuid } from "uuid";
 import dayjs from "dayjs";
 
 const props = defineProps<{
@@ -250,22 +249,20 @@ function removeFile() {
 }
 
 async function selectFiles(e: Event) {
-  const supabase = useSupabaseClient();
-  const config = useRuntimeConfig();
   const uploadedFiles = (e.target as HTMLInputElement).files;
   if (!uploadedFiles) return;
 
   const file = Array.from(uploadedFiles)[0];
 
-  const { data, error } = await supabase.storage
-    .from("events")
-    .upload(`${uuid()}`, file);
+  const formData = new FormData();
+  formData.append("file", file);
 
-  if (error) {
-    throw error;
-  }
+  const data = await $fetch(`/api/storage/events`, {
+    method: "POST",
+    body: formData,
+  });
 
-  props.event.image = `${config.public.supabase.url}/storage/v1/object/public/events/${data.path}`;
+  props.event.image = data[0];
 }
 
 watchEffect(() => {
