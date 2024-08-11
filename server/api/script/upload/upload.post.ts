@@ -35,12 +35,6 @@ export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
   const featureFlags = await useFeatureFlags(user);
 
-  if (!featureFlags.isEnabled("upload-custom-scripts")) {
-    throw createError({
-      status: 403,
-      statusMessage: "Forbidden",
-    });
-  }
   const body = await readBody<UploadedScript>(handler);
 
   if (!user) {

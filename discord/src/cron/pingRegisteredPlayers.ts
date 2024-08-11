@@ -41,24 +41,29 @@ export async function execute(client: Client) {
     },
   });
 
-  // Send a message to all registered players with discord IDs
-  events.forEach((event) => {
-    event.registered_players.forEach((player) => {
-      client.users.fetch(player.discord_user_id).then((user) => {
+  for (const event of events) {
+    // Send a message to all registered players with discord IDs
+    for (const player of event.registered_players) {
+      if (player.discord_user_id) {
+        const user = await client.users.fetch(player.discord_user_id);
+
         sendMessage(user, event);
-      });
-    });
+      }
+    }
 
     // Send a message to all waitlisted players with discord IDs
-    event.waitlists.forEach((waitlist) => {
-      waitlist.users.forEach((player) => {
-        client.users.fetch(player.discord_user_id).then((user) => {
-          sendMessage(user, event);
-        });
-      });
-    });
+    for (const waitlist of event.waitlists) {
+      for (const player of waitlist.users) {
+        if (player.discord_user_id) {
+          const user = await client.users.fetch(player.discord_user_id);
 
-    prisma.event.update({
+          sendMessage(user, event);
+        }
+      }
+    }
+
+    // Update the event to show that it has been pinged
+    await prisma.event.update({
       where: {
         id: event.id,
       },
@@ -66,7 +71,7 @@ export async function execute(client: Client) {
         has_pinged_discord: true,
       },
     });
-  });
+  }
 }
 
 function sendMessage(user, event) {
