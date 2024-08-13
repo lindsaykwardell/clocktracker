@@ -34,7 +34,7 @@ folders.set("avatars", {
 });
 
 folders.set("game-attachments", {
-  resize: (image: Jimp) => image.resize(600, Jimp.AUTO),
+  resize: (image: Jimp) => image.resize(800, Jimp.AUTO),
 });
 
 export default defineEventHandler(async (handler) => {
