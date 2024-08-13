@@ -50,7 +50,7 @@ folders.set("avatars", {
 });
 
 folders.set("game-attachments", {
-  resize: (image) => image.resize(600, Jimp.AUTO),
+  resize: (image) => image.resize(800, Jimp.AUTO),
 });
 
 async function main() {

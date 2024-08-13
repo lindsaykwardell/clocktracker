@@ -37,6 +37,7 @@ model Game {
   win_v2                   WinStatus_V2   @default(NOT_RECORDED)
   notes                    String
   image_urls               String[]
+  old_image_urls           String[]
   storyteller              String?
   co_storytellers          String[]
   user                     UserSettings?  @relation(fields: [user_id], references: [user_id])
@@ -209,6 +210,7 @@ model UserSettings {
   display_name            String
   finished_welcome        Boolean                 @default(false)
   avatar                  String?
+  old_avatar              String?
   email                   String                  @unique @default("your@address.here")
   pronouns                String?
   bio                     String                  @default("")
@@ -342,6 +344,7 @@ model Community {
   deleted_date      DateTime?
   posts             CommunityPost[]
   icon              String          @default("/img/default.png")
+  old_icon          String?
   games             Game[]
   is_private        Boolean         @default(false)
   events            Event[]
@@ -375,6 +378,7 @@ model Event {
   location_type        LocationType            @default(ONLINE)
   location             String
   image                String?
+  old_image            String?
   storytellers         String[]
   script               String                  @default("")
   script_id            Int?
