@@ -148,6 +148,14 @@
                   </transition>
                 </Menu>
               </div>
+              <div>
+                <Button
+                  @click="selectMultipleGames.toggleMode"
+                  class="py-[.125rem] md:mt-1 font-normal w-full"
+                >
+                  <div class="w-full text-left">Select Games</div>
+                </Button>
+              </div>
             </div>
             <div class="flex-grow"></div>
             <div class="flex gap-2 items-center justify-end">
@@ -292,6 +300,7 @@ const users = useUsers();
 const roles = useRoles();
 const allGames = useGames();
 const importGamesDialogVisible = ref(false);
+const selectMultipleGames = useSelectMultipleGames();
 
 const me = computed(() => {
   if (user.value) {
