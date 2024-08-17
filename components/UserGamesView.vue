@@ -13,6 +13,7 @@
                 >
                   <option value="date">Sort by Date</option>
                   <option value="character">Sort by Character</option>
+                  <option value="alignment">Sort by Alignment</option>
                   <option value="script">Sort by Script</option>
                   <option value="location">Sort by Location</option>
                   <option value="community_name">Sort by Community</option>
@@ -82,6 +83,41 @@
                               >
                                 {{ role }}
                               </option>
+                            </select>
+                          </label>
+                        </MenuItem>
+                        <MenuItem>
+                          <label class="w-full">
+                            <select
+                              v-model="selectedAlignment"
+                              @click.stop
+                              class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
+                              aria-label="Alignment"
+                            >
+                              <option :value="null">Filter by alignment</option>
+                              <option value="GOOD">Good</option>
+                              <option value="EVIL">Evil</option>
+                            </select>
+                          </label>
+                        </MenuItem>
+                        <MenuItem>
+                          <label class="w-full">
+                            <select
+                              v-model="selectedWinState"
+                              @click.stop
+                              class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
+                              aria-label="Alignment"
+                            >
+                              <option :value="null">Filter by win/loss</option>
+                              <option :value="WinStatus_V2.GOOD_WINS">
+                                Good wins
+                              </option>
+                              <option :value="WinStatus_V2.EVIL_WINS">
+                                Evil wins
+                              </option>
+                              <options :value="WinStatus_V2.NOT_RECORDED"
+                                >Not recorded</options
+                              >
                             </select>
                           </label>
                         </MenuItem>
@@ -294,6 +330,49 @@
           <div class="flex flex-col md:flex-row gap-3 px-4">
             <div class="flex flex-wrap gap-2">
               <Button
+                v-if="selectedRole"
+                font-size="md"
+                @click.prevent="selectedRole = null"
+              >
+                Role: {{ selectedRole }}
+              </Button>
+              <Button
+                v-if="selectedAlignment"
+                font-size="md"
+                @click.prevent="selectedAlignment = null"
+              >
+                Alignment:
+                <template v-if="selectedAlignment === 'GOOD'">Good</template>
+                <template v-else-if="selectedAlignment === 'EVIL'"
+                  >Evil</template
+                >
+              </Button>
+              <Button
+                v-if="selectedWinState"
+                font-size="md"
+                @click.prevent="selectedWinState = null"
+              >
+                Win/Loss:
+                <template v-if="selectedWinState === WinStatus_V2.GOOD_WINS"
+                  >Good wins</template
+                >
+                <template
+                  v-else-if="selectedWinState === WinStatus_V2.EVIL_WINS"
+                  >Evil wins</template
+                >
+                <template
+                  v-else-if="selectedWinState === WinStatus_V2.NOT_RECORDED"
+                  >Not recorded</template
+                >
+              </Button>
+              <Button
+                v-if="selectedCommunity"
+                font-size="md"
+                @click.prevent="selectedCommunity = null"
+              >
+                Community: {{ selectedCommunity }}
+              </Button>
+              <Button
                 v-for="(player, index) in selectedPlayers"
                 font-size="md"
                 @click.prevent="selectedPlayers.splice(index, 1)"
@@ -367,6 +446,7 @@
 <script setup lang="ts">
 import naturalOrder from "natural-order";
 import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
+import type { WinStatus_V2 } from "~/composables/useGames";
 
 const user = useSupabaseUser();
 const users = useUsers();
@@ -448,7 +528,13 @@ const myCommunities = computed(() => {
 const ready = ref(false);
 const gameView = ref<"grid" | "table">("grid");
 const sortBy = ref<
-  "character" | "date" | "script" | "location" | "community_name" | "players"
+  | "character"
+  | "date"
+  | "script"
+  | "location"
+  | "community_name"
+  | "players"
+  | "alignment"
 >("date");
 const orderBy = ref<"asc" | "desc">("desc");
 const selectedTag = ref<string | null>(null);
@@ -457,6 +543,8 @@ const selectedPlayer = ref<string | null>(null);
 const selectedPlayers = ref<string[]>([]);
 const selectedRole = ref<string | null>(null);
 const selectedCommunity = ref<string | null>(null);
+const selectedAlignment = ref<"GOOD" | "EVIL" | null>(null);
+const selectedWinState = ref<WinStatus_V2 | null>(null);
 
 watchEffect(() => {
   if (selectedTag.value) {
@@ -498,6 +586,9 @@ const activeFilters = computed(() => {
     ...(selectedCommunity.value
       ? [{ type: "community", value: selectedCommunity.value }]
       : []),
+    ...(selectedAlignment.value
+      ? [{ type: "alignment", value: selectedAlignment.value }]
+      : []),
   ];
 });
 
@@ -512,6 +603,8 @@ const sortedGames = computed(() => {
       last_character: g.is_storyteller
         ? "Storyteller"
         : g.player_characters[g.player_characters.length - 1]?.name,
+      last_alignment:
+        g.player_characters[g.player_characters.length - 1]?.alignment,
     }))
   )
     .orderBy(orderBy.value)
@@ -522,6 +615,8 @@ const sortedGames = computed(() => {
             return ["date", "created_at"];
           case "character":
             return ["last_character", "date", "created_at"];
+          case "alignment":
+            return ["last_alignment", "date", "created_at"];
           case "script":
             return ["script", "date", "created_at"];
           case "location":
@@ -538,7 +633,7 @@ const sortedGames = computed(() => {
     .filter(
       (game) =>
         (!selectedTags.value.length ||
-          selectedTags.value.every((tag) => game.tags.includes(tag))) && // filter by tags
+          selectedTags.value.every((tag) => game.tags.includes(tag))) &&
         (!selectedPlayers.value.length ||
           selectedPlayers.value.every((tag) =>
             game.grimoire
@@ -548,12 +643,17 @@ const sortedGames = computed(() => {
                 )
               )
               .includes(tag)
-          )) && // filter by tags
+          )) &&
         (!selectedRole.value ||
           game.player_characters.some((c) => c.name === selectedRole.value) ||
-          (game.is_storyteller && selectedRole.value === "Storyteller")) && // filter by role
+          (game.is_storyteller && selectedRole.value === "Storyteller")) &&
         (!selectedCommunity.value ||
-          game.community_name.trim() === selectedCommunity.value.trim()) // filter by community
+          game.community_name.trim() === selectedCommunity.value.trim()) &&
+        (!selectedAlignment.value ||
+          game.player_characters.some(
+            (c) => c.alignment === selectedAlignment.value
+          )) &&
+        (!selectedWinState.value || game.win_v2 === selectedWinState.value)
     );
 });
 
@@ -581,6 +681,8 @@ onMounted(() => {
   const lastSelectedTags = localStorage.getItem("lastSelectedTags");
   const lastSelectedPlayers = localStorage.getItem("lastSelectedPlayers");
   const lastSelectedRole = localStorage.getItem("lastSelectedRole");
+  const lastSelectedAlignment = localStorage.getItem("lastSelectedAlignment");
+  const lastSelectedWinStatus = localStorage.getItem("lastSelectedWinStatus");
   if (lastSortBy) {
     sortBy.value = lastSortBy as any;
   }
@@ -598,6 +700,12 @@ onMounted(() => {
   }
   if (lastSelectedRole) {
     selectedRole.value = lastSelectedRole;
+  }
+  if (lastSelectedAlignment) {
+    selectedAlignment.value = lastSelectedAlignment as any;
+  }
+  if (lastSelectedWinStatus) {
+    selectedWinState.value = lastSelectedWinStatus as any;
   }
   ready.value = true;
 });
@@ -638,6 +746,18 @@ watch(
   () => selectedRole.value,
   (value) => {
     localStorage.setItem("lastSelectedRole", value || "");
+  }
+);
+watch(
+  () => selectedAlignment.value,
+  (value) => {
+    localStorage.setItem("lastSelectedAlignment", value || "");
+  }
+);
+watch(
+  () => selectedWinState.value,
+  (value) => {
+    localStorage.setItem("lastSelectedWinStatus", value || "");
   }
 );
 
