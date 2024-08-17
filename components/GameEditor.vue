@@ -194,7 +194,7 @@
           />
           <span class="block whitespace-nowrap"> Not recorded </span>
         </label>
-        <label class="flex gap-2 items-center">
+        <label v-if="editingMultipleGames" class="flex gap-2 items-center">
           <input
             type="radio"
             v-model="game.win_v2"
