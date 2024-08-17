@@ -215,7 +215,7 @@
                   </Button>
                 </div>
               </template>
-              <div class="w-full md:w-auto">
+              <div v-if="myPage" class="w-full md:w-auto">
                 <Button
                   @click="selectMultipleGames.toggleMode"
                   class="font-normal w-full"
@@ -225,7 +225,7 @@
                     <template v-if="selectMultipleGames.enabled">
                       <span>Cancel</span>
                     </template>
-                    <template v-else>Select Multiple</template>
+                    <template v-else>Select Games</template>
                   </div>
                 </Button>
               </div>

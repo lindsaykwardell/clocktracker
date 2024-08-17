@@ -26,7 +26,8 @@
               <div class="w-[30px] overflow-hidden">
                 <img src="/img/role/investigator.png" />
               </div>
-              <template v-if="game.script === ''">Select Script</template>
+              <template v-if="editingMultipleGames">Not updated</template>
+              <template v-else-if="game.script === ''">Select Script</template>
             </Button>
           </div>
           <SelectScriptDialog
@@ -61,12 +62,24 @@
             <TaggedUserInput
               v-model:value="game.storyteller"
               :users="potentialStorytellers"
+              :placeholder="editingMultipleGames ? 'Not updated' : ''"
             />
           </label>
-          <label class="flex whitespace-nowrap items-center gap-2">
-            <input type="checkbox" v-model="game.is_storyteller" />
-            <span class="block">I was the Storyteller</span>
-          </label>
+          <div class="flex gap-3">
+            <label class="flex whitespace-nowrap items-center gap-2">
+              <input type="checkbox" v-model="game.is_storyteller" />
+              <span class="block">I was the Storyteller</span>
+            </label>
+            <label
+              class="flex whitespace-nowrap items-center gap-2"
+              :class="{
+                'pointer-events-none': noChangeToIsStoryteller,
+              }"
+            >
+              <input type="checkbox" v-model="noChangeToIsStoryteller" />
+              <span class="block">Not updated</span>
+            </label>
+          </div>
         </div>
         <div class="flex-1 flex flex-col gap-1 justify-center">
           <div v-for="(st, index) in game.co_storytellers" class="flex gap-2">
@@ -135,20 +148,25 @@
               v-model:value="game.community_name"
               :communities="myCommunities"
               inputClass="w-full border border-stone-500 rounded-md p-2 h-[2.5rem] text-lg bg-stone-600 disabled:bg-stone-700"
+              :placeholder="editingMultipleGames ? 'Not updated' : ''"
             />
           </div>
         </label>
         <label class="w-1/3 md:w-auto">
           <span class="block">Players</span>
           <Input mode="select" v-model="game.player_count">
-            <option :value="null"></option>
+            <option :value="null">
+              <template v-if="editingMultipleGames">Not updated</template>
+            </option>
             <option v-for="i in 11" :value="i + 4">{{ i + 4 }}</option>
           </Input>
         </label>
         <label class="w-1/3 md:w-auto">
           <span class="block">Travelers</span>
           <Input mode="select" v-model="game.traveler_count">
-            <option :value="null"></option>
+            <option :value="null">
+              <template v-if="editingMultipleGames">Not updated</template>
+            </option>
             <option v-for="i in 5" :value="i">{{ i }}</option>
           </Input>
         </label>
@@ -203,7 +221,7 @@
           />
           <span class="block whitespace-nowrap"> Not updated </span>
         </label>
-        <label class="flex gap-2 items-center">
+        <label v-if="!editingMultipleGames" class="flex gap-2 items-center">
           <input type="checkbox" v-model="game.ignore_for_stats" />
           <span class="block whitespace-nowrap">Ignore for stats</span>
         </label>
@@ -611,6 +629,14 @@ const { isBaseScript, fetchScriptVersions } = useScripts();
 const allRoles = useRoles();
 
 const advancedModeEnabled_ = useLocalStorage("advancedModeEnabled", "false");
+const noChangeToIsStoryteller = computed({
+  get: () => props.game.is_storyteller === undefined,
+  set: () => {
+    if (props.game.is_storyteller !== undefined) {
+      props.game.is_storyteller = undefined;
+    }
+  },
+});
 
 const advancedModeEnabled = computed({
   get: () => advancedModeEnabled_.value === "true",
@@ -728,7 +754,7 @@ const props = defineProps<{
     script_id: number | null;
     storyteller: string;
     co_storytellers: string[];
-    is_storyteller: boolean;
+    is_storyteller: boolean | undefined;
     location_type: undefined | "ONLINE" | "IN_PERSON";
     location: string;
     community_name: string;
