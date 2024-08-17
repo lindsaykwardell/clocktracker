@@ -5,7 +5,7 @@
     >
       <legend>Game Setup</legend>
       <div class="w-full flex flex-col md:flex-row gap-5">
-        <label class="flex-1">
+        <label v-if="!editingMultipleGames" class="flex-1">
           <span class="block">Date</span>
           <Input type="date" v-model="game.date" required />
         </label>
@@ -94,6 +94,7 @@
         <label class="w-full md:w-auto">
           <span class="block">Privacy</span>
           <Input mode="select" v-model="game.privacy">
+            <option v-if="editingMultipleGames" value="">Not updated</option>
             <option value="PUBLIC">Public</option>
             <option value="PRIVATE">Private</option>
             <option value="FRIENDS_ONLY">Friends Only</option>
@@ -102,6 +103,9 @@
         <label class="w-full md:w-auto">
           <span class="block">Location Type</span>
           <Input mode="select" v-model="game.location_type">
+            <option v-if="editingMultipleGames" :value="undefined">
+              Not updated
+            </option>
             <option value="ONLINE">Online</option>
             <option value="IN_PERSON">In Person</option>
           </Input>
@@ -149,7 +153,7 @@
           </Input>
         </label>
         <label
-          v-if="featureFlags.isEnabled('advanced-editor')"
+          v-if="!editingMultipleGames"
           class="w-1/3 md:w-auto flex flex-col gap-2 items-center"
         >
           <span class="block">Record Grimoire</span>
@@ -189,6 +193,15 @@
             class="border border-stone-500"
           />
           <span class="block whitespace-nowrap"> Not recorded </span>
+        </label>
+        <label v-if="editingMultipleGames" class="flex gap-2 items-center">
+          <input
+            type="radio"
+            v-model="game.win_v2"
+            :value="undefined"
+            class="border border-stone-500"
+          />
+          <span class="block whitespace-nowrap"> Not updated </span>
         </label>
         <label class="flex gap-2 items-center">
           <input type="checkbox" v-model="game.ignore_for_stats" />
@@ -256,7 +269,7 @@
       </div>
     </fieldset>
     <fieldset
-      v-if="advancedModeEnabled"
+      v-if="!editingMultipleGames && advancedModeEnabled"
       class="flex justify-center md:justify-normal flex-wrap gap-5 border rounded border-stone-500 p-4 my-3"
     >
       <legend>Grimoire</legend>
@@ -351,90 +364,10 @@
       </div>
     </fieldset>
     <fieldset
+      v-if="!editingMultipleGames"
       class="block border rounded border-stone-500 p-4 my-3 bg-center bg-cover"
     >
       <legend>Additional Details</legend>
-      <details
-        v-if="
-          !featureFlags.isEnabled('advanced-editor') &&
-          game.player_count &&
-          game.player_count >= 5
-        "
-        :open="game.grimoire[0].tokens.some((token) => token.role)"
-      >
-        <summary class="cursor-pointer">Grimoire</summary>
-        <div
-          class="pt-3 relative bg-center bg-cover w-full"
-          :class="{
-            'trouble-brewing': game.script === 'Trouble Brewing',
-            'sects-and-violets': game.script === 'Sects and Violets',
-            'bad-moon-rising': game.script === 'Bad Moon Rising',
-            'custom-script':
-              [
-                'Trouble Brewing',
-                'Sects and Violets',
-                'Bad Moon Rising',
-              ].indexOf(game.script) === -1,
-          }"
-        >
-          <Button
-            v-if="game.grimoire.length > 1"
-            @click.prevent="deletePage"
-            class="absolute top-1 right-1 z-10"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="32"
-              height="32"
-              viewBox="0 0 512 512"
-            >
-              <path
-                d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
-                fill="currentColor"
-              />
-              <path d="M249 160h14v241h-14z" fill="currentColor" />
-              <path d="M320 160h-14.6l-10.7 241h14.6z" fill="currentColor" />
-              <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
-            </svg>
-            <span class="hidden md:inline">Delete page</span>
-          </Button>
-          <Button
-            type="button"
-            @click="pageBackward"
-            v-if="grimPage !== 0"
-            class="absolute bottom-1 left-1 font-dumbledor"
-            font-size="sm"
-          >
-            <span> {{ "<" }} Previous page </span>
-          </Button>
-          <Button
-            type="button"
-            @click="pageForward"
-            class="absolute bottom-1 right-1 font-dumbledor"
-            font-size="sm"
-          >
-            <span v-if="grimPage <= game.grimoire.length - 1">
-              {{
-                grimPage === game.grimoire.length - 1 ? "Add page" : "Next page"
-              }}
-              {{ ">" }}
-            </span>
-          </Button>
-          <div class="w-screen md:w-auto overflow-scroll">
-            <Grimoire
-              :tokens="game.grimoire[grimPage].tokens"
-              :availableRoles="orderedRoles"
-              :excludePlayers="storytellerNames"
-              @selectedMe="applyMyRoleToGrimoire"
-            />
-          </div>
-          <div
-            class="text-center bg-gradient-to-b from-transparent via-stone-800 to-stone-800 text-white"
-          >
-            Page {{ grimPage + 1 }} of {{ game.grimoire.length }}
-          </div>
-        </div>
-      </details>
       <details :open="game.demon_bluffs.length > 0">
         <summary class="cursor-pointer">Demon Bluffs</summary>
         <div class="flex justify-center md:justify-normal flex-wrap gap-5">
@@ -544,6 +477,7 @@
     <fieldset class="border rounded border-stone-500 p-4 my-3">
       <legend>Notes</legend>
       <ExpandingTextarea
+        v-if="!editingMultipleGames"
         v-model="game.notes"
         class="block w-full border border-stone-500 rounded-md p-2 min-h-[10rem]"
       />
@@ -573,7 +507,10 @@
         </Button>
       </div>
     </fieldset>
-    <fieldset class="border rounded border-stone-500 p-4 my-3">
+    <fieldset
+      v-if="!editingMultipleGames"
+      class="border rounded border-stone-500 p-4 my-3"
+    >
       <legend>Images</legend>
       <div class="flex flex-col gap-5">
         <Button type="button" @click="uploadFile" font-size="md" tertiary>
@@ -671,15 +608,12 @@ const users = useUsers();
 const games = useGames();
 const friends = useFriends();
 const { isBaseScript, fetchScriptVersions } = useScripts();
-const featureFlags = useFeatureFlags();
 const allRoles = useRoles();
 
 const advancedModeEnabled_ = useLocalStorage("advancedModeEnabled", "false");
 
 const advancedModeEnabled = computed({
-  get: () =>
-    featureFlags.isEnabled("advanced-editor") &&
-    advancedModeEnabled_.value === "true",
+  get: () => advancedModeEnabled_.value === "true",
   set: (value) => {
     advancedModeEnabled_.value = value ? "true" : "false";
   },
@@ -787,6 +721,7 @@ const showRoleSelectionDialog = ref(false);
 
 const props = defineProps<{
   inFlight: boolean;
+  editingMultipleGames?: boolean;
   game: {
     date: string;
     script: string;
@@ -794,7 +729,7 @@ const props = defineProps<{
     storyteller: string;
     co_storytellers: string[];
     is_storyteller: boolean;
-    location_type: "ONLINE" | "IN_PERSON";
+    location_type: undefined | "ONLINE" | "IN_PERSON";
     location: string;
     community_name: string;
     community_id: number | null;
@@ -829,7 +764,7 @@ const props = defineProps<{
         token_url: string;
       };
     }[];
-    win_v2: WinStatus_V2;
+    win_v2: WinStatus_V2 | undefined;
     notes: string;
     image_urls: string[];
     grimoire: {
