@@ -20,6 +20,7 @@ export async function getFeatureFlags(me: User | null) {
     select: {
       id: true,
       name: true,
+      effective_date: true,
     },
   });
 
@@ -28,6 +29,10 @@ export async function getFeatureFlags(me: User | null) {
       OR: [
         {
           active: true,
+          OR: [
+            { effective_date: null },
+            { effective_date: { lte: new Date() } },
+          ],
         },
         {
           active_for: {

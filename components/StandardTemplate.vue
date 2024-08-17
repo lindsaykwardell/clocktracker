@@ -72,9 +72,7 @@
           <NavLink to="/logout" icon="steward"> Logout </NavLink>
         </template>
         <template v-else>
-          <NavLink id="home" to="/" icon="innkeeper">
-            Home
-          </NavLink>
+          <NavLink id="home" to="/" icon="innkeeper"> Home </NavLink>
           <NavLink id="search" to="/search" icon="investigator">
             Search
           </NavLink>
@@ -122,16 +120,17 @@
       </section>
     </nav>
     <main class="flex-grow">
-      <!-- <div
-        v-if="isInMaintenanceWindow"
-        class="bg-purple-400 dark:bg-purple-950 p-2 min-h-[42px]"
-      >
-        <p class="ml-[42px] md:ml-0">
-          We are performing maintenance on our server. During this time, you may
-          experience some downtime. Please see our Discord community for
-          updates.
-        </p>
-      </div> -->
+      <ClientOnly>
+        <div
+          v-if="featureFlags.maintenanceIsScheduled"
+          class="bg-orange-400 dark:bg-orange-900 p-2 min-h-[42px]"
+        >
+          <p class="ml-[42px] md:ml-0">
+            On {{ formattedMaintenanceDate }}, ClockTracker will be down for
+            scheduled maintenance. Please check Discord for updates.
+          </p>
+        </div>
+      </ClientOnly>
       <slot />
     </main>
   </div>
@@ -156,18 +155,17 @@ const friends = useFriends();
 const featureFlags = useFeatureFlags();
 
 const showMenu = ref(false);
-const maintenanceStart = dayjs.tz(
-  "2024-04-29T00:00:00Z",
-  "America/Los_Angeles"
-);
-const maintenanceEnd = maintenanceStart.add(24, "hours");
-const now = new Date();
-
-const isInMaintenanceWindow = computed(() => {
-  return now >= maintenanceStart.toDate() && now <= maintenanceEnd.toDate();
-});
 
 const dark = ref<boolean | null>(null);
+
+const formattedMaintenanceDate = computed(() => {
+  if (!featureFlags.maintenanceIsScheduled) return "";
+
+  return Intl.DateTimeFormat(navigator.language, {
+    dateStyle: "full",
+    timeStyle: "short",
+  }).format(featureFlags.maintenanceIsScheduled);
+});
 
 watch(dark, () => {
   if (dark.value) {
