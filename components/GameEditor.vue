@@ -5,7 +5,7 @@
     >
       <legend>Game Setup</legend>
       <div class="w-full flex flex-col md:flex-row gap-5">
-        <label class="flex-1">
+        <label v-if="!editingMultipleGames" class="flex-1">
           <span class="block">Date</span>
           <Input type="date" v-model="game.date" required />
         </label>
@@ -94,6 +94,7 @@
         <label class="w-full md:w-auto">
           <span class="block">Privacy</span>
           <Input mode="select" v-model="game.privacy">
+            <option v-if="editingMultipleGames" value="">Not updated</option>
             <option value="PUBLIC">Public</option>
             <option value="PRIVATE">Private</option>
             <option value="FRIENDS_ONLY">Friends Only</option>
@@ -102,6 +103,9 @@
         <label class="w-full md:w-auto">
           <span class="block">Location Type</span>
           <Input mode="select" v-model="game.location_type">
+            <option v-if="editingMultipleGames" :value="undefined">
+              Not updated
+            </option>
             <option value="ONLINE">Online</option>
             <option value="IN_PERSON">In Person</option>
           </Input>
@@ -148,7 +152,10 @@
             <option v-for="i in 5" :value="i">{{ i }}</option>
           </Input>
         </label>
-        <label class="w-1/3 md:w-auto flex flex-col gap-2 items-center">
+        <label
+          v-if="!editingMultipleGames"
+          class="w-1/3 md:w-auto flex flex-col gap-2 items-center"
+        >
           <span class="block">Record Grimoire</span>
           <Toggle v-model="advancedModeEnabled" />
         </label>
@@ -186,6 +193,15 @@
             class="border border-stone-500"
           />
           <span class="block whitespace-nowrap"> Not recorded </span>
+        </label>
+        <label class="flex gap-2 items-center">
+          <input
+            type="radio"
+            v-model="game.win_v2"
+            :value="undefined"
+            class="border border-stone-500"
+          />
+          <span class="block whitespace-nowrap"> Not updated </span>
         </label>
         <label class="flex gap-2 items-center">
           <input type="checkbox" v-model="game.ignore_for_stats" />
@@ -253,7 +269,7 @@
       </div>
     </fieldset>
     <fieldset
-      v-if="advancedModeEnabled"
+      v-if="!editingMultipleGames && advancedModeEnabled"
       class="flex justify-center md:justify-normal flex-wrap gap-5 border rounded border-stone-500 p-4 my-3"
     >
       <legend>Grimoire</legend>
@@ -348,6 +364,7 @@
       </div>
     </fieldset>
     <fieldset
+      v-if="!editingMultipleGames"
       class="block border rounded border-stone-500 p-4 my-3 bg-center bg-cover"
     >
       <legend>Additional Details</legend>
@@ -460,6 +477,7 @@
     <fieldset class="border rounded border-stone-500 p-4 my-3">
       <legend>Notes</legend>
       <ExpandingTextarea
+        v-if="!editingMultipleGames"
         v-model="game.notes"
         class="block w-full border border-stone-500 rounded-md p-2 min-h-[10rem]"
       />
@@ -489,7 +507,10 @@
         </Button>
       </div>
     </fieldset>
-    <fieldset class="border rounded border-stone-500 p-4 my-3">
+    <fieldset
+      v-if="!editingMultipleGames"
+      class="border rounded border-stone-500 p-4 my-3"
+    >
       <legend>Images</legend>
       <div class="flex flex-col gap-5">
         <Button type="button" @click="uploadFile" font-size="md" tertiary>
@@ -700,6 +721,7 @@ const showRoleSelectionDialog = ref(false);
 
 const props = defineProps<{
   inFlight: boolean;
+  editingMultipleGames?: boolean;
   game: {
     date: string;
     script: string;
@@ -707,7 +729,7 @@ const props = defineProps<{
     storyteller: string;
     co_storytellers: string[];
     is_storyteller: boolean;
-    location_type: "ONLINE" | "IN_PERSON";
+    location_type: undefined | "ONLINE" | "IN_PERSON";
     location: string;
     community_name: string;
     community_id: number | null;
@@ -742,7 +764,7 @@ const props = defineProps<{
         token_url: string;
       };
     }[];
-    win_v2: WinStatus_V2;
+    win_v2: WinStatus_V2 | undefined;
     notes: string;
     image_urls: string[];
     grimoire: {

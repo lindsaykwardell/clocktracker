@@ -6,28 +6,26 @@
           <div class="flex flex-col lg:flex-row gap-3 px-4">
             <div class="flex flex-col md:flex-row gap-3 items-center">
               <template v-if="!selectMultipleGames.enabled">
-                <label class="flex gap-2 items-center">
-                  <select
-                    v-model="sortBy"
-                    class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
-                  >
-                    <option value="date">Sort by Date</option>
-                    <option value="character">Sort by Character</option>
-                    <option value="script">Sort by Script</option>
-                    <option value="location">Sort by Location</option>
-                    <option value="community_name">Sort by Community</option>
-                    <option value="players">Sort by Players</option>
-                  </select>
-                </label>
-                <label class="flex gap-2 items-center">
-                  <select
-                    v-model="orderBy"
-                    class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
-                  >
-                    <option value="asc">Ascending</option>
-                    <option value="desc">Descending</option>
-                  </select>
-                </label>
+                <Input
+                  mode="select"
+                  v-model="sortBy"
+                  class="w-full md:w-auto rounded text-lg bg-stone-200 dark:bg-stone-600 border-0"
+                >
+                  <option value="date">Sort by Date</option>
+                  <option value="character">Sort by Character</option>
+                  <option value="script">Sort by Script</option>
+                  <option value="location">Sort by Location</option>
+                  <option value="community_name">Sort by Community</option>
+                  <option value="players">Sort by Players</option>
+                </Input>
+                <Input
+                  mode="select"
+                  v-model="orderBy"
+                  class="w-full md:w-auto rounded p-1 text-lg bg-stone-200 dark:bg-stone-600 border-0"
+                >
+                  <option value="asc">Ascending</option>
+                  <option value="desc">Descending</option>
+                </Input>
                 <div class="relative w-full md:w-auto">
                   <Menu>
                     <MenuButton class="relative w-full md:w-auto">
@@ -38,15 +36,14 @@
                       >
                         {{ activeFilters.length }}
                       </span>
-                      <Button class="py-0 md:mt-1 font-normal w-full">
+                      <Button class="font-normal w-full">
                         <div
                           class="w-full flex gap-2 items-center md:justify-center"
                         >
-                          Filter Games
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
-                            width="32"
-                            height="32"
+                            width="28"
+                            height="28"
                             viewBox="0 0 24 24"
                           >
                             <path
@@ -54,6 +51,7 @@
                               d="M10 18v-2h4v2zm-4-5v-2h12v2zM3 8V6h18v2z"
                             />
                           </svg>
+                          Filter Games
                         </div>
                       </Button>
                     </MenuButton>
@@ -159,33 +157,45 @@
                 </div>
                 <div class="relative w-full md:w-auto">
                   <Button
-                    class="py-[.125rem] md:mt-1 font-normal w-full"
+                    class="font-normal w-full"
                     :disabled="selectMultipleGames.selectedGames.length <= 0"
                     @click="deleteMultipleGames"
                   >
-                    Delete game{{
-                      selectMultipleGames.selectedGames.length !== 1 ? "s" : ""
-                    }}
+                    <span class="w-full text-left">
+                      Delete game{{
+                        selectMultipleGames.selectedGames.length !== 1
+                          ? "s"
+                          : ""
+                      }}
+                    </span>
                   </Button>
                 </div>
                 <div class="relative w-full md:w-auto">
                   <Button
-                    class="py-[.125rem] md:mt-1 font-normal w-full"
+                    component="nuxt-link"
+                    to="/edit-games"
+                    class="font-normal w-full"
                     :disabled="selectMultipleGames.selectedGames.length <= 0"
                   >
-                    Edit game{{
-                      selectMultipleGames.selectedGames.length !== 1 ? "s" : ""
-                    }}
+                    <span class="w-full text-left">
+                      Edit game{{
+                        selectMultipleGames.selectedGames.length !== 1
+                          ? "s"
+                          : ""
+                      }}
+                    </span>
                   </Button>
                 </div>
                 <div v-if="canPostToBGG" class="relative w-full md:w-auto">
                   <Button
-                    class="py-[.125rem] md:mt-1 font-normal w-full flex items-center"
+                    class="font-normal w-full flex items-center h-[2.5rem]"
                     custom="bg-[#3f3a60] hover:bg-[#2e2950]"
                     :disabled="selectMultipleGames.selectedGames.length <= 0"
                     @click="
                       selectMultipleGames.selectedGamesHaveBGG
-                        ? deleteMultipleFromBGG(selectMultipleGames.selectedGames)
+                        ? deleteMultipleFromBGG(
+                            selectMultipleGames.selectedGames
+                          )
                         : postMultipleToBGG(selectMultipleGames.selectedGames)
                     "
                   >
@@ -196,17 +206,19 @@
                         :class="{ 'animate-spin': bggInFlight }"
                       />
                     </div>
-                    <span v-if="selectMultipleGames.selectedGamesHaveBGG"
+                    <span
+                      class="text-left w-full"
+                      v-if="selectMultipleGames.selectedGamesHaveBGG"
                       >Delete from BGG</span
                     >
-                    <span v-else>Post to BGG</span>
+                    <span class="text-left w-full" v-else>Post to BGG</span>
                   </Button>
                 </div>
               </template>
-              <div>
+              <div class="w-full md:w-auto">
                 <Button
                   @click="selectMultipleGames.toggleMode"
-                  class="py-[.125rem] md:mt-1 font-normal w-full"
+                  class="font-normal w-full"
                   :tertiary="selectMultipleGames.enabled"
                 >
                   <div class="w-full text-left">
@@ -560,6 +572,7 @@ async function deleteMultipleGames() {
 }
 
 onMounted(() => {
+  selectMultipleGames.selection = { type: "OFF" };
   roles.fetchRoles();
 
   const lastSortBy = localStorage.getItem("lastSortBy");
