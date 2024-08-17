@@ -1,14 +1,21 @@
 import { defineStore } from "pinia";
 
 export const useFeatureFlags = defineStore("featureFlags", {
-  state: () => ({
+  state: (): {
+    flags: Map<string, boolean>;
+    scheduledMaintenance: Date | null;
+  } => ({
     flags: new Map<string, boolean>(),
+    scheduledMaintenance: null,
   }),
   getters: {
     isEnabled(): (flag: string) => boolean {
       return (flag: string): boolean => {
         return this.flags.get(flag) || false;
       };
+    },
+    maintenanceIsScheduled(): false | Date {
+      return this.scheduledMaintenance ?? false;
     },
   },
   actions: {
@@ -28,5 +35,19 @@ export const useFeatureFlags = defineStore("featureFlags", {
         this.flags.set(key, value);
       }
     },
+    async fetchScheduledMaintenance() {
+      const { data: maintenance, error: maintenanceError } = await useFetch(
+        "/api/scheduled_maintenance"
+      );
+
+      if (maintenanceError.value) {
+        console.error(maintenanceError);
+        return;
+      }
+
+      this.scheduledMaintenance = maintenance.value
+        ? new Date(maintenance.value)
+        : null;
+    }
   },
 });
