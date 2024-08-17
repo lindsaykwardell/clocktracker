@@ -719,14 +719,7 @@ async function deleteGame(alsoUntagMyself: boolean) {
       }?`
     )
   ) {
-    const result = await $fetch(
-      `/api/games/${route.params.id}?untag=${alsoUntagMyself}`,
-      {
-        method: "delete",
-      }
-    );
-
-    games.games.delete(gameId);
+    await games.deleteGame(gameId, alsoUntagMyself);
 
     router.push(`/`);
   }

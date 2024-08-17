@@ -17,6 +17,7 @@
         }"
       >
         <button
+          v-if="selectMultipleGames.enabled"
           class="absolute top-0 left-0 w-full h-full z-50 cursor-pointer"
           @click="selectMultipleGames.toggleGame(game.id)"
         ></button>

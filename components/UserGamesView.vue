@@ -4,156 +4,193 @@
       <section class="w-full flex flex-col md:flex-row gap-8 pb-20 md:pb-0">
         <div class="w-full flex flex-col gap-4">
           <div class="flex flex-col lg:flex-row gap-3 px-4">
-            <div class="flex flex-col md:flex-row gap-3">
-              <label class="flex gap-2 items-center">
-                <select
-                  v-model="sortBy"
-                  class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
-                >
-                  <option value="date">Sort by Date</option>
-                  <option value="character">Sort by Character</option>
-                  <option value="script">Sort by Script</option>
-                  <option value="location">Sort by Location</option>
-                  <option value="community_name">Sort by Community</option>
-                  <option value="players">Sort by Players</option>
-                </select>
-              </label>
-              <label class="flex gap-2 items-center">
-                <select
-                  v-model="orderBy"
-                  class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
-                >
-                  <option value="asc">Ascending</option>
-                  <option value="desc">Descending</option>
-                </select>
-              </label>
-              <div class="relative w-full md:w-auto">
-                <Menu>
-                  <MenuButton class="relative w-full md:w-auto">
-                    <span
-                      v-if="activeFilters.length"
-                      class="absolute -top-2 -right-2 text-stone-200 bg-red-800 rounded-full px-2 py-1 text-xs font-bold aspect-square"
-                      aria-label="Unread notifications"
-                    >
-                      {{ activeFilters.length }}
-                    </span>
-                    <Button class="py-0 md:mt-1 font-normal w-full">
-                      <div
-                        class="w-full flex gap-2 items-center md:justify-center"
-                      >
-                        Filter Games
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="32"
-                          height="32"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            fill="currentColor"
-                            d="M10 18v-2h4v2zm-4-5v-2h12v2zM3 8V6h18v2z"
-                          />
-                        </svg>
-                      </div>
-                    </Button>
-                  </MenuButton>
-                  <transition
-                    enter-active-class="transition duration-100 ease-out"
-                    enter-from-class="transform scale-95 opacity-0"
-                    enter-to-class="transform scale-100 opacity-100"
-                    leave-active-class="transition duration-75 ease-out"
-                    leave-from-class="transform scale-100 opacity-100"
-                    leave-to-class="transform scale-95 opacity-0"
+            <div class="flex flex-col md:flex-row gap-3 items-center">
+              <template v-if="!selectMultipleGames.enabled">
+                <label class="flex gap-2 items-center">
+                  <select
+                    v-model="sortBy"
+                    class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
                   >
-                    <MenuItems
-                      class="absolute top-[100%] z-20 bg-stone-950 p-2 rounded shadow-md whitespace-nowrap flex flex-col gap-2 items-start w-full md:w-[300px]"
+                    <option value="date">Sort by Date</option>
+                    <option value="character">Sort by Character</option>
+                    <option value="script">Sort by Script</option>
+                    <option value="location">Sort by Location</option>
+                    <option value="community_name">Sort by Community</option>
+                    <option value="players">Sort by Players</option>
+                  </select>
+                </label>
+                <label class="flex gap-2 items-center">
+                  <select
+                    v-model="orderBy"
+                    class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
+                  >
+                    <option value="asc">Ascending</option>
+                    <option value="desc">Descending</option>
+                  </select>
+                </label>
+                <div class="relative w-full md:w-auto">
+                  <Menu>
+                    <MenuButton class="relative w-full md:w-auto">
+                      <span
+                        v-if="activeFilters.length"
+                        class="absolute -top-2 -right-2 text-stone-200 bg-red-800 rounded-full px-2 py-1 text-xs font-bold aspect-square"
+                        aria-label="Unread notifications"
+                      >
+                        {{ activeFilters.length }}
+                      </span>
+                      <Button class="py-0 md:mt-1 font-normal w-full">
+                        <div
+                          class="w-full flex gap-2 items-center md:justify-center"
+                        >
+                          Filter Games
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="32"
+                            height="32"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="currentColor"
+                              d="M10 18v-2h4v2zm-4-5v-2h12v2zM3 8V6h18v2z"
+                            />
+                          </svg>
+                        </div>
+                      </Button>
+                    </MenuButton>
+                    <transition
+                      enter-active-class="transition duration-100 ease-out"
+                      enter-from-class="transform scale-95 opacity-0"
+                      enter-to-class="transform scale-100 opacity-100"
+                      leave-active-class="transition duration-75 ease-out"
+                      leave-from-class="transform scale-100 opacity-100"
+                      leave-to-class="transform scale-95 opacity-0"
                     >
-                      <MenuItem>
-                        <label class="w-full">
-                          <select
-                            v-model="selectedRole"
-                            @click.stop
-                            class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
-                            aria-label="Role"
-                          >
-                            <option :value="null">Filter by role</option>
-                            <option
-                              v-for="role in myRoles"
-                              :key="role"
-                              :value="role"
+                      <MenuItems
+                        class="absolute top-[100%] z-20 bg-stone-950 p-2 rounded shadow-md whitespace-nowrap flex flex-col gap-2 items-start w-full md:w-[300px]"
+                      >
+                        <MenuItem>
+                          <label class="w-full">
+                            <select
+                              v-model="selectedRole"
+                              @click.stop
+                              class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
+                              aria-label="Role"
                             >
-                              {{ role }}
-                            </option>
-                          </select>
-                        </label>
-                      </MenuItem>
-                      <MenuItem v-if="myCommunities.length">
-                        <label class="flex gap-2 items-center w-full">
-                          <select
-                            v-model="selectedCommunity"
-                            @click.stop
-                            class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
-                            aria-label="Community"
-                          >
-                            <option :value="null">Filter by community</option>
-                            <option
-                              v-for="community in myCommunities"
-                              :key="community"
+                              <option :value="null">Filter by role</option>
+                              <option
+                                v-for="role in myRoles"
+                                :key="role"
+                                :value="role"
+                              >
+                                {{ role }}
+                              </option>
+                            </select>
+                          </label>
+                        </MenuItem>
+                        <MenuItem v-if="myCommunities.length">
+                          <label class="flex gap-2 items-center w-full">
+                            <select
+                              v-model="selectedCommunity"
+                              @click.stop
+                              class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
+                              aria-label="Community"
                             >
-                              {{ community }}
-                            </option>
-                          </select>
-                        </label>
-                      </MenuItem>
-                      <MenuItem>
-                        <label class="w-full">
-                          <select
-                            v-model="selectedTag"
-                            @click.stop
-                            class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
-                            aria-label="Tags"
-                          >
-                            <option :value="null">Filter by tag</option>
-                            <option
-                              v-for="tag in myTags.filter(
-                                (tag) => !selectedTags.includes(tag)
-                              )"
-                              :key="tag"
+                              <option :value="null">Filter by community</option>
+                              <option
+                                v-for="community in myCommunities"
+                                :key="community"
+                              >
+                                {{ community }}
+                              </option>
+                            </select>
+                          </label>
+                        </MenuItem>
+                        <MenuItem>
+                          <label class="w-full">
+                            <select
+                              v-model="selectedTag"
+                              @click.stop
+                              class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
+                              aria-label="Tags"
                             >
-                              {{ tag }}
-                            </option>
-                          </select>
-                        </label>
-                      </MenuItem>
-                      <MenuItem>
-                        <label class="w-full">
-                          <select
-                            v-model="selectedPlayer"
-                            @click.stop
-                            class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
-                            aria-label="Tags"
-                          >
-                            <option :value="null">Filter by player</option>
-                            <option
-                              v-for="player in mySelectedPlayers.filter(
-                                (player) => !selectedPlayers.includes(player)
-                              )"
-                              :key="player"
+                              <option :value="null">Filter by tag</option>
+                              <option
+                                v-for="tag in myTags.filter(
+                                  (tag) => !selectedTags.includes(tag)
+                                )"
+                                :key="tag"
+                              >
+                                {{ tag }}
+                              </option>
+                            </select>
+                          </label>
+                        </MenuItem>
+                        <MenuItem>
+                          <label class="w-full">
+                            <select
+                              v-model="selectedPlayer"
+                              @click.stop
+                              class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
+                              aria-label="Tags"
                             >
-                              {{ player }}
-                            </option>
-                          </select>
-                        </label>
-                      </MenuItem>
-                    </MenuItems>
-                  </transition>
-                </Menu>
-              </div>
+                              <option :value="null">Filter by player</option>
+                              <option
+                                v-for="player in mySelectedPlayers.filter(
+                                  (player) => !selectedPlayers.includes(player)
+                                )"
+                                :key="player"
+                              >
+                                {{ player }}
+                              </option>
+                            </select>
+                          </label>
+                        </MenuItem>
+                      </MenuItems>
+                    </transition>
+                  </Menu>
+                </div>
+              </template>
+              <template v-else>
+                <div class="relative w-full md:w-auto">
+                  {{ selectMultipleGames.selectedGames.length }} game{{
+                    selectMultipleGames.selectedGames.length !== 1 ? "s" : ""
+                  }}
+                  selected
+                </div>
+                <div class="relative w-full md:w-auto">
+                  <Button
+                    class="py-[.125rem] md:mt-1 font-normal w-full"
+                    :disabled="selectMultipleGames.selectedGames.length <= 0"
+                    @click="deleteMultipleGames"
+                  >
+                    Delete game{{
+                      selectMultipleGames.selectedGames.length !== 1 ? "s" : ""
+                    }}
+                  </Button>
+                </div>
+                <div class="relative w-full md:w-auto">
+                  <Button
+                    class="py-[.125rem] md:mt-1 font-normal w-full"
+                    :disabled="selectMultipleGames.selectedGames.length <= 0"
+                  >
+                    Edit game{{
+                      selectMultipleGames.selectedGames.length !== 1 ? "s" : ""
+                    }}
+                  </Button>
+                </div>
+              </template>
               <div>
                 <Button
                   @click="selectMultipleGames.toggleMode"
                   class="py-[.125rem] md:mt-1 font-normal w-full"
+                  :tertiary="selectMultipleGames.enabled"
                 >
-                  <div class="w-full text-left">Select Games</div>
+                  <div class="w-full text-left">
+                    <template v-if="selectMultipleGames.enabled">
+                      <span>Cancel</span>
+                    </template>
+                    <template v-else>Select Multiple</template>
+                  </div>
                 </Button>
               </div>
             </div>
@@ -481,6 +518,20 @@ const sortedGames = computed(() => {
           game.community_name.trim() === selectedCommunity.value.trim()) // filter by community
     );
 });
+
+async function deleteMultipleGames() {
+  if (
+    confirm(
+      `Are you sure you want to delete ${
+        selectMultipleGames.selectedGames.length
+      } game${selectMultipleGames.selectedGames.length === 1 ? "" : "s"}?`
+    )
+  ) {
+    await allGames.deleteMultipleGames(selectMultipleGames.selectedGames);
+
+    selectMultipleGames.toggleMode();
+  }
+}
 
 onMounted(() => {
   roles.fetchRoles();
