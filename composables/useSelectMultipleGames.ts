@@ -22,6 +22,18 @@ export const useSelectMultipleGames = defineStore("selectMultipleGames", {
     enabled(): boolean {
       return this.selection.type === "ON";
     },
+    selectedGamesHaveBGG(): boolean {
+      const allGames = useGames();
+
+      if (this.selection.type === "OFF") {
+        return false;
+      }
+
+      return this.selection.games.some((game_id) => {
+        const game = allGames.getGame(game_id);
+        return game.status === Status.SUCCESS && !!game.data.bgg_id;
+      });
+    },
   },
   actions: {
     toggleMode() {

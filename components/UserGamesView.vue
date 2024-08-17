@@ -178,6 +178,30 @@
                     }}
                   </Button>
                 </div>
+                <div v-if="canPostToBGG" class="relative w-full md:w-auto">
+                  <Button
+                    class="py-[.125rem] md:mt-1 font-normal w-full flex items-center"
+                    custom="bg-[#3f3a60] hover:bg-[#2e2950]"
+                    :disabled="selectMultipleGames.selectedGames.length <= 0"
+                    @click="
+                      selectMultipleGames.selectedGamesHaveBGG
+                        ? deleteMultipleFromBGG(selectMultipleGames.selectedGames)
+                        : postMultipleToBGG(selectMultipleGames.selectedGames)
+                    "
+                  >
+                    <div class="w-6">
+                      <img
+                        src="/img/bgg.png"
+                        class="w-6 h-6 m-auto"
+                        :class="{ 'animate-spin': bggInFlight }"
+                      />
+                    </div>
+                    <span v-if="selectMultipleGames.selectedGamesHaveBGG"
+                      >Delete from BGG</span
+                    >
+                    <span v-else>Post to BGG</span>
+                  </Button>
+                </div>
               </template>
               <div>
                 <Button
@@ -338,6 +362,8 @@ const roles = useRoles();
 const allGames = useGames();
 const importGamesDialogVisible = ref(false);
 const selectMultipleGames = useSelectMultipleGames();
+const { canPostToBGG, bggInFlight, postMultipleToBGG, deleteMultipleFromBGG } =
+  useBGG();
 
 const me = computed(() => {
   if (user.value) {

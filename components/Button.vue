@@ -17,6 +17,7 @@ const props = defineProps<{
   secondary?: boolean;
   tertiary?: boolean;
   danger?: boolean;
+  custom?: string;
   discord?: boolean;
   fontSize?: "sm" | "md" | "lg" | "xl";
   disabled?: boolean;
@@ -48,6 +49,9 @@ const danger =
 const discord = "bg-discord hover:bg-discord-dark";
 
 const colorScheme = computed(() => {
+  if (props.custom) {
+    return props.custom;
+  } else
   if (props.primary) {
     return primary;
   } else if (props.outline) {
