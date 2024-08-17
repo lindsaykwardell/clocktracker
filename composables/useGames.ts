@@ -321,7 +321,7 @@ export const useGames = defineStore("games", {
       const scriptList: { name: string; id: number | null; version: string }[] =
         [];
 
-      for (const game of games.data) {
+      for (const game of orderedGames) {
         if (scriptList.length >= 10) continue;
 
         if (
@@ -375,16 +375,16 @@ export const useGames = defineStore("games", {
         });
       }
 
-      // const allGames = this.getByPlayer(username);
-      // if (allGames.status === Status.SUCCESS) {
-      //   for (const game of allGames.data) {
-      //     // If the game is in the new data, don't worry
-      //     if (games.map((g) => g.id).includes(game.id)) continue;
+      const allGames = this.getByPlayer(username);
+      if (allGames.status === Status.SUCCESS) {
+        for (const game of allGames.data) {
+          // If the game is in the new data, don't worry
+          if (games.map((g) => g.id).includes(game.id)) continue;
 
-      //     // Purge the game if it's not in the new data
-      //     this.games.delete(game.id);
-      //   }
-      // }
+          // Purge the game if it's not in the new data
+          this.games.delete(game.id);
+        }
+      }
     },
     async fetchRecentGamesForScript(scriptId: number) {
       const games = await $fetch<RecentGameRecord[]>(
@@ -503,6 +503,16 @@ export const useGames = defineStore("games", {
           reject(err);
         }
       });
+    },
+    async deleteGame(gameId: string, untagMyself?: boolean) {
+      await $fetch(`/api/games/${gameId}?untag=${untagMyself}`, {
+        method: "DELETE",
+      });
+
+      this.games.delete(gameId);
+    },
+    async deleteMultipleGames(gameIds: string[]) {
+      await Promise.all(gameIds.map((id) => this.deleteGame(id)));
     },
   },
 });
