@@ -14,10 +14,16 @@
         </tr>
       </thead>
       <tbody>
-        <nuxt-link
+        <component
+          :is="componentIs"
           v-for="game in games"
           :to="`/game/${game.id}`"
           class="table-row cursor-pointer bg-cover bg-center"
+          @click="
+            selectMultipleGames.enabled
+              ? selectMultipleGames.toggleGame(game.id)
+              : null
+          "
           :class="{
             'trouble-brewing': game.script === 'Trouble Brewing',
             'sects-and-violets': game.script === 'Sects and Violets',
@@ -28,6 +34,8 @@
                 'Sects and Violets',
                 'Bad Moon Rising',
               ].indexOf(game.script) === -1,
+            'select-multiple': selectMultipleGames.enabled,
+            selected: selectMultipleGames.selectedGames.includes(game.id),
           }"
         >
           <td class="w-12">
@@ -64,36 +72,48 @@
             </template>
             <template v-else> Online </template>
           </td>
-          <td class="hidden md:table-cell">{{ game.community_name }}</td>
+          <td class="hidden md:table-cell">
+            <div class="flex gap-2 items-center">
+              <Avatar
+                v-if="game.community"
+                :value="game.community.icon"
+                size="xs"
+                class="flex-shrink bg-stone-300 dark:bg-stone-950"
+              />
+              {{ game.community_name }}
+            </div>
+          </td>
           <td class="hidden md:table-cell">
             {{ game.player_count }}
             <template v-if="game.traveler_count && game.traveler_count > 0">
               (+{{ game.traveler_count }})
             </template>
           </td>
-          <td class="flex gap-1">
-            <img
-              class="w-8 h-8 md:w-12 md:h-12 col-span-auto z-10"
-              :src="displayWinIcon(game)"
-            />
-            <nuxt-link
-              v-if="!readonly"
-              class="dark:text-white font-bold px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial z-10"
-              :to="`/game/${game.id}/edit`"
-              ><svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="32"
-                height="32"
-                viewBox="0 0 32 32"
-              >
-                <path
-                  fill="currentColor"
-                  d="M2 26h28v2H2zM25.4 9c.8-.8.8-2 0-2.8l-3.6-3.6c-.8-.8-2-.8-2.8 0l-15 15V24h6.4l15-15zm-5-5L24 7.6l-3 3L17.4 7l3-3zM6 22v-3.6l10-10l3.6 3.6l-10 10H6z"
-                />
-              </svg>
-            </nuxt-link>
+          <td>
+            <div class="flex gap-1">
+              <img
+                class="w-8 h-8 md:w-12 md:h-12 col-span-auto z-10"
+                :src="displayWinIcon(game)"
+              />
+              <nuxt-link
+                v-if="!readonly"
+                class="dark:text-white font-bold px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial z-10"
+                :to="`/game/${game.id}/edit`"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="32"
+                  height="32"
+                  viewBox="0 0 32 32"
+                >
+                  <path
+                    fill="currentColor"
+                    d="M2 26h28v2H2zM25.4 9c.8-.8.8-2 0-2.8l-3.6-3.6c-.8-.8-2-.8-2.8 0l-15 15V24h6.4l15-15zm-5-5L24 7.6l-3 3L17.4 7l3-3zM6 22v-3.6l10-10l3.6 3.6l-10 10H6z"
+                  />
+                </svg>
+              </nuxt-link>
+            </div>
           </td>
-        </nuxt-link>
+        </component>
       </tbody>
     </table>
   </div>
@@ -103,6 +123,7 @@
 import { displayWinIcon } from "~/composables/useGames";
 
 const gamesStore = useGames();
+const selectMultipleGames = useSelectMultipleGames();
 const { isBaseScript } = useScripts();
 
 const props = defineProps<{
@@ -116,6 +137,13 @@ function formatDate(date: Date) {
     timeZone: "UTC",
   }).format(new Date(date));
 }
+
+const nuxtLink = resolveComponent("nuxt-link");
+
+const componentIs = computed(() => {
+  if (selectMultipleGames.enabled) return "tr";
+  return nuxtLink;
+});
 </script>
 
 <style scoped>
@@ -230,9 +258,13 @@ th {
 }
 
 td {
-  @apply h-12 md:h-16 p-2;
+  @apply h-12 md:h-16 p-2 transition duration-150;
   vertical-align: middle;
   white-space: nowrap;
   text-overflow: ellipsis;
+
+  .select-multiple.selected & {
+    @apply bg-primary;
+  }
 }
 </style>
