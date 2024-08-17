@@ -43,8 +43,6 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  console.log(body);
-
   const games = await prisma.game.findMany({
     where: {
       id: {
@@ -53,8 +51,6 @@ export default defineEventHandler(async (handler) => {
       user_id: user.id,
     },
   });
-
-  console.log(games.length)
 
   for (const payload of games) {
     const game = await prisma.game.update({
@@ -152,7 +148,7 @@ export default defineEventHandler(async (handler) => {
       win_v2: game.win_v2,
       tags: game.tags,
       privacy: game.privacy,
-    })
+    });
 
     const related_games = [...game.child_games];
 
