@@ -102,7 +102,7 @@ const game = reactive<{
       token_url: string;
     };
   }[];
-  win_v2: WinStatus_V2;
+  win_v2: WinStatus_V2 | undefined;
   notes: string;
   image_urls: string[];
   grimoire: {
@@ -177,7 +177,7 @@ const game = reactive<{
     //   },
     // },
   ],
-  win_v2: WinStatus_V2.NOT_RECORDED,
+  win_v2: undefined,
   notes: "",
   image_urls: [],
   grimoire: [
@@ -222,6 +222,11 @@ const formattedGame = computed(() => ({
 }));
 
 async function submitGame() {
+  if (!game.win_v2) {
+    alert("Please select a win condition.");
+    return;
+  }
+
   const privacyNotice = (() => {
     if (game.privacy === "PUBLIC") {
       return `, and this game will be publicly visible to anyone who visits the site.`;
@@ -307,7 +312,7 @@ function resetGame() {
         //   },
         // },
       ],
-      win_v2: WinStatus_V2.NOT_RECORDED,
+      win_v2: undefined,
       notes: "",
       image_urls: [],
       grimoire: [
