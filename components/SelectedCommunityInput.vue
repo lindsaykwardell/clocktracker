@@ -5,6 +5,7 @@
         @focus="emit('inputFocused')"
         @change="value = $event.target.value"
         class="block w-full border bg-stone-200 dark:bg-stone-600 disabled:bg-stone-300 dark:disabled:bg-stone-700 border-stone-100 dark:border-stone-500 rounded-md p-2 h-[2.5rem] text-lg"
+        :placeholder="placeholder"
       />
       <ComboboxOptions
         v-if="filteredCommunities.length > 0"
@@ -43,6 +44,7 @@ const props = defineProps<{
   }[];
   value: string;
   inputClass?: string;
+  placeholder?: string;
 }>();
 
 const emit = defineEmits(["inputFocused", "update:value"]);
