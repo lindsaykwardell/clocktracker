@@ -475,7 +475,7 @@
                 <MenuItem v-if="canPostToBGG">
                   <button
                     class="bg-[#3f3a60] hover:bg-[#2e2950] transition duration-150 text-white flex items-center w-full text-sm min-h-[32px]"
-                    @click="postToBGG"
+                    @click="initPostToBGG"
                     :disabled="bggInFlight"
                   >
                     <div class="w-6 ml-1">
@@ -533,7 +533,7 @@ const users = useUsers();
 const games = useGames();
 const friends = useFriends();
 const gameId = route.params.id as string;
-const bggInFlight = ref(false);
+const { bggInFlight, canPostToBGG, postToBGG } = useBGG();
 const mergeInFlight = ref(false);
 
 const game = computed(() => games.getGame(gameId));
@@ -549,14 +549,6 @@ const similarGames = computed(() => games.getSimilarGames(gameId));
 const showSimilarGamesDialog = ref(false);
 
 const { canPostToBGStats, link: bgStatsLink } = useBGStats(game);
-
-const canPostToBGG = computed(() => {
-  const me = users.getUserById(user.value?.id || "");
-
-  if (me.status !== Status.SUCCESS) return false;
-
-  return !!me.data.bgg_username;
-});
 
 watchEffect(() => {
   if (
@@ -719,14 +711,7 @@ async function deleteGame(alsoUntagMyself: boolean) {
       }?`
     )
   ) {
-    const result = await $fetch(
-      `/api/games/${route.params.id}?untag=${alsoUntagMyself}`,
-      {
-        method: "delete",
-      }
-    );
-
-    games.games.delete(gameId);
+    await games.deleteGame(gameId, alsoUntagMyself);
 
     router.push(`/`);
   }
@@ -768,26 +753,10 @@ watchEffect(() => {
   }
 });
 
-async function postToBGG() {
+async function initPostToBGG() {
   if (game.value.status !== Status.SUCCESS) return;
 
-  bggInFlight.value = true;
-
-  if (game.value.data.bgg_id) {
-    await $fetch(`/api/games/${gameId}/post_to_bgg`, {
-      method: "DELETE",
-    });
-  } else {
-    await $fetch(`/api/games/${gameId}/post_to_bgg`, {
-      method: "POST",
-      body: JSON.stringify({
-        anonymize: anonymize.value,
-      }),
-    });
-  }
-
-  await games.fetchGame(gameId);
-  bggInFlight.value = false;
+  await postToBGG(game.value.data, anonymize.value);
 }
 
 function formatDate(date: Date) {
