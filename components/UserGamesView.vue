@@ -4,149 +4,266 @@
       <section class="w-full flex flex-col md:flex-row gap-8 pb-20 md:pb-0">
         <div class="w-full flex flex-col gap-4">
           <div class="flex flex-col lg:flex-row gap-3 px-4">
-            <div class="flex flex-col md:flex-row gap-3">
-              <label class="flex gap-2 items-center">
-                <select
+            <div class="flex flex-col md:flex-row gap-3 items-center">
+              <template v-if="!selectMultipleGames.enabled">
+                <Input
+                  mode="select"
                   v-model="sortBy"
-                  class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
+                  class="w-full md:w-auto rounded text-lg bg-stone-200 dark:bg-stone-600 border-0"
                 >
                   <option value="date">Sort by Date</option>
                   <option value="character">Sort by Character</option>
+                  <option value="alignment">Sort by Alignment</option>
                   <option value="script">Sort by Script</option>
                   <option value="location">Sort by Location</option>
                   <option value="community_name">Sort by Community</option>
                   <option value="players">Sort by Players</option>
-                </select>
-              </label>
-              <label class="flex gap-2 items-center">
-                <select
+                </Input>
+                <Input
+                  mode="select"
                   v-model="orderBy"
-                  class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
+                  class="w-full md:w-auto rounded p-1 text-lg bg-stone-200 dark:bg-stone-600 border-0"
                 >
                   <option value="asc">Ascending</option>
                   <option value="desc">Descending</option>
-                </select>
-              </label>
-              <div class="relative w-full md:w-auto">
-                <Menu>
-                  <MenuButton class="relative w-full md:w-auto">
-                    <span
-                      v-if="activeFilters.length"
-                      class="absolute -top-2 -right-2 text-stone-200 bg-red-800 rounded-full px-2 py-1 text-xs font-bold aspect-square"
-                      aria-label="Unread notifications"
-                    >
-                      {{ activeFilters.length }}
-                    </span>
-                    <Button class="py-0 md:mt-1 font-normal w-full">
-                      <div
-                        class="w-full flex gap-2 items-center md:justify-center"
+                </Input>
+                <div class="relative w-full md:w-auto">
+                  <Menu>
+                    <MenuButton class="relative w-full md:w-auto">
+                      <span
+                        v-if="activeFilters.length"
+                        class="absolute -top-2 -right-2 text-stone-200 bg-red-800 rounded-full px-2 py-1 text-xs font-bold aspect-square"
+                        aria-label="Unread notifications"
                       >
-                        Filter Games
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="32"
-                          height="32"
-                          viewBox="0 0 24 24"
+                        {{ activeFilters.length }}
+                      </span>
+                      <Button class="font-normal w-full">
+                        <div
+                          class="w-full flex gap-2 items-center md:justify-center"
                         >
-                          <path
-                            fill="currentColor"
-                            d="M10 18v-2h4v2zm-4-5v-2h12v2zM3 8V6h18v2z"
-                          />
-                        </svg>
-                      </div>
-                    </Button>
-                  </MenuButton>
-                  <transition
-                    enter-active-class="transition duration-100 ease-out"
-                    enter-from-class="transform scale-95 opacity-0"
-                    enter-to-class="transform scale-100 opacity-100"
-                    leave-active-class="transition duration-75 ease-out"
-                    leave-from-class="transform scale-100 opacity-100"
-                    leave-to-class="transform scale-95 opacity-0"
-                  >
-                    <MenuItems
-                      class="absolute top-[100%] z-20 bg-stone-950 p-2 rounded shadow-md whitespace-nowrap flex flex-col gap-2 items-start w-full md:w-[300px]"
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="28"
+                            height="28"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              fill="currentColor"
+                              d="M10 18v-2h4v2zm-4-5v-2h12v2zM3 8V6h18v2z"
+                            />
+                          </svg>
+                          Filter Games
+                        </div>
+                      </Button>
+                    </MenuButton>
+                    <transition
+                      enter-active-class="transition duration-100 ease-out"
+                      enter-from-class="transform scale-95 opacity-0"
+                      enter-to-class="transform scale-100 opacity-100"
+                      leave-active-class="transition duration-75 ease-out"
+                      leave-from-class="transform scale-100 opacity-100"
+                      leave-to-class="transform scale-95 opacity-0"
                     >
-                      <MenuItem>
-                        <label class="w-full">
-                          <select
-                            v-model="selectedRole"
-                            @click.stop
-                            class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
-                            aria-label="Role"
-                          >
-                            <option :value="null">Filter by role</option>
-                            <option
-                              v-for="role in myRoles"
-                              :key="role"
-                              :value="role"
+                      <MenuItems
+                        class="absolute top-[100%] z-20 bg-stone-950 p-2 rounded shadow-md whitespace-nowrap flex flex-col gap-2 items-start w-full md:w-[300px]"
+                      >
+                        <MenuItem>
+                          <label class="w-full">
+                            <select
+                              v-model="selectedRole"
+                              @click.stop
+                              class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
+                              aria-label="Role"
                             >
-                              {{ role }}
-                            </option>
-                          </select>
-                        </label>
-                      </MenuItem>
-                      <MenuItem v-if="myCommunities.length">
-                        <label class="flex gap-2 items-center w-full">
-                          <select
-                            v-model="selectedCommunity"
-                            @click.stop
-                            class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
-                            aria-label="Community"
-                          >
-                            <option :value="null">Filter by community</option>
-                            <option
-                              v-for="community in myCommunities"
-                              :key="community"
+                              <option :value="null">Filter by role</option>
+                              <option
+                                v-for="role in myRoles"
+                                :key="role"
+                                :value="role"
+                              >
+                                {{ role }}
+                              </option>
+                            </select>
+                          </label>
+                        </MenuItem>
+                        <MenuItem>
+                          <label class="w-full">
+                            <select
+                              v-model="selectedAlignment"
+                              @click.stop
+                              class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
+                              aria-label="Alignment"
                             >
-                              {{ community }}
-                            </option>
-                          </select>
-                        </label>
-                      </MenuItem>
-                      <MenuItem>
-                        <label class="w-full">
-                          <select
-                            v-model="selectedTag"
-                            @click.stop
-                            class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
-                            aria-label="Tags"
-                          >
-                            <option :value="null">Filter by tag</option>
-                            <option
-                              v-for="tag in myTags.filter(
-                                (tag) => !selectedTags.includes(tag)
-                              )"
-                              :key="tag"
+                              <option :value="null">Filter by alignment</option>
+                              <option value="GOOD">Good</option>
+                              <option value="EVIL">Evil</option>
+                            </select>
+                          </label>
+                        </MenuItem>
+                        <MenuItem>
+                          <label class="w-full">
+                            <select
+                              v-model="selectedWinState"
+                              @click.stop
+                              class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
+                              aria-label="Alignment"
                             >
-                              {{ tag }}
-                            </option>
-                          </select>
-                        </label>
-                      </MenuItem>
-                      <MenuItem>
-                        <label class="w-full">
-                          <select
-                            v-model="selectedPlayer"
-                            @click.stop
-                            class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
-                            aria-label="Tags"
-                          >
-                            <option :value="null">Filter by player</option>
-                            <option
-                              v-for="player in mySelectedPlayers.filter(
-                                (player) => !selectedPlayers.includes(player)
-                              )"
-                              :key="player"
+                              <option :value="null">Filter by win/loss</option>
+                              <option :value="WinStatus_V2.GOOD_WINS">
+                                Good wins
+                              </option>
+                              <option :value="WinStatus_V2.EVIL_WINS">
+                                Evil wins
+                              </option>
+                              <options :value="WinStatus_V2.NOT_RECORDED"
+                                >Not recorded</options
+                              >
+                            </select>
+                          </label>
+                        </MenuItem>
+                        <MenuItem v-if="myCommunities.length">
+                          <label class="flex gap-2 items-center w-full">
+                            <select
+                              v-model="selectedCommunity"
+                              @click.stop
+                              class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
+                              aria-label="Community"
                             >
-                              {{ player }}
-                            </option>
-                          </select>
-                        </label>
-                      </MenuItem>
-                    </MenuItems>
-                  </transition>
-                </Menu>
+                              <option :value="null">Filter by community</option>
+                              <option
+                                v-for="community in myCommunities"
+                                :key="community"
+                              >
+                                {{ community }}
+                              </option>
+                            </select>
+                          </label>
+                        </MenuItem>
+                        <MenuItem>
+                          <label class="w-full">
+                            <select
+                              v-model="selectedTag"
+                              @click.stop
+                              class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
+                              aria-label="Tags"
+                            >
+                              <option :value="null">Filter by tag</option>
+                              <option
+                                v-for="tag in myTags.filter(
+                                  (tag) => !selectedTags.includes(tag)
+                                )"
+                                :key="tag"
+                              >
+                                {{ tag }}
+                              </option>
+                            </select>
+                          </label>
+                        </MenuItem>
+                        <MenuItem>
+                          <label class="w-full">
+                            <select
+                              v-model="selectedPlayer"
+                              @click.stop
+                              class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
+                              aria-label="Tags"
+                            >
+                              <option :value="null">Filter by player</option>
+                              <option
+                                v-for="player in mySelectedPlayers.filter(
+                                  (player) => !selectedPlayers.includes(player)
+                                )"
+                                :key="player"
+                              >
+                                {{ player }}
+                              </option>
+                            </select>
+                          </label>
+                        </MenuItem>
+                      </MenuItems>
+                    </transition>
+                  </Menu>
+                </div>
+              </template>
+              <template v-else>
+                <div class="relative w-full md:w-auto">
+                  {{ selectMultipleGames.selectedGames.length }} game{{
+                    selectMultipleGames.selectedGames.length !== 1 ? "s" : ""
+                  }}
+                  selected
+                </div>
+                <div class="relative w-full md:w-auto">
+                  <Button
+                    class="font-normal w-full"
+                    :disabled="selectMultipleGames.selectedGames.length <= 0"
+                    @click="deleteMultipleGames"
+                  >
+                    <span class="w-full text-left">
+                      Delete game{{
+                        selectMultipleGames.selectedGames.length !== 1
+                          ? "s"
+                          : ""
+                      }}
+                    </span>
+                  </Button>
+                </div>
+                <div class="relative w-full md:w-auto">
+                  <Button
+                    component="nuxt-link"
+                    to="/edit-games"
+                    class="font-normal w-full"
+                    :disabled="selectMultipleGames.selectedGames.length <= 0"
+                  >
+                    <span class="w-full text-left">
+                      Edit game{{
+                        selectMultipleGames.selectedGames.length !== 1
+                          ? "s"
+                          : ""
+                      }}
+                    </span>
+                  </Button>
+                </div>
+                <div v-if="canPostToBGG" class="relative w-full md:w-auto">
+                  <Button
+                    class="font-normal w-full flex items-center h-[2.5rem]"
+                    custom="bg-[#3f3a60] hover:bg-[#2e2950]"
+                    :disabled="selectMultipleGames.selectedGames.length <= 0"
+                    @click="
+                      selectMultipleGames.selectedGamesHaveBGG
+                        ? deleteMultipleFromBGG(
+                            selectMultipleGames.selectedGames
+                          )
+                        : postMultipleToBGG(selectMultipleGames.selectedGames)
+                    "
+                  >
+                    <div class="w-6">
+                      <img
+                        src="/img/bgg.png"
+                        class="w-6 h-6 m-auto"
+                        :class="{ 'animate-spin': bggInFlight }"
+                      />
+                    </div>
+                    <span
+                      class="text-left w-full"
+                      v-if="selectMultipleGames.selectedGamesHaveBGG"
+                      >Delete from BGG</span
+                    >
+                    <span class="text-left w-full" v-else>Post to BGG</span>
+                  </Button>
+                </div>
+              </template>
+              <div v-if="myPage" class="w-full md:w-auto">
+                <Button
+                  @click="selectMultipleGames.toggleMode"
+                  class="font-normal w-full"
+                  :tertiary="selectMultipleGames.enabled"
+                >
+                  <div class="w-full text-left">
+                    <template v-if="selectMultipleGames.enabled">
+                      <span>Cancel</span>
+                    </template>
+                    <template v-else>Select Games</template>
+                  </div>
+                </Button>
               </div>
             </div>
             <div class="flex-grow"></div>
@@ -212,6 +329,49 @@
           </div>
           <div class="flex flex-col md:flex-row gap-3 px-4">
             <div class="flex flex-wrap gap-2">
+              <Button
+                v-if="selectedRole"
+                font-size="md"
+                @click.prevent="selectedRole = null"
+              >
+                Role: {{ selectedRole }}
+              </Button>
+              <Button
+                v-if="selectedAlignment"
+                font-size="md"
+                @click.prevent="selectedAlignment = null"
+              >
+                Alignment:
+                <template v-if="selectedAlignment === 'GOOD'">Good</template>
+                <template v-else-if="selectedAlignment === 'EVIL'"
+                  >Evil</template
+                >
+              </Button>
+              <Button
+                v-if="selectedWinState"
+                font-size="md"
+                @click.prevent="selectedWinState = null"
+              >
+                Win/Loss:
+                <template v-if="selectedWinState === WinStatus_V2.GOOD_WINS"
+                  >Good wins</template
+                >
+                <template
+                  v-else-if="selectedWinState === WinStatus_V2.EVIL_WINS"
+                  >Evil wins</template
+                >
+                <template
+                  v-else-if="selectedWinState === WinStatus_V2.NOT_RECORDED"
+                  >Not recorded</template
+                >
+              </Button>
+              <Button
+                v-if="selectedCommunity"
+                font-size="md"
+                @click.prevent="selectedCommunity = null"
+              >
+                Community: {{ selectedCommunity }}
+              </Button>
               <Button
                 v-for="(player, index) in selectedPlayers"
                 font-size="md"
@@ -286,12 +446,16 @@
 <script setup lang="ts">
 import naturalOrder from "natural-order";
 import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
+import type { WinStatus_V2 } from "~/composables/useGames";
 
 const user = useSupabaseUser();
 const users = useUsers();
 const roles = useRoles();
 const allGames = useGames();
 const importGamesDialogVisible = ref(false);
+const selectMultipleGames = useSelectMultipleGames();
+const { canPostToBGG, bggInFlight, postMultipleToBGG, deleteMultipleFromBGG } =
+  useBGG();
 
 const me = computed(() => {
   if (user.value) {
@@ -364,7 +528,13 @@ const myCommunities = computed(() => {
 const ready = ref(false);
 const gameView = ref<"grid" | "table">("grid");
 const sortBy = ref<
-  "character" | "date" | "script" | "location" | "community_name" | "players"
+  | "character"
+  | "date"
+  | "script"
+  | "location"
+  | "community_name"
+  | "players"
+  | "alignment"
 >("date");
 const orderBy = ref<"asc" | "desc">("desc");
 const selectedTag = ref<string | null>(null);
@@ -373,6 +543,8 @@ const selectedPlayer = ref<string | null>(null);
 const selectedPlayers = ref<string[]>([]);
 const selectedRole = ref<string | null>(null);
 const selectedCommunity = ref<string | null>(null);
+const selectedAlignment = ref<"GOOD" | "EVIL" | null>(null);
+const selectedWinState = ref<WinStatus_V2 | null>(null);
 
 watchEffect(() => {
   if (selectedTag.value) {
@@ -414,6 +586,9 @@ const activeFilters = computed(() => {
     ...(selectedCommunity.value
       ? [{ type: "community", value: selectedCommunity.value }]
       : []),
+    ...(selectedAlignment.value
+      ? [{ type: "alignment", value: selectedAlignment.value }]
+      : []),
   ];
 });
 
@@ -428,6 +603,8 @@ const sortedGames = computed(() => {
       last_character: g.is_storyteller
         ? "Storyteller"
         : g.player_characters[g.player_characters.length - 1]?.name,
+      last_alignment:
+        g.player_characters[g.player_characters.length - 1]?.alignment,
     }))
   )
     .orderBy(orderBy.value)
@@ -438,6 +615,8 @@ const sortedGames = computed(() => {
             return ["date", "created_at"];
           case "character":
             return ["last_character", "date", "created_at"];
+          case "alignment":
+            return ["last_alignment", "date", "created_at"];
           case "script":
             return ["script", "date", "created_at"];
           case "location":
@@ -454,7 +633,7 @@ const sortedGames = computed(() => {
     .filter(
       (game) =>
         (!selectedTags.value.length ||
-          selectedTags.value.every((tag) => game.tags.includes(tag))) && // filter by tags
+          selectedTags.value.every((tag) => game.tags.includes(tag))) &&
         (!selectedPlayers.value.length ||
           selectedPlayers.value.every((tag) =>
             game.grimoire
@@ -464,16 +643,36 @@ const sortedGames = computed(() => {
                 )
               )
               .includes(tag)
-          )) && // filter by tags
+          )) &&
         (!selectedRole.value ||
           game.player_characters.some((c) => c.name === selectedRole.value) ||
-          (game.is_storyteller && selectedRole.value === "Storyteller")) && // filter by role
+          (game.is_storyteller && selectedRole.value === "Storyteller")) &&
         (!selectedCommunity.value ||
-          game.community_name.trim() === selectedCommunity.value.trim()) // filter by community
+          game.community_name.trim() === selectedCommunity.value.trim()) &&
+        (!selectedAlignment.value ||
+          game.player_characters.some(
+            (c) => c.alignment === selectedAlignment.value
+          )) &&
+        (!selectedWinState.value || game.win_v2 === selectedWinState.value)
     );
 });
 
+async function deleteMultipleGames() {
+  if (
+    confirm(
+      `Are you sure you want to delete ${
+        selectMultipleGames.selectedGames.length
+      } game${selectMultipleGames.selectedGames.length === 1 ? "" : "s"}?`
+    )
+  ) {
+    await allGames.deleteMultipleGames(selectMultipleGames.selectedGames);
+
+    selectMultipleGames.toggleMode();
+  }
+}
+
 onMounted(() => {
+  selectMultipleGames.selection = { type: "OFF" };
   roles.fetchRoles();
 
   const lastSortBy = localStorage.getItem("lastSortBy");
@@ -482,6 +681,8 @@ onMounted(() => {
   const lastSelectedTags = localStorage.getItem("lastSelectedTags");
   const lastSelectedPlayers = localStorage.getItem("lastSelectedPlayers");
   const lastSelectedRole = localStorage.getItem("lastSelectedRole");
+  const lastSelectedAlignment = localStorage.getItem("lastSelectedAlignment");
+  const lastSelectedWinStatus = localStorage.getItem("lastSelectedWinStatus");
   if (lastSortBy) {
     sortBy.value = lastSortBy as any;
   }
@@ -499,6 +700,12 @@ onMounted(() => {
   }
   if (lastSelectedRole) {
     selectedRole.value = lastSelectedRole;
+  }
+  if (lastSelectedAlignment) {
+    selectedAlignment.value = lastSelectedAlignment as any;
+  }
+  if (lastSelectedWinStatus) {
+    selectedWinState.value = lastSelectedWinStatus as any;
   }
   ready.value = true;
 });
@@ -539,6 +746,18 @@ watch(
   () => selectedRole.value,
   (value) => {
     localStorage.setItem("lastSelectedRole", value || "");
+  }
+);
+watch(
+  () => selectedAlignment.value,
+  (value) => {
+    localStorage.setItem("lastSelectedAlignment", value || "");
+  }
+);
+watch(
+  () => selectedWinState.value,
+  (value) => {
+    localStorage.setItem("lastSelectedWinStatus", value || "");
   }
 );
 

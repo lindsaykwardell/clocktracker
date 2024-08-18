@@ -1,78 +1,19 @@
 <template>
   <NuxtPage />
-  <AnnouncementDialog v-if="shouldShowAnnouncement" id="changelog-07-24">
+  <AnnouncementDialog v-if="shouldShowAnnouncement" id="maint-8-20">
     <template #title>
-      <h1 class="text-2xl font-bold font-dumbledor">Changelog for July 2024</h1>
+      <h1 class="text-2xl font-bold font-dumbledor">
+        Maintenance {{ formattedMaintenceDayAndMonth }}
+      </h1>
       <div class="text-lg text-stone-400">{{ formattedAnnouncementDate }}</div>
     </template>
     <p class="p-2">
-      Hello everyone! Starting this month, I will be posting a changelog at the
-      beginning of each month to keep you all updated on the changes I've made
-      to ClockTracker. Here are the changes for July 2024:
+      Starting {{ formattedMaintenanceStart }}, the site will be down for
+      maintenance for a few hours. During this time, I will be migrating the
+      database to a new server. The site will be back up as soon as possible.
+      Please check Discord for updates.
     </p>
-    <ul class="list-disc list-inside p-2">
-      <li>
-        Add Zealot to the available characters
-      </li>
-      <li>
-        Moved game filters into a dropdown menu, rather than spread out above
-        the games list
-      </li>
-      <li>
-        Changed "Player Roles" to "Your Roles" on the game editor
-      </li>
-      <li>
-        Updated the tagged games tab to always show, even when there are no
-        games to accept
-      </li>
-      <li>
-        Support filtering the games list by multiple players
-      </li>
-      <li>
-        Added a time zone field to communities (defaults to UTC)
-      </li>
-      <li>
-        Add a user's communities to their page
-      </li>
-      <li>
-        Add a user's total game count (split by storyteller and player) to their
-        header
-      </li>
-      <li>
-        Correctly display the number of games shown after filters have been
-        applied
-      </li>
-      <li>
-        Rename the "Charts" tab of a user's profile to the "Stats" tab
-      </li>
-      <li>
-        Add a list of all roles and which ones have been played to the Stats tab.
-      </li>
-      <li>
-        Show travelers on the stats tab
-      </li>
-      <li>
-        The Discord bot will now ping users 15 minutes prior to the start of an event they are registered for
-      </li>
-      <li>
-        Fixed a bug where users who sign up with email skip the onboarding step
-      </li>
-      <li>
-        Fixed multiple bugs for custom script uploads
-      </li>
-      <li>
-        Fixed a bug where community events would not appear on the final day of
-        the month
-      </li>
-      <li>
-        Fixed a bug where script stats would fail to load, causing the page to
-        crash
-      </li>
-    </ul>
-    <p class="p-2">
-      Please let me know on Discord if you have any issues or feedback. Thank
-      you!
-    </p>
+    <p class="p-2">Thank you for your understanding and patience.</p>
   </AnnouncementDialog>
   <VitePwaManifest />
 </template>
@@ -106,6 +47,7 @@ const user = useSupabaseUser();
 const featureFlags = useFeatureFlags();
 
 await featureFlags.init();
+await featureFlags.fetchScheduledMaintenance();
 
 onMounted(() => {
   users.fetchMe(user.value?.id);
@@ -118,12 +60,30 @@ onMounted(() => {
   }, 1000 * 60);
 });
 
-const announcementDate = dayjs.tz("2024-08-01", "America/Los_Angeles");
+const announcementDate = dayjs.tz("2024-08-14", "America/Los_Angeles");
+const maintenanceMode = featureFlags.maintenanceIsScheduled;
 
 const formattedAnnouncementDate = computed(() => {
   return new Intl.DateTimeFormat(navigator.language, {
     dateStyle: "full",
   }).format(announcementDate.toDate());
+});
+
+const formattedMaintenceDayAndMonth = computed(() => {
+  if (!maintenanceMode) return "";
+
+  return new Intl.DateTimeFormat(navigator.language, {
+    dateStyle: "full",
+  }).format(maintenanceMode);
+});
+
+const formattedMaintenanceStart = computed(() => {
+  if (!maintenanceMode) return "";
+
+  return new Intl.DateTimeFormat(navigator.language, {
+    dateStyle: "full",
+    timeStyle: "short",
+  }).format(maintenanceMode);
 });
 
 const shouldShowAnnouncement = computed(() => {
