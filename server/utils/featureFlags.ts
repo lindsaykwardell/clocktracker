@@ -4,6 +4,17 @@ import { User } from "@supabase/supabase-js";
 const prisma = new PrismaClient();
 
 export async function getFeatureFlags(me: User | null) {
+  const is_admin = await prisma.userSettings
+    .findUnique({
+      where: {
+        user_id: me?.id || "",
+      },
+      select: {
+        is_admin: true,
+      },
+    })
+    .then((settings) => settings?.is_admin || false);
+
   const latest_kofi_payment = await prisma.koFiPayment.findFirst({
     where: {
       user_id: me?.id || "",
@@ -56,6 +67,11 @@ export async function getFeatureFlags(me: User | null) {
   const payload: { [key: string]: boolean } = {};
 
   for (const flag of flags) {
+    if (flag.name === "maintenance" && is_admin) {
+      payload[flag.name] = false;
+      continue;
+    }
+
     payload[flag.name] = enabledFlags.some(
       (enabledFlag) => enabledFlag.id === flag.id
     );

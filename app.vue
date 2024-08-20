@@ -50,6 +50,10 @@ await featureFlags.init();
 await featureFlags.fetchScheduledMaintenance();
 
 onMounted(() => {
+  if (featureFlags.isEnabled("maintenance")) {
+    return;
+  }
+  
   users.fetchMe(user.value?.id);
   friends.fetchFriends();
   friends.fetchRequests();
