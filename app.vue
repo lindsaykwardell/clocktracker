@@ -1,6 +1,6 @@
 <template>
   <NuxtPage />
-  <AnnouncementDialog v-if="shouldShowAnnouncement" id="maint-8-20">
+  <!-- <AnnouncementDialog v-if="shouldShowAnnouncement" id="maint-8-20">
     <template #title>
       <h1 class="text-2xl font-bold font-dumbledor">
         Maintenance {{ formattedMaintenceDayAndMonth }}
@@ -14,7 +14,7 @@
       Please check Discord for updates.
     </p>
     <p class="p-2">Thank you for your understanding and patience.</p>
-  </AnnouncementDialog>
+  </AnnouncementDialog> -->
   <VitePwaManifest />
 </template>
 
@@ -53,7 +53,7 @@ onMounted(() => {
   if (featureFlags.isEnabled("maintenance")) {
     return;
   }
-  
+
   users.fetchMe(user.value?.id);
   friends.fetchFriends();
   friends.fetchRequests();
