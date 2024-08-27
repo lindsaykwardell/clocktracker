@@ -40,10 +40,10 @@
           </a>
         </p>
       </div>
-      <h2 class="font-dumbledor text-4xl text-center">
+      <!-- <h2 class="font-dumbledor text-4xl text-center">
         Current Supporter Perks
-      </h2>
-      <section>
+      </h2> -->
+      <!-- <section>
         <h3 class="font-dumbledor text-2xl">Advanced Game Editor</h3>
         <p class="p-2">
           I have been working on some adjustments to the game editor. The most
@@ -54,7 +54,7 @@
         </p>
         <img src="/img/perks/advanced-editor-1.webp" />
         <img src="/img/perks/advanced-editor-2.webp" />
-      </section>
+      </section> -->
     </section>
   </SettingsTemplate>
 </template>

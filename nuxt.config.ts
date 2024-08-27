@@ -7,6 +7,7 @@ export default defineNuxtConfig({
     "@vite-pwa/nuxt",
     "@pinia/nuxt",
     "floating-vue/nuxt",
+    "nuxt-cron",
   ],
   app: {
     head: {
@@ -73,8 +74,8 @@ export default defineNuxtConfig({
           } else {
             document.documentElement.classList.remove('dark')
           }
-          `
-        }
+          `,
+        },
       ],
       meta: [
         {
