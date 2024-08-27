@@ -51,6 +51,7 @@
     "jimp": "^0.22.12",
     "nanoid": "^5.0.7",
     "natural-order": "^2.0.2",
+    "nuxt-cron": "^1.6.0",
     "papaparse": "^5.4.1",
     "pinia": "^2.1.7",
     "ua-parser-js": "^1.0.37",

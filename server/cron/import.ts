@@ -1,21 +1,23 @@
-const axios = require("axios");
-const cheerio = require("cheerio");
-const { PrismaClient } = require("@prisma/client");
-const { Worker } = require("worker_threads");
-const ProgressBar = require("progress");
-const { roles, reminders } = require("./roles");
+import { defineCronHandler } from "#nuxt/cron";
+import axios from "axios";
+import cheerio from "cheerio";
+import { Alignment, PrismaClient, RoleType } from "@prisma/client";
 
 const url = "https://botcscripts.com";
 const prisma = new PrismaClient();
 
-async function main() {
-  const scriptList = [];
+export default defineCronHandler("daily", async () => {
+  const scriptList: {
+    script_id: string;
+    name: string;
+    version: string;
+    author: string;
+    type: string;
+    json_url: string;
+    pdf_url: string;
+  }[] = [];
 
-  function fullUrl(href) {
-    return url + href;
-  }
-
-  async function parsePage(page) {
+  async function parsePage(page: number) {
     const response = await axios.get(url + "?page=" + page);
     const $ = cheerio.load(response.data);
     // Iterate over the table rows
@@ -63,20 +65,12 @@ async function main() {
   const $ = cheerio.load(response.data);
   const lastPage = parseInt($("ul.pagination li:nth-last-child(2) a").text());
   console.log(`Found ${lastPage} pages.`);
-  const pageBar = new ProgressBar(":current / :total [:bar] :elapseds", {
-    total: lastPage,
-  });
   for (let i = 1; i <= lastPage; i++) {
     await parsePage(i);
-    pageBar.tick();
   }
 
   // Upsert all the scripts
   console.log("Upserting scripts...");
-
-  const upsertBar = new ProgressBar(":percent [:bar] :elapseds", {
-    total: scriptList.length,
-  });
 
   for (const script of scriptList) {
     await prisma.script.upsert({
@@ -93,44 +87,11 @@ async function main() {
         ...script,
       },
     });
-
-    upsertBar.tick();
-  }
-
-  // Upsert all the roles
-  console.log("Upserting roles...");
-  for (const role of roles) {
-    await prisma.role.upsert({
-      where: {
-        id: role.id,
-      },
-      update: role,
-      create: role,
-    });
-  }
-
-  // Upsert the reminders
-  for (const reminder of reminders) {
-    await prisma.roleReminder.upsert({
-      where: {
-        role_id_reminder: {
-          role_id: reminder.role_id,
-          reminder: reminder.reminder,
-        },
-      },
-      update: reminder,
-      create: reminder,
-    });
   }
 
   console.log("Done!");
-}
+});
 
-main()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
-  .catch(async (e) => {
-    console.error(e);
-    await prisma.$disconnect();
-  });
+function fullUrl(href: string) {
+  return url + href;
+}
