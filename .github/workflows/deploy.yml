@@ -16,16 +16,6 @@ jobs:
           node-version: 18.x
       - name: Install dependencies
         run: npm install
-      - name: Run migrations
-        run: npx prisma migrate deploy
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          DIRECT_DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
-      - name: Update scripts and roles
-        run: node prisma/import-scripts.js
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          DIRECT_DATABASE_URL: ${{ secrets.DIRECT_DATABASE_URL }}
       - name: Merge main -> deploy
         uses: devmasx/merge-branch@master
         with:
