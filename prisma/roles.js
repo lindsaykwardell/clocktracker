@@ -155,6 +155,7 @@ const demons = [
   "Ojo",
   "Kazali",
   "Yaggababble",
+  "Lord of Typhon",
 ];
 
 const travelers = [
