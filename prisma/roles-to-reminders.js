@@ -248,8 +248,14 @@ const roles = [
     ability:
       "You do not know you are the Drunk. You think you are a Townsfolk character, but you are not.",
     special: [
-      { type: "selection", name: "bag-disabled" },
-      { type: "reveal", name: "replace-character" },
+      {
+        type: "selection",
+        name: "bag-disabled",
+      },
+      {
+        type: "reveal",
+        name: "replace-character",
+      },
     ],
     firstNight: 0,
     otherNight: 0,
@@ -303,7 +309,13 @@ const roles = [
     otherNightReminder: "Show the Grimoire for as long as the Spy needs.",
     reminders: [],
     setup: false,
-    special: [{ type: "signal", name: "grimoire", time: "night" }],
+    special: [
+      {
+        type: "signal",
+        name: "grimoire",
+        time: "night",
+      },
+    ],
     ability:
       "Each night, you see the Grimoire. You might register as good & as a Townsfolk or Outsider, even if dead.",
     firstNight: 61,
@@ -332,8 +344,14 @@ const roles = [
         id: "damsel",
         reason: "If the Spy is (or has been) in play, the Damsel is poisoned.",
       },
-      { id: "heretic", reason: "Only 1 jinxed character can be in play." },
-      { id: "ogre", reason: "The Spy registers as evil to the Ogre." },
+      {
+        id: "heretic",
+        reason: "Only 1 jinxed character can be in play.",
+      },
+      {
+        id: "ogre",
+        reason: "The Spy registers as evil to the Ogre.",
+      },
     ],
   },
   {
@@ -371,7 +389,10 @@ const roles = [
     firstNight: 0,
     otherNight: 0,
     jinxes: [
-      { id: "heretic", reason: "The Baron might only add 1 Outsider, not 2." },
+      {
+        id: "heretic",
+        reason: "The Baron might only add 1 Outsider, not 2.",
+      },
       {
         id: "plaguedoctor",
         reason:
@@ -405,7 +426,13 @@ const roles = [
     setup: false,
     ability:
       "Each night, choose a player (not yourself): their vote counts as 3 votes tomorrow.",
-    special: [{ type: "vote", name: "multiplier", value: 3 }],
+    special: [
+      {
+        type: "vote",
+        name: "multiplier",
+        value: 3,
+      },
+    ],
     firstNight: 4,
     otherNight: 4,
   },
@@ -420,7 +447,13 @@ const roles = [
     setup: false,
     ability:
       "Each night, choose a player (not yourself): their vote counts negatively tomorrow.",
-    special: [{ type: "vote", name: "multiplier", value: -1 }],
+    special: [
+      {
+        type: "vote",
+        name: "multiplier",
+        value: -1,
+      },
+    ],
     firstNight: 5,
     otherNight: 6,
   },
@@ -743,7 +776,10 @@ const roles = [
     firstNight: 28,
     otherNight: 47,
     jinxes: [
-      { id: "heretic", reason: "Only 1 jinxed character can be in play." },
+      {
+        id: "heretic",
+        reason: "Only 1 jinxed character can be in play.",
+      },
     ],
   },
   {
@@ -870,7 +906,13 @@ const roles = [
     setup: false,
     ability:
       "On your 1st night, you gain a Townsfolk ability (if good), or a Minion ability (if evil).",
-    special: [{ type: "signal", name: "grimoire", time: "night" }],
+    special: [
+      {
+        type: "signal",
+        name: "grimoire",
+        time: "night",
+      },
+    ],
     firstNight: 2,
     otherNight: 0,
   },
@@ -1073,7 +1115,12 @@ const roles = [
     setup: false,
     ability:
       "Once per game, at night, choose a good character: gain that ability. If this character is in play, they are drunk.",
-    special: [{ type: "reveal", name: "replace-character" }],
+    special: [
+      {
+        type: "reveal",
+        name: "replace-character",
+      },
+    ],
     firstNight: 6,
     otherNight: 7,
     jinxes: [
@@ -1256,7 +1303,10 @@ const roles = [
     firstNight: 0,
     otherNight: 21,
     jinxes: [
-      { id: "heretic", reason: "A Pit-Hag can not create a Heretic." },
+      {
+        id: "heretic",
+        reason: "A Pit-Hag can not create a Heretic.",
+      },
       {
         id: "damsel",
         reason:
@@ -1669,7 +1719,12 @@ const roles = [
     remindersGlobal: ["Is The Alchemist"],
     setup: false,
     ability: "You have a not-in-play Minion ability.",
-    special: [{ type: "reveal", name: "replace-character" }],
+    special: [
+      {
+        type: "reveal",
+        name: "replace-character",
+      },
+    ],
     firstNight: 8,
     otherNight: 0,
   },
@@ -1744,7 +1799,12 @@ const roles = [
     setup: true,
     ability:
       "The Storyteller can break the game rules & if executed, good wins, even if you are dead. [No evil characters]",
-    special: [{ type: "selection", name: "bag-duplicate" }],
+    special: [
+      {
+        type: "selection",
+        name: "bag-duplicate",
+      },
+    ],
     firstNight: 0,
     otherNight: 0,
   },
@@ -1772,6 +1832,11 @@ const roles = [
         id: "juggler",
         reason:
           "If the Juggler guesses on their first day and dies by execution, tonight the living Cannibal learns how many guesses the Juggler got correct.",
+      },
+      {
+        id: "zealot",
+        reason:
+          "If the Cannibal gains the Zealot ability, the Cannibal learns this.",
       },
     ],
   },
@@ -1885,7 +1950,13 @@ const roles = [
     reminders: ["Poisoned"],
     remindersGlobal: ["Knows"],
     setup: false,
-    special: [{ name: "grimoire", type: "signal", time: "night" }],
+    special: [
+      {
+        name: "grimoire",
+        type: "signal",
+        time: "night",
+      },
+    ],
     ability:
       "On your 1st night, look at the Grimoire and choose a player: they are poisoned. 1 good player knows a Widow is in play.",
     firstNight: 25,
@@ -1910,7 +1981,10 @@ const roles = [
         reason:
           "If the Widow is (or has been) in play, the Damsel is poisoned.",
       },
-      { id: "heretic", reason: "Only 1 jinxed character can be in play." },
+      {
+        id: "heretic",
+        reason: "Only 1 jinxed character can be in play.",
+      },
     ],
   },
   {
@@ -2000,8 +2074,14 @@ const roles = [
     ability:
       "You think you are a good character but you are not. The Demon knows who you are. [You neighbor the Demon]",
     special: [
-      { type: "selection", name: "bag-disabled" },
-      { type: "reveal", name: "replace-character" },
+      {
+        type: "selection",
+        name: "bag-disabled",
+      },
+      {
+        type: "reveal",
+        name: "replace-character",
+      },
     ],
     firstNight: 19,
     otherNight: 0,
@@ -2053,7 +2133,13 @@ const roles = [
     setup: false,
     ability:
       "If you are executed, all but 3 players die. 1 minute later, the player with the most players pointing at them dies.",
-    special: [{ type: "ability", name: "pointing", time: "day" }],
+    special: [
+      {
+        type: "ability",
+        name: "pointing",
+        time: "day",
+      },
+    ],
     firstNight: 0,
     otherNight: 0,
     jinxes: [
@@ -2079,8 +2165,16 @@ const roles = [
     ability:
       'Each night, Minions choose who babysits Lil\' Monsta & "is the Demon". Each night*, a player might die. [+1 Minion]',
     special: [
-      { type: "ability", name: "pointing", time: "night", global: "minion" },
-      { type: "selection", name: "bag-disabled" },
+      {
+        type: "ability",
+        name: "pointing",
+        time: "night",
+        global: "minion",
+      },
+      {
+        type: "selection",
+        name: "bag-disabled",
+      },
     ],
     firstNight: 22,
     otherNight: 43,
@@ -2127,7 +2221,7 @@ const roles = [
     reminders: ["Dead", "Poisoned"],
     setup: false,
     ability:
-      "Each night*, choose a player: they die. You start by choosing an alive player: they are poisoned - you die if & only if they die.",
+      "Each night*, choose a player: they die. You start by choosing a player: they are poisoned. You die if & only if they are dead.",
     firstNight: 23,
     otherNight: 42,
     jinxes: [
@@ -2180,7 +2274,12 @@ const roles = [
     setup: true,
     ability:
       "Each night*, a player might die. Executions fail if only evil voted. You register as a Minion too. [Most players are Legion]",
-    special: [{ type: "selection", name: "bag-duplicate" }],
+    special: [
+      {
+        type: "selection",
+        name: "bag-duplicate",
+      },
+    ],
     firstNight: 0,
     otherNight: 30,
     jinxes: [
@@ -2203,6 +2302,10 @@ const roles = [
         id: "hatter",
         reason:
           "If the Hatter dies and Legion is in play, nothing happens. If the Hatter dies and an evil player chooses Legion, all current evil players become Legion.",
+      },
+      {
+        id: "zealot",
+        reason: "The Zealot might register as evil to Legion's ability.",
       },
     ],
   },
@@ -2291,7 +2394,12 @@ const roles = [
     setup: true,
     ability:
       "Nominees die, but may nominate again immediately (on day 3, they must). After day 3, evil wins. [All Minions are Riot]",
-    special: [{ type: "selection", name: "bag-duplicate" }],
+    special: [
+      {
+        type: "selection",
+        name: "bag-duplicate",
+      },
+    ],
     firstNight: 0,
     otherNight: 0,
     jinxes: [
@@ -2314,7 +2422,10 @@ const roles = [
         reason:
           "If a good player nominates and kills the Saint, the Saint's team loses.",
       },
-      { id: "butler", reason: "The Butler can not nominate their master." },
+      {
+        id: "butler",
+        reason: "The Butler can not nominate their master.",
+      },
       {
         id: "pithag",
         reason:
@@ -2370,9 +2481,18 @@ const roles = [
         reason:
           "If a Riot player nominates and kills the King and the Choirboy is alive, the Choirboy uses their ability tonight.",
       },
-      { id: "exorcist", reason: "Only 1 jinxed character can be in play." },
-      { id: "minstrel", reason: "Only 1 jinxed character can be in play." },
-      { id: "flowergirl", reason: "Only 1 jinxed character can be in play." },
+      {
+        id: "exorcist",
+        reason: "Only 1 jinxed character can be in play.",
+      },
+      {
+        id: "minstrel",
+        reason: "Only 1 jinxed character can be in play.",
+      },
+      {
+        id: "flowergirl",
+        reason: "Only 1 jinxed character can be in play.",
+      },
       {
         id: "undertaker",
         reason:
@@ -2405,12 +2525,22 @@ const roles = [
         id: "towncrier",
         reason: "Riot registers as a Minion to the Town Crier.",
       },
-      { id: "damsel", reason: "Riot registers as a Minion to the Damsel." },
-      { id: "preacher", reason: "Riot registers as a Minion to the Preacher." },
+      {
+        id: "damsel",
+        reason: "Riot registers as a Minion to the Damsel.",
+      },
+      {
+        id: "preacher",
+        reason: "Riot registers as a Minion to the Preacher.",
+      },
       {
         id: "hatter",
         reason:
           "If the Hatter dies, Riot is in play and a Riot chooses a different Demon, a normal evil team is created from the Riot players. If the Hatter dies and the Demon chooses Riot, Minions become Riot too.",
+      },
+      {
+        id: "zealot",
+        reason: "If you are nominated, you must nominate again, even if dead.",
       },
     ],
   },
@@ -2439,7 +2569,12 @@ const roles = [
     setup: false,
     ability:
       "All players keep their eyes closed when voting & the vote tally is secret. Votes for you only count if you vote.",
-    special: [{ type: "vote", name: "hidden" }],
+    special: [
+      {
+        type: "vote",
+        name: "hidden",
+      },
+    ],
     firstNight: 0,
     otherNight: 0,
     jinxes: [
@@ -2511,6 +2646,10 @@ const roles = [
         id: "alsaahir",
         reason:
           "If the Vizier is in play, the Alsaahir must also guess which Demon(s) are in play.",
+      },
+      {
+        id: "zealot",
+        reason: "The Zealot might register as evil to the Vizier.",
       },
     ],
   },
@@ -2683,7 +2822,12 @@ const roles = [
     setup: true,
     ability:
       "Each night, choose a player: you learn their alignment. [+0 to +2 Village Idiots. 1 of the extras is drunk]",
-    special: [{ type: "selection", name: "bag-duplicate" }],
+    special: [
+      {
+        type: "selection",
+        name: "bag-duplicate",
+      },
+    ],
     firstNight: 57,
     otherNight: 75,
   },
@@ -2845,6 +2989,18 @@ const roles = [
     otherNight: 0,
   },
   {
+    id: "zealot",
+    name: "Zealot",
+    team: "outsider",
+    edition: "",
+    reminders: [],
+    setup: false,
+    ability:
+      "If 5 or more players are alive, you must vote for every nomination.",
+    firstNight: 0,
+    otherNight: 0,
+  },
+  {
     id: "doomsayer",
     firstNightReminder: "",
     otherNightReminder: "",
@@ -2918,7 +3074,13 @@ const roles = [
     edition: "fabled",
     ability:
       "Once per game, the Demon secretly chooses an opposing player: all players choose which of these 2 players win.",
-    special: [{ name: "pointing", type: "ability", time: "day" }],
+    special: [
+      {
+        name: "pointing",
+        type: "ability",
+        time: "day",
+      },
+    ],
   },
   {
     id: "toymaker",
@@ -3018,7 +3180,13 @@ const roles = [
     team: "fabled",
     edition: "fabled",
     ability: "The Storyteller assigns 1 or more players' characters.",
-    special: [{ name: "distribute-roles", type: "ability", time: "pregame" }],
+    special: [
+      {
+        name: "distribute-roles",
+        type: "ability",
+        time: "pregame",
+      },
+    ],
   },
   {
     id: "bootlegger",
@@ -3041,7 +3209,13 @@ const roles = [
     team: "fabled",
     edition: "fabled",
     ability: "On the final day, all dead players regain their vote token.",
-    special: [{ name: "ghost-votes", type: "ability", time: "day" }],
+    special: [
+      {
+        name: "ghost-votes",
+        type: "ability",
+        time: "day",
+      },
+    ],
   },
 ];
 
