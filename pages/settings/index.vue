@@ -61,12 +61,17 @@
             </option>
           </select>
         </label>
-        <Button
-          type="submit"
-          primary
-          class="px-4 py-2"
-          :disabled="inFlight"
-        >
+        <label class="block w-full xl:w-3/4">
+          <span class="block">Disable Tutorials</span>
+          <select
+            v-model="tutorials"
+            class="block w-full border border-stone-500 rounded-md p-2 text-black"
+          >
+            <option :value="false">Tutorials are enabled</option>
+            <option :value="true">Tutorials are disabled</option>
+          </select>
+        </label>
+        <Button type="submit" primary class="px-4 py-2" :disabled="inFlight">
           <template v-if="inFlight">
             <Spinner />
             Saving...
@@ -101,6 +106,7 @@ const pronouns = ref(settings.data.value?.pronouns);
 const location = ref(settings.data.value?.location);
 const bio = ref(settings.data.value?.bio);
 const privacy = ref(settings.data.value?.privacy);
+const tutorials = ref(settings.data.value?.disable_tutorials);
 
 watchEffect(() => (username.value = username.value?.replaceAll(" ", "")));
 
@@ -119,6 +125,7 @@ async function saveSettings() {
       finished_welcome: true,
       bio: bio.value,
       privacy: privacy.value,
+      disable_tutorials: tutorials.value,
     }),
   });
 

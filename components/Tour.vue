@@ -17,6 +17,7 @@
 const tour = ref();
 const tourStarted = ref(false);
 const { did, isDone } = useDids();
+const me = useMe();
 
 const props = defineProps<{
   steps: Step[];
@@ -52,7 +53,11 @@ onMounted(async () => {
   }
   // end migration path
 
-  if (!isDone(props.tourKey)) {
+  if (
+    me.value.status === Status.SUCCESS &&
+    !me.value.data.disable_tutorials &&
+    !isDone(props.tourKey)
+  ) {
     setTimeout(() => {
       tour.value.startTour();
       emit("onTourStart");
