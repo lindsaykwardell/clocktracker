@@ -24,6 +24,7 @@ export type User = {
   kofi_level: string;
   opt_into_testing: boolean;
   finished_welcome: boolean;
+  disable_tutorials: boolean;
   community_admin: {
     id: number;
   }[];
@@ -38,6 +39,10 @@ export type User = {
       admins: number;
       posts: number;
     };
+  }[];
+  dids?: {
+    id: number;
+    did: string;
   }[];
 };
 
@@ -86,6 +91,14 @@ export const useUsers = defineStore("users", {
       // games.fetchPlayerGames(me.username);
 
       this.storeUser(me);
+    },
+    async initMe(user_id?: string) {
+      if (!user_id) return;
+      const { data, error } = await useFetch<User>("/api/settings");
+
+      if (data.value) {
+        this.storeUser(data.value);
+      }
     },
   },
 });
