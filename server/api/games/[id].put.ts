@@ -179,14 +179,14 @@ export default defineEventHandler(async (handler) => {
                         id: token.id,
                       },
                       data: {
-                        role_id: token.role_id,
-                        related_role_id: token.related_role_id,
+                        role_id: token.role_id ?? null,
+                        related_role_id: token.related_role_id ?? null,
                         alignment: token.alignment || Alignment.NEUTRAL,
                         is_dead: token.is_dead || false,
                         used_ghost_vote: token.used_ghost_vote || false,
                         order: token.order || index,
                         player_name: token.player_name || "",
-                        player_id: token.player_id,
+                        player_id: token.player_id ?? null,
                         reminders: {
                           deleteMany: {
                             id: {
