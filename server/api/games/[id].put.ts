@@ -174,47 +174,50 @@ export default defineEventHandler(async (handler) => {
                     })),
                   update: g.tokens
                     ?.filter((token) => token.id)
-                    .map((token, index) => ({
-                      where: {
-                        id: token.id,
-                      },
-                      data: {
-                        role_id: token.role_id,
-                        related_role_id: token.related_role_id,
-                        alignment: token.alignment || Alignment.NEUTRAL,
-                        is_dead: token.is_dead || false,
-                        used_ghost_vote: token.used_ghost_vote || false,
-                        order: token.order || index,
-                        player_name: token.player_name || "",
-                        player_id: token.player_id,
-                        reminders: {
-                          deleteMany: {
-                            id: {
-                              notIn: token.reminders
-                                ?.filter((reminder) => !!reminder.id)
-                                .map((reminder) => reminder.id!),
-                            },
-                          },
-                          create: token.reminders
-                            ?.filter((reminder) => !reminder.id)
-                            .map((reminder) => ({
-                              reminder: reminder.reminder,
-                              token_url: reminder.token_url,
-                            })),
-                          update: token.reminders
-                            ?.filter((reminder) => reminder.id)
-                            .map((reminder) => ({
-                              where: {
-                                id: reminder.id,
+                    .map((token, index) => {
+                      console.log(token);
+                      return {
+                        where: {
+                          id: token.id,
+                        },
+                        data: {
+                          role_id: token.role_id ?? null,
+                          related_role_id: token.related_role_id ?? null,
+                          alignment: token.alignment || Alignment.NEUTRAL,
+                          is_dead: token.is_dead || false,
+                          used_ghost_vote: token.used_ghost_vote || false,
+                          order: token.order || index,
+                          player_name: token.player_name || "",
+                          player_id: token.player_id ?? null,
+                          reminders: {
+                            deleteMany: {
+                              id: {
+                                notIn: token.reminders
+                                  ?.filter((reminder) => !!reminder.id)
+                                  .map((reminder) => reminder.id!),
                               },
-                              data: {
+                            },
+                            create: token.reminders
+                              ?.filter((reminder) => !reminder.id)
+                              .map((reminder) => ({
                                 reminder: reminder.reminder,
                                 token_url: reminder.token_url,
-                              },
-                            })),
+                              })),
+                            update: token.reminders
+                              ?.filter((reminder) => reminder.id)
+                              .map((reminder) => ({
+                                where: {
+                                  id: reminder.id,
+                                },
+                                data: {
+                                  reminder: reminder.reminder,
+                                  token_url: reminder.token_url,
+                                },
+                              })),
+                          },
                         },
-                      },
-                    })),
+                      };
+                    }),
                 },
               },
             })),
