@@ -38,6 +38,13 @@
               Integrations
             </nuxt-link>
             <nuxt-link
+              to="/settings/account"
+              class="block w-full p-2 hover:bg-stone-200 dark:hover:bg-stone-900 duration-150"
+              active-class="bg-stone-200 dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-950"
+            >
+              Account & Data
+            </nuxt-link>
+            <nuxt-link
               to="/settings/perks"
               class="flex gap-2 w-full p-2 hover:bg-stone-200 dark:hover:bg-stone-900 duration-150"
               active-class="bg-stone-200 dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-950"
