@@ -8,7 +8,7 @@ type UploadedScript = [
   {
     id: "_meta";
     name: string;
-    author: string;
+    author?: string;
     logo?: string;
     almanac?: string;
   },
@@ -33,7 +33,6 @@ type UploadedScript = [
 
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
-  const featureFlags = await useFeatureFlags(user);
 
   const body = await readBody<UploadedScript>(handler);
 
@@ -52,6 +51,13 @@ export default defineEventHandler(async (handler) => {
   }
 
   const [script, ...roles] = body;
+
+  if (!script.name) {
+    throw createError({
+      status: 400,
+      statusMessage: "Script name is required.",
+    });
+  }
 
   const baseRoles = await prisma.role.findMany({
     where: {
@@ -73,9 +79,23 @@ export default defineEventHandler(async (handler) => {
     }
   });
 
-  for (const role of roles) {
+  for (const roleId in roles) {
+    const role = roles[roleId];
+
     if (typeof role === "string") {
-      continue;
+      const existingRoleId = existingRoleIds.find(
+        (existingRole) => existingRole.id === role
+      );
+
+      if (existingRoleId) {
+        roles[roleId] = existingRoleId.map_id;
+        continue;
+      } else {
+        throw createError({
+          status: 400,
+          statusMessage: `The provided role with id ${role} does not exist`,
+        });
+      }
     }
 
     const existingRoleId = existingRoleIds.find(
@@ -183,6 +203,16 @@ export default defineEventHandler(async (handler) => {
   }
 
   console.log(roles);
+
+  const existingRoles = await prisma.role.findMany({
+    where: {
+      id: {
+        in: roles.map((role) => (typeof role === "string" ? role : role.id)),
+      },
+    },
+  });
+
+  console.log(existingRoles);
 
   const version =
     (await prisma.script.count({
