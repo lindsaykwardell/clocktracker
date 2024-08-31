@@ -99,7 +99,6 @@ export default defineEventHandler(async (handler) => {
     orderBy: {
       date: "desc",
     },
-    take: 4,
   });
 
   const anonymizedGames: GameRecord[] = [];

@@ -126,10 +126,9 @@ const gamesStore = useGames();
 const selectMultipleGames = useSelectMultipleGames();
 const { isBaseScript } = useScripts();
 
-const props = defineProps<{
+defineProps<{
   games: GameRecord[];
   readonly?: boolean;
-  username: string;
 }>();
 
 function formatDate(date: Date) {

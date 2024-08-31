@@ -82,10 +82,7 @@
           <label>
             Add to the conversation
             <form @submit.prevent="submitPost">
-              <ExpandingTextarea
-                
-                v-model="message"
-              />
+              <ExpandingTextarea v-model="message" />
               <Button
                 type="submit"
                 class="px-4 py-2 mt-2"
@@ -129,11 +126,10 @@ const recentGames = computed(() => {
   if (communityGames.status !== Status.SUCCESS) return communityGames;
   return {
     ...communityGames,
-    data: naturalOrder(
-      communityGames.data.filter((g) => !g.parent_game_id).slice(0, 4)
-    )
+    data: naturalOrder(communityGames.data)
       .orderBy("desc")
-      .sort(["date"]),
+      .sort(["date"])
+      .slice(0, 4),
   };
 });
 
