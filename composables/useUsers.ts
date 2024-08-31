@@ -24,6 +24,7 @@ export type User = {
   kofi_level: string;
   opt_into_testing: boolean;
   finished_welcome: boolean;
+  disable_tutorials: boolean;
   community_admin: {
     id: number;
   }[];

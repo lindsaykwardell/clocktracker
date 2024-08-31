@@ -33,6 +33,7 @@ export default defineEventHandler(async (handler) => {
       enable_bgstats: true,
       discord_id: true,
       opt_into_testing: true,
+      disable_tutorials: true,
       community_admin: {
         select: {
           id: true,
@@ -179,6 +180,7 @@ export default defineEventHandler(async (handler) => {
       bgg_username: true,
       enable_bgstats: true,
       opt_into_testing: true,
+      disable_tutorials: true,
       community_admin: {
         select: {
           id: true,
