@@ -49,12 +49,13 @@ const featureFlags = useFeatureFlags();
 await featureFlags.init();
 await featureFlags.fetchScheduledMaintenance();
 
+users.initMe(user.value?.id);
+
 onMounted(() => {
   if (featureFlags.isEnabled("maintenance")) {
     return;
   }
 
-  users.fetchMe(user.value?.id);
   friends.fetchFriends();
   friends.fetchRequests();
 

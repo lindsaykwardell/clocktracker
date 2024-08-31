@@ -58,6 +58,12 @@ export default defineEventHandler(async (handler) => {
           },
         },
       },
+      dids: {
+        select: {
+          id: true,
+          did: true,
+        },
+      },
     },
   });
 
@@ -196,6 +202,12 @@ export default defineEventHandler(async (handler) => {
               },
             },
           },
+        },
+      },
+      dids: {
+        select: {
+          id: true,
+          did: true,
         },
       },
     },

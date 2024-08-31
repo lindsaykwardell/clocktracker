@@ -39,6 +39,10 @@ export type User = {
       posts: number;
     };
   }[];
+  dids?: {
+    id: number;
+    did: string;
+  }[];
 };
 
 export const useUsers = defineStore("users", {
@@ -86,6 +90,14 @@ export const useUsers = defineStore("users", {
       // games.fetchPlayerGames(me.username);
 
       this.storeUser(me);
+    },
+    async initMe(user_id?: string) {
+      if (!user_id) return;
+      const { data, error } = await useFetch<User>("/api/settings");
+
+      if (data.value) {
+        this.storeUser(data.value);
+      }
     },
   },
 });

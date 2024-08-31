@@ -16,6 +16,7 @@
 <script setup lang="ts">
 const tour = ref();
 const tourStarted = ref(false);
+const { did, isDone } = useDids();
 
 const props = defineProps<{
   steps: Step[];
@@ -27,22 +28,31 @@ const emit = defineEmits(["onTourStart", "onTourEnd"]);
 function onTourEnd() {
   localStorage.removeItem("vjt-default");
 
-  const tours = JSON.parse(localStorage.getItem("tours") || "{}");
-  localStorage.setItem(
-    "tours",
-    JSON.stringify({ ...tours, [props.tourKey]: true })
-  );
+  did(props.tourKey);
 
   tourStarted.value = false;
   emit("onTourEnd");
 }
 
-onMounted(() => {
+onMounted(async () => {
   localStorage.removeItem("vjt-default");
   localStorage.removeItem("vjt-tour");
-  if (
-    JSON.parse(localStorage.getItem("tours") || "{}")[props.tourKey] !== true
-  ) {
+
+  // Migration path from localStorage to dids
+  const tours = localStorage.getItem("tours");
+
+  if (tours) {
+    const parsedTours = JSON.parse(tours);
+
+    for (const key in parsedTours) {
+      await did(key);
+    }
+
+    localStorage.removeItem("tours");
+  }
+  // end migration path
+
+  if (!isDone(props.tourKey)) {
     setTimeout(() => {
       tour.value.startTour();
       emit("onTourStart");
