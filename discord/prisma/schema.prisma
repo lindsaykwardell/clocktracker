@@ -15,6 +15,7 @@ model FeatureFlag {
   created_at             DateTime       @default(now()) @db.Timestamptz(6)
   id                     Int            @id @default(autoincrement())
   enabled_for_supporters Boolean        @default(false)
+  effective_date         DateTime?
   active_for             UserSettings[] @relation("FeatureFlagToUserSettings")
 }
 
@@ -46,6 +47,7 @@ model Game {
   community_name           String         @default("")
   community_id             Int?
   win_v2                   WinStatus_V2   @default(NOT_RECORDED)
+  old_image_urls           String[]
   player_characters        Character[]
   demon_bluffs             DemonBluff[]
   fabled                   Fabled[]
@@ -194,8 +196,11 @@ model UserSettings {
   enable_bgstats          Boolean                 @default(false)
   discord_id              String?                 @unique
   opt_into_testing        Boolean                 @default(false)
+  old_avatar              String?
+  disable_tutorials       Boolean                 @default(false)
   charts                  Chart[]
   community_posts         CommunityPost[]
+  Did                     Did[]
   events                  EventAttendee[]
   waitlisted_events       EventWaitlistAttendee[]
   links                   ExternalLink[]
@@ -282,6 +287,7 @@ model Community {
   is_private        Boolean         @default(false)
   discord_server_id String?
   time_zone         String          @default("UTC")
+  old_icon          String?
   posts             CommunityPost[]
   events            Event[]
   games             Game[]
@@ -325,6 +331,7 @@ model Event {
   game_link             String?
   short_link            String?                 @unique
   has_pinged_discord    Boolean                 @default(false)
+  old_image             String?
   community             Community?              @relation(fields: [community_id], references: [id])
   Script                Script?                 @relation(fields: [script_id], references: [id])
   registered_players    EventAttendee[]
@@ -397,6 +404,16 @@ model EventRegistrationSpam {
   Event      Event    @relation(fields: [event_id], references: [id])
 
   @@unique([ip_address, event_id])
+}
+
+model Did {
+  id           Int          @id @default(autoincrement())
+  user_id      String
+  did          String
+  created_at   DateTime     @default(now()) @db.Timestamptz(6)
+  UserSettings UserSettings @relation(fields: [user_id], references: [user_id])
+
+  @@unique([user_id, did])
 }
 
 enum Alignment {
