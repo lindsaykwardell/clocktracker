@@ -25,4 +25,4 @@ primary_region = 'sea'
   cpus = 1
 
 [deploy]
-  release_command = "npx prisma migrate deploy && node ./prisma/import-roles.js"
+  release_command = "./migrate.sh"
