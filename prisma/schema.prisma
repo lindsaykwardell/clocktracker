@@ -233,6 +233,7 @@ model UserSettings {
   bgg_cookies             String[]
   enable_bgstats          Boolean                 @default(false)
   opt_into_testing        Boolean                 @default(false)
+  disable_tutorials       Boolean                 @default(false)
   communities             Community[]             @relation("CommunityMember")
   community_admin         Community[]             @relation("CommunityAdmin")
   community_banned        Community[]             @relation("CommunityBanned")
@@ -243,6 +244,17 @@ model UserSettings {
   waitlisted_events       EventWaitlistAttendee[]
   payments                KoFiPayment[]
   uploaded_scripts        Script[]
+  dids                    Did[]
+}
+
+model Did {
+  id         Int          @id @default(autoincrement())
+  user       UserSettings @relation(fields: [user_id], references: [user_id])
+  user_id    String
+  did        String
+  created_at DateTime     @default(now()) @db.Timestamptz(6)
+
+  @@unique([user_id, did])
 }
 
 model KoFiPayment {
