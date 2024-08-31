@@ -7,6 +7,7 @@ async function main() {
   // Upsert all the roles
   console.log("Upserting roles...");
   for (const role of roles) {
+    console.log(`Upserting role: ${role.name}`);
     await prisma.role.upsert({
       where: {
         id: role.id,
