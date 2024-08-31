@@ -115,9 +115,9 @@
                               <option :value="WinStatus_V2.EVIL_WINS">
                                 Evil wins
                               </option>
-                              <options :value="WinStatus_V2.NOT_RECORDED"
-                                >Not recorded</options
-                              >
+                              <option :value="WinStatus_V2.NOT_RECORDED">
+                                Not recorded
+                              </option>
                             </select>
                           </label>
                         </MenuItem>
