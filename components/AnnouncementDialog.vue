@@ -20,6 +20,7 @@
 
 <script setup lang="ts">
 const user = useSupabaseUser();
+const { did, isDone } = useDids();
 
 const props = defineProps<{
   id: string;
@@ -28,22 +29,20 @@ const props = defineProps<{
 const show = ref(false);
 
 onMounted(() => {
-  const latestAnnouncement = localStorage.getItem("announcement");
-  if (user.value && latestAnnouncement !== props.id) {
+  if (user.value && !isDone(props.id)) {
     show.value = true;
   }
 });
 
 watch(user, () => {
-  const latestAnnouncement = localStorage.getItem("announcement");
-  if (user.value && latestAnnouncement !== props.id) {
+  if (user.value && !isDone(props.id)) {
     show.value = true;
   }
 });
 
 watch(show, (value) => {
   if (!value) {
-    localStorage.setItem("announcement", props.id);
+    did(props.id);
   }
 });
 </script>
