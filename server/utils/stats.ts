@@ -14,7 +14,7 @@ export function winRateByRole(
 
       const character = (() => {
         if (game.is_storyteller) {
-          return game.grimoire[game.grimoire.length - 1].tokens.find(
+          return game.grimoire[game.grimoire.length - 1]?.tokens.find(
             (token) => token.role_id === role.id
           );
         } else {
