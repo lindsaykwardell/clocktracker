@@ -29,15 +29,19 @@ const props = defineProps<{
 const show = ref(false);
 
 onMounted(() => {
-  if (user.value && !isDone(props.id)) {
-    show.value = true;
-  }
+  setTimeout(() => {
+    if (user.value && !isDone(props.id)) {
+      show.value = true;
+    }
+  }, 1000);
 });
 
 watch(user, () => {
-  if (user.value && !isDone(props.id)) {
-    show.value = true;
-  }
+  setTimeout(() => {
+    if (user.value && !isDone(props.id)) {
+      show.value = true;
+    }
+  }, 1000);
 });
 
 watch(show, (value) => {
