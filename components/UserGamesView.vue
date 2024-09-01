@@ -1,5 +1,5 @@
 <template>
-  <template v-if="player && games.status === Status.SUCCESS && ready">
+  <template v-if="games.status === Status.SUCCESS && ready">
     <template v-if="games.data.length">
       <section class="w-full flex flex-col md:flex-row gap-8 pb-20 md:pb-0">
         <div class="w-full flex flex-col gap-4">
@@ -115,9 +115,9 @@
                               <option :value="WinStatus_V2.EVIL_WINS">
                                 Evil wins
                               </option>
-                              <options :value="WinStatus_V2.NOT_RECORDED"
-                                >Not recorded</options
-                              >
+                              <option :value="WinStatus_V2.NOT_RECORDED">
+                                Not recorded
+                              </option>
                             </select>
                           </label>
                         </MenuItem>
@@ -397,7 +397,6 @@
             <GameOverviewList
               v-if="gameView === 'table'"
               :games="sortedGames"
-              :username="player.username"
               :readonly="!myPage"
             />
             <p
@@ -414,7 +413,7 @@
       <slot name="no-content">
         <div class="flex flex-col items-center gap-6">
           <p class="text-center text-2xl font-dumbledor">No games yet!</p>
-          <template v-if="user && user.id === player.user_id">
+          <template v-if="player && user && user.id === player.user_id">
             <Button
               component="nuxt-link"
               to="/add-game"
