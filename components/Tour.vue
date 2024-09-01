@@ -53,16 +53,16 @@ onMounted(async () => {
   }
   // end migration path
 
-  if (
-    me.value.status === Status.SUCCESS &&
-    !me.value.data.disable_tutorials &&
-    !isDone(props.tourKey)
-  ) {
-    setTimeout(() => {
+  setTimeout(() => {
+    if (
+      me.value.status === Status.SUCCESS &&
+      !me.value.data.disable_tutorials &&
+      !isDone(props.tourKey)
+    ) {
       tour.value.startTour();
       emit("onTourStart");
-    }, 1000);
-  }
+    }
+  }, 1000);
 });
 </script>
 
