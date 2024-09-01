@@ -130,7 +130,7 @@
       </div>
     </section>
     <GameOverviewGrid
-      :games="recentGames"
+      :games="myGamesWithRole"
       readonly
       cardWidth="w-1/2 xl:w-1/3"
     />
@@ -146,8 +146,7 @@ const games = useGames();
 const user = useSupabaseUser();
 const users = useUsers();
 const scripts = useScripts();
-
-const recentGames = ref<RecentGameRecord[]>([]);
+const me = useMe();
 
 const myGamesWithRole = computed(() => {
   if (!user.value) return [];
@@ -280,8 +279,10 @@ const wikiUrl = computed(() => {
   return `https://wiki.bloodontheclocktower.com/${wiki_role_name}`;
 });
 
-onMounted(async () => {
-  recentGames.value = await games.fetchRecentGamesForRole(role_id);
+onMounted(() => {
+  if (me.value.status === Status.SUCCESS) {
+    games.fetchPlayerGames(me.value.data.username);
+  }
 });
 </script>
 

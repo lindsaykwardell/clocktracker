@@ -213,19 +213,19 @@
         </div>
       </div>
     </section>
-    <GameOverviewGrid :games="recentGames" readonly />
+    <GameOverviewGrid :games="relatedGames" readonly />
   </StandardTemplate>
 </template>
 
 <script setup lang="ts">
 import type { Script, Role, RoleType, Alignment } from "@prisma/client";
-import type { ChartOptions } from "chart.js";
 import { Line, Pie } from "vue-chartjs";
 
 const route = useRoute();
 const router = useRouter();
 const { scriptLogo } = useScripts();
 const allGames = useGames();
+const me = useMe();
 
 const scriptName = route.params.name as string;
 const version = ref(route.query.version as string);
@@ -244,6 +244,16 @@ if (!version.value) {
 const script = computed(
   () => scripts.find((s) => s.version === version.value) || scripts[0]
 );
+
+const relatedGames = computed(() => {
+  if (me.value.status !== Status.SUCCESS) return [];
+
+  const games = allGames.getByPlayer(me.value.data.username);
+
+  if (games.status !== Status.SUCCESS) return [];
+
+  return games.data.filter((game) => game.script_id === script.value.id);
+});
 
 watchEffect(() => {
   // update the URL when the version changes
@@ -329,27 +339,6 @@ const scriptStats = ref<{
   games_by_month: {},
   role_win_rates: {},
 });
-
-// scriptStats.value = await $fetch<{
-//   count: number;
-//   win_loss: {
-//     total: number;
-//     win: number;
-//     loss: number;
-//     pct: number;
-//   };
-//   games_by_month: Record<string, number>;
-//   role_win_rates: Record<
-//     string,
-//     {
-//       total: number;
-//       win: number;
-//       loss: number;
-//     }
-//   >;
-// }>("/api/script/" + script.value.id + "/stats");
-
-const recentGames = ref<RecentGameRecord[]>([]);
 
 const averageGamesPlayed = computed(() =>
   Math.round(
@@ -539,13 +528,15 @@ watch(
         }
       >;
     }>("/api/script/" + newScript.id + "/stats");
-
-    recentGames.value = await allGames.fetchRecentGamesForScript(
-      script.value.id
-    );
   },
   { immediate: true }
 );
+
+onMounted(() => {
+  if (me.value.status === Status.SUCCESS) {
+    allGames.fetchPlayerGames(me.value.data.username);
+  }
+});
 </script>
 
 <style scoped>
