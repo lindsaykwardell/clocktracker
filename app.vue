@@ -104,7 +104,7 @@ onMounted(() => {
   }, 1000 * 60);
 });
 
-const announcementDate = dayjs.tz("2023-09-01", "America/Los_Angeles");
+const announcementDate = dayjs.tz("2024-09-01", "America/Los_Angeles");
 const maintenanceMode = featureFlags.maintenanceIsScheduled;
 
 const formattedAnnouncementDate = computed(() => {
