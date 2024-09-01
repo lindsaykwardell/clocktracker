@@ -34,11 +34,8 @@
                 font-size="md"
                 @click="showUsers = !showUsers"
                 class="w-full md:w-auto"
-                :class="{
-                  'bg-stone-200 dark:bg-stone-600': showUsers,
-                  'bg-stone-300 dark:bg-stone-700 text-stone-400 dark:text-stone-500 hover:text-inherit':
-                    !showUsers,
-                }"
+                :tertiary="!showUsers"
+                :disabled="users.length === 0"
               >
                 <h2>
                   {{ users.length }} User{{ users.length === 1 ? "" : "s" }}
@@ -50,11 +47,8 @@
                 font-size="md"
                 @click="showCommunities = !showCommunities"
                 class="w-full md:w-auto"
-                :class="{
-                  'bg-stone-200 dark:bg-stone-600': showCommunities,
-                  'bg-stone-300 dark:bg-stone-700 text-stone-400 dark:text-stone-500 hover:text-inherit':
-                    !showCommunities,
-                }"
+                :tertiary="!showCommunities"
+                :disabled="communities.length === 0"
               >
                 <h2>
                   {{ communities.length }} Communit{{
@@ -68,11 +62,8 @@
                 font-size="md"
                 @click="showScripts = !showScripts"
                 class="w-full md:w-auto"
-                :class="{
-                  'bg-stone-200 dark:bg-stone-600': showScripts,
-                  'bg-stone-300 dark:bg-stone-700 text-stone-400 dark:text-stone-500 hover:text-inherit':
-                    !showScripts,
-                }"
+                :tertiary="!showScripts"
+                :disabled="scripts.length === 0"
               >
                 <h2>
                   {{ scripts.length }} Script{{
@@ -86,11 +77,8 @@
                 font-size="md"
                 @click="showRoles = !showRoles"
                 class="w-full md:w-auto"
-                :class="{
-                  'bg-stone-200 dark:bg-stone-600': showRoles,
-                  'bg-stone-300 dark:bg-stone-700 text-stone-400 dark:text-stone-500 hover:text-inherit':
-                    !showRoles,
-                }"
+                :tertiary="!showRoles"
+                :disabled="roles.length === 0"
               >
                 <h2>
                   {{ roles.length }} Role{{ roles.length === 1 ? "" : "s" }}
@@ -122,6 +110,9 @@
 <script setup lang="ts">
 import type { Role } from "@prisma/client";
 import { watchDebounced } from "@vueuse/core";
+
+const route = useRoute();
+const router = useRouter();
 
 const users = ref<
   {
@@ -157,6 +148,7 @@ const scripts = ref<
     type: string;
     json_url: string;
     pdf_url: string;
+    logo: string;
     characters_last_updated: string | null;
     _count: {
       games: number;
@@ -166,15 +158,51 @@ const scripts = ref<
 const roles = ref<(Role & { _count: { scripts: number; games: number } })[]>(
   []
 );
-const query = ref("");
+
+// Default the query to the query parameter in the URL
+const query = ref<string>(route.query.query as string | "");
 const searching = ref(false);
 
-const showUsers = ref(true);
-const showCommunities = ref(true);
-const showScripts = ref(true);
-const showRoles = ref(true);
+const activeTab = ref<"USERS" | "COMMUNITIES" | "SCRIPTS" | "ROLES">("USERS");
+
+const showUsers = computed({
+  get() {
+    return activeTab.value === "USERS";
+  },
+  set() {
+    activeTab.value = "USERS";
+  },
+});
+const showCommunities = computed({
+  get() {
+    return activeTab.value === "COMMUNITIES";
+  },
+  set() {
+    activeTab.value = "COMMUNITIES";
+  },
+});
+const showScripts = computed({
+  get() {
+    return activeTab.value === "SCRIPTS";
+  },
+  set() {
+    activeTab.value = "SCRIPTS";
+  },
+});
+const showRoles = computed({
+  get() {
+    return activeTab.value === "ROLES";
+  },
+  set() {
+    activeTab.value = "ROLES";
+  },
+});
 
 async function search() {
+  // Only search if the query is at least 3 characters long
+  if (query.value.length < 3) {
+    return;
+  }
   searching.value = true;
   users.value = [];
   communities.value = [];
@@ -187,16 +215,57 @@ async function search() {
   });
 
   users.value = result.users;
-  scripts.value = result.scripts;
+  scripts.value = result.scripts as any;
   communities.value = result.communities;
   if ("roles" in result) {
-    roles.value = result.roles;
+    roles.value = result.roles as any;
   } else {
     roles.value = [];
+  }
+
+  // check if the current tab has content
+  const hasContent = (() => {
+    switch (activeTab.value) {
+      case "USERS":
+        return users.value.length > 0;
+      case "COMMUNITIES":
+        return communities.value.length > 0;
+      case "SCRIPTS":
+        return scripts.value.length > 0;
+      case "ROLES":
+        return roles.value.length > 0;
+    }
+  })();
+
+  if (!hasContent) {
+    // switch to a tab that has content
+    if (users.value.length > 0) {
+      activeTab.value = "USERS";
+    } else if (communities.value.length > 0) {
+      activeTab.value = "COMMUNITIES";
+    } else if (scripts.value.length > 0) {
+      activeTab.value = "SCRIPTS";
+    } else if (roles.value.length > 0) {
+      activeTab.value = "ROLES";
+    }
   }
 
   searching.value = false;
 }
 
-watchDebounced(query, search, { debounce: 500 });
+onMounted(() => {
+  if (query.value) {
+    search();
+  }
+});
+
+watchDebounced(
+  query,
+  () => {
+    search();
+    // update the router with the query parameter
+    router.push({ query: { query: query.value } });
+  },
+  { debounce: 500 }
+);
 </script>
