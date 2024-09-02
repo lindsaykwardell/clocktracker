@@ -159,7 +159,7 @@
             <option :value="null">
               <template v-if="editingMultipleGames">Not updated</template>
             </option>
-            <option v-for="i in 11" :value="i + 4">{{ i + 4 }}</option>
+            <option v-for="i in 16" :value="i + 4">{{ i + 4 }}</option>
           </Input>
         </label>
         <label class="w-1/3 md:w-auto">
@@ -367,7 +367,7 @@
             {{ ">" }}
           </span>
         </Button>
-        <div class="w-screen md:w-auto overflow-scroll">
+        <div class="w-screen md:w-auto max-w-[966px] overflow-scroll">
           <Grimoire
             :tokens="game.grimoire[grimPage].tokens"
             :availableRoles="orderedRoles"
@@ -1045,7 +1045,7 @@ watchEffect(() => {
     while (
       (props.game.player_count || 0) + (props.game.traveler_count || 0) >
         grimoire.tokens.length &&
-      grimoire.tokens.length < 20
+      grimoire.tokens.length < 25
     ) {
       grimoire.tokens.push({
         id: undefined,
