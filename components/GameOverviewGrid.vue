@@ -45,9 +45,12 @@
             crossorigin="anonymous"
           />
           <div
-            class="absolute top-0 left-0 text-white md:text-lg bg-gradient-to-br from-black/75 via-black/50 to-black-0 p-1"
+            class="absolute top-0 left-0 text-white md:text-lg bg-gradient-to-br from-black/75 via-black/50 to-black-0 p-1 flex gap-1 items-center"
           >
-            {{ formatDate(game.date) }}
+            <div v-if="isFavorite(game)" class="text-primary">
+              <Star class="w-6" />
+            </div>
+            <div>{{ formatDate(game.date) }}</div>
           </div>
           <div class="absolute top-8 left-1 z-10">
             <Avatar
@@ -118,15 +121,19 @@
             >
               <img src="/img/bgg.png" class="w-8 h-8 aspect-square" />
             </a>
-            <div class="font-gothic text-white md:text-lg p-1">
-              {{ game.script }}
-              <template
-                v-if="
-                  game.associated_script && !scripts.isBaseScript(game.script)
-                "
-              >
-                v{{ game.associated_script.version }}
-              </template>
+            <div
+              class="font-gothic text-white md:text-lg p-1 flex gap-1 items-center"
+            >
+              <div>
+                {{ game.script }}
+                <template
+                  v-if="
+                    game.associated_script && !scripts.isBaseScript(game.script)
+                  "
+                >
+                  v{{ game.associated_script.version }}
+                </template>
+              </div>
             </div>
           </div>
           <nuxt-link
@@ -154,6 +161,7 @@
 <script setup lang="ts">
 import { displayWinIcon } from "~/composables/useGames";
 const gamesStore = useGames();
+const users = useUsers();
 
 const config = useRuntimeConfig();
 const scripts = useScripts();
@@ -186,6 +194,14 @@ const cardWidth = computed(() => props.cardWidth || "w-1/2 lg:w-1/3 xl:w-1/4");
 
 function handleCardClick(game: GameRecord) {
   if (props.onCardClick) props.onCardClick(game);
+}
+
+function isFavorite(game: GameRecord) {
+  const user = users.getUserById(game.user_id);
+
+  if (user.status !== Status.SUCCESS) return false;
+
+  return user.data.favorites.some((f) => f.game_id === game.id);
 }
 </script>
 

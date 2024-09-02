@@ -50,12 +50,17 @@
                   </template>
                 </div>
               </div>
-              <time
-                :datetime="dayjs(game.data.date).toISOString()"
-                class="text-sm"
-              >
-                {{ formatDate(game.data.date) }}
-              </time>
+              <div class="flex gap-1 items-center">
+                <div v-if="isFavorite(game.data)">
+                  <Star class="w-5 text-primary" />
+                </div>
+                <time
+                  :datetime="dayjs(game.data.date).toISOString()"
+                  class="text-sm"
+                >
+                  {{ formatDate(game.data.date) }}
+                </time>
+              </div>
             </div>
             <div
               v-if="
@@ -332,12 +337,8 @@
           :onCardClick="confirmMergeGame"
         />
       </Dialog>
-      <div
-        v-if="user?.id && player.data.user_id === user.id"
-        class="absolute top-1 right-3"
-        id="menu-controls"
-      >
-        <Menu>
+      <div v-if="isMe" class="absolute top-1 right-3" id="menu-controls">
+        <Menu v-slot="{ open }">
           <MenuButton>
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -360,156 +361,171 @@
             leave-from-class="transform scale-100 opacity-100"
             leave-to-class="transform scale-95 opacity-0"
           >
-            <MenuItems
-              class="absolute right-0 z-10 bg-stone-100 dark:bg-stone-900 rounded shadow-md whitespace-nowrap flex flex-col items-start min-w-[150px] divide-y divide-stone-500 dark:divide-stone-700 overflow-hidden"
-            >
-              <div
-                v-if="
-                  game.data.waiting_for_confirmation || similarGames.length > 0
-                "
-                class="w-full"
+            <div v-show="open || showMenuForTour">
+              <MenuItems
+                static
+                class="absolute right-0 z-10 bg-stone-100 dark:bg-stone-900 rounded shadow-md whitespace-nowrap flex flex-col items-start min-w-[150px] divide-y divide-stone-500 dark:divide-stone-700 overflow-hidden"
               >
-                <MenuItem v-if="game.data.waiting_for_confirmation">
-                  <button
-                    @click="confirmGame"
-                    class="flex gap-1 w-full items-center dark:text-white text-sm px-2 min-h-[32px]"
-                  >
-                    Add game to my Profile
-                  </button>
-                </MenuItem>
-                <MenuItem v-if="similarGames.length > 0">
-                  <button
-                    @click="showSimilarGamesDialog = true"
-                    :disabled="mergeInFlight"
-                    class="flex gap-1 w-full items-center dark:text-white text-sm px-2 min-h-[32px]"
-                  >
-                    Merge with similar game
-                  </button>
-                </MenuItem>
-              </div>
-              <div class="w-full">
-                <MenuItem v-if="!game.data.waiting_for_confirmation">
-                  <nuxt-link
-                    class="flex gap-1 w-full items-center dark:text-white text-sm px-2"
-                    :to="`/game/${route.params.id}/edit`"
-                    id="edit-game"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="32"
-                      height="32"
-                      viewBox="0 0 32 32"
-                      class="w-4"
+                <div
+                  v-if="
+                    game.data.waiting_for_confirmation ||
+                    similarGames.length > 0
+                  "
+                  class="w-full"
+                >
+                  <MenuItem v-if="game.data.waiting_for_confirmation">
+                    <button
+                      @click="confirmGame"
+                      class="flex gap-1 w-full items-center dark:text-white text-sm px-2 min-h-[32px]"
                     >
-                      <path
-                        fill="currentColor"
-                        d="M2 26h28v2H2zM25.4 9c.8-.8.8-2 0-2.8l-3.6-3.6c-.8-.8-2-.8-2.8 0l-15 15V24h6.4l15-15zm-5-5L24 7.6l-3 3L17.4 7l3-3zM6 22v-3.6l10-10l3.6 3.6l-10 10H6z"
-                      />
-                    </svg>
-                    Edit
-                  </nuxt-link>
-                </MenuItem>
-                <MenuItem>
-                  <button
-                    @click="deleteGame(false)"
-                    class="flex gap-1 w-full items-center dark:text-white text-sm px-2"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="32"
-                      height="32"
-                      viewBox="0 0 512 512"
-                      class="w-4"
+                      Add game to my Profile
+                    </button>
+                  </MenuItem>
+                  <MenuItem v-if="similarGames.length > 0">
+                    <button
+                      @click="showSimilarGamesDialog = true"
+                      :disabled="mergeInFlight"
+                      class="flex gap-1 w-full items-center dark:text-white text-sm px-2 min-h-[32px]"
                     >
-                      <path
-                        d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
-                        fill="currentColor"
-                      />
-                      <path d="M249 160h14v241h-14z" fill="currentColor" />
-                      <path
-                        d="M320 160h-14.6l-10.7 241h14.6z"
-                        fill="currentColor"
-                      />
-                      <path
-                        d="M206.5 160H192l10.7 241h14.6z"
-                        fill="currentColor"
-                      />
-                    </svg>
-                    <template v-if="game.data.waiting_for_confirmation"
-                      >Ignore</template
+                      Merge with similar game
+                    </button>
+                  </MenuItem>
+                </div>
+                <div class="w-full">
+                  <MenuItem>
+                    <button
+                      @click="toggleFavorite"
+                      class="flex gap-1 w-full items-center dark:text-white text-sm px-1 py-1"
                     >
-                    <template v-else>Delete</template>
-                  </button>
-                </MenuItem>
-                <MenuItem v-if="game.data.waiting_for_confirmation">
-                  <button
-                    @click="deleteGame(true)"
-                    class="flex gap-1 w-full items-center dark:text-white text-sm px-2"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="32"
-                      height="32"
-                      viewBox="0 0 512 512"
-                      class="w-4"
+                      <Star class="w-5 text-primary" />
+                      <div id="favorite-game">Mark as Favorite</div>
+                    </button>
+                  </MenuItem>
+                  <MenuItem v-if="!game.data.waiting_for_confirmation">
+                    <nuxt-link
+                      class="flex gap-1 w-full items-center dark:text-white text-sm px-2"
+                      :to="`/game/${route.params.id}/edit`"
                     >
-                      <path
-                        d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
-                        fill="currentColor"
-                      />
-                      <path d="M249 160h14v241h-14z" fill="currentColor" />
-                      <path
-                        d="M320 160h-14.6l-10.7 241h14.6z"
-                        fill="currentColor"
-                      />
-                      <path
-                        d="M206.5 160H192l10.7 241h14.6z"
-                        fill="currentColor"
-                      />
-                    </svg>
-                    Ignore and Untag Myself
-                  </button>
-                </MenuItem>
-              </div>
-              <div class="w-full">
-                <MenuItem v-if="canPostToBGG">
-                  <button
-                    class="bg-[#3f3a60] hover:bg-[#2e2950] transition duration-150 text-white flex items-center w-full text-sm min-h-[32px]"
-                    @click="initPostToBGG"
-                    :disabled="bggInFlight"
-                  >
-                    <div class="w-6 ml-1">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="32"
+                        height="32"
+                        viewBox="0 0 32 32"
+                        class="w-4"
+                      >
+                        <path
+                          fill="currentColor"
+                          d="M2 26h28v2H2zM25.4 9c.8-.8.8-2 0-2.8l-3.6-3.6c-.8-.8-2-.8-2.8 0l-15 15V24h6.4l15-15zm-5-5L24 7.6l-3 3L17.4 7l3-3zM6 22v-3.6l10-10l3.6 3.6l-10 10H6z"
+                        />
+                      </svg>
+                      <div id="edit-game">Edit</div>
+                    </nuxt-link>
+                  </MenuItem>
+                  <MenuItem>
+                    <button
+                      @click="deleteGame(false)"
+                      class="flex gap-1 w-full items-center dark:text-white text-sm px-2"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="32"
+                        height="32"
+                        viewBox="0 0 512 512"
+                        class="w-4"
+                      >
+                        <path
+                          d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
+                          fill="currentColor"
+                        />
+                        <path d="M249 160h14v241h-14z" fill="currentColor" />
+                        <path
+                          d="M320 160h-14.6l-10.7 241h14.6z"
+                          fill="currentColor"
+                        />
+                        <path
+                          d="M206.5 160H192l10.7 241h14.6z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                      <div id="delete-game">
+                        <template v-if="game.data.waiting_for_confirmation"
+                          >Ignore</template
+                        >
+                        <template v-else>Delete</template>
+                      </div>
+                    </button>
+                  </MenuItem>
+                  <MenuItem v-if="game.data.waiting_for_confirmation">
+                    <button
+                      @click="deleteGame(true)"
+                      class="flex gap-1 w-full items-center dark:text-white text-sm px-2"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="32"
+                        height="32"
+                        viewBox="0 0 512 512"
+                        class="w-4"
+                      >
+                        <path
+                          d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
+                          fill="currentColor"
+                        />
+                        <path d="M249 160h14v241h-14z" fill="currentColor" />
+                        <path
+                          d="M320 160h-14.6l-10.7 241h14.6z"
+                          fill="currentColor"
+                        />
+                        <path
+                          d="M206.5 160H192l10.7 241h14.6z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                      Ignore and Untag Myself
+                    </button>
+                  </MenuItem>
+                </div>
+                <div class="w-full">
+                  <MenuItem v-if="canPostToBGG">
+                    <button
+                      class="bg-[#3f3a60] hover:bg-[#2e2950] transition duration-150 text-white flex items-center w-full text-sm min-h-[32px]"
+                      @click="initPostToBGG"
+                      :disabled="bggInFlight"
+                    >
+                      <div class="w-6 ml-1">
+                        <img
+                          src="/img/bgg.png"
+                          class="w-6 h-6 m-auto"
+                          :class="{ 'animate-spin': bggInFlight }"
+                        />
+                      </div>
+                      <span v-if="game.data.bgg_id">Delete from BGG</span>
+                      <span v-else>Post to BGG</span>
+                    </button>
+                  </MenuItem>
+                  <MenuItem v-if="canPostToBGStats">
+                    <a
+                      :href="bgStatsLink"
+                      class="bg-[#333] transition duration-150 dark:text-white flex items-center w-full gap-1 text-sm min-h-[32px]"
+                    >
                       <img
-                        src="/img/bgg.png"
-                        class="w-6 h-6 m-auto"
-                        :class="{ 'animate-spin': bggInFlight }"
+                        src="https://clocktracker.app/img/bgstats.png"
+                        class="w-5 h-5 ml-1"
                       />
-                    </div>
-                    <span v-if="game.data.bgg_id">Delete from BGG</span>
-                    <span v-else>Post to BGG</span>
-                  </button>
-                </MenuItem>
-                <MenuItem v-if="canPostToBGStats">
-                  <a
-                    :href="bgStatsLink"
-                    class="bg-[#333] transition duration-150 dark:text-white flex items-center w-full gap-1 text-sm min-h-[32px]"
-                  >
-                    <img
-                      src="https://clocktracker.app/img/bgstats.png"
-                      class="w-5 h-5 ml-1"
-                    />
-                    Post to BGStats
-                  </a>
-                </MenuItem>
-              </div>
-            </MenuItems>
+                      Post to BGStats
+                    </a>
+                  </MenuItem>
+                </div>
+              </MenuItems>
+            </div>
           </transition>
         </Menu>
       </div>
       <Tour
         v-if="user?.id && game.data.user_id === user.id"
         :steps="tour"
-        tourKey="game-viewer"
+        tourKey="game-viewer-v2"
+        @onTourEnd="showMenuForTour = false"
       />
     </section>
     <template v-else>
@@ -535,6 +551,7 @@ const friends = useFriends();
 const gameId = route.params.id as string;
 const { bggInFlight, canPostToBGG, postToBGG } = useBGG();
 const mergeInFlight = ref(false);
+const me = useMe();
 
 const game = computed(() => games.getGame(gameId));
 const player = computed<FetchStatus<User>>(() => {
@@ -549,6 +566,14 @@ const similarGames = computed(() => games.getSimilarGames(gameId));
 const showSimilarGamesDialog = ref(false);
 
 const { canPostToBGStats, link: bgStatsLink } = useBGStats(game);
+
+const isMe = computed(() => {
+  if (user.value && game.value.status === Status.SUCCESS) {
+    return user.value.id === game.value.data.user_id;
+  }
+
+  return false;
+});
 
 watchEffect(() => {
   if (
@@ -766,6 +791,30 @@ function formatDate(date: Date) {
   }).format(new Date(date));
 }
 
+function isFavorite(game: GameRecord) {
+  const user = users.getUserById(game.user_id);
+
+  if (user.status !== Status.SUCCESS) return false;
+
+  return user.data.favorites.some((f) => f.game_id === game.id);
+}
+
+async function toggleFavorite() {
+  if (me.value.status === Status.SUCCESS) {
+    const result = await $fetch(`/api/games/${gameId}/favorite`, {
+      method: "POST",
+    });
+
+    if (result.status === "added") {
+      me.value.data.favorites.push(result.data);
+    } else {
+      me.value.data.favorites = me.value.data.favorites.filter(
+        (f) => f.game_id !== gameId
+      );
+    }
+  }
+}
+
 onMounted(() => {
   games.fetchGame(route.params.id as string).then(() => {
     if (game.value.status === Status.SUCCESS) {
@@ -778,10 +827,31 @@ onMounted(() => {
   }
 });
 
+const showMenuForTour = ref(false);
+
 const tour = [
   {
     target: "#menu-controls",
-    content: "Use this menu to modify or share your game.",
+    content:
+      "Here you can edit or delete this game, or post it to BoardGameGeek (if you have connected your account).",
+    onNext: () => {
+      showMenuForTour.value = true;
+    },
+  },
+  {
+    target: "#favorite-game",
+    content:
+      "You can mark this game as a favorite to display it on your profile, as well as find it more easily in your games list.",
+  },
+  {
+    target: "#edit-game",
+    content:
+      "If you need to make any changes to this game, you can do so here.",
+  },
+  {
+    target: "#delete-game",
+    content:
+      "You can also delete your game, but be careful! This action is permanent.",
   },
 ];
 </script>

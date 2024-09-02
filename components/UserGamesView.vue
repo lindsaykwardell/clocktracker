@@ -18,6 +18,7 @@
                   <option value="location">Sort by Location</option>
                   <option value="community_name">Sort by Community</option>
                   <option value="players">Sort by Players</option>
+                  <option value="favorite">Sort by Favorite</option>
                 </Input>
                 <Input
                   mode="select"
@@ -534,6 +535,7 @@ const sortBy = ref<
   | "community_name"
   | "players"
   | "alignment"
+  | "favorite"
 >("date");
 const orderBy = ref<"asc" | "desc">("desc");
 const selectedTag = ref<string | null>(null);
@@ -591,6 +593,14 @@ const activeFilters = computed(() => {
   ];
 });
 
+function isFavorite(game: GameRecord) {
+  const user = users.getUserById(game.user_id);
+
+  if (user.status !== Status.SUCCESS) return false;
+
+  return user.data.favorites.some((f) => f.game_id === game.id);
+}
+
 const sortedGames = computed(() => {
   if (props.games.status !== Status.SUCCESS) {
     return [];
@@ -604,6 +614,8 @@ const sortedGames = computed(() => {
         : g.player_characters[g.player_characters.length - 1]?.name,
       last_alignment:
         g.player_characters[g.player_characters.length - 1]?.alignment,
+      // Hack to properly sort by date. I'm sorry.
+      favorite: !isFavorite(g),
     }))
   )
     .orderBy(orderBy.value)
@@ -624,6 +636,8 @@ const sortedGames = computed(() => {
             return ["community_name", "date", "created_at"];
           case "players":
             return ["total_players", "date", "created_at"];
+          case "favorite":
+            return ["favorite", "date", "created_at"];
           default:
             return ["created_at"];
         }

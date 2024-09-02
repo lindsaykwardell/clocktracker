@@ -57,8 +57,21 @@ model Game {
   privacy                  PrivacySetting @default(PUBLIC)
   demon_bluffs             DemonBluff[]
   fabled                   Fabled[]
+  favorite                 FavoriteGame?
+  favorite_id              Int?           @unique
 
   @@index([user_id])
+}
+
+model FavoriteGame {
+  id         Int          @id @default(autoincrement())
+  user       UserSettings @relation(fields: [user_id], references: [user_id])
+  user_id    String
+  game       Game         @relation(fields: [game_id], references: [id])
+  game_id    String       @unique
+  created_at DateTime     @default(now()) @db.Timestamptz(6)
+
+  @@unique([user_id, game_id])
 }
 
 enum WinStatus_V2 {
@@ -245,6 +258,7 @@ model UserSettings {
   payments                KoFiPayment[]
   uploaded_scripts        Script[]
   dids                    Did[]
+  favorites               FavoriteGame[]
 }
 
 model Did {

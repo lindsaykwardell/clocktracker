@@ -6,11 +6,12 @@
       'w-11/12 md:w-1/3 lg:w-1/4 xl:w-[500px]': size === 'sm',
       'w-11/12 md:w-1/2 lg:w-1/2 xl:w-[750px]': size === 'md',
       'w-11/12 md:w-2/3 lg:w-3/4 xl:w-[900px]': size === 'lg',
+      'w-11/12': size === 'xl',
     }"
   >
     <div ref="dialogContent" v-if="visible">
       <div
-        class="flex justify-between items-top sticky top-0 bg-stone-900 z-10"
+        class="flex justify-between items-top sticky top-0 bg-stone-900 z-20"
       >
         <div class="p-4 w-full">
           <slot name="title" />
@@ -35,7 +36,7 @@
 import { onClickOutside } from "@vueuse/core";
 const props = defineProps<{
   visible: boolean;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
 }>();
 
 const emit = defineEmits(["update:visible"]);

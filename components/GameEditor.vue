@@ -71,6 +71,7 @@
               <span class="block">I was the Storyteller</span>
             </label>
             <label
+              v-if="editingMultipleGames"
               class="flex whitespace-nowrap items-center gap-2"
               :class="{
                 'pointer-events-none': noChangeToIsStoryteller,
