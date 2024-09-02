@@ -1,10 +1,39 @@
 <template>
-  <section v-if="favoriteGames.length" class="grid grid-cols-1 md:grid-cols-2">
-    <div>
+  <section
+    v-if="userGames.status === Status.SUCCESS"
+    class="grid grid-cols-1 md:grid-cols-2"
+  >
+    <div class="row-span-2">
       <GameOverviewGrid
         :games="favoriteGames"
         cardWidth="w-1/2 md:w-full lg:w-1/2"
       />
+    </div>
+    <div
+      class="row-start-1 md:row-start-auto p-4 grid grid-cols-2 xl:grid-cols-4 gap-4"
+    >
+      <div
+        class="border rounded border-stone-500 p-2 text-center text-lg font-bold"
+      >
+        {{ userGames.data.length }}
+        {{ userGames.data.length === 1 ? "game" : "games" }} played
+      </div>
+      <div
+        class="border rounded border-stone-500 p-2 text-center text-lg font-bold"
+      >
+        {{ totalScripts }}
+        {{ totalScripts === 1 ? "script" : "scripts" }} played
+      </div>
+      <div
+        class="border rounded border-stone-500 p-2 text-center text-lg font-bold"
+      >
+        {{ totalRoles }} {{ totalRoles === 1 ? "role" : "roles" }} played
+      </div>
+      <div
+        class="border rounded border-stone-500 p-2 text-center text-lg font-bold"
+      >
+        {{ totalWins }} {{ totalWins === 1 ? "win" : "wins" }}
+      </div>
     </div>
     <div>
       <UserRoles :games="userGames" condensed />
@@ -32,6 +61,56 @@ const props = defineProps<{
 
 const userGames = computed(() => {
   return games.getByPlayer(props.player.username);
+});
+
+const totalScripts = computed(() => {
+  if (userGames.value.status !== Status.SUCCESS) return 0;
+
+  return userGames.value.data.reduce((scripts, game) => {
+    if (!scripts.includes(game.script)) scripts.push(game.script);
+
+    return scripts;
+  }, [] as string[]).length;
+});
+
+const totalRoles = computed(() => {
+  if (userGames.value.status !== Status.SUCCESS) return 0;
+
+  return userGames.value.data.reduce((roles, game) => {
+    game.player_characters.forEach((character) => {
+      if (!roles.includes(character.name)) roles.push(character.name);
+    });
+
+    return roles;
+  }, [] as string[]).length;
+});
+
+const totalWins = computed(() => {
+  if (userGames.value.status !== Status.SUCCESS) return 0;
+
+  return userGames.value.data.reduce((wins, game) => {
+    if (game.is_storyteller) return wins;
+
+    const lastCharacter =
+      game.player_characters[game.player_characters.length - 1];
+
+    if (!lastCharacter) return wins;
+
+    switch (lastCharacter.alignment) {
+      case "GOOD":
+        if (game.win_v2 === "GOOD_WINS") {
+          wins++;
+        }
+        break;
+      case "EVIL":
+        if (game.win_v2 === "EVIL_WINS") {
+          wins++;
+        }
+        break;
+    }
+
+    return wins;
+  }, 0);
 });
 
 const favoriteGames = computed(() => {
