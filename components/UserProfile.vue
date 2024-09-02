@@ -60,7 +60,7 @@
       </p>
     </template>
 
-    <div class="text-black">
+    <div class="text-black dark:text-stone-200">
       <GameOverviewList
         v-if="userGames.status === Status.SUCCESS"
         :games="userGames.data"
