@@ -50,12 +50,17 @@
                   </template>
                 </div>
               </div>
-              <time
-                :datetime="dayjs(game.data.date).toISOString()"
-                class="text-sm"
-              >
-                {{ formatDate(game.data.date) }}
-              </time>
+              <div class="flex gap-1 items-center">
+                <div v-if="isFavorite(game.data)">
+                  <Star class="w-5 text-primary" />
+                </div>
+                <time
+                  :datetime="dayjs(game.data.date).toISOString()"
+                  class="text-sm"
+                >
+                  {{ formatDate(game.data.date) }}
+                </time>
+              </div>
             </div>
             <div
               v-if="
@@ -332,11 +337,7 @@
           :onCardClick="confirmMergeGame"
         />
       </Dialog>
-      <div
-        v-if="user?.id && player.data.user_id === user.id"
-        class="absolute top-1 right-3"
-        id="menu-controls"
-      >
+      <div v-if="isMe" class="absolute top-1 right-3" id="menu-controls">
         <Menu>
           <MenuButton>
             <svg
@@ -388,6 +389,15 @@
                 </MenuItem>
               </div>
               <div class="w-full">
+                <MenuItem>
+                  <button
+                    @click="toggleFavorite"
+                    class="flex gap-1 w-full items-center dark:text-white text-sm px-1 py-1"
+                  >
+                    <Star class="w-6 text-primary" />
+                    <div>Mark as Favorite</div>
+                  </button>
+                </MenuItem>
                 <MenuItem v-if="!game.data.waiting_for_confirmation">
                   <nuxt-link
                     class="flex gap-1 w-full items-center dark:text-white text-sm px-2"
@@ -535,6 +545,7 @@ const friends = useFriends();
 const gameId = route.params.id as string;
 const { bggInFlight, canPostToBGG, postToBGG } = useBGG();
 const mergeInFlight = ref(false);
+const me = useMe();
 
 const game = computed(() => games.getGame(gameId));
 const player = computed<FetchStatus<User>>(() => {
@@ -549,6 +560,14 @@ const similarGames = computed(() => games.getSimilarGames(gameId));
 const showSimilarGamesDialog = ref(false);
 
 const { canPostToBGStats, link: bgStatsLink } = useBGStats(game);
+
+const isMe = computed(() => {
+  if (user.value && game.value.status === Status.SUCCESS) {
+    return user.value.id === game.value.data.user_id;
+  }
+
+  return false;
+});
 
 watchEffect(() => {
   if (
@@ -764,6 +783,30 @@ function formatDate(date: Date) {
     dateStyle: "long",
     timeZone: "UTC",
   }).format(new Date(date));
+}
+
+function isFavorite(game: GameRecord) {
+  const user = users.getUserById(game.user_id);
+
+  if (user.status !== Status.SUCCESS) return false;
+
+  return user.data.favorites.some((f) => f.game_id === game.id);
+}
+
+async function toggleFavorite() {
+  if (me.value.status === Status.SUCCESS) {
+    const result = await $fetch(`/api/games/${gameId}/favorite`, {
+      method: "POST",
+    });
+
+    if (result.status === "added") {
+      me.value.data.favorites.push(result.data);
+    } else {
+      me.value.data.favorites = me.value.data.favorites.filter(
+        (f) => f.game_id !== gameId
+      );
+    }
+  }
 }
 
 onMounted(() => {

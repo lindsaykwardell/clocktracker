@@ -57,7 +57,16 @@
               size="sm"
             />
           </td>
-          <td class="hidden md:table-cell">{{ formatDate(game.date) }}</td>
+          <td class="hidden md:table-cell">
+            <div class="flex gap-1 items-center">
+              <div v-if="isFavorite(game)" class="text-primary">
+                <Star class="w-6" />
+              </div>
+              <div>
+                {{ formatDate(game.date) }}
+              </div>
+            </div>
+          </td>
           <td>
             {{ game.script }}
             <template
@@ -125,6 +134,7 @@ import { displayWinIcon } from "~/composables/useGames";
 const gamesStore = useGames();
 const selectMultipleGames = useSelectMultipleGames();
 const { isBaseScript } = useScripts();
+const users = useUsers();
 
 defineProps<{
   games: GameRecord[];
@@ -143,6 +153,14 @@ const componentIs = computed(() => {
   if (selectMultipleGames.enabled) return "tr";
   return nuxtLink;
 });
+
+function isFavorite(game: GameRecord) {
+  const user = users.getUserById(game.user_id);
+
+  if (user.status !== Status.SUCCESS) return false;
+
+  return user.data.favorites.some((f) => f.game_id === game.id);
+}
 </script>
 
 <style scoped>

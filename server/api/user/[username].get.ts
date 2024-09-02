@@ -127,6 +127,11 @@ export default defineEventHandler(async (handler) => {
           icon: true,
         },
       },
+      favorites: {
+        select: {
+          game_id: true,
+        },
+      },
     },
   });
 
