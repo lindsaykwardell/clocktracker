@@ -294,7 +294,7 @@
       <legend>Grimoire</legend>
       <div
         v-if="!game.player_count"
-        class="pt-3 relative bg-center bg-cover w-full h-[100px] flex justify-center items-center"
+        class="pt-3 relative bg-center bg-cover w-full h-[200px] flex justify-center items-center"
         :class="{
           'trouble-brewing': game.script === 'Trouble Brewing',
           'sects-and-violets': game.script === 'Sects and Violets',
@@ -306,9 +306,19 @@
         }"
       >
         <div
-          class="font-dumbledor text-white bg-black/75 p-4 text-xl rounded shadow-md"
+          class="font-dumbledor text-white bg-black/60 p-4 text-xl rounded shadow-md text-center"
         >
-          Select player count to begin
+          <p class="p-2">Select player count to begin</p>
+          <p class="p-2">OR</p>
+          <div class="flex justify-center">
+            <Button
+              primary
+              type="button"
+              @click="showCopyGrimoireDialog = true"
+            >
+              Copy an existing grimoire
+            </Button>
+          </div>
         </div>
       </div>
       <div
@@ -569,6 +579,20 @@
     :alwaysShowFabled="tokenSet === 'fabled'"
     :hideTravelers="tokenSet !== 'player_characters'"
   />
+  <Dialog v-model:visible="showCopyGrimoireDialog" size="xl">
+    <template #title>
+      <h2 class="text-2xl font-bold">Manage Favorites</h2>
+      <p class="text-lg text-stone-400 p-4">
+        Click on a game to add or remove it from your favorites. Only six
+        favorites are shown on your profile, but you can favorite as many games
+        as you like.
+      </p>
+    </template>
+
+    <div class="text-black dark:text-stone-200">
+      <GameOverviewList :games="myGames" readonly :onClick="copyGrimoire" />
+    </div>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
@@ -576,175 +600,7 @@ import type { Alignment } from "@prisma/client";
 import type { RoleType } from "~/composables/useRoles";
 import naturalOrder from "natural-order";
 import { useLocalStorage } from "@vueuse/core";
-import { WinStatus_V2 } from "~/composables/useGames";
-
-const tour: Step[] = [
-  {
-    target: "#select-script",
-    content: "Select a script to use for this game.",
-  },
-  {
-    target: "#player-count",
-    content: "Enter the number of players in the game.",
-  },
-  {
-    target: "#game-results",
-    content: "Select whether you won or lost the game.",
-    placement: Placement.TOP_START,
-  },
-  {
-    target: "#player-role",
-    content: "Select your character role in the game.",
-  },
-  {
-    target: "#related-player-role",
-    content:
-      "If your role is related to another (such as Drunk), you can enter a related role here.",
-  },
-  {
-    target: "#save-game",
-    content:
-      "When you've finished entering the game details, you're ready to save!",
-  },
-];
-
-type Character = {
-  name: string;
-  role_id: string | null;
-  alignment?: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
-  showRelated?: boolean;
-  related?: string;
-  related_role_id?: string | null;
-  role?: {
-    token_url: string;
-    initial_alignment?: "GOOD" | "EVIL" | "NEUTRAL";
-  };
-  related_role?: { token_url: string };
-};
-
-const user = useSupabaseUser();
-const users = useUsers();
-const games = useGames();
-const friends = useFriends();
-const { isBaseScript, fetchScriptVersions } = useScripts();
-const allRoles = useRoles();
-
-const advancedModeEnabled_ = useLocalStorage("advancedModeEnabled", "false");
-const noChangeToIsStoryteller = computed({
-  get: () => props.game.is_storyteller === undefined,
-  set: () => {
-    if (props.game.is_storyteller !== undefined) {
-      props.game.is_storyteller = undefined;
-    }
-  },
-});
-
-const advancedModeEnabled = computed({
-  get: () => advancedModeEnabled_.value === "true",
-  set: (value) => {
-    advancedModeEnabled_.value = value ? "true" : "false";
-  },
-});
-
-const roles = ref<
-  {
-    type: RoleType;
-    id: string;
-    token_url: string;
-    name: string;
-    initial_alignment: Alignment;
-  }[]
->([]);
-
-const visibleRoles = computed(() => {
-  return roles.value.filter((role) => {
-    switch (tokenSet.value) {
-      case "player_characters":
-        return true;
-      case "demon_bluffs":
-        return role.type === "TOWNSFOLK" || role.type === "OUTSIDER";
-      case "fabled":
-        return role.type === "FABLED";
-    }
-  });
-});
-
-const scriptVersions = ref<{ id: number; version: string }[]>([]);
-const fetchingScriptVersions = ref(false);
-const tokenMode = ref<"role" | "related_role">("role");
-const tokenSet = ref<"player_characters" | "demon_bluffs" | "fabled">(
-  "player_characters"
-);
-
-let focusedToken: Partial<Character> | null = null;
-
-const me = computed(() => users.getUserById(user.value?.id));
-const myTags = computed(() => {
-  if (me.value.status === Status.SUCCESS) {
-    return games.getTagsByPlayer(me.value.data.username);
-  }
-  return [];
-});
-
-const myCommunities = computed(() => {
-  if (me.value.status === Status.SUCCESS) {
-    const taggedCommunities = me.value.data.communities!.map((c) => ({
-      id: c.id,
-      name: c.name,
-      icon: c.icon,
-    }));
-
-    const allCommunityNames = games
-      .getCommunityNamesByPlayer(me.value.data.username)
-      .filter((name) => !taggedCommunities.some((c) => c.name === name))
-      .map((name) => ({
-        id: null,
-        name,
-        icon: "/img/default.png",
-      }));
-
-    return [...taggedCommunities, ...allCommunityNames];
-  }
-  return [];
-});
-
-const myLocations = computed(() => {
-  if (me.value.status === Status.SUCCESS) {
-    return games.getLocationsByPlayer(me.value.data.username);
-  }
-  return [];
-});
-
-const potentialStorytellers = computed(() => {
-  if (me.value.status === Status.SUCCESS) {
-    return [...friends.getFriends, ...friends.getCommunityMembers]
-      .map((f) => ({ ...f, username: `@${f.username}` }))
-      .filter(
-        (friend, index, arr) =>
-          // friend is unique
-          arr.findIndex((f) => f.username === friend.username) === index &&
-          // friend is not the storyteller, not a co-storyteller, and not found in the grimoire
-          friend.username !== props.game.storyteller &&
-          !props.game.co_storytellers.includes(friend.username) &&
-          !props.game.grimoire.find((grim) =>
-            grim.tokens.find((token) => token.player_name === friend.username)
-          )
-      );
-  }
-  return [];
-});
-
-const storytellerNames = computed(() => {
-  return [props.game.storyteller, ...props.game.co_storytellers];
-});
-
-const showScriptDialog = ref(false);
-
-const orderedRoles = computed(() =>
-  naturalOrder(roles.value).orderBy("asc").sort(["name"])
-);
-
-const showRoleSelectionDialog = ref(false);
+import { WinStatus_V2, type GameRecord } from "~/composables/useGames";
 
 const props = defineProps<{
   inFlight: boolean;
@@ -821,10 +677,190 @@ const props = defineProps<{
   };
 }>();
 
+const emit = defineEmits(["submit"]);
+
+const tour: Step[] = [
+  {
+    target: "#select-script",
+    content: "Select a script to use for this game.",
+  },
+  {
+    target: "#player-count",
+    content: "Enter the number of players in the game.",
+  },
+  {
+    target: "#game-results",
+    content: "Select whether you won or lost the game.",
+    placement: Placement.TOP_START,
+  },
+  {
+    target: "#player-role",
+    content: "Select your character role in the game.",
+  },
+  {
+    target: "#related-player-role",
+    content:
+      "If your role is related to another (such as Drunk), you can enter a related role here.",
+  },
+  {
+    target: "#save-game",
+    content:
+      "When you've finished entering the game details, you're ready to save!",
+  },
+];
+
+type Character = {
+  name: string;
+  role_id: string | null;
+  alignment?: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
+  showRelated?: boolean;
+  related?: string;
+  related_role_id?: string | null;
+  role?: {
+    token_url: string;
+    initial_alignment?: "GOOD" | "EVIL" | "NEUTRAL";
+  };
+  related_role?: { token_url: string };
+};
+
+const user = useSupabaseUser();
+const me = useMe();
+const games = useGames();
+const friends = useFriends();
+const { isBaseScript, fetchScriptVersions } = useScripts();
+const allRoles = useRoles();
+
+const showScriptDialog = ref(false);
+const showRoleSelectionDialog = ref(false);
+const advancedModeEnabled_ = useLocalStorage("advancedModeEnabled", "false");
+const roles = ref<
+  {
+    type: RoleType;
+    id: string;
+    token_url: string;
+    name: string;
+    initial_alignment: Alignment;
+  }[]
+>([]);
+const scriptVersions = ref<{ id: number; version: string }[]>([]);
+const fetchingScriptVersions = ref(false);
+const tokenMode = ref<"role" | "related_role">("role");
+const tokenSet = ref<"player_characters" | "demon_bluffs" | "fabled">(
+  "player_characters"
+);
+
+// Grimoire
+const showCopyGrimoireDialog = ref(false);
 const grimPage = ref(props.game.grimoire.length - 1);
 const tagsInput = ref("");
 
-const emit = defineEmits(["submit"]);
+let focusedToken: Partial<Character> | null = null;
+
+const noChangeToIsStoryteller = computed({
+  get: () => props.game.is_storyteller === undefined,
+  set: () => {
+    if (props.game.is_storyteller !== undefined) {
+      props.game.is_storyteller = undefined;
+    }
+  },
+});
+
+const advancedModeEnabled = computed({
+  get: () => advancedModeEnabled_.value === "true",
+  set: (value) => {
+    advancedModeEnabled_.value = value ? "true" : "false";
+  },
+});
+
+const visibleRoles = computed(() => {
+  return roles.value.filter((role) => {
+    switch (tokenSet.value) {
+      case "player_characters":
+        return true;
+      case "demon_bluffs":
+        return role.type === "TOWNSFOLK" || role.type === "OUTSIDER";
+      case "fabled":
+        return role.type === "FABLED";
+    }
+  });
+});
+
+const myTags = computed(() => {
+  if (me.value.status === Status.SUCCESS) {
+    return games.getTagsByPlayer(me.value.data.username);
+  }
+  return [];
+});
+
+const myCommunities = computed(() => {
+  if (me.value.status === Status.SUCCESS) {
+    const taggedCommunities = me.value.data.communities!.map((c) => ({
+      id: c.id,
+      name: c.name,
+      icon: c.icon,
+    }));
+
+    const allCommunityNames = games
+      .getCommunityNamesByPlayer(me.value.data.username)
+      .filter((name) => !taggedCommunities.some((c) => c.name === name))
+      .map((name) => ({
+        id: null,
+        name,
+        icon: "/img/default.png",
+      }));
+
+    return [...taggedCommunities, ...allCommunityNames];
+  }
+  return [];
+});
+
+const myLocations = computed(() => {
+  if (me.value.status === Status.SUCCESS) {
+    return games.getLocationsByPlayer(me.value.data.username);
+  }
+  return [];
+});
+
+const myGames = computed(() => {
+  if (me.value.status !== Status.SUCCESS) {
+    return [];
+  }
+
+  const myGames = games.getByPlayer(me.value.data.username);
+
+  if (myGames.status === Status.SUCCESS) {
+    return myGames.data;
+  } else {
+    return [];
+  }
+});
+
+const potentialStorytellers = computed(() => {
+  if (me.value.status === Status.SUCCESS) {
+    return [...friends.getFriends, ...friends.getCommunityMembers]
+      .map((f) => ({ ...f, username: `@${f.username}` }))
+      .filter(
+        (friend, index, arr) =>
+          // friend is unique
+          arr.findIndex((f) => f.username === friend.username) === index &&
+          // friend is not the storyteller, not a co-storyteller, and not found in the grimoire
+          friend.username !== props.game.storyteller &&
+          !props.game.co_storytellers.includes(friend.username) &&
+          !props.game.grimoire.find((grim) =>
+            grim.tokens.find((token) => token.player_name === friend.username)
+          )
+      );
+  }
+  return [];
+});
+
+const storytellerNames = computed(() => {
+  return [props.game.storyteller, ...props.game.co_storytellers];
+});
+
+const orderedRoles = computed(() =>
+  naturalOrder(roles.value).orderBy("asc").sort(["name"])
+);
 
 function addCharacter() {
   props.game.player_characters.push({
@@ -1038,6 +1074,36 @@ function selectRoleForToken(role: {
   showRoleSelectionDialog.value = false;
 
   console.log(focusedToken);
+}
+
+function copyGrimoire(game: GameRecord) {
+  const tokens = [];
+
+  for (const token of game.grimoire[game.grimoire.length - 1].tokens) {
+    tokens.push({
+      id: undefined,
+      alignment: undefined,
+      is_dead: false,
+      used_ghost_vote: false,
+      order: token.order,
+      role_id: null,
+      related_role_id: null,
+      player_name: token.player_name,
+      player_id: token.player_id,
+      reminders: [],
+    });
+  }
+
+  props.game.grimoire = [
+    {
+      tokens,
+    },
+  ];
+
+  props.game.player_count = game.player_count;
+  props.game.traveler_count = game.traveler_count;
+
+  showCopyGrimoireDialog.value = false;
 }
 
 watchEffect(() => {
@@ -1259,6 +1325,9 @@ watch(
 
 onMounted(() => {
   friends.fetchCommunityMembers();
+  if (me.value.status === Status.SUCCESS) {
+    games.fetchPlayerGames(me.value.data.username);
+  }
 });
 </script>
 
