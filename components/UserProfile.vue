@@ -4,18 +4,21 @@
     class="grid grid-cols-1 md:grid-cols-2"
   >
     <div class="row-span-2">
-      <GameOverviewGrid
-        :games="favoriteGames"
-        cardWidth="w-1/2 md:w-full lg:w-1/2"
-      />
-      <div v-if="isMe" class="flex justify-center items-center">
-        <button
-          @click="showFavoritesDialog = !showFavoritesDialog"
-          class="p-4 text-gray-400 hover:text-gray-200"
-        >
-          Manage Favorites
-        </button>
-      </div>
+      <template v-if="favoriteGames.length > 0">
+        <GameOverviewGrid
+          :games="favoriteGames"
+          cardWidth="w-1/2 md:w-full lg:w-1/2"
+        />
+        <div v-if="isMe" class="flex justify-center items-center">
+          <button
+            @click="showFavoritesDialog = !showFavoritesDialog"
+            class="p-4 text-gray-400 hover:text-gray-200"
+          >
+            Manage Favorite Games
+          </button>
+        </div>
+      </template>
+      <p v-else class="text-center text-2xl font-dumbledor">No games yet!</p>
     </div>
     <div
       class="row-start-1 md:row-start-auto p-4 grid grid-cols-2 xl:grid-cols-4 gap-4"
@@ -52,8 +55,8 @@
       <h2 class="text-2xl font-bold">Manage Favorites</h2>
       <p class="text-lg text-stone-400 p-4">
         Click on a game to add or remove it from your favorites. Only six
-        favorites are shown on your profile, but you can favorite as many games as you
-        like.
+        favorites are shown on your profile, but you can favorite as many games
+        as you like.
       </p>
     </template>
 
