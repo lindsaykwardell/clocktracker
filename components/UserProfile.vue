@@ -60,12 +60,14 @@
       </p>
     </template>
 
-    <GameOverviewList
-      v-if="userGames.status === Status.SUCCESS"
-      :games="userGames.data"
-      readonly
-      :onClick="toggleFavorite"
-    />
+    <div class="text-black">
+      <GameOverviewList
+        v-if="userGames.status === Status.SUCCESS"
+        :games="userGames.data"
+        readonly
+        :onClick="toggleFavorite"
+      />
+    </div>
   </Dialog>
 </template>
 
