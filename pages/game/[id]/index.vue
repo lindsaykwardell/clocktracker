@@ -524,7 +524,7 @@
       <Tour
         v-if="user?.id && game.data.user_id === user.id"
         :steps="tour"
-        tourKey="game-viewer"
+        tourKey="game-viewer-v2"
         @onTourEnd="showMenuForTour = false"
       />
     </section>
