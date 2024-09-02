@@ -8,6 +8,14 @@
         :games="favoriteGames"
         cardWidth="w-1/2 md:w-full lg:w-1/2"
       />
+      <div v-if="isMe" class="flex justify-center items-center">
+        <button
+          @click="showFavoritesDialog = !showFavoritesDialog"
+          class="p-4 text-gray-400 hover:text-gray-200"
+        >
+          Manage Favorites
+        </button>
+      </div>
     </div>
     <div
       class="row-start-1 md:row-start-auto p-4 grid grid-cols-2 xl:grid-cols-4 gap-4"
@@ -39,6 +47,23 @@
       <UserRoles :games="userGames" condensed />
     </div>
   </section>
+  <Dialog v-if="isMe" v-model:visible="showFavoritesDialog" size="xl">
+    <template #title>
+      <h2 class="text-2xl font-bold">Manage Favorites</h2>
+      <p class="text-lg text-stone-400 p-4">
+        Click on a game to add or remove it from your favorites. Only six
+        favorites are shown on your profile, but you can favorite as many games as you
+        like.
+      </p>
+    </template>
+
+    <GameOverviewList
+      v-if="userGames.status === Status.SUCCESS"
+      :games="userGames.data"
+      readonly
+      :onClick="toggleFavorite"
+    />
+  </Dialog>
 </template>
 
 <script setup lang="ts">
@@ -46,6 +71,7 @@ import naturalOrder from "natural-order";
 
 const games = useGames();
 const users = useUsers();
+const me = useMe();
 
 const props = defineProps<{
   player: {
@@ -58,6 +84,13 @@ const props = defineProps<{
     location: string | null;
   };
 }>();
+
+const isMe = computed(() => {
+  return (
+    me.value.status === Status.SUCCESS &&
+    me.value.data.user_id === props.player.user_id
+  );
+});
 
 const userGames = computed(() => {
   return games.getByPlayer(props.player.username);
@@ -138,4 +171,22 @@ const favoriteGames = computed(() => {
       .slice(0, 6);
   }
 });
+
+const showFavoritesDialog = ref(false);
+
+async function toggleFavorite(game: GameRecord) {
+  if (me.value.status === Status.SUCCESS) {
+    const result = await $fetch(`/api/games/${game.id}/favorite`, {
+      method: "POST",
+    });
+
+    if (result.status === "added") {
+      me.value.data.favorites.push(result.data);
+    } else {
+      me.value.data.favorites = me.value.data.favorites.filter(
+        (f) => f.game_id !== game.id
+      );
+    }
+  }
+}
 </script>
