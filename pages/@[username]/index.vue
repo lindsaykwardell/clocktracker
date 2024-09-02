@@ -14,7 +14,14 @@
             <nuxt-link
               :to="`/@${username}`"
               class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-200 dark:hover:bg-stone-700"
-              :class="currentTabClass('dashboard')"
+              :class="currentTabClass('profile')"
+            >
+              Profile
+            </nuxt-link>
+            <nuxt-link
+              :to="`/@${username}?view=games`"
+              class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-200 dark:hover:bg-stone-700"
+              :class="currentTabClass('games')"
             >
               Games
             </nuxt-link>
@@ -51,13 +58,14 @@
             friends.getFriendStatus(player.user_id) === FriendStatus.FRIENDS
           "
         >
+          <UserProfile v-if="currentTab === 'profile'" :player="player" />
           <UserCharts
             v-if="currentTab === 'stats'"
             :games="games"
             :username="username"
           />
           <UserGamesView
-            v-if="currentTab === 'dashboard'"
+            v-if="currentTab === 'games'"
             :player="player"
             :games="games"
           />
@@ -159,8 +167,10 @@ const currentTab = computed(() => {
       return "stats";
     case "pending":
       return "pending";
+    case "games":
+      return "games";
     default:
-      return "dashboard";
+      return "profile";
   }
 });
 
