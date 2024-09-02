@@ -66,6 +66,11 @@ export default defineEventHandler(async (handler) => {
         },
       },
     },
+    orderBy: [
+      {
+        name: "asc",
+      },
+    ],
   });
 
   const scripts = await prisma.script.findMany({
@@ -84,7 +89,17 @@ export default defineEventHandler(async (handler) => {
           },
         },
       ],
-      is_custom_script: false,
+      AND: {
+        OR: [
+          {
+            is_custom_script: false,
+          },
+          {
+            is_custom_script: true,
+            user_id: me?.id,
+          },
+        ],
+      },
     },
     include: {
       _count: {
@@ -97,6 +112,11 @@ export default defineEventHandler(async (handler) => {
         },
       },
     },
+    orderBy: [
+      {
+        name: "asc",
+      },
+    ],
   });
 
   const users = await prisma.userSettings.findMany({
@@ -148,6 +168,14 @@ export default defineEventHandler(async (handler) => {
       location: true,
       charts: true,
     },
+    orderBy: [
+      {
+        display_name: "asc",
+      },
+      {
+        username: "asc",
+      }
+    ],
   });
 
   const usersWithKofiLevel = await Promise.all(users.map(addUserKofiLevel));
@@ -158,6 +186,19 @@ export default defineEventHandler(async (handler) => {
         contains: query,
         mode: "insensitive",
       },
+      OR: [
+        {
+          custom_role: false,
+        },
+        {
+          custom_role: true,
+          scripts: {
+            some: {
+              user_id: me?.id,
+            },
+          },
+        },
+      ],
     },
     // We need to count the number of games a given role appears in
     // Roles are included in games via Character, which has a many to one relationship with Game
@@ -178,6 +219,11 @@ export default defineEventHandler(async (handler) => {
         },
       },
     },
+    orderBy: [
+      {
+        name: "asc",
+      },
+    ],
   });
 
   return {
