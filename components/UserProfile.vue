@@ -13,24 +13,24 @@
       class="row-start-1 md:row-start-auto p-4 grid grid-cols-2 xl:grid-cols-4 gap-4"
     >
       <div
-        class="border rounded border-stone-500 p-2 text-center text-lg font-bold"
+        class="border rounded border-stone-500 p-2 text-center text-lg font-bold bg-purple-200 dark:bg-purple-950"
       >
         {{ userGames.data.length }}
-        {{ userGames.data.length === 1 ? "game" : "games" }} played
+        {{ userGames.data.length === 1 ? "game" : "games" }}
       </div>
       <div
-        class="border rounded border-stone-500 p-2 text-center text-lg font-bold"
+        class="border rounded border-stone-500 p-2 text-center text-lg font-bold bg-red-200 dark:bg-red-950"
+      >
+        {{ totalRoles }} {{ totalRoles === 1 ? "role" : "roles" }}
+      </div>
+      <div
+        class="border rounded border-stone-500 p-2 text-center text-lg font-bold bg-green-200 dark:bg-green-950"
       >
         {{ totalScripts }}
-        {{ totalScripts === 1 ? "script" : "scripts" }} played
+        {{ totalScripts === 1 ? "script" : "scripts" }}
       </div>
       <div
-        class="border rounded border-stone-500 p-2 text-center text-lg font-bold"
-      >
-        {{ totalRoles }} {{ totalRoles === 1 ? "role" : "roles" }} played
-      </div>
-      <div
-        class="border rounded border-stone-500 p-2 text-center text-lg font-bold"
+        class="border rounded border-stone-500 p-2 text-center text-lg font-bold bg-blue-200 dark:bg-blue-950"
       >
         {{ totalWins }} {{ totalWins === 1 ? "win" : "wins" }}
       </div>
