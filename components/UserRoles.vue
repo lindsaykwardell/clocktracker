@@ -13,7 +13,7 @@
         'lg:col-span-2': roleGroup.name === 'Townsfolk',
       }"
     >
-      <h3 class="font-dumbledor text-2xl text-center">
+      <h3 class="font-dumbledor text-xl text-center">
         {{ roleGroup.name }}
       </h3>
       <ul class="flex flex-wrap justify-center gap-1">
