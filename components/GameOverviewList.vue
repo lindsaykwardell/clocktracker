@@ -22,6 +22,8 @@
           @click="
             selectMultipleGames.enabled
               ? selectMultipleGames.toggleGame(game.id)
+              : onClick
+              ? onClick(game)
               : null
           "
           :class="{
@@ -136,9 +138,10 @@ const selectMultipleGames = useSelectMultipleGames();
 const { isBaseScript } = useScripts();
 const users = useUsers();
 
-defineProps<{
+const props = defineProps<{
   games: GameRecord[];
   readonly?: boolean;
+  onClick?: (game: GameRecord) => void;
 }>();
 
 function formatDate(date: Date) {
@@ -150,7 +153,7 @@ function formatDate(date: Date) {
 const nuxtLink = resolveComponent("nuxt-link");
 
 const componentIs = computed(() => {
-  if (selectMultipleGames.enabled) return "tr";
+  if (selectMultipleGames.enabled || props.onClick) return "tr";
   return nuxtLink;
 });
 
