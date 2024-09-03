@@ -44,6 +44,9 @@ export type User = {
     id: number;
     did: string;
   }[];
+  favorites: {
+    game_id: string;
+  }[];
 };
 
 export const useUsers = defineStore("users", {
@@ -82,7 +85,10 @@ export const useUsers = defineStore("users", {
       }
     },
     storeUser(user: User) {
-      this.users.set(user.username, { status: Status.SUCCESS, data: user });
+      this.users.set(user.username, {
+        status: Status.SUCCESS,
+        data: { ...user, favorites: user.favorites || [] },
+      });
     },
     async fetchMe(user_id?: string) {
       if (!user_id) return;

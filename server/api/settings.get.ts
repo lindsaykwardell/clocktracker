@@ -65,6 +65,11 @@ export default defineEventHandler(async (handler) => {
           did: true,
         },
       },
+      favorites: {
+        select: {
+          game_id: true,
+        }
+      }
     },
   });
 
@@ -212,6 +217,11 @@ export default defineEventHandler(async (handler) => {
           did: true,
         },
       },
+      favorites: {
+        select: {
+          game_id: true,
+        }
+      }
     },
   });
 
