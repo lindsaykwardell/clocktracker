@@ -38,7 +38,7 @@
                       >
                         {{ activeFilters.length }}
                       </span>
-                      <Button class="font-normal w-full">
+                      <Button class="font-normal w-full whitespace-nowrap">
                         <div
                           class="w-full flex gap-2 items-center md:justify-center"
                         >
@@ -66,8 +66,54 @@
                       leave-to-class="transform scale-95 opacity-0"
                     >
                       <MenuItems
-                        class="absolute top-[100%] z-20 bg-stone-950 p-2 rounded shadow-md whitespace-nowrap flex flex-col gap-2 items-start w-full md:w-[300px]"
+                        class="absolute top-[100%] left-0 md:right-0 md:left-auto lg:right-auto lg:left-0 z-20 bg-stone-950 p-2 rounded shadow-md whitespace-nowrap flex flex-col gap-2 items-start w-full md:w-[350px]"
                       >
+                        <MenuItem>
+                          <div class="flex gap-2 items-center">
+                            <span class="flex-shrink">Dates</span>
+                            <Input
+                              @click.stop
+                              type="date"
+                              v-model="startDateRange"
+                              aria-label="After Date"
+                              class="h-[32px] text-sm flex-grow"
+                              v-tooltip="'After Date'"
+                            />
+                            <Input
+                              @click.stop
+                              type="date"
+                              v-model="endDateRange"
+                              aria-label="Before Date"
+                              class="h-[32px] text-sm flex-grow"
+                              v-tooltip="'Before Date'"
+                            />
+                          </div>
+                        </MenuItem>
+                        <MenuItem>
+                          <div class="flex gap-2 items-center">
+                            Player Count
+                            <Input
+                              @click.stop
+                              type="number"
+                              v-model="minPlayers"
+                              min="0"
+                              placeholder="Min"
+                              aria-label="Min Players"
+                              class="h-[32px] text-sm"
+                              v-tooltip="'Min Players'"
+                            />
+                            <Input
+                              @click.stop
+                              type="number"
+                              v-model="maxPlayers"
+                              max="25"
+                              placeholder="Max"
+                              aria-label="Max Players"
+                              class="h-[32px] text-sm"
+                              v-tooltip="'Max Players'"
+                            />
+                          </div>
+                        </MenuItem>
                         <MenuItem>
                           <label class="w-full">
                             <select
@@ -258,7 +304,7 @@
                   class="font-normal w-full"
                   :tertiary="selectMultipleGames.enabled"
                 >
-                  <div class="w-full text-left">
+                  <div class="w-full text-left whitespace-nowrap">
                     <template v-if="selectMultipleGames.enabled">
                       <span>Cancel</span>
                     </template>
@@ -270,7 +316,7 @@
             <div class="flex-grow"></div>
             <div class="flex gap-2 items-center justify-end">
               <slot>
-                <div class="text-xl dark:text-stone-200">
+                <div class="text-xl dark:text-stone-200 whitespace-nowrap">
                   {{ sortedGames.length }} game{{
                     sortedGames.length !== 1 ? "s" : ""
                   }}
@@ -278,11 +324,6 @@
               </slot>
               <Button
                 class="w-[100px]"
-                :class="{
-                  'bg-stone-200 dark:bg-stone-600': gameView !== 'grid',
-                  'bg-stone-300 dark:bg-stone-700 text-stone-400 dark:text-stone-500 hover:text-inherit':
-                    gameView !== 'grid',
-                }"
                 @click="gameView = 'grid'"
                 :disabled="gameView === 'grid'"
               >
@@ -301,11 +342,6 @@
               </Button>
               <Button
                 class="w-[100px]"
-                :class="{
-                  'bg-stone-200 dark:bg-stone-600': gameView !== 'table',
-                  'bg-stone-300 dark:bg-stone-700 text-stone-400 dark:text-stone-500 hover:text-inherit':
-                    gameView !== 'table',
-                }"
                 @click="gameView = 'table'"
                 :disabled="gameView === 'table'"
               >
@@ -330,6 +366,34 @@
           </div>
           <div class="flex flex-col md:flex-row gap-3 px-4">
             <div class="flex flex-wrap gap-2">
+              <Button
+                v-if="startDateRange !== null"
+                font-size="md"
+                @click.prevent="startDateRange = null"
+              >
+                After Date: {{ formatDate(new Date(startDateRange)) }}
+              </Button>
+              <Button
+                v-if="endDateRange !== null"
+                font-size="md"
+                @click.prevent="endDateRange = null"
+              >
+                Before Date: {{ formatDate(new Date(endDateRange)) }}
+              </Button>
+              <Button
+                v-if="minPlayers !== null"
+                font-size="md"
+                @click.prevent="minPlayers = null"
+              >
+                Min Players: {{ minPlayers }}
+              </Button>
+              <Button
+                v-if="maxPlayers !== null"
+                font-size="md"
+                @click.prevent="maxPlayers = null"
+              >
+                Max Players: {{ maxPlayers }}
+              </Button>
               <Button
                 v-if="selectedRole"
                 font-size="md"
@@ -447,6 +511,7 @@
 import naturalOrder from "natural-order";
 import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
 import type { WinStatus_V2 } from "~/composables/useGames";
+import { useLocalStorage } from "@vueuse/core";
 
 const user = useSupabaseUser();
 const users = useUsers();
@@ -537,15 +602,61 @@ const sortBy = ref<
   | "alignment"
   | "favorite"
 >("date");
-const orderBy = ref<"asc" | "desc">("desc");
+const orderBy = useLocalStorage<"asc" | "desc">("games__orderBy", "desc");
 const selectedTag = ref<string | null>(null);
-const selectedTags = ref<string[]>([]);
+const selectedTags = useLocalStorage<string[]>("games__selectedTags", []);
 const selectedPlayer = ref<string | null>(null);
-const selectedPlayers = ref<string[]>([]);
-const selectedRole = ref<string | null>(null);
-const selectedCommunity = ref<string | null>(null);
-const selectedAlignment = ref<"GOOD" | "EVIL" | null>(null);
-const selectedWinState = ref<WinStatus_V2 | null>(null);
+const selectedPlayers = useLocalStorage<string[]>("games__selectedPlayers", []);
+const selectedRole = useLocalStorage<string | null>(
+  "games__selectedRole",
+  null
+);
+const selectedCommunity = useLocalStorage<string | null>(
+  "games__selectedCommunity",
+  null
+);
+const selectedAlignment = useLocalStorage<"GOOD" | "EVIL" | null>(
+  "games__selectedAlignment",
+  null
+);
+const selectedWinState = useLocalStorage<WinStatus_V2 | null>(
+  "games__selectedWinState",
+  null
+);
+const minPlayers = useLocalStorage<string | null>("games__minPlayers", null);
+const maxPlayers = useLocalStorage<string | null>("games__maxPlayers", null);
+const startDateRange = useLocalStorage<string | null>(
+  "games__startDateRange",
+  null
+);
+const endDateRange = useLocalStorage<string | null>(
+  "games__endDateRange",
+  null
+);
+
+watchEffect(() => {
+  if (minPlayers.value === "") {
+    minPlayers.value = null;
+  }
+});
+
+watchEffect(() => {
+  if (maxPlayers.value === "") {
+    maxPlayers.value = null;
+  }
+});
+
+watchEffect(() => {
+  if (startDateRange.value === "") {
+    startDateRange.value = null;
+  }
+});
+
+watchEffect(() => {
+  if (endDateRange.value === "") {
+    endDateRange.value = null;
+  }
+});
 
 watchEffect(() => {
   if (selectedTag.value) {
@@ -666,7 +777,15 @@ const sortedGames = computed(() => {
           game.player_characters.some(
             (c) => c.alignment === selectedAlignment.value
           )) &&
-        (!selectedWinState.value || game.win_v2 === selectedWinState.value)
+        (!selectedWinState.value || game.win_v2 === selectedWinState.value) &&
+        (minPlayers.value === null ||
+          (game.player_count ?? 0) >= +minPlayers.value) &&
+        (maxPlayers.value === null ||
+          (game.player_count ?? 0) <= +maxPlayers.value) &&
+        (!startDateRange.value ||
+          new Date(game.date) >= new Date(startDateRange.value)) &&
+        (!endDateRange.value ||
+          new Date(game.date) <= new Date(endDateRange.value))
     );
 });
 
@@ -684,95 +803,18 @@ async function deleteMultipleGames() {
   }
 }
 
+function formatDate(date: Date) {
+  return new Intl.DateTimeFormat(navigator.language, {
+    timeZone: "UTC",
+  }).format(new Date(date));
+}
+
 onMounted(() => {
   selectMultipleGames.selection = { type: "OFF" };
   roles.fetchRoles();
 
-  const lastSortBy = localStorage.getItem("lastSortBy");
-  const lastOrderBy = localStorage.getItem("lastOrderBy");
-  const lastGameView = localStorage.getItem("lastGameView");
-  const lastSelectedTags = localStorage.getItem("lastSelectedTags");
-  const lastSelectedPlayers = localStorage.getItem("lastSelectedPlayers");
-  const lastSelectedRole = localStorage.getItem("lastSelectedRole");
-  const lastSelectedAlignment = localStorage.getItem("lastSelectedAlignment");
-  const lastSelectedWinStatus = localStorage.getItem("lastSelectedWinStatus");
-  if (lastSortBy) {
-    sortBy.value = lastSortBy as any;
-  }
-  if (lastOrderBy) {
-    orderBy.value = lastOrderBy as any;
-  }
-  if (lastGameView) {
-    gameView.value = lastGameView as any;
-  }
-  if (lastSelectedTags) {
-    selectedTags.value = JSON.parse(lastSelectedTags);
-  }
-  if (lastSelectedPlayers) {
-    selectedPlayers.value = JSON.parse(lastSelectedPlayers);
-  }
-  if (lastSelectedRole) {
-    selectedRole.value = lastSelectedRole;
-  }
-  if (lastSelectedAlignment) {
-    selectedAlignment.value = lastSelectedAlignment as any;
-  }
-  if (lastSelectedWinStatus) {
-    selectedWinState.value = lastSelectedWinStatus as any;
-  }
   ready.value = true;
 });
-
-watch(
-  () => sortBy.value,
-  (value) => {
-    localStorage.setItem("lastSortBy", value);
-  }
-);
-watch(
-  () => orderBy.value,
-  (value) => {
-    localStorage.setItem("lastOrderBy", value);
-  }
-);
-watch(
-  () => gameView.value,
-  (value) => {
-    localStorage.setItem("lastGameView", value);
-  }
-);
-watch(
-  () => selectedTags.value,
-  (value) => {
-    localStorage.setItem("lastSelectedTags", JSON.stringify(value));
-  },
-  { deep: true }
-);
-watch(
-  () => selectedPlayers.value,
-  (value) => {
-    localStorage.setItem("lastSelectedPlayers", JSON.stringify(value));
-  },
-  { deep: true }
-);
-watch(
-  () => selectedRole.value,
-  (value) => {
-    localStorage.setItem("lastSelectedRole", value || "");
-  }
-);
-watch(
-  () => selectedAlignment.value,
-  (value) => {
-    localStorage.setItem("lastSelectedAlignment", value || "");
-  }
-);
-watch(
-  () => selectedWinState.value,
-  (value) => {
-    localStorage.setItem("lastSelectedWinStatus", value || "");
-  }
-);
 
 function initImportGames() {
   importGamesDialogVisible.value = true;
