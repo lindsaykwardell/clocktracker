@@ -69,7 +69,7 @@ const filteredCommunities = computed(() =>
 );
 </script>
 
-<style>
+<style scoped>
 [data-headlessui-state="active"] {
   @apply bg-stone-300 dark:bg-stone-700;
 }
