@@ -81,6 +81,11 @@ export default defineEventHandler(async (handler) => {
           id: role.id.replaceAll("_", ""),
           map_id: role.id,
         });
+      } else if (role.id.includes("-")) {
+        existingRoleIds.push({
+          id: role.id.replaceAll("-", ""),
+          map_id: role.id,
+        });
       }
     });
 
