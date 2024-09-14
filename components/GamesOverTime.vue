@@ -79,6 +79,7 @@ const chartData = computed(() => ({
       backgroundColor: colors.tb,
       borderColor: colors.tb,
       tension: 0.1,
+      fill: true,
     },
     {
       label: "Sects and Violets",
@@ -86,6 +87,7 @@ const chartData = computed(() => ({
       backgroundColor: colors.snv,
       borderColor: colors.snv,
       tension: 0.1,
+      fill: true,
     },
     {
       label: "Bad Moon Rising",
@@ -93,6 +95,7 @@ const chartData = computed(() => ({
       backgroundColor: colors.bmr,
       borderColor: colors.bmr,
       tension: 0.1,
+      fill: true,
     },
     {
       label: "Custom Script",
@@ -100,6 +103,7 @@ const chartData = computed(() => ({
       backgroundColor: colors.custom,
       borderColor: colors.custom,
       tension: 0.1,
+      fill: true,
     },
   ],
 }));
@@ -122,7 +126,7 @@ const chartOptions = computed(() => ({
       },
     },
     y: {
-      // stacked: true,
+      stacked: true,
       ticks: {
         min: 0,
         stepSize: 1,
