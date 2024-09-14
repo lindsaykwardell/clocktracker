@@ -48,11 +48,36 @@ export const useScripts = () => {
           // The file is a JSON array. Extract it from the file and send it to the server
 
           const body = await file.text();
+          // Parse the JSON string into an object
+          const scriptBody = JSON.parse(body);
+
+          // find the metadata
+          const metaLocation = scriptBody.findIndex(
+            (item: any) => item.id === "_meta"
+          );
+
+          // if its not 0, we need to move it to the front
+          if (metaLocation > 0) {
+            const meta = scriptBody.splice(metaLocation, 1);
+            scriptBody.unshift(meta[0]);
+          }
+
+          // if it doesn't exist, we need to add it.
+          if (metaLocation === -1) {
+            scriptBody.unshift({
+              id: "_meta",
+            });
+          }
+
+          // if it doesn't have a name, we need to add it.
+          if (!scriptBody[0].name) {
+            scriptBody[0].name = file.name;
+          }
 
           try {
             const script = await $fetch("/api/script/upload/upload", {
               method: "POST",
-              body,
+              body: JSON.stringify(scriptBody),
             });
 
             resolve(script);
