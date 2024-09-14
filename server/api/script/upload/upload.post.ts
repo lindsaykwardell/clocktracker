@@ -76,8 +76,15 @@ export default defineEventHandler(async (handler) => {
         id: role.id.replaceAll("_", ""),
         map_id: role.id,
       });
+    } else if (role.id.includes("-")) {
+      existingRoleIds.push({
+        id: role.id.replaceAll("-", ""),
+        map_id: role.id,
+      });
     }
   });
+
+  console.log(JSON.stringify(existingRoleIds, null, 2));
 
   for (const roleId in roles) {
     const role = roles[roleId];
