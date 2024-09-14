@@ -62,8 +62,11 @@ const value = computed({
   },
 });
 
-const filteredPeople = computed(() =>
-  naturalOrder(
+const filteredPeople = computed(() => [
+  {
+    username: value.value,
+  },
+  ...naturalOrder(
     value.value === ""
       ? props.users
       : props.users.filter((user) => {
@@ -76,8 +79,8 @@ const filteredPeople = computed(() =>
         })
   )
     .orderBy("asc")
-    .sort(["display_name", "username"])
-);
+    .sort(["display_name", "username"]),
+]);
 </script>
 
 <style scoped>
