@@ -1,6 +1,7 @@
 import type { User } from "@supabase/supabase-js";
 import { PrismaClient, PrivacySetting } from "@prisma/client";
 import { fetchGame } from "~/server/utils/fetchGames";
+import dayjs from "dayjs";
 
 const prisma = new PrismaClient();
 
@@ -27,8 +28,8 @@ export default defineEventHandler(async (handler) => {
   const player_names: string[] = [
     ...new Set(
       game.grimoire.flatMap(({ tokens }) =>
-        tokens.map((token) => token.player_name),
-      ),
+        tokens.map((token) => token.player_name)
+      )
     ),
   ];
 
@@ -39,7 +40,10 @@ export default defineEventHandler(async (handler) => {
       },
       deleted: false,
       user_id: me.id,
-      date: game.date,
+      date: {
+        lte: dayjs(game.date).add(1, "day").toDate(),
+        gte: dayjs(game.date).subtract(1, "day").toDate(),
+      },
       parent_game_id: null,
       OR: [
         {
