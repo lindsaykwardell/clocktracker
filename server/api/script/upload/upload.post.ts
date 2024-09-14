@@ -202,18 +202,6 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  console.log(roles);
-
-  const existingRoles = await prisma.role.findMany({
-    where: {
-      id: {
-        in: roles.map((role) => (typeof role === "string" ? role : role.id)),
-      },
-    },
-  });
-
-  console.log(existingRoles);
-
   const version =
     (await prisma.script.count({
       where: {
