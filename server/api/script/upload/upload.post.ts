@@ -84,8 +84,6 @@ export default defineEventHandler(async (handler) => {
     }
   });
 
-  console.log(JSON.stringify(existingRoleIds, null, 2));
-
   for (const roleId in roles) {
     const role = roles[roleId];
 
