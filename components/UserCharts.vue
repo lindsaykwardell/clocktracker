@@ -36,7 +36,7 @@
     <div
       class="flex flex-col items-center justify-center sm:flex-row flex-wrap gap-y-12"
     >
-      <template v-if="games.status === Status.LOADING"> Loading... </template>
+      <template v-if="games.status === Status.LOADING"> <Loading /> </template>
       <template v-else-if="games.status === Status.ERROR">
         Error loading games
       </template>
