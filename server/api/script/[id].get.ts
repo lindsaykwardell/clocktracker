@@ -57,57 +57,76 @@ export default defineEventHandler(async (handler) => {
   }
 
   // If the characters have not been fetched, fetch them
-  if (script.roles.length === 0) {
-    try {
-      const roleIds: { id: string }[] = (
-        await fetch(script.json_url).then((res) => res.json())
-      )
-        .filter((role: { id: string }) => role.id !== "_meta")
-        .map((role: { id: string }) => ({ id: role.id.toLowerCase() }));
+  try {
+    const roleIds: { id: string }[] = (
+      await fetch(script.json_url).then((res) => res.json())
+    )
+      .filter((role: { id: string }) => role.id !== "_meta")
+      .map((role: { id: string }) => ({ id: role.id.toLowerCase() }));
 
-      // filter out roles that we don't have in the database
-      const existingRoles = await prisma.role.findMany({
-        where: {
-          id: {
-            in: roleIds.map((role) => role.id),
-          },
-        },
-      });
+    const baseRoles = await prisma.role.findMany({
+      where: {
+        custom_role: false,
+      },
+    });
 
-      const existingRoleIds = existingRoles.map((role) => role.id);
-      const knownRoles = roleIds.filter((role) =>
-        existingRoleIds.includes(role.id)
+    const existingRoleIds = baseRoles.map((role) => ({
+      id: role.id,
+      map_id: role.id,
+    }));
+
+    baseRoles.forEach((role) => {
+      if (role.id.includes("_")) {
+        existingRoleIds.push({
+          id: role.id.replaceAll("_", ""),
+          map_id: role.id,
+        });
+      }
+    });
+
+    const knownRoles = roleIds
+      .map((role) => {
+        const existingRoleId = existingRoleIds.find(
+          (existingRole) => existingRole.id === role.id
+        );
+
+        if (existingRoleId) {
+          return { id: existingRoleId.map_id };
+        }
+        return role;
+      })
+      .filter((role) =>
+        existingRoleIds.some((existingRole) => existingRole.id === role.id)
       );
 
-      const updated = await prisma.script.update({
-        where: {
-          id: script.id,
+    const updated = await prisma.script.update({
+      where: {
+        id: script.id,
+      },
+      data: {
+        roles: {
+          connect: knownRoles,
         },
-        data: {
-          roles: {
-            connect: knownRoles,
-          },
-        },
-        include: {
-          roles: {
-            where: {
-              type: {
-                not: RoleType.FABLED,
-              },
+      },
+      include: {
+        roles: {
+          where: {
+            type: {
+              not: RoleType.FABLED,
             },
           },
         },
-      });
+      },
+    });
 
-      return updated;
-    } catch {
-      // The script database is either down, or the script doesn't exist in the database
-      // We don't want to throw an error here, because we still have the script data
-      // We just won't have the roles
-      console.error(`Failed to fetch roles for script: ${id}`);
+    return updated;
+  } catch {
+    // The script database is either down, or the script doesn't exist in the database
+    // We don't want to throw an error here, because we still have the script data
+    // We just won't have the roles
+    console.error(`Failed to fetch roles for script: ${id}`);
 
-      script.roles = await prisma.role.findMany();
-    }
+    script.roles = await prisma.role.findMany();
   }
 
   return script;
