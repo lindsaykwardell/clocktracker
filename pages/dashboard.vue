@@ -1,29 +1,56 @@
 <template>
   <StandardTemplate>
     <template v-if="me.status === Status.SUCCESS">
-      <div class="flex flex-col lg:flex-row gap-4 relative">
-        <div class="w-full lg:w-1/2 sticky top-0 bg-stone-800">
+      <div class="dashboard">
+        <div class="flex flex-col gap-4 p-4">
+          <h1 class="text-xl font-dumbledor text-center">Recent Scripts</h1>
+          <ul class="list-disc list-inside">
+            <li class="px-4" v-for="script in games.getRecentScripts">
+              <nuxt-link :to="script.url" class="hover:underline">
+                {{ script.name }}
+              </nuxt-link>
+            </li>
+          </ul>
+          <hr class="border-stone-600" />
+          <h1 class="font-dumbledor text-xl text-center">Communities</h1>
+          <ul>
+            <li
+              v-for="community in myCommunities"
+              class="flex gap-2 items-center"
+            >
+              <Avatar :value="community.icon" size="xs" />
+              <nuxt-link
+                :to="`/community/${community.slug}`"
+                class="hover:underline"
+                >{{ community.name }}</nuxt-link
+              >
+            </li>
+          </ul>
+        </div>
+        <div></div>
+        <div class="flex flex-col gap-4 bg-stone-950 p-4">
           <Calendar
-            size="sm"
+            size="xs"
             :events="events"
             @selectDay="selectDay"
             :selectedDay="selectedDay"
             clickableDays
           />
-        </div>
-        <div class="w-full lg:w-1/2 flex flex-col gap-4">
-          <nuxt-link
-            v-for="event in eventsOnDay"
-            :to="`/community/${event.community.slug}/event/${event.id}`"
-            class="w-full"
-          >
-            <EventCard
-              :event="event"
-              class="m-auto"
-              :canModifyEvent="canModifyEvent(event)"
-              @deleted="removeEvent"
-            />
-          </nuxt-link>
+          <div class="flex flex-col gap-4 calendar-events">
+            <nuxt-link
+              v-for="event in eventsOnDay"
+              :to="`/community/${event.community.slug}/event/${event.id}`"
+              class="w-full"
+            >
+              <EventCard
+                size="sm"
+                :event="event"
+                class="m-auto"
+                :canModifyEvent="canModifyEvent(event)"
+                @deleted="removeEvent"
+              />
+            </nuxt-link>
+          </div>
         </div>
       </div>
     </template>
@@ -38,15 +65,19 @@
 import dayjs from "dayjs";
 import type { Event } from "~/composables/useCommunities";
 
-const users = useUsers();
-const user = useSupabaseUser();
-
-const me = computed(() => {
-  return users.getUserById(user.value?.id);
-});
+const me = useMe();
+const games = useGames();
 
 const events = ref(await $fetch<Event[]>("/api/events"));
 const selectedDay = ref<dayjs.Dayjs | null>(dayjs());
+
+const myCommunities = computed(() => {
+  if (me.value.status === Status.SUCCESS) {
+    return me.value.data.communities;
+  } else {
+    return [];
+  }
+});
 
 function selectDay(val: dayjs.Dayjs) {
   selectedDay.value = val;
@@ -77,4 +108,28 @@ const eventsOnDay = computed(() => {
     );
   });
 });
+
+watch(
+  me,
+  () => {
+    if (me.value.status === Status.SUCCESS) {
+      games.fetchPlayerGames(me.value.data.username);
+    }
+  },
+  {
+    immediate: true,
+  }
+);
 </script>
+
+<style scoped>
+.dashboard {
+  display: grid;
+  grid-template-columns: 300px 1fr 300px;
+}
+
+.calendar-events {
+  height: calc(100vh - 300px);
+  overflow-y: scroll;
+}
+</style>
