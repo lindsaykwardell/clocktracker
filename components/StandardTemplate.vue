@@ -1,14 +1,14 @@
 <template>
   <div class="flex flex-col relative">
     <div
-      class="sticky w-full flex items-center top-0 left-0 z-40 bg-stone-950 h-[50px] gap-6 px-6"
+      class="sticky w-full flex items-center top-0 left-0 z-40 bg-stone-950 h-[50px] md:gap-6 md:px-6 pl-14"
     >
-      <div class="min-w-[42px]" />
-      <div v-if="!expandSearchBar" class="flex-grow" />
+      <div v-if="!expandSearchBar" class="hidden md:block md:flex-grow" />
       <div
         class="relative"
         :class="{
           'flex-grow': expandSearchBar,
+          'flex-grow md:flex-grow-0 md:w-[40ch]': !expandSearchBar,
         }"
       >
         <form @submit.prevent.stop="search" role="search">
@@ -20,10 +20,6 @@
               customSearchPlaceholder || 'Type in a query, then press enter'
             "
             class="h-[2rem]"
-            :class="{
-              'w-[40ch]': !expandSearchBar,
-              'w-full': expandSearchBar,
-            }"
           />
           <div class="absolute right-2 top-0 w-8 h-8" aria-label="Search">
             <img src="/img/role/investigator.png" />
@@ -35,7 +31,7 @@
         :to="`/@${me.data.username}`"
         class="flex items-center gap-2 p-2"
       >
-        <span class="text-stone-200">{{ me.data.display_name }}</span>
+        <span class="hidden md:inline text-stone-200">{{ me.data.display_name }}</span>
         <Avatar :value="me.data.avatar" size="xs" />
       </nuxt-link>
       <nuxt-link v-else to="/login"> Login </nuxt-link>
@@ -205,6 +201,8 @@ const props = defineProps<{
   customSearch?: (query: string) => void;
   customSearchPlaceholder?: string;
 }>();
+
+console.log(props);
 
 const me = useMe();
 const friends = useFriends();

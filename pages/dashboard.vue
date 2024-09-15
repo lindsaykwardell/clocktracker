@@ -3,9 +3,34 @@
     <template v-if="me.status === Status.SUCCESS">
       <div class="dashboard">
         <div class="flex flex-col gap-4 p-4 bg-stone-950">
+          <h1 class="text-xl font-dumbledor text-center">My Profile</h1>
+          <ul class="px-4">
+            <li>
+              <nuxt-link
+                :to="`/@${me.data.username}?view=games`"
+                class="hover:underline"
+                >Games</nuxt-link
+              >
+            </li>
+            <li>
+              <nuxt-link
+                :to="`/@${me.data.username}?view=pending`"
+                class="hover:underline"
+                >Tagged Games</nuxt-link
+              >
+            </li>
+            <li>
+              <nuxt-link
+                :to="`/@${me.data.username}?view=stats`"
+                class="hover:underline"
+                >Stats</nuxt-link
+              >
+            </li>
+          </ul>
+          <hr class="border-stone-600" />
           <h1 class="text-xl font-dumbledor text-center">Recent Scripts</h1>
-          <ul class="list-disc list-inside">
-            <li class="px-4" v-for="script in games.getRecentScripts">
+          <ul class="px-4">
+            <li v-for="script in games.getRecentScripts">
               <nuxt-link :to="script.url" class="hover:underline">
                 {{ script.name }}
               </nuxt-link>
@@ -82,14 +107,13 @@ const myCommunities = computed(() => {
 /**
  * We need to find all the recent stuff that has happened.
  * This is a computed property that will return the events
- * 
+ *
  * Things we need to fetch:
  * - Newly scheduled events
  * - New community posts
  * - New friend requests?
  * - Recently tagged games?
  */
-
 
 // Calendar-related functions
 
