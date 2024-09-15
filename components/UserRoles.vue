@@ -42,6 +42,8 @@
 </template>
 
 <script setup lang="ts">
+import naturalOrder from "natural-order";
+
 const roles = useRoles();
 
 const props = defineProps<{
@@ -50,23 +52,33 @@ const props = defineProps<{
 }>();
 
 const townsfolk = computed(() => {
-  return roles.getRoleByType(RoleType.TOWNSFOLK);
+  return naturalOrder(roles.getRoleByType(RoleType.TOWNSFOLK))
+    .orderBy("asc")
+    .sort(["name"]);
 });
 
 const outsiders = computed(() => {
-  return roles.getRoleByType(RoleType.OUTSIDER);
+  return naturalOrder(roles.getRoleByType(RoleType.OUTSIDER))
+    .orderBy("asc")
+    .sort(["name"]);
 });
 
 const minions = computed(() => {
-  return roles.getRoleByType(RoleType.MINION);
+  return naturalOrder(roles.getRoleByType(RoleType.MINION))
+    .orderBy("asc")
+    .sort(["name"]);
 });
 
 const demons = computed(() => {
-  return roles.getRoleByType(RoleType.DEMON);
+  return naturalOrder(roles.getRoleByType(RoleType.DEMON))
+    .orderBy("asc")
+    .sort(["name"]);
 });
 
 const travelers = computed(() => {
-  return roles.getRoleByType(RoleType.TRAVELER);
+  return naturalOrder(roles.getRoleByType(RoleType.TRAVELER))
+    .orderBy("asc")
+    .sort(["name"]);
 });
 
 const allRolesLoaded = computed(() => {
