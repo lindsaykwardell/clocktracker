@@ -76,6 +76,11 @@ export default defineEventHandler(async (handler) => {
         id: role.id.replaceAll("_", ""),
         map_id: role.id,
       });
+    } else if (role.id.includes("-")) {
+      existingRoleIds.push({
+        id: role.id.replaceAll("-", ""),
+        map_id: role.id,
+      });
     }
   });
 
@@ -201,18 +206,6 @@ export default defineEventHandler(async (handler) => {
       },
     });
   }
-
-  console.log(roles);
-
-  const existingRoles = await prisma.role.findMany({
-    where: {
-      id: {
-        in: roles.map((role) => (typeof role === "string" ? role : role.id)),
-      },
-    },
-  });
-
-  console.log(existingRoles);
 
   const version =
     (await prisma.script.count({
