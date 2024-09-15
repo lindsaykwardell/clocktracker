@@ -2,7 +2,7 @@
   <StandardTemplate>
     <template v-if="me.status === Status.SUCCESS">
       <div class="dashboard">
-        <div class="flex flex-col gap-4 p-4">
+        <div class="flex flex-col gap-4 p-4 bg-stone-950">
           <h1 class="text-xl font-dumbledor text-center">Recent Scripts</h1>
           <ul class="list-disc list-inside">
             <li class="px-4" v-for="script in games.getRecentScripts">
@@ -79,6 +79,20 @@ const myCommunities = computed(() => {
   }
 });
 
+/**
+ * We need to find all the recent stuff that has happened.
+ * This is a computed property that will return the events
+ * 
+ * Things we need to fetch:
+ * - Newly scheduled events
+ * - New community posts
+ * - New friend requests?
+ * - Recently tagged games?
+ */
+
+
+// Calendar-related functions
+
 function selectDay(val: dayjs.Dayjs) {
   selectedDay.value = val;
 }
@@ -129,7 +143,7 @@ watch(
 }
 
 .calendar-events {
-  height: calc(100vh - 300px);
+  height: calc(100vh - 350px);
   overflow-y: scroll;
 }
 </style>

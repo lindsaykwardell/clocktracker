@@ -1,33 +1,74 @@
 <template>
-  <div class="flex relative">
+  <div class="flex flex-col relative">
+    <div
+      class="sticky w-full flex items-center top-0 left-0 z-40 bg-stone-950 h-[50px] gap-6 px-6"
+    >
+      <div class="min-w-[42px]" />
+      <div v-if="!expandSearchBar" class="flex-grow" />
+      <div
+        class="relative"
+        :class="{
+          'flex-grow': expandSearchBar,
+        }"
+      >
+        <form @submit.prevent.stop="search" role="search">
+          <Input
+            v-model="query"
+            type="search"
+            spellcheck="false"
+            :placeholder="
+              customSearchPlaceholder || 'Type in a query, then press enter'
+            "
+            class="h-[2rem]"
+            :class="{
+              'w-[40ch]': !expandSearchBar,
+              'w-full': expandSearchBar,
+            }"
+          />
+          <div class="absolute right-2 top-0 w-8 h-8" aria-label="Search">
+            <img src="/img/role/investigator.png" />
+          </div>
+        </form>
+      </div>
+      <nuxt-link
+        v-if="me.status === Status.SUCCESS"
+        :to="`/@${me.data.username}`"
+        class="flex items-center gap-2 p-2"
+      >
+        <span class="text-stone-200">{{ me.data.display_name }}</span>
+        <Avatar :value="me.data.avatar" size="xs" />
+      </nuxt-link>
+      <nuxt-link v-else to="/login"> Login </nuxt-link>
+    </div>
+    <button
+      id="show-navbar"
+      @click="showMenu = !showMenu"
+      class="fixed top-1 left-1 z-50 w-[42px] h-[42px] flex items-center justify-center bg-stone-400 dark:bg-stone-900 border border-stone-500 rounded-lg"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="32"
+        height="32"
+        viewBox="0 0 32 32"
+      >
+        <path
+          fill="currentColor"
+          d="M4 6h24v2H4zm0 18h24v2H4zm0-12h24v2H4zm0 6h24v2H4z"
+        />
+      </svg>
+    </button>
     <nav
-      class="flex flex-col gap-3 p-2 rounded md:rounded-none rounded-l-none md:pb-0 fixed md:sticky top-0 md:h-screen bg-stone-400 dark:bg-stone-900 md:w-[175px] md:min-w-[175px] z-50 min-w-[42px] min-h-[42px]"
+      class="fixed flex flex-col gap-3 p-2 rounded md:rounded-none rounded-l-none md:pb-0 top-0 bg-stone-400 dark:bg-stone-900 z-40 overflow-hidden transition duration-300 w-screen h-screen max-w-screen md:max-w-[300px]"
       :class="{
-        'h-screen w-screen': showMenu,
+        'opacity-100': showMenu,
+        'opacity-0 pointer-events-none': !showMenu,
       }"
     >
-      <button
-        id="show-navbar"
-        @click="showMenu = !showMenu"
-        class="md:hidden absolute top-1 left-1"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="32"
-          height="32"
-          viewBox="0 0 32 32"
-        >
-          <path
-            fill="currentColor"
-            d="M4 6h24v2H4zm0 18h24v2H4zm0-12h24v2H4zm0 6h24v2H4z"
-          />
-        </svg>
-      </button>
       <section
-        class="h-full pb-3"
+        class="h-full pb-3 flex flex-col items-center"
         :class="{
-          'hidden md:flex flex-col items-center': !showMenu,
-          'flex flex-col items-center': showMenu,
+          hidden: !showMenu,
+          flex: showMenu,
         }"
       >
         <nuxt-link
@@ -41,7 +82,7 @@
             alt="ClockTracker"
           />
         </nuxt-link>
-        <template v-if="user">
+        <template v-if="me.status === Status.SUCCESS">
           <NavLink id="my-profile" to="/" icon="innkeeper">
             <template v-if="featureFlags.isEnabled('dashboard')">
               Dashboard
@@ -58,7 +99,7 @@
             id="friends"
             to="/friends"
             icon="eviltwin"
-            :notificationCount="friends.getRequestCount(user.id)"
+            :notificationCount="friends.getRequestCount(me.data.user_id)"
           >
             Friends
           </NavLink>
@@ -131,11 +172,19 @@
           </p>
         </div>
       </ClientOnly>
+      <div
+        @click="showMenu = false"
+        class="w-screen h-screen fixed top-0 left-0 z-30 transition duration-300"
+        :class="{
+          'bg-black/25': showMenu,
+          'bg-transparent pointer-events-none': !showMenu,
+        }"
+      ></div>
       <slot />
     </main>
   </div>
   <Tour
-    v-if="user"
+    v-if="me.status === Status.SUCCESS"
     :steps="tour"
     @onTourEnd="showMenu = false"
     tourKey="new-community-nav-item"
@@ -146,15 +195,25 @@
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
+import { watchDebounced } from "@vueuse/core";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-const user = useSupabaseUser();
+const props = defineProps<{
+  expandSearchBar?: boolean;
+  customSearch?: (query: string) => void;
+  customSearchPlaceholder?: string;
+}>();
+
+const me = useMe();
 const friends = useFriends();
 const featureFlags = useFeatureFlags();
+const router = useRouter();
+const route = useRoute();
 
 const showMenu = ref(false);
+const query = ref<string>(route.query.query as string | "");
 
 const dark = ref<boolean | null>(null);
 
@@ -166,6 +225,22 @@ const formattedMaintenanceDate = computed(() => {
     timeStyle: "short",
   }).format(featureFlags.maintenanceIsScheduled);
 });
+
+function search() {
+  if (query.value && !props.customSearch) {
+    router.push({ path: "/search", query: { query: query.value } });
+  }
+}
+
+watchDebounced(
+  query,
+  () => {
+    if (props.customSearch) {
+      props.customSearch(query.value);
+    }
+  },
+  { debounce: 500, immediate: true, flush: "post" }
+);
 
 watch(dark, () => {
   if (dark.value) {
