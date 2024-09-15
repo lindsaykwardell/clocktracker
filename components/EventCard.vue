@@ -1,5 +1,10 @@
 <template>
-  <section class="max-w-[600px] bg-stone-200 dark:bg-stone-900 rounded shadow">
+  <section
+    class="max-w-[600px] bg-stone-200 dark:bg-stone-900 rounded shadow"
+    :class="{
+      'text-sm': size === 'sm',
+    }"
+  >
     <img
       v-if="event.image"
       :src="event.image"
@@ -7,7 +12,11 @@
     />
     <div class="p-3 flex flex-col gap-2">
       <div
-        class="flex flex-row text-stone-500 dark:text-stone-400 items-center"
+        class="flex text-stone-500 dark:text-stone-400 items-center"
+        :class="{
+          'flex-row': size !== 'sm',
+          'flex-col': size === 'sm',
+        }"
       >
         <div class="flex-grow">
           <ClientOnly>
@@ -23,7 +32,11 @@
             {{ event.location }}
           </template>
         </div>
-        <div v-if="canModifyEvent" class="pl-4 relative" id="menu-controls">
+        <div
+          v-if="size !== 'sm' && canModifyEvent"
+          class="pl-4 relative"
+          id="menu-controls"
+        >
           <Menu>
             <MenuButton>
               <svg
@@ -85,9 +98,16 @@
           {{ event.location }}
         </template>
       </div>
-      <h2 class="font-dumbledor text-lg lg:text-xl">{{ event.title }}</h2>
+      <h2 class="font-dumbledor" :class="{
+        'text-lg lg:text-xl': size !== 'sm',
+        'text-base': size === 'sm',
+      }">{{ event.title }}</h2>
       <VueMarkdown
-        class="post text-sm md:text-base"
+        class="post"
+        :class="{
+          'text-sm md:text-base': size !== 'sm',
+          'text-sm': size === 'sm',
+        }"
         :source="event.description"
       />
       <div v-if="event.game_link" class="flex gap-3">
@@ -164,6 +184,7 @@ import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
 const props = defineProps<{
   event: Event;
   canModifyEvent?: boolean;
+  size?: "sm" | "md";
 }>();
 
 const emit = defineEmits(["deleted"]);

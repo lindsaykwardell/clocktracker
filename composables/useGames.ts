@@ -304,27 +304,34 @@ export const useGames = defineStore("games", {
         );
       };
     },
-    getRecentScripts(): { name: string; id: number | null; version: string }[] {
-      const user = useSupabaseUser();
-      if (!user.value) return [];
-      const users = useUsers();
-      const me = users.getUserById(user.value.id);
-      if (me.status !== Status.SUCCESS) return [];
+    getRecentScripts(): {
+      name: string;
+      id: number | null;
+      version: string;
+      url: string;
+    }[] {
+      const me = useMe();
+      if (me.value.status !== Status.SUCCESS) return [];
 
-      const games = this.getByPlayer(me.data.username);
+      const games = this.getByPlayer(me.value.data.username);
 
       if (games.status !== Status.SUCCESS) return [];
       const orderedGames = naturalOrder(games.data)
         .orderBy("desc")
         .sort(["date"]);
 
-      const scriptList: { name: string; id: number | null; version: string }[] =
-        [];
+      const scriptList: {
+        name: string;
+        id: number | null;
+        version: string;
+        url: string;
+      }[] = [];
 
       for (const game of orderedGames) {
         if (scriptList.length >= 10) continue;
 
         if (
+          game.script &&
           !scriptList.some(
             (s) => s.name === game.script && s.id === game.script_id
           )
@@ -333,11 +340,35 @@ export const useGames = defineStore("games", {
             name: game.script,
             id: game.script_id,
             version: game.associated_script?.version ?? "",
+            url: this.getScriptLink(game),
           });
         }
       }
 
       return scriptList;
+    },
+    getScriptLink(): (game: GameRecord) => string {
+      return (game: GameRecord) => {
+        if (game.script === "Sects & Violets")
+          return "/scripts/Sects_and_Violets";
+
+        if (game.script_id) {
+          if (game.associated_script?.is_custom_script) {
+            return `/scripts/${game.script.replaceAll(" ", "_")}?version=${
+              game.associated_script.version
+            }&id=${game.associated_script.script_id}`;
+          } else {
+            return `/scripts/${game.script.replaceAll(" ", "_")}?version=${
+              game.associated_script?.version
+            }`;
+          }
+        }
+
+        return `https://botcscripts.com/?search=${game.script.replace(
+          / /g,
+          "+"
+        )}&script_type=&include=&exclude=&edition=&author=`;
+      };
     },
   },
   actions: {
