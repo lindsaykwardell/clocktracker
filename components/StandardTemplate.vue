@@ -31,7 +31,9 @@
         :to="`/@${me.data.username}`"
         class="flex items-center gap-2 p-2"
       >
-        <span class="hidden md:inline text-stone-200">{{ me.data.display_name }}</span>
+        <span class="hidden md:inline text-stone-200">{{
+          me.data.display_name
+        }}</span>
         <Avatar :value="me.data.avatar" size="xs" />
       </nuxt-link>
       <nuxt-link v-else to="/login"> Login </nuxt-link>
@@ -201,8 +203,6 @@ const props = defineProps<{
   customSearch?: (query: string) => void;
   customSearchPlaceholder?: string;
 }>();
-
-console.log(props);
 
 const me = useMe();
 const friends = useFriends();

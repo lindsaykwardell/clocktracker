@@ -54,8 +54,8 @@ export type Event = {
   end: string;
   location: string;
   location_type: "ONLINE" | "IN_PERSON";
-  player_count?: number;
-  image?: string;
+  player_count?: number | null;
+  image?: string | null;
   who_can_register: "ANYONE" | "PRIVATE" | "COMMUNITY_MEMBERS";
   storytellers: string[];
   script: string;
@@ -64,12 +64,12 @@ export type Event = {
   registered_players: {
     name: string;
     created_at: string;
-    discord_user_id: string;
+    discord_user_id: string | null;
     user?: {
       user_id: string;
       username: string;
       avatar: string | null;
-    };
+    } | null;
   }[];
   waitlists: {
     id: number;
@@ -78,12 +78,12 @@ export type Event = {
     users: {
       name: string;
       created_at: string;
-      discord_user_id: string;
+      discord_user_id: string | null;
       user?: {
         user_id: string;
         username: string;
         avatar: string | null;
-      };
+      } | null;
     }[];
   }[];
   community: {
@@ -91,7 +91,7 @@ export type Event = {
     name: string;
     slug: string;
     icon: string;
-  };
+  } | null;
 };
 
 export const useCommunities = defineStore("communities", {
@@ -184,21 +184,19 @@ export const useCommunities = defineStore("communities", {
         console.error(err);
       }
     },
-    async submitReply(slug: string, reply_to_id: string, content: string) {
+    async submitReply(
+      slug: string,
+      parent_post: CommunityPost,
+      content: string
+    ) {
       try {
         const reply = await $fetch(`/api/community/${slug}/post/`, {
           method: "POST",
-          body: JSON.stringify({ content, reply_to_id }),
+          body: JSON.stringify({ content, reply_to_id: parent_post.id }),
         });
 
-        const community = this.communities.get(slug);
-        if (community?.status === Status.SUCCESS) {
-          const post = community.data.posts.find((p) => p.id === reply_to_id);
-          if (post) {
-            post._count.replies++;
-            post.replies.push(reply);
-          }
-        }
+        parent_post.replies.push(reply);
+        parent_post._count.replies++;
       } catch (err) {
         console.error(err);
       }
