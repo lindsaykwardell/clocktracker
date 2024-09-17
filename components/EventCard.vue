@@ -1,8 +1,10 @@
 <template>
   <section
-    class="max-w-[600px] bg-stone-200 dark:bg-stone-900 rounded shadow"
+    class="bg-stone-200 dark:bg-stone-900 rounded shadow"
     :class="{
       'text-sm': size === 'sm',
+      'max-w-full': width === 'full',
+      'max-w-[600px]': width !== 'full',
     }"
   >
     <img
@@ -65,7 +67,7 @@
               >
                 <MenuItem>
                   <nuxt-link
-                    :to="`/community/${event.community.slug}/event/${event.id}/edit`"
+                    :to="`/community/${event.community!.slug}/event/${event.id}/edit`"
                     class="flex gap-1 w-full items-center text-black dark:text-white text-sm px-2 min-h-[32px]"
                   >
                     Edit Event
@@ -73,7 +75,7 @@
                 </MenuItem>
                 <MenuItem>
                   <nuxt-link
-                    :to="`/community/${event.community.slug}/events/create?duplicate=${event.id}`"
+                    :to="`/community/${event.community!.slug}/events/create?duplicate=${event.id}`"
                     class="flex gap-1 w-full items-center text-black dark:text-white text-sm px-2 min-h-[32px]"
                   >
                     Duplicate Event
@@ -98,10 +100,15 @@
           {{ event.location }}
         </template>
       </div>
-      <h2 class="font-dumbledor" :class="{
-        'text-lg lg:text-xl': size !== 'sm',
-        'text-base': size === 'sm',
-      }">{{ event.title }}</h2>
+      <h2
+        class="font-dumbledor"
+        :class="{
+          'text-lg lg:text-xl': size !== 'sm',
+          'text-base': size === 'sm',
+        }"
+      >
+        {{ event.title }}
+      </h2>
       <VueMarkdown
         class="post"
         :class="{
@@ -185,6 +192,7 @@ const props = defineProps<{
   event: Event;
   canModifyEvent?: boolean;
   size?: "sm" | "md";
+  width?: "full" | "auto";
 }>();
 
 const emit = defineEmits(["deleted"]);
@@ -240,7 +248,7 @@ function scriptLink(event: { script: string; script_id: number | null }) {
 function deleteEvent() {
   if (confirm("Are you sure you want to delete this event?")) {
     $fetch(
-      `/api/community/${props.event.community.slug}/event/${props.event.id}`,
+      `/api/community/${props.event.community!.slug}/event/${props.event.id}`,
       {
         method: "DELETE",
       }

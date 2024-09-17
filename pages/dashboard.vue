@@ -52,7 +52,62 @@
             </li>
           </ul>
         </div>
-        <div></div>
+        <div>
+          <ClientOnly>
+            <ul class="px-4">
+              <li v-for="update in updates.data.value" class="py-3">
+                <div class="flex flex-col gap-2">
+                  <template v-if="update.kind === 'new_event'">
+                    <div class="flex gap-2 items-center">
+                      <Avatar :value="update.event.community?.icon" size="xs" />
+                      <div class="flex flex-col">
+                        <span
+                          class="text-sm text-stone-500 dark:text-stone-400"
+                        >
+                          New Event in
+                          <nuxt-link
+                            :to="`/community/${update.event.community?.slug}`"
+                            class="hover:underline"
+                            >{{ update.event.community?.name }}</nuxt-link
+                          >
+                        </span>
+                      </div>
+                    </div>
+                    <EventCard
+                      v-if="update.kind === 'new_event'"
+                      :event="update.event"
+                      width="full"
+                    />
+                  </template>
+                  <template v-else-if="update.kind === 'new_post'">
+                    <div class="flex gap-2 items-center">
+                      <Avatar :value="update.post.community?.icon" size="xs" />
+                      <div class="flex flex-col">
+                        <span
+                          class="text-sm text-stone-500 dark:text-stone-400"
+                        >
+                          New Post in
+                          <nuxt-link
+                            :to="`/community/${update.post.community?.slug}`"
+                            class="hover:underline"
+                            >{{ update.post.community?.name }}</nuxt-link
+                          >
+                        </span>
+                      </div>
+                    </div>
+                    <CommunityPost
+                      v-if="update.kind === 'new_post'"
+                      :post="update.post"
+                      :community="update.post.community"
+                      :isMember="true"
+                      @deleted="postDeleted"
+                    />
+                  </template>
+                </div>
+              </li>
+            </ul>
+          </ClientOnly>
+        </div>
         <div class="flex flex-col gap-4 bg-stone-950 p-4">
           <Calendar
             size="xs"
@@ -64,7 +119,7 @@
           <div class="flex flex-col gap-4 calendar-events">
             <nuxt-link
               v-for="event in eventsOnDay"
-              :to="`/community/${event.community.slug}/event/${event.id}`"
+              :to="`/community/${event.community!.slug}/event/${event.id}`"
               class="w-full"
             >
               <EventCard
@@ -90,8 +145,16 @@
 import dayjs from "dayjs";
 import type { Event } from "~/composables/useCommunities";
 
+definePageMeta({
+  middleware: "auth",
+});
+
 const me = useMe();
 const games = useGames();
+const communities = useCommunities();
+const updates = await useFetch("/api/dashboard/recent");
+
+console.log(updates.data.value);
 
 const events = ref(await $fetch<Event[]>("/api/events"));
 const selectedDay = ref<dayjs.Dayjs | null>(dayjs());
@@ -104,17 +167,6 @@ const myCommunities = computed(() => {
   }
 });
 
-/**
- * We need to find all the recent stuff that has happened.
- * This is a computed property that will return the events
- *
- * Things we need to fetch:
- * - Newly scheduled events
- * - New community posts
- * - New friend requests?
- * - Recently tagged games?
- */
-
 // Calendar-related functions
 
 function selectDay(val: dayjs.Dayjs) {
@@ -125,8 +177,41 @@ function canModifyEvent(event: Event) {
   if (me.value.status !== Status.SUCCESS) return false;
 
   return me.value.data.community_admin?.some(
-    (c) => c.id === event.community.id
+    (c) => c.id === event.community?.id
   );
+}
+
+function postDeleted(id: string) {
+  if (updates.data.value) {
+    updates.data.value = (
+      JSON.parse(
+        JSON.stringify(updates.data.value)
+      ) as typeof updates.data.value
+    ).reduce((acc, update) => {
+      switch (update.kind) {
+        case "new_event":
+          acc.push(update);
+          break;
+        case "new_post":
+          if (update.post.id !== id) {
+            const replyIndex = update.post.replies.findIndex(
+              (r) => r.id === id
+            );
+
+            if (replyIndex === -1) {
+              acc.push(update);
+            } else {
+              update.post.replies.splice(replyIndex, 1);
+              update.post._count.replies--;
+              acc.push(update);
+            }
+            break;
+          }
+      }
+
+      return acc;
+    }, [] as typeof updates.data.value);
+  }
 }
 
 function removeEvent(id: string) {
@@ -147,17 +232,11 @@ const eventsOnDay = computed(() => {
   });
 });
 
-watch(
-  me,
-  () => {
-    if (me.value.status === Status.SUCCESS) {
-      games.fetchPlayerGames(me.value.data.username);
-    }
-  },
-  {
-    immediate: true,
+onMounted(async () => {
+  if (me.value.status === Status.SUCCESS) {
+    games.fetchPlayerGames(me.value.data.username);
   }
-);
+});
 </script>
 
 <style scoped>
