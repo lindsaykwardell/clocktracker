@@ -103,6 +103,36 @@
                       @deleted="postDeleted"
                     />
                   </template>
+                  <template v-else-if="update.kind === 'friend_request'">
+                    <div>
+                      <div class="text-sm text-stone-500 dark:text-stone-400">
+                        New friend request
+                      </div>
+                    </div>
+                    <UserCard
+                      :username="
+                        update.request.user_id === me.data.user_id
+                          ? update.request.from_user.username
+                          : update.request.user.username
+                      "
+                      class="w-full"
+                    >
+                      <div class="p-2">
+                        <FriendButton
+                          :username="
+                            update.request.user_id === me.data.user_id
+                              ? update.request.from_user.username
+                              : update.request.user.username
+                          "
+                          :user_id="
+                            update.request.user_id === me.data.user_id
+                              ? update.request.from_user.user_id
+                              : update.request.user.user_id
+                          "
+                        />
+                      </div>
+                    </UserCard>
+                  </template>
                 </div>
               </li>
             </ul>

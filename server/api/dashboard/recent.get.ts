@@ -87,7 +87,25 @@ type Update =
           name: string;
           slug: string;
           icon: string;
-        }
+        };
+      };
+    }
+  | {
+      kind: "friend_request";
+      date: Date;
+      request: {
+        id: number;
+        accepted: boolean;
+        user_id: string;
+        from_user_id: string;
+        from_user: {
+          user_id: string;
+          username: string;
+        };
+        user: {
+          user_id: string;
+          username: string;
+        };
       };
     };
 
@@ -267,6 +285,37 @@ export default defineEventHandler(async (handler) => {
     take: 20,
   });
 
+  const friendRequests = await prisma.friendRequest.findMany({
+    where: {
+      OR: [
+        {
+          from_user_id: user.id,
+        },
+        {
+          user_id: user.id,
+        },
+      ],
+      accepted: false,
+    },
+    include: {
+      from_user: {
+        select: {
+          user_id: true,
+          username: true,
+        },
+      },
+      user: {
+        select: {
+          user_id: true,
+          username: true,
+        },
+      },
+    },
+    orderBy: {
+      created_at: "desc",
+    },
+  });
+
   const updates: Update[] = [];
 
   for (const event of recentEvents) {
@@ -282,6 +331,14 @@ export default defineEventHandler(async (handler) => {
       kind: "new_post",
       date: post.created_at,
       post,
+    });
+  }
+
+  for (const request of friendRequests) {
+    updates.push({
+      kind: "friend_request",
+      date: request.created_at || new Date(),
+      request,
     });
   }
 
