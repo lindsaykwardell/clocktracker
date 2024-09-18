@@ -52,7 +52,7 @@
             </li>
           </ul>
         </div>
-        <div>
+        <div class="content overflow-y-scroll">
           <ClientOnly>
             <ul class="px-4">
               <li v-for="update in updates.data.value" class="py-3">
@@ -105,8 +105,18 @@
                   </template>
                   <template v-else-if="update.kind === 'friend_request'">
                     <div>
-                      <div class="text-sm text-stone-500 dark:text-stone-400">
-                        New friend request
+                      <div
+                        class="text-sm text-stone-500 dark:text-stone-400 flex gap-2 items-center"
+                      >
+                        <Avatar
+                          :value="
+                            update.request.user_id === me.data.user_id
+                              ? update.request.from_user.avatar
+                              : update.request.user.avatar
+                          "
+                          size="xs"
+                        />
+                        <span>New friend request</span>
                       </div>
                     </div>
                     <UserCard
@@ -132,6 +142,30 @@
                         />
                       </div>
                     </UserCard>
+                  </template>
+                  <template v-else-if="update.kind === 'tagged_game'">
+                    <div>
+                      <div
+                        class="text-sm text-stone-500 dark:text-stone-400 flex gap-2 items-center"
+                      >
+                        <Avatar
+                          :value="update.game.parent_game?.user?.avatar"
+                          size="xs"
+                        />
+                        <span
+                          >You were tagged in a game by
+                          {{
+                            update.game.parent_game?.user?.display_name
+                          }}</span
+                        >
+                      </div>
+                    </div>
+                    <div>
+                      <GameOverviewGrid
+                        :games="getGame(update.game.id)"
+                        cardWidth="w-full"
+                      />
+                    </div>
                   </template>
                 </div>
               </li>
@@ -181,10 +215,7 @@ definePageMeta({
 
 const me = useMe();
 const games = useGames();
-const communities = useCommunities();
 const updates = await useFetch("/api/dashboard/recent");
-
-console.log(updates.data.value);
 
 const events = ref(await $fetch<Event[]>("/api/events"));
 const selectedDay = ref<dayjs.Dayjs | null>(dayjs());
@@ -195,6 +226,18 @@ const myCommunities = computed(() => {
   } else {
     return [];
   }
+});
+
+const getGame = computed(() => {
+  return (id: string) => {
+    const game = games.getGame(id);
+
+    if (game.status === Status.SUCCESS) {
+      return [game.data];
+    }
+
+    return [];
+  };
 });
 
 // Calendar-related functions
@@ -271,8 +314,14 @@ onMounted(async () => {
 
 <style scoped>
 .dashboard {
+  position: relative;
   display: grid;
   grid-template-columns: 300px 1fr 300px;
+
+  & .content {
+    height: calc(100vh - 50px);
+    overflow-y: scroll;
+  }
 }
 
 .calendar-events {
