@@ -101,11 +101,29 @@ type Update =
         from_user: {
           user_id: string;
           username: string;
+          display_name: string;
+          avatar: string | null;
         };
         user: {
           user_id: string;
           username: string;
+          display_name: string;
+          avatar: string | null;
         };
+      };
+    }
+  | {
+      kind: "tagged_game";
+      date: Date;
+      game: {
+        id: string;
+        parent_game: {
+          user: {
+            username: string;
+            display_name: string;
+            avatar: string | null;
+          } | null;
+        } | null;
       };
     };
 
@@ -295,24 +313,51 @@ export default defineEventHandler(async (handler) => {
           user_id: user.id,
         },
       ],
-      accepted: false,
     },
     include: {
       from_user: {
         select: {
           user_id: true,
           username: true,
+          display_name: true,
+          avatar: true,
         },
       },
       user: {
         select: {
           user_id: true,
           username: true,
+          display_name: true,
+          avatar: true,
         },
       },
     },
     orderBy: {
       created_at: "desc",
+    },
+  });
+
+  const taggedGames = await prisma.game.findMany({
+    where: {
+      user_id: user.id,
+      parent_game_id: {
+        not: null,
+      },
+    },
+    select: {
+      id: true,
+      created_at: true,
+      parent_game: {
+        select: {
+          user: {
+            select: {
+              username: true,
+              display_name: true,
+              avatar: true,
+            },
+          },
+        },
+      },
     },
   });
 
@@ -339,6 +384,14 @@ export default defineEventHandler(async (handler) => {
       kind: "friend_request",
       date: request.created_at || new Date(),
       request,
+    });
+  }
+
+  for (const game of taggedGames) {
+    updates.push({
+      kind: "tagged_game",
+      date: game.created_at || new Date(),
+      game,
     });
   }
 
