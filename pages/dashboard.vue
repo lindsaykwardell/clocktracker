@@ -73,11 +73,15 @@
                         </span>
                       </div>
                     </div>
-                    <EventCard
-                      v-if="update.kind === 'new_event'"
-                      :event="update.event"
-                      width="full"
-                    />
+                    <nuxt-link
+                      :to="`/community/${update.event.community?.slug}/event/${update.event.id}`"
+                    >
+                      <EventCard
+                        v-if="update.kind === 'new_event'"
+                        :event="update.event"
+                        width="full"
+                      />
+                    </nuxt-link>
                   </template>
                   <template v-else-if="update.kind === 'new_post'">
                     <div class="flex gap-2 items-center">
@@ -116,7 +120,19 @@
                           "
                           size="xs"
                         />
-                        <span>New friend request</span>
+                        <span
+                          >New friend request
+                          <template
+                            v-if="update.request.user_id === me.data.user_id"
+                          >
+                            received from
+                            {{
+                              update.request.from_user.display_name
+                            }}</template
+                          ><template v-else>
+                            sent to {{ update.request.user.display_name }}
+                          </template></span
+                        >
                       </div>
                     </div>
                     <UserCard
