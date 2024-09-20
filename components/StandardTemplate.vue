@@ -3,6 +3,7 @@
     <div
       class="sticky w-full flex items-center top-0 left-0 z-40 bg-stone-950 h-[50px] md:gap-6 md:px-6 pl-14"
     >
+      <div class="w-2" />
       <div v-if="!expandSearchBar" class="hidden md:block md:flex-grow" />
       <div
         class="relative"
@@ -13,6 +14,7 @@
       >
         <form @submit.prevent.stop="search" role="search">
           <Input
+            id="search"
             v-model="query"
             type="search"
             spellcheck="false"
@@ -28,6 +30,7 @@
       </div>
       <nuxt-link
         v-if="me.status === Status.SUCCESS"
+        id="my-profile"
         :to="`/@${me.data.username}`"
         class="flex items-center gap-2 p-2"
       >
@@ -36,7 +39,16 @@
         }}</span>
         <Avatar :value="me.data.avatar" size="xs" />
       </nuxt-link>
-      <nuxt-link v-else to="/login"> Login </nuxt-link>
+      <nuxt-link v-else-if="me.status !== Status.LOADING" to="/login">
+        Login
+      </nuxt-link>
+      <div
+        v-if="me.status === Status.LOADING"
+        class="flex items-center gap-2 p-2"
+      >
+        <span class="hidden md:inline text-stone-200">Loading...</span>
+        <Avatar value="/img/default.png" size="xs" />
+      </div>
     </div>
     <button
       id="show-navbar"
@@ -81,14 +93,13 @@
           />
         </nuxt-link>
         <template v-if="me.status === Status.SUCCESS">
-          <NavLink id="my-profile" to="/" icon="innkeeper">
-            <template v-if="featureFlags.isEnabled('dashboard')">
-              Dashboard
-            </template>
-            <template v-else>My Profile</template>
-          </NavLink>
-          <NavLink id="search" to="/search" icon="investigator">
-            Search
+          <NavLink id="dashboard" to="/" icon="innkeeper"> Home </NavLink>
+          <NavLink
+            id="my-games"
+            :to="`/@${me.data.username}?view=games`"
+            icon="bureaucrat"
+          >
+            My Games
           </NavLink>
           <NavLink id="add-game" to="/add-game" icon="mezepheles">
             Add Game
@@ -104,7 +115,7 @@
           <NavLink id="communities" to="/community" icon="cultleader">
             Communities
           </NavLink>
-          <NavLink id="events" to="/events" icon="mutant"> Events </NavLink>
+          <!-- <NavLink id="events" to="/events" icon="mutant"> Events </NavLink> -->
           <NavLink id="settings" to="/settings" icon="tinker">
             Settings
           </NavLink>
@@ -254,12 +265,9 @@ onMounted(() => {
 
 const tour: Step[] = [
   {
-    target: "#clocktracker-icon",
+    target: "#anchor-center",
     content:
       "Welcome to ClockTracker! You can see your friends, communities, and games here. Let's walk through some of the features available to you.",
-    onNext: () => {
-      showMenu.value = true;
-    },
   },
   {
     target: "#my-profile",
@@ -269,7 +277,25 @@ const tour: Step[] = [
   {
     target: "#search",
     content:
-      "You can search for users and communities, and connect with the people that you play with.",
+      "From any page, you can search for users, communities, or roles and scripts that you want to see details about.",
+  },
+  {
+    target: "#show-navbar",
+    content:
+      "This is the navigation bar. You can access all the main features of ClockTracker from here.",
+    onNext: () => {
+      showMenu.value = true;
+    },
+  },
+  {
+    target: "#dashboard",
+    content:
+      "This is your dashboard. You can see recent activity from your friends and communities and see upcoming events.",
+  },
+  {
+    target: "#my-games",
+    content:
+      "You can see all the games you have recorded here. You can also edit or delete them.",
   },
   {
     target: "#add-game",
@@ -286,11 +312,11 @@ const tour: Step[] = [
     content:
       "Communities are another way to connect. You can create a community and invite your friends to join. Once you have a community, you can create and manage events, and see what scripts you've all been playing.",
   },
-  {
-    target: "#events",
-    content:
-      "Events that you are registered for can be viewed here. If you're looking for an event, check our your community's events page.",
-  },
+  // {
+  //   target: "#events",
+  //   content:
+  //     "Events that you are registered for can be viewed here. If you're looking for an event, check our your community's events page.",
+  // },
   {
     target: "#settings",
     content:
@@ -305,6 +331,9 @@ const tour: Step[] = [
     target: "#kofi",
     content:
       "If you find ClockTracker valuable, you can donate to support us on Ko-Fi. Donations help keep the site running and are greatly appreciated.",
+    onNext: () => {
+      showMenu.value = false;
+    },
   },
   {
     target: "#anchor-center",
