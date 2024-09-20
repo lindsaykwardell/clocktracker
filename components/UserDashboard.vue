@@ -1,7 +1,7 @@
 <template>
   <template v-if="me.status === Status.SUCCESS">
     <div class="dashboard">
-      <div class="content hidden lg:flex flex-col gap-4 p-4 bg-stone-950">
+      <div class="content hidden lg:flex flex-col gap-4 p-4 dark:bg-stone-950">
         <h1 class="text-xl font-dumbledor text-center">My Profile</h1>
         <ul class="px-4">
           <li>
@@ -179,7 +179,7 @@
           </ul>
         </ClientOnly>
       </div>
-      <div class="flex flex-col gap-4 bg-stone-950 p-4">
+      <div class="flex flex-col gap-4 dark:bg-stone-950 p-4">
         <Calendar
           size="xs"
           :events="events ?? []"

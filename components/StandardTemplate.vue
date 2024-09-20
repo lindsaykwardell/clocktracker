@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col relative">
     <div
-      class="sticky w-full flex items-center top-0 left-0 z-40 bg-stone-950 h-[50px] md:gap-6 md:px-6 pl-14"
+      class="sticky w-full flex items-center top-0 left-0 z-40 bg-white dark:bg-stone-950 h-[50px] md:gap-6 md:px-6 pl-14"
     >
       <div class="w-2" />
       <div v-if="!expandSearchBar" class="hidden md:block md:flex-grow" />
@@ -34,7 +34,7 @@
         :to="`/@${me.data.username}`"
         class="flex items-center gap-2 p-2"
       >
-        <span class="hidden md:inline text-stone-200">{{
+        <span class="hidden md:inline dark:text-stone-200">{{
           me.data.display_name
         }}</span>
         <Avatar :value="me.data.avatar" size="xs" />
@@ -46,14 +46,14 @@
         v-if="me.status === Status.LOADING"
         class="flex items-center gap-2 p-2"
       >
-        <span class="hidden md:inline text-stone-200">Loading...</span>
+        <span class="hidden md:inline dark:text-stone-200">Loading...</span>
         <Avatar value="/img/default.png" size="xs" />
       </div>
     </div>
     <button
       id="show-navbar"
       @click="showMenu = !showMenu"
-      class="fixed top-1 left-1 z-50 w-[42px] h-[42px] flex items-center justify-center bg-stone-400 dark:bg-stone-900 border border-stone-500 rounded-lg"
+      class="fixed top-1 left-1 z-50 w-[42px] h-[42px] flex items-center justify-center bg-stone-300 dark:bg-stone-900 border border-stone-500 rounded-lg"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -68,7 +68,7 @@
       </svg>
     </button>
     <nav
-      class="fixed flex flex-col gap-3 p-2 rounded md:rounded-none rounded-l-none md:pb-0 top-0 bg-stone-400 dark:bg-stone-900 z-40 overflow-hidden transition duration-300 w-screen h-screen max-w-screen md:max-w-[300px]"
+      class="fixed flex flex-col gap-3 p-2 rounded md:rounded-none rounded-l-none md:pb-0 top-0 bg-stone-200 dark:bg-stone-900 z-40 overflow-hidden transition duration-300 w-screen h-screen max-w-screen md:max-w-[300px]"
       :class="{
         'opacity-100': showMenu,
         'opacity-0 pointer-events-none': !showMenu,
@@ -139,7 +139,7 @@
             <a
               id="discord"
               href="https://discord.gg/KwMz8ThamT"
-              class="text-stone-200 hover:text-stone-300 dark:text-stone-200 dark:hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
+              class="text-stone-400 hover:text-stone-500 dark:text-stone-200 dark:hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
               aria-label="Join the ClockTracker Discord server"
             >
               <div class="w-[50px] flex justify-center">
@@ -149,7 +149,7 @@
             <a
               id="kofi"
               href="https://ko-fi.com/clocktracker"
-              class="text-stone-200 hover:text-stone-300 dark:text-stone-200 dark:hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
+              class="text-stone-400 hover:text-stone-500 dark:text-stone-200 dark:hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
               aria-label="Donate to ClockTracker"
             >
               <div class="w-[50px] flex justify-center">
@@ -158,7 +158,7 @@
             </a>
             <a
               href="https://github.com/lindsaykwardell/clocktracker"
-              class="text-stone-200 hover:text-stone-300 dark:text-stone-200 dark:hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
+              class="text-stone-400 hover:text-stone-500 dark:text-stone-200 dark:hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
               aria-label="View the ClockTracker source code"
             >
               <div class="w-[50px] flex justify-center">
