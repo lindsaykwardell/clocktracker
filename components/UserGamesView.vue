@@ -122,7 +122,7 @@
                               class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
                               aria-label="Role"
                             >
-                              <option :value="null">Filter by role</option>
+                              <option :value="null">Filter by character</option>
                               <option
                                 v-for="role in myRoles"
                                 :key="role"
@@ -150,20 +150,36 @@
                         <MenuItem>
                           <label class="w-full">
                             <select
-                              v-model="selectedWinState"
+                              v-model="selectedScript"
                               @click.stop
                               class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
-                              aria-label="Alignment"
+                              aria-label="Script"
                             >
-                              <option :value="null">Filter by win/loss</option>
-                              <option :value="WinStatus_V2.GOOD_WINS">
-                                Good wins
+                              <option :value="null">Filter by script</option>
+                              <option
+                                v-for="script in myScripts"
+                                :key="script"
+                                :value="script"
+                              >
+                                {{ script }}
                               </option>
-                              <option :value="WinStatus_V2.EVIL_WINS">
-                                Evil wins
-                              </option>
-                              <option :value="WinStatus_V2.NOT_RECORDED">
-                                Not recorded
+                            </select>
+                          </label>
+                        </MenuItem>
+                        <MenuItem v-if="myLocations.length">
+                          <label class="w-full">
+                            <select
+                              v-model="selectedLocation"
+                              @click.stop
+                              class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
+                              aria-label="Community"
+                            >
+                              <option :value="null">Filter by location</option>
+                              <option
+                                v-for="location in myLocations"
+                                :key="location"
+                              >
+                                {{ location }}
                               </option>
                             </select>
                           </label>
@@ -182,6 +198,27 @@
                                 :key="community"
                               >
                                 {{ community }}
+                              </option>
+                            </select>
+                          </label>
+                        </MenuItem>
+                        <MenuItem>
+                          <label class="w-full">
+                            <select
+                              v-model="selectedWinState"
+                              @click.stop
+                              class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
+                              aria-label="Alignment"
+                            >
+                              <option :value="null">Filter by win/loss</option>
+                              <option :value="WinStatus_V2.GOOD_WINS">
+                                Good wins
+                              </option>
+                              <option :value="WinStatus_V2.EVIL_WINS">
+                                Evil wins
+                              </option>
+                              <option :value="WinStatus_V2.NOT_RECORDED">
+                                Not recorded
                               </option>
                             </select>
                           </label>
@@ -399,7 +436,7 @@
                 font-size="md"
                 @click.prevent="selectedRole = null"
               >
-                Role: {{ selectedRole }}
+                Character: {{ selectedRole }}
               </Button>
               <Button
                 v-if="selectedAlignment"
@@ -411,6 +448,27 @@
                 <template v-else-if="selectedAlignment === 'EVIL'"
                   >Evil</template
                 >
+              </Button>
+              <Button
+                v-if="selectedScript"
+                font-size="md"
+                @click.prevent="selectedScript = null"
+              >
+                Script: {{ selectedScript }}
+              </Button>
+              <Button
+                v-if="selectedLocation"
+                font-size="md"
+                @click.prevent="selectedLocation = null"
+              >
+                Location: {{ selectedLocation }}
+              </Button>
+              <Button
+                v-if="selectedCommunity"
+                font-size="md"
+                @click.prevent="selectedCommunity = null"
+              >
+                Community: {{ selectedCommunity }}
               </Button>
               <Button
                 v-if="selectedWinState"
@@ -429,13 +487,6 @@
                   v-else-if="selectedWinState === WinStatus_V2.NOT_RECORDED"
                   >Not recorded</template
                 >
-              </Button>
-              <Button
-                v-if="selectedCommunity"
-                font-size="md"
-                @click.prevent="selectedCommunity = null"
-              >
-                Community: {{ selectedCommunity }}
               </Button>
               <Button
                 v-for="(player, index) in selectedPlayers"
@@ -521,13 +572,7 @@ const importGamesDialogVisible = ref(false);
 const selectMultipleGames = useSelectMultipleGames();
 const { canPostToBGG, bggInFlight, postMultipleToBGG, deleteMultipleFromBGG } =
   useBGG();
-
-const me = computed(() => {
-  if (user.value) {
-    return users.getUserById(user.value.id);
-  }
-  return null;
-});
+const me = useMe();
 
 const myPage = computed(() => {
   if (me.value?.status === Status.SUCCESS) {
@@ -590,8 +635,23 @@ const myCommunities = computed(() => {
   }
 });
 
+const myScripts = computed(() => {
+  if (props.games.status !== Status.SUCCESS) {
+    return [];
+  }
+  return naturalOrder([
+    ...new Set(
+      props.games.data.filter((game) => game.script).map((game) => game.script)
+    ),
+  ]).sort();
+});
+
+const myLocations = computed(() => {
+  return allGames.getLocationsByPlayer(props.player?.username || "");
+});
+
 const ready = ref(false);
-const gameView = ref<"grid" | "table">("grid");
+const gameView = useLocalStorage<"grid" | "table">("gameView", "grid");
 const sortBy = ref<
   | "character"
   | "date"
@@ -631,6 +691,14 @@ const startDateRange = useLocalStorage<string | null>(
 );
 const endDateRange = useLocalStorage<string | null>(
   "games__endDateRange",
+  null
+);
+const selectedScript = useLocalStorage<string | null>(
+  "games__selectedScript",
+  null
+);
+const selectedLocation = useLocalStorage<string | null>(
+  "games__selectedLocation",
   null
 );
 
@@ -700,6 +768,27 @@ const activeFilters = computed(() => {
       : []),
     ...(selectedAlignment.value
       ? [{ type: "alignment", value: selectedAlignment.value }]
+      : []),
+    ...(selectedWinState.value
+      ? [{ type: "win_state", value: selectedWinState.value }]
+      : []),
+    ...(minPlayers.value
+      ? [{ type: "min_players", value: minPlayers.value }]
+      : []),
+    ...(maxPlayers.value
+      ? [{ type: "max_players", value: maxPlayers.value }]
+      : []),
+    ...(startDateRange.value
+      ? [{ type: "start_date", value: startDateRange.value }]
+      : []),
+    ...(endDateRange.value
+      ? [{ type: "end_date", value: endDateRange.value }]
+      : []),
+    ...(selectedScript.value
+      ? [{ type: "script", value: selectedScript.value }]
+      : []),
+    ...(selectedLocation.value
+      ? [{ type: "location", value: selectedLocation.value }]
       : []),
   ];
 });
@@ -785,7 +874,10 @@ const sortedGames = computed(() => {
         (!startDateRange.value ||
           new Date(game.date) >= new Date(startDateRange.value)) &&
         (!endDateRange.value ||
-          new Date(game.date) <= new Date(endDateRange.value))
+          new Date(game.date) <= new Date(endDateRange.value)) &&
+        (!selectedScript.value || game.script === selectedScript.value) &&
+        (!selectedLocation.value ||
+          game.location.trim() === selectedLocation.value.trim())
     );
 });
 
