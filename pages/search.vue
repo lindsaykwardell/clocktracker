@@ -1,27 +1,10 @@
 <template>
-  <StandardTemplate>
+  <StandardTemplate
+    expandSearchBar
+    :customSearch="search"
+    customSearchPlaceholder="Type in a query to begin"
+  >
     <div class="max-w-[1000px] w-5/6 py-4 m-auto">
-      <div class="pt-8">
-        <form @submit.prevent.stop role="search">
-          <label>
-            <h1 class="font-dumbledor text-2xl text-center">Search</h1>
-            <div class="relative">
-              <Input
-                v-model="query"
-                type="search"
-                spellcheck="false"
-                placeholder="Type in a query to begin"
-              />
-              <div
-                class="absolute right-2 -top-2 w-16 h-16"
-                aria-label="Search"
-              >
-                <img src="/img/role/investigator.png" />
-              </div>
-            </div>
-          </label>
-        </form>
-      </div>
       <div class="py-4 flex flex-col gap-4">
         <div v-if="searching" class="flex justify-center gap-1">
           <Spinner />
@@ -109,10 +92,8 @@
 
 <script setup lang="ts">
 import type { Role } from "@prisma/client";
-import { watchDebounced } from "@vueuse/core";
-
-const route = useRoute();
 const router = useRouter();
+const route = useRoute();
 
 const users = ref<
   {
@@ -159,8 +140,6 @@ const roles = ref<(Role & { _count: { scripts: number; games: number } })[]>(
   []
 );
 
-// Default the query to the query parameter in the URL
-const query = ref<string>(route.query.query as string | "");
 const searching = ref(false);
 
 const activeTab = ref<"USERS" | "COMMUNITIES" | "SCRIPTS" | "ROLES">("USERS");
@@ -198,11 +177,12 @@ const showRoles = computed({
   },
 });
 
-async function search() {
+async function search(query: string) {
   // Only search if the query is at least 3 characters long
-  if (query.value.length < 3) {
+  if (query.length < 3) {
     return;
   }
+  router.push({ query: { query } });
   searching.value = true;
   users.value = [];
   communities.value = [];
@@ -210,7 +190,7 @@ async function search() {
   roles.value = [];
   const result = await $fetch("/api/search", {
     params: {
-      query: query.value,
+      query,
     },
   });
 
@@ -254,18 +234,9 @@ async function search() {
 }
 
 onMounted(() => {
-  if (query.value) {
-    search();
+  const query = route.query.query as string;
+  if (query) {
+    searching.value = true;
   }
 });
-
-watchDebounced(
-  query,
-  () => {
-    search();
-    // update the router with the query parameter
-    router.push({ query: { query: query.value } });
-  },
-  { debounce: 500 }
-);
 </script>

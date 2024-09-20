@@ -6,8 +6,10 @@
     @onTourEnd="onTourEnd"
   />
   <div
-    v-if="tourStarted"
-    class="fixed top-0 left-0 w-screen h-screen flex justify-center items-center bg-stone-800/40 z-50"
+    class="fixed top-0 left-0 w-screen h-screen flex justify-center items-center pointer-events-none"
+    :class="{
+      'bg-stone-800/40 z-50': tourStarted,
+    }"
   >
     <div id="anchor-center" class="w-[1px] h-[1px]" />
   </div>

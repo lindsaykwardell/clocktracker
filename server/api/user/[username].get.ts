@@ -126,6 +126,11 @@ export default defineEventHandler(async (handler) => {
           slug: true,
           icon: true,
         },
+        orderBy: [
+          {
+            name: "asc",
+          },
+        ],
       },
       favorites: {
         select: {
