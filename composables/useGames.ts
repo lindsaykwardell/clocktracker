@@ -234,7 +234,7 @@ export const useGames = defineStore("games", {
           locations.add(game.location);
         }
 
-        return Array.from(locations);
+        return Array.from(locations).filter((l) => !!l);
       };
     },
     getPreviouslyTaggedByPlayer(): (username?: string) => string[] {
