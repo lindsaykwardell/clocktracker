@@ -100,8 +100,6 @@
           :community="community.data"
           :isMember="isMember"
           :isModerator="isModerator"
-          @delete="deletePost"
-          @reply="submitReply"
         />
       </div>
     </template>
@@ -137,14 +135,6 @@ async function submitPost() {
   await communities.submitPost(slug, message.value);
 
   message.value = "";
-}
-
-async function submitReply(content: { content: string; parent_id: string }) {
-  await communities.submitReply(slug, content.parent_id, content.content);
-}
-
-async function deletePost(postId: string) {
-  await communities.deletePost(slug, postId);
 }
 
 function allEventAttendees(event: Event) {

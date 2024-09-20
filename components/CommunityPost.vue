@@ -1,22 +1,29 @@
 <template>
-  <div class="shadow p-3 rounded my-1 bg-stone-200 dark:bg-stone-900 dark:text-stone-300 text-sm">
+  <div
+    class="shadow p-3 rounded bg-stone-200 dark:bg-stone-900 dark:text-stone-300 text-sm"
+  >
     <div class="flex items-start">
       <div class="flex flex-grow flex-wrap items-center gap-4 md:h-12">
         <Avatar :value="post.user.avatar" size="xs" />
         <div class="flex flex-col flex-grow">
           <div
             :class="{
-              'text-green-600 dark:text-green-500': isUserModerator(post.user.user_id),
+              'text-green-600 dark:text-green-500': isUserModerator(
+                post.user.user_id
+              ),
             }"
           >
             {{ post.user.display_name }}
           </div>
           <div class="text-sm">
-            <a href="#" class="decoration-stone-400">
+            <nuxt-link
+              :to="`/@${post.user.username}`"
+              class="decoration-stone-400"
+            >
               <span class="text-stone-500 dark:text-stone-400">
                 {{ post.user.username }}
               </span>
-            </a>
+            </nuxt-link>
           </div>
         </div>
       </div>
@@ -43,7 +50,9 @@
       </div>
     </div>
     <VueMarkdown class="post" :source="post.content" />
-    <div class="text-sm flex gap-4 px-4 pt-3 text-stone-500 dark:text-stone-400">
+    <div
+      class="text-sm flex gap-4 px-4 pt-3 text-stone-500 dark:text-stone-400"
+    >
       <div class="flex gap-4 md:gap-12 flex-grow">
         <div class="flex gap-3 items-center">
           <button @click="toggleReply">
@@ -58,7 +67,9 @@
         </div>
       </div>
       <div class="flex gap-2 md:gap-4 flex-shrink items-center">
-        <time class="text-stone-500 dark:text-stone-400">{{ formatDate(post.created_at) }}</time>
+        <time class="text-stone-500 dark:text-stone-400">{{
+          formatDate(post.created_at)
+        }}</time>
       </div>
     </div>
     <div v-if="post.replies.length > 0" class="mt-4 ml-12">
@@ -72,17 +83,22 @@
             <div class="flex flex-col flex-grow">
               <div
                 :class="{
-                  'text-green-600 dark:text-green-500': isUserModerator(reply.user.user_id),
+                  'text-green-600 dark:text-green-500': isUserModerator(
+                    reply.user.user_id
+                  ),
                 }"
               >
                 {{ reply.user.display_name }}
               </div>
               <div class="text-sm">
-                <a href="#" class="decoration-stone-400">
+                <nuxt-link
+                  :to="`/@${reply.user.username}`"
+                  class="decoration-stone-400"
+                >
                   <span class="text-stone-500 dark:text-stone-400">
                     {{ reply.user.username }}
                   </span>
-                </a>
+                </nuxt-link>
               </div>
             </div>
           </div>
@@ -120,16 +136,8 @@
     </div>
     <label v-if="showReply" class="block pt-4">
       <form @submit.prevent="submitReply">
-        <ExpandingTextarea
-          
-          v-model="newReply"
-        />
-        <Button
-          type="submit"
-          primary
-          font-size="md"
-          class="px-4 py-2 mt-2"
-        >
+        <ExpandingTextarea v-model="newReply" />
+        <Button type="submit" primary font-size="md" class="px-4 py-2 mt-2">
           Send
         </Button>
       </form>
@@ -141,15 +149,16 @@
 import VueMarkdown from "vue-markdown-render";
 
 const user = useSupabaseUser();
+const communities = useCommunities();
 
 const props = defineProps<{
   post: CommunityPost;
-  community: Community;
-  isMember: boolean;
-  isModerator: boolean;
+  community: Partial<Community>;
+  isMember?: boolean;
+  isModerator?: boolean;
 }>();
 
-const emit = defineEmits(["delete", "reply"]);
+const emit = defineEmits(["deleted"]);
 
 const newReply = ref("");
 const showReply = ref(false);
@@ -162,7 +171,9 @@ function formatDate(date: string) {
 }
 
 function isUserModerator(user_id: string) {
-  return props.community.admins.map(({ user_id }) => user_id).includes(user_id);
+  return props.community.admins
+    ?.map(({ user_id }) => user_id)
+    .includes(user_id);
 }
 
 function isMe(id: string) {
@@ -175,18 +186,21 @@ function toggleReply() {
   }
 }
 
-function submitReply() {
-  emit("reply", {
-    content: newReply.value,
-    parent_id: props.post.id,
-  });
+async function submitReply() {
+  await communities.submitReply(
+    props.community.slug!,
+    props.post,
+    newReply.value
+  );
+
   newReply.value = "";
   showReply.value = false;
 }
 
-function deletePost(post_id: string) {
+async function deletePost(post_id: string) {
   if (confirm("Are you sure you want to delete this post?")) {
-    emit("delete", post_id);
+    await communities.deletePost(props.community.slug!, post_id);
+    emit("deleted", post_id);
   }
 }
 </script>

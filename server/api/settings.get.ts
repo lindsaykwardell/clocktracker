@@ -58,6 +58,11 @@ export default defineEventHandler(async (handler) => {
             },
           },
         },
+        orderBy: [
+          {
+            name: "asc",
+          },
+        ],
       },
       dids: {
         select: {
@@ -68,8 +73,8 @@ export default defineEventHandler(async (handler) => {
       favorites: {
         select: {
           game_id: true,
-        }
-      }
+        },
+      },
     },
   });
 
@@ -220,8 +225,8 @@ export default defineEventHandler(async (handler) => {
       favorites: {
         select: {
           game_id: true,
-        }
-      }
+        },
+      },
     },
   });
 

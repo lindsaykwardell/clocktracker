@@ -81,7 +81,7 @@
               <span>Script</span>
               <nuxt-link
                 class="hover:underline text-blue-800 hover:text-blue-700"
-                :to="scriptLink(game.data)"
+                :to="games.getScriptLink(game.data)"
               >
                 {{ game.data.script }}
                 <template
@@ -705,27 +705,6 @@ const storytellers = computed(() => {
 function fullImageUrl(file: string) {
   if (file.startsWith("http")) return file;
   return `${config.public.supabase.url}/storage/v1/object/public/game-attachments/${file}`;
-}
-
-function scriptLink(game: GameRecord) {
-  if (game.script === "Sects & Violets") return "/scripts/Sects_and_Violets";
-
-  if (game.script_id) {
-    if (game.associated_script?.is_custom_script) {
-      return `/scripts/${game.script.replaceAll(" ", "_")}?version=${
-        game.associated_script.version
-      }&id=${game.associated_script.script_id}`;
-    } else {
-      return `/scripts/${game.script.replaceAll(" ", "_")}?version=${
-        game.associated_script?.version
-      }`;
-    }
-  }
-
-  return `https://botcscripts.com/?search=${game.script.replace(
-    / /g,
-    "+"
-  )}&script_type=&include=&exclude=&edition=&author=`;
 }
 
 async function deleteGame(alsoUntagMyself: boolean) {
