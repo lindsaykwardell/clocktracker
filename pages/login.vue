@@ -26,12 +26,7 @@
         />
       </label>
       <Button type="submit" class="w-[300px] py-2"> Login </Button>
-      <Button
-        type="button"
-        @click="register"
-        class="w-[300px] py-2"
-        tertiary
-      >
+      <Button type="button" @click="register" class="w-[300px] py-2" tertiary>
         Register
       </Button>
       <button
@@ -76,7 +71,6 @@ async function login() {
   } else {
     friends.fetchFriends();
     friends.fetchRequests();
-    router.push("/welcome");
   }
 }
 
@@ -92,7 +86,6 @@ async function register() {
   } else {
     friends.fetchFriends();
     friends.fetchRequests();
-    router.push("/welcome");
   }
 }
 

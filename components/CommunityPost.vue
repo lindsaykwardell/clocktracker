@@ -16,11 +16,14 @@
             {{ post.user.display_name }}
           </div>
           <div class="text-sm">
-            <a href="#" class="decoration-stone-400">
+            <nuxt-link
+              :to="`/@${post.user.username}`"
+              class="decoration-stone-400"
+            >
               <span class="text-stone-500 dark:text-stone-400">
                 {{ post.user.username }}
               </span>
-            </a>
+            </nuxt-link>
           </div>
         </div>
       </div>
@@ -88,11 +91,14 @@
                 {{ reply.user.display_name }}
               </div>
               <div class="text-sm">
-                <a href="#" class="decoration-stone-400">
+                <nuxt-link
+                  :to="`/@${reply.user.username}`"
+                  class="decoration-stone-400"
+                >
                   <span class="text-stone-500 dark:text-stone-400">
                     {{ reply.user.username }}
                   </span>
-                </a>
+                </nuxt-link>
               </div>
             </div>
           </div>

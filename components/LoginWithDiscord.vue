@@ -1,9 +1,5 @@
 <template>
-  <Button
-    class="w-[300px] py-2 text-white"
-    discord
-    @click="login"
-  >
+  <Button class="w-[300px] py-2 text-white" discord @click="login">
     <Discord />
     <span>Login with Discord</span>
   </Button>
@@ -17,7 +13,7 @@ async function login() {
     provider: "discord",
     options: {
       queryParams: { prompt: "none" },
-      redirectTo: `${window.location.host}/welcome`,
+      redirectTo: `${window.location.host}`,
     },
   });
 }

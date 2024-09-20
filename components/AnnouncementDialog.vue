@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-const user = useSupabaseUser();
+const me = useMe();
 const { did, isDone } = useDids();
 
 const props = defineProps<{
@@ -30,15 +30,15 @@ const show = ref(false);
 
 onMounted(() => {
   setTimeout(() => {
-    if (user.value && !isDone(props.id)) {
+    if (me.value.status === Status.SUCCESS && !isDone(props.id)) {
       show.value = true;
     }
   }, 1000);
 });
 
-watch(user, () => {
+watch(me, () => {
   setTimeout(() => {
-    if (user.value && !isDone(props.id)) {
+    if (me.value.status === Status.SUCCESS && !isDone(props.id)) {
       show.value = true;
     }
   }, 1000);
