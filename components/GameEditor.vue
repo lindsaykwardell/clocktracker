@@ -61,14 +61,14 @@
             <span class="block">Storyteller</span>
             <TaggedUserInput
               v-model:value="game.storyteller"
-              :users="potentialStorytellers"
+              :users="potentialCoStorytellers"
               :placeholder="editingMultipleGames ? 'Not updated' : ''"
             />
           </label>
           <div class="flex gap-3">
             <label class="flex whitespace-nowrap items-center gap-2">
               <input type="checkbox" v-model="game.is_storyteller" />
-              <span class="block">I was the Storyteller</span>
+              <span class="block">I was a Storyteller</span>
             </label>
             <label
               v-if="editingMultipleGames"
@@ -86,7 +86,7 @@
           <div v-for="(st, index) in game.co_storytellers" class="flex gap-2">
             <TaggedUserInput
               v-model:value="game.co_storytellers[index]"
-              :users="potentialStorytellers"
+              :users="potentialCoStorytellers"
             />
             <button
               type="button"
@@ -100,7 +100,7 @@
             @click="game.co_storytellers.push('')"
             class="w-full"
           >
-            Add Co-Storyteller
+            Add Storyteller
           </button>
         </div>
       </div>
@@ -835,23 +835,61 @@ const myGames = computed(() => {
   }
 });
 
-const potentialStorytellers = computed(() => {
-  if (me.value.status === Status.SUCCESS) {
-    return [...friends.getFriends, ...friends.getCommunityMembers]
-      .map((f) => ({ ...f, username: `@${f.username}` }))
-      .filter(
-        (friend, index, arr) =>
-          // friend is unique
-          arr.findIndex((f) => f.username === friend.username) === index &&
-          // friend is not the storyteller, not a co-storyteller, and not found in the grimoire
-          friend.username !== props.game.storyteller &&
-          !props.game.co_storytellers.includes(friend.username) &&
-          !props.game.grimoire.find((grim) =>
-            grim.tokens.find((token) => token.player_name === friend.username)
-          )
-      );
+const communityMembersWhoArentFriends = computed(() =>
+  friends.getCommunityMembers.filter(
+    (member) =>
+      !friends.getFriends.find((friend) => friend.user_id === member.user_id)
+  )
+);
+
+const potentiallyTaggedPlayers = computed(() => {
+  return [...friends.getFriends, ...communityMembersWhoArentFriends.value].map(
+    (player) => ({
+      ...player,
+      username: `@${player?.username}`,
+    })
+  );
+});
+
+const potentialCoStorytellers = computed(() => {
+  return allTaggablePlayers.value.filter(
+    (player) =>
+      !player ||
+      (!props.game.grimoire.some(({ tokens }) =>
+        tokens.find((token) => token.player_name === player.username)
+      ) &&
+        !props.game.co_storytellers.find(
+          (costoryteller) => costoryteller === player.username
+        ))
+  );
+});
+
+const previouslyTaggedPlayers = computed(() => {
+  if (me.value.status !== Status.SUCCESS) {
+    return [];
   }
-  return [];
+
+  return games
+    .getPreviouslyTaggedByPlayer(me.value.data.username)
+    .map((player) => ({
+      username: player,
+      display_name: "",
+      user_id: null,
+      avatar: "/img/default.png",
+    }));
+});
+
+const allTaggablePlayers = computed(() => {
+  return [
+    ...potentiallyTaggedPlayers.value,
+    ...previouslyTaggedPlayers.value,
+  ].filter(
+    (player, index, array) =>
+      player &&
+      array.findIndex(
+        (p) => p.user_id === player.user_id && p.username === player.username
+      ) === index
+  );
 });
 
 const storytellerNames = computed(() => {

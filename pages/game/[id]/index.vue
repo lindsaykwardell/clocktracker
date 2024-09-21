@@ -695,7 +695,9 @@ const storytellers = computed(() => {
 
   if (game.value.data.is_storyteller) {
     storytellerList.push(`@${game.value.data.user.username}`);
-  } else if (game.value.data.storyteller) {
+  }
+
+  if (game.value.data.storyteller) {
     storytellerList.push(game.value.data.storyteller);
   }
 
