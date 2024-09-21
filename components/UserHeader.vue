@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-stone-300 dark:bg-stone-950 shadow-lg">
+  <div class="bg-stone-200 dark:bg-stone-950 shadow-lg">
     <div
       class="flex flex-col items-center w-full md:w-3/4 lg:w-2/3 xl:w-1/2 m-auto pt-4"
     >

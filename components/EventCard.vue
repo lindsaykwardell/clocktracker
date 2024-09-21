@@ -1,13 +1,24 @@
 <template>
-  <section class="max-w-[600px] bg-stone-200 dark:bg-stone-900 rounded shadow">
+  <section
+    class="bg-stone-200 dark:bg-stone-900 rounded shadow"
+    :class="{
+      'text-sm': size === 'sm',
+      'max-w-full': width === 'full',
+      'max-w-[600px]': width !== 'full',
+    }"
+  >
     <img
       v-if="event.image"
       :src="event.image"
-      class="w-full md:w-[600px] object-cover h-[150px] md:h-[250px]"
+      class="w-full md:w-[600px] object-cover h-[150px] md:h-[250px] m-auto"
     />
     <div class="p-3 flex flex-col gap-2">
       <div
-        class="flex flex-row text-stone-500 dark:text-stone-400 items-center"
+        class="flex text-stone-500 dark:text-stone-400 items-center"
+        :class="{
+          'flex-row': size !== 'sm',
+          'flex-col': size === 'sm',
+        }"
       >
         <div class="flex-grow">
           <ClientOnly>
@@ -23,7 +34,11 @@
             {{ event.location }}
           </template>
         </div>
-        <div v-if="canModifyEvent" class="pl-4 relative" id="menu-controls">
+        <div
+          v-if="size !== 'sm' && canModifyEvent"
+          class="pl-4 relative"
+          id="menu-controls"
+        >
           <Menu>
             <MenuButton>
               <svg
@@ -52,7 +67,7 @@
               >
                 <MenuItem>
                   <nuxt-link
-                    :to="`/community/${event.community.slug}/event/${event.id}/edit`"
+                    :to="`/community/${event.community!.slug}/event/${event.id}/edit`"
                     class="flex gap-1 w-full items-center text-black dark:text-white text-sm px-2 min-h-[32px]"
                   >
                     Edit Event
@@ -60,7 +75,7 @@
                 </MenuItem>
                 <MenuItem>
                   <nuxt-link
-                    :to="`/community/${event.community.slug}/events/create?duplicate=${event.id}`"
+                    :to="`/community/${event.community!.slug}/events/create?duplicate=${event.id}`"
                     class="flex gap-1 w-full items-center text-black dark:text-white text-sm px-2 min-h-[32px]"
                   >
                     Duplicate Event
@@ -85,9 +100,21 @@
           {{ event.location }}
         </template>
       </div>
-      <h2 class="font-dumbledor text-lg lg:text-xl">{{ event.title }}</h2>
+      <h2
+        class="font-dumbledor"
+        :class="{
+          'text-lg lg:text-xl': size !== 'sm',
+          'text-base': size === 'sm',
+        }"
+      >
+        {{ event.title }}
+      </h2>
       <VueMarkdown
-        class="post text-sm md:text-base"
+        class="post"
+        :class="{
+          'text-sm md:text-base': size !== 'sm',
+          'text-sm': size === 'sm',
+        }"
         :source="event.description"
       />
       <div v-if="event.game_link" class="flex gap-3">
@@ -164,6 +191,8 @@ import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
 const props = defineProps<{
   event: Event;
   canModifyEvent?: boolean;
+  size?: "sm" | "md";
+  width?: "full" | "auto";
 }>();
 
 const emit = defineEmits(["deleted"]);
@@ -219,7 +248,7 @@ function scriptLink(event: { script: string; script_id: number | null }) {
 function deleteEvent() {
   if (confirm("Are you sure you want to delete this event?")) {
     $fetch(
-      `/api/community/${props.event.community.slug}/event/${props.event.id}`,
+      `/api/community/${props.event.community!.slug}/event/${props.event.id}`,
       {
         method: "DELETE",
       }

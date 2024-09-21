@@ -7,6 +7,7 @@
           'text-xl lg:text-2xl': size === 'lg',
           'text-lg lg:text-xl': size === 'md',
           'lg:text-lg': size === 'sm',
+          'text-sm': size === 'xs',
         }"
       >
         <button @click="backOneMonth">＜</button>
@@ -27,22 +28,25 @@
             @click="emit('selectDay', day)"
             class="p-1 hover:bg-stone-300 dark:hover:bg-stone-700 overflow-hidden"
             :class="{
-              'min-h-[100px] md:min-h-[150px]': size !== 'sm',
+              'min-h-[100px] md:min-h-[150px]': size !== 'sm' && size !== 'xs',
               'h-[40px] md:h-[75px]': size === 'sm',
+              'h-[40px]': size === 'xs',
               'cursor-pointer': clickableDays,
               'border border-yellow-500': day.isSame(today, 'day'),
-              'bg-stone-200 dark:bg-stone-700': selectedDay && day.isSame(selectedDay, 'day'),
+              'bg-stone-200 dark:bg-stone-700':
+                selectedDay && day.isSame(selectedDay, 'day'),
             }"
           >
             <div
               class="text-stone-500"
               :class="{
-                'text-center': size === 'sm',
+                'text-center': size === 'sm' || size === 'xs',
+                'text-xs': size === 'xs',
               }"
             >
               {{ day?.date() }}
             </div>
-            <ul v-if="size !== 'sm'">
+            <ul v-if="size !== 'sm' && size !== 'xs'">
               <li v-for="event in eventsOnDay(day)">
                 <a
                   :href="`/community/${event.community.slug}/event/${event.id}`"
@@ -66,7 +70,10 @@
             </ul>
             <div
               v-else
-              class="flex flex-wrap justify-center text-xl md:text-4xl leading-none"
+              class="flex flex-wrap justify-center text-xl leading-none"
+              :class="{
+                'md:text-4xl': size === 'sm',
+              }"
             >
               <div v-for="_ in eventsOnDay(day).length">·</div>
             </div>
@@ -83,7 +90,7 @@ import type { Event } from "~/composables/useCommunities";
 
 const props = defineProps<{
   events: Event[];
-  size: "sm" | "md" | "lg";
+  size: "xs" | "sm" | "md" | "lg";
   clickableDays?: boolean;
   selectedDay?: dayjs.Dayjs | null;
 }>();

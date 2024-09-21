@@ -3,7 +3,7 @@
     v-if="userGames.status === Status.SUCCESS"
     class="grid grid-cols-1 md:grid-cols-2"
   >
-    <div class="row-span-2">
+    <div class="row-span-3">
       <template v-if="favoriteGames.length > 0">
         <GameOverviewGrid
           :games="favoriteGames"
@@ -46,9 +46,7 @@
         {{ totalWins }} {{ totalWins === 1 ? "win" : "wins" }}
       </div>
     </div>
-    <div>
-      <UserRoles :games="userGames" condensed />
-    </div>
+    <UserRoles :games="userGames" condensed />
   </section>
   <Dialog v-if="isMe" v-model:visible="showFavoritesDialog" size="xl">
     <template #title>

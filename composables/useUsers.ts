@@ -66,7 +66,7 @@ export const useUsers = defineStore("users", {
             return user;
         }
 
-        return { status: Status.IDLE };
+        return this.users.get(user_id || "") || { status: Status.IDLE };
       };
     },
   },
@@ -91,19 +91,28 @@ export const useUsers = defineStore("users", {
       });
     },
     async fetchMe(user_id?: string) {
-      if (!user_id) return;
+      const friends = useFriends();
       const games = useGames();
+      const router = useRouter();
+
+      if (!user_id) return;
+      this.users.set(user_id, { status: Status.LOADING });
+
       const me = await $fetch<User>("/api/settings");
-      // games.fetchPlayerGames(me.username);
 
       this.storeUser(me);
-    },
-    async initMe(user_id?: string) {
-      if (!user_id) return;
-      const { data, error } = await useFetch<User>("/api/settings");
 
-      if (data.value) {
-        this.storeUser(data.value);
+      games.fetchPlayerGames(me.username);
+      friends.fetchFriends();
+      friends.fetchRequests();
+
+      setInterval(() => {
+        friends.fetchRequests();
+        // one minute
+      }, 1000 * 60);
+
+      if (!me.finished_welcome) {
+        router.push("/welcome");
       }
     },
   },
