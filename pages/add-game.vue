@@ -254,7 +254,7 @@ async function submitGame() {
       console.error(error.value);
     } else {
       localStorage.removeItem("draftGame");
-      router.push(`/game/${data.value?.id}`);
+      router.push(`/game/${data.value?.id}?new=true`);
     }
   }
 }
