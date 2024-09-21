@@ -222,7 +222,7 @@ async function submitGame() {
       body: JSON.stringify(formattedGame.value),
     });
 
-    router.push(`/game/${savedGame.data.value?.id}`);
+    router.push(`/game/${savedGame.data.value?.id}?updated=true`);
   } catch (err: any) {
     inFlight.value = false;
     alert(err.statusMessage);
