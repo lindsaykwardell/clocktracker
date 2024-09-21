@@ -132,11 +132,13 @@ export default defineEventHandler(async (handler) => {
       // We just won't have the roles
       console.error(`Failed to fetch roles for script: ${id}`);
 
-      script.roles = await prisma.role.findMany({
-        where: {
-          custom_role: false,
-        },
-      });
+      if (script.roles.length === 0) {
+        script.roles = await prisma.role.findMany({
+          where: {
+            custom_role: false,
+          },
+        });
+      }
     }
   }
 
