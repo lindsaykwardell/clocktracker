@@ -1,23 +1,15 @@
-import { defineCronHandler } from "#nuxt/cron";
 import axios from "axios";
-import * as cheerio from "cheerio";
+import cheerio from "cheerio";
 import { Alignment, PrismaClient, RoleType } from "@prisma/client";
 
 const url = "https://botcscripts.com";
 const prisma = new PrismaClient();
 
-export default defineCronHandler("daily", async () => {
-  const scriptList: {
-    script_id: string;
-    name: string;
-    version: string;
-    author: string;
-    type: string;
-    json_url: string;
-    pdf_url: string;
-  }[] = [];
+async function main() {
+  const scriptList = [];
 
-  async function parsePage(page: number) {
+  async function parsePage(page) {
+    console.log(`Parsing page ${page}...`);
     const response = await axios.get(url + "?page=" + page);
     const $ = cheerio.load(response.data);
     // Iterate over the table rows
@@ -90,8 +82,10 @@ export default defineCronHandler("daily", async () => {
   }
 
   console.log("Done!");
-});
+}
 
-function fullUrl(href: string) {
+function fullUrl(href) {
   return url + href;
 }
+
+main();

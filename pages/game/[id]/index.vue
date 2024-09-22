@@ -1,533 +1,576 @@
 <template>
   <StandardTemplate>
-    <section
+    <template
       v-if="game.status === Status.SUCCESS && player.status === Status.SUCCESS"
-      class="flex flex-col gap-4 bg-gradient-to-b from-stone-200 to-stone-400 dark:from-stone-100 dark:to-stone-300 text-black w-full lg:w-4/5 m-auto my-4 rounded shadow-lg relative"
     >
       <div
-        class="metadata flex flex-col-reverse md:flex-row items-center md:items-start px-4 pt-4"
+        v-if="isMe && me.status === Status.SUCCESS && (isNew || isUpdate)"
+        class="bg-blue-100 px-4 py-2 text-blue-800"
       >
-        <div class="flex-grow flex flex-col w-full">
-          <div class="flex flex-col md:flex-row gap-4 items-center">
-            <Avatar
-              :value="player.data.avatar || ''"
-              class="border-2 shadow-xl"
-              :class="{
-                'border-blue-600': last_character?.alignment === 'GOOD',
-                'border-red-600': last_character?.alignment === 'EVIL',
-              }"
-            />
-            <div class="flex-grow">
-              <h2 class="text-3xl font-dumbledor">
+        <div class="flex items-center gap-2">
+          <img src="/img/role/good.png" class="w-6 h-6" />
+          <div>
+            {{ isNew ? "Game added!" : "Game updated!" }}
+            <template v-if="isNew">
+              <nuxt-link to="/add-game" class="underline">Add another game</nuxt-link>
+              or
+              <nuxt-link
+                :to="`/@${me.data.username}?view=games`"
+                class="underline"
+              >
+                view all games
+              </nuxt-link>
+            </template>
+            <template v-if="isUpdate">
+              <nuxt-link
+                :to="`/@${me.data.username}?view=games`"
+                class="underline"
+              >
+                View all games
+              </nuxt-link>
+            </template>
+          </div>
+        </div>
+      </div>
+      <section
+        class="flex flex-col gap-4 bg-gradient-to-b from-stone-200 to-stone-400 dark:from-stone-100 dark:to-stone-300 text-black w-full lg:w-4/5 m-auto my-4 rounded shadow-lg relative"
+      >
+        <div
+          class="metadata flex flex-col-reverse md:flex-row items-center md:items-start px-4 pt-4"
+        >
+          <div class="flex-grow flex flex-col w-full">
+            <div class="flex flex-col md:flex-row gap-4 items-center">
+              <Avatar
+                :value="player.data.avatar || ''"
+                class="border-2 shadow-xl"
+                :class="{
+                  'border-blue-600': last_character?.alignment === 'GOOD',
+                  'border-red-600': last_character?.alignment === 'EVIL',
+                }"
+              />
+              <div class="flex-grow">
+                <h2 class="text-3xl font-dumbledor">
+                  <nuxt-link
+                    class="hover:underline"
+                    :to="`/@${player.data.username}`"
+                  >
+                    {{ player.data.display_name }}
+                  </nuxt-link>
+                </h2>
+                <div class="flex flex-col md:flex-row gap-2">
+                  <div
+                    v-if="game.data.is_storyteller"
+                    class="font-dumbledor text-xl font-bold bottom-[20px]"
+                  >
+                    Storyteller
+                  </div>
+                  <div
+                    v-for="(character, i) in game.data.player_characters"
+                    class="font-dumbledor text-xl font-bold bottom-[20px]"
+                    :class="{
+                      'text-blue-800': character.alignment === 'GOOD',
+                      'text-red-800': character.alignment === 'EVIL',
+                    }"
+                  >
+                    {{ character.name }}
+                    <template v-if="character.related">
+                      ({{ character.related }})
+                    </template>
+                    <template
+                      v-if="i !== game.data.player_characters.length - 1"
+                    >
+                      ➡
+                    </template>
+                  </div>
+                </div>
+                <div class="flex gap-1 items-center">
+                  <div v-if="isFavorite(game.data)">
+                    <Star class="w-5 text-primary" />
+                  </div>
+                  <time
+                    :datetime="dayjs(game.data.date).toISOString()"
+                    class="text-sm"
+                  >
+                    {{ formatDate(game.data.date) }}
+                  </time>
+                </div>
+              </div>
+              <div
+                v-if="
+                  last_character.name || last_character.alignment !== 'NEUTRAL'
+                "
+                class="font-dumbledor text-2xl"
+              >
                 <nuxt-link
-                  class="hover:underline"
-                  :to="`/@${player.data.username}`"
+                  :to="`/roles/${last_character?.role_id}`"
+                  class="hover:underline flex flex-col items-center"
                 >
-                  {{ player.data.display_name }}
+                  <Token :character="last_character" size="md" />
                 </nuxt-link>
-              </h2>
-              <div class="flex flex-col md:flex-row gap-2">
-                <div
-                  v-if="game.data.is_storyteller"
-                  class="font-dumbledor text-xl font-bold bottom-[20px]"
-                >
-                  Storyteller
-                </div>
-                <div
-                  v-for="(character, i) in game.data.player_characters"
-                  class="font-dumbledor text-xl font-bold bottom-[20px]"
-                  :class="{
-                    'text-blue-800': character.alignment === 'GOOD',
-                    'text-red-800': character.alignment === 'EVIL',
-                  }"
-                >
-                  {{ character.name }}
-                  <template v-if="character.related">
-                    ({{ character.related }})
-                  </template>
-                  <template v-if="i !== game.data.player_characters.length - 1">
-                    ➡
-                  </template>
-                </div>
               </div>
-              <div class="flex gap-1 items-center">
-                <div v-if="isFavorite(game.data)">
-                  <Star class="w-5 text-primary" />
-                </div>
-                <time
-                  :datetime="dayjs(game.data.date).toISOString()"
-                  class="text-sm"
+            </div>
+            <div class="flex flex-col md:flex-row gap-4 mt-4">
+              <label class="flex gap-3 items-center">
+                <span>Script</span>
+                <nuxt-link
+                  class="hover:underline text-blue-800 hover:text-blue-700"
+                  :to="games.getScriptLink(game.data)"
                 >
-                  {{ formatDate(game.data.date) }}
-                </time>
-              </div>
+                  {{ game.data.script }}
+                  <template
+                    v-if="
+                      game.data.associated_script?.version &&
+                      !isBaseScript(game.data.script)
+                    "
+                  >
+                    v{{ game.data.associated_script.version }}
+                  </template>
+                </nuxt-link>
+              </label>
+              <label v-if="storytellers.length" class="flex gap-3 items-center">
+                <span
+                  >Storyteller{{ storytellers.length === 1 ? "" : "s" }}</span
+                >
+                <div>
+                  <template v-for="(storyteller, index) in storytellers">
+                    <nuxt-link
+                      v-if="
+                        isStorytellerAFriend(storyteller) &&
+                        storyteller.includes('@')
+                      "
+                      class="hover:underline text-blue-800 hover:text-blue-700"
+                      :to="`/${storyteller}`"
+                    >
+                      {{ storyteller }}
+                    </nuxt-link>
+                    <template v-else>{{ storyteller }}</template>
+                    <template v-if="index !== storytellers.length - 1"
+                      >,
+                    </template>
+                  </template>
+                </div>
+              </label>
+              <label
+                v-if="game.data.player_count"
+                class="flex gap-3 items-center"
+              >
+                <span>Players</span>
+                {{ game.data.player_count }}
+              </label>
+              <label
+                v-if="game.data.traveler_count"
+                class="flex gap-3 items-center"
+              >
+                <span>Travelers</span>
+                {{ game.data.traveler_count }}
+              </label>
+            </div>
+            <div class="flex flex-col md:flex-row gap-4 mt-4 justify-start">
+              <label
+                v-if="game.data.community_name"
+                class="flex gap-3 items-center"
+              >
+                <span>Community</span>
+                <Avatar
+                  v-if="game.data.community?.icon"
+                  :value="game.data.community.icon"
+                  size="xs"
+                  class="border-stone-800 flex-shrink"
+                />
+
+                <nuxt-link
+                  v-if="game.data.community?.slug"
+                  class="hover:underline text-blue-800 hover:text-blue-700"
+                  :to="`/community/${game.data.community.slug}`"
+                >
+                  {{ game.data.community_name }}
+                </nuxt-link>
+                <div v-else>{{ game.data.community_name }}</div>
+              </label>
+              <label class="flex gap-3 items-center">
+                <span>Location</span>
+                {{
+                  game.data.location_type === "IN_PERSON"
+                    ? "In Person"
+                    : "Online"
+                }}
+                {{ game.data.location ? ` (${game.data.location})` : "" }}
+              </label>
+              <label
+                v-if="game.data?.win_v2 !== WinStatus_V2.NOT_RECORDED"
+                class="flex gap-3 items-center"
+              >
+                <span class="block">Result</span>
+                {{
+                  game.data?.win_v2 === WinStatus_V2.GOOD_WINS
+                    ? "Good Wins"
+                    : "Evil Wins"
+                }}
+              </label>
+              <label
+                v-if="game.data.parent_game"
+                class="flex gap-3 items-center"
+              >
+                <span class="block">Tagged By</span>
+                <nuxt-link
+                  class="hover:underline text-blue-800 hover:text-blue-700"
+                  :to="`/@${game.data.parent_game.user.username}`"
+                >
+                  {{ game.data.parent_game.user.display_name }}
+                </nuxt-link>
+              </label>
             </div>
             <div
-              v-if="
-                last_character.name || last_character.alignment !== 'NEUTRAL'
-              "
-              class="font-dumbledor text-2xl"
+              v-if="game.data.demon_bluffs.length || game.data.fabled.length"
+              class="flex flex-col md:flex-row gap-4 mt-4 justify-start"
             >
-              <nuxt-link
-                :to="`/roles/${last_character?.role_id}`"
-                class="hover:underline flex flex-col items-center"
+              <label
+                v-if="game.data.demon_bluffs.length"
+                class="flex gap-3 items-center"
               >
-                <Token :character="last_character" size="md" />
-              </nuxt-link>
+                <span class="block">Demon Bluffs</span>
+                <div class="flex flex-wrap gap-2">
+                  <Token
+                    v-for="bluff in game.data.demon_bluffs"
+                    :key="bluff.id"
+                    :character="bluff"
+                    size="sm"
+                  />
+                </div>
+              </label>
+              <label
+                v-if="game.data.fabled.length"
+                class="flex gap-3 items-center"
+              >
+                <span class="block">Fabled</span>
+                <div class="flex flex-wrap gap-2">
+                  <Token
+                    v-for="fabled in game.data.fabled"
+                    :key="fabled.id"
+                    :character="fabled"
+                    size="sm"
+                  />
+                </div>
+              </label>
+            </div>
+            <div v-if="game.data.bgg_id" class="flex flex-wrap gap-2 mt-4">
+              <a
+                class="flex gap-1 items-center hover:underline text-blue-800 hover:text-blue-700"
+                target="_blank"
+                :href="`https://boardgamegeek.com/play/details/${game.data.bgg_id}`"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  class="text-[#ff5100]"
+                >
+                  <path
+                    fill="currentColor"
+                    d="m19.7 4.44l-2.38.64L19.65 0L4.53 5.56l.83 6.67l-1.4 1.34L8.12 24l8.85-3.26l3.07-7.22l-1.32-1.27l.98-7.81Z"
+                  />
+                </svg>
+                BoardGameGeek
+              </a>
+            </div>
+            <div class="flex flex-wrap gap-2 mt-4">
+              <span
+                v-for="tag in game.data.tags"
+                class="bg-stone-300 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
+              >
+                <span>{{ tag }}</span>
+              </span>
             </div>
           </div>
-          <div class="flex flex-col md:flex-row gap-4 mt-4">
-            <label class="flex gap-3 items-center">
-              <span>Script</span>
-              <nuxt-link
-                class="hover:underline text-blue-800 hover:text-blue-700"
-                :to="games.getScriptLink(game.data)"
-              >
-                {{ game.data.script }}
-                <template
-                  v-if="
-                    game.data.associated_script?.version &&
-                    !isBaseScript(game.data.script)
-                  "
-                >
-                  v{{ game.data.associated_script.version }}
-                </template>
-              </nuxt-link>
-            </label>
-            <label v-if="storytellers.length" class="flex gap-3 items-center">
-              <span>Storyteller{{ storytellers.length === 1 ? "" : "s" }}</span>
-              <div>
-                <template v-for="(storyteller, index) in storytellers">
-                  <nuxt-link
-                    v-if="
-                      isStorytellerAFriend(storyteller) &&
-                      storyteller.includes('@')
-                    "
-                    class="hover:underline text-blue-800 hover:text-blue-700"
-                    :to="`/${storyteller}`"
-                  >
-                    {{ storyteller }}
-                  </nuxt-link>
-                  <template v-else>{{ storyteller }}</template>
-                  <template v-if="index !== storytellers.length - 1"
-                    >,
-                  </template>
-                </template>
-              </div>
-            </label>
-            <label
-              v-if="game.data.player_count"
-              class="flex gap-3 items-center"
-            >
-              <span>Players</span>
-              {{ game.data.player_count }}
-            </label>
-            <label
-              v-if="game.data.traveler_count"
-              class="flex gap-3 items-center"
-            >
-              <span>Travelers</span>
-              {{ game.data.traveler_count }}
-            </label>
+          <img
+            :src="
+              game.data.associated_script?.logo ?? scriptLogo(game.data.script)
+            "
+            class="w-48 md:w-64 h-48 md:h-64"
+          />
+        </div>
+        <div v-if="game.data.notes || game.data.image_urls.length" class="px-4">
+          <h3 class="font-dumbledor text-2xl">Notes and Images</h3>
+          <div
+            v-if="game.data.notes"
+            class="notes bg-stone-100 p-4 shadow-lg my-3"
+          >
+            <VueMarkdown :source="game.data.notes" />
           </div>
-          <div class="flex flex-col md:flex-row gap-4 mt-4 justify-start">
-            <label
-              v-if="game.data.community_name"
-              class="flex gap-3 items-center"
+          <div class="flex flex-col gap-5">
+            <div class="flex flex-wrap gap-5">
+              <div v-for="file in game.data.image_urls" :key="file">
+                <a
+                  :href="fullImageUrl(file)"
+                  target="_blank"
+                  class="w-full sm:w-1/2 md:w-64 md:h-64"
+                >
+                  <img
+                    :src="fullImageUrl(file)"
+                    class="w-full sm:w-1/2 md:w-64 md:h-64 object-cover shadow-lg"
+                    crossorigin="anonymous"
+                  />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          v-if="
+            game.data.grimoire[0] &&
+            game.data.grimoire[0].tokens.some((token) => token.role)
+          "
+          class="bg-center bg-cover relative text-white"
+          :class="{
+            'trouble-brewing': game.data.script === 'Trouble Brewing',
+            'sects-and-violets': game.data.script === 'Sects and Violets',
+            'bad-moon-rising': game.data.script === 'Bad Moon Rising',
+            'custom-script':
+              [
+                'Trouble Brewing',
+                'Sects and Violets',
+                'Bad Moon Rising',
+              ].indexOf(game.data.script) === -1,
+          }"
+        >
+          <button
+            type="button"
+            @click="grimPage -= 1"
+            v-if="grimPage !== 0"
+            class="absolute bottom-0 left-1 flex items-center font-dumbledor z-10"
+          >
+            <span
+              class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded"
             >
-              <span>Community</span>
-              <Avatar
-                v-if="game.data.community?.icon"
-                :value="game.data.community.icon"
-                size="xs"
-                class="border-stone-800 flex-shrink"
-              />
-
-              <nuxt-link
-                v-if="game.data.community?.slug"
-                class="hover:underline text-blue-800 hover:text-blue-700"
-                :to="`/community/${game.data.community.slug}`"
-              >
-                {{ game.data.community_name }}
-              </nuxt-link>
-              <div v-else>{{ game.data.community_name }}</div>
-            </label>
-            <label class="flex gap-3 items-center">
-              <span>Location</span>
-              {{
-                game.data.location_type === "IN_PERSON" ? "In Person" : "Online"
-              }}
-              {{ game.data.location ? ` (${game.data.location})` : "" }}
-            </label>
-            <label
-              v-if="game.data?.win_v2 !== WinStatus_V2.NOT_RECORDED"
-              class="flex gap-3 items-center"
+              {{ "<" }} Previous page
+            </span>
+          </button>
+          <button
+            v-if="grimPage !== game.data.grimoire.length - 1"
+            type="button"
+            @click="grimPage += 1"
+            class="absolute bottom-0 right-1 flex items-center font-dumbledor z-10"
+          >
+            <span
+              class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded"
             >
-              <span class="block">Result</span>
-              {{
-                game.data?.win_v2 === WinStatus_V2.GOOD_WINS
-                  ? "Good Wins"
-                  : "Evil Wins"
-              }}
-            </label>
-            <label v-if="game.data.parent_game" class="flex gap-3 items-center">
-              <span class="block">Tagged By</span>
-              <nuxt-link
-                class="hover:underline text-blue-800 hover:text-blue-700"
-                :to="`/@${game.data.parent_game.user.username}`"
-              >
-                {{ game.data.parent_game.user.display_name }}
-              </nuxt-link>
-            </label>
+              Next page
+              {{ ">" }}
+            </span>
+          </button>
+          <div class="w-screen md:w-full overflow-scroll">
+            <Grimoire :tokens="game.data.grimoire[grimPage].tokens" readonly />
           </div>
           <div
-            v-if="game.data.demon_bluffs.length || game.data.fabled.length"
-            class="flex flex-col md:flex-row gap-4 mt-4 justify-start"
+            class="text-center bg-gradient-to-b from-transparent via-stone-800 to-stone-800"
           >
-            <label
-              v-if="game.data.demon_bluffs.length"
-              class="flex gap-3 items-center"
-            >
-              <span class="block">Demon Bluffs</span>
-              <div class="flex flex-wrap gap-2">
-                <Token
-                  v-for="bluff in game.data.demon_bluffs"
-                  :key="bluff.id"
-                  :character="bluff"
-                  size="sm"
-                />
-              </div>
-            </label>
-            <label
-              v-if="game.data.fabled.length"
-              class="flex gap-3 items-center"
-            >
-              <span class="block">Fabled</span>
-              <div class="flex flex-wrap gap-2">
-                <Token
-                  v-for="fabled in game.data.fabled"
-                  :key="fabled.id"
-                  :character="fabled"
-                  size="sm"
-                />
-              </div>
-            </label>
+            Page {{ grimPage + 1 }} of {{ game.data.grimoire.length }}
           </div>
-          <div v-if="game.data.bgg_id" class="flex flex-wrap gap-2 mt-4">
-            <a
-              class="flex gap-1 items-center hover:underline text-blue-800 hover:text-blue-700"
-              target="_blank"
-              :href="`https://boardgamegeek.com/play/details/${game.data.bgg_id}`"
-            >
+        </div>
+        <Dialog v-model:visible="showSimilarGamesDialog" size="lg">
+          <template #title>
+            <h2 class="text-2xl font-dumbledor">Similar Games</h2>
+          </template>
+          <GameOverviewGrid
+            :games="similarGames"
+            readonly
+            cardWidth="w-1/2 lg:w-1/3"
+            :onCardClick="confirmMergeGame"
+          />
+        </Dialog>
+        <div v-if="isMe" class="absolute top-1 right-3" id="menu-controls">
+          <Menu v-slot="{ open }">
+            <MenuButton>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="32"
                 height="32"
-                viewBox="0 0 24 24"
-                class="text-[#ff5100]"
+                viewBox="0 0 16 16"
+                class="w-6"
               >
                 <path
-                  fill="currentColor"
-                  d="m19.7 4.44l-2.38.64L19.65 0L4.53 5.56l.83 6.67l-1.4 1.34L8.12 24l8.85-3.26l3.07-7.22l-1.32-1.27l.98-7.81Z"
+                  fill="#000"
+                  d="M3 9.5a1.5 1.5 0 1 1 0-3a1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3a1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3a1.5 1.5 0 0 1 0 3"
                 />
               </svg>
-              BoardGameGeek
-            </a>
-          </div>
-          <div class="flex flex-wrap gap-2 mt-4">
-            <span
-              v-for="tag in game.data.tags"
-              class="bg-stone-300 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
+            </MenuButton>
+            <transition
+              enter-active-class="transition duration-100 ease-out"
+              enter-from-class="transform scale-95 opacity-0"
+              enter-to-class="transform scale-100 opacity-100"
+              leave-active-class="transition duration-75 ease-out"
+              leave-from-class="transform scale-100 opacity-100"
+              leave-to-class="transform scale-95 opacity-0"
             >
-              <span>{{ tag }}</span>
-            </span>
-          </div>
-        </div>
-        <img
-          :src="
-            game.data.associated_script?.logo ?? scriptLogo(game.data.script)
-          "
-          class="w-48 md:w-64 h-48 md:h-64"
-        />
-      </div>
-      <div v-if="game.data.notes || game.data.image_urls.length" class="px-4">
-        <h3 class="font-dumbledor text-2xl">Notes and Images</h3>
-        <div
-          v-if="game.data.notes"
-          class="notes bg-stone-100 p-4 shadow-lg my-3"
-        >
-          <VueMarkdown :source="game.data.notes" />
-        </div>
-        <div class="flex flex-col gap-5">
-          <div class="flex flex-wrap gap-5">
-            <div v-for="file in game.data.image_urls" :key="file">
-              <a
-                :href="fullImageUrl(file)"
-                target="_blank"
-                class="w-full sm:w-1/2 md:w-64 md:h-64"
-              >
-                <img
-                  :src="fullImageUrl(file)"
-                  class="w-full sm:w-1/2 md:w-64 md:h-64 object-cover shadow-lg"
-                  crossorigin="anonymous"
-                />
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        v-if="
-          game.data.grimoire[0] &&
-          game.data.grimoire[0].tokens.some((token) => token.role)
-        "
-        class="bg-center bg-cover relative text-white"
-        :class="{
-          'trouble-brewing': game.data.script === 'Trouble Brewing',
-          'sects-and-violets': game.data.script === 'Sects and Violets',
-          'bad-moon-rising': game.data.script === 'Bad Moon Rising',
-          'custom-script':
-            ['Trouble Brewing', 'Sects and Violets', 'Bad Moon Rising'].indexOf(
-              game.data.script
-            ) === -1,
-        }"
-      >
-        <button
-          type="button"
-          @click="grimPage -= 1"
-          v-if="grimPage !== 0"
-          class="absolute bottom-0 left-1 flex items-center font-dumbledor z-10"
-        >
-          <span
-            class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded"
-          >
-            {{ "<" }} Previous page
-          </span>
-        </button>
-        <button
-          v-if="grimPage !== game.data.grimoire.length - 1"
-          type="button"
-          @click="grimPage += 1"
-          class="absolute bottom-0 right-1 flex items-center font-dumbledor z-10"
-        >
-          <span
-            class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded"
-          >
-            Next page
-            {{ ">" }}
-          </span>
-        </button>
-        <div class="w-screen md:w-full overflow-scroll">
-          <Grimoire :tokens="game.data.grimoire[grimPage].tokens" readonly />
-        </div>
-        <div
-          class="text-center bg-gradient-to-b from-transparent via-stone-800 to-stone-800"
-        >
-          Page {{ grimPage + 1 }} of {{ game.data.grimoire.length }}
-        </div>
-      </div>
-      <Dialog v-model:visible="showSimilarGamesDialog" size="lg">
-        <template #title>
-          <h2 class="text-2xl font-dumbledor">Similar Games</h2>
-        </template>
-        <GameOverviewGrid
-          :games="similarGames"
-          readonly
-          cardWidth="w-1/2 lg:w-1/3"
-          :onCardClick="confirmMergeGame"
-        />
-      </Dialog>
-      <div v-if="isMe" class="absolute top-1 right-3" id="menu-controls">
-        <Menu v-slot="{ open }">
-          <MenuButton>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="32"
-              height="32"
-              viewBox="0 0 16 16"
-              class="w-6"
-            >
-              <path
-                fill="#000"
-                d="M3 9.5a1.5 1.5 0 1 1 0-3a1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3a1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3a1.5 1.5 0 0 1 0 3"
-              />
-            </svg>
-          </MenuButton>
-          <transition
-            enter-active-class="transition duration-100 ease-out"
-            enter-from-class="transform scale-95 opacity-0"
-            enter-to-class="transform scale-100 opacity-100"
-            leave-active-class="transition duration-75 ease-out"
-            leave-from-class="transform scale-100 opacity-100"
-            leave-to-class="transform scale-95 opacity-0"
-          >
-            <div v-show="open || showMenuForTour">
-              <MenuItems
-                static
-                class="absolute right-0 z-10 bg-stone-100 dark:bg-stone-900 rounded shadow-md whitespace-nowrap flex flex-col items-start min-w-[150px] divide-y divide-stone-500 dark:divide-stone-700 overflow-hidden"
-              >
-                <div
-                  v-if="
-                    game.data.waiting_for_confirmation ||
-                    similarGames.length > 0
-                  "
-                  class="w-full"
+              <div v-show="open || showMenuForTour">
+                <MenuItems
+                  static
+                  class="absolute right-0 z-10 bg-stone-100 dark:bg-stone-900 rounded shadow-md whitespace-nowrap flex flex-col items-start min-w-[150px] divide-y divide-stone-500 dark:divide-stone-700 overflow-hidden"
                 >
-                  <MenuItem v-if="game.data.waiting_for_confirmation">
-                    <button
-                      @click="confirmGame"
-                      class="flex gap-1 w-full items-center dark:text-white text-sm px-2 min-h-[32px]"
-                    >
-                      Add game to my Profile
-                    </button>
-                  </MenuItem>
-                  <MenuItem v-if="similarGames.length > 0">
-                    <button
-                      @click="showSimilarGamesDialog = true"
-                      :disabled="mergeInFlight"
-                      class="flex gap-1 w-full items-center dark:text-white text-sm px-2 min-h-[32px]"
-                    >
-                      Merge with similar game
-                    </button>
-                  </MenuItem>
-                </div>
-                <div class="w-full">
-                  <MenuItem>
-                    <button
-                      @click="toggleFavorite"
-                      class="flex gap-1 w-full items-center dark:text-white text-sm px-1 py-1"
-                    >
-                      <Star class="w-5 text-primary" />
-                      <div id="favorite-game">Mark as Favorite</div>
-                    </button>
-                  </MenuItem>
-                  <MenuItem v-if="!game.data.waiting_for_confirmation">
-                    <nuxt-link
-                      class="flex gap-1 w-full items-center dark:text-white text-sm px-2"
-                      :to="`/game/${route.params.id}/edit`"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="32"
-                        height="32"
-                        viewBox="0 0 32 32"
-                        class="w-4"
+                  <div
+                    v-if="
+                      game.data.waiting_for_confirmation ||
+                      similarGames.length > 0
+                    "
+                    class="w-full"
+                  >
+                    <MenuItem v-if="game.data.waiting_for_confirmation">
+                      <button
+                        @click="confirmGame"
+                        class="flex gap-1 w-full items-center dark:text-white text-sm px-2 min-h-[32px]"
                       >
-                        <path
-                          fill="currentColor"
-                          d="M2 26h28v2H2zM25.4 9c.8-.8.8-2 0-2.8l-3.6-3.6c-.8-.8-2-.8-2.8 0l-15 15V24h6.4l15-15zm-5-5L24 7.6l-3 3L17.4 7l3-3zM6 22v-3.6l10-10l3.6 3.6l-10 10H6z"
-                        />
-                      </svg>
-                      <div id="edit-game">Edit</div>
-                    </nuxt-link>
-                  </MenuItem>
-                  <MenuItem>
-                    <button
-                      @click="deleteGame(false)"
-                      class="flex gap-1 w-full items-center dark:text-white text-sm px-2"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="32"
-                        height="32"
-                        viewBox="0 0 512 512"
-                        class="w-4"
+                        Add game to my Profile
+                      </button>
+                    </MenuItem>
+                    <MenuItem v-if="similarGames.length > 0">
+                      <button
+                        @click="showSimilarGamesDialog = true"
+                        :disabled="mergeInFlight"
+                        class="flex gap-1 w-full items-center dark:text-white text-sm px-2 min-h-[32px]"
                       >
-                        <path
-                          d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
-                          fill="currentColor"
-                        />
-                        <path d="M249 160h14v241h-14z" fill="currentColor" />
-                        <path
-                          d="M320 160h-14.6l-10.7 241h14.6z"
-                          fill="currentColor"
-                        />
-                        <path
-                          d="M206.5 160H192l10.7 241h14.6z"
-                          fill="currentColor"
-                        />
-                      </svg>
-                      <div id="delete-game">
-                        <template v-if="game.data.waiting_for_confirmation"
-                          >Ignore</template
+                        Merge with similar game
+                      </button>
+                    </MenuItem>
+                  </div>
+                  <div class="w-full">
+                    <MenuItem>
+                      <button
+                        @click="toggleFavorite"
+                        class="flex gap-1 w-full items-center dark:text-white text-sm px-1 py-1"
+                      >
+                        <Star class="w-5 text-primary" />
+                        <div id="favorite-game">Mark as Favorite</div>
+                      </button>
+                    </MenuItem>
+                    <MenuItem v-if="!game.data.waiting_for_confirmation">
+                      <nuxt-link
+                        class="flex gap-1 w-full items-center dark:text-white text-sm px-2"
+                        :to="`/game/${route.params.id}/edit`"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="32"
+                          height="32"
+                          viewBox="0 0 32 32"
+                          class="w-4"
                         >
-                        <template v-else>Delete</template>
-                      </div>
-                    </button>
-                  </MenuItem>
-                  <MenuItem v-if="game.data.waiting_for_confirmation">
-                    <button
-                      @click="deleteGame(true)"
-                      class="flex gap-1 w-full items-center dark:text-white text-sm px-2"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="32"
-                        height="32"
-                        viewBox="0 0 512 512"
-                        class="w-4"
+                          <path
+                            fill="currentColor"
+                            d="M2 26h28v2H2zM25.4 9c.8-.8.8-2 0-2.8l-3.6-3.6c-.8-.8-2-.8-2.8 0l-15 15V24h6.4l15-15zm-5-5L24 7.6l-3 3L17.4 7l3-3zM6 22v-3.6l10-10l3.6 3.6l-10 10H6z"
+                          />
+                        </svg>
+                        <div id="edit-game">Edit</div>
+                      </nuxt-link>
+                    </MenuItem>
+                    <MenuItem>
+                      <button
+                        @click="deleteGame(false)"
+                        class="flex gap-1 w-full items-center dark:text-white text-sm px-2"
                       >
-                        <path
-                          d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
-                          fill="currentColor"
-                        />
-                        <path d="M249 160h14v241h-14z" fill="currentColor" />
-                        <path
-                          d="M320 160h-14.6l-10.7 241h14.6z"
-                          fill="currentColor"
-                        />
-                        <path
-                          d="M206.5 160H192l10.7 241h14.6z"
-                          fill="currentColor"
-                        />
-                      </svg>
-                      Ignore and Untag Myself
-                    </button>
-                  </MenuItem>
-                </div>
-                <div class="w-full">
-                  <MenuItem v-if="canPostToBGG">
-                    <button
-                      class="bg-[#3f3a60] hover:bg-[#2e2950] transition duration-150 text-white flex items-center w-full text-sm min-h-[32px]"
-                      @click="initPostToBGG"
-                      :disabled="bggInFlight"
-                    >
-                      <div class="w-6 ml-1">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="32"
+                          height="32"
+                          viewBox="0 0 512 512"
+                          class="w-4"
+                        >
+                          <path
+                            d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
+                            fill="currentColor"
+                          />
+                          <path d="M249 160h14v241h-14z" fill="currentColor" />
+                          <path
+                            d="M320 160h-14.6l-10.7 241h14.6z"
+                            fill="currentColor"
+                          />
+                          <path
+                            d="M206.5 160H192l10.7 241h14.6z"
+                            fill="currentColor"
+                          />
+                        </svg>
+                        <div id="delete-game">
+                          <template v-if="game.data.waiting_for_confirmation"
+                            >Ignore</template
+                          >
+                          <template v-else>Delete</template>
+                        </div>
+                      </button>
+                    </MenuItem>
+                    <MenuItem v-if="game.data.waiting_for_confirmation">
+                      <button
+                        @click="deleteGame(true)"
+                        class="flex gap-1 w-full items-center dark:text-white text-sm px-2"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="32"
+                          height="32"
+                          viewBox="0 0 512 512"
+                          class="w-4"
+                        >
+                          <path
+                            d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
+                            fill="currentColor"
+                          />
+                          <path d="M249 160h14v241h-14z" fill="currentColor" />
+                          <path
+                            d="M320 160h-14.6l-10.7 241h14.6z"
+                            fill="currentColor"
+                          />
+                          <path
+                            d="M206.5 160H192l10.7 241h14.6z"
+                            fill="currentColor"
+                          />
+                        </svg>
+                        Ignore and Untag Myself
+                      </button>
+                    </MenuItem>
+                  </div>
+                  <div class="w-full">
+                    <MenuItem v-if="canPostToBGG">
+                      <button
+                        class="bg-[#3f3a60] hover:bg-[#2e2950] transition duration-150 text-white flex items-center w-full text-sm min-h-[32px]"
+                        @click="initPostToBGG"
+                        :disabled="bggInFlight"
+                      >
+                        <div class="w-6 ml-1">
+                          <img
+                            src="/img/bgg.png"
+                            class="w-6 h-6 m-auto"
+                            :class="{ 'animate-spin': bggInFlight }"
+                          />
+                        </div>
+                        <span v-if="game.data.bgg_id">Delete from BGG</span>
+                        <span v-else>Post to BGG</span>
+                      </button>
+                    </MenuItem>
+                    <MenuItem v-if="canPostToBGStats">
+                      <a
+                        :href="bgStatsLink"
+                        class="bg-[#333] transition duration-150 dark:text-white flex items-center w-full gap-1 text-sm min-h-[32px]"
+                      >
                         <img
-                          src="/img/bgg.png"
-                          class="w-6 h-6 m-auto"
-                          :class="{ 'animate-spin': bggInFlight }"
+                          src="https://clocktracker.app/img/bgstats.png"
+                          class="w-5 h-5 ml-1"
                         />
-                      </div>
-                      <span v-if="game.data.bgg_id">Delete from BGG</span>
-                      <span v-else>Post to BGG</span>
-                    </button>
-                  </MenuItem>
-                  <MenuItem v-if="canPostToBGStats">
-                    <a
-                      :href="bgStatsLink"
-                      class="bg-[#333] transition duration-150 dark:text-white flex items-center w-full gap-1 text-sm min-h-[32px]"
-                    >
-                      <img
-                        src="https://clocktracker.app/img/bgstats.png"
-                        class="w-5 h-5 ml-1"
-                      />
-                      Post to BGStats
-                    </a>
-                  </MenuItem>
-                </div>
-              </MenuItems>
-            </div>
-          </transition>
-        </Menu>
-      </div>
-      <Tour
-        v-if="user?.id && game.data.user_id === user.id"
-        :steps="tour"
-        tourKey="game-viewer-v2"
-        @onTourEnd="showMenuForTour = false"
-      />
-    </section>
+                        Post to BGStats
+                      </a>
+                    </MenuItem>
+                  </div>
+                </MenuItems>
+              </div>
+            </transition>
+          </Menu>
+        </div>
+        <Tour
+          v-if="user?.id && game.data.user_id === user.id"
+          :steps="tour"
+          tourKey="game-viewer-v2"
+          @onTourEnd="showMenuForTour = false"
+        />
+      </section>
+    </template>
     <template v-else>
       <Loading class="h-screen" />
     </template>
@@ -552,6 +595,20 @@ const gameId = route.params.id as string;
 const { bggInFlight, canPostToBGG, postToBGG } = useBGG();
 const mergeInFlight = ref(false);
 const me = useMe();
+
+const isNew = route.query.new === "true";
+const isUpdate = route.query.updated === "true";
+
+if (isNew || isUpdate) {
+  // Update the route query params to remove them
+  router.replace({
+    query: {
+      ...route.query,
+      new: undefined,
+      updated: undefined,
+    },
+  });
+}
 
 const game = computed(() => games.getGame(gameId));
 const player = computed<FetchStatus<User>>(() => {
@@ -695,7 +752,9 @@ const storytellers = computed(() => {
 
   if (game.value.data.is_storyteller) {
     storytellerList.push(`@${game.value.data.user.username}`);
-  } else if (game.value.data.storyteller) {
+  }
+
+  if (game.value.data.storyteller) {
     storytellerList.push(game.value.data.storyteller);
   }
 

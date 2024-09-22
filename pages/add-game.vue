@@ -237,6 +237,7 @@ async function submitGame() {
     }
   })();
   if (
+    game.date !== dayjs().format("YYYY-MM-DD") ||
     confirm(
       `Are you sure you are ready to save this game? Any tagged players will be notified${privacyNotice}`
     )
@@ -253,7 +254,7 @@ async function submitGame() {
       console.error(error.value);
     } else {
       localStorage.removeItem("draftGame");
-      router.push(`/game/${data.value?.id}`);
+      router.push(`/game/${data.value?.id}?new=true`);
     }
   }
 }

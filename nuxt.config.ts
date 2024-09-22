@@ -1,6 +1,11 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  experimental: {
+    viewTransition: true
+  },
+
   devtools: { enabled: false },
+
   modules: [
     "@nuxtjs/tailwindcss",
     "@nuxtjs/supabase",
@@ -9,6 +14,7 @@ export default defineNuxtConfig({
     "floating-vue/nuxt",
     "nuxt-cron",
   ],
+
   app: {
     head: {
       charset: "utf-8",
@@ -93,14 +99,17 @@ export default defineNuxtConfig({
       ],
     },
   },
+
   supabase: {
     redirect: false,
   },
+
   runtimeConfig: {
     public: {
       sentryDsn: process.env.SENTRY_DSN,
     },
   },
+
   pwa: {
     registerType: "autoUpdate",
     includeAssets: [
@@ -184,6 +193,7 @@ export default defineNuxtConfig({
       ],
     },
   },
+
   routeRules: {
     "/scripts/**": {
       ssr: false,
@@ -192,4 +202,6 @@ export default defineNuxtConfig({
       ssr: false,
     },
   },
+
+  compatibilityDate: "2024-09-21",
 });
