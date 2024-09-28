@@ -186,7 +186,7 @@ async function submitGame() {
       console.error(error.value);
     } else {
       inFlight.value = false;
-      router.push("/");
+      router.back();
     }
   }
 }
