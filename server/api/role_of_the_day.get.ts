@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
+import dayjs from "dayjs";
 
 const prisma = new PrismaClient();
 
@@ -10,37 +11,21 @@ export default defineEventHandler(async (handler) => {
     },
   });
 
-  console.log(roleCount + " roles");
+  const day = new Date().getDate();
 
-  // Get a random role based on the count and the current date
-  const roleIndex = new Date().getDate() % roleCount;
-
-  console.log("Selected role index", roleIndex);
+  const roleIndex =
+    dayjs()
+      .startOf("day")
+      .add((day % 7) * (day / 30), "seconds")
+      .add(day, "minutes")
+      .unix() % roleCount;
 
   const role = await prisma.role.findFirst({
     where: {
       custom_role: false,
     },
-    // include: {
-    //   scripts: {
-    //     where: {
-    //       is_custom_script: false,
-    //     },
-    //     select: {
-    //       name: true,
-    //     },
-    //     take: 5,
-    //     orderBy: {
-    //       games: {
-    //         _count: "desc",
-    //       },
-    //     },
-    //   },
-    // },
     skip: roleIndex,
   });
-
-  console.log(role);
 
   return role;
 });
