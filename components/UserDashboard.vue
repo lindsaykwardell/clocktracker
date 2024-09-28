@@ -27,29 +27,48 @@
           </li>
         </ul>
         <hr class="border-stone-600" />
-        <h1 class="text-xl font-dumbledor text-center">Recent Scripts</h1>
-        <ul class="px-4">
-          <li v-for="script in games.getRecentScripts">
-            <nuxt-link :to="script.url" class="hover:underline">
-              {{ script.name }}
-            </nuxt-link>
-          </li>
-        </ul>
+        <h1 class="text-xl font-dumbledor text-center">Role of the Day</h1>
+        <nuxt-link class="flex flex-col items-center" :to="`/roles/${roleOfTheDay.data.value?.id}`">
+          <Token
+            size="lg"
+            :character="{
+            name: roleOfTheDay.data.value?.name,
+            alignment: roleOfTheDay.data.value?.initial_alignment,
+            role: roleOfTheDay.data.value!,
+          }"
+          />
+          <h2 class="text-center font-bold">
+            {{ roleOfTheDay.data.value?.name }}
+          </h2>
+        </nuxt-link>
         <hr class="border-stone-600" />
-        <h1 class="font-dumbledor text-xl text-center">Communities</h1>
-        <ul>
-          <li
-            v-for="community in myCommunities"
-            class="flex gap-2 items-center"
-          >
-            <Avatar :value="community.icon" size="xs" />
-            <nuxt-link
-              :to="`/community/${community.slug}`"
-              class="hover:underline"
-              >{{ community.name }}</nuxt-link
+        <template v-if="games.getRecentScripts.length > 0">
+          <h1 class="text-xl font-dumbledor text-center">Recent Scripts</h1>
+          <ul class="px-4">
+            <li v-for="script in games.getRecentScripts">
+              <nuxt-link :to="script.url" class="hover:underline">
+                {{ script.name }}
+              </nuxt-link>
+            </li>
+          </ul>
+          <hr class="border-stone-600" />
+        </template>
+        <template v-if="myCommunities.length > 0">
+          <h1 class="font-dumbledor text-xl text-center">Communities</h1>
+          <ul>
+            <li
+              v-for="community in myCommunities"
+              class="flex gap-2 items-center"
             >
-          </li>
-        </ul>
+              <Avatar :value="community.icon" size="xs" />
+              <nuxt-link
+                :to="`/community/${community.slug}`"
+                class="hover:underline"
+                >{{ community.name }}</nuxt-link
+              >
+            </li>
+          </ul>
+        </template>
       </div>
       <div class="content md:overflow-y-scroll">
         <ClientOnly>
@@ -214,6 +233,7 @@
 <script setup lang="ts">
 import dayjs from "dayjs";
 import type { Event } from "~/composables/useCommunities";
+import { Status } from "~/composables/useFetchStatus.js";
 
 definePageMeta({
   middleware: "auth",
@@ -222,6 +242,7 @@ definePageMeta({
 const me = useMe();
 const games = useGames();
 const updates = await useFetch("/api/dashboard/recent");
+const roleOfTheDay = await useFetch("/api/role_of_the_day");
 
 const { data: events } = await useFetch<Event[]>("/api/events");
 const selectedDay = ref<dayjs.Dayjs | null>(dayjs());
