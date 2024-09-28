@@ -96,6 +96,7 @@ export default defineEventHandler(async (handler) => {
     _count: {
       script_id: true,
     },
+    take: 10,
   });
 
   const popular_scripts_formatted = [];
