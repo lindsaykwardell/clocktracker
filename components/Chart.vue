@@ -110,28 +110,7 @@ const emit = defineEmits(["deleteChart"]);
 const width = computed(() => (props.options.width || 250) + "px");
 const height = computed(() => (props.options.height || 250) + "px");
 
-const labels = computed(() => {
-  if (props.options.data === "ROLE") {
-    return ["Townsfolk", "Outsider", "Minion", "Demon", "Traveler"];
-  } else if (props.options.data === "ALIGNMENT") {
-    return ["Good", "Evil"];
-  } else if (props.options.data === "SCRIPT") {
-    return [
-      "Trouble Brewing",
-      "Bad Moon Rising",
-      "Sects and Violets",
-      "Custom Script",
-    ];
-  } else if (props.options.data === "GAME_SIZE") {
-    return ["Teensy", "1 Minion", "2 Minions", "3 Minions"];
-  } else if (props.options.data === "WIN") {
-    return ["Win", "Loss"];
-  } else {
-    return [];
-  }
-});
-
-const datasets = computed(() => {
+const chartData = computed(() => {
   const games = props.games.filter(
     (game) =>
       !game.ignore_for_stats &&
@@ -141,8 +120,41 @@ const datasets = computed(() => {
   );
 
   if (props.options.data === "ROLE") {
-    return (
-      getPivot(
+    const townsfolk = games.filter(
+      (game) =>
+        game.player_characters[game.player_characters.length - 1]?.role
+          ?.type === "TOWNSFOLK"
+    ).length;
+    const outsider = games.filter(
+      (game) =>
+        game.player_characters[game.player_characters.length - 1]?.role
+          ?.type === "OUTSIDER"
+    ).length;
+    const minion = games.filter(
+      (game) =>
+        game.player_characters[game.player_characters.length - 1]?.role
+          ?.type === "MINION"
+    ).length;
+    const demon = games.filter(
+      (game) =>
+        game.player_characters[game.player_characters.length - 1]?.role
+          ?.type === "DEMON"
+    ).length;
+    const traveler = games.filter(
+      (game) =>
+        game.player_characters[game.player_characters.length - 1]?.role
+          ?.type === "TRAVELER"
+    ).length;
+    const total = townsfolk + outsider + minion + demon + traveler;
+    return {
+      labels: [
+        `Townsfolk (${Math.round((townsfolk / total) * 100)}%)`,
+        `Outsider (${Math.round((outsider / total) * 100)}%)`,
+        `Minion (${Math.round((minion / total) * 100)}%)`,
+        `Demon (${Math.round((demon / total) * 100)}%)`,
+        `Traveler (${Math.round((traveler / total) * 100)}%)`,
+      ],
+      datasets: getPivot(
         games,
         [
           (game) =>
@@ -161,36 +173,16 @@ const datasets = computed(() => {
             game.player_characters[game.player_characters.length - 1]?.role
               ?.type === "TRAVELER",
         ],
-        [colors.townsfolk, colors.outsider, colors.minion, colors.demon]
+        [
+          colors.townsfolk,
+          colors.outsider,
+          colors.minion,
+          colors.demon,
+          colors.traveler,
+        ]
       ) ?? [
         {
-          data: [
-            games.filter(
-              (game) =>
-                game.player_characters[game.player_characters.length - 1]?.role
-                  ?.type === "TOWNSFOLK"
-            ).length,
-            games.filter(
-              (game) =>
-                game.player_characters[game.player_characters.length - 1]?.role
-                  ?.type === "OUTSIDER"
-            ).length,
-            games.filter(
-              (game) =>
-                game.player_characters[game.player_characters.length - 1]?.role
-                  ?.type === "MINION"
-            ).length,
-            games.filter(
-              (game) =>
-                game.player_characters[game.player_characters.length - 1]?.role
-                  ?.type === "DEMON"
-            ).length,
-            games.filter(
-              (game) =>
-                game.player_characters[game.player_characters.length - 1]?.role
-                  ?.type === "TRAVELER"
-            ).length,
-          ],
+          data: [townsfolk, outsider, minion, demon, traveler],
           backgroundColor: [
             colors.townsfolk,
             colors.outsider,
@@ -199,11 +191,26 @@ const datasets = computed(() => {
             colors.traveler,
           ],
         },
-      ]
-    );
+      ],
+    };
   } else if (props.options.data === "ALIGNMENT") {
-    return (
-      getPivot(
+    const good = games.filter(
+      (game) =>
+        game.player_characters[game.player_characters.length - 1]?.alignment ===
+        "GOOD"
+    ).length;
+    const evil = games.filter(
+      (game) =>
+        game.player_characters[game.player_characters.length - 1]?.alignment ===
+        "EVIL"
+    ).length;
+    const total = good + evil;
+    return {
+      labels: [
+        `Good (${Math.round((good / total) * 100)}%)`,
+        `Evil (${Math.round((evil / total) * 100)}%)`,
+      ],
+      datasets: getPivot(
         games,
         [
           (game) =>
@@ -216,25 +223,34 @@ const datasets = computed(() => {
         [colors.good, colors.evil]
       ) ?? [
         {
-          data: [
-            games.filter(
-              (game) =>
-                game.player_characters[game.player_characters.length - 1]
-                  ?.alignment === "GOOD"
-            ).length,
-            games.filter(
-              (game) =>
-                game.player_characters[game.player_characters.length - 1]
-                  ?.alignment === "EVIL"
-            ).length,
-          ],
+          data: [good, evil],
           backgroundColor: [colors.good, colors.evil],
         },
-      ]
-    );
+      ],
+    };
   } else if (props.options.data === "SCRIPT") {
-    return (
-      getPivot(
+    const troubleBrewing = games.filter(
+      (game) => game.script === Script.TroubleBrewing
+    ).length;
+    const badMoonRising = games.filter(
+      (game) => game.script === Script.BadMoonRising
+    ).length;
+    const sectsAndViolets = games.filter(
+      (game) => game.script === Script.SectsAndViolets
+    ).length;
+    const customScript = games.filter(
+      (game) => !isBaseScript(game.script)
+    ).length;
+    const total =
+      troubleBrewing + badMoonRising + sectsAndViolets + customScript;
+    return {
+      labels: [
+        `Trouble Brewing (${Math.round((troubleBrewing / total) * 100)}%)`,
+        `Bad Moon Rising (${Math.round((badMoonRising / total) * 100)}%)`,
+        `Sects and Violets (${Math.round((sectsAndViolets / total) * 100)}%)`,
+        `Custom Script (${Math.round((customScript / total) * 100)}%)`,
+      ],
+      datasets: getPivot(
         games,
         [
           (game) => game.script === Script.TroubleBrewing,
@@ -245,21 +261,35 @@ const datasets = computed(() => {
         [colors.tb, colors.bmr, colors.snv, colors.custom]
       ) ?? [
         {
-          data: [
-            games.filter((game) => game.script === Script.TroubleBrewing)
-              .length,
-            games.filter((game) => game.script === Script.BadMoonRising).length,
-            games.filter((game) => game.script === Script.SectsAndViolets)
-              .length,
-            games.filter((game) => !isBaseScript(game.script)).length,
-          ],
+          data: [troubleBrewing, badMoonRising, sectsAndViolets, customScript],
           backgroundColor: [colors.tb, colors.bmr, colors.snv, colors.custom],
         },
-      ]
-    );
+      ],
+    };
   } else if (props.options.data === "GAME_SIZE") {
-    return (
-      getPivot(
+    const teensy = games.filter(
+      (game) => game.player_count && game.player_count <= 6
+    ).length;
+    const small = games.filter(
+      (game) =>
+        game.player_count && game.player_count > 6 && game.player_count <= 10
+    ).length;
+    const medium = games.filter(
+      (game) =>
+        game.player_count && game.player_count > 10 && game.player_count <= 13
+    ).length;
+    const large = games.filter(
+      (game) => game.player_count && game.player_count > 13
+    ).length;
+    const total = teensy + small + medium + large;
+    return {
+      labels: [
+        `Teensy (${Math.round((teensy / total) * 100)}%)`,
+        `1 Minion (${Math.round((small / total) * 100)}%)`,
+        `2 Minions (${Math.round((medium / total) * 100)}%)`,
+        `3 Minions (${Math.round((large / total) * 100)}%)`,
+      ],
+      datasets: getPivot(
         games,
         [
           (game) => !!game.player_count && game.player_count <= 6,
@@ -276,24 +306,7 @@ const datasets = computed(() => {
         [colors.teensy, colors.small, colors.medium, colors.large]
       ) ?? [
         {
-          data: [
-            games.filter((game) => game.player_count && game.player_count <= 6)
-              .length,
-            games.filter(
-              (game) =>
-                game.player_count &&
-                game.player_count > 6 &&
-                game.player_count <= 10
-            ).length,
-            games.filter(
-              (game) =>
-                game.player_count &&
-                game.player_count > 10 &&
-                game.player_count <= 13
-            ).length,
-            games.filter((game) => game.player_count && game.player_count > 13)
-              .length,
-          ],
+          data: [teensy, small, medium, large],
           backgroundColor: [
             colors.teensy,
             colors.small,
@@ -301,11 +314,34 @@ const datasets = computed(() => {
             colors.large,
           ],
         },
-      ]
-    );
+      ],
+    };
   } else if (props.options.data === "WIN") {
-    return (
-      getPivot(
+    const win = games.filter((game) => {
+      const lastAlignment =
+        game.player_characters[game.player_characters.length - 1]?.alignment;
+
+      return (
+        (lastAlignment === "GOOD" && game.win_v2 === WinStatus_V2.GOOD_WINS) ||
+        (lastAlignment === "EVIL" && game.win_v2 === WinStatus_V2.EVIL_WINS)
+      );
+    }).length;
+    const loss = games.filter((game) => {
+      const lastAlignment =
+        game.player_characters[game.player_characters.length - 1]?.alignment;
+
+      return (
+        (lastAlignment === "GOOD" && game.win_v2 === WinStatus_V2.EVIL_WINS) ||
+        (lastAlignment === "EVIL" && game.win_v2 === WinStatus_V2.GOOD_WINS)
+      );
+    }).length;
+    const total = win + loss;
+    return {
+      labels: [
+        `Win (${Math.round((win / total) * 100)}%)`,
+        `Loss (${Math.round((loss / total) * 100)}%)`,
+      ],
+      datasets: getPivot(
         games,
         [
           (game) => {
@@ -336,39 +372,17 @@ const datasets = computed(() => {
         [colors.win, colors.loss]
       ) ?? [
         {
-          data: [
-            games.filter((game) => {
-              const lastAlignment =
-                game.player_characters[game.player_characters.length - 1]
-                  ?.alignment;
-
-              return (
-                (lastAlignment === "GOOD" &&
-                  game.win_v2 === WinStatus_V2.GOOD_WINS) ||
-                (lastAlignment === "EVIL" &&
-                  game.win_v2 === WinStatus_V2.EVIL_WINS)
-              );
-            }).length,
-            games.filter((game) => {
-              const lastAlignment =
-                game.player_characters[game.player_characters.length - 1]
-                  ?.alignment;
-
-              return (
-                (lastAlignment === "GOOD" &&
-                  game.win_v2 === WinStatus_V2.EVIL_WINS) ||
-                (lastAlignment === "EVIL" &&
-                  game.win_v2 === WinStatus_V2.GOOD_WINS)
-              );
-            }).length,
-          ],
+          data: [win, loss],
           backgroundColor: [colors.win, colors.loss],
         },
-      ]
-    );
+      ],
+    };
   }
 
-  return [];
+  return {
+    labels: [],
+    datasets: [],
+  };
 });
 
 function getPivot(
@@ -382,232 +396,302 @@ function getPivot(
     props.options.type === "BAR" ? categoryColor : dataColors;
 
   if (props.options.pivot === "ROLE") {
+    const townsfolk = validators.map(
+      (validator, index) =>
+        games.filter(
+          (game) =>
+            game.player_characters[game.player_characters.length - 1]?.role
+              ?.type === "TOWNSFOLK" && validator(game)
+        ).length
+    );
+    const outsider = validators.map(
+      (validator) =>
+        games.filter(
+          (game) =>
+            game.player_characters[game.player_characters.length - 1]?.role
+              ?.type === "OUTSIDER" && validator(game)
+        ).length
+    );
+    const minion = validators.map(
+      (validator) =>
+        games.filter(
+          (game) =>
+            game.player_characters[game.player_characters.length - 1]?.role
+              ?.type === "MINION" && validator(game)
+        ).length
+    );
+    const demon = validators.map(
+      (validator) =>
+        games.filter(
+          (game) =>
+            game.player_characters[game.player_characters.length - 1]?.role
+              ?.type === "DEMON" && validator(game)
+        ).length
+    );
+    const traveler = validators.map(
+      (validator) =>
+        games.filter(
+          (game) =>
+            game.player_characters[game.player_characters.length - 1]?.role
+              ?.type === "TRAVELER" && validator(game)
+        ).length
+    );
+
+    const total = [
+      ...townsfolk,
+      ...outsider,
+      ...minion,
+      ...demon,
+      ...traveler,
+    ].reduce((acc, curr) => acc + curr, 0);
+
     return [
       {
-        label: "Townsfolk",
-        data: validators.map(
-          (validator, index) =>
-            games.filter(
-              (game) =>
-                game.player_characters[game.player_characters.length - 1]?.role
-                  ?.type === "TOWNSFOLK" && validator(game)
-            ).length
-        ),
+        label: `Townsfolk (${Math.round(
+          (townsfolk.reduce((acc, curr) => acc + curr, 0) / total) * 100
+        )}%)`,
+        data: townsfolk,
         backgroundColor: getColor(colors.townsfolk),
       },
       {
-        label: "Outsider",
-        data: validators.map(
-          (validator) =>
-            games.filter(
-              (game) =>
-                game.player_characters[game.player_characters.length - 1]?.role
-                  ?.type === "OUTSIDER" && validator(game)
-            ).length
-        ),
+        label: `Outsider (${Math.round(
+          (outsider.reduce((acc, curr) => acc + curr, 0) / total) * 100
+        )}%)`,
+        data: outsider,
         backgroundColor: getColor(colors.outsider),
       },
       {
-        label: "Minion",
-        data: validators.map(
-          (validator) =>
-            games.filter(
-              (game) =>
-                game.player_characters[game.player_characters.length - 1]?.role
-                  ?.type === "MINION" && validator(game)
-            ).length
-        ),
+        label: `Minion (${Math.round(
+          (minion.reduce((acc, curr) => acc + curr, 0) / total) * 100
+        )}%)`,
+        data: minion,
         backgroundColor: getColor(colors.minion),
       },
       {
-        label: "Demon",
-        data: validators.map(
-          (validator) =>
-            games.filter(
-              (game) =>
-                game.player_characters[game.player_characters.length - 1]?.role
-                  ?.type === "DEMON" && validator(game)
-            ).length
-        ),
+        label: `Demon (${Math.round(
+          (demon.reduce((acc, curr) => acc + curr, 0) / total) * 100
+        )}%)`,
+        data: demon,
         backgroundColor: getColor(colors.demon),
       },
       {
-        label: "Traveler",
-        data: validators.map(
-          (validator) =>
-            games.filter(
-              (game) =>
-                game.player_characters[game.player_characters.length - 1]?.role
-                  ?.type === "TRAVELER" && validator(game)
-            ).length
-        ),
+        label: `Traveler (${Math.round(
+          (traveler.reduce((acc, curr) => acc + curr, 0) / total) * 100
+        )}%)`,
+        data: traveler,
         backgroundColor: getColor(colors.traveler),
       },
     ];
   } else if (props.options.pivot === "ALIGNMENT") {
+    const good = validators.map(
+      (validator) =>
+        games.filter(
+          (game) =>
+            game.player_characters[game.player_characters.length - 1]
+              ?.alignment === "GOOD" && validator(game)
+        ).length
+    );
+    const evil = validators.map(
+      (validator) =>
+        games.filter(
+          (game) =>
+            game.player_characters[game.player_characters.length - 1]
+              ?.alignment === "EVIL" && validator(game)
+        ).length
+    );
+    const total = [...good, ...evil].reduce((acc, curr) => acc + curr, 0);
     return [
       {
-        label: "Good",
-        data: validators.map(
-          (validator) =>
-            games.filter(
-              (game) =>
-                game.player_characters[game.player_characters.length - 1]
-                  ?.alignment === "GOOD" && validator(game)
-            ).length
-        ),
+        label: `Good (${Math.round(
+          (good.reduce((acc, curr) => acc + curr, 0) / total) * 100
+        )}%)`,
+        data: good,
         backgroundColor: getColor(colors.good),
       },
       {
-        label: "Evil",
-        data: validators.map(
-          (validator) =>
-            games.filter(
-              (game) =>
-                game.player_characters[game.player_characters.length - 1]
-                  ?.alignment === "EVIL" && validator(game)
-            ).length
-        ),
+        label: `Evil (${Math.round(
+          (evil.reduce((acc, curr) => acc + curr, 0) / total) * 100
+        )}%)`,
+        data: evil,
         backgroundColor: getColor(colors.evil),
       },
     ];
   } else if (props.options.pivot === "SCRIPT") {
+    const troubleBrewing = validators.map(
+      (validator) =>
+        games.filter(
+          (game) => game.script === Script.TroubleBrewing && validator(game)
+        ).length
+    );
+    const badMoonRising = validators.map(
+      (validator) =>
+        games.filter(
+          (game) => game.script === Script.BadMoonRising && validator(game)
+        ).length
+    );
+    const sectsAndViolets = validators.map(
+      (validator) =>
+        games.filter(
+          (game) => game.script === Script.SectsAndViolets && validator(game)
+        ).length
+    );
+    const customScript = validators.map(
+      (validator) =>
+        games.filter((game) => !isBaseScript(game.script) && validator(game))
+          .length
+    );
+    const total = [
+      ...troubleBrewing,
+      ...badMoonRising,
+      ...sectsAndViolets,
+      ...customScript,
+    ].reduce((acc, curr) => acc + curr, 0);
     return [
       {
-        label: "Trouble Brewing",
-        data: validators.map(
-          (validator) =>
-            games.filter(
-              (game) => game.script === Script.TroubleBrewing && validator(game)
-            ).length
-        ),
+        label: `Trouble Brewing (${Math.round(
+          (troubleBrewing.reduce((acc, curr) => acc + curr, 0) / total) * 100
+        )}%)`,
+        data: troubleBrewing,
         backgroundColor: getColor(colors.tb),
       },
       {
-        label: "Bad Moon Rising",
-        data: validators.map(
-          (validator) =>
-            games.filter(
-              (game) => game.script === Script.BadMoonRising && validator(game)
-            ).length
-        ),
+        label: `Bad Moon Rising (${Math.round(
+          (badMoonRising.reduce((acc, curr) => acc + curr, 0) / total) * 100
+        )}%)`,
+        data: badMoonRising,
         backgroundColor: getColor(colors.bmr),
       },
       {
-        label: "Sects and Violets",
-        data: validators.map(
-          (validator) =>
-            games.filter(
-              (game) =>
-                game.script === Script.SectsAndViolets && validator(game)
-            ).length
-        ),
+        label: `Sects and Violets (${Math.round(
+          (sectsAndViolets.reduce((acc, curr) => acc + curr, 0) / total) * 100
+        )}%)`,
+        data: sectsAndViolets,
         backgroundColor: getColor(colors.snv),
       },
       {
-        label: "Custom Script",
-        data: validators.map(
-          (validator) =>
-            games.filter(
-              (game) => !isBaseScript(game.script) && validator(game)
-            ).length
-        ),
+        label: `Custom Script (${Math.round(
+          (customScript.reduce((acc, curr) => acc + curr, 0) / total) * 100
+        )}%)`,
+        data: customScript,
         backgroundColor: getColor(colors.custom),
       },
     ];
   } else if (props.options.pivot === "GAME_SIZE") {
+    const teensy = validators.map(
+      (validator) =>
+        games.filter(
+          (game) =>
+            game.player_count && game.player_count <= 6 && validator(game)
+        ).length
+    );
+    const small = validators.map(
+      (validator) =>
+        games.filter(
+          (game) =>
+            game.player_count &&
+            game.player_count > 6 &&
+            game.player_count <= 10 &&
+            validator(game)
+        ).length
+    );
+    const medium = validators.map(
+      (validator) =>
+        games.filter(
+          (game) =>
+            game.player_count &&
+            game.player_count > 10 &&
+            game.player_count <= 13 &&
+            validator(game)
+        ).length
+    );
+    const large = validators.map(
+      (validator) =>
+        games.filter(
+          (game) =>
+            game.player_count && game.player_count > 13 && validator(game)
+        ).length
+    );
+    const total = [...teensy, ...small, ...medium, ...large].reduce(
+      (acc, curr) => acc + curr,
+      0
+    );
     return [
       {
-        label: "Teensy",
-        data: validators.map(
-          (validator) =>
-            games.filter(
-              (game) =>
-                game.player_count && game.player_count <= 6 && validator(game)
-            ).length
-        ),
+        label: `Teensy (${Math.round(
+          (teensy.reduce((acc, curr) => acc + curr, 0) / total) * 100
+        )}%)`,
+        data: teensy,
         backgroundColor: getColor(colors.teensy),
       },
       {
-        label: "1 Minion",
-        data: validators.map(
-          (validator) =>
-            games.filter(
-              (game) =>
-                game.player_count &&
-                game.player_count > 6 &&
-                game.player_count <= 10 &&
-                validator(game)
-            ).length
-        ),
+        label: `1 Minion (${Math.round(
+          (small.reduce((acc, curr) => acc + curr, 0) / total) * 100
+        )}%)`,
+        data: small,
         backgroundColor: getColor(colors.small),
       },
       {
-        label: "2 Minions",
-        data: validators.map(
-          (validator) =>
-            games.filter(
-              (game) =>
-                game.player_count &&
-                game.player_count > 10 &&
-                game.player_count <= 13 &&
-                validator(game)
-            ).length
-        ),
+        label: `2 Minions (${Math.round(
+          (medium.reduce((acc, curr) => acc + curr, 0) / total) * 100
+        )}%)`,
+        data: medium,
         backgroundColor: getColor(colors.medium),
       },
       {
-        label: "3 Minions",
-        data: validators.map(
-          (validator) =>
-            games.filter(
-              (game) =>
-                game.player_count && game.player_count > 13 && validator(game)
-            ).length
-        ),
+        label: `3 Minions (${Math.round(
+          (large.reduce((acc, curr) => acc + curr, 0) / total) * 100
+        )}%)`,
+        data: large,
         backgroundColor: getColor(colors.large),
       },
     ];
   } else if (props.options.pivot === "WIN") {
+    const win = validators.map(
+      (validator) =>
+        games.filter((game) => {
+          const lastAlignment =
+            game.player_characters[game.player_characters.length - 1]
+              ?.alignment;
+
+          return (
+            ((lastAlignment === "GOOD" &&
+              game.win_v2 === WinStatus_V2.GOOD_WINS) ||
+              (lastAlignment === "EVIL" &&
+                game.win_v2 === WinStatus_V2.EVIL_WINS)) &&
+            validator(game)
+          );
+        }).length
+    );
+    const loss = validators.map(
+      (validator) =>
+        games.filter((game) => {
+          const lastAlignment =
+            game.player_characters[game.player_characters.length - 1]
+              ?.alignment;
+
+          return (
+            ((lastAlignment === "GOOD" &&
+              game.win_v2 === WinStatus_V2.EVIL_WINS) ||
+              (lastAlignment === "EVIL" &&
+                game.win_v2 === WinStatus_V2.GOOD_WINS)) &&
+            validator(game)
+          );
+        }).length
+    );
+    const total = [...win, ...loss].reduce((acc, curr) => acc + curr, 0);
     return [
       {
-        label: "Win",
-        data: validators.map(
-          (validator) =>
-            games.filter((game) => {
-              const lastAlignment =
-                game.player_characters[game.player_characters.length - 1]
-                  ?.alignment;
-
-              return (
-                ((lastAlignment === "GOOD" &&
-                  game.win_v2 === WinStatus_V2.GOOD_WINS) ||
-                  (lastAlignment === "EVIL" &&
-                    game.win_v2 === WinStatus_V2.EVIL_WINS)) &&
-                validator(game)
-              );
-            }).length
-        ),
+        label: `Win (${Math.round(
+          (win.reduce((acc, curr) => acc + curr, 0) / total) * 100
+        )}%)`,
+        data: win,
         backgroundColor: getColor(colors.win),
       },
       {
-        label: "Loss",
-        data: validators.map(
-          (validator) =>
-            games.filter((game) => {
-              const lastAlignment =
-                game.player_characters[game.player_characters.length - 1]
-                  ?.alignment;
-
-              return (
-                ((lastAlignment === "GOOD" &&
-                  game.win_v2 === WinStatus_V2.EVIL_WINS) ||
-                  (lastAlignment === "EVIL" &&
-                    game.win_v2 === WinStatus_V2.GOOD_WINS)) &&
-                validator(game)
-              );
-            }).length
-        ),
+        label: `Loss (${Math.round(
+          (loss.reduce((acc, curr) => acc + curr, 0) / total) * 100
+        )}%)`,
+        data: loss,
         backgroundColor: getColor(colors.loss),
       },
     ];
@@ -615,11 +699,6 @@ function getPivot(
 
   return null;
 }
-
-const chartData = computed(() => ({
-  labels: labels.value,
-  datasets: datasets.value,
-}));
 
 const chartOptions = computed(() => ({
   responsive: true,
