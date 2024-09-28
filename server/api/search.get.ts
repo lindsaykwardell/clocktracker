@@ -26,26 +26,6 @@ export default defineEventHandler(async (handler) => {
           user_id: me?.id || "",
         },
       },
-      OR: [
-        {
-          name: {
-            contains: query,
-            mode: "insensitive",
-          },
-        },
-        {
-          slug: {
-            contains: query,
-            mode: "insensitive",
-          },
-        },
-        {
-          description: {
-            contains: query,
-            mode: "insensitive",
-          },
-        },
-      ],
     },
     select: {
       id: true,
@@ -66,40 +46,26 @@ export default defineEventHandler(async (handler) => {
         },
       },
     },
-    orderBy: [
-      {
-        name: "asc",
+    orderBy: {
+      _relevance: {
+        fields: ["name", "slug", "description"],
+        search: query,
+        sort: "asc",
       },
-    ],
+    },
   });
 
   const scripts = await prisma.script.findMany({
     where: {
       OR: [
         {
-          name: {
-            contains: query,
-            mode: "insensitive",
-          },
+          is_custom_script: false,
         },
         {
-          author: {
-            contains: query,
-            mode: "insensitive",
-          },
+          is_custom_script: true,
+          user_id: me?.id,
         },
       ],
-      AND: {
-        OR: [
-          {
-            is_custom_script: false,
-          },
-          {
-            is_custom_script: true,
-            user_id: me?.id,
-          },
-        ],
-      },
     },
     include: {
       _count: {
@@ -112,11 +78,13 @@ export default defineEventHandler(async (handler) => {
         },
       },
     },
-    orderBy: [
-      {
-        name: "asc",
+    orderBy: {
+      _relevance: {
+        fields: ["author", "name"],
+        search: query,
+        sort: "asc",
       },
-    ],
+    },
   });
 
   const users = await prisma.userSettings.findMany({
@@ -140,22 +108,6 @@ export default defineEventHandler(async (handler) => {
             },
           ],
         },
-        {
-          OR: [
-            {
-              username: {
-                contains: query,
-                mode: "insensitive",
-              },
-            },
-            {
-              display_name: {
-                contains: query,
-                mode: "insensitive",
-              },
-            },
-          ],
-        },
       ],
     },
     select: {
@@ -168,24 +120,19 @@ export default defineEventHandler(async (handler) => {
       location: true,
       charts: true,
     },
-    orderBy: [
-      {
-        display_name: "asc",
+    orderBy: {
+      _relevance: {
+        fields: ["display_name", "username"],
+        search: query,
+        sort: "asc",
       },
-      {
-        username: "asc",
-      }
-    ],
+    },
   });
 
   const usersWithKofiLevel = await Promise.all(users.map(addUserKofiLevel));
 
   const roles = await prisma.role.findMany({
     where: {
-      name: {
-        contains: query,
-        mode: "insensitive",
-      },
       OR: [
         {
           custom_role: false,
@@ -219,11 +166,13 @@ export default defineEventHandler(async (handler) => {
         },
       },
     },
-    orderBy: [
-      {
-        name: "asc",
+    orderBy: {
+      _relevance: {
+        fields: ["name"],
+        search: query,
+        sort: "asc",
       },
-    ],
+    },
   });
 
   return {
