@@ -28,7 +28,10 @@
         </ul>
         <hr class="border-stone-600" />
         <h1 class="text-xl font-dumbledor text-center">Role of the Day</h1>
-        <nuxt-link class="flex flex-col items-center" :to="`/roles/${roleOfTheDay.data.value?.id}`">
+        <nuxt-link
+          class="flex flex-col items-center"
+          :to="`/roles/${roleOfTheDay.data.value?.id}`"
+        >
           <Token
             size="lg"
             :character="{
@@ -53,7 +56,7 @@
           </ul>
           <hr class="border-stone-600" />
         </template>
-        <template v-if="myCommunities.length > 0">
+        <template v-if="(myCommunities?.length ?? 0) > 0">
           <h1 class="font-dumbledor text-xl text-center">Communities</h1>
           <ul>
             <li
