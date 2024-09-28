@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
 }
 
 datasource db {
@@ -48,9 +49,11 @@ model Game {
   community_id             Int?
   win_v2                   WinStatus_V2   @default(NOT_RECORDED)
   old_image_urls           String[]
+  favorite_id              Int?           @unique
   player_characters        Character[]
   demon_bluffs             DemonBluff[]
   fabled                   Fabled[]
+  FavoriteGame             FavoriteGame?
   community                Community?     @relation(fields: [community_id], references: [id])
   parent_game              Game?          @relation("AssociatedGame", fields: [parent_game_id], references: [id])
   child_games              Game[]         @relation("AssociatedGame")
@@ -204,6 +207,7 @@ model UserSettings {
   events                  EventAttendee[]
   waitlisted_events       EventWaitlistAttendee[]
   links                   ExternalLink[]
+  FavoriteGame            FavoriteGame[]
   followers               Following[]             @relation("Follower")
   following               Following[]             @relation("Following")
   friends                 Friend[]                @relation("Friend")
@@ -414,6 +418,17 @@ model Did {
   UserSettings UserSettings @relation(fields: [user_id], references: [user_id])
 
   @@unique([user_id, did])
+}
+
+model FavoriteGame {
+  id           Int          @id @default(autoincrement())
+  user_id      String
+  game_id      String       @unique
+  created_at   DateTime     @default(now()) @db.Timestamptz(6)
+  Game         Game         @relation(fields: [game_id], references: [id])
+  UserSettings UserSettings @relation(fields: [user_id], references: [user_id])
+
+  @@unique([user_id, game_id])
 }
 
 enum Alignment {
