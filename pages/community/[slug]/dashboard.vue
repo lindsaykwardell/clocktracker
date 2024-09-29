@@ -3,7 +3,7 @@
     <div class="flex flex-col gap-3 p-2">
       <form
         @submit.prevent="updateCommunity"
-        class="flex flex-col md:flex-row gap-4 items-center p-2"
+        class="flex flex-col md:flex-row gap-4 items-center p-2 w-full lg:w-5/6 xl:w-3/4 m-auto"
       >
         <div class="flex flex-col items-center">
           <Avatar :value="community.data.icon" size="lg" />
@@ -42,6 +42,28 @@
               </Input>
             </label>
           </div>
+          <label>
+            <span class="block">Links</span>
+            <div class="flex flex-col gap-1">
+              <div
+                v-for="(_, index) in updatedLinks"
+                :key="index"
+                class="flex gap-1"
+              >
+                <Input v-model="updatedLinks[index]" type="text" />
+                <button
+                  type="button"
+                  @click="updatedLinks.splice(index, 1)"
+                  class="transition duration-150 dark:text-white font-bold py-2 px-4 rounded"
+                >
+                  Remove
+                </button>
+              </div>
+              <button @click="updatedLinks.push('')" type="button">
+                Add link
+              </button>
+            </div>
+          </label>
           <label>
             <span class="block">Discord Server ID</span>
             <div class="flex gap-2">
@@ -264,6 +286,7 @@ const updatedSlug = ref(community.slug);
 const updatedPrivacy = ref(community.is_private);
 const updatedDiscordServerId = ref<string | null>(community.discord_server_id);
 const updatedTimeZone = ref<string | null>(community.time_zone);
+const updatedLinks = ref(community.links);
 const inFlight = ref(false);
 
 function isMe(id: string) {
@@ -307,6 +330,10 @@ function updateCommunity() {
     is_private: updatedPrivacy.value,
     discord_server_id: updatedDiscordServerId.value,
     time_zone: updatedTimeZone.value,
+    links:
+      updatedLinks.value.length === 1 && updatedLinks.value[0] === ""
+        ? []
+        : updatedLinks.value,
   });
   inFlight.value = false;
 }
@@ -334,4 +361,10 @@ function approveUser(user_id: string) {
 function denyUser(user_id: string) {
   communities.denyUser(slug, user_id);
 }
+
+watchEffect(() => {
+  if (updatedLinks.value.length < 1) {
+    updatedLinks.value.push("");
+  }
+});
 </script>
