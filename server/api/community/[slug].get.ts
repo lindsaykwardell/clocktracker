@@ -53,6 +53,7 @@ export default defineEventHandler(async (handler) => {
       is_private: true,
       discord_server_id: !!isModerator,
       time_zone: true,
+      links: true,
       members: {
         select: {
           user_id: true,

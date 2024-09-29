@@ -1,7 +1,7 @@
 <template>
   <StandardTemplate>
     <template v-if="community.status === Status.SUCCESS">
-      <div class="bg-stone-300 dark:bg-stone-950 shadow-lg">
+      <div class=" dark:bg-stone-950 shadow-lg">
         <div
           class="flex flex-col items-center w-full md:w-3/4 lg:w-2/3 xl:w-1/2 m-auto"
         >
@@ -33,6 +33,11 @@
                 <template v-else> Join Community </template>
               </button>
             </div>
+          </div>
+          <div class="flex gap-2">
+            <SocialLink v-for="link in community.data.links" :href="link" class="hover:text-primary dark:hover:text-primary-light transition duration-150 hover:underline">
+              {{ link }}
+            </SocialLink>
           </div>
           <hr class="border-stone-100 w-full my-4" />
           <p class="whitespace-pre-wrap text-left w-full py-4">
@@ -116,6 +121,7 @@ const route = useRoute();
 const slug = route.params.slug as string;
 const communities = useCommunities();
 const user = useSupabaseUser();
+import { Status } from "@/composables/useFetchStatus";
 
 const props = defineProps<{
   moderatorOnly?: boolean;
