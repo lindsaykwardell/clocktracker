@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["fullTextSearch"]
 }
 
@@ -230,7 +230,6 @@ model UserSettings {
   pronouns                String?
   bio                     String                  @default("")
   location                String?
-  links                   ExternalLink[]
   is_admin                Boolean                 @default(false)
   privacy                 PrivacySetting          @default(PUBLIC)
   created_at              DateTime?               @default(now()) @db.Timestamptz(6)
@@ -321,14 +320,6 @@ model Following {
   @@id([user_id, following_id])
 }
 
-model ExternalLink {
-  id           Int          @id @default(autoincrement())
-  user         UserSettings @relation(fields: [user_id], references: [user_id])
-  user_id      String
-  service_name String
-  url          String
-}
-
 model Chart {
   id           Int          @id @default(autoincrement())
   user         UserSettings @relation(fields: [user_id], references: [user_id])
@@ -378,6 +369,7 @@ model Community {
   events            Event[]
   discord_server_id String?
   time_zone         String          @default("UTC")
+  links             String[]
 }
 
 model CommunityPost {
