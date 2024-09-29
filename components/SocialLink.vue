@@ -1,7 +1,12 @@
 <template>
   <div class="flex gap-1 items-center">
     <component :is="icon" class="w-6 h-6" :class="iconClass" />
-    <a :href="href" :class="linkClass" target="_blank" rel="noopener noreferrer">
+    <a
+      :href="url"
+      :class="linkClass"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
       <slot />
     </a>
   </div>
@@ -13,6 +18,10 @@ const props = defineProps<{
   linkClass?: string;
   iconClass?: string;
 }>();
+
+const url = computed(() =>
+  props.href.match(/^https?:\/\//) ? props.href : `https://${props.href}`
+);
 
 const github = resolveComponent("github");
 const twitter = resolveComponent("twitter");
