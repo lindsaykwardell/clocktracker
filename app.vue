@@ -1,50 +1,76 @@
 <template>
   <NuxtPage />
-  <AnnouncementDialog v-if="shouldShowAnnouncement" id="august-2024">
+  <AnnouncementDialog v-if="shouldShowAnnouncement" id="sept-2024">
     <template #title>
       <h1 class="text-2xl font-bold font-dumbledor">
-        Changelog for August 2024
+        Changelog for September 2024
       </h1>
       <div class="text-lg text-stone-400">{{ formattedAnnouncementDate }}</div>
     </template>
     <p class="p-2">
-      This month had a large infrastructure change, as well as a number of
-      feature releases and fixes. Here are the changes for August 2024:
+      There's a number of fun changes that have come out this month! Here are the changes for September 2024:
     </p>
     <ul class="list-disc list-inside p-2">
-      <li>Add Lord of Typhon to the available characters.</li>
-      <li>Add functionality to edit and delete multiple games at once.</li>
-      <li>Add "Sort by Alignment" to the games view.</li>
       <li>
-        Require users to choose the win state (win/loss/no result) when creating
-        a game.
+        The new Boffin role has been added to the list of roles.
       </li>
       <li>
-        Track tutorials and announcements that users have seen on the server,
-        rather than per device.
+        Add a new "Dashboard" page that shows recent activity and upcoming events the user has signed up for.
       </li>
       <li>
-        Add a "Games" page for communities, so all games for that community can
-        be viewed in one place.
-      </li>
-      <li>Add the ability to export games from ClockTracker as a CSV.</li>
-      <li>
-        Migrate the database and file storage from Supabase to Fly.io and
-        Tigris. Most of the work of this month was done here, to reduce hosting
-        costs and improve performance.
+        Add a public profile page for users, displaying favorite games and all played roles.
       </li>
       <li>
-        Fix the Discord bot ping frequency (from repeating every minute to one
-        ping per event).
+        Add percentages to charts (instead of just the total count).
       </li>
       <li>
-        Fix a bug where the Discord bot would attempt to ping non-Discord users.
+        Add links to communities on the "Communities" page.
       </li>
       <li>
-        Fix a bug with uploading scripts using characters with multiple words in
-        their name.
+        Limit games shown on the roles and scripts page to the current user's, instead of all public games in the database.
       </li>
-      <li>Fix a bug preventing players from being untagged in a Grimoire.</li>
+      <li>
+        Add functionality to copy a grimoire from a previous game.
+      </li>
+      <li>
+        Add support for up to 25 players in a game.
+      </li>
+      <li>
+        Add new date, player count, script, and location filters to the games view.
+      </li>
+      <li>
+        Allow users to tag themselves as a co-storyteller for a game.
+      </li>
+      <li>
+        Improve search functionality.
+      </li>
+      <li>
+        Improve the style of the "Games over time" chart.
+      </li>
+      <li>
+        Improve transitions between pages to be smoother.
+      </li>
+      <li>
+        Properly alphabetize the roles in the "all roles" view of player profiles.
+      </li>
+      <li>
+        Expand the range for games to be merged so that they don't need to be recorded on the same exact date.
+      </li>
+      <li>
+        Change how saving a game works to only warn users if the game is being created on the current day.
+      </li>
+      <li>
+        When multiple games are being edited, the user is now returned to the games list instead of the dashbaord.
+      </li>
+      <li>
+        Fix a bug related to displaying stats in scripts.
+      </li>
+      <li>
+        Fix multiple bugs related to fetching roles for scripts.
+      </li>
+      <li>
+        Fix a bug where a player name in the grimoire would try to default to a previously-entered name that was similar.
+      </li>
     </ul>
     <p class="p-2">
       Please let me know on Discord if you have any issues or feedback. Thank
@@ -107,7 +133,7 @@ watch(
   }
 );
 
-const announcementDate = dayjs.tz("2024-09-01", "America/Los_Angeles");
+const announcementDate = dayjs.tz("2024-10-01", "America/Los_Angeles");
 const maintenanceMode = featureFlags.maintenanceIsScheduled;
 
 const formattedAnnouncementDate = computed(() => {
