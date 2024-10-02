@@ -28,6 +28,7 @@ const twitter = resolveComponent("twitter");
 const twitch = resolveComponent("twitch");
 const youtube = resolveComponent("youtube");
 const discord = resolveComponent("discord");
+const facebook = resolveComponent("facebook");
 const link = resolveComponent("website");
 
 const icon = computed(() => {
@@ -37,6 +38,7 @@ const icon = computed(() => {
   if (href.includes("twitch.tv")) return twitch;
   if (href.includes("youtube.com")) return youtube;
   if (href.includes("discord.gg")) return discord;
+  if (href.includes("facebook.com")) return facebook;
   return link;
 });
 </script>
