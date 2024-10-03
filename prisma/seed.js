@@ -749,6 +749,7 @@ async function main() {
   for (let i = 0; i < 200; i++) {
     let user1;
     let user2;
+    const created_at = faker.date.past();
 
     while (!user1 || !user2 || user1.user_id === user2.user_id) {
       user1 = users[Math.floor(Math.random() * users.length)];
@@ -771,6 +772,7 @@ async function main() {
         user_id: user1.user_id,
         from_user_id: user2.user_id,
         accepted: true,
+        created_at
       },
     });
 
@@ -779,10 +781,12 @@ async function main() {
         {
           user_id: user1.user_id,
           friend_id: user2.user_id,
+          created_at,
         },
         {
           user_id: user2.user_id,
           friend_id: user1.user_id,
+          created_at,
         },
       ],
     });
@@ -791,7 +795,14 @@ async function main() {
   console.log("Seeding communities");
   const communities = [];
 
-  async function seedCommunity(name, description, icon, isPrivate, members) {
+  async function seedCommunity(
+    name,
+    description,
+    icon,
+    isPrivate,
+    members,
+    links = []
+  ) {
     const slug = name.toLowerCase().replace(/ /g, "-");
     const userCount = Math.floor(Math.random() * 50) + 5;
     const communityUsers = [...members];
@@ -847,6 +858,7 @@ async function main() {
         members: {
           connect: communityUsers,
         },
+        links,
       },
       include: {
         members: {
@@ -860,11 +872,13 @@ async function main() {
     communities.push(community);
 
     for (const post of posts) {
+      const created_at = faker.date.past();
       await prisma.communityPost.create({
         data: {
           user_id: post.user_id,
           content: post.content,
           community_id: community.id,
+          created_at,
           replies: {
             create: post.replies.map((reply) => ({
               user_id: reply.user_id,
@@ -936,20 +950,26 @@ async function main() {
               user_id: player.user_id,
             })),
           },
+          created_at: event.start,
         },
       });
     }
   }
 
   await seedCommunity(
-    "Rose City Clocktower",
-    "A community for fans of Trouble Brewing.",
-    "/img/role/godfather.png",
+    "ClockTracker",
+    "A community for fans of data, deduction, and demons.",
+    "https://fly.storage.tigris.dev/clocktracker-storage/avatars/7c42b5db-ee24-48b6-a3b0-3d4f07cbcf0b",
     false,
     [
       {
         user_id: lindsaykwardell.user_id,
       },
+    ],
+    [
+      "https://clocktracker.app/",
+      "https://twitter.com/lindsaykwardell",
+      "https://discord.gg/KwMz8ThamT",
     ]
   );
 
@@ -1089,7 +1109,10 @@ async function main() {
           location_type: "ONLINE",
           location: faker.location.city(),
           player_count,
-          win_v2: Math.random() > 0.5 ? WinStatus_V2.GOOD_WINS : WinStatus_V2.EVIL_WINS,
+          win_v2:
+            Math.random() > 0.5
+              ? WinStatus_V2.GOOD_WINS
+              : WinStatus_V2.EVIL_WINS,
           notes: faker.lorem.paragraph(),
           storyteller: faker.person.firstName(),
           player_characters: {
