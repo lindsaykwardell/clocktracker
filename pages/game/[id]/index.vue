@@ -12,7 +12,9 @@
           <div>
             {{ isNew ? "Game added!" : "Game updated!" }}
             <template v-if="isNew">
-              <nuxt-link to="/add-game" class="underline">Add another game</nuxt-link>
+              <nuxt-link to="/add-game" class="underline"
+                >Add another game</nuxt-link
+              >
               or
               <nuxt-link
                 :to="`/@${me.data.username}?view=games`"
@@ -360,7 +362,12 @@
             </span>
           </button>
           <div class="w-screen md:w-full overflow-scroll">
-            <Grimoire :tokens="game.data.grimoire[grimPage].tokens" readonly />
+            <Grimoire
+              :tokens="game.data.grimoire[grimPage].tokens"
+              readonly
+              :canClaimSeat="canClaimSeat"
+              @claimSeat="claimSeat"
+            />
           </div>
           <div
             class="text-center bg-gradient-to-b from-transparent via-stone-800 to-stone-800"
@@ -579,9 +586,11 @@
 
 <script setup lang="ts">
 import { WinStatus_V2 } from "~/composables/useGames";
+import type { GameRecord } from "~/composables/useGames";
 import dayjs from "dayjs";
 import VueMarkdown from "vue-markdown-render";
 import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
+import { Status } from "~/composables/useFetchStatus";
 
 const { scriptLogo, isBaseScript } = useScripts();
 const config = useRuntimeConfig();
@@ -589,6 +598,7 @@ const router = useRouter();
 const route = useRoute();
 const user = useSupabaseUser();
 const users = useUsers();
+const communities = useCommunities();
 const games = useGames();
 const friends = useFriends();
 const gameId = route.params.id as string;
@@ -761,6 +771,59 @@ const storytellers = computed(() => {
   return [...storytellerList, ...game.value.data.co_storytellers];
 });
 
+const canClaimSeat = computed(() => {
+  if (game.value.status !== Status.SUCCESS) return false;
+
+  /** Reasons to disallow claimining the seat:
+   * 1. The user is not signed in
+   * 2. The user is not a friend of the game creator
+   * 3. The user is not in a community with the game creator
+   * 4. The user is a storyteller
+   * 5. The user is a co-storyteller
+   * 6. The user already has a seat in the grimoire
+   */
+
+  if (me.value.status !== Status.SUCCESS) return false;
+
+  // Check if the user is a friend of the game creator
+  if (
+    !friends.isFriend(game.value.data.user.username) &&
+    !(
+      game.value.data.community?.slug &&
+      communities.isMember(
+        game.value.data.community.slug,
+        me.value.data.user_id
+      )
+    )
+  ) {
+    return false;
+  }
+
+  // Check if the user is a storyteller or co-storyteller
+  if (
+    game.value.data.is_storyteller ||
+    game.value.data.storyteller === me.value.data.username ||
+    game.value.data.co_storytellers.includes(me.value.data.username)
+  ) {
+    return false;
+  }
+
+  // Check if the user already has a seat in the grimoire
+  if (
+    game.value.data.grimoire.some((page) =>
+      page.tokens.some(
+        (token) =>
+          me.value.status === Status.SUCCESS &&
+          token.player_id === me.value.data.user_id
+      )
+    )
+  ) {
+    return false;
+  }
+
+  return true;
+});
+
 function fullImageUrl(file: string) {
   if (file.startsWith("http")) return file;
   return `${config.public.supabase.url}/storage/v1/object/public/game-attachments/${file}`;
@@ -809,10 +872,8 @@ async function confirmMergeGame(game: GameRecord) {
 const anonymize = ref(false);
 
 watchEffect(() => {
-  const me = users.getUserById(user.value?.id);
-
-  if (me.status === Status.SUCCESS) {
-    anonymize.value = me.data.privacy === "PRIVATE";
+  if (me.value.status === Status.SUCCESS) {
+    anonymize.value = me.value.data.privacy === "PRIVATE";
   }
 });
 
@@ -853,10 +914,30 @@ async function toggleFavorite() {
   }
 }
 
+async function claimSeat(token: { order: number }) {
+  if (
+    game.value.status !== Status.SUCCESS ||
+    me.value.status !== Status.SUCCESS
+  ) {
+    return;
+  }
+
+  const result = await $fetch<GameRecord>(`/api/games/${gameId}/claim_seat`, {
+    method: "PUT",
+    body: { order: token.order },
+  });
+
+  games.games.set(gameId, { status: Status.SUCCESS, data: result });
+}
+
 onMounted(() => {
   games.fetchGame(route.params.id as string).then(() => {
     if (game.value.status === Status.SUCCESS) {
       games.fetchSimilarGames(game.value.data.id);
+
+      if (game.value.data.community?.slug) {
+        communities.fetchCommunity(game.value.data.community.slug);
+      }
     }
   });
 

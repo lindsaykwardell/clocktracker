@@ -11,8 +11,6 @@ const slug = route.params.slug as string;
 
 const communityGames = computed(() => games.getByCommunity(slug));
 
-watchEffect(() => console.log(communityGames.value));
-
 onMounted(() => {
   games.fetchCommunityGames(slug);
 });

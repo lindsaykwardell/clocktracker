@@ -31,17 +31,11 @@ useHead({
 
 const router = useRouter();
 const inFlight = ref(false);
-const userSettings = await useFetch("/api/settings");
 const selectMultipleGames = useSelectMultipleGames();
 
 const importGamesDialogVisible = ref(false);
 
-function initImportGames() {
-  importGamesDialogVisible.value = true;
-}
-
 function doneImporting() {
-  console.log("here");
   router.push("/");
 }
 
