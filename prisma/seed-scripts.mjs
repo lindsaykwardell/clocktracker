@@ -1,5 +1,5 @@
 import axios from "axios";
-import cheerio from "cheerio";
+import * as cheerio from "cheerio";
 import { Alignment, PrismaClient, RoleType } from "@prisma/client";
 
 const url = "https://botcscripts.com";

@@ -292,7 +292,6 @@ watchEffect(() => {
 });
 
 watchEffect(() => {
-  console.log(props.event.storytellers);
   if (props.event.storytellers?.length === 0) {
     props.event.storytellers.push("");
   }

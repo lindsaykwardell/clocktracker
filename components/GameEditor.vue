@@ -1072,7 +1072,6 @@ function selectRoleForToken(role: {
 }) {
   if (focusedToken) {
     if (tokenMode.value === "role") {
-      console.log(role);
       if (role.id) {
         focusedToken.role = {
           token_url: role.token_url,
@@ -1110,8 +1109,6 @@ function selectRoleForToken(role: {
     }
   }
   showRoleSelectionDialog.value = false;
-
-  console.log(focusedToken);
 }
 
 function copyGrimoire(game: GameRecord) {
