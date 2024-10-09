@@ -6,7 +6,6 @@
 </template>
 
 <script setup lang="ts">
+import { Status } from "~/composables/useFetchStatus";
 const me = useMe();
-
-watchEffect(() => console.log(me.value));
 </script>
