@@ -55,7 +55,6 @@ function initImportGames() {
 }
 
 function doneImporting() {
-  console.log("here");
   router.push("/");
 }
 
