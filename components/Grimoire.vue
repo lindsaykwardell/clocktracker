@@ -138,7 +138,7 @@
           class="relative bg-stone-600 rounded p-1 border-2 border-stone-500 text-center text-ellipsis text-xs md:text-sm max-w-[150px] overflow-hidden whitespace-nowrap"
         >
           <button
-            v-if="me.status === Status.SUCCESS && canClaimSeat"            
+            v-if="me.status === Status.SUCCESS && canClaimSeat"
             class="absolute top-0 left-0 w-full h-full bg-stone-600 flex items-center justify-center opacity-0 hover:opacity-100 transition duration-300 gap-2"
             @click="emit('claimSeat', token)"
           >
@@ -162,6 +162,7 @@
     :reminders="reminders"
     @selectReminder="selectReminder"
   />
+  <Tour v-if="readonly" :steps="viewTour" tourKey="grimoire-guide" />
 </template>
 
 <script setup lang="ts">
@@ -437,6 +438,24 @@ function toggleUsedGhostVote(token: Token) {
 onMounted(() => {
   roles.fetchRoles();
 });
+
+const viewTour = [
+  {
+    target: "#grimoire",
+    content:
+      "This is a representation of the game's grimoire. It shows all the players and their roles, as well as any other relevant information that was entered by the game creator.",
+  },
+  {
+    target: ".token-seat:first-child",
+    content:
+      "Each individual seat includes data such as the role, player name, and aligment. If this player has an account on ClockTracker and was tagged, their name will have a green background and be a link to their profile.",
+  },
+  {
+    target: ".token-seat:first-child",
+    content:
+      "If you played in this game and your seat is unclaimed, you can claim it by hovering over your name card and clicking the 'Claim Seat' button that appears.",
+  },
+];
 </script>
 
 <style scoped>

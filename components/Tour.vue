@@ -16,6 +16,8 @@
 </template>
 
 <script setup lang="ts">
+import { nanoid } from "nanoid";
+
 const tour = ref();
 const tourStarted = ref(false);
 const { did, isDone } = useDids();
@@ -24,14 +26,23 @@ const me = useMe();
 const props = defineProps<{
   steps: Step[];
   tourKey: string;
+  devMode?: boolean;
 }>();
+
+const tourKey = computed(() => {
+  if (props.devMode) {
+    return nanoid();
+  } else {
+    return props.tourKey;
+  }
+});
 
 const emit = defineEmits(["onTourStart", "onTourEnd"]);
 
 function onTourEnd() {
   localStorage.removeItem("vjt-default");
 
-  did(props.tourKey);
+  did(tourKey.value);
 
   tourStarted.value = false;
   emit("onTourEnd");
@@ -59,7 +70,7 @@ onMounted(async () => {
     if (
       me.value.status === Status.SUCCESS &&
       !me.value.data.disable_tutorials &&
-      !isDone(props.tourKey)
+      !isDone(tourKey.value)
     ) {
       tour.value.startTour();
       emit("onTourStart");
