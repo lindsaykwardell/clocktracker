@@ -133,12 +133,20 @@
         >
           {{ token.player?.display_name || token.player_name }}
         </nuxt-link>
-        <span
+        <div
           v-else-if="token.player_name"
-          class="bg-stone-600 rounded p-1 border-2 border-stone-500 text-center text-ellipsis text-xs md:text-sm max-w-[150px] overflow-hidden whitespace-nowrap"
+          class="relative bg-stone-600 rounded p-1 border-2 border-stone-500 text-center text-ellipsis text-xs md:text-sm max-w-[150px] overflow-hidden whitespace-nowrap"
         >
+          <button
+            v-if="me.status === Status.SUCCESS && canClaimSeat"
+            class="absolute top-0 left-0 w-full h-full bg-stone-600 flex items-center justify-center opacity-0 hover:opacity-100 transition duration-300 gap-2"
+            @click="emit('claimSeat', token)"
+          >
+            <Chair class="w-6 h-6" />
+            Claim Seat
+          </button>
           {{ token.player_name }}
-        </span>
+        </div>
       </div>
     </div>
   </div>
@@ -154,10 +162,12 @@
     :reminders="reminders"
     @selectReminder="selectReminder"
   />
+  <Tour v-if="readonly" :steps="viewTour" tourKey="grimoire-guide" />
 </template>
 
 <script setup lang="ts">
 import { RoleType } from "~/composables/useRoles";
+import { Status } from "~/composables/useFetchStatus";
 
 type Token = {
   alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
@@ -183,31 +193,25 @@ type Token = {
 };
 
 const friends = useFriends();
-const users = useUsers();
-const user = useSupabaseUser();
 const games = useGames();
 const roles = useRoles();
 
-const me = computed(() => {
-  const meStatus = users.getUserById(user.value?.id);
-
-  if (meStatus.status === Status.SUCCESS) {
-    return meStatus.data;
-  } else {
-    return undefined;
-  }
-});
+const me = useMe();
 
 const communityMembersWhoArentFriends = computed(() =>
   friends.getCommunityMembers.filter(
     (member) =>
-      !friends.getFriends.find((friend) => friend.user_id === member.user_id),
-  ),
+      !friends.getFriends.find((friend) => friend.user_id === member.user_id)
+  )
 );
 
 const potentiallyTaggedPlayers = computed(() => {
+  if (me.value.status !== Status.SUCCESS) {
+    return [];
+  }
+
   return [
-    me.value,
+    me.value.data,
     ...friends.getFriends,
     ...communityMembersWhoArentFriends.value,
   ].map((player) => ({
@@ -221,13 +225,17 @@ const filteredTaggablePlayers = computed(() => {
     (player) =>
       !player ||
       (!props.tokens.find((token) => token.player_name === player.username) &&
-        !props.excludePlayers?.includes(player.username)),
+        !props.excludePlayers?.includes(player.username))
   );
 });
 
 const previouslyTaggedPlayers = computed(() => {
+  if (me.value.status !== Status.SUCCESS) {
+    return [];
+  }
+
   return games
-    .getPreviouslyTaggedByPlayer(me.value?.username)
+    .getPreviouslyTaggedByPlayer(me.value.data.username)
     .map((player) => ({
       username: player,
       display_name: "",
@@ -244,8 +252,8 @@ const allTaggablePlayers = computed(() => {
     (player, index, array) =>
       player &&
       array.findIndex(
-        (p) => p.user_id === player.user_id && p.username === player.username,
-      ) === index,
+        (p) => p.user_id === player.user_id && p.username === player.username
+      ) === index
   );
 });
 
@@ -260,12 +268,13 @@ const props = defineProps<{
   }[];
   readonly?: boolean;
   excludePlayers?: string[];
+  canClaimSeat?: boolean;
 }>();
 
-const emit = defineEmits(["selectedMe"]);
+const emit = defineEmits(["selectedMe", "claimSeat"]);
 
 const orderedTokens = computed(() =>
-  props.tokens.sort((a, b) => a.order - b.order),
+  props.tokens.sort((a, b) => a.order - b.order)
 );
 
 const reminders = computed(() => {
@@ -350,7 +359,7 @@ watch(
       checkIfPlayerNameIsFriend(token);
     });
   },
-  { immediate: true, deep: true },
+  { immediate: true, deep: true }
 );
 
 function checkIfPlayerNameIsFriend(token: Token) {
@@ -364,7 +373,7 @@ function checkIfPlayerNameIsFriend(token: Token) {
 
   if (token.player_name.startsWith("@")) {
     const player = potentiallyTaggedPlayers.value.find(
-      (player) => player?.username.slice(1) === token.player_name.slice(1),
+      (player) => player?.username.slice(1) === token.player_name.slice(1)
     );
     if (player) {
       if (token.player_id !== player.user_id) {
@@ -379,7 +388,7 @@ function checkIfPlayerNameIsFriend(token: Token) {
   } else {
     if (token.player_id) {
       const player = potentiallyTaggedPlayers.value.find(
-        (player) => player?.user_id === token.player_id,
+        (player) => player?.user_id === token.player_id
       );
 
       if (!player || player.display_name !== token.player_name) {
@@ -406,11 +415,11 @@ function selectReminder(reminder: { reminder: string; token_url: string }) {
 
 function removeReminder(
   token: Token,
-  reminder: { reminder: string; token_url: string },
+  reminder: { reminder: string; token_url: string }
 ) {
   token.reminders = token.reminders.filter(
     (r) =>
-      r.reminder !== reminder.reminder && r.token_url !== reminder.token_url,
+      r.reminder !== reminder.reminder && r.token_url !== reminder.token_url
   );
 }
 
@@ -429,6 +438,24 @@ function toggleUsedGhostVote(token: Token) {
 onMounted(() => {
   roles.fetchRoles();
 });
+
+const viewTour = [
+  {
+    target: "#grimoire",
+    content:
+      "This is a representation of the game's grimoire. It shows all the players and their roles, as well as any other relevant information that was entered by the game creator.",
+  },
+  {
+    target: ".token-seat:first-child",
+    content:
+      "Each individual seat includes data such as the role, player name, and aligment. If this player has an account on ClockTracker and was tagged, their name will have a green background and be a link to their profile.",
+  },
+  {
+    target: ".token-seat:first-child",
+    content:
+      "If you played in this game and your seat is unclaimed, you can claim it by hovering over your name card and clicking the 'Claim Seat' button that appears.",
+  },
+];
 </script>
 
 <style scoped>
