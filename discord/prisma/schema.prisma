@@ -206,7 +206,6 @@ model UserSettings {
   Did                     Did[]
   events                  EventAttendee[]
   waitlisted_events       EventWaitlistAttendee[]
-  links                   ExternalLink[]
   FavoriteGame            FavoriteGame[]
   followers               Following[]             @relation("Follower")
   following               Following[]             @relation("Following")
@@ -257,14 +256,6 @@ model Following {
   @@id([user_id, following_id])
 }
 
-model ExternalLink {
-  id           Int          @id @default(autoincrement())
-  user_id      String
-  service_name String
-  url          String
-  user         UserSettings @relation(fields: [user_id], references: [user_id])
-}
-
 model Chart {
   id           Int          @id @default(autoincrement())
   user_id      String
@@ -292,6 +283,7 @@ model Community {
   discord_server_id String?
   time_zone         String          @default("UTC")
   old_icon          String?
+  links             String[]
   posts             CommunityPost[]
   events            Event[]
   games             Game[]
@@ -429,6 +421,34 @@ model FavoriteGame {
   UserSettings UserSettings @relation(fields: [user_id], references: [user_id])
 
   @@unique([user_id, game_id])
+}
+
+model City {
+  id         Int     @id @default(autoincrement())
+  name       String
+  latitude   Float
+  longitude  Float
+  state_id   Int
+  country_id Int
+  Country    Country @relation(fields: [country_id], references: [id])
+  State      State   @relation(fields: [state_id], references: [id])
+}
+
+model Country {
+  id    Int     @id @default(autoincrement())
+  name  String
+  code  String
+  City  City[]
+  State State[]
+}
+
+model State {
+  id         Int     @id @default(autoincrement())
+  name       String
+  code       String
+  country_id Int
+  City       City[]
+  Country    Country @relation(fields: [country_id], references: [id])
 }
 
 enum Alignment {
