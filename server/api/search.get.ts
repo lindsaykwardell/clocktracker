@@ -21,6 +21,26 @@ export default defineEventHandler(async (handler) => {
 
   const communities = await prisma.community.findMany({
     where: {
+      OR: [
+        {
+          name: {
+            contains: query,
+            mode: "insensitive",
+          },
+        },
+        {
+          slug: {
+            contains: query,
+            mode: "insensitive",
+          },
+        },
+        {
+          description: {
+            contains: query,
+            mode: "insensitive",
+          },
+        },
+      ],
       banned_users: {
         none: {
           user_id: me?.id || "",
@@ -57,6 +77,22 @@ export default defineEventHandler(async (handler) => {
 
   const scripts = await prisma.script.findMany({
     where: {
+      AND: {
+        OR: [
+          {
+            name: {
+              contains: query,
+              mode: "insensitive",
+            },
+          },
+          {
+            author: {
+              contains: query,
+              mode: "insensitive",
+            },
+          },
+        ],
+      },
       OR: [
         {
           is_custom_script: false,
@@ -89,6 +125,20 @@ export default defineEventHandler(async (handler) => {
 
   const users = await prisma.userSettings.findMany({
     where: {
+      OR: [
+        {
+          display_name: {
+            contains: query,
+            mode: "insensitive",
+          },
+        },
+        {
+          username: {
+            contains: query,
+            mode: "insensitive",
+          },
+        },
+      ],
       AND: [
         {
           OR: [
@@ -133,6 +183,10 @@ export default defineEventHandler(async (handler) => {
 
   const roles = await prisma.role.findMany({
     where: {
+      name: {
+        contains: query,
+        mode: "insensitive",
+      },
       OR: [
         {
           custom_role: false,

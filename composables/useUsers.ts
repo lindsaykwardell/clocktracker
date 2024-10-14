@@ -11,6 +11,7 @@ export enum PrivacySetting {
 
 export type User = {
   location: string | null;
+  city_id: number | null;
   user_id: string;
   username: string;
   display_name: string;
