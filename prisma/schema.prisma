@@ -230,6 +230,8 @@ model UserSettings {
   pronouns                String?
   bio                     String                  @default("")
   location                String?
+  city_id                 Int?
+  city                    City?                   @relation(fields: [city_id], references: [id])
   is_admin                Boolean                 @default(false)
   privacy                 PrivacySetting          @default(PUBLIC)
   created_at              DateTime?               @default(now()) @db.Timestamptz(6)
@@ -479,30 +481,10 @@ model EventRegistrationSpam {
   @@unique([ip_address, event_id])
 }
 
-model Country {
-  id     Int     @id @default(autoincrement())
-  name   String
-  code   String
-  states State[]
-  cities City[]
-}
-
-model State {
-  id         Int     @id @default(autoincrement())
-  name       String
-  code       String
-  country    Country @relation(fields: [country_id], references: [id])
-  country_id Int
-  cities     City[]
-}
-
 model City {
-  id         Int     @id @default(autoincrement())
-  name       String
-  latitude   Float
-  longitude  Float
-  state      State   @relation(fields: [state_id], references: [id])
-  state_id   Int
-  country    Country @relation(fields: [country_id], references: [id])
-  country_id Int
+  id        Int            @id @default(autoincrement())
+  name      String
+  latitude  Float
+  longitude Float
+  users     UserSettings[]
 }

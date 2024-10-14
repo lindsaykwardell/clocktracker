@@ -35,9 +35,9 @@
         </label>
         <label class="block w-full xl:w-3/4">
           <span class="block">Location</span>
-          <input
-            v-model="location"
-            class="block w-full border border-stone-500 rounded-md p-2"
+          <LocationSearchInput
+            v-model:value="_location"
+            inputClass="bg-white dark:bg-white dark:text-black block w-full border border-stone-500 rounded-md p-2"
           />
         </label>
         <label class="block w-full xl:w-3/4">
@@ -88,6 +88,7 @@
 </template>
 
 <script setup lang="ts">
+import { PrivacySetting } from "~/composables/useUsers";
 definePageMeta({
   middleware: "auth",
 });
@@ -104,9 +105,18 @@ const username = ref(settings.data.value?.username);
 const displayName = ref(settings.data.value?.display_name);
 const pronouns = ref(settings.data.value?.pronouns);
 const location = ref(settings.data.value?.location);
+const city_id = ref(settings.data.value?.city_id);
 const bio = ref(settings.data.value?.bio);
 const privacy = ref(settings.data.value?.privacy);
 const tutorials = ref(settings.data.value?.disable_tutorials);
+
+const _location = computed({
+  get: () => location.value,
+  set: (newValue: { id: number; name: string }) => {
+    location.value = newValue.name;
+    city_id.value = newValue.id;
+  },
+});
 
 watchEffect(() => (username.value = username.value?.replaceAll(" ", "")));
 
@@ -122,6 +132,7 @@ async function saveSettings() {
       display_name: displayName.value,
       pronouns: pronouns.value,
       location: location.value,
+      city_id: city_id.value,
       finished_welcome: true,
       bio: bio.value,
       privacy: privacy.value,
