@@ -201,6 +201,7 @@ model UserSettings {
   opt_into_testing        Boolean                 @default(false)
   old_avatar              String?
   disable_tutorials       Boolean                 @default(false)
+  city_id                 Int?
   charts                  Chart[]
   community_posts         CommunityPost[]
   Did                     Did[]
@@ -217,6 +218,7 @@ model UserSettings {
   KoFiPayment             KoFiPayment[]
   Script                  Script[]
   token                   Token[]
+  City                    City?                   @relation(fields: [city_id], references: [id])
   community_admin         Community[]             @relation("CommunityAdmin")
   community_banned        Community[]             @relation("CommunityBanned")
   community_join_requests Community[]             @relation("CommunityJoinRequest")
@@ -424,31 +426,11 @@ model FavoriteGame {
 }
 
 model City {
-  id         Int     @id @default(autoincrement())
-  name       String
-  latitude   Float
-  longitude  Float
-  state_id   Int
-  country_id Int
-  Country    Country @relation(fields: [country_id], references: [id])
-  State      State   @relation(fields: [state_id], references: [id])
-}
-
-model Country {
-  id    Int     @id @default(autoincrement())
-  name  String
-  code  String
-  City  City[]
-  State State[]
-}
-
-model State {
-  id         Int     @id @default(autoincrement())
-  name       String
-  code       String
-  country_id Int
-  City       City[]
-  Country    Country @relation(fields: [country_id], references: [id])
+  id           Int            @id @default(autoincrement())
+  name         String
+  latitude     Float
+  longitude    Float
+  UserSettings UserSettings[]
 }
 
 enum Alignment {
