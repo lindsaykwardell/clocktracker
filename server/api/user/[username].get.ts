@@ -117,6 +117,7 @@ export default defineEventHandler(async (handler) => {
       pronouns: true,
       bio: true,
       location: true,
+      city_id: true,
       privacy: true,
       charts: true,
       communities: {

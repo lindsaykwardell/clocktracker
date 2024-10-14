@@ -48,6 +48,7 @@
     "discord.js": "^14.16.2",
     "floating-vue": "^5.2.2",
     "formidable": "^3.5.1",
+    "geolib": "^3.3.4",
     "jimp": "^0.22.12",
     "nanoid": "^5.0.7",
     "natural-order": "^2.0.2",
