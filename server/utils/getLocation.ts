@@ -47,7 +47,7 @@ export default {
 
       const city = await prisma.city.upsert({
         where: {
-          id: feature.properties.osm_id,
+          id: feature.properties.osm_id.toString(),
         },
         update: {
           name,
@@ -55,7 +55,7 @@ export default {
           longitude: feature.geometry.coordinates[0],
         },
         create: {
-          id: feature.properties.osm_id,
+          id: feature.properties.osm_id.toString(),
           name,
           latitude: feature.geometry.coordinates[1],
           longitude: feature.geometry.coordinates[0],
