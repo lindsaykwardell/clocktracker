@@ -230,7 +230,7 @@ model UserSettings {
   pronouns                String?
   bio                     String                  @default("")
   location                String?
-  city_id                 Int?
+  city_id                 String?
   city                    City?                   @relation(fields: [city_id], references: [id])
   is_admin                Boolean                 @default(false)
   privacy                 PrivacySetting          @default(PUBLIC)
@@ -482,7 +482,7 @@ model EventRegistrationSpam {
 }
 
 model City {
-  id        Int            @id @default(autoincrement())
+  id        String         @id
   name      String
   latitude  Float
   longitude Float
