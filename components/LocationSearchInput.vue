@@ -10,6 +10,10 @@
         aria-autocomplete="none"
         autocomplete="off"
       />
+      <Spinner
+        v-if="isLoading"
+        class="absolute right-3 top-[10px] z-20 text-black"
+      />
       <ComboboxOptions
         v-if="locations.length > 0"
         class="absolute text-sm bg-stone-200 dark:bg-stone-900 border border-stone-300 dark:border-stone-500 max-h-[150px] min-w-[200px] w-full overflow-y-scroll overflow-x-hidden z-10"
@@ -55,6 +59,7 @@ const props = defineProps<{
 const emit = defineEmits(["inputFocused", "update:value"]);
 
 const _value = ref<string | null | undefined>(props.value);
+const isLoading = ref(false);
 
 const value = computed({
   get: () => _value.value,
@@ -74,6 +79,7 @@ watchDebounced(
   value,
   async (newValue) => {
     if (newValue && newValue.length > 2) {
+      isLoading.value = true;
       const result = await $fetch<City[]>("/api/location", {
         query: {
           search: newValue,
@@ -81,9 +87,10 @@ watchDebounced(
       });
 
       locations.value = result;
+      isLoading.value = false;
     }
   },
-  { debounce: 500 }
+  { debounce: 300 }
 );
 </script>
 
