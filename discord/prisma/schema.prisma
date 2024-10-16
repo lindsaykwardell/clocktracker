@@ -201,15 +201,13 @@ model UserSettings {
   opt_into_testing        Boolean                 @default(false)
   old_avatar              String?
   disable_tutorials       Boolean                 @default(false)
-  city_id                 Int?
+  city_id                 String?
   charts                  Chart[]
   community_posts         CommunityPost[]
   Did                     Did[]
   events                  EventAttendee[]
   waitlisted_events       EventWaitlistAttendee[]
   FavoriteGame            FavoriteGame[]
-  followers               Following[]             @relation("Follower")
-  following               Following[]             @relation("Following")
   friends                 Friend[]                @relation("Friend")
   friend_of               Friend[]                @relation("FriendOf")
   sent_friend_requests    FriendRequest[]         @relation("Sender")
@@ -247,15 +245,6 @@ model Friend {
   user       UserSettings @relation("FriendOf", fields: [user_id], references: [user_id])
 
   @@index([user_id])
-}
-
-model Following {
-  user_id      String
-  following_id String
-  following    UserSettings @relation("Follower", fields: [following_id], references: [user_id])
-  user         UserSettings @relation("Following", fields: [user_id], references: [user_id])
-
-  @@id([user_id, following_id])
 }
 
 model Chart {
@@ -426,7 +415,7 @@ model FavoriteGame {
 }
 
 model City {
-  id           Int            @id @default(autoincrement())
+  id           String         @id
   name         String
   latitude     Float
   longitude    Float
