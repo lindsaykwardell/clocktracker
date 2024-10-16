@@ -19,6 +19,9 @@ export type Community = {
   events: Event[];
   discord_server_id?: string;
   links: string[];
+  location?: string;
+  city_id?: string;
+  time_zone: string;
 };
 
 export type CommunityPost = {
@@ -391,6 +394,8 @@ export const useCommunities = defineStore("communities", {
         discord_server_id: string | null;
         time_zone: string | null;
         links: string[];
+        location: string | null;
+        city_id: string | null;
       }
     ) {
       const user = useSupabaseUser();
