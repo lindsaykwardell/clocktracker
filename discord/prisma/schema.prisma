@@ -275,6 +275,9 @@ model Community {
   time_zone         String          @default("UTC")
   old_icon          String?
   links             String[]
+  city_id           String?
+  location          String?
+  City              City?           @relation(fields: [city_id], references: [id])
   posts             CommunityPost[]
   events            Event[]
   games             Game[]
@@ -419,6 +422,7 @@ model City {
   name         String
   latitude     Float
   longitude    Float
+  Community    Community[]
   UserSettings UserSettings[]
 }
 
