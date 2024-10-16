@@ -54,6 +54,9 @@ export default defineEventHandler(async (handler) => {
       description: true,
       icon: true,
       is_private: true,
+      location: true,
+      time_zone: true,
+      city_id: true,
       _count: {
         select: {
           members: true,
