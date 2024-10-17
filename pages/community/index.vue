@@ -1,7 +1,7 @@
 <template>
   <StandardTemplate>
     <template v-if="me.status === Status.SUCCESS">
-      <div class="flex justify-end items-center p-4">
+      <div class="flex justify-end items-center p-4 gap-4">
         <Button
           component="nuxt-link"
           to="/community/create"
@@ -9,6 +9,14 @@
           primary
         >
           Create Community
+        </Button>
+        <Button
+          component="nuxt-link"
+          to="/search?near_me=true"
+          class="py-2 px-4"
+          secondary
+        >
+          Find Communities Near Me
         </Button>
       </div>
       <div class="w-full lg:w-[800px] m-auto flex flex-col items-center gap-4">
@@ -28,6 +36,8 @@
 </template>
 
 <script setup lang="ts">
+import { Status } from "~/composables/useFetchStatus";
+
 definePageMeta({
   middleware: "auth",
 });

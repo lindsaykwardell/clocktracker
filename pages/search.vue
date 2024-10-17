@@ -92,8 +92,10 @@
 
 <script setup lang="ts">
 import type { Role } from "@prisma/client";
+import { useGeolocation } from "@vueuse/core";
 const router = useRouter();
 const route = useRoute();
+const { coords } = useGeolocation();
 
 const users = ref<
   {
@@ -178,12 +180,19 @@ const showRoles = computed({
   },
 });
 
-async function search(query: string) {
+async function search(query: string | undefined) {
+  const near_me = route.query.near_me as string;
   // Only search if the query is at least 3 characters long
-  if (query.length < 3) {
+
+  if ((query?.length ?? 0 < 3) && !near_me) {
     return;
   }
-  router.push({ query: { query } });
+  router.push({
+    query: {
+      query,
+      near_me,
+    },
+  });
   searching.value = true;
   users.value = [];
   communities.value = [];
@@ -191,7 +200,18 @@ async function search(query: string) {
   roles.value = [];
   const result = await $fetch("/api/search", {
     params: {
-      query,
+      query: query ?? "",
+      near_me: near_me,
+      lat: near_me
+        ? isFinite(coords.value.latitude)
+          ? coords.value.latitude
+          : undefined
+        : undefined,
+      lon: near_me
+        ? isFinite(coords.value.longitude)
+          ? coords.value.longitude
+          : undefined
+        : undefined,
     },
   });
 
@@ -236,7 +256,8 @@ async function search(query: string) {
 
 onMounted(() => {
   const query = route.query.query as string;
-  if (query) {
+  const near_me = route.query.near_me as string;
+  if (query || near_me) {
     searching.value = true;
   }
 });
