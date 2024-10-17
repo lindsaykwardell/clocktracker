@@ -5,6 +5,7 @@ const { faker } = require("@faker-js/faker");
 const { v4: uuidv4 } = require("uuid");
 const dayjs = require("dayjs");
 const { roles, roleNames, reminders } = require("./roles");
+const citySeed = require("./city-seed.json");
 
 const prisma = new PrismaClient();
 
@@ -604,6 +605,30 @@ async function main() {
     });
   }
 
+  console.log("Seeding locations");
+
+  await prisma.city.createMany({
+    data: citySeed.map((city) => ({
+      id: city.properties.osm_id.toString(),
+      name: `${city.properties.name}, ${city.properties.state}, ${city.properties.country}`,
+      latitude: city.geometry.coordinates[1],
+      longitude: city.geometry.coordinates[0],
+    })),
+  });
+
+  const cities = await prisma.city.findMany();
+
+  const portland = await prisma.city.findFirst({
+    where: {
+      id: "186579",
+    },
+  });
+  const boring = await prisma.city.findFirst({
+    where: {
+      id: "5122552325",
+    },
+  });
+
   console.log("Seeding users");
 
   const testUser = await prisma.userSettings.create({
@@ -614,7 +639,8 @@ async function main() {
       avatar: "/img/default.png",
       email: "me@me.me",
       display_name: "Test User",
-      location: "Testville",
+      location: boring.name,
+      city_id: boring.id,
       pronouns: "they/them",
       is_admin: false,
       privacy: "PUBLIC",
@@ -629,7 +655,8 @@ async function main() {
       avatar: "/img/default.png",
       email: "me2@me.me",
       display_name: "Test User 2",
-      location: "Testville",
+      location: boring.name,
+      city_id: boring.id,
       pronouns: "they/them",
       is_admin: false,
       privacy: "PRIVATE",
@@ -646,9 +673,10 @@ async function main() {
       email: "veryme@me.me",
       display_name: "Lindsay Wardell 🏳️‍⚧️",
       bio: "Writing code, killing demons, even when evil.",
-      location: "The Internet",
       is_admin: true,
       privacy: "FRIENDS_ONLY",
+      city_id: portland.id,
+      location: portland.name,
     },
   });
 
@@ -656,6 +684,10 @@ async function main() {
 
   for (let i = 0; i < 100; i++) {
     const { username, display_name, randomRole } = generateName();
+
+    // Get a random city
+    const city = cities[Math.floor(Math.random() * cities.length)];
+
     const user = await prisma.userSettings.create({
       data: {
         user_id: uuidv4(),
@@ -668,7 +700,8 @@ async function main() {
           .replace(/'/g, "")
           .replace(/-/g, "")}.png`,
         email: faker.internet.email(),
-        location: faker.location.city(),
+        location: city.name,
+        city_id: city.id,
         pronouns: "they/them",
         is_admin: false,
         privacy: "PUBLIC",
@@ -772,7 +805,7 @@ async function main() {
         user_id: user1.user_id,
         from_user_id: user2.user_id,
         accepted: true,
-        created_at
+        created_at,
       },
     });
 
@@ -801,7 +834,8 @@ async function main() {
     icon,
     isPrivate,
     members,
-    links = []
+    links = [],
+    city = cities[Math.floor(Math.random() * cities.length)]
   ) {
     const slug = name.toLowerCase().replace(/ /g, "-");
     const userCount = Math.floor(Math.random() * 50) + 5;
@@ -859,6 +893,8 @@ async function main() {
           connect: communityUsers,
         },
         links,
+        location: city.name,
+        city_id: city.id,
       },
       include: {
         members: {
@@ -970,7 +1006,8 @@ async function main() {
       "https://clocktracker.app/",
       "https://twitter.com/lindsaykwardell",
       "https://discord.gg/KwMz8ThamT",
-    ]
+    ],
+    portland,
   );
 
   for (let i = 0; i < 30; i++) {
