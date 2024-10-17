@@ -36,6 +36,7 @@ export type FullDemonBluff = DemonBluff & {
 export type FullFabled = Fabled & {
   role?: {
     token_url: string;
+    type: string;
   };
 };
 
