@@ -88,7 +88,11 @@ const hideAllRolesToggle = computed(
 const showFabled = ref(false);
 
 const allRoles = computed(() => roles.getAllRoles());
-const travelerRoles = computed(() => roles.getRoleByType(RoleType.TRAVELER));
+const travelerRoles = computed(() =>
+  roles
+    .getRoleByType(RoleType.TRAVELER)
+    .map((role) => ({ ...role, initial_alignment: "NEUTRAL" }))
+);
 const fabledRoles = computed(() => roles.getRoleByType(RoleType.FABLED));
 
 const roleFilter = ref("");

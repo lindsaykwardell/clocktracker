@@ -39,7 +39,7 @@
           <Token
             v-if="!readonly"
             class="reminder-token opacity-0 hover:opacity-100 transition duration-200 cursor-pointer"
-            :character="{ role: { token_url: '/1x1.png' } }"
+            :character="{ role: { token_url: '/1x1.png', type: '' } }"
             size="reminder"
             :style="`--ti: ${token.reminders?.length ?? 0}`"
             @click="openReminderDialog(token)"
@@ -96,7 +96,6 @@
             :class="{ 'cursor-pointer': !props.readonly }"
             :alwaysShowAlignment="!props.readonly && !!token.role"
             :tokenTooltip="token.role?.ability"
-            :reminderText="token.role?.name"
           />
         </a>
         <Token
