@@ -74,6 +74,7 @@ const game = reactive<{
     role_id: string | null;
     role?: {
       token_url: string;
+      type: string;
     };
   }[];
   win_v2: WinStatus_V2;
@@ -154,6 +155,7 @@ const game = reactive<{
       role_id: fabled.role_id,
       role: fabled.role || {
         token_url: "/1x1.png",
+        type: "",
       },
     })) || [],
   win_v2: savedGame.data.value?.win_v2 || WinStatus_V2.NOT_RECORDED,

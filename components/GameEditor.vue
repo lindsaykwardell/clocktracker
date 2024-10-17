@@ -645,6 +645,7 @@ const props = defineProps<{
       role_id: string | null;
       role?: {
         token_url: string;
+        type: string;
       };
     }[];
     win_v2: WinStatus_V2 | undefined;
@@ -719,6 +720,7 @@ type Character = {
   role?: {
     token_url: string;
     initial_alignment?: "GOOD" | "EVIL" | "NEUTRAL";
+    type: string;
   };
   related_role?: { token_url: string };
 };
@@ -962,6 +964,7 @@ function addFabled() {
     role_id: null,
     role: {
       token_url: "/1x1.png",
+      type: "",
     },
   });
 
@@ -1076,6 +1079,7 @@ function selectRoleForToken(role: {
         focusedToken.role = {
           token_url: role.token_url,
           initial_alignment: role.initial_alignment,
+          type: role.type,
         };
         focusedToken.role_id = role.id;
         focusedToken.alignment = role.initial_alignment;
