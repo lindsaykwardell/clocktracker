@@ -26,4 +26,5 @@ logs
 .netlify
 
 reminders.json
+abilities.json
 tmp
