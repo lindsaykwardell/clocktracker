@@ -99,6 +99,7 @@ const game = reactive<{
     role_id: string | null;
     role?: {
       token_url: string;
+      type: string;
     };
   }[];
   win_v2: WinStatus_V2 | undefined;
