@@ -47,6 +47,7 @@ export default defineEventHandler(async (handler) => {
           slug: true,
           description: true,
           icon: true,
+          location: true,
           _count: {
             select: {
               members: true,
