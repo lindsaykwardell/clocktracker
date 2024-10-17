@@ -1,0 +1,1383 @@
+[
+  {
+    "geometry": {
+      "coordinates": [
+        -122.674194,
+        45.5202471
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 186579,
+      "extent": [
+        -122.8367489,
+        45.6528812,
+        -122.4720252,
+        45.432536
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "city",
+      "name": "Portland",
+      "county": "Multnomah County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.1511929,
+        44.7349139
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 186606,
+      "extent": [
+        -122.1625261,
+        44.7421107,
+        -122.1367124,
+        44.7275951
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "village",
+      "postcode": "97342",
+      "name": "Detroit",
+      "county": "Marion County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.081299,
+        44.7023729
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 186531,
+      "extent": [
+        -122.1189326,
+        44.713104,
+        -122.0606596,
+        44.6949323
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "village",
+      "postcode": "97350",
+      "name": "Idanha",
+      "county": "Marion County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -121.9111906,
+        45.3295632
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "N",
+      "osm_id": 150972469,
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "village",
+      "name": "Rhododendron",
+      "county": "Clackamas County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -121.9634026,
+        45.3384997
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "N",
+      "osm_id": 150971463,
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "village",
+      "postcode": "97067",
+      "name": "Welches",
+      "county": "Clackamas County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -121.7547596,
+        45.3041033
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "N",
+      "osm_id": 150975844,
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "village",
+      "postcode": "97028",
+      "name": "Government Camp",
+      "county": "Clackamas County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.334259,
+        45.2864689
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 186585,
+      "extent": [
+        -122.3508548,
+        45.3152615,
+        -122.314082,
+        45.2805435
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "village",
+      "postcode": "97023",
+      "name": "Estacada",
+      "county": "Clackamas County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.416335,
+        44.7556996
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 186527,
+      "extent": [
+        -122.43706,
+        44.75926,
+        -122.406363,
+        44.751592
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "village",
+      "postcode": "97346",
+      "name": "Gates",
+      "county": "Marion County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.478138,
+        44.7540106
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 186569,
+      "extent": [
+        -122.493457,
+        44.757922,
+        -122.465389,
+        44.74332
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "village",
+      "postcode": "97360",
+      "name": "Mill City",
+      "county": "Linn County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.577032,
+        45.1473445
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 186593,
+      "extent": [
+        -122.6127823,
+        45.1628999,
+        -122.5582739,
+        45.1372394
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "town",
+      "postcode": "97038",
+      "name": "Molalla",
+      "county": "Clackamas County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.2616283,
+        45.3969212
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 186595,
+      "extent": [
+        -122.3042464,
+        45.4219889,
+        -122.227803,
+        45.3812265
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "town",
+      "postcode": "97055",
+      "name": "Sandy",
+      "county": "Clackamas County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.3594005,
+        45.3576721
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "N",
+      "osm_id": 150934351,
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "village",
+      "postcode": "97022",
+      "name": "Eagle Creek",
+      "county": "Clackamas County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.668088,
+        45.0433165
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 186620,
+      "extent": [
+        -122.673709,
+        45.047045,
+        -122.660052,
+        45.034756
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "village",
+      "name": "Scotts Mills",
+      "county": "Marion County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.615085,
+        44.7745664
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 186352,
+      "extent": [
+        -122.621389,
+        44.788937,
+        -122.583802,
+        44.766371
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "village",
+      "name": "Lyons",
+      "county": "Linn County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.3695057,
+        45.432664
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "N",
+      "osm_id": 5122552325,
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "village",
+      "postcode": "97009",
+      "name": "Boring",
+      "county": "Clackamas County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.458985,
+        45.4176261
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "N",
+      "osm_id": 150967774,
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "village",
+      "postcode": "97089",
+      "name": "Damascus",
+      "county": "Clackamas County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.3525897,
+        45.4673428
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "N",
+      "osm_id": 150963896,
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "village",
+      "postcode": "97009",
+      "name": "Orient",
+      "county": "Multnomah County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.497174,
+        45.428679
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 10279228,
+      "extent": [
+        -122.5683294,
+        45.4613616,
+        -122.449698,
+        45.3929584
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "town",
+      "postcode": "97086",
+      "name": "Happy Valley",
+      "county": "Clackamas County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.7832947,
+        45.0049305
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 186621,
+      "extent": [
+        -122.803808,
+        45.022986,
+        -122.751292,
+        44.981845
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "town",
+      "postcode": "97381",
+      "name": "Silverton",
+      "county": "Marion County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.6925983,
+        45.2629088
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 186584,
+      "extent": [
+        -122.7142061,
+        45.2943802,
+        -122.6612536,
+        45.2475399
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "town",
+      "postcode": "97013",
+      "name": "Canby",
+      "county": "Clackamas County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.606758,
+        45.3573429
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 186594,
+      "extent": [
+        -122.6400863,
+        45.3805715,
+        -122.5430931,
+        45.3110543
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "town",
+      "postcode": "97045",
+      "name": "Oregon City",
+      "county": "Clackamas County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.612314,
+        45.3656761
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 186596,
+      "extent": [
+        -122.6776177,
+        45.4003866,
+        -122.6037354,
+        45.3376749
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "town",
+      "postcode": "97068",
+      "name": "West Linn",
+      "county": "Clackamas County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.699036,
+        44.7270326
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "N",
+      "osm_id": 2977033873,
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "village",
+      "name": "Jordan",
+      "county": "Linn County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.5945507,
+        45.3803261
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 186586,
+      "extent": [
+        -122.6203516,
+        45.4041815,
+        -122.5695831,
+        45.3722919
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "town",
+      "postcode": "97027",
+      "name": "Gladstone",
+      "county": "Clackamas County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.7212232,
+        45.2522574
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 186583,
+      "extent": [
+        -122.7294424,
+        45.2582988,
+        -122.7171618,
+        45.2480907
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "village",
+      "name": "Barlow",
+      "county": "Clackamas County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.3298128,
+        45.519009
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "N",
+      "osm_id": 150978146,
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "village",
+      "name": "Springdale",
+      "county": "Multnomah County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.799682,
+        45.0678032
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 186618,
+      "extent": [
+        -122.807148,
+        45.078342,
+        -122.783379,
+        45.060079
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "village",
+      "name": "Mount Angel",
+      "county": "Marion County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.292256,
+        45.5314503
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "N",
+      "osm_id": 150971214,
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "village",
+      "postcode": "97019",
+      "name": "Corbett",
+      "county": "Multnomah County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -121.2663309,
+        44.7635576
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "N",
+      "osm_id": 150944528,
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "village",
+      "postcode": "97761",
+      "name": "Warm Springs",
+      "county": "Jefferson County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.579356,
+        45.4043992
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 186235,
+      "extent": [
+        -122.5829659,
+        45.4064441,
+        -122.5767617,
+        45.4015048
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "village",
+      "name": "Johnson City",
+      "county": "Clackamas County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.755035,
+        45.2310497
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 186605,
+      "extent": [
+        -122.7655035,
+        45.2414233,
+        -122.7477474,
+        45.2171944
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "village",
+      "name": "Aurora",
+      "county": "Marion County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.4329883,
+        45.4978623
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 186274,
+      "extent": [
+        -122.4980699,
+        45.5608795,
+        -122.3675829,
+        45.46094
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "city",
+      "name": "Gresham",
+      "county": "Multnomah County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.7922873436412,
+        44.826497450000005
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "W",
+      "osm_id": 38432413,
+      "extent": [
+        -122.8034576,
+        44.8382981,
+        -122.781657,
+        44.8175492
+      ],
+      "country": "United States",
+      "osm_key": "boundary",
+      "countrycode": "US",
+      "osm_value": "administrative",
+      "name": "Sublimity City Limits",
+      "county": "Marion County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.7945335,
+        44.8295663
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 186624,
+      "extent": [
+        -122.8034576,
+        44.8382981,
+        -122.781657,
+        44.8175492
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "village",
+      "name": "Sublimity",
+      "county": "Marion County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.794533,
+        44.8006775
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 186622,
+      "extent": [
+        -122.8215581,
+        44.8200345,
+        -122.763719,
+        44.7857683
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "town",
+      "postcode": "97383",
+      "name": "Stayton",
+      "county": "Marion County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.808628,
+        45.1831388
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 186617,
+      "extent": [
+        -122.816568,
+        45.192085,
+        -122.797566,
+        45.171959
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "village",
+      "name": "Hubbard",
+      "county": "Marion County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.388599,
+        45.5414373
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 186715,
+      "extent": [
+        -122.4303269,
+        45.5657556,
+        -122.3674876,
+        45.5064761
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "town",
+      "postcode": "97060",
+      "name": "Troutdale",
+      "county": "Multnomah County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.4184703,
+        45.5370464
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 186273,
+      "extent": [
+        -122.4337093,
+        45.5477265,
+        -122.4069661,
+        45.5276884
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "village",
+      "name": "Wood Village",
+      "county": "Multnomah County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.4330512,
+        45.5385457
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 186713,
+      "extent": [
+        -122.4597787,
+        45.5666055,
+        -122.4168786,
+        45.5269704
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "town",
+      "postcode": "97024",
+      "name": "Fairview",
+      "county": "Multnomah County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.8553725,
+        45.143731
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 186631,
+      "extent": [
+        -122.893608,
+        45.162823,
+        -122.822178,
+        45.127862
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "town",
+      "postcode": "97071",
+      "name": "Woodburn",
+      "county": "Marion County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.76816,
+        45.3099218
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 186581,
+      "extent": [
+        -122.8071674,
+        45.3446936,
+        -122.7381861,
+        45.2813863
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "town",
+      "postcode": "97070",
+      "name": "Wilsonville",
+      "county": "Clackamas County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.3479921,
+        45.5819594
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 237271,
+      "extent": [
+        -122.3860895,
+        45.6048822,
+        -122.3061598,
+        45.5558971
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "town",
+      "name": "Washougal",
+      "county": "Clark County",
+      "state": "Washington",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.670649,
+        45.4206749
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 186576,
+      "extent": [
+        -122.7478872,
+        45.4403461,
+        -122.6425235,
+        45.3822911
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "town",
+      "name": "Lake Oswego",
+      "county": "Clackamas County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.6412523,
+        45.4440051
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 186582,
+      "extent": [
+        -122.6522507,
+        45.4622158,
+        -122.5817455,
+        45.4246949
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "town",
+      "postcode": "97222",
+      "name": "Milwaukie",
+      "county": "Clackamas County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -121.17312,
+        45.247341
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "N",
+      "osm_id": 150970851,
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "village",
+      "name": "Tygh Valley",
+      "county": "Wasco County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.841394,
+        45.2222599
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 186607,
+      "extent": [
+        -122.8472766,
+        45.227053,
+        -122.8241365,
+        45.2181854
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "village",
+      "postcode": "97020",
+      "name": "Donald",
+      "county": "Marion County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.870924,
+        44.8409548
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 186604,
+      "extent": [
+        -122.881445,
+        44.855941,
+        -122.854654,
+        44.837911
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "village",
+      "postcode": "97325",
+      "name": "Aumsville",
+      "county": "Marion County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -121.971193,
+        45.6373393
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 238067,
+      "extent": [
+        -122.0027617,
+        45.6571809,
+        -121.914024,
+        45.6260781
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "village",
+      "postcode": "98639",
+      "name": "North Bonneville",
+      "county": "Skamania County",
+      "state": "Washington",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.729739,
+        45.3845958
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 186224,
+      "extent": [
+        -122.7504133,
+        45.3883258,
+        -122.7207638,
+        45.3825895
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "village",
+      "name": "Rivergrove",
+      "county": "Clackamas County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.897893,
+        45.1084663
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "R",
+      "osm_id": 186610,
+      "extent": [
+        -122.9046171,
+        45.115234,
+        -122.8867418,
+        45.1019116
+      ],
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "village",
+      "name": "Gervais",
+      "county": "Marion County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  },
+  {
+    "geometry": {
+      "coordinates": [
+        -122.840374,
+        45.2623415
+      ],
+      "type": "Point"
+    },
+    "type": "Feature",
+    "properties": {
+      "osm_type": "N",
+      "osm_id": 150978794,
+      "country": "United States",
+      "osm_key": "place",
+      "countrycode": "US",
+      "osm_value": "village",
+      "postcode": "97020",
+      "name": "Butteville",
+      "county": "Marion County",
+      "state": "Oregon",
+      "type": "city"
+    }
+  }
+]

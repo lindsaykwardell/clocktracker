@@ -35,6 +35,7 @@ export type User = {
     slug: string;
     description: string;
     icon: string;
+    location: string
     _count: {
       members: number;
       admins: number;
