@@ -113,6 +113,7 @@ const communities = ref<
     slug: string;
     description: string;
     icon: string | null;
+    location: string | null;
     _count: {
       members: number;
       admins: number;

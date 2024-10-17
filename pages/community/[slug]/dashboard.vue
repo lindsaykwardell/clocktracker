@@ -26,6 +26,8 @@
               <span class="block">Slug</span>
               <Input v-model="updatedSlug" required />
             </label>
+          </div>
+          <div class="flex flex-col md:flex-row md:gap-2">
             <label class="block">
               <span class="block">Privacy</span>
               <Input mode="select" v-model="updatedPrivacy">
@@ -33,13 +35,16 @@
                 <option :value="true">Private</option>
               </Input>
             </label>
-            <label class="block">
+            <label class="block flex-grow">
+              <span class="block">Location</span>
+              <LocationSearchInput
+                v-model:value="_location"
+                inputClass="block w-full border border-stone-500 rounded-md p-2"
+              />
+            </label>
+            <label class="block flex-grow">
               <span class="block">Time Zone</span>
-              <Input mode="select" v-model="updatedTimeZone">
-                <option v-for="tz in Intl.supportedValuesOf('timeZone')">
-                  {{ tz }}
-                </option>
-              </Input>
+              <TimeZoneSelector v-model:value="updatedTimeZone" />
             </label>
           </div>
           <label>
@@ -287,6 +292,17 @@ const updatedPrivacy = ref(community.is_private);
 const updatedDiscordServerId = ref<string | null>(community.discord_server_id);
 const updatedTimeZone = ref<string | null>(community.time_zone);
 const updatedLinks = ref(community.links);
+const updatedLocation = ref(community.location);
+const updatedCityId = ref(community.city_id);
+
+const _location = computed({
+  get: () => updatedLocation.value,
+  set: (newValue: { id: number; name: string }) => {
+    updatedLocation.value = newValue.name;
+    updatedCityId.value = newValue.id.toString();
+  },
+});
+
 const inFlight = ref(false);
 
 function isMe(id: string) {
@@ -321,9 +337,9 @@ async function uploadAvatar(event: Event) {
   communities.updateIcon(slug, url);
 }
 
-function updateCommunity() {
+async function updateCommunity() {
   inFlight.value = true;
-  communities.updateCommunity(slug, {
+  await communities.updateCommunity(slug, {
     name: updatedName.value,
     description: updatedDescription.value,
     slug: updatedSlug.value,
@@ -334,6 +350,8 @@ function updateCommunity() {
       updatedLinks.value.length === 1 && updatedLinks.value[0] === ""
         ? []
         : updatedLinks.value,
+    location: updatedLocation.value,
+    city_id: updatedCityId.value,
   });
   inFlight.value = false;
 }

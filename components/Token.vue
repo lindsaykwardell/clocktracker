@@ -7,7 +7,7 @@
     <img
       v-if="image"
       class="token-image"
-      :class="imageSize"
+      :class="dynamicTokenClass"
       :src="image"
       loading="lazy"
       :alt="character?.name || character?.role?.name || 'Unknown'"
@@ -21,11 +21,7 @@
       {{ reminderText }}
     </div>
     <div
-      v-if="
-        (character?.role &&
-          character.alignment !== character.role?.initial_alignment) ||
-        alwaysShowAlignment
-      "
+      v-if="alwaysShowAlignment"
       class="token bg-center bg-cover absolute bottom-0 -left-3 rounded-full shadow-xl border border-black flex justify-center items-center"
       :class="relatedSize"
       @click.stop="emit('clickAlignment')"
@@ -109,6 +105,26 @@ const tokenClass = computed(() => {
 
   if (props.outline) {
     classes += " border-dashed border-stone-100";
+  }
+
+  return classes;
+});
+
+const dynamicTokenClass = computed(() => {
+  let classes = imageSize.value;
+
+  if (
+    props.character?.alignment &&
+    props.character.role &&
+    props.character.alignment !== props.character.role.initial_alignment
+  ) {
+    if (props.character.alignment === "NEUTRAL") {
+      classes += " neutral";
+    } else if (props.character.role?.initial_alignment === "GOOD") {
+      classes += " turned-evil";
+    } else if (props.character.role?.initial_alignment === "EVIL") {
+      classes += " turned-good";
+    }
   }
 
   return classes;
@@ -204,6 +220,19 @@ const reminderTextSize = computed(() => {
 
   &.reminder {
     background-image: url("/img/reminder-token.webp");
+  }
+
+  .token-image {
+    &.neutral {
+      filter: sepia(1) brightness(1.5) contrast(1.6)
+    }
+    &.turned-good {
+      filter: hue-rotate(220deg);
+    }
+
+    &.turned-evil {
+      filter: hue-rotate(155deg) brightness(0.8) contrast(1.5);
+    }
   }
 }
 </style>

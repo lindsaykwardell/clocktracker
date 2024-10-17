@@ -114,7 +114,7 @@ const _location = computed({
   get: () => location.value,
   set: (newValue: { id: number; name: string }) => {
     location.value = newValue.name;
-    city_id.value = newValue.id;
+    city_id.value = newValue.id.toString();
   },
 });
 

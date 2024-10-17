@@ -1,5 +1,5 @@
 import type { User } from "@supabase/supabase-js";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, WhoCanRegister } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -15,6 +15,8 @@ export default defineEventHandler(async (handler) => {
     discord_server_id?: string;
     time_zone?: string;
     links?: string[];
+    location?: string;
+    city_id?: string;
   }>(handler);
 
   if (!me) {
@@ -64,6 +66,8 @@ export default defineEventHandler(async (handler) => {
       discord_server_id: body.discord_server_id ?? community.discord_server_id,
       time_zone: body.time_zone ?? community.time_zone,
       links: body.links ?? community.links,
+      location: body.location ?? community.location,
+      city_id: body.city_id ?? community.city_id,
     },
     select: {
       id: true,
@@ -71,8 +75,11 @@ export default defineEventHandler(async (handler) => {
       slug: true,
       description: true,
       icon: true,
+      is_private: true,
       discord_server_id: true,
       time_zone: true,
+      location: true,
+      city_id: true,
       links: true,
       members: {
         select: {
@@ -93,6 +100,32 @@ export default defineEventHandler(async (handler) => {
       admins: {
         select: {
           user_id: true,
+        },
+      },
+      banned_users: {
+        select: {
+          user_id: true,
+          username: true,
+          display_name: true,
+          avatar: true,
+          pronouns: true,
+          bio: true,
+          location: true,
+          privacy: true,
+          charts: true,
+        },
+      },
+      join_requests: {
+        select: {
+          user_id: true,
+          username: true,
+          display_name: true,
+          avatar: true,
+          pronouns: true,
+          bio: true,
+          location: true,
+          privacy: true,
+          charts: true,
         },
       },
       posts: {
@@ -147,6 +180,87 @@ export default defineEventHandler(async (handler) => {
           reply_to_id: {
             equals: null,
           },
+        },
+      },
+      events: {
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          start: true,
+          end: true,
+          location: true,
+          location_type: true,
+          player_count: true,
+          image: true,
+          who_can_register: true,
+          storytellers: true,
+          script: true,
+          script_id: true,
+          game_link: true,
+          registered_players: {
+            select: {
+              name: true,
+              created_at: true,
+              discord_user_id: true,
+              user: {
+                select: {
+                  username: true,
+                  avatar: true,
+                },
+              },
+            },
+            orderBy: {
+              created_at: "asc",
+            },
+          },
+          waitlists: {
+            select: {
+              id: true,
+              name: true,
+              default: true,
+              created_at: true,
+              users: {
+                select: {
+                  name: true,
+                  created_at: true,
+                  discord_user_id: true,
+                  user: {
+                    select: {
+                      user_id: true,
+                      username: true,
+                      avatar: true,
+                    },
+                  },
+                },
+                orderBy: {
+                  created_at: "asc",
+                },
+              },
+            },
+            orderBy: {
+              created_at: "asc",
+            },
+          },
+          community: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              icon: true,
+            },
+          },
+        },
+        where: {
+          who_can_register: {
+            not: WhoCanRegister.PRIVATE,
+          },
+          end: {
+            gte: new Date(),
+          },
+        },
+        orderBy: {
+          start: "asc",
         },
       },
     },
