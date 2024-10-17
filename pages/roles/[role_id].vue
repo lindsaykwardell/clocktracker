@@ -10,12 +10,15 @@
           <Token :character="character" size="lg" class="md:hidden m-auto" />
           <div class="flex flex-col md:flex-row gap-4 items-center">
             <div class="flex-grow">
-              <h1 class="text-3xl font-dumbledor">
+              <h1 class="text-center md:text-left text-3xl font-dumbledor">
                 {{ role_data.role.name }}
               </h1>
-              <h2 class="text-xl font-dumbledor">
+              <h2 class="text-center md:text-left text-xl font-dumbledor">
                 {{ role_data.role.type }}
               </h2>
+              <p class="block md:hidden text-center text-stone-700 italic max-w-[300px] py-4">
+            {{ role_data.role.ability }}
+          </p>
             </div>
           </div>
           <div class="flex flex-wrap py-6 justify-center">
@@ -58,6 +61,9 @@
             size="lg"
             class="hidden md:flex m-auto"
           />
+          <p class="hidden md:block text-center text-stone-700 italic max-w-[300px] py-4">
+            {{ role_data.role.ability }}
+          </p>
           <hr class="border-stone-400 w-full print:hidden" />
           <a
             :href="wikiUrl"
