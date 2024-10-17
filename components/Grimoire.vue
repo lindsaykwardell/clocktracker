@@ -79,7 +79,7 @@
           v-if="props.readonly && token.role_id"
           :href="`/roles/${token.role_id}`"
           target="_blank"
-          class="hover:underline flex flex-col items-center"
+          class="hover:underline flex flex-col items-center text-black font-extrabold"
         >
           <Token
             @clickRole="
@@ -95,6 +95,8 @@
             size="md"
             :class="{ 'cursor-pointer': !props.readonly }"
             :alwaysShowAlignment="!props.readonly && !!token.role"
+            :tokenTooltip="token.role?.ability"
+            :reminderText="token.role?.name"
           />
         </a>
         <Token
@@ -179,6 +181,7 @@ type Token = {
     token_url: string;
     type: string;
     initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+    ability?: string;
     name?: string;
   };
   related_role_id: string | null;
@@ -197,6 +200,16 @@ const games = useGames();
 const roles = useRoles();
 
 const me = useMe();
+
+function getRoleAbility(role_id: string | null) {
+  if (!role_id) {
+    return "";
+  }
+
+  const role = roles.getRole(role_id);
+
+  return role?.ability ?? "";
+}
 
 const communityMembersWhoArentFriends = computed(() =>
   friends.getCommunityMembers.filter(

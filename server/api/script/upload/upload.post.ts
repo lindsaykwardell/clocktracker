@@ -190,6 +190,7 @@ export default defineEventHandler(async (handler) => {
         id: role.id,
         name: role.name,
         initial_alignment,
+        ability: role.ability ?? "",
         token_url,
         type: role_type,
         custom_role: true,

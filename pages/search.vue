@@ -189,11 +189,6 @@ const showRoles = computed({
 });
 
 async function search(query: string | undefined) {
-  // Only search if the query is at least 3 characters long
-
-  if ((query?.length ?? 0 < 3) && !near_me.value) {
-    return;
-  }
   router.push({
     query: {
       query,
