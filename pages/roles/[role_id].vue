@@ -47,7 +47,7 @@
                   />
                 </div>
                 <img
-                  class="token relative z-50 w-28 h-28 md:w-40 md:h-40 transition duration-200 rounded-full overflow-visible aspect-square"
+                  class="token relative z-20 w-28 h-28 md:w-40 md:h-40 transition duration-200 rounded-full overflow-visible aspect-square"
                   :src="script.logo ?? scripts.scriptLogo(script.script)"
                 />
               </div>
