@@ -176,6 +176,7 @@ model Role {
   id                String         @id
   name              String
   initial_alignment Alignment
+  ability           String         @default("")
   token_url         String
   type              RoleType
   custom_role       Boolean        @default(false)

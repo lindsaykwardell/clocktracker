@@ -1,6 +1,6 @@
 <template>
   <div
-    class="bg-center bg-cover relative rounded-full shadow-xl border flex justify-center items-center aspect-square"
+    class="bg-center bg-cover relative rounded-full shadow-xl border flex justify-center items-center aspect-square flex-col"
     :class="tokenClass"
     @click="emit('clickRole')"
   >
@@ -63,6 +63,7 @@ const props = defineProps<{
         related?: string | null;
         role?: {
           token_url: string;
+          type: string;
           initial_alignment?: "GOOD" | "EVIL" | "NEUTRAL";
           name?: string;
         };
@@ -89,7 +90,7 @@ const tokenClass = computed(() => {
       classes += "w-8 h-8 md:w-12 md:h-12";
       break;
     case "reminder":
-      classes += "reminder flex-col w-12 h-12 md:w-16 md:h-16";
+      classes += "reminder w-12 h-12 md:w-16 md:h-16";
       break;
     case "md":
       classes += "w-20 h-20 md:w-28 md:h-28";
@@ -113,7 +114,13 @@ const tokenClass = computed(() => {
 const dynamicTokenClass = computed(() => {
   let classes = imageSize.value;
 
-  if (
+  if (props.character?.role?.type === "TRAVELER") {
+    if (props.character.alignment === "GOOD") {
+      classes += " good-traveler";
+    } else if (props.character.alignment === "EVIL") {
+      classes += " evil-traveler";
+    }
+  } else if (
     props.character?.alignment &&
     props.character.role &&
     props.character.alignment !== props.character.role.initial_alignment
@@ -224,14 +231,23 @@ const reminderTextSize = computed(() => {
 
   .token-image {
     &.neutral {
-      filter: sepia(1) brightness(1.5) contrast(1.6)
+      filter: sepia(1) brightness(1.5) contrast(1.6);
     }
+
+    &.good-traveler {
+      filter: hue-rotate(220deg) brightness(1.3);
+    }
+
+    &.evil-traveler {
+      filter: hue-rotate(155deg) brightness(0.65) contrast(4);
+    }
+
     &.turned-good {
-      filter: hue-rotate(220deg);
+      filter: hue-rotate(220deg) brightness(1.3);
     }
 
     &.turned-evil {
-      filter: hue-rotate(155deg) brightness(0.8) contrast(1.5);
+      filter: hue-rotate(155deg) brightness(0.65) contrast(4);
     }
   }
 }

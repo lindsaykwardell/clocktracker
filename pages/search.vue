@@ -69,6 +69,12 @@
               </Button>
             </div>
           </div>
+          <div>
+            <label>
+              <input type="checkbox" v-model="near_me" />
+              Show nearby results (when applicable)
+            </label>
+          </div>
           <template v-if="showUsers">
             <UserCard v-for="user in users" :username="user.username" />
           </template>
@@ -92,8 +98,12 @@
 
 <script setup lang="ts">
 import type { Role } from "@prisma/client";
+import { useGeolocation } from "@vueuse/core";
 const router = useRouter();
 const route = useRoute();
+const { coords } = useGeolocation();
+
+const near_me = ref(route.query.near_me === "true");
 
 const users = ref<
   {
@@ -178,12 +188,13 @@ const showRoles = computed({
   },
 });
 
-async function search(query: string) {
-  // Only search if the query is at least 3 characters long
-  if (query.length < 3) {
-    return;
-  }
-  router.push({ query: { query } });
+async function search(query: string | undefined) {
+  router.push({
+    query: {
+      query,
+      near_me: near_me.value ? "true" : undefined,
+    },
+  });
   searching.value = true;
   users.value = [];
   communities.value = [];
@@ -191,7 +202,18 @@ async function search(query: string) {
   roles.value = [];
   const result = await $fetch("/api/search", {
     params: {
-      query,
+      query: query ?? "",
+      near_me: near_me.value ? "true" : undefined,
+      lat: near_me.value
+        ? isFinite(coords.value.latitude)
+          ? coords.value.latitude
+          : undefined
+        : undefined,
+      lon: near_me.value
+        ? isFinite(coords.value.longitude)
+          ? coords.value.longitude
+          : undefined
+        : undefined,
     },
   });
 
@@ -234,9 +256,21 @@ async function search(query: string) {
   searching.value = false;
 }
 
+watch(near_me, async () => {
+  router.push({
+    query: {
+      query: route.query.query,
+      near_me: near_me.value ? "true" : undefined,
+    },
+  });
+
+  search(route.query.query as string);
+});
+
 onMounted(() => {
   const query = route.query.query as string;
-  if (query) {
+  const near_me = route.query.near_me as string;
+  if (query || near_me) {
     searching.value = true;
   }
 });
