@@ -34,11 +34,10 @@
         >
           <Token
             size="lg"
-            :character="{
-            name: roleOfTheDay.data.value?.name,
-            alignment: roleOfTheDay.data.value?.initial_alignment,
-            role: roleOfTheDay.data.value!,
-          }"
+            :character="{ name: roleOfTheDay.data.value?.name,
+          alignment: roleOfTheDay.data.value?.type === 'TRAVELER' ? 'NEUTRAL' :
+          roleOfTheDay.data.value?.initial_alignment, role:
+          roleOfTheDay.data.value!, }"
           />
           <h2 class="text-center font-bold">
             {{ roleOfTheDay.data.value?.name }}
