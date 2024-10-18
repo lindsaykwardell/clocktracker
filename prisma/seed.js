@@ -1007,7 +1007,7 @@ async function main() {
       "https://twitter.com/lindsaykwardell",
       "https://discord.gg/KwMz8ThamT",
     ],
-    portland,
+    portland
   );
 
   for (let i = 0; i < 30; i++) {
@@ -1189,8 +1189,13 @@ async function main() {
 }
 
 function generateName() {
+  const availableNames = roleNames.filter(
+    (role) => !role.toLowerCase().includes("legacy")
+  );
+
   const randomRole =
-    roleNames[Math.floor(Math.random() * roleNames.length)] || "Traveler";
+    availableNames[Math.floor(Math.random() * availableNames.length)] ||
+    "Traveler";
   const adjective = faker.word.adjective();
 
   const username = faker.internet.userName({
