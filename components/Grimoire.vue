@@ -1,10 +1,15 @@
 <template>
-  <div id="grimoire" class="container m-auto" :style="`--m: ${tokens.length}`">
+  <div
+    id="grimoire"
+    class="container m-auto"
+    :style="`--m: ${orderedTokens.length}`"
+  >
     <div v-for="(token, index) in orderedTokens" :style="`--i: ${index}`">
       <div
         class="token-seat relative flex flex-col"
         :class="{
           'z-50': token.order === focusedToken?.order,
+          'opacity-65': !token.role && !token.player_name,
         }"
       >
         <div class="reminder-tokens">
@@ -111,7 +116,9 @@
           @clickAlignment="toggleAlignment(token)"
           :character="token"
           size="md"
-          :class="{ 'cursor-pointer': !props.readonly }"
+          :class="{
+            'cursor-pointer': !props.readonly,
+          }"
           :alwaysShowAlignment="!props.readonly && !!token.role"
         />
         <div v-if="!props.readonly" class="relative z-50">
@@ -286,15 +293,15 @@ const props = defineProps<{
 const emit = defineEmits(["selectedMe", "claimSeat"]);
 
 const orderedTokens = computed(() =>
-  props.tokens.sort((a, b) => a.order - b.order)
+  props.tokens
+    .sort((a, b) => a.order - b.order)
+    .filter((t) => !props.readonly || t.role || t.player_name)
 );
 
 const reminders = computed(() => {
   const fabled = roles.getRoleByType(RoleType.FABLED);
   return roles.getRemindersForRoles([
-    ...(props.availableRoles
-      ?.filter((r) => props.tokens.map((t) => t.role_id).includes(r.id))
-      .map((r) => r.id) ?? []),
+    ...(props.availableRoles?.map((r) => r.id) ?? []),
     ...fabled.map((r) => r.id),
   ]);
 });
