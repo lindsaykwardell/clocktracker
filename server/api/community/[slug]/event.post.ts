@@ -74,6 +74,7 @@ export default defineEventHandler(async (handler) => {
       storytellers: body.storytellers,
       script_id: body.script_id,
       game_link: body.game_link,
+      created_by_id: me.id,
       waitlists: {
         createMany: {
           data: body.waitlists.map((waitlist) => ({

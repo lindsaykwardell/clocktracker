@@ -101,6 +101,14 @@ export default defineEventHandler(async (handler) => {
           slug: true,
         },
       },
+      created_by: {
+        select: {
+          user_id: true,
+          username: true,
+          display_name: true,
+          avatar: true,
+        },
+      },
     },
   });
 

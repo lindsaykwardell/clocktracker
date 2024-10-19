@@ -85,6 +85,14 @@ export async function fetchEventAndUpdateDiscord(event_id: string) {
           icon: true,
         },
       },
+      created_by: {
+        select: {
+          user_id: true,
+          username: true,
+          display_name: true,
+          avatar: true,
+        },
+      },
     },
   });
 

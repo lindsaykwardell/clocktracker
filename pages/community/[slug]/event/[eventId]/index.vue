@@ -315,18 +315,22 @@ async function register(name: string, waitlistId?: number) {
 const showShareTooltip = ref(false);
 
 async function getShareLink() {
-  shareDetails.value.url = await $fetch(`/api/events/${eventId}/share`);
+  try {
+    shareDetails.value.url = await $fetch(`/api/events/${eventId}/share`);
 
-  if (shareIsSupported.value) {
-    await share();
-  } else if (copyIsSupported.value) {
-    await copy();
-    if (copied.value) {
-      showShareTooltip.value = true;
-      setTimeout(() => {
-        showShareTooltip.value = false;
-      }, 2000);
+    if (shareIsSupported.value) {
+      await share();
+    } else if (copyIsSupported.value) {
+      await copy();
+      if (copied.value) {
+        showShareTooltip.value = true;
+        setTimeout(() => {
+          showShareTooltip.value = false;
+        }, 2000);
+      }
     }
+  } catch (e) {
+    // Do nothing
   }
 }
 

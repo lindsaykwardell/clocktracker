@@ -127,6 +127,14 @@ export default defineEventHandler(async (handler) => {
           icon: true,
         },
       },
+      created_by: {
+        select: {
+          user_id: true,
+          username: true,
+          display_name: true,
+          avatar: true,
+        },
+      },
     },
     orderBy: {
       start: "asc",

@@ -987,6 +987,7 @@ async function main() {
             })),
           },
           created_at: event.start,
+          created_by_id: communityUsers[0].user_id,
         },
       });
     }

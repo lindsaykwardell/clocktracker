@@ -96,6 +96,12 @@ export type Event = {
     slug: string;
     icon: string;
   } | null;
+  created_by: {
+    user_id: string;
+    username: string;
+    display_name: string;
+    avatar: string | null;
+  }
 };
 
 export const useCommunities = defineStore("communities", {

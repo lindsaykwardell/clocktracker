@@ -260,6 +260,7 @@ model UserSettings {
   uploaded_scripts        Script[]
   dids                    Did[]
   favorites               FavoriteGame[]
+  created_events          Event[]
 }
 
 model Did {
@@ -403,6 +404,8 @@ model Event {
   registered_players   EventAttendee[]
   community            Community?              @relation(fields: [community_id], references: [id])
   community_id         Int?
+  created_by           UserSettings?           @relation(fields: [created_by_id], references: [user_id])
+  created_by_id        String?
   who_can_register     WhoCanRegister          @default(COMMUNITY_MEMBERS)
   waitlists            EventWaitlist[]
   discord_posts        EventDiscordPost[]
