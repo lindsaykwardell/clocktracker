@@ -259,6 +259,7 @@ export async function execute(interaction: CommandInteraction<CacheType>) {
           data: waitlists,
         },
       },
+      created_by_id: clocktracker_user.user_id,
     },
   });
 

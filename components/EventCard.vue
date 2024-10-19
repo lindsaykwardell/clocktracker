@@ -100,6 +100,13 @@
           {{ event.location }}
         </template>
       </div>
+      <div
+        v-if="event.created_by"
+        class="flex text-stone-500 dark:text-stone-400 items-center gap-2"
+      >
+        <Avatar :value="event.created_by.avatar" size="xs" />
+        <span class="text-sm">Created by {{ event.created_by.display_name }}</span>
+      </div>
       <h2
         class="font-dumbledor"
         :class="{
