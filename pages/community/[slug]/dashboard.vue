@@ -3,7 +3,7 @@
     <div class="flex flex-col gap-3 p-2">
       <form
         @submit.prevent="updateCommunity"
-        class="flex flex-col md:flex-row gap-4 items-center p-2 w-full lg:w-5/6 xl:w-3/4 m-auto"
+        class="flex flex-col md:flex-row gap-4 items-start p-2 w-full lg:w-5/6 xl:w-3/4 m-auto"
       >
         <div class="flex flex-col items-center">
           <Avatar :value="community.data.icon" size="lg" />
