@@ -6,9 +6,9 @@ const prisma = new PrismaClient();
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
-  const slug = handler.context.params!.slug;
   const event_id = handler.context.params!.event_id;
-  const registered_player_id = +handler.context.params!.id;
+  const waitlist_id = +handler.context.params!.waitlist_id;
+  const waitlist_player_id = +handler.context.params!.id;
 
   if (!me) {
     throw createError({
@@ -20,14 +20,20 @@ export default defineEventHandler(async (handler) => {
   const event = await prisma.event.findUnique({
     where: {
       id: event_id,
-      community: {
-        slug,
-        admins: {
-          some: {
-            user_id: me?.id || "",
+      OR: [
+        {
+          community: {
+            admins: {
+              some: {
+                user_id: me.id,
+              },
+            },
           },
         },
-      },
+        {
+          created_by_id: me.id,
+        },
+      ],
     },
     select: {
       id: true,
@@ -41,10 +47,10 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  await prisma.eventAttendee.deleteMany({
+  await prisma.eventWaitlistAttendee.deleteMany({
     where: {
-      event_id,
-      id: registered_player_id,
+      waitlist_id,
+      id: waitlist_player_id,
     },
   });
 

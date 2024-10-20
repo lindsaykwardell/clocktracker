@@ -91,9 +91,7 @@
                       </span>
                     </div>
                   </div>
-                  <nuxt-link
-                    :to="`/community/${update.event.community?.slug}/event/${update.event.id}`"
-                  >
+                  <nuxt-link :to="`/event/${update.event.id}`">
                     <EventCard
                       v-if="update.kind === 'new_event'"
                       :event="update.event"
@@ -211,7 +209,7 @@
         <div class="flex flex-col gap-4 calendar-events">
           <nuxt-link
             v-for="event in eventsOnDay"
-            :to="`/community/${event.community!.slug}/event/${event.id}`"
+            :to="`/event/${event.id}`"
             class="w-full"
           >
             <EventCard

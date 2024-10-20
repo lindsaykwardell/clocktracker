@@ -14,7 +14,7 @@
         <div class="w-full lg:w-1/2 flex flex-col gap-4">
           <nuxt-link
             v-for="event in eventsOnDay"
-            :to="`/community/${event.community.slug}/event/${event.id}`"
+            :to="`/event/${event.id}`"
             class="w-full"
           >
             <EventCard
@@ -37,6 +37,7 @@
 <script setup lang="ts">
 import dayjs from "dayjs";
 import type { Event } from "~/composables/useCommunities";
+import { Status } from "~/composables/useFetchStatus";
 
 const users = useUsers();
 const user = useSupabaseUser();

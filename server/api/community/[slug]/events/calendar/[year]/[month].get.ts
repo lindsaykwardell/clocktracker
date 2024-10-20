@@ -61,6 +61,7 @@ export default defineEventHandler(async (handler) => {
     },
     select: {
       id: true,
+      community_id: true,
       title: true,
       description: true,
       start: true,

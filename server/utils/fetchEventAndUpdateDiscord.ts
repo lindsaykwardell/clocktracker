@@ -17,6 +17,7 @@ export async function fetchEventAndUpdateDiscord(event_id: string) {
     },
     select: {
       id: true,
+      community_id: true,
       title: true,
       description: true,
       start: true,
@@ -140,19 +141,37 @@ export async function fetchEventAndUpdateDiscord(event_id: string) {
                 process.env.NODE_ENV === "production"
                   ? "https://clocktracker.app"
                   : "http://localhost:3000"
-              }/community/${event.community!.slug}/event/${event.id}`
+              }/event/${event.id}`
             )
-            .setAuthor({
-              name: event.community!.name,
-              iconURL: event.community!.icon.includes("http")
-                ? event.community!.icon
-                : `https://clocktracker.app${event.community!.icon}`,
-              url: `${
-                process.env.NODE_ENV === "production"
-                  ? "https://clocktracker.app"
-                  : "http://localhost:3000"
-              }/community/${event.community!.slug}`,
-            })
+            .setAuthor(
+              event.community
+                ? {
+                    name: event.community.name,
+                    iconURL: event.community.icon.includes("http")
+                      ? event.community.icon
+                      : `https://clocktracker.app${event.community.icon}`,
+                    url: `${
+                      process.env.NODE_ENV === "production"
+                        ? "https://clocktracker.app"
+                        : "http://localhost:3000"
+                    }/community/${event.community.slug}`,
+                  }
+                : event.created_by
+                ? {
+                    name: event.created_by.display_name,
+                    iconURL: event.created_by.avatar!,
+                    url: `${
+                      process.env.NODE_ENV === "production"
+                        ? "https://clocktracker.app"
+                        : "http://localhost:3000"
+                    }/@${event.created_by.username}`,
+                  }
+                : {
+                    name: "ClockTracker",
+                    iconURL: "https://clocktracker.app/images/logo.png",
+                    url: "https://clocktracker.app",
+                  }
+            )
             // .setThumbnail(`https://clocktracker.app${event.community.icon}`)
             .setTimestamp(event.start)
             .setFooter({ text: event.id })

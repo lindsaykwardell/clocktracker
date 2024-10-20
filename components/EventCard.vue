@@ -67,7 +67,7 @@
               >
                 <MenuItem>
                   <nuxt-link
-                    :to="`/community/${event.community!.slug}/event/${event.id}/edit`"
+                    :to="`/event/${event.id}/edit`"
                     class="flex gap-1 w-full items-center text-black dark:text-white text-sm px-2 min-h-[32px]"
                   >
                     Edit Event
@@ -75,7 +75,7 @@
                 </MenuItem>
                 <MenuItem>
                   <nuxt-link
-                    :to="`/community/${event.community!.slug}/events/create?duplicate=${event.id}`"
+                    :to="`/event/create?duplicate=${event.id}`"
                     class="flex gap-1 w-full items-center text-black dark:text-white text-sm px-2 min-h-[32px]"
                   >
                     Duplicate Event
@@ -255,7 +255,7 @@ function scriptLink(event: { script: string; script_id: number | null }) {
 function deleteEvent() {
   if (confirm("Are you sure you want to delete this event?")) {
     $fetch(
-      `/api/community/${props.event.community!.slug}/event/${props.event.id}`,
+      `/api/event/${props.event.id}`,
       {
         method: "DELETE",
       }

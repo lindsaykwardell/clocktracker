@@ -5,36 +5,42 @@ const prisma = new PrismaClient();
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
-  const slug = handler.context.params!.slug;
   const event_id = handler.context.params!.event_id;
 
   const event = await prisma.event.findUnique({
     where: {
       id: event_id,
-      community: {
-        slug,
-        banned_users: {
-          none: {
-            user_id: me?.id || "",
-          },
+      OR: [
+        {
+          community_id: null,
         },
-        OR: [
-          {
-            is_private: false,
-          },
-          {
-            members: {
-              some: {
+        {
+          community: {
+            banned_users: {
+              none: {
                 user_id: me?.id || "",
               },
             },
-            is_private: true,
+            OR: [
+              {
+                is_private: false,
+              },
+              {
+                members: {
+                  some: {
+                    user_id: me?.id || "",
+                  },
+                },
+                is_private: true,
+              },
+            ],
           },
-        ],
-      },
+        },
+      ],
     },
     select: {
       id: true,
+      community_id: true,
       title: true,
       description: true,
       start: true,

@@ -6,7 +6,6 @@ const prisma = new PrismaClient();
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
-  const slug = handler.context.params!.slug;
   const event_id = handler.context.params!.event_id;
   const body = await readBody<{
     player_id: number;
@@ -31,14 +30,20 @@ export default defineEventHandler(async (handler) => {
   const event = await prisma.event.findUnique({
     where: {
       id: event_id,
-      community: {
-        slug,
-        admins: {
-          some: {
-            user_id: me?.id || "",
+      OR: [
+        {
+          community: {
+            admins: {
+              some: {
+                user_id: me.id,
+              },
+            },
           },
         },
-      },
+        {
+          created_by_id: me.id,
+        },
+      ],
     },
     select: {
       id: true,
