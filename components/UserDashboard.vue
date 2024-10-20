@@ -72,7 +72,13 @@
           </ul>
         </template>
       </div>
-      <div class="content md:overflow-y-scroll">
+      <div
+        class="content md:overflow-y-scroll pb-20 md:pb-0"
+        :class="{
+          block: selectedTab === 'updates',
+          'hidden md:block': selectedTab === 'events',
+        }"
+      >
         <ClientOnly>
           <ul class="px-4">
             <li v-for="update in updates.data.value" class="py-3">
@@ -220,9 +226,20 @@
           </ul>
         </ClientOnly>
       </div>
-      <div class="flex flex-col gap-4 dark:bg-stone-950 p-4">
+      <div
+        class="flex flex-col gap-4 dark:bg-stone-950 p-4 pb-20 md:pb-0"
+        :class="{
+          block: selectedTab === 'events',
+          'hidden md:block': selectedTab === 'updates',
+        }"
+      >
         <div>
-          <Button component="nuxt-link" to="/event/create" tertiary fontSize="sm">
+          <Button
+            component="nuxt-link"
+            to="/event/create"
+            tertiary
+            fontSize="sm"
+          >
             Create Event
           </Button>
           <Calendar
@@ -249,6 +266,22 @@
           </nuxt-link>
         </div>
       </div>
+      <div
+        class="md:hidden fixed bottom-0 left-0 flex p-2 bg-stone-50 border-t border-stone-400 dark:border-stone-700 dark:bg-stone-950 w-full"
+      >
+        <button class="flex-1 flex flex-col items-center text-xs" @click="selectedTab = 'updates'">
+          <img :src="`/img/role/towncrier.png`" class="w-10 m-auto" />
+          Updates
+        </button>
+        <button class="flex-1 flex flex-col items-center text-xs" @click="selectedTab = 'events'">
+          <img :src="`/img/role/clockmaker.png`" class="w-10 m-auto" />
+          Events
+        </button>
+        <nuxt-link class="flex-1 flex flex-col items-center text-xs" to="/add-game">
+          <img :src="`/img/role/mezepheles.png`" class="w-10 m-auto" />
+          Add Game
+        </nuxt-link>
+      </div>
     </div>
   </template>
   <template v-else-if="me.status === Status.ERROR"> </template>
@@ -273,6 +306,7 @@ const roleOfTheDay = await useFetch("/api/role_of_the_day");
 
 const { data: events } = await useFetch<Event[]>("/api/events");
 const selectedDay = ref<dayjs.Dayjs | null>(dayjs());
+const selectedTab = ref<"updates" | "events">("updates");
 
 const myCommunities = computed(() => {
   if (me.value.status === Status.SUCCESS) {
