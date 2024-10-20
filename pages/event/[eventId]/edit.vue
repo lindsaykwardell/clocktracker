@@ -1,5 +1,5 @@
 <template>
-  <CommunityTemplate moderatorOnly>
+  <component :is="template" moderatorOnly :slug="existingEvent.community?.slug">
     <h2 class="font-dumbledor text-2xl lg:text-3xl my-4 text-center">
       Edit Event
     </h2>
@@ -140,7 +140,7 @@
         </div>
       </div>
     </ClientOnly>
-  </CommunityTemplate>
+  </component>
 </template>
 
 <script setup lang="ts">
@@ -148,15 +148,15 @@ import dayjs from "dayjs";
 
 const router = useRouter();
 const route = useRoute();
+const communities = useCommunities();
 
-const slug = route.params.slug as string;
 const eventId = route.params.eventId as string;
 
 definePageMeta({
   middleware: "community-admin",
 });
 
-const existingEvent = await $fetch(`/api/community/${slug}/event/${eventId}`);
+const existingEvent = await $fetch(`/api/event/${eventId}`);
 
 const event = reactive<{
   title: string;
@@ -177,6 +177,7 @@ const event = reactive<{
     name: string;
     default: boolean;
   }[];
+  community_id: number | null;
 }>({
   title: existingEvent.title,
   description: existingEvent.description,
@@ -196,6 +197,7 @@ const event = reactive<{
     name: w.name,
     default: w.default,
   })),
+  community_id: existingEvent.community_id,
 });
 
 const registered_players = ref(existingEvent.registered_players);
@@ -255,16 +257,13 @@ async function saveEvent() {
   inFlight.value = true;
   errors.value = "";
   try {
-    const saved = await $fetch(
-      `/api/community/${slug}/event/${existingEvent.id}`,
-      {
-        method: "PUT",
-        body: JSON.stringify(formattedEvent.value),
-      }
-    );
+    const saved = await $fetch(`/api/event/${existingEvent.id}`, {
+      method: "PUT",
+      body: JSON.stringify(formattedEvent.value),
+    });
 
     if (saved) {
-      router.push(`/community/${slug}/event/${saved.id}`);
+      router.push(`/event/${saved.id}`);
     }
   } catch (err) {
     errors.value = (err as any).statusMessage;
@@ -273,7 +272,7 @@ async function saveEvent() {
 
 async function deleteRegisteredPlayer(id: number) {
   if (confirm("Are you sure you want to remove this player?")) {
-    await $fetch(`/api/community/${slug}/event/${eventId}/registered/${id}`, {
+    await $fetch(`/api/event/${eventId}/registered/${id}`, {
       method: "DELETE",
     });
 
@@ -286,7 +285,7 @@ async function deleteRegisteredPlayer(id: number) {
 async function deleteWaitlistPlayer(waitlistId: number, id: number) {
   if (confirm("Are you sure you want to remove this player?")) {
     await $fetch(
-      `/api/community/${slug}/event/${eventId}/waitlist/${waitlistId}/registered/${id}`,
+      `/api/event/${eventId}/waitlist/${waitlistId}/registered/${id}`,
       {
         method: "DELETE",
       }
@@ -306,15 +305,29 @@ async function moveRegisteredPlayer(
   from: "registered" | number,
   to: "registered" | number
 ) {
-  const updatedEvent = await $fetch(
-    `/api/community/${slug}/event/${eventId}/registered`,
-    {
-      method: "PUT",
-      body: JSON.stringify({ player_id, from, to }),
-    }
-  );
+  const updatedEvent = await $fetch(`/api/event/${eventId}/registered`, {
+    method: "PUT",
+    body: JSON.stringify({ player_id, from, to }),
+  });
 
   registered_players.value = updatedEvent.registered_players;
   waitlists.value = updatedEvent.waitlists;
 }
+
+const standardTemplate = resolveComponent("StandardTemplate");
+const communityTemplate = resolveComponent("CommunityTemplate");
+
+const template = computed(() => {
+  if (event.community_id) {
+    return communityTemplate;
+  }
+
+  return standardTemplate;
+});
+
+onMounted(() => {
+  if (existingEvent.community?.slug) {
+    communities.fetchCommunity(existingEvent.community.slug);
+  }
+});
 </script>

@@ -4,7 +4,7 @@
       <div v-if="isModerator" class="flex justify-end p-4">
         <Button
           component="nuxt-link"
-          :to="`/community/${community.data.slug}/events/create`"
+          :to="`/event/create?slug=${slug}`"
           class="py-2 px-4"
           primary
         >

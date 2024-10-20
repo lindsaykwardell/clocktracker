@@ -1,15 +1,17 @@
 <template>
-  <CommunityTemplate moderatorOnly>
-    <h2 class="font-dumbledor text-2xl lg:text-3xl my-4 text-center">
-      Create Event
-    </h2>
-    <EventEditor
-      :event="event"
-      :inFlight="inFlight"
-      :errors="errors"
-      @save="createEvent"
-    />
-  </CommunityTemplate>
+  <component :is="template" moderatorOnly :slug="slug">
+    <template v-if="!slug || community_id">
+      <h2 class="font-dumbledor text-2xl lg:text-3xl my-4 text-center">
+        Create Event
+      </h2>
+      <EventEditor
+        :event="event"
+        :inFlight="inFlight"
+        :errors="errors"
+        @save="createEvent"
+      />
+    </template>
+  </component>
 </template>
 
 <script setup lang="ts">
@@ -17,8 +19,7 @@ import dayjs from "dayjs";
 
 const router = useRouter();
 const route = useRoute();
-
-const slug = route.params.slug as string;
+const communities = useCommunities();
 
 definePageMeta({
   middleware: "community-admin",
@@ -27,7 +28,20 @@ definePageMeta({
 const start = dayjs().add(1, "hour").format("YYYY-MM-DDTHH:mm");
 const end = dayjs().add(2.5, "hour").format("YYYY-MM-DDTHH:mm");
 
+const slug = route.query.slug as string;
+
+const community_id = computed(() => {
+  const community = communities.getCommunity(slug);
+
+  if (community.status === Status.SUCCESS) {
+    return community.data.id;
+  } else {
+    return null;
+  }
+});
+
 const event = reactive<{
+  community_id: number | null;
   title: string;
   start: string;
   end: string;
@@ -46,6 +60,7 @@ const event = reactive<{
     default: boolean;
   }[];
 }>({
+  community_id: community_id.value,
   title: "",
   description: "",
   start,
@@ -64,10 +79,9 @@ const event = reactive<{
 
 if (route.query.duplicate) {
   try {
-    const previousEvent = await $fetch(
-      `/api/community/${slug}/event/${route.query.duplicate}`
-    );
+    const previousEvent = await $fetch(`/api/event/${route.query.duplicate}`);
 
+    event.community_id = previousEvent.community_id;
     event.title = previousEvent.title;
     event.description = previousEvent.description;
     event.player_count = previousEvent.player_count;
@@ -90,6 +104,17 @@ if (route.query.duplicate) {
   }
 }
 
+const standardTemplate = resolveComponent("StandardTemplate");
+const communityTemplate = resolveComponent("CommunityTemplate");
+
+const template = computed(() => {
+  if (event.community_id) {
+    return communityTemplate;
+  }
+
+  return standardTemplate;
+});
+
 const formattedEvent = computed(() => {
   return {
     ...event,
@@ -105,16 +130,26 @@ async function createEvent() {
   inFlight.value = true;
   errors.value = "";
   try {
-    const saved = await $fetch(`/api/community/${slug}/event`, {
+    const saved = await $fetch(`/api/event`, {
       method: "POST",
       body: JSON.stringify(formattedEvent.value),
     });
 
     if (saved) {
-      router.push(`/community/${slug}/event/${saved.id}`);
+      router.push(`/event/${saved.id}`);
     }
   } catch (err) {
     errors.value = (err as any).statusMessage;
   }
 }
+
+watch(community_id, () => {
+  event.community_id = community_id.value;
+});
+
+onMounted(() => {
+  if (slug) {
+    communities.fetchCommunity(slug);
+  }
+});
 </script>
