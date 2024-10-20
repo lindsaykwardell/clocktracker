@@ -33,7 +33,7 @@
       </template>
       <div v-if="community.data.events.length > 0" class="flex justify-center">
         <nuxt-link
-          :to="`${community.data.slug}/event/${community.data.events[0].id}`"
+          :to="`/event/${community.data.events[0].id}`"
           class="w-full md:w-[600px]"
         >
           <EventCard
@@ -109,6 +109,7 @@
 <script setup lang="ts">
 import naturalOrder from "natural-order";
 import type { Event } from "~/composables/useCommunities";
+import { Status } from "~/composables/useFetchStatus";
 
 const route = useRoute();
 const slug = route.params.slug as string;
