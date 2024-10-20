@@ -139,6 +139,7 @@
 
 <script setup lang="ts">
 const route = useRoute();
+const router = useRouter();
 const communities = useCommunities();
 const user = useSupabaseUser();
 import { Status } from "@/composables/useFetchStatus";
@@ -182,6 +183,12 @@ function leave() {
 function join() {
   communities.joinCommunity(slug);
 }
+
+watch(community, () => {
+  if (community.value.status === Status.SUCCESS && props.moderatorOnly && !isModerator.value) {
+    router.push(`/community/${slug}`);
+  }
+})
 
 onMounted(() => {
   communities.fetchCommunity(slug);

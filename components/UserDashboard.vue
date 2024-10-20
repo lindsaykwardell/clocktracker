@@ -221,13 +221,18 @@
         </ClientOnly>
       </div>
       <div class="flex flex-col gap-4 dark:bg-stone-950 p-4">
-        <Calendar
-          size="xs"
-          :events="events ?? []"
-          @selectDay="selectDay"
-          :selectedDay="selectedDay"
-          clickableDays
-        />
+        <div>
+          <Button component="nuxt-link" to="/event/create" tertiary fontSize="sm">
+            Create Event
+          </Button>
+          <Calendar
+            size="xs"
+            :events="events ?? []"
+            @selectDay="selectDay"
+            :selectedDay="selectedDay"
+            clickableDays
+          />
+        </div>
         <div class="flex flex-col gap-4 calendar-events">
           <nuxt-link
             v-for="event in eventsOnDay"
