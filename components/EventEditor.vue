@@ -11,9 +11,12 @@
       <label>
         <span class="block">Who Can Register</span>
         <Input mode="select" v-model="event.who_can_register">
-          <option value="COMMUNITY_MEMBERS">Community Members</option>
+          <option value="COMMUNITY_MEMBERS">
+            <template v-if="event.community_id"> Community Members </template>
+            <template v-else>Friends</template>
+          </option>
           <option value="PRIVATE">Anyone with the event link</option>
-          <option value="ANYONE">Anyone</option>
+          <option v-if="event.community_id" value="ANYONE">Anyone</option>
         </Input>
       </label>
     </div>
@@ -197,6 +200,7 @@ import dayjs from "dayjs";
 
 const props = defineProps<{
   event: {
+    community_id: number | null;
     title: string;
     start: string;
     end: string;

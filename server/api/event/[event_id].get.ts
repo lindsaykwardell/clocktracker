@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, WhoCanRegister } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
 
 const prisma = new PrismaClient();
@@ -13,6 +13,27 @@ export default defineEventHandler(async (handler) => {
       OR: [
         {
           community_id: null,
+          OR: [
+            {
+              created_by_id: me?.id,
+            },
+            {
+              who_can_register: WhoCanRegister.ANYONE,
+            },
+            {
+              who_can_register: WhoCanRegister.PRIVATE,
+            },
+            {
+              who_can_register: WhoCanRegister.COMMUNITY_MEMBERS,
+              created_by: {
+                friends: {
+                  some: {
+                    user_id: me?.id || "",
+                  },
+                },
+              },
+            },
+          ],
         },
         {
           community: {

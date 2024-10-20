@@ -1,5 +1,5 @@
 <template>
-  <StandardTemplate>
+  <component :is="template" moderatorOnly :slug="existingEvent.community?.slug">
     <h2 class="font-dumbledor text-2xl lg:text-3xl my-4 text-center">
       Edit Event
     </h2>
@@ -140,7 +140,7 @@
         </div>
       </div>
     </ClientOnly>
-  </StandardTemplate>
+  </component>
 </template>
 
 <script setup lang="ts">
@@ -148,6 +148,7 @@ import dayjs from "dayjs";
 
 const router = useRouter();
 const route = useRoute();
+const communities = useCommunities();
 
 const eventId = route.params.eventId as string;
 
@@ -312,4 +313,21 @@ async function moveRegisteredPlayer(
   registered_players.value = updatedEvent.registered_players;
   waitlists.value = updatedEvent.waitlists;
 }
+
+const standardTemplate = resolveComponent("StandardTemplate");
+const communityTemplate = resolveComponent("CommunityTemplate");
+
+const template = computed(() => {
+  if (event.community_id) {
+    return communityTemplate;
+  }
+
+  return standardTemplate;
+});
+
+onMounted(() => {
+  if (existingEvent.community?.slug) {
+    communities.fetchCommunity(existingEvent.community.slug);
+  }
+});
 </script>
