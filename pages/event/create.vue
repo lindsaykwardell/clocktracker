@@ -69,7 +69,7 @@ const event = reactive<{
   location_type: "ONLINE",
   location: "",
   image: null,
-  who_can_register: slug ? "COMMUNITY_MEMBERS" : "PRIVATE",
+  who_can_register: "COMMUNITY_MEMBERS",
   storytellers: [],
   script: "",
   script_id: null,
