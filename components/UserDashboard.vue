@@ -82,12 +82,34 @@
                     <Avatar :value="update.event.community?.icon" size="xs" />
                     <div class="flex flex-col">
                       <span class="text-sm text-stone-500 dark:text-stone-400">
-                        New Event in
-                        <nuxt-link
-                          :to="`/community/${update.event.community?.slug}`"
-                          class="hover:underline"
-                          >{{ update.event.community?.name }}</nuxt-link
-                        >
+                        <template v-if="update.event.community">
+                          New Event in
+                          <nuxt-link
+                            :to="`/community/${update.event.community?.slug}`"
+                            class="hover:underline"
+                            >{{ update.event.community?.name }}</nuxt-link
+                          >
+                        </template>
+                        <template v-else-if="update.event.created_by">
+                          New Event by
+                          <template
+                            v-if="
+                              update.event.created_by.user_id ===
+                              me.data.user_id
+                            "
+                          >
+                            you
+                          </template>
+                          <template v-else>
+                            <nuxt-link
+                              :to="`/@${update.event.created_by.username}`"
+                              class="hover:underline"
+                              >{{
+                                update.event.created_by.display_name
+                              }}</nuxt-link
+                            >
+                          </template>
+                        </template>
                       </span>
                     </div>
                   </div>
