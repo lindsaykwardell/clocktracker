@@ -1,15 +1,17 @@
 <template>
-  <StandardTemplate>
-    <h2 class="font-dumbledor text-2xl lg:text-3xl my-4 text-center">
-      Create Event
-    </h2>
-    <EventEditor
-      :event="event"
-      :inFlight="inFlight"
-      :errors="errors"
-      @save="createEvent"
-    />
-  </StandardTemplate>
+  <component :is="template" moderatorOnly :slug="slug">
+    <template v-if="!slug || community_id">
+      <h2 class="font-dumbledor text-2xl lg:text-3xl my-4 text-center">
+        Create Event
+      </h2>
+      <EventEditor
+        :event="event"
+        :inFlight="inFlight"
+        :errors="errors"
+        @save="createEvent"
+      />
+    </template>
+  </component>
 </template>
 
 <script setup lang="ts">
@@ -17,6 +19,7 @@ import dayjs from "dayjs";
 
 const router = useRouter();
 const route = useRoute();
+const communities = useCommunities();
 
 definePageMeta({
   middleware: "community-admin",
@@ -24,6 +27,18 @@ definePageMeta({
 
 const start = dayjs().add(1, "hour").format("YYYY-MM-DDTHH:mm");
 const end = dayjs().add(2.5, "hour").format("YYYY-MM-DDTHH:mm");
+
+const slug = route.query.slug as string;
+
+const community_id = computed(() => {
+  const community = communities.getCommunity(slug);
+
+  if (community.status === Status.SUCCESS) {
+    return community.data.id;
+  } else {
+    return null;
+  }
+});
 
 const event = reactive<{
   community_id: number | null;
@@ -45,7 +60,7 @@ const event = reactive<{
     default: boolean;
   }[];
 }>({
-  community_id: null,
+  community_id: community_id.value,
   title: "",
   description: "",
   start,
@@ -64,9 +79,7 @@ const event = reactive<{
 
 if (route.query.duplicate) {
   try {
-    const previousEvent = await $fetch(
-      `/api/event/${route.query.duplicate}`
-    );
+    const previousEvent = await $fetch(`/api/event/${route.query.duplicate}`);
 
     event.community_id = previousEvent.community_id;
     event.title = previousEvent.title;
@@ -90,6 +103,17 @@ if (route.query.duplicate) {
     // ignore
   }
 }
+
+const standardTemplate = resolveComponent("StandardTemplate");
+const communityTemplate = resolveComponent("CommunityTemplate");
+
+const template = computed(() => {
+  if (event.community_id) {
+    return communityTemplate;
+  }
+
+  return standardTemplate;
+});
 
 const formattedEvent = computed(() => {
   return {
@@ -118,4 +142,14 @@ async function createEvent() {
     errors.value = (err as any).statusMessage;
   }
 }
+
+watch(community_id, () => {
+  event.community_id = community_id.value;
+});
+
+onMounted(() => {
+  if (slug) {
+    communities.fetchCommunity(slug);
+  }
+});
 </script>

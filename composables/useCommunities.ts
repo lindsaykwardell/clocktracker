@@ -161,7 +161,9 @@ export const useCommunities = defineStore("communities", {
     },
   },
   actions: {
-    async fetchCommunity(slug: string) {
+    async fetchCommunity(slug: string | undefined) {
+      if (!slug) return;
+      
       // Mark as loading if we don't have the community yet
       if (!this.communities.has(slug))
         this.communities.set(slug, { status: Status.LOADING });
