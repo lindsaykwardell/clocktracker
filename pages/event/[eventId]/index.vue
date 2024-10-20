@@ -281,8 +281,6 @@ onMounted(() => {
     event.value = await $fetch<EventView>(`/api/event/${eventId}`);
   }, 1000 * 60 * 5);
 
-  console.log(event.value);
-
   if (event.value.community) {
     communities.fetchCommunity(event.value.community.slug);
   }
