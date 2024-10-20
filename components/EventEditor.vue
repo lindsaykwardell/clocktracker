@@ -13,7 +13,7 @@
         <Input mode="select" v-model="event.who_can_register">
           <option value="COMMUNITY_MEMBERS">
             <template v-if="event.community_id"> Community Members </template>
-            <template v-else>Friends</template>
+            <template v-else>Friends only</template>
           </option>
           <option value="PRIVATE">Anyone with the event link</option>
           <option v-if="event.community_id" value="ANYONE">Anyone</option>
