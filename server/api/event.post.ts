@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
-  const slug = handler.context.params!.slug;
+
   const body = await readBody<{
     title: string;
     description: string;
@@ -18,6 +18,7 @@ export default defineEventHandler(async (handler) => {
     script: string;
     script_id: number | null;
     game_link: string | null;
+    community_id: number | null;
     waitlists: {
       id?: number;
       name: string;
@@ -34,29 +35,31 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  const community = await prisma.community.findUnique({
-    where: {
-      slug,
-      admins: {
-        some: {
-          user_id: me.id,
-        },
-      },
-    },
-  });
-
-  if (!community) {
-    throw createError({
-      status: 404,
-      statusMessage: "Not Found",
-    });
-  }
-
   if (!body) {
     throw createError({
       status: 400,
       statusMessage: "Bad Request",
     });
+  }
+
+  if (body.community_id) {
+    const community = await prisma.community.findUnique({
+      where: {
+        id: body.community_id,
+        admins: {
+          some: {
+            user_id: me.id,
+          },
+        },
+      },
+    });
+
+    if (!community) {
+      throw createError({
+        status: 404,
+        statusMessage: "Not Found",
+      });
+    }
   }
 
   const event = await prisma.event.create({
@@ -70,7 +73,7 @@ export default defineEventHandler(async (handler) => {
       player_count: body.player_count,
       who_can_register: body.who_can_register,
       image: body.image,
-      community_id: community.id,
+      community_id: body.community_id,
       storytellers: body.storytellers,
       script_id: body.script_id,
       game_link: body.game_link,

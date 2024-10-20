@@ -9,6 +9,7 @@ type Update =
       date: Date;
       event: {
         id: string;
+        community_id: number | null;
         title: string;
         description: string;
         start: Date;
@@ -53,6 +54,12 @@ type Update =
           slug: string;
           icon: string;
         } | null;
+        created_by: {
+          user_id: string;
+          username: string;
+          display_name: string;
+          avatar: string | null;
+        } | null;
       };
     }
   | {
@@ -87,7 +94,7 @@ type Update =
           name: string;
           slug: string;
           icon: string;
-        };
+        }
       };
     }
   | {
@@ -161,6 +168,7 @@ export default defineEventHandler(async (handler) => {
     select: {
       created_at: true,
       id: true,
+      community_id: true,
       title: true,
       description: true,
       start: true,

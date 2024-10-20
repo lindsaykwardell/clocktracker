@@ -52,6 +52,7 @@ export type CommunityPost = {
 
 export type Event = {
   id: string;
+  community_id: number | null;
   title: string;
   description: string;
   start: string;
@@ -101,7 +102,7 @@ export type Event = {
     username: string;
     display_name: string;
     avatar: string | null;
-  }
+  } | null;
 };
 
 export const useCommunities = defineStore("communities", {

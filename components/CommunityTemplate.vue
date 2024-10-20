@@ -139,14 +139,16 @@
 
 <script setup lang="ts">
 const route = useRoute();
-const slug = route.params.slug as string;
 const communities = useCommunities();
 const user = useSupabaseUser();
 import { Status } from "@/composables/useFetchStatus";
 
 const props = defineProps<{
   moderatorOnly?: boolean;
+  slug?: string;
 }>();
+
+const slug = (route.params.slug || props.slug) as string;
 
 const community = computed(() => communities.getCommunity(slug));
 const isMember = computed(() => communities.isMember(slug, user.value?.id));

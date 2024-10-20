@@ -1,11 +1,12 @@
 <template>
-  <CommunityTemplate v-slot="{ isModerator, isMember }">
+  <component :is="template" :slug="event.community?.slug">
+    <UserHeader v-if="createdBy" :player="createdBy" />
     <EventCard
       v-if="event"
       :event="event"
       class="m-auto my-6"
-      :canModifyEvent="isModerator"
-      @deleted="router.push(`/community/${slug}/events`)"
+      x:canModifyEvent="isModerator"
+      @deleted="eventDeleted"
     >
       <template #register>
         <Button
@@ -22,7 +23,7 @@
           Share
         </Button>
         <Button
-          v-if="event.who_can_register === 'ANYONE' ? true : isMember"
+          v-if="isAllowedToRegister"
           :disabled="inFlight"
           @click="initRegister()"
           class="py-2 px-4"
@@ -150,10 +151,11 @@
                 </li>
               </ul>
               <button
-                v-if="
+                xv-if="
                   !inFlight &&
                   (event.who_can_register === 'ANYONE' ? true : isMember)
                 "
+                v-if="!inFlight"
                 @click="initRegister(waitlist.id)"
                 class="transition duration-150 text-stone-400 hover:text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
               >
@@ -193,7 +195,7 @@
         </button>
       </form>
     </Dialog>
-  </CommunityTemplate>
+  </component>
 </template>
 
 <script setup lang="ts">
@@ -209,18 +211,17 @@ type EventView = Event & {
 
 const route = useRoute();
 const router = useRouter();
-const slug = route.params.slug as string;
 const eventId = route.params.eventId as string;
 const users = useUsers();
 const user = useSupabaseUser();
+const communities = useCommunities();
+const friends = useFriends();
 
 const showRegisterDialog = ref(false);
 const attendeeName = ref("");
 const inFlight = ref(false);
 
-const event = ref<EventView>(
-  await $fetch<EventView>(`/api/community/${slug}/event/${eventId}`)
-);
+const event = ref<EventView>(await $fetch<EventView>(`/api/event/${eventId}`));
 
 const shareDetails = ref({
   title: event.value.title,
@@ -239,12 +240,56 @@ const {
 
 let poll: NodeJS.Timeout | null = null;
 
+const createdBy = computed(() => {
+  if (event.value.created_by) {
+    const createdByFetchStatus = users.getUserById(
+      event.value.created_by.user_id
+    );
+
+    if (createdByFetchStatus.status === Status.SUCCESS) {
+      return createdByFetchStatus.data;
+    }
+  }
+
+  return null;
+});
+
+const isAllowedToRegister = computed(() => {
+  if (event.value.who_can_register === "ANYONE") {
+    return true;
+  }
+
+  if (event.value.community?.slug) {
+    return communities.isMember(event.value.community.slug, user.value?.id);
+  }
+
+  if (event.value.created_by) {
+    // If it's me, I can register
+    if (event.value.created_by.user_id === user.value?.id) {
+      return true;
+    }
+
+    // If the creator of the event is a friend, I can register
+    return friends.isFriend(event.value.created_by.username);
+  }
+
+  return false;
+});
+
 onMounted(() => {
   poll = setInterval(async () => {
-    event.value = await $fetch<EventView>(
-      `/api/community/${slug}/event/${eventId}`
-    );
+    event.value = await $fetch<EventView>(`/api/event/${eventId}`);
   }, 1000 * 60 * 5);
+
+  console.log(event.value);
+
+  if (event.value.community) {
+    communities.fetchCommunity(event.value.community.slug);
+  }
+
+  if (event.value.created_by) {
+    users.fetchUser(event.value.created_by.username);
+  }
 });
 
 onUnmounted(() => {
@@ -285,23 +330,17 @@ async function register(name: string, waitlistId?: number) {
   inFlight.value = true;
   try {
     if (alreadyRegistered.value) {
-      event.value = await $fetch<EventView>(
-        `/api/community/${slug}/event/${eventId}/register`,
-        {
-          method: "DELETE",
-        }
-      );
+      event.value = await $fetch<EventView>(`/api/event/${eventId}/register`, {
+        method: "DELETE",
+      });
     } else {
-      event.value = await $fetch<EventView>(
-        `/api/community/${slug}/event/${eventId}/register`,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            name,
-            waitlist_id: waitlistId,
-          }),
-        }
-      );
+      event.value = await $fetch<EventView>(`/api/event/${eventId}/register`, {
+        method: "POST",
+        body: JSON.stringify({
+          name,
+          waitlist_id: waitlistId,
+        }),
+      });
 
       showRegisterDialog.value = false;
       attendeeName.value = "";
@@ -316,6 +355,7 @@ const showShareTooltip = ref(false);
 
 async function getShareLink() {
   try {
+    // @ts-ignore
     shareDetails.value.url = await $fetch(`/api/events/${eventId}/share`);
 
     if (shareIsSupported.value) {
@@ -334,26 +374,49 @@ async function getShareLink() {
   }
 }
 
+function eventDeleted() {
+  if (event.value.community?.slug) {
+    router.push(`/community/${event.value.community.slug}/events`);
+  } else {
+    router.push(`/`);
+  }
+}
+
+const standardTemplate = resolveComponent("StandardTemplate");
+const communityTemplate = resolveComponent("CommunityTemplate");
+
+const template = computed(() => {
+  if (event.value.community?.slug) {
+    return communityTemplate;
+  }
+
+  return standardTemplate;
+});
+
 useHead({
-  title: `${event.value.community.name} | ${event.value.title}`,
+  title: `${
+    event.value.community?.name ?? event.value.created_by?.display_name
+  } | ${event.value.title}`,
   meta: [
     {
       hid: "description",
       name: "description",
       content: `${event.value.title}, hosted by ${
-        event.value.community.name
+        event.value.community?.name ?? event.value.created_by?.display_name
       } on ${dayjs(event.value.start).format("MMMM D, YYYY")} at ${dayjs(
         event.value.start
       ).format("HH:MM a")}.`,
     },
     {
       property: "og:title",
-      content: `${event.value.community.name} | ${event.value.title}`,
+      content: `${
+        event.value.community?.name ?? event.value.created_by?.display_name
+      } | ${event.value.title}`,
     },
     {
       property: "og:description",
       content: `${event.value.title}, hosted by ${
-        event.value.community.name
+        event.value.community?.name ?? event.value.created_by?.display_name
       } on ${dayjs(event.value.start).format("MMMM D, YYYY")} at ${dayjs(
         event.value.start
       ).format("HH:MM a")}.`,
@@ -376,12 +439,14 @@ useHead({
     },
     {
       property: "twitter:title",
-      content: `${event.value.community.name} | ${event.value.title}`,
+      content: `${
+        event.value.community?.name ?? event.value.created_by?.display_name
+      } | ${event.value.title}`,
     },
     {
       property: "twitter:description",
       content: `${event.value.title}, hosted by ${
-        event.value.community.name
+        event.value.community?.name ?? event.value.created_by?.display_name
       } on ${dayjs(event.value.start).format("MMMM D, YYYY")} at ${dayjs(
         event.value.start
       ).format("HH:MM a")}.`,

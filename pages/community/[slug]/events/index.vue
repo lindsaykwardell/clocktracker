@@ -1,10 +1,10 @@
 <template>
-  <CommunityTemplate v-slot="{ community, isModerator }">
+  <CommunityTemplate v-slot="{ isModerator }">
     <Calendar size="lg" :events="events" @viewChanged="fetchEvents">
       <div v-if="isModerator" class="flex justify-end p-4">
         <Button
           component="nuxt-link"
-          :to="`/community/${community.data.slug}/events/create`"
+          :to="`/event/create`"
           class="py-2 px-4"
           primary
         >

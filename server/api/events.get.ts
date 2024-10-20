@@ -14,6 +14,9 @@ export default defineEventHandler(async (handler) => {
     where: {
       OR: [
         {
+          created_by_id: user.id,
+        },
+        {
           registered_players: {
             some: {
               user_id: user.id,
@@ -51,6 +54,7 @@ export default defineEventHandler(async (handler) => {
       script: true,
       script_id: true,
       game_link: true,
+      community_id: true,
       registered_players: {
         select: {
           name: true,
