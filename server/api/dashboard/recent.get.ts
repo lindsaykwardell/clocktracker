@@ -94,7 +94,7 @@ type Update =
           name: string;
           slug: string;
           icon: string;
-        }
+        };
       };
     }
   | {
@@ -157,13 +157,29 @@ export default defineEventHandler(async (handler) => {
 
   const recentEvents = await prisma.event.findMany({
     where: {
-      community: {
-        members: {
-          some: {
-            user_id: user.id,
+      OR: [
+        {
+          community: {
+            members: {
+              some: {
+                user_id: user.id,
+              },
+            },
           },
         },
-      },
+        {
+          created_by_id: user.id,
+        },
+        {
+          created_by: {
+            friends: {
+              some: {
+                user_id: user.id,
+              },
+            }
+          }
+        }
+      ],
     },
     select: {
       created_at: true,
