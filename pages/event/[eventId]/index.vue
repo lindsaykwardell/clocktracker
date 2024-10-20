@@ -489,8 +489,8 @@ const showShareTooltip = ref(false);
 
 async function getShareLink() {
   try {
-    // @ts-ignore
-    shareDetails.value.url = await $fetch(`/api/events/${eventId}/share`);
+    const url = await $fetch(`/api/events/${eventId}/share`);
+    shareDetails.value.url = url;
 
     if (shareIsSupported.value) {
       await share();
