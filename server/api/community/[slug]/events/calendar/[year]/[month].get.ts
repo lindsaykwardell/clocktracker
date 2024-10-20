@@ -61,6 +61,7 @@ export default defineEventHandler(async (handler) => {
     },
     select: {
       id: true,
+      community_id: true,
       title: true,
       description: true,
       start: true,
@@ -125,6 +126,14 @@ export default defineEventHandler(async (handler) => {
           name: true,
           slug: true,
           icon: true,
+        },
+      },
+      created_by: {
+        select: {
+          user_id: true,
+          username: true,
+          display_name: true,
+          avatar: true,
         },
       },
     },

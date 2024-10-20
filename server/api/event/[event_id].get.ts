@@ -1,40 +1,67 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, WhoCanRegister } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
 
 const prisma = new PrismaClient();
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
-  const slug = handler.context.params!.slug;
   const event_id = handler.context.params!.event_id;
 
   const event = await prisma.event.findUnique({
     where: {
       id: event_id,
-      community: {
-        slug,
-        banned_users: {
-          none: {
-            user_id: me?.id || "",
-          },
+      OR: [
+        {
+          community_id: null,
+          OR: [
+            {
+              created_by_id: me?.id,
+            },
+            {
+              who_can_register: WhoCanRegister.ANYONE,
+            },
+            {
+              who_can_register: WhoCanRegister.PRIVATE,
+            },
+            {
+              who_can_register: WhoCanRegister.COMMUNITY_MEMBERS,
+              created_by: {
+                friends: {
+                  some: {
+                    user_id: me?.id || "",
+                  },
+                },
+              },
+            },
+          ],
         },
-        OR: [
-          {
-            is_private: false,
-          },
-          {
-            members: {
-              some: {
+        {
+          community: {
+            banned_users: {
+              none: {
                 user_id: me?.id || "",
               },
             },
-            is_private: true,
+            OR: [
+              {
+                is_private: false,
+              },
+              {
+                members: {
+                  some: {
+                    user_id: me?.id || "",
+                  },
+                },
+                is_private: true,
+              },
+            ],
           },
-        ],
-      },
+        },
+      ],
     },
     select: {
       id: true,
+      community_id: true,
       title: true,
       description: true,
       start: true,
@@ -99,6 +126,14 @@ export default defineEventHandler(async (handler) => {
         select: {
           name: true,
           slug: true,
+        },
+      },
+      created_by: {
+        select: {
+          user_id: true,
+          username: true,
+          display_name: true,
+          avatar: true,
         },
       },
     },

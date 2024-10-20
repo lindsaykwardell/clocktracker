@@ -271,11 +271,12 @@ export async function buildEmbed(guild_id: string, event_id: string) {
 
 export function generateEmbed(
   event: Event & {
-    community: Partial<Community>;
+    community?: Partial<Community>;
     registered_players: Partial<EventAttendee>[];
     waitlists: (Partial<EventWaitlist> & {
       users: Partial<EventWaitlistAttendee>[];
     })[];
+    created_by?: Partial<UserSettings>;
   }
 ) {
   const embed = new EmbedBuilder()
@@ -286,19 +287,37 @@ export function generateEmbed(
         process.env.NODE_ENV === "production"
           ? "https://clocktracker.app"
           : "http://localhost:3000"
-      }/community/${event.community.slug}/event/${event.id}`
+      }/event/${event.id}`
     )
-    .setAuthor({
-      name: event.community.name,
-      iconURL: event.community.icon.includes("http")
-        ? event.community.icon
-        : `https://clocktracker.app${event.community.icon}`,
-      url: `${
-        process.env.NODE_ENV === "production"
-          ? "https://clocktracker.app"
-          : "http://localhost:3000"
-      }/community/${event.community.slug}`,
-    })
+    .setAuthor(
+      event.community
+        ? {
+            name: event.community.name,
+            iconURL: event.community.icon.includes("http")
+              ? event.community.icon
+              : `https://clocktracker.app${event.community.icon}`,
+            url: `${
+              process.env.NODE_ENV === "production"
+                ? "https://clocktracker.app"
+                : "http://localhost:3000"
+            }/community/${event.community.slug}`,
+          }
+        : event.created_by
+        ? {
+            name: event.created_by.display_name,
+            iconURL: event.created_by.avatar!,
+            url: `${
+              process.env.NODE_ENV === "production"
+                ? "https://clocktracker.app"
+                : "http://localhost:3000"
+            }/@${event.created_by.username}`,
+          }
+        : {
+            name: "ClockTracker",
+            iconURL: "https://clocktracker.app/images/logo.png",
+            url: "https://clocktracker.app",
+          }
+    )
     // .setThumbnail(`https://clocktracker.app${event.community.icon}`)
     .setTimestamp(event.start)
     .setFooter({ text: event.id })

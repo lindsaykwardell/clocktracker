@@ -9,7 +9,6 @@ export default defineEventHandler(async (handler) => {
   const ip_address = getRequestIP(handler, { xForwardedFor: true });
   const event_id = handler.context.params!.event_id;
   const me: User | null = handler.context.user;
-  const slug = handler.context.params!.slug;
   const body = await readBody<{
     name: string;
     waitlist_id?: number;
@@ -20,15 +19,15 @@ export default defineEventHandler(async (handler) => {
     const banned = await prisma.eventRegistrationSpam.findFirst({
       where: {
         ip_address,
-        is_banned: true
-      }
-    })
+        is_banned: true,
+      },
+    });
 
     if (banned) {
       throw createError({
         status: 403,
-        statusMessage: "Forbidden"
-      })
+        statusMessage: "Forbidden",
+      });
     }
   }
 
@@ -59,14 +58,16 @@ export default defineEventHandler(async (handler) => {
           // Reject the user
           // Log who they are
 
-          const existing_record = await prisma.eventRegistrationSpam.findUnique({
-            where: {
-              ip_address_event_id: {
-                event_id,
-                ip_address,
+          const existing_record = await prisma.eventRegistrationSpam.findUnique(
+            {
+              where: {
+                ip_address_event_id: {
+                  event_id,
+                  ip_address,
+                },
               },
-            },
-          });
+            }
+          );
 
           if (!existing_record) {
             await prisma.eventRegistrationSpam.create({
@@ -121,13 +122,23 @@ export default defineEventHandler(async (handler) => {
   const event = await prisma.event.findUnique({
     where: {
       id: event_id,
-      community: {
-        slug,
-      },
       OR: [
         {
           community: {
             members: {
+              some: {
+                user_id: me?.id || "",
+              },
+            },
+          },
+          who_can_register: WhoCanRegister.COMMUNITY_MEMBERS,
+        },
+        {
+          created_by_id: me?.id,
+        },
+        {
+          created_by: {
+            friends: {
               some: {
                 user_id: me?.id || "",
               },
