@@ -48,7 +48,7 @@ export default defineEventHandler(async (handler) => {
       OR: [
         {
           community: {
-            id: body.community_id,
+            id: body.community_id ?? undefined,
             admins: {
               some: {
                 user_id: me.id,
