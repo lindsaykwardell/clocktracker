@@ -9,6 +9,7 @@ type Update =
       date: Date;
       event: {
         id: string;
+        community_id: number | null;
         title: string;
         description: string;
         start: Date;
@@ -52,6 +53,12 @@ type Update =
           name: string;
           slug: string;
           icon: string;
+        } | null;
+        created_by: {
+          user_id: string;
+          username: string;
+          display_name: string;
+          avatar: string | null;
         } | null;
       };
     }
@@ -150,17 +157,34 @@ export default defineEventHandler(async (handler) => {
 
   const recentEvents = await prisma.event.findMany({
     where: {
-      community: {
-        members: {
-          some: {
-            user_id: user.id,
+      OR: [
+        {
+          community: {
+            members: {
+              some: {
+                user_id: user.id,
+              },
+            },
           },
         },
-      },
+        {
+          created_by_id: user.id,
+        },
+        {
+          created_by: {
+            friends: {
+              some: {
+                user_id: user.id,
+              },
+            }
+          }
+        }
+      ],
     },
     select: {
       created_at: true,
       id: true,
+      community_id: true,
       title: true,
       description: true,
       start: true,
@@ -225,6 +249,14 @@ export default defineEventHandler(async (handler) => {
           name: true,
           slug: true,
           icon: true,
+        },
+      },
+      created_by: {
+        select: {
+          user_id: true,
+          username: true,
+          display_name: true,
+          avatar: true,
         },
       },
     },

@@ -11,26 +11,33 @@ export default defineEventHandler(async (handler) => {
   const event = await prisma.event.findUnique({
     where: {
       id: event_id,
-      community: {
-        banned_users: {
-          none: {
-            user_id: me?.id || "",
-          },
+      OR: [
+        {
+          community_id: null,
         },
-        OR: [
-          {
-            is_private: false,
-          },
-          {
-            members: {
-              some: {
+        {
+          community: {
+            banned_users: {
+              none: {
                 user_id: me?.id || "",
               },
             },
-            is_private: true,
+            OR: [
+              {
+                is_private: false,
+              },
+              {
+                members: {
+                  some: {
+                    user_id: me?.id || "",
+                  },
+                },
+                is_private: true,
+              },
+            ],
           },
-        ],
-      },
+        },
+      ],
     },
     select: {
       id: true,

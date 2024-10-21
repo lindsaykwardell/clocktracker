@@ -18,14 +18,14 @@ const url = computed(() =>
   props.href.match(/^https?:\/\//) ? props.href : `https://${props.href}`
 );
 
-const github = resolveComponent("github");
-const twitter = resolveComponent("twitter");
-const twitch = resolveComponent("twitch");
-const youtube = resolveComponent("youtube");
-const discord = resolveComponent("discord");
-const facebook = resolveComponent("facebook");
-const bluesky = resolveComponent("bluesky");
-const link = resolveComponent("website");
+const github = resolveComponent("Github");
+const twitter = resolveComponent("Twitter");
+const twitch = resolveComponent("Twitch");
+const youtube = resolveComponent("YouTube");
+const discord = resolveComponent("Discord");
+const facebook = resolveComponent("Facebook");
+const bluesky = resolveComponent("Bluesky");
+const link = resolveComponent("Website");
 
 const icon = computed(() => {
   const href = props.href;

@@ -48,8 +48,8 @@
             </div>
             <ul v-if="size !== 'sm' && size !== 'xs'">
               <li v-for="event in eventsOnDay(day)">
-                <a
-                  :href="`/community/${event.community.slug}/event/${event.id}`"
+                <nuxt-link
+                  :to="`/event/${event.id}`"
                   class="flex flex-col md:flex-row gap-3"
                 >
                   <div class="flex-grow hover:underline">
@@ -65,7 +65,7 @@
                         : event.player_count
                     }}/{{ event.player_count }}
                   </span>
-                </a>
+                </nuxt-link>
               </li>
             </ul>
             <div

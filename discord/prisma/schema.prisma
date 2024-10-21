@@ -162,6 +162,7 @@ model Role {
   token_url         String
   type              RoleType
   custom_role       Boolean        @default(false)
+  ability           String         @default("")
   related_character Character[]    @relation("RelatedRole")
   character         Character[]
   demon_bluffs      DemonBluff[]
@@ -205,6 +206,7 @@ model UserSettings {
   charts                  Chart[]
   community_posts         CommunityPost[]
   Did                     Did[]
+  Event                   Event[]
   events                  EventAttendee[]
   waitlisted_events       EventWaitlistAttendee[]
   FavoriteGame            FavoriteGame[]
@@ -322,7 +324,9 @@ model Event {
   short_link            String?                 @unique
   has_pinged_discord    Boolean                 @default(false)
   old_image             String?
+  created_by_id         String?
   community             Community?              @relation(fields: [community_id], references: [id])
+  UserSettings          UserSettings?           @relation(fields: [created_by_id], references: [user_id])
   Script                Script?                 @relation(fields: [script_id], references: [id])
   registered_players    EventAttendee[]
   EventDiscordPost      EventDiscordPost[]
