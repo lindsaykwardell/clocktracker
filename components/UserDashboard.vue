@@ -244,14 +244,13 @@
             Create Event
           </Button>
           <Calendar
-            v-else
             size="xs"
             :events="events ?? []"
             @selectDay="selectDay"
             :selectedDay="selectedDay"
             clickableDays
           >
-            <Menu>
+            <Menu v-if="featureFlags.isEnabled('ical')">
               <MenuButton>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
