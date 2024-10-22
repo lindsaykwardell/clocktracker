@@ -235,6 +235,7 @@
       >
         <div>
           <Button
+            v-if="!featureFlags.isEnabled('ical')"
             component="nuxt-link"
             to="/event/create"
             tertiary
@@ -248,7 +249,58 @@
             @selectDay="selectDay"
             :selectedDay="selectedDay"
             clickableDays
-          />
+          >
+            <Menu v-if="featureFlags.isEnabled('ical')">
+              <MenuButton>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="32"
+                  height="32"
+                  viewBox="0 0 16 16"
+                  class="w-6"
+                >
+                  <path
+                    fill="#a8a29e"
+                    d="M3 9.5a1.5 1.5 0 1 1 0-3a1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3a1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3a1.5 1.5 0 0 1 0 3"
+                  />
+                </svg>
+              </MenuButton>
+              <transition
+                enter-active-class="transition duration-100 ease-out"
+                enter-from-class="transform scale-95 opacity-0"
+                enter-to-class="transform scale-100 opacity-100"
+                leave-active-class="transition duration-75 ease-out"
+                leave-from-class="transform scale-100 opacity-100"
+                leave-to-class="transform scale-95 opacity-0"
+              >
+                <MenuItems
+                  class="absolute right-0 z-10 bg-stone-100 dark:bg-stone-800 rounded shadow-md whitespace-nowrap flex flex-col items-start min-w-[150px]"
+                >
+                  <MenuItem>
+                    <nuxt-link
+                      to="/event/create"
+                      class="flex gap-1 w-full items-center text-black dark:text-white text-sm px-2 min-h-[32px]"
+                    >
+                      Create Event
+                    </nuxt-link>
+                  </MenuItem>
+                  <MenuItem v-if="copyIsSupported">
+                    <button
+                      @click.prevent="copyCalendarLink"
+                      class="flex gap-1 w-full items-center text-black dark:text-white text-sm px-2 min-h-[32px]"
+                      v-tooltip="{
+                        content: 'Copied!',
+                        shown: showCopyTooltip,
+                        triggers: [],
+                      }"
+                    >
+                      Copy Calendar Link
+                    </button>
+                  </MenuItem>
+                </MenuItems>
+              </transition>
+            </Menu>
+          </Calendar>
         </div>
         <div class="flex flex-col gap-4 calendar-events">
           <nuxt-link
@@ -269,15 +321,24 @@
       <div
         class="md:hidden fixed bottom-0 left-0 flex p-2 bg-stone-50 border-t border-stone-400 dark:border-stone-700 dark:bg-stone-950 w-full"
       >
-        <button class="flex-1 flex flex-col items-center text-xs" @click="selectedTab = 'updates'">
+        <button
+          class="flex-1 flex flex-col items-center text-xs"
+          @click="selectedTab = 'updates'"
+        >
           <img :src="`/img/role/towncrier.png`" class="w-10 m-auto" />
           Updates
         </button>
-        <button class="flex-1 flex flex-col items-center text-xs" @click="selectedTab = 'events'">
+        <button
+          class="flex-1 flex flex-col items-center text-xs"
+          @click="selectedTab = 'events'"
+        >
           <img :src="`/img/role/clockmaker.png`" class="w-10 m-auto" />
           Events
         </button>
-        <nuxt-link class="flex-1 flex flex-col items-center text-xs" to="/add-game">
+        <nuxt-link
+          class="flex-1 flex flex-col items-center text-xs"
+          to="/add-game"
+        >
           <img :src="`/img/role/mezepheles.png`" class="w-10 m-auto" />
           Add Game
         </nuxt-link>
@@ -294,6 +355,8 @@
 import dayjs from "dayjs";
 import type { Event } from "~/composables/useCommunities";
 import { Status } from "~/composables/useFetchStatus.js";
+import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
+import { useClipboard } from "@vueuse/core";
 
 definePageMeta({
   middleware: "auth",
@@ -301,6 +364,7 @@ definePageMeta({
 
 const me = useMe();
 const games = useGames();
+const featureFlags = useFeatureFlags();
 const updates = await useFetch("/api/dashboard/recent");
 const roleOfTheDay = await useFetch("/api/role_of_the_day");
 
@@ -392,6 +456,36 @@ const eventsOnDay = computed(() => {
     );
   });
 });
+
+const icalUrl = ref<string | null>(null);
+
+const copySource = computed(() => icalUrl.value ?? "");
+
+const {
+  copy,
+  copied,
+  isSupported: copyIsSupported,
+} = useClipboard({ source: copySource, legacy: true });
+const showCopyTooltip = ref(false);
+
+async function copyCalendarLink() {
+  try {
+    const url = await $fetch("/api/ical");
+    icalUrl.value = url;
+
+    if (copyIsSupported.value) {
+      await copy();
+      if (copied.value) {
+        showCopyTooltip.value = true;
+        setTimeout(() => {
+          showCopyTooltip.value = false;
+        }, 2000);
+      }
+    }
+  } catch (e) {
+    // Do nothing
+  }
+}
 
 onMounted(async () => {
   if (me.value.status === Status.SUCCESS) {
