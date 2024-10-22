@@ -234,15 +234,17 @@
         }"
       >
         <div>
-          <!-- <Button
+          <Button
+            v-if="!featureFlags.isEnabled('ical')"
             component="nuxt-link"
             to="/event/create"
             tertiary
             fontSize="sm"
           >
             Create Event
-          </Button> -->
+          </Button>
           <Calendar
+            v-else
             size="xs"
             :events="events ?? []"
             @selectDay="selectDay"
@@ -283,9 +285,7 @@
                       Create Event
                     </nuxt-link>
                   </MenuItem>
-                  <MenuItem
-                    v-if="featureFlags.isEnabled('ical') && copyIsSupported"
-                  >
+                  <MenuItem v-if="copyIsSupported">
                     <button
                       @click.prevent="copyCalendarLink"
                       class="flex gap-1 w-full items-center text-black dark:text-white text-sm px-2 min-h-[32px]"
