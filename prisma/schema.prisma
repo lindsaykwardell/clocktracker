@@ -261,6 +261,7 @@ model UserSettings {
   dids                    Did[]
   favorites               FavoriteGame[]
   created_events          Event[]
+  calendar                SharedCalendarLink?
 }
 
 model Did {
@@ -281,6 +282,12 @@ model KoFiPayment {
   expires_at              DateTime
   user                    UserSettings? @relation(fields: [user_id], references: [user_id])
   user_id                 String?
+}
+
+model SharedCalendarLink {
+  id      String       @id
+  user    UserSettings @relation(fields: [user_id], references: [user_id])
+  user_id String       @unique
 }
 
 enum PrivacySetting {
