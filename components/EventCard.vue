@@ -75,7 +75,11 @@
                 </MenuItem>
                 <MenuItem>
                   <nuxt-link
-                    :to="`/event/create?duplicate=${event.id}`"
+                    :to="`/event/create?duplicate=${event.id}${
+                      event.community?.slug
+                        ? `&slug=${event.community?.slug}`
+                        : ''
+                    }`"
                     class="flex gap-1 w-full items-center text-black dark:text-white text-sm px-2 min-h-[32px]"
                   >
                     Duplicate Event
@@ -105,7 +109,9 @@
         class="flex text-stone-500 dark:text-stone-400 items-center gap-2"
       >
         <Avatar :value="event.created_by.avatar" size="xs" />
-        <span class="text-sm">Created by {{ event.created_by.display_name }}</span>
+        <span class="text-sm"
+          >Created by {{ event.created_by.display_name }}</span
+        >
       </div>
       <h2
         class="font-dumbledor"
@@ -254,12 +260,9 @@ function scriptLink(event: { script: string; script_id: number | null }) {
 
 function deleteEvent() {
   if (confirm("Are you sure you want to delete this event?")) {
-    $fetch(
-      `/api/event/${props.event.id}`,
-      {
-        method: "DELETE",
-      }
-    ).then(() => {
+    $fetch(`/api/event/${props.event.id}`, {
+      method: "DELETE",
+    }).then(() => {
       emit("deleted", props.event.id);
     });
   }
