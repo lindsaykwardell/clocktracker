@@ -28,10 +28,10 @@ definePageMeta({
 const start = dayjs().add(1, "hour").format("YYYY-MM-DDTHH:mm");
 const end = dayjs().add(2.5, "hour").format("YYYY-MM-DDTHH:mm");
 
-const slug = route.query.slug as string;
+let slug = route.query.slug as string | undefined;
 
 const community_id = computed(() => {
-  const community = communities.getCommunity(slug);
+  const community = communities.getCommunity(slug || "");
 
   if (community.status === Status.SUCCESS) {
     return community.data.id;
@@ -148,7 +148,7 @@ watch(community_id, () => {
 });
 
 onMounted(() => {
-  if (slug) {
+  if (slug && !community_id.value) {
     communities.fetchCommunity(slug);
   }
 });
