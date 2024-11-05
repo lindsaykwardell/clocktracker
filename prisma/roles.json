@@ -96,7 +96,7 @@
     "reminders": [],
     "setup": false,
     "ability": "You start knowing how many pairs of evil players there are.",
-    "flavor": "This evening's reservations seem odd. Never before has Mrs Mayweather kept company with that scamp from Hudson Lane. Yet, tonight, they have a table for two. Strange.",
+    "flavor": "This evening's reservations seem odd. Never before has Mrs. Mayweather kept company with that scamp from Hudson Lane. Yet, tonight, they have a table for two. Strange.",
     "firstNight": 47,
     "otherNight": 0
   },
@@ -478,7 +478,7 @@
         "value": -1
       }
     ],
-    "flavor": "I aint done nuffink. I weren't even in dat alley last night! It weren't me what stole Mayor Bruno's briefcase wiv all dem fancy dockoments innit. Besides, it was too 'eavy to carry far.",
+    "flavor": "I ain't done nuffink. I weren't even in dat alley last night! It weren't me what stole Mayor Bruno's briefcase wiv all dem fancy dockoments innit. Besides, it was too 'eavy to carry far.",
     "firstNight": 7,
     "otherNight": 4
   },
@@ -954,7 +954,7 @@
       "Dead",
       "Dead",
       "Dead",
-      "3 attacks"
+      "3 Attacks"
     ],
     "setup": false,
     "ability": "Each night*, you may choose a player: they die. If your last choice was no-one, choose 3 players tonight.",
@@ -1532,7 +1532,7 @@
     ],
     "setup": false,
     "ability": "Each night, until dusk, 1) a player becomes sober, healthy and gets true info, or 2) their ability works twice. They learn which.",
-    "flavor": "“A cup of coffee with no cream, Monsieur? I’m terribly sorry, but we’re fresh out of cream — how about with no milk?”",
+    "flavor": "A cup of coffee with no cream, Monsieur? I’m terribly sorry, but we’re fresh out of cream — how about with no milk?",
     "firstNight": 5,
     "otherNight": 2
   },
@@ -1579,7 +1579,7 @@
       "Has Ability"
     ],
     "setup": false,
-    "ability": "Once per game, at night, choose a dead player: they regain their ability until dusk.",
+    "ability": "Once per game, at night*, choose a dead player: they regain their ability until dusk.",
     "flavor": "I collect many things. Hair. Teeth. Clothes. Fragments of poems. The dreams of lost lovers. My secret arts are not for you to know but my fee is a mere pittance. Bring me the blood of a noblewoman who died of heartbreak under a full moon, and you shall have your answers.",
     "firstNight": 0,
     "otherNight": 6
@@ -1733,10 +1733,11 @@
     "firstNightReminder": "",
     "otherNightReminder": "The Lycanthrope chooses a player :reminder:",
     "reminders": [
+      "Appears Evil",
       "Dead"
     ],
     "setup": false,
-    "ability": "Each night*, choose a living player: if good, they die, but they are the only player that can die tonight.",
+    "ability": "Each night*, choose an alive player. If good, they die & the Demon doesn’t kill tonight. One good player registers as evil.",
     "flavor": "Beneath the thin veneer of civilisation lies a howling madness.",
     "firstNight": 0,
     "otherNight": 31,
@@ -2258,7 +2259,7 @@
     "otherNightReminder": "",
     "reminders": [],
     "setup": false,
-    "ability": "If you are executed, all but 3 players die. 1 minute later, the player with the most players pointing at them dies.",
+    "ability": "If you are executed, all but 3 players die. After a 10 to 1 countdown, the player with the most players pointing at them, dies.",
     "special": [
       {
         "type": "ability",
@@ -2317,10 +2318,6 @@
       {
         "id": "scarletwoman",
         "reason": "If there are 5 or more players alive and the player holding the Lil' Monsta token dies, the Scarlet Woman is given the Lil' Monsta token tonight."
-      },
-      {
-        "id": "organgrinder",
-        "reason": "Votes for the Organ Grinder count if the Organ Grinder is babysitting Lil' Monsta."
       },
       {
         "id": "vizier",
@@ -2689,7 +2686,7 @@
     "reminders": [],
     "setup": false,
     "ability": "All players know who you are. You can not die during the day. If good voted, you may choose to execute immediately.",
-    "flavor": "“An excellent decision, as always, sire. Such a petty crime as bumping into the Bishop indeed deserves your ‘justice’ and ‘mercy’. Take a stroll in the gardens. Visit the gallery and peruse the sculptures of Von Strauf. Relax, sire. Leave everything… to me.”",
+    "flavor": "An excellent decision, as always, sire. Such a petty crime as bumping into the Bishop indeed deserves your ‘justice’ and ‘mercy’. Take a stroll in the gardens. Visit the gallery and peruse the sculptures of Von Strauf. Relax, sire. Leave everything… to me.",
     "firstNight": 72,
     "otherNight": 0,
     "jinxes": [
@@ -2772,7 +2769,7 @@
     "reminders": [],
     "setup": false,
     "ability": "Each night, learn which player the Storyteller believes you should talk to most.",
-    "flavor": "“There is life behind the personality that uses personalities as masks. There are times when life puts off the mask and deep answers to deep.”",
+    "flavor": "There is life behind the personality that uses personalities as masks. There are times when life puts off the mask and deep answers to deep.",
     "firstNight": 66,
     "otherNight": 84
   },
@@ -2789,7 +2786,7 @@
     ],
     "setup": false,
     "ability": "Each night, choose 2 players: tomorrow, the 1st player is mad that the 2nd is evil, or one or both might die.",
-    "flavor": "”So fair a day I never did see, nor so fowl a presence hanging over me.”",
+    "flavor": "So fair a day I never did see, nor so fowl a presence hanging over me.",
     "firstNight": 37,
     "otherNight": 25
   },
@@ -2805,7 +2802,7 @@
     ],
     "setup": false,
     "ability": "If you die, the Storyteller gains a Minion ability.",
-    "flavor": "“Pleauze shtay shtill. Thinks nid tiime for hillink. Myrhh-myrhh.”",
+    "flavor": "Pleauze shtay shtill. Thinks nid tiime for hillink. Myrhh-myrhh.",
     "firstNight": 0,
     "otherNight": 0
   },
@@ -2835,7 +2832,7 @@
     ],
     "setup": false,
     "ability": "Each night*, choose a character: they die. If they are not in play, the Storyteller chooses who dies.",
-    "flavor": "“Like a bonfire on a moonless night… I see you, mortal.”",
+    "flavor": "Like a bonfire on a moonless night… I see you, mortal.",
     "firstNight": 0,
     "otherNight": 43
   },
@@ -2851,7 +2848,7 @@
     ],
     "setup": false,
     "ability": "If you died today or tonight, the Minion & Demon players may choose new Minion & Demon characters to be.",
-    "flavor": "”One Hat. Too Hat. Three Hat. Tea Hat. Fore Hat. Thrive Hat. Six Hat. Sticks Hat.”",
+    "flavor": "One Hat. Too Hat. Three Hat. Tea Hat. Fore Hat. Thrive Hat. Six Hat. Sticks Hat.",
     "firstNight": 0,
     "otherNight": 52
   },
@@ -2915,7 +2912,7 @@
         "name": "bag-duplicate"
       }
     ],
-    "flavor": "”Roses are blue, and violets are red, Please reverse what I just said.”",
+    "flavor": "Roses are blue, and violets are red, Please reverse what I just said.",
     "firstNight": 60,
     "otherNight": 77
   },
@@ -3096,7 +3093,7 @@
     ],
     "setup": true,
     "ability": "Each night*, choose a player: they die. [Evil characters are in a line. You are in the middle. +1 Minion. -? to +? Outsiders]",
-    "flavor": "“In the shadowed and forgotten corners of the cosmos, where the stars whisper secrets to the void, lies a truth so profound that the merest glimpse of it unravels the sanity of mortal minds.”",
+    "flavor": "In the shadowed and forgotten corners of the cosmos, where the stars whisper secrets to the void, lies a truth so profound that the merest glimpse of it unravels the sanity of mortal minds.",
     "firstNight": 2,
     "otherNight": 41
   },
@@ -3146,6 +3143,22 @@
         "reason": "If there is a spare token, the Boffin can give the Demon the Village Idiot ability."
       }
     ]
+  },
+  {
+    "id": "gnome",
+    "name": "Gnome",
+    "edition": "",
+    "team": "traveler",
+    "firstNightReminder": "",
+    "otherNightReminder": "",
+    "reminders": [
+      "Amigo"
+    ],
+    "setup": false,
+    "ability": "All players start knowing a player of your alignment. You may choose to kill anyone who nominates them.",
+    "flavor": "Four the score or seven beers, no shows are goes for me and my. A prank to crack the cranks and planks o’ the floor foundation length, so incontravertabubbilly mini. The large essays down streams of joyse, no greater than is scene,not inherdt. Ha-urrumph.",
+    "firstNight": 0,
+    "otherNight": 0
   },
   {
     "id": "doomsayer",

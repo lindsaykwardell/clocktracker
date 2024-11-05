@@ -71,6 +71,7 @@
 
 <script setup lang="ts">
 import naturalOrder from "natural-order";
+import { Status } from "~/composables/useFetchStatus";
 
 const games = useGames();
 const users = useUsers();
