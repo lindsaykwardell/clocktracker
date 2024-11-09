@@ -18,7 +18,7 @@
     "@types/ua-parser-js": "^0.7.39",
     "@types/uuid": "^9.0.8",
     "@vite-pwa/nuxt": "^0.6.0",
-    "nuxt": "^3.13.2",
+    "nuxt": "^3.14.159",
     "prisma": "^5.19.1",
     "progress": "^2.0.3",
     "sass": "^1.79.3",
@@ -63,5 +63,8 @@
   },
   "prisma": {
     "seed": "node prisma/seed.js"
+  },
+  "overrides": {
+    "vue": "latest"
   }
 }
