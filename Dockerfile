@@ -11,6 +11,7 @@ RUN --mount=type=secret,id=SUPABASE_URL \
     --mount=type=secret,id=SUPABASE_KEY \
     SUPABASE_URL="$(cat /run/secrets/SUPABASE_URL)" \
     SUPABASE_KEY="$(cat /run/secrets/SUPABASE_KEY)" \
+    BUGSNAG_API_KEY="$(cat /run/secrets/BUGSNAG_API_KEY)" \
     npm run build
 
 FROM node:lts
