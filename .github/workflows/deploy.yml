@@ -46,8 +46,9 @@ jobs:
         with:
           ref: deploy
       - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --remote-only --build-secret SUPABASE_URL="$SUPABASE_URL" --build-secret SUPABASE_KEY="$SUPABASE_KEY"
+      - run: flyctl deploy --remote-only --build-secret SUPABASE_URL="$SUPABASE_URL" --build-secret SUPABASE_KEY="$SUPABASE_KEY" --build-secret BUGSNAG_API_KEY="$BUGSNAG_API_KEY"
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          BUGSNAG_API_KEY: ${{ secrets.BUGSNAG_API_KEY }}
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
