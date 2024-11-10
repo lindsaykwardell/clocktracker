@@ -16,9 +16,9 @@
     "@types/node": "^20.16.5",
     "@types/papaparse": "^5.3.14",
     "@types/ua-parser-js": "^0.7.39",
-    "@types/uuid": "^9.0.8",
-    "@vite-pwa/nuxt": "^0.6.0",
-    "nuxt": "^3.13.2",
+    "@types/uuid": "^10.0.0",
+    "@vite-pwa/nuxt": "^0.10.6",
+    "nuxt": "^3.14.159",
     "prisma": "^5.19.1",
     "progress": "^2.0.3",
     "sass": "^1.79.3",
@@ -30,16 +30,16 @@
     "@aws-sdk/client-s3": "^3.654.0",
     "@aws-sdk/lib-storage": "^3.654.0",
     "@aws-sdk/s3-request-presigner": "^3.654.0",
-    "@faker-js/faker": "^8.4.1",
+    "@faker-js/faker": "^9.2.0",
     "@globalhive/vuejs-tour": "^1.6.1",
     "@headlessui/vue": "^1.7.23",
-    "@pinia/nuxt": "^0.5.4",
+    "@pinia/nuxt": "^0.7.0",
     "@prisma/client": "^5.19.1",
     "@sentry/node": "^7.119.0",
     "@sentry/tracing": "^7.114.0",
     "@sentry/vue": "^7.119.0",
     "@supabase/supabase-js": "^2.45.4",
-    "@vueuse/core": "^10.11.1",
+    "@vueuse/core": "^11.2.0",
     "axios": "^1.7.7",
     "chart.js": "^4.4.4",
     "cheerio": "^1.0.0",
@@ -57,11 +57,14 @@
     "papaparse": "^5.4.1",
     "pinia": "^2.2.2",
     "ua-parser-js": "^1.0.39",
-    "uuid": "^9.0.1",
+    "uuid": "^11.0.2",
     "vue-chartjs": "^5.3.1",
     "vue-markdown-render": "^2.2.1"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
+  },
+  "overrides": {
+    "vue": "latest"
   }
 }
