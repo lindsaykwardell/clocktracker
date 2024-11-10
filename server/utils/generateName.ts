@@ -11,7 +11,7 @@ export function generateName() {
     roles[Math.floor(Math.random() * roles.length)] || "Traveler";
   const adjective = faker.word.adjective();
 
-  const username = faker.internet.userName({
+  const username = faker.internet.username({
     firstName: adjective,
     lastName: randomRole,
   });
