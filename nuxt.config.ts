@@ -13,6 +13,7 @@ export default defineNuxtConfig({
     "@pinia/nuxt",
     "floating-vue/nuxt",
     "nuxt-cron",
+    "nuxt-bugsnag",
   ],
 
   app: {
@@ -106,6 +107,17 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {},
+  },
+
+  bugsnag: {
+    publishRelease: true,
+    baseUrl: "https://clocktracker.app",
+    disableLog: true,
+    config: {
+      apiKey: process.env.BUGSNAG_API_KEY!,
+      enabledReleaseStages: ["development", "production"],
+      releaseStage: process.env.NODE_ENV,
+    },
   },
 
   pwa: {
