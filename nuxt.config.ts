@@ -111,6 +111,7 @@ export default defineNuxtConfig({
 
   bugsnag: {
     publishRelease: true,
+    performance: true,
     baseUrl: "https://clocktracker.app",
     disableLog: true,
     config: {
