@@ -1,7 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   experimental: {
-    viewTransition: true
+    viewTransition: true,
   },
 
   devtools: { enabled: false },
@@ -13,6 +13,7 @@ export default defineNuxtConfig({
     "@pinia/nuxt",
     "floating-vue/nuxt",
     "nuxt-cron",
+    "nuxt-bugsnag",
   ],
 
   app: {
@@ -105,8 +106,18 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
-    public: {
-      sentryDsn: process.env.SENTRY_DSN,
+    public: {},
+  },
+
+  bugsnag: {
+    publishRelease: true,
+    performance: true,
+    baseUrl: "https://clocktracker.app",
+    disableLog: true,
+    config: {
+      apiKey: process.env.BUGSNAG_API_KEY!,
+      enabledReleaseStages: ["development", "production"],
+      releaseStage: process.env.NODE_ENV,
     },
   },
 
