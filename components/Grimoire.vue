@@ -19,7 +19,7 @@
             :style="`--ti: ${tokenIndex}`"
           >
             <button
-              v-if="!readonly"
+              v-if="!props.readonly"
               type="button"
               class="z-50 absolute w-full h-full flex justify-center items-center rounded-full bg-black/25 opacity-0 hover:opacity-100 transition duration-200 cursor-pointer"
               @click="removeReminder(token, reminderToken)"
@@ -42,7 +42,7 @@
             <ReminderToken :reminder="reminderToken"> </ReminderToken>
           </div>
           <Token
-            v-if="!readonly"
+            v-if="!props.readonly"
             class="reminder-token opacity-0 hover:opacity-100 transition duration-200 cursor-pointer"
             :character="{ role: { token_url: '/1x1.png', type: '' } }"
             size="reminder"
@@ -54,13 +54,13 @@
         <button
           type="button"
           v-if="token.is_dead || token.used_ghost_vote"
-          :disabled="readonly"
+          :disabled="props.readonly"
           class="absolute top-0 left-0 z-20 flex justify-center w-full duration-200"
           :class="{
             'cursor-default': readonly,
             'opacity-0': !token.used_ghost_vote,
             'hover:opacity-50 transition hover:-translate-y-2':
-              !readonly && token.is_dead && !token.used_ghost_vote,
+              !props.readonly && token.is_dead && !token.used_ghost_vote,
           }"
           @click.prevent="toggleUsedGhostVote(token)"
         >
@@ -170,7 +170,7 @@
     :reminders="reminders"
     @selectReminder="selectReminder"
   />
-  <Tour v-if="readonly" :steps="viewTour" tourKey="grimoire-guide" />
+  <Tour v-if="shouldShowTour" :steps="viewTour" tourKey="grimoire-guide" />
 </template>
 
 <script setup lang="ts">
@@ -204,6 +204,7 @@ type Token = {
 const friends = useFriends();
 const games = useGames();
 const roles = useRoles();
+const { isDone } = useDids();
 
 const me = useMe();
 
@@ -457,6 +458,8 @@ function toggleUsedGhostVote(token: Token) {
 onMounted(() => {
   roles.fetchRoles();
 });
+
+const shouldShowTour = props.readonly && isDone("game-viewer-v2");
 
 const viewTour = [
   {
