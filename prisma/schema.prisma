@@ -68,9 +68,11 @@ model FavoriteGame {
   id         Int          @id @default(autoincrement())
   user       UserSettings @relation(fields: [user_id], references: [user_id])
   user_id    String
-  game       Game         @relation(fields: [game_id], references: [id])
-  game_id    String       @unique
+  game       Game?        @relation(fields: [game_id], references: [id])
+  game_id    String?      @unique
   created_at DateTime     @default(now()) @db.Timestamptz(6)
+  game_v2    GameV2?      @relation(fields: [game_v2_id], references: [id])
+  game_v2_id String?      @unique
 
   @@unique([user_id, game_id])
 }
@@ -107,13 +109,82 @@ model Token {
   reminders       ReminderToken[]
 }
 
+model GameV2 {
+  id                       String        @id @default(uuid())
+  bgg_id                   Int?          @unique
+  user_id                  String
+  game_id                  String
+  favorite_id              Int?          @unique
+  characters               Character[]
+  ignore_for_stats         Boolean       @default(false)
+  tags                     String[]
+  waiting_for_confirmation Boolean       @default(false)
+  favorite                 FavoriteGame?
+  user                     UserSettings  @relation(fields: [user_id], references: [user_id])
+  details                  GameDetails   @relation(fields: [game_id], references: [id])
+  created_at               DateTime?     @default(now()) @db.Timestamptz(6)
+  deleted                  Boolean       @default(false)
+}
+
+model GameDetails {
+  id                String         @id @default(uuid())
+  date              DateTime       @default(now()) @db.Date
+  privacy           PrivacySetting @default(PUBLIC)
+  tags              String[]
+  script            String
+  script_id         Int?
+  location_type     LocationType   @default(ONLINE)
+  location          String
+  community         Community?     @relation(fields: [community_id], references: [id])
+  community_id      Int?
+  player_count      Int?
+  traveler_count    Int?
+  win_v2            WinStatus_V2   @default(NOT_RECORDED)
+  image_urls        String[]
+  storytellers      UserSettings[] @relation("Storyteller")
+  associated_script Script?        @relation(fields: [script_id], references: [id])
+  grimoire          GrimoireV2[]
+  demon_bluffs      DemonBluff[]
+  fabled            Fabled[]
+  records           GameV2[]
+  deleted           Boolean        @default(false)
+}
+
+model GrimoireV2 {
+  id         Int           @id @default(autoincrement())
+  created_at DateTime      @default(now()) @db.Timestamptz(6)
+  tokens     TokenV2[]
+  game       GameDetails[]
+}
+
+model TokenV2 {
+  id              Int             @id @default(autoincrement())
+  role            Role?           @relation(fields: [role_id], references: [id])
+  role_id         String?
+  related_role    Role?           @relation("RelatedToken", fields: [related_role_id], references: [id])
+  related_role_id String?
+  alignment       Alignment
+  is_dead         Boolean         @default(false)
+  used_ghost_vote Boolean         @default(false)
+  order           Int
+  created_at      DateTime        @default(now()) @db.Timestamptz(6)
+  grimoire        GrimoireV2      @relation(fields: [grimoire_id], references: [id])
+  grimoire_id     Int
+  player_name     String          @default("")
+  player          UserSettings?   @relation(fields: [player_id], references: [user_id])
+  player_id       String?
+  reminders       ReminderToken[]
+}
+
 model ReminderToken {
-  id         Int      @id @default(autoincrement())
-  reminder   String   @default("")
-  token_url  String   @default("")
-  created_at DateTime @default(now()) @db.Timestamptz(6)
-  token      Token?   @relation(fields: [token_id], references: [id])
-  token_id   Int?
+  id          Int      @id @default(autoincrement())
+  reminder    String   @default("")
+  token_url   String   @default("")
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  token       Token?   @relation(fields: [token_id], references: [id])
+  token_id    Int?
+  token_v2    TokenV2? @relation(fields: [token_v2_id], references: [id])
+  token_v2_id Int?
 }
 
 model Character {
@@ -127,26 +198,32 @@ model Character {
   role_id         String?
   related_role_id String?
   related_role    Role?     @relation("RelatedRole", fields: [related_role_id], references: [id])
+  game_v2         GameV2?   @relation(fields: [game_v2_id], references: [id])
+  game_v2_id      String?
 }
 
 model DemonBluff {
-  id      Int     @id @default(autoincrement())
-  name    String
-  role    Role?   @relation(fields: [role_id], references: [id])
-  related String?
-  game    Game?   @relation(fields: [game_id], references: [id])
-  game_id String?
-  role_id String?
+  id              Int          @id @default(autoincrement())
+  name            String
+  role            Role?        @relation(fields: [role_id], references: [id])
+  related         String?
+  game            Game?        @relation(fields: [game_id], references: [id])
+  game_id         String?
+  role_id         String?
+  game_details    GameDetails? @relation(fields: [game_details_id], references: [id])
+  game_details_id String?
 }
 
 model Fabled {
-  id      Int     @id @default(autoincrement())
-  name    String
-  role    Role?   @relation(fields: [role_id], references: [id])
-  related String?
-  game    Game?   @relation(fields: [game_id], references: [id])
-  game_id String?
-  role_id String?
+  id              Int          @id @default(autoincrement())
+  name            String
+  role            Role?        @relation(fields: [role_id], references: [id])
+  related         String?
+  game            Game?        @relation(fields: [game_id], references: [id])
+  game_id         String?
+  role_id         String?
+  game_details    GameDetails? @relation(fields: [game_details_id], references: [id])
+  game_details_id String?
 }
 
 model Script {
@@ -168,6 +245,7 @@ model Script {
   roles            Role[]
   games            Game[]
   events           Event[]
+  game_details     GameDetails[]
 
   @@unique([script_id, version])
 }
@@ -188,6 +266,8 @@ model Role {
   demon_bluffs      DemonBluff[]
   fabled            Fabled[]
   reminders         RoleReminder[]
+  related_tokens_v2 TokenV2[]      @relation("RelatedToken")
+  tokens_v2         TokenV2[]
 }
 
 model RoleReminder {
@@ -262,6 +342,9 @@ model UserSettings {
   favorites               FavoriteGame[]
   created_events          Event[]
   calendar                SharedCalendarLink?
+  games_v2                GameV2[]
+  token_v2                TokenV2[]
+  storytold_games         GameDetails[]           @relation("Storyteller")
 }
 
 model Did {
@@ -373,6 +456,7 @@ model Community {
   location          String?
   city_id           String?
   city              City?           @relation(fields: [city_id], references: [id])
+  games_v2          GameDetails[]
 }
 
 model CommunityPost {
