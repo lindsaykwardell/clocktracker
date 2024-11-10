@@ -1,7 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   experimental: {
-    viewTransition: true
+    viewTransition: true,
   },
 
   devtools: { enabled: false },
@@ -105,9 +105,7 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
-    public: {
-      sentryDsn: process.env.SENTRY_DSN,
-    },
+    public: {},
   },
 
   pwa: {
