@@ -9,6 +9,7 @@ RUN npm install
 
 RUN --mount=type=secret,id=SUPABASE_URL \
     --mount=type=secret,id=SUPABASE_KEY \
+    --mount=type=secret,id=BUGSNAG_API_KEY \
     SUPABASE_URL="$(cat /run/secrets/SUPABASE_URL)" \
     SUPABASE_KEY="$(cat /run/secrets/SUPABASE_KEY)" \
     BUGSNAG_API_KEY="$(cat /run/secrets/BUGSNAG_API_KEY)" \
