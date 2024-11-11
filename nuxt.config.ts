@@ -3,6 +3,7 @@ export default defineNuxtConfig({
   experimental: {
     viewTransition: true,
   },
+  sourcemap: true,
 
   devtools: { enabled: false },
 
@@ -111,12 +112,12 @@ export default defineNuxtConfig({
 
   bugsnag: {
     publishRelease: true,
-    performance: true,
+    // performance: true,
     baseUrl: "https://clocktracker.app",
     disableLog: true,
     config: {
       apiKey: process.env.BUGSNAG_API_KEY!,
-      enabledReleaseStages: ["development", "production"],
+      enabledReleaseStages: ["production"],
       releaseStage: process.env.NODE_ENV,
     },
   },

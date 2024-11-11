@@ -17,6 +17,7 @@
 
 <script setup lang="ts">
 import { nanoid } from "nanoid";
+import "@globalhive/vuejs-tour/dist/style.css"
 
 const tour = ref();
 const tourStarted = ref(false);
@@ -78,7 +79,3 @@ onMounted(async () => {
   }, 1000);
 });
 </script>
-
-<style lang="scss">
-@import "@globalhive/vuejs-tour/src/style/style.scss";
-</style>
