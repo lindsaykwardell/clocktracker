@@ -7,6 +7,9 @@ export async function roleOfTheDay() {
   const roleCount = await prisma.role.count({
     where: {
       custom_role: false,
+      type: {
+        not: "FABLED",
+      },
     },
   });
 

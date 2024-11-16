@@ -28,6 +28,7 @@
     "typescript": "^5.6.2"
   },
   "dependencies": {
+    "@atproto/api": "^0.13.16",
     "@aws-sdk/client-s3": "^3.654.0",
     "@aws-sdk/lib-storage": "^3.654.0",
     "@aws-sdk/s3-request-presigner": "^3.654.0",
