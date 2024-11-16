@@ -147,6 +147,16 @@
               </div>
             </a>
             <a
+              id="bluesky"
+              href="https://bsky.app/profile/clocktracker.app"
+              class="text-stone-400 hover:text-stone-500 dark:text-stone-200 dark:hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
+              aria-label="Join the ClockTracker Discord server"
+            >
+              <div class="w-[50px] flex justify-center">
+                <Bluesky />
+              </div>
+            </a>
+            <a
               id="kofi"
               href="https://ko-fi.com/clocktracker"
               class="text-stone-400 hover:text-stone-500 dark:text-stone-200 dark:hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
