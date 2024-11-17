@@ -180,6 +180,9 @@ export default defineEventHandler(async (handler) => {
           }
         }
       ],
+      who_can_register: {
+        in: ["ANYONE", "COMMUNITY_MEMBERS"],
+      }
     },
     select: {
       created_at: true,
