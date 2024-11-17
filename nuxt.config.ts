@@ -206,6 +206,10 @@ export default defineNuxtConfig({
     },
   },
 
+  cron: {
+    timeZone: "America/Los_Angeles",
+  },
+
   routeRules: {
     "/scripts/**": {
       ssr: false,
