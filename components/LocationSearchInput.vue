@@ -15,12 +15,12 @@
         class="absolute right-3 top-[10px] z-20 text-black"
       />
       <ComboboxOptions
-        v-if="locations.length > 0"
+        v-if="_locations.length > 0"
         class="absolute text-sm bg-stone-200 dark:bg-stone-900 border border-stone-300 dark:border-stone-500 max-h-[150px] min-w-[200px] w-full overflow-y-scroll overflow-x-hidden z-10"
       >
         <ComboboxOption
           class="cursor-pointer p-1 flex gap-2 overflow-ellipsis whitespace-nowrap"
-          v-for="location in locations"
+          v-for="location in _locations"
           :value="location"
         >
           <div class="flex flex-col gap-1">
@@ -74,6 +74,13 @@ const value = computed({
 });
 
 const locations = ref<City[]>([]);
+
+const _locations = computed<City[]>(() => {
+  return [
+    { id: 0, name: value.value || "", latitute: 0, longitude: 0 },
+    ...locations.value,
+  ];
+});
 
 watchDebounced(
   value,
