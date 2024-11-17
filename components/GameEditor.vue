@@ -1133,11 +1133,12 @@ function copyGrimoire(game: GameRecord) {
     });
   }
 
-  props.game.grimoire = [
-    {
-      tokens,
-    },
-  ];
+  // Empty the grimoire
+  while (props.game.grimoire.length > 0) {
+    props.game.grimoire.pop();
+  }
+
+  props.game.grimoire.push({ tokens });
 
   props.game.player_count = game.player_count;
   props.game.traveler_count = game.traveler_count;
