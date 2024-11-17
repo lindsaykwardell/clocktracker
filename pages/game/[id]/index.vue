@@ -922,12 +922,16 @@ async function claimSeat(token: { order: number }) {
     return;
   }
 
-  const result = await $fetch<GameRecord>(`/api/games/${gameId}/claim_seat`, {
-    method: "PUT",
-    body: { order: token.order },
-  });
+  try {
+    const result = await $fetch<GameRecord>(`/api/games/${gameId}/claim_seat`, {
+      method: "PUT",
+      body: { order: token.order },
+    });
 
-  games.games.set(gameId, { status: Status.SUCCESS, data: result });
+    games.games.set(gameId, { status: Status.SUCCESS, data: result });
+  } catch (error: any) {
+    alert(`There was a problem claiming this seat: ${error.statusMessage}`);
+  }
 }
 
 onMounted(() => {
