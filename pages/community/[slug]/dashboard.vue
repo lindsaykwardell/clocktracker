@@ -299,7 +299,11 @@ const _location = computed({
   get: () => updatedLocation.value,
   set: (newValue: { id: number; name: string }) => {
     updatedLocation.value = newValue.name;
-    updatedCityId.value = newValue.id.toString();
+    if (newValue.id !== 0) {
+      updatedCityId.value = newValue.id.toString();
+    } else {
+      updatedCityId.value = null;
+    }
   },
 });
 
