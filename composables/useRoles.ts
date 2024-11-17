@@ -20,8 +20,12 @@ export const useRoles = defineStore("roles", {
     roles: new Map<string, RoleRecord>(),
   }),
   getters: {
-    getRole(): (roleId: string) => RoleRecord | undefined {
-      return (roleId: string) => {
+    getRole(): (roleId: string | undefined) => RoleRecord | undefined {
+      return (roleId: string | undefined) => {
+        if (!roleId) {
+          return;
+        }
+        
         return this.roles.get(roleId.toLowerCase());
       };
     },
