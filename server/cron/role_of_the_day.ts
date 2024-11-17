@@ -2,7 +2,7 @@ import { defineCronHandler } from "#nuxt/cron";
 import dayjs from "dayjs";
 import { roleOfTheDay } from "../utils/roleOfTheDay";
 import { AtpAgent, RichText } from "@atproto/api";
-import { PrismaClient } from "@prisma/client";
+import { Alignment, PrismaClient, WinStatus_V2 } from "@prisma/client";
 
 const agent = new AtpAgent({
   service: "https://bsky.social",
@@ -62,7 +62,29 @@ export default defineCronHandler("daily", async () => {
       games.length / Object.keys(games_by_month).length
     );
 
-    const win_count = winRateByRole(games as unknown as GameRecord[], role);
+    const win_loss = {
+      wins: 0,
+      losses: 0,
+    };
+
+    for (const game of games) {
+      const lastCharacter =
+        game.player_characters[game.player_characters.length - 1];
+
+      if (lastCharacter.role_id === role.id) {
+        if (
+          (lastCharacter.alignment === Alignment.GOOD &&
+            game.win_v2 === WinStatus_V2.GOOD_WINS) ||
+          (lastCharacter.alignment === Alignment.EVIL &&
+            game.win_v2 === WinStatus_V2.EVIL_WINS)
+        ) {
+          win_loss.wins++;
+        } else if (game.win_v2 !== WinStatus_V2.NOT_RECORDED) {
+          win_loss.losses++;
+        }
+      }
+    }
+
     const popular_scripts = await prisma.game.groupBy({
       by: ["script_id", "script"],
       where: {
@@ -117,14 +139,30 @@ export default defineCronHandler("daily", async () => {
         }
       }
 
-      const { win, total } = winRateByRole(
-        games.filter(
-          (g) => g.script_id === script.script_id
-        ) as unknown as GameRecord[],
-        role
-      );
+      let wins = 0;
+      let total = 0;
 
-      const pct = +((win / total) * 100).toFixed(2);
+      for (const game of games) {
+        const lastCharacter =
+          game.player_characters[game.player_characters.length - 1];
+
+        if (
+          lastCharacter.role_id === role.id &&
+          game.script_id === script.script_id
+        ) {
+          total++;
+          if (
+            (lastCharacter.alignment === Alignment.GOOD &&
+              game.win_v2 === WinStatus_V2.GOOD_WINS) ||
+            (lastCharacter.alignment === Alignment.EVIL &&
+              game.win_v2 === WinStatus_V2.EVIL_WINS)
+          ) {
+            wins++;
+          }
+        }
+      }
+
+      const pct = +((wins / total) * 100).toFixed(2);
 
       popular_scripts_formatted.push({
         script_id: script.script_id,
@@ -132,18 +170,11 @@ export default defineCronHandler("daily", async () => {
         version,
         custom_script_id,
         logo: logo,
-        wins: win,
+        wins,
         pct,
         count: script._count.script_id,
       });
     }
-
-    const win_loss = {
-      total: win_count.total,
-      win: win_count.win,
-      loss: win_count.total - win_count.win,
-      pct: +((win_count.win / win_count.total) * 100).toFixed(2) || 0,
-    };
 
     // Fetch the role image
     const image = await fetch(
@@ -186,7 +217,11 @@ https://clocktracker.app/roles/${role.id}`,
       text: `On ClockTracker, the ${
         role.name
       } has an average of ${averageGamesPerMonth} games played per month over the past year
-Win Rate: ${win_loss.pct}%
+Win Rate: ${
+        +((win_loss.wins / (win_loss.wins + win_loss.losses)) * 100).toFixed(
+          2
+        ) || 0
+      }%
 
 Popular Scripts:
 ${popular_scripts_formatted
