@@ -18,7 +18,7 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  if (!body || !body.order) {
+  if (!body || isNaN(body.order)) {
     throw createError({
       status: 400,
       statusMessage: "Bad Request",
@@ -54,7 +54,7 @@ export default defineEventHandler(async (handler) => {
           user: {
             friends: {
               some: {
-                friend_id: user.id,
+                user_id: user.id,
               },
             },
           },
@@ -163,6 +163,88 @@ export default defineEventHandler(async (handler) => {
   });
 
   if (!game) {
+    // Try to figure out what went wrong.
+    const gameExists = await prisma.game.findFirst({
+      where: {
+        id: gameId,
+      },
+      select: {
+        id: true,
+        user: {
+          select: {
+            friends: {
+              select: {
+                user_id: true,
+              },
+            },
+          },
+        },
+        community: {
+          select: {
+            members: {
+              select: {
+                user_id: true,
+              },
+            },
+          },
+        },
+        storyteller: true,
+        co_storytellers: true,
+        grimoire: {
+          select: {
+            tokens: {
+              select: {
+                player_id: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!gameExists) {
+      throw createError({
+        status: 404,
+        statusMessage: "Game not found",
+      });
+    }
+
+    const isFriend = gameExists.user?.friends.some(
+      (f) => f.user_id === user.id
+    );
+    const is_community_member = gameExists.community?.members.some(
+      (m) => m.user_id === user.id
+    );
+
+    if (!isFriend && !is_community_member) {
+      throw createError({
+        status: 400,
+        statusMessage:
+          "You are either not a friend of the game creator, or a member of the community the game is in.",
+      });
+    }
+
+    if (
+      gameExists.storyteller === `@${userDetails.username}` ||
+      gameExists.co_storytellers?.includes(`@${userDetails.username}`)
+    ) {
+      throw createError({
+        status: 400,
+        statusMessage: "You are the storyteller of this game.",
+      });
+    }
+
+    if (
+      gameExists.grimoire.some((g) =>
+        g.tokens.some((t) => t.player_id === user.id)
+      )
+    ) {
+      throw createError({
+        status: 400,
+        statusMessage: "You already have a seat in this game.",
+      });
+    }
+
     throw createError({
       status: 400,
       statusMessage: "Bad Request",
@@ -186,6 +268,16 @@ export default defineEventHandler(async (handler) => {
       player_id: user.id,
       player_name: userDetails.display_name,
     },
+  });
+
+  // Mirror this change in the fetched game
+  game.grimoire.forEach((g) => {
+    g.tokens.forEach((t) => {
+      if (t.order === body.order) {
+        t.player_id = user.id;
+        t.player_name = userDetails.display_name;
+      }
+    });
   });
 
   // Reduce grimoire to find all tokens that have this player_id
