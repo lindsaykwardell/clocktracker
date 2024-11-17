@@ -189,7 +189,7 @@ function formatRoleAsCharacter(
   role: Omit<Role, "alignment"> & { alignment: "GOOD" | "EVIL" | "NEUTRAL" }
 ) {
   return {
-    alignment: role.initial_alignment,
+    alignment: role.type === "TRAVELER" ? "NEUTRAL" : role.initial_alignment,
     role,
   };
 }
