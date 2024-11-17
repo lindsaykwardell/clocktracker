@@ -178,10 +178,10 @@ const mostCommonCharacter = computed(() => {
   const allPlayedCharacters = gamesAsPlayer.value
     .filter((game) => !game.ignore_for_stats)
     .flatMap((game) => game.player_characters)
-    .filter((character) => character.role_id);
+    .filter((character) => character?.role_id);
 
   const characterCounts = allPlayedCharacters.reduce((acc, character) => {
-    if (!character.role_id) return acc;
+    if (!character?.role_id) return acc;
 
     if (acc[character.role_id]) {
       acc[character.role_id]++;
