@@ -1056,7 +1056,7 @@
     "reminders": [],
     "setup": false,
     "ability": "You start knowing how many steps from the Demon to its nearest Minion.",
-    "flavor": "Do not disturb me. The tick must continue, for the circle is a symbol of life and contains all things - all answers - in it's divine machinery. I must work.",
+    "flavor": "Do not disturb me. The tick must continue, for the circle is a symbol of life and contains all things - all answers - in its divine machinery. I must work.",
     "firstNight": 52,
     "otherNight": 0
   },
@@ -1690,7 +1690,7 @@
     "otherNightReminder": "If the dead equal or outnumber the living, show the character token of an alive player.",
     "reminders": [],
     "setup": false,
-    "ability": "Each night, if the dead equal or outnumber the living, you learn 1 alive character. The Demon knows who you are.",
+    "ability": "Each night, if the dead equal or outnumber the living, you learn 1 alive character. The Demon knows you are the King.",
     "flavor": "Betwixt the unknown strains of mortal strife / And morbid night, sweet with mystery and woe / Lies unfettered joys of fate’s long and colored life / Who’s garden blooms with each painted Face to Show.",
     "firstNight": 19,
     "otherNight": 78
@@ -1740,13 +1740,7 @@
     "ability": "Each night*, choose an alive player. If good, they die & the Demon doesn’t kill tonight. One good player registers as evil.",
     "flavor": "Beneath the thin veneer of civilisation lies a howling madness.",
     "firstNight": 0,
-    "otherNight": 31,
-    "jinxes": [
-      {
-        "id": "gambler",
-        "reason": "If the Lycanthrope is alive and the Gambler kills themself at night, no other players can die tonight."
-      }
-    ]
+    "otherNight": 31
   },
   {
     "id": "amnesiac",
@@ -1777,7 +1771,7 @@
       "No Ability"
     ],
     "setup": false,
-    "ability": "Once per game, at night, choose a player: they learn who you are.",
+    "ability": "Once per game, at night, choose a player: they learn you are the Nightwatchman.",
     "flavor": "The night is cold and lonely, but I have the moon, the stars, the crisp wind and the soft thud of leather boots on cobbled stone for company. Yonder, candlelight flickers behind a murky window...",
     "firstNight": 62,
     "otherNight": 80
@@ -1862,7 +1856,7 @@
     "otherNightReminder": "If the Farmer died tonight, wake an alive good player. Show them the *YOU ARE* info token and a Farmer character token. Replace their previous token with the Farmer token.",
     "reminders": [],
     "setup": false,
-    "ability": "If you die at night, an alive good player becomes a Farmer.",
+    "ability": "When you die at night, an alive good player becomes a Farmer.",
     "flavor": "Even the high and mighty need food on the table. Without us, the city starves.",
     "firstNight": 0,
     "otherNight": 62
@@ -1959,6 +1953,10 @@
       {
         "id": "zealot",
         "reason": "If the Cannibal gains the Zealot ability, the Cannibal learns this."
+      },
+      {
+        "id": "poppygrower",
+        "reason": "If the Cannibal eats the Poppy Grower, then dies or loses the Poppy Grower ability, the Demon and Minions learn each other that night."
       }
     ]
   },
@@ -1971,7 +1969,7 @@
     "otherNightReminder": "",
     "reminders": [],
     "setup": false,
-    "ability": "Minions start knowing 3 not-in-play characters.",
+    "ability": "Each Minion gets 3 bluffs.",
     "flavor": "It was John.",
     "firstNight": 15,
     "otherNight": 0
@@ -2035,7 +2033,7 @@
       "Guess Used"
     ],
     "setup": false,
-    "ability": "All Minions know you are in play. If a Minion publicly guesses you (once), your team loses.",
+    "ability": "All Minions know a Damsel is in play. If a Minion publicly guesses you (once), your team loses.",
     "flavor": "Don't touch the hair, honey.",
     "firstNight": 42,
     "otherNight": 60
@@ -2685,7 +2683,7 @@
     "firstNightReminder": "Announce the Vizier player to the group.",
     "reminders": [],
     "setup": false,
-    "ability": "All players know who you are. You can not die during the day. If good voted, you may choose to execute immediately.",
+    "ability": "All players know you are the Vizier. You can not die during the day. If good voted, you may choose to execute immediately.",
     "flavor": "An excellent decision, as always, sire. Such a petty crime as bumping into the Bishop indeed deserves your ‘justice’ and ‘mercy’. Take a stroll in the gardens. Visit the gallery and peruse the sculptures of Von Strauf. Relax, sire. Leave everything… to me.",
     "firstNight": 72,
     "otherNight": 0,
@@ -2801,7 +2799,7 @@
       "Storyteller Ability"
     ],
     "setup": false,
-    "ability": "If you die, the Storyteller gains a Minion ability.",
+    "ability": "When you die, the Storyteller gains a Minion ability.",
     "flavor": "Pleauze shtay shtill. Thinks nid tiime for hillink. Myrhh-myrhh.",
     "firstNight": 0,
     "otherNight": 0
@@ -3064,7 +3062,7 @@
     "edition": "",
     "reminders": [],
     "setup": false,
-    "ability": "Once per day, if you publicly guess which players are Minion(s) and which are Demon(s), good wins.",
+    "ability": "Each day, if you publicly guess which players are Minion(s) and which are Demon(s), good wins.",
     "flavor": "I am here because of you, and you are here because of me.",
     "firstNight": 0,
     "otherNight": 0
