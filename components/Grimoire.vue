@@ -301,8 +301,10 @@ const orderedTokens = computed(() =>
 
 const reminders = computed(() => {
   const fabled = roles.getRoleByType(RoleType.FABLED);
+  const travelers = roles.getRoleByType(RoleType.TRAVELER);
   return roles.getRemindersForRoles([
     ...(props.availableRoles?.map((r) => r.id) ?? []),
+    ...travelers.map((r) => r.id),
     ...fabled.map((r) => r.id),
   ]);
 });
