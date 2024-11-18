@@ -100,7 +100,7 @@
             size="md"
             :class="{ 'cursor-pointer': !props.readonly }"
             :alwaysShowAlignment="!props.readonly && !!token.role"
-            :tokenTooltip="token.role?.ability"
+            :tokenTooltip="token.role?.name"
           />
         </a>
         <Token
