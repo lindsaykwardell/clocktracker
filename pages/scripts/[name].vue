@@ -503,31 +503,35 @@ const scriptLink = computed(() => {
     return "https://wiki.bloodontheclocktower.com/Sects_%26_Violets";
   else if (script.value.website) return script.value.website;
   else {
-    return `https://botcscripts.com/script/${script.value.script_id}/${script.value.version}/`;
+    return `https://botcscripts.com/script/${script.value.script_id}/${script.value.version}`;
   }
 });
 
 watch(
   script,
   async (newScript) => {
-    scriptStats.value = await $fetch<{
-      count: number;
-      win_loss: {
-        total: number;
-        win: number;
-        loss: number;
-        pct: number;
-      };
-      games_by_month: Record<string, number>;
-      role_win_rates: Record<
-        string,
-        {
+    try {
+      scriptStats.value = await $fetch<{
+        count: number;
+        win_loss: {
           total: number;
           win: number;
           loss: number;
-        }
-      >;
-    }>("/api/script/" + newScript.id + "/stats");
+          pct: number;
+        };
+        games_by_month: Record<string, number>;
+        role_win_rates: Record<
+          string,
+          {
+            total: number;
+            win: number;
+            loss: number;
+          }
+        >;
+      }>("/api/script/" + newScript.id + "/stats");
+    } catch (e) {
+      console.error(e);
+    }
   },
   { immediate: true }
 );
