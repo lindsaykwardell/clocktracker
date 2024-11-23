@@ -61,6 +61,7 @@ export type GameRecord = Omit<Game, "win_v2"> & {
       player?: {
         username: string;
         display_name: string;
+        avatar: string;
       };
     })[];
   })[];
