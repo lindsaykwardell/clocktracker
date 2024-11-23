@@ -223,6 +223,8 @@ export async function fetchGames(user_id: string, me: User | null) {
               player: {
                 select: {
                   display_name: true,
+                  username: true,
+                  avatar: true,
                 },
               },
             },
@@ -478,6 +480,7 @@ export async function fetchGame(
                 select: {
                   username: true,
                   display_name: true,
+                  avatar: true,
                 },
               },
             },
