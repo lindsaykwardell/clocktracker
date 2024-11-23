@@ -801,7 +801,8 @@ const canClaimSeat = computed(() => {
 
   // Check if the user is a storyteller or co-storyteller
   if (
-    game.value.data.is_storyteller ||
+    (game.value.data.is_storyteller &&
+      game.value.data.user_id === me.value.data.user_id) ||
     game.value.data.storyteller === me.value.data.username ||
     game.value.data.co_storytellers.includes(me.value.data.username)
   ) {

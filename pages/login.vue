@@ -71,6 +71,8 @@ async function login() {
   } else {
     friends.fetchFriends();
     friends.fetchRequests();
+
+    router.push("/");
   }
 }
 
@@ -86,6 +88,8 @@ async function register() {
   } else {
     friends.fetchFriends();
     friends.fetchRequests();
+
+    router.push("/");
   }
 }
 
