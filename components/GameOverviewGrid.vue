@@ -91,7 +91,7 @@
           class="absolute bottom-0 left-0 w-full flex justify-between bg-gradient-to-tr from-black/75 via-black/25 to-black/75"
         >
           <div
-            class="absolute -top-10 left-0 p-1 flex gap-2 items-center bg-gradient-to-r from-black/75 via-black/50 to-black-0"
+            class="absolute -top-12 left-0 p-1 flex gap-2 items-center bg-gradient-to-r from-black/75 via-black/50 to-black-0 h-12"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -105,11 +105,18 @@
                 d="M64.12 147.8a4 4 0 0 1-4 4.2H16a8 8 0 0 1-7.8-6.17a8.35 8.35 0 0 1 1.62-6.93A67.8 67.8 0 0 1 37 117.51a40 40 0 1 1 66.46-35.8a3.94 3.94 0 0 1-2.27 4.18A64.08 64.08 0 0 0 64 144c0 1.28 0 2.54.12 3.8m182-8.91A67.76 67.76 0 0 0 219 117.51a40 40 0 1 0-66.46-35.8a3.94 3.94 0 0 0 2.27 4.18A64.08 64.08 0 0 1 192 144c0 1.28 0 2.54-.12 3.8a4 4 0 0 0 4 4.2H240a8 8 0 0 0 7.8-6.17a8.33 8.33 0 0 0-1.63-6.94Zm-89 43.18a48 48 0 1 0-58.37 0A72.13 72.13 0 0 0 65.07 212A8 8 0 0 0 72 224h112a8 8 0 0 0 6.93-12a72.15 72.15 0 0 0-33.74-29.93Z"
               />
             </svg>
-            <div class="text-white font-bold">
+            <div class="text-white font-bold flex items-center gap-2">
               {{ game.player_count }}
               <template v-if="game.traveler_count">
                 (+{{ game.traveler_count }})
               </template>
+              <div
+                v-for="(player, index) in taggedPlayers(game)"
+                class="tagged-players"
+                :style="`--i: ${index}`"
+              >
+                <Avatar size="xs" :value="player?.avatar" />
+              </div>
             </div>
           </div>
           <div class="flex-grow flex gap-1">
@@ -203,6 +210,16 @@ function isFavorite(game: GameRecord) {
 
   return user.data.favorites.some((f) => f.game_id === game.id);
 }
+
+const taggedPlayers = computed(
+  () => (game: GameRecord) =>
+    game.grimoire
+      .flatMap((g) => g.tokens.filter((t) => t.player_id))
+      .map((t) => t.player)
+      .filter(
+        (p, i, a) => p && a.findIndex((p2) => p2?.username === p.username) === i
+      )
+);
 </script>
 
 <style scoped>
@@ -229,5 +246,10 @@ th {
 .custom-script-name {
   -webkit-text-stroke-width: 1px;
   -webkit-text-stroke-color: white;
+}
+
+.tagged-players {
+  @apply relative;
+  left: calc(var(--i) * -1.75rem);
 }
 </style>

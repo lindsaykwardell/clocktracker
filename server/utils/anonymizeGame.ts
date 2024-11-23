@@ -36,6 +36,7 @@ export type GameRecord = Game & {
       player?: {
         username: string;
         display_name: string;
+        avatar: string;
       };
     })[];
   })[];
