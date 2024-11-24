@@ -49,55 +49,24 @@ export default defineEventHandler(async (handler) => {
         },
       ],
     },
-    include: {
-      player_characters: {
-        include: {
-          role: {
-            select: {
-              token_url: true,
-              type: true,
-              initial_alignment: true,
-              name: true,
-            },
-          },
-          related_role: {
-            select: {
-              token_url: true,
-            },
-          },
-        },
-      },
-      demon_bluffs: {
-        include: {
-          role: {
-            select: {
-              token_url: true,
-              type: true,
-            },
-          },
-        },
-      },
-      fabled: {
-        include: {
-          role: {
-            select: {
-              token_url: true,
-            },
-          },
-        },
-      },
+    select: {
+      win_v2: true,
+      date: true,
+      is_storyteller: true,
       grimoire: {
-        include: {
+        select: {
           tokens: {
-            include: {
-              role: true,
-              related_role: true,
-              reminders: true,
+            select: {
+              role_id: true,
+              alignment: true,
             },
           },
         },
-        orderBy: {
-          id: "asc",
+      },
+      player_characters: {
+        select: {
+          role_id: true,
+          alignment: true,
         },
       },
     },
@@ -134,7 +103,38 @@ export default defineEventHandler(async (handler) => {
 
   // Ge the win rate for each role on the script.
   const role_win_rates = script.roles.reduce((acc, role) => {
-    const win_count = winRateByRole(games as unknown as GameRecord[], role);
+    const win_count = games.reduce(
+      (acc, game) => {
+        let win = acc.win;
+
+        const character = (() => {
+          if (game.is_storyteller) {
+            return game.grimoire[game.grimoire.length - 1]?.tokens.find(
+              (token) => token.role_id === role.id
+            );
+          } else {
+            return game.player_characters[game.player_characters.length - 1];
+          }
+        })();
+
+        if (!character || character.role_id !== role.id) return acc;
+
+        if (
+          game.win_v2 === WinStatus_V2.GOOD_WINS &&
+          character.alignment === Alignment.GOOD
+        ) {
+          win++;
+        } else if (
+          game.win_v2 === WinStatus_V2.EVIL_WINS &&
+          character.alignment === Alignment.EVIL
+        ) {
+          win++;
+        }
+
+        return { total: acc.total + 1, win };
+      },
+      { total: 0, win: 0 }
+    );
 
     return {
       ...acc,
