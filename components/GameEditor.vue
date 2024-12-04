@@ -536,6 +536,32 @@
         </Button>
       </div>
     </fieldset>
+    <fieldset class="border rounded border-stone-500 p-4 my-3">
+      <legend>External Links</legend>
+      <div class="w-full flex flex-col md:flex-row gap-5">
+        <label class="flex-1">
+          <span class="block">BoardGameGeek Game URL</span>
+          <div class="flex items-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              class="text-[#ff5100]"
+            >
+              <path
+                fill="currentColor"
+                d="m19.7 4.44l-2.38.64L19.65 0L4.53 5.56l.83 6.67l-1.4 1.34L8.12 24l8.85-3.26l3.07-7.22l-1.32-1.27l.98-7.81Z"
+              />
+            </svg>
+            <Input type="text" v-model="bggIdInput" />
+          </div>
+          <div v-if="!bggIdIsValid" class="text-red-500">
+            Invalid BoardGameGeek URL
+          </div>
+        </label>
+      </div>
+    </fieldset>
     <fieldset
       v-if="!editingMultipleGames"
       class="border rounded border-stone-500 p-4 my-3"
@@ -609,6 +635,7 @@ const props = defineProps<{
     date: string;
     script: string;
     script_id: number | null;
+    bgg_id: number | null;
     storyteller: string;
     co_storytellers: string[];
     is_storyteller: boolean | undefined;
@@ -755,6 +782,28 @@ const tokenSet = ref<"player_characters" | "demon_bluffs" | "fabled">(
 const showCopyGrimoireDialog = ref(false);
 const grimPage = ref(props.game.grimoire.length - 1);
 const tagsInput = ref("");
+const bggIdInput = ref("");
+const bggIdIsValid = ref(true);
+
+watch(bggIdInput, () => {
+  // Validate the URL
+  const validUrl = new RegExp(
+    /https:\/\/boardgamegeek.com\/play\/details\/\d+$/
+  );
+
+  if (bggIdInput.value.match(validUrl)) {
+    bggIdIsValid.value = true;
+    const bggId = bggIdInput.value.match(/\d+$/);
+    if (bggId) {
+      props.game.bgg_id = parseInt(bggId[0]);
+    }
+  } else {
+    props.game.bgg_id = null;
+    if (bggIdInput.value.length > 0) {
+      bggIdIsValid.value = false;
+    }
+  }
+});
 
 let focusedToken: Partial<Character> | null = null;
 
@@ -1367,6 +1416,10 @@ onMounted(() => {
   friends.fetchCommunityMembers();
   if (me.value.status === Status.SUCCESS) {
     games.fetchPlayerGames(me.value.data.username);
+  }
+
+  if (props.game.bgg_id) {
+    bggIdInput.value = `https://boardgamegeek.com/play/details/${props.game.bgg_id}`;
   }
 });
 </script>
