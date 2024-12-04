@@ -554,10 +554,15 @@
                 d="m19.7 4.44l-2.38.64L19.65 0L4.53 5.56l.83 6.67l-1.4 1.34L8.12 24l8.85-3.26l3.07-7.22l-1.32-1.27l.98-7.81Z"
               />
             </svg>
-            <Input type="text" v-model="bggIdInput" pattern="https:\/\/boardgamegeek\.com\/play\/details\/\d+" />
+            <Input
+              type="text"
+              v-model="bggIdInput"
+              pattern="https:\/\/boardgamegeek\.com\/play\/details\/\d+"
+            />
           </div>
           <div v-if="!bggIdIsValid" class="text-red-500">
-            Invalid BoardGameGeek URL. Format should be: https://boardgamegeek.com/play/details/[game id]
+            Invalid BoardGameGeek URL. Format should be:
+            https://boardgamegeek.com/play/details/[game id]
           </div>
         </label>
       </div>
@@ -1082,6 +1087,22 @@ watchEffect(async () => {
       }[];
     }>(`/api/script/${props.game.script_id}`);
     roles.value = result.roles ?? [];
+
+    const fabled = roles.value.filter((role) => role.type === "FABLED");
+
+    if (fabled.length > 0) {
+      fabled.forEach((fabledRole) => {
+        if (!props.game.fabled.some((fabled) => fabled.role?.token_url === fabledRole.token_url))
+        props.game.fabled.push({
+          name: "",
+          role_id: null,
+          role: {
+            token_url: fabledRole.token_url,
+            type: fabledRole.type,
+          },
+        });
+      });
+    }
 
     scriptVersions.value = await fetchScriptVersions(props.game.script_id);
     fetchingScriptVersions.value = false;
