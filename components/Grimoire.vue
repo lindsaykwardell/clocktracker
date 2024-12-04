@@ -99,7 +99,7 @@
             :character="token"
             size="md"
             :class="{ 'cursor-pointer': !props.readonly }"
-            :alwaysShowAlignment="!props.readonly && !!token.role"
+            :alwaysShowAlignment="!props.readonly && (!!token.role || !!token.player_name)"
             :tokenTooltip="token.role?.name"
           />
         </a>
@@ -119,7 +119,7 @@
           :class="{
             'cursor-pointer': !props.readonly,
           }"
-          :alwaysShowAlignment="!props.readonly && !!token.role"
+          :alwaysShowAlignment="!props.readonly && (!!token.role || !!token.player_name)"
         />
         <div v-if="!props.readonly" class="relative z-50">
           <ClientOnly>
@@ -370,6 +370,14 @@ function selectRoleForToken(role: {
 function toggleAlignment(token: Token) {
   if (token.role) {
     token.alignment = token.alignment === "GOOD" ? "EVIL" : "GOOD";
+  } else {
+    if (token.alignment === "GOOD") {
+      token.alignment = "EVIL";
+    } else if (token.alignment === "EVIL") {
+      token.alignment = "NEUTRAL";
+    } else {
+      token.alignment = "GOOD";
+    }
   }
 }
 

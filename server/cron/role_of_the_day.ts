@@ -178,7 +178,7 @@ export default defineCronHandler("daily", async () => {
 
     // Fetch the role image
     const image = await fetch(
-      `https://clocktracker.app/img/role/${role.id}.png`
+      `https://clocktracker.app/img/role/${role.id.replaceAll("_", "")}.png`
     ).then((res) => res.blob());
     const blobRecord = await agent.uploadBlob(image, {
       encoding: "image/png",
@@ -213,24 +213,24 @@ https://clocktracker.app/roles/${role.id}`,
       },
     });
 
-    const statsPost = await agent.post({
-      text: `On ClockTracker, the ${
-        role.name
-      } has an average of ${averageGamesPerMonth} games played per month over the past year
-Win Rate: ${
-        +((win_loss.wins / (win_loss.wins + win_loss.losses)) * 100).toFixed(
-          2
-        ) || 0
-      }%
-
-Popular Scripts:
-${popular_scripts_formatted
-  .map((script) => `${script.script} (${script.pct}% win rate)`)
-  .join("\n")}`,
-      reply: {
-        root: firstPost,
-        parent: firstPost,
-      },
-    });
+    if (averageGamesPerMonth > 0) {
+      const statsPost = await agent.post({
+        text: `On ClockTracker, the ${
+          role.name
+        } has an average of ${averageGamesPerMonth} games played per month over the past year
+  Win Rate: ${
+    +((win_loss.wins / (win_loss.wins + win_loss.losses)) * 100).toFixed(2) || 0
+  }%
+  
+  Popular Scripts:
+  ${popular_scripts_formatted
+    .map((script) => `${script.script} (${script.pct}% win rate)`)
+    .join("\n")}`,
+        reply: {
+          root: firstPost,
+          parent: firstPost,
+        },
+      });
+    }
   }
 });

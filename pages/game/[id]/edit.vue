@@ -38,6 +38,7 @@ const game = reactive<{
   date: string;
   script: string;
   script_id: number | null;
+  bgg_id: number | null;
   storyteller: string;
   co_storytellers: string[];
   is_storyteller: boolean;
@@ -108,6 +109,7 @@ const game = reactive<{
   date: savedGame.data.value?.date.toString().slice(0, 10) || "",
   script: savedGame.data.value?.script || "",
   script_id: savedGame.data.value?.script_id || null,
+  bgg_id: savedGame.data.value?.bgg_id || null,
   storyteller: savedGame.data.value?.storyteller || "",
   co_storytellers: savedGame.data.value?.co_storytellers || [],
   is_storyteller: savedGame.data.value?.is_storyteller || false,

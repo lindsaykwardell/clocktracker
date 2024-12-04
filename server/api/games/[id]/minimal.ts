@@ -133,8 +133,11 @@ export default defineEventHandler(async (handler) => {
     select: {
       date: true,
       script: true,
+      privacy: true,
+      user_id: true,
       user: {
         select: {
+          privacy: true,
           display_name: true,
         },
       },
@@ -151,6 +154,34 @@ export default defineEventHandler(async (handler) => {
       status: 404,
       statusMessage: "Not Found",
     });
+  }
+
+  // If the game should be private, anonymize the display name.
+  // We need to know if the user is a friend of the game creator
+  const isFriend = !!(await prisma.friend.findFirst({
+    where: {
+      OR: [
+        {
+          user_id: game.user_id,
+          friend_id: me?.id || "",
+        },
+        {
+          user_id: me?.id || "",
+          friend_id: game.user_id,
+        },
+      ],
+    },
+  }));
+
+  if (
+    !isFriend &&
+    game.user &&
+    (game.user.privacy === PrivacySetting.PRIVATE ||
+      game.user.privacy === PrivacySetting.FRIENDS_ONLY)
+  ) {
+    if (game.user.privacy === PrivacySetting.FRIENDS_ONLY) {
+      game.user.display_name = "";
+    }
   }
 
   return game;
