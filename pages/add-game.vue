@@ -62,6 +62,7 @@ const game = reactive<{
   date: string;
   script: string;
   script_id: number | null;
+  bgg_id: number | null;
   storyteller: string;
   co_storytellers: string[];
   is_storyteller: boolean;
@@ -130,6 +131,7 @@ const game = reactive<{
   date: dayjs().format("YYYY-MM-DD"),
   script: "",
   script_id: null,
+  bgg_id: null,
   storyteller: "",
   co_storytellers: [],
   is_storyteller: false,
