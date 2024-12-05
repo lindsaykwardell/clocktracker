@@ -492,3 +492,8 @@ model City {
   users       UserSettings[]
   communities Community[]
 }
+
+model CronLock {
+  task_id    String   @id
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+}
