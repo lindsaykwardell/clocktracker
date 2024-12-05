@@ -38,13 +38,7 @@ export default defineEventHandler(async (handler) => {
       ],
     },
     include: {
-      roles: {
-        where: {
-          type: {
-            not: RoleType.FABLED,
-          },
-        },
-      },
+      roles: true,
     },
   });
 
@@ -115,13 +109,7 @@ export default defineEventHandler(async (handler) => {
           },
         },
         include: {
-          roles: {
-            where: {
-              type: {
-                not: RoleType.FABLED,
-              },
-            },
-          },
+          roles: true,
         },
       });
 
