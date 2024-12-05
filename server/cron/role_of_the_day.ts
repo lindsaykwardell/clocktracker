@@ -10,13 +10,35 @@ const agent = new AtpAgent({
 
 const prisma = new PrismaClient();
 
+// Write a function that waits for a random amount of time, between 1 and 10 seconds
+const wait = () =>
+  new Promise((resolve) => {
+    setTimeout(resolve, Math.random() * 10000);
+  });
+
 export default defineCronHandler("daily", async () => {
+  // Wait for a random amount of time
+  await wait();
+
+  const lock = await prisma.cronLock.findUnique({
+    where: {
+      task_id: "role_of_the_day",
+    },
+  });
+
   if (
     process.env.NODE_ENV === "development" ||
-    process.env.BSKY_PASSWORD === undefined
+    process.env.BSKY_PASSWORD === undefined ||
+    lock !== null
   ) {
     return;
   }
+
+  await prisma.cronLock.create({
+    data: {
+      task_id: "role_of_the_day",
+    },
+  });
 
   await agent.login({
     identifier: "clocktracker.app",
@@ -233,4 +255,10 @@ https://clocktracker.app/roles/${role.id}`,
       });
     }
   }
+
+  await prisma.cronLock.delete({
+    where: {
+      task_id: "role_of_the_day",
+    },
+  });
 });
