@@ -6,7 +6,31 @@ import { Alignment, PrismaClient, RoleType } from "@prisma/client";
 const url = "https://botcscripts.com";
 const prisma = new PrismaClient();
 
+const wait = () =>
+  new Promise((resolve) => {
+    setTimeout(resolve, Math.random() * 10000);
+  });
+
 export default defineCronHandler("daily", async () => {
+  // Wait for a random amount of time
+  await wait();
+
+  const lock = await prisma.cronLock.findUnique({
+    where: {
+      task_id: "script_import",
+    },
+  });
+
+  if (lock !== null) {
+    return;
+  }
+
+  await prisma.cronLock.create({
+    data: {
+      task_id: "script_import",
+    },
+  });
+
   const scriptList: {
     script_id: string;
     name: string;
@@ -90,6 +114,12 @@ export default defineCronHandler("daily", async () => {
   }
 
   console.log("Done!");
+
+  await prisma.cronLock.delete({
+    where: {
+      task_id: "script_import",
+    },
+  });
 });
 
 function fullUrl(href: string) {
