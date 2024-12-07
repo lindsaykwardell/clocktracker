@@ -28,6 +28,19 @@ const all_raw_roles = [
     firstNight: 0,
     otherNight: 50,
   },
+  {
+    id: "xaan",
+    name: "Xaan",
+    edition: "",
+    team: "minion",
+    firstNightReminder: "",
+    otherNightReminder: "",
+    reminders: [],
+    setup: false,
+    ability: "On night X, all Townsfolk are poisoned until dusk. [X Outsiders]",
+    firstNight: 0,
+    otherNight: 0,
+  },
 ];
 const reminders = [];
 const abilities = [];
