@@ -1,5 +1,5 @@
 <template>
-  <FullScreen v-if="data">
+  <FullScreen v-if="data" class="bg-stone-800 text-white">
     <section class="gap-5">
       <img
         src="/logo.png"
@@ -17,16 +17,18 @@
       </h2>
     </section>
     <section
-      class="gap-20"
+      v-if="data.games_played > 0"
       :class="{
         'bg-red-950': mostCommonRole?.role.initial_alignment === 'EVIL',
         'bg-blue-950': mostCommonRole?.role.initial_alignment === 'GOOD',
       }"
     >
-      <h3 class="text-center font-dumbledor text-4xl">Games Played</h3>
+      <h3 class="text-center font-dumbledor text-3xl md:text-4xl pb-4">
+        Games Played
+      </h3>
       <div class="flex flex-col md:flex-row justify-around items-center gap-12">
         <div class="text-center w-2/3">
-          <div class="text-xl md:text-3xl md:w-2/3">
+          <div class="text-lg md:text-3xl md:w-2/3">
             You played {{ data.games_played }}
             {{ data.games_played === 1 ? "game" : "games" }} this year, which is
             <span
@@ -57,11 +59,13 @@
         </div>
       </div>
     </section>
-    <section v-if="data.games_storytold > 0" class="gap-20 bg-primary-darkest">
-      <h3 class="text-center font-dumbledor text-4xl">Storytelling</h3>
+    <section v-if="data.games_storytold > 0" class="bg-primary-darkest">
+      <h3 class="text-center font-dumbledor text-3xl md:text-4xl pb-4">
+        Storytelling
+      </h3>
       <div class="flex flex-col md:flex-row justify-around items-center gap-12">
         <div class="text-center md:w-2/3">
-          <div class="text-xl md:text-3xl md:w-2/3">
+          <div class="text-lg md:text-3xl md:w-2/3">
             You were storyteller in {{ data.games_storytold }}
             {{ data.games_storytold === 1 ? "game" : "games" }} this year, which
             is
@@ -93,7 +97,7 @@
       </div>
     </section>
     <section
-      class="gap-20"
+      v-if="data.win_rate > 1 && data.loss_rate > 1"
       :class="{
         'bg-blue-900':
           Math.round((data.win_rate / data.games_played) * 100) > 0.5,
@@ -101,20 +105,23 @@
           Math.round((data.win_rate / data.games_played) * 100) < 0.5,
       }"
     >
-      <h3 class="text-center font-dumbledor text-4xl">Win / Loss</h3>
+      <h3 class="text-center font-dumbledor text-3xl md:text-4xl pb-4">
+        Win / Loss
+      </h3>
       <div class="flex flex-col md:flex-row justify-around items-center gap-12">
         <div class="text-center md:w-2/3 flex flex-col gap-5">
-          <div class="text-xl md:text-3xl md:w-2/3">
+          <div class="text-lg md:text-3xl md:w-2/3">
             You won {{ data.win_rate }} games and lost
             {{ data.loss_rate }} games this year, for an average of a
             {{ Math.round((data.win_rate / data.games_played) * 100) }}% win
             rate.
           </div>
-          <div class="text-xl md:text-3xl md:w-2/3">
-            You won {{ data.win_rate_good }} games as a good character and
-            {{ data.win_rate_evil }} games as an evil character.
+          <div class="text-lg md:text-3xl md:w-2/3">
+            Of the {{ data.win_rate }} games you won,
+            {{ data.win_rate_good }} were as a good character and
+            {{ data.win_rate_evil }} were as an evil character.
           </div>
-          <div class="text-xl md:text-3xl md:w-2/3">
+          <div class="text-lg md:text-3xl md:w-2/3">
             You won the most games in {{ wonMostInMonth?.month }} with
             {{ wonMostInMonth?.win }} wins. Keep it up!
           </div>
@@ -150,6 +157,306 @@
           </div>
         </div>
       </div>
+    </section>
+    <section v-if="data.roles.length > 0" class="bg-yellow-800">
+      <!-- Most common roles -->
+      <h3 class="text-center font-dumbledor text-3xl md:text-4xl pb-4">
+        Most Common Roles
+      </h3>
+      <div class="flex flex-col md:flex-row justify-around items-center gap-12">
+        <div class="text-center flex flex-col gap-5">
+          <div class="text-lg md:text-3xl">
+            Your most common roles this year were:
+          </div>
+          <ul
+            class="text-lg md:text-3xl flex flex-wrap justify-around items-center"
+          >
+            <li
+              v-for="role in data.roles.slice(0, 5)"
+              :key="role.role.id"
+              class="w-1/3 flex flex-col items-center gap-1"
+            >
+              <Token
+                :character="{ name: role.role.name, role: role.role }"
+                size="md"
+              />
+              <span class="whitespace-nowrap">
+                {{ role.role.name }} ({{ role.count }})
+              </span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <section v-if="data.roles.length > 0" class="bg-primary-dark">
+      <!-- Least common roles -->
+      <h3 class="text-center font-dumbledor text-3xl md:text-4xl pb-4">
+        Least Common Roles
+      </h3>
+      <div class="flex flex-col md:flex-row justify-around items-center gap-12">
+        <div class="text-center flex flex-col gap-5">
+          <div class="text-lg md:text-3xl">
+            And your least common roles this year were:
+          </div>
+          <ul
+            class="text-lg md:text-3xl flex flex-wrap justify-around items-center"
+          >
+            <li
+              v-for="role in data.roles.toReversed().slice(0, 5)"
+              :key="role.role.id"
+              class="w-1/3 flex flex-col items-center gap-1"
+            >
+              <Token
+                :character="{ name: role.role.name, role: role.role }"
+                size="md"
+              />
+              <span class="whitespace-nowrap">
+                {{ role.role.name }} ({{ role.count }})
+              </span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <section v-if="data.largest_character_change !== null">
+      <!-- Largest character change -->
+      <h3 class="text-center font-dumbledor text-3xl md:text-4xl pb-4">
+        Largest Character Change
+      </h3>
+      <div class="flex flex-col md:flex-row justify-around items-center gap-12">
+        <div class="text-center flex flex-col gap-5">
+          <img
+            :src="getScriptLogo(data.largest_character_change)"
+            class="w-36 h-36 md:w-48 md:h-48 m-auto"
+          />
+          <div class="text-lg md:text-3xl">
+            And don't forget this game of
+            {{ data.largest_character_change.script }}
+            where you changed characters the most this year!
+          </div>
+          <ul class="text-lg md:text-3xl flex flex-wrap items-center">
+            <li
+              v-for="(change, index) in data.largest_character_change
+                .characters"
+              :key="change.role.id"
+              class="flex items-center gap-1 w-1/3 justify-around"
+            >
+              <div class="flex flex-col items-center justify-center">
+                <Token
+                  :character="{ name: change.role.name, role: change.role }"
+                  size="md"
+                />
+                <span class="whitespace-nowrap">
+                  {{ change.role.name }}
+                </span>
+              </div>
+              <div
+                v-if="
+                  index + 1 < data.largest_character_change.characters.length
+                "
+                class="text-2xl md:text-5xl"
+                :class="{
+                  'text-blue-800': change.alignment === 'GOOD',
+                  'text-red-800': change.alignment === 'EVIL',
+                }"
+              >
+                ➡
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <section
+      v-if="data.most_common_scripts.length > 0"
+      style="
+        background: url('/img/trouble-brewing-bg.webp');
+        background-position: center;
+      "
+    >
+      <div class="bg-black/45 w-screen h-screen">
+        <!-- Most common scripts -->
+        <h3 class="text-center font-dumbledor text-3xl md:text-4xl pb-4">
+          Most Common Scripts
+        </h3>
+        <div
+          class="flex flex-col md:flex-row justify-around items-center gap-12"
+        >
+          <div class="text-center flex flex-col gap-5">
+            <div class="text-lg md:text-3xl">
+              Your most common scripts this year were:
+            </div>
+            <ul
+              class="text-lg md:text-3xl flex flex-wrap justify-around items-center"
+            >
+              <li
+                v-for="script in data.most_common_scripts.slice(0, 5)"
+                :key="script.script"
+                class="w-1/3 flex flex-col items-center gap-1"
+              >
+                <img
+                  :src="getScriptLogo(script)"
+                  class="w-36 h-36 md:w-48 md:h-48"
+                />
+                <span> {{ script.script }} ({{ script.count }}) </span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section
+      v-if="data.most_common_storytold_scripts.length > 0"
+      style="
+        background: url('/img/sects-and-violets-bg.webp');
+        background-position: center;
+      "
+    >
+      <div class="bg-black/45 w-screen h-screen">
+        <!-- Most common scripts -->
+        <h3 class="text-center font-dumbledor text-3xl md:text-4xl pb-4">
+          Most Commonly Storytold Scripts
+        </h3>
+        <div
+          class="flex flex-col md:flex-row justify-around items-center gap-12"
+        >
+          <div class="text-center flex flex-col gap-5">
+            <div class="text-lg md:text-3xl">
+              Your most common scripts to storytell this year were:
+            </div>
+            <ul
+              class="text-lg md:text-3xl flex flex-wrap justify-around items-center"
+            >
+              <li
+                v-for="script in data.most_common_storytold_scripts.slice(0, 5)"
+                :key="script.script"
+                class="w-1/3 flex flex-col items-center gap-1"
+              >
+                <img
+                  :src="getScriptLogo(script)"
+                  class="w-36 h-36 md:w-48 md:h-48"
+                />
+                <span> {{ script.script }} ({{ script.count }}) </span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section v-if="data.most_common_players" class="bg-gradient-to-br from-red-950 via-primary-darkest to-blue-950">
+      <!-- Most common players -->
+      <h3 class="text-center font-dumbledor text-3xl md:text-4xl pb-4">
+        Players
+      </h3>
+      <div class="flex flex-col md:flex-row justify-around items-center gap-12">
+        <div class="text-center flex flex-col gap-5">
+          <div class="text-lg md:text-3xl">
+            We couldn't forget the players you played with the most this year!
+          </div>
+          <ul
+            class="text-lg md:text-3xl flex flex-wrap justify-around items-center"
+          >
+            <li
+              v-for="player in data.most_common_players.slice(0, 5)"
+              class="flex flex-col items-center gap-1"
+            >
+              <Avatar :value="player.avatar" size="md" />
+              <span>
+                {{ player.display_name }}
+              </span>
+            </li>
+          </ul>
+          <ul
+            class="text-lg md:text-3xl flex flex-wrap justify-around items-center max-h-52"
+          >
+            <li
+              v-for="player in data.most_common_players.slice(5)"
+              class="flex flex-col items-center gap-1"
+            >
+              <Avatar :value="player.avatar" size="xs" />
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <section>
+      <!-- Wrap up and farewell -->
+      <h3 class="text-center font-dumbledor text-3xl md:text-4xl pb-4">
+        That's a wrap!
+      </h3>
+
+      <div class="text-lg md:text-3xl text-center">
+        Thank you for being a part of ClockTracker this year! Let's see what
+        adventures await us in {{ data.year + 1 }}!
+      </div>
+
+      <div class="text-lg md:text-3xl text-center pt-4">
+        Until then, good luck, and don't let the Yaggababble bite!
+      </div>
+
+      <img
+        src="/logo.png"
+        alt="ClockTracker Logo"
+        class="w-40 md:w-52 pb-8 md:pb-20"
+      />
+
+      <div class="flex justify-around">
+        <a
+          id="discord"
+          href="https://discord.gg/KwMz8ThamT"
+          class="text-stone-400 hover:text-stone-500 dark:text-stone-200 dark:hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
+          aria-label="Join the ClockTracker Discord server"
+        >
+          <div class="w-[50px] flex justify-center">
+            <Discord />
+          </div>
+        </a>
+        <a
+          id="bluesky"
+          href="https://bsky.app/profile/clocktracker.app"
+          class="text-stone-400 hover:text-stone-500 dark:text-stone-200 dark:hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
+          aria-label="Join the ClockTracker Discord server"
+        >
+          <div class="w-[50px] flex justify-center">
+            <Bluesky />
+          </div>
+        </a>
+        <a
+          id="kofi"
+          href="https://ko-fi.com/clocktracker"
+          class="text-stone-400 hover:text-stone-500 dark:text-stone-200 dark:hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
+          aria-label="Donate to ClockTracker"
+        >
+          <div class="w-[50px] flex justify-center">
+            <KoFi />
+          </div>
+        </a>
+        <a
+          href="https://github.com/lindsaykwardell/clocktracker"
+          class="text-stone-400 hover:text-stone-500 dark:text-stone-200 dark:hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
+          aria-label="View the ClockTracker source code"
+        >
+          <div class="w-[50px] flex justify-center">
+            <Github />
+          </div>
+        </a>
+      </div>
+    </section>
+    <section class="gap-5">
+      <img
+        src="/logo.png"
+        alt="ClockTracker Logo"
+        class="w-40 md:w-52 pb-8 md:pb-20"
+      />
+      <h1 class="text-center font-dumbledor">
+        <span class="text-3xl md:text-5xl">ClockTracker</span> <br />
+        <span class="text-2xl md:text-4xl">Year in Review</span> <br />
+        <span class="text-xl md:text-3xl">{{ data.year }}</span>
+      </h1>
+      <Avatar :value="data.avatar" size="lg" />
+      <h2 class="text-center font-dumbledor text-2xl md:text-3xl">
+        {{ data.display_name }}
+      </h2>
     </section>
   </FullScreen>
 </template>

@@ -1,4 +1,5 @@
 import {
+  Character,
   PrismaClient,
   PrivacySetting,
   Role,
@@ -246,6 +247,14 @@ export default defineEventHandler(async (handler) => {
     role: Role;
     count: number;
   }[] = [];
+  const character_changes: {
+    characters: (Character & {
+      role: Role;
+      related_role: Role;
+    })[];
+    script: string;
+    logo: string | null;
+  }[] = [];
   let win_rate = 0;
   let win_rate_good = 0;
   let win_rate_evil = 0;
@@ -348,6 +357,14 @@ export default defineEventHandler(async (handler) => {
         most_common_storytold_scripts[scriptIndex].count =
           most_common_storytold_scripts[scriptIndex].count + 1;
       }
+    }
+
+    if (game.player_characters.length > 1) {
+      character_changes.push({
+        characters: game.player_characters as any,
+        script: game.script,
+        logo: game.associated_script?.logo ?? null,
+      });
     }
 
     const lastCharacter =
@@ -462,21 +479,27 @@ export default defineEventHandler(async (handler) => {
 
     if (grimoirePage) {
       grimoirePage.tokens.forEach((token) => {
-        const playerIndex = most_common_players.findIndex((player) =>
-          token.player
-            ? token.player.username === player.username
-            : player.display_name === token.player_name
-        );
-        if (playerIndex === -1) {
-          most_common_players.push({
-            display_name: token.player?.display_name || token.player_name,
-            username: token.player?.username ?? null,
-            avatar: token.player?.avatar ?? null,
-            count: 1,
-          });
-        } else {
-          most_common_players[playerIndex].count =
-            most_common_players[playerIndex].count + 1;
+        if (
+          (token.player || token.player_name) &&
+          token.player_name !== yearInReview.user.display_name &&
+          token.player?.username !== yearInReview.user.username
+        ) {
+          const playerIndex = most_common_players.findIndex((player) =>
+            token.player
+              ? token.player.username === player.username
+              : player.display_name === token.player_name
+          );
+          if (playerIndex === -1) {
+            most_common_players.push({
+              display_name: token.player?.display_name || token.player_name,
+              username: token.player?.username ?? null,
+              avatar: token.player?.avatar ?? null,
+              count: 1,
+            });
+          } else {
+            most_common_players[playerIndex].count =
+              most_common_players[playerIndex].count + 1;
+          }
         }
       });
     }
@@ -499,6 +522,18 @@ export default defineEventHandler(async (handler) => {
     }
   });
 
+  let largest_character_change =
+    character_changes.length > 0 ? character_changes[0] : null;
+
+  for (const change of character_changes) {
+    if (
+      change.characters.length >
+      (largest_character_change?.characters.length ?? 0)
+    ) {
+      largest_character_change = change;
+    }
+  }
+
   return {
     username: yearInReview.user.username,
     display_name: yearInReview.user.display_name,
@@ -510,6 +545,7 @@ export default defineEventHandler(async (handler) => {
     average_games_storytold,
     roles: roles.toSorted((a, b) => b.count - a.count),
     related_roles: related_roles.toSorted((a, b) => b.count - a.count),
+    largest_character_change,
     win_rate,
     win_rate_good,
     win_rate_evil,
@@ -524,8 +560,8 @@ export default defineEventHandler(async (handler) => {
     most_common_scripts: most_common_scripts
       .toSorted((a, b) => b.count - a.count)
       .slice(0, 5),
-    most_common_players: most_common_players
-      .toSorted((a, b) => b.count - a.count)
-      .slice(0, 5),
+    most_common_players: most_common_players.toSorted(
+      (a, b) => b.count - a.count
+    ),
   };
 });
