@@ -262,6 +262,7 @@ model UserSettings {
   favorites               FavoriteGame[]
   created_events          Event[]
   calendar                SharedCalendarLink?
+  year_reviews            YearInReview[]
 }
 
 model Did {
@@ -295,6 +296,15 @@ enum PrivacySetting {
   PRIVATE
   FRIENDS_ONLY
   PERSONAL
+}
+
+model YearInReview {
+  id      String       @id @default(uuid())
+  year    Int
+  user    UserSettings @relation(fields: [user_id], references: [user_id])
+  user_id String
+
+  @@unique([year, user_id])
 }
 
 model FriendRequest {
