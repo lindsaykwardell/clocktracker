@@ -217,6 +217,9 @@ export default defineNuxtConfig({
     "/roles/**": {
       ssr: false,
     },
+    "/year-in-review/**": {
+      ssr: false,
+    },
   },
 
   compatibilityDate: "2024-09-21",
