@@ -24,6 +24,12 @@ export default <Partial<Config>>{
         discord: "#5865F2",
         "discord-dark": "#4752C4",
       },
+      dropShadow: {
+        glow: [
+          "0 0px 20px rgba(255,255, 255, 0.35)",
+          "0 0px 65px rgba(255, 255,255, 0.2)",
+        ],
+      },
     },
   },
   plugins: [],
