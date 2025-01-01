@@ -569,4 +569,50 @@ const wonMostInMonth = computed(() => {
 
   return month;
 });
+
+useHead({
+  title: `Year in Review ${data.value?.year} | ${data.value?.display_name}`,
+  meta: [
+    {
+      name: "description",
+      content: `Year in Review for ${data.value?.display_name} in ${data.value?.year}`,
+    },
+    {
+      property: "og:title",
+      content: `Year in Review ${data.value?.year} | ${data.value?.display_name}`,
+    },
+    {
+      property: "og:description",
+      content: `Year in Review for ${data.value?.display_name} in ${data.value?.year}`,
+    },
+    {
+      property: "og:image",
+      content: `/api/year_in_review/${data.value?.username}/avatar` || "",
+    },
+    {
+      property: "og:url",
+      content: route.fullPath,
+    },
+    {
+      property: "twitter:card",
+      content: "summary_large_image",
+    },
+    {
+      property: "twitter:url",
+      content: route.fullPath,
+    },
+    {
+      property: "twitter:title",
+      content: `Year in Review ${data.value?.year} | ${data.value?.display_name}`,
+    },
+    {
+      property: "twitter:description",
+      content: `Year in Review for ${data.value?.display_name} in ${data.value?.year}`,
+    },
+    {
+      property: "twitter:image",
+      content: `/api/year_in_review/${data.value?.username}/avatar` || "",
+    },
+  ],
+});
 </script>
