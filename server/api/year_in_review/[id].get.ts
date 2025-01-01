@@ -13,7 +13,7 @@ const prisma = new PrismaClient();
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
-  const year_in_review_id = handler.context.params?.year_in_review_id as string;
+  const year_in_review_id = handler.context.params?.id as string;
 
   const yearInReview = await prisma.yearInReview.findFirst({
     where: {
