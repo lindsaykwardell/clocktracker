@@ -33,7 +33,9 @@
             {{ data.games_played === 1 ? "game" : "games" }} this year, which is
             <span
               >{{
-                Math.round(data.games_played - data.average_games_played)
+                Math.abs(
+                  Math.round(data.games_played - data.average_games_played)
+                )
               }}%</span
             >
             {{
@@ -71,7 +73,11 @@
             is
             <span
               >{{
-                Math.round(data.games_storytold - data.average_games_storytold)
+                Math.abs(
+                  Math.round(
+                    data.games_storytold - data.average_games_storytold
+                  )
+                )
               }}%</span
             >
             {{
@@ -343,7 +349,10 @@
         </div>
       </div>
     </section>
-    <section v-if="data.most_common_players" class="bg-gradient-to-br from-red-950 via-primary-darkest to-blue-950">
+    <section
+      v-if="data.most_common_players"
+      class="bg-gradient-to-br from-red-950 via-primary-darkest to-blue-950"
+    >
       <!-- Most common players -->
       <h3 class="text-center font-dumbledor text-3xl md:text-4xl pb-4">
         Players

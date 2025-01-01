@@ -665,7 +665,7 @@ async function main() {
 
   const lindsaykwardell = await prisma.userSettings.create({
     data: {
-      user_id: "e53045e0-e144-491a-8ef0-0a5240cbd406",
+      user_id: "52a24807-0789-4cb3-8fd2-155b465a4e63",
       username: "lindsaykwardell",
       finished_welcome: true,
       avatar:
