@@ -13,7 +13,7 @@ const prisma = new PrismaClient();
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
-  const year_in_review_id = handler.context.params?.year_in_review_id as string;
+  const year_in_review_id = handler.context.params?.id as string;
 
   const yearInReview = await prisma.yearInReview.findFirst({
     where: {
@@ -357,119 +357,119 @@ export default defineEventHandler(async (handler) => {
         most_common_storytold_scripts[scriptIndex].count =
           most_common_storytold_scripts[scriptIndex].count + 1;
       }
-    }
-
-    if (game.player_characters.length > 1) {
-      character_changes.push({
-        characters: game.player_characters as any,
-        script: game.script,
-        logo: game.associated_script?.logo ?? null,
-      });
-    }
-
-    const lastCharacter =
-      game.player_characters[game.player_characters.length - 1];
-
-    if (lastCharacter?.role) {
-      const roleIndex = roles.findIndex(
-        (role) => role.role.id === lastCharacter.role!.id
-      );
-      if (roleIndex === -1) {
-        roles.push({
-          role: lastCharacter.role,
-          count: 1,
+    } else {
+      if (game.player_characters.length > 1) {
+        character_changes.push({
+          characters: game.player_characters as any,
+          script: game.script,
+          logo: game.associated_script?.logo ?? null,
         });
-      } else {
-        roles[roleIndex].count = roles[roleIndex].count + 1;
       }
-    }
-    if (lastCharacter?.related_role) {
-      const relatedRoleIndex = related_roles.findIndex(
-        (role) => role.role.id === lastCharacter.related_role!.id
-      );
-      if (relatedRoleIndex === -1) {
-        related_roles.push({
-          role: lastCharacter.related_role,
-          count: 1,
-        });
-      } else {
-        related_roles[relatedRoleIndex].count =
-          related_roles[relatedRoleIndex].count + 1;
-      }
-    }
 
-    const lastAlignment = lastCharacter?.alignment;
-
-    if (lastAlignment === "GOOD") {
-      games_by_month[month].good = games_by_month[month].good + 1;
-    } else if (lastAlignment === "EVIL") {
-      games_by_month[month].evil = games_by_month[month].evil + 1;
-    }
-
-    switch (lastCharacter?.role?.type) {
-      case RoleType.TOWNSFOLK:
-        role_types[RoleType.TOWNSFOLK] = role_types[RoleType.TOWNSFOLK] + 1;
-        break;
-      case RoleType.OUTSIDER:
-        role_types[RoleType.OUTSIDER] = role_types[RoleType.OUTSIDER] + 1;
-        break;
-      case RoleType.MINION:
-        role_types[RoleType.MINION] = role_types[RoleType.MINION] + 1;
-        break;
-      case RoleType.DEMON:
-        role_types[RoleType.DEMON] = role_types[RoleType.DEMON] + 1;
-        break;
-      case RoleType.TRAVELER:
-        role_types[RoleType.TRAVELER] = role_types[RoleType.TRAVELER] + 1;
-        break;
-    }
-
-    if (
-      (lastAlignment === "GOOD" && game.win_v2 === WinStatus_V2.GOOD_WINS) ||
-      (lastAlignment === "EVIL" && game.win_v2 === WinStatus_V2.EVIL_WINS)
-    ) {
-      games_by_month[month].win = games_by_month[month].win + 1;
-      win_rate = win_rate + 1;
+      const lastCharacter =
+        game.player_characters[game.player_characters.length - 1];
 
       if (lastCharacter?.role) {
-        const roleIndex = winning_roles.findIndex(
-          (role) => role.role_id === lastCharacter.role_id
+        const roleIndex = roles.findIndex(
+          (role) => role.role.id === lastCharacter.role!.id
         );
         if (roleIndex === -1) {
-          winning_roles.push({
-            role_id: lastCharacter.role.id,
-            win_count: 1,
+          roles.push({
+            role: lastCharacter.role,
+            count: 1,
           });
         } else {
-          winning_roles[roleIndex].win_count =
-            winning_roles[roleIndex].win_count + 1;
-        }
-
-        if (lastAlignment === "GOOD") {
-          win_rate_good = win_rate_good + 1;
-        } else if (lastAlignment === "EVIL") {
-          win_rate_evil = win_rate_evil + 1;
+          roles[roleIndex].count = roles[roleIndex].count + 1;
         }
       }
-    } else if (
-      (lastAlignment === "GOOD" && game.win_v2 === WinStatus_V2.EVIL_WINS) ||
-      (lastAlignment === "EVIL" && game.win_v2 === WinStatus_V2.GOOD_WINS)
-    ) {
-      games_by_month[month].loss = games_by_month[month].loss + 1;
-      loss_rate = loss_rate + 1;
-
-      if (lastCharacter?.role) {
-        const roleIndex = losing_roles.findIndex(
-          (role) => role.role_id === lastCharacter.role_id
+      if (lastCharacter?.related_role) {
+        const relatedRoleIndex = related_roles.findIndex(
+          (role) => role.role.id === lastCharacter.related_role!.id
         );
-        if (roleIndex === -1) {
-          losing_roles.push({
-            role_id: lastCharacter.role.id,
-            loss_count: 1,
+        if (relatedRoleIndex === -1) {
+          related_roles.push({
+            role: lastCharacter.related_role,
+            count: 1,
           });
         } else {
-          losing_roles[roleIndex].loss_count =
-            losing_roles[roleIndex].loss_count + 1;
+          related_roles[relatedRoleIndex].count =
+            related_roles[relatedRoleIndex].count + 1;
+        }
+      }
+
+      const lastAlignment = lastCharacter?.alignment;
+
+      if (lastAlignment === "GOOD") {
+        games_by_month[month].good = games_by_month[month].good + 1;
+      } else if (lastAlignment === "EVIL") {
+        games_by_month[month].evil = games_by_month[month].evil + 1;
+      }
+
+      switch (lastCharacter?.role?.type) {
+        case RoleType.TOWNSFOLK:
+          role_types[RoleType.TOWNSFOLK] = role_types[RoleType.TOWNSFOLK] + 1;
+          break;
+        case RoleType.OUTSIDER:
+          role_types[RoleType.OUTSIDER] = role_types[RoleType.OUTSIDER] + 1;
+          break;
+        case RoleType.MINION:
+          role_types[RoleType.MINION] = role_types[RoleType.MINION] + 1;
+          break;
+        case RoleType.DEMON:
+          role_types[RoleType.DEMON] = role_types[RoleType.DEMON] + 1;
+          break;
+        case RoleType.TRAVELER:
+          role_types[RoleType.TRAVELER] = role_types[RoleType.TRAVELER] + 1;
+          break;
+      }
+
+      if (
+        (lastAlignment === "GOOD" && game.win_v2 === WinStatus_V2.GOOD_WINS) ||
+        (lastAlignment === "EVIL" && game.win_v2 === WinStatus_V2.EVIL_WINS)
+      ) {
+        games_by_month[month].win = games_by_month[month].win + 1;
+        win_rate = win_rate + 1;
+
+        if (lastCharacter?.role) {
+          const roleIndex = winning_roles.findIndex(
+            (role) => role.role_id === lastCharacter.role_id
+          );
+          if (roleIndex === -1) {
+            winning_roles.push({
+              role_id: lastCharacter.role.id,
+              win_count: 1,
+            });
+          } else {
+            winning_roles[roleIndex].win_count =
+              winning_roles[roleIndex].win_count + 1;
+          }
+
+          if (lastAlignment === "GOOD") {
+            win_rate_good = win_rate_good + 1;
+          } else if (lastAlignment === "EVIL") {
+            win_rate_evil = win_rate_evil + 1;
+          }
+        }
+      } else if (
+        (lastAlignment === "GOOD" && game.win_v2 === WinStatus_V2.EVIL_WINS) ||
+        (lastAlignment === "EVIL" && game.win_v2 === WinStatus_V2.GOOD_WINS)
+      ) {
+        games_by_month[month].loss = games_by_month[month].loss + 1;
+        loss_rate = loss_rate + 1;
+
+        if (lastCharacter?.role) {
+          const roleIndex = losing_roles.findIndex(
+            (role) => role.role_id === lastCharacter.role_id
+          );
+          if (roleIndex === -1) {
+            losing_roles.push({
+              role_id: lastCharacter.role.id,
+              loss_count: 1,
+            });
+          } else {
+            losing_roles[roleIndex].loss_count =
+              losing_roles[roleIndex].loss_count + 1;
+          }
         }
       }
     }

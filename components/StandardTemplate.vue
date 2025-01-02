@@ -84,7 +84,7 @@
         <nuxt-link
           id="clocktracker-icon"
           to="/"
-          class="flex items-center gap-4"
+          class="flex items-center gap-4 pb-2"
         >
           <img
             src="/logo-ct-sm.png"
@@ -93,6 +93,15 @@
           />
         </nuxt-link>
         <template v-if="me.status === Status.SUCCESS">
+          <NavLink
+            v-if="isJanuary"
+            id="year-in-review"
+            to="/year-in-review"
+            icon="fanggu"
+            class="bg-purple-400 dark:bg-primary-darkest rounded-full transition duration-200"
+          >
+            Year in Review
+          </NavLink>
           <NavLink id="dashboard" to="/" icon="innkeeper"> Home </NavLink>
           <NavLink
             id="my-games"
@@ -251,6 +260,8 @@ function search() {
     router.push({ path: "/search", query: { query: query.value } });
   }
 }
+
+const isJanuary = computed(() => dayjs().month() === 0);
 
 watchDebounced(
   query,

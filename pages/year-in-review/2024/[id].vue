@@ -33,7 +33,9 @@
             {{ data.games_played === 1 ? "game" : "games" }} this year, which is
             <span
               >{{
-                Math.round(data.games_played - data.average_games_played)
+                Math.abs(
+                  Math.round(data.games_played - data.average_games_played)
+                )
               }}%</span
             >
             {{
@@ -71,7 +73,11 @@
             is
             <span
               >{{
-                Math.round(data.games_storytold - data.average_games_storytold)
+                Math.abs(
+                  Math.round(
+                    data.games_storytold - data.average_games_storytold
+                  )
+                )
               }}%</span
             >
             {{
@@ -343,7 +349,10 @@
         </div>
       </div>
     </section>
-    <section v-if="data.most_common_players" class="bg-gradient-to-br from-red-950 via-primary-darkest to-blue-950">
+    <section
+      v-if="data.most_common_players"
+      class="bg-gradient-to-br from-red-950 via-primary-darkest to-blue-950"
+    >
       <!-- Most common players -->
       <h3 class="text-center font-dumbledor text-3xl md:text-4xl pb-4">
         Players
@@ -559,5 +568,51 @@ const wonMostInMonth = computed(() => {
   });
 
   return month;
+});
+
+useHead({
+  title: `Year in Review ${data.value?.year} | ${data.value?.display_name}`,
+  meta: [
+    {
+      name: "description",
+      content: `Year in Review for ${data.value?.display_name} in ${data.value?.year}`,
+    },
+    {
+      property: "og:title",
+      content: `Year in Review ${data.value?.year} | ${data.value?.display_name}`,
+    },
+    {
+      property: "og:description",
+      content: `Year in Review for ${data.value?.display_name} in ${data.value?.year}`,
+    },
+    {
+      property: "og:image",
+      content: `/api/year_in_review/${data.value?.username}/avatar` || "",
+    },
+    {
+      property: "og:url",
+      content: route.fullPath,
+    },
+    {
+      property: "twitter:card",
+      content: "summary_large_image",
+    },
+    {
+      property: "twitter:url",
+      content: route.fullPath,
+    },
+    {
+      property: "twitter:title",
+      content: `Year in Review ${data.value?.year} | ${data.value?.display_name}`,
+    },
+    {
+      property: "twitter:description",
+      content: `Year in Review for ${data.value?.display_name} in ${data.value?.year}`,
+    },
+    {
+      property: "twitter:image",
+      content: `/api/year_in_review/${data.value?.username}/avatar` || "",
+    },
+  ],
 });
 </script>
