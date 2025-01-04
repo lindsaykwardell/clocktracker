@@ -32,6 +32,7 @@
           </div>
           <SelectScriptDialog
             v-model:visible="showScriptDialog"
+            :scriptSelected="!!game.script"
             @selectScript="selectScript"
           />
         </label>

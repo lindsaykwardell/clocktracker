@@ -1,7 +1,18 @@
 <template>
   <Dialog v-model:visible="showScriptDialog">
     <template #title>
-      <h2 class="text-2xl font-bold font-dumbledor">Select Script</h2>
+      <div class="flex">
+        <h2 class="text-2xl font-bold font-dumbledor flex-grow">
+          Select Script
+        </h2>
+        <button
+          v-if="scriptSelected"
+          @click.prevent="clearSelectedScript"
+          class="text-stone-400"
+        >
+          Clear selection
+        </button>
+      </div>
     </template>
     <section class="p-4 flex flex-col gap-2">
       <div class="flex justify-around gap-8 pb-4">
@@ -96,6 +107,7 @@ const featureFlags = useFeatureFlags();
 
 const props = defineProps<{
   visible: boolean;
+  scriptSelected: boolean;
 }>();
 
 const emit = defineEmits(["selectScript", "update:visible"]);
@@ -151,5 +163,9 @@ async function handleUploadScript() {
   if (script) {
     emit("selectScript", script);
   }
+}
+
+function clearSelectedScript() {
+  emit("selectScript", { name: "", id: null });
 }
 </script>
