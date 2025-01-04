@@ -14,8 +14,8 @@
     "name": "Dawn",
     "firstNightReminder": "Wait for a few seconds. End the Night Phase.",
     "otherNightReminder": "Wait for a few seconds. End the Night Phase.",
-    "firstNight": 70,
-    "otherNight": 88
+    "firstNight": 72,
+    "otherNight": 90
   },
   {
     "id": "minioninfo",
@@ -49,7 +49,7 @@
     "setup": false,
     "ability": "You start knowing that 1 of 2 players is a particular Townsfolk.",
     "flavor": "Bloodstains on a dinner jacket? No, this is cooking sherry. How careless.",
-    "firstNight": 44,
+    "firstNight": 46,
     "otherNight": 0
   },
   {
@@ -66,7 +66,7 @@
     "setup": false,
     "ability": "You start knowing that 1 of 2 players is a particular Outsider. (Or that zero are in play.)",
     "flavor": "Certainly madam, under normal circumstances, you may borrow the Codex Malificarium from the library vaults. However, you do not seem to be a member.",
-    "firstNight": 45,
+    "firstNight": 47,
     "otherNight": 0
   },
   {
@@ -83,7 +83,7 @@
     "setup": false,
     "ability": "You start knowing that 1 of 2 players is a particular Minion.",
     "flavor": "It is a fine night for a stroll, wouldn't you say, Mister Morozov? Or should I say... BARON Morozov?",
-    "firstNight": 46,
+    "firstNight": 48,
     "otherNight": 0
   },
   {
@@ -97,7 +97,7 @@
     "setup": false,
     "ability": "You start knowing how many pairs of evil players there are.",
     "flavor": "This evening's reservations seem odd. Never before has Mrs. Mayweather kept company with that scamp from Hudson Lane. Yet, tonight, they have a table for two. Strange.",
-    "firstNight": 47,
+    "firstNight": 49,
     "otherNight": 0
   },
   {
@@ -111,8 +111,8 @@
     "setup": false,
     "ability": "Each night, you learn how many of your 2 alive neighbors are evil.",
     "flavor": "My skin prickles. Something is not right here. I can feel it.",
-    "firstNight": 48,
-    "otherNight": 67
+    "firstNight": 50,
+    "otherNight": 69
   },
   {
     "id": "fortuneteller",
@@ -127,8 +127,8 @@
     "setup": false,
     "ability": "Each night, choose 2 players: you learn if either is a Demon. There is a good player that registers as a Demon to you.",
     "flavor": "I sense great evil in your soul! But... that could just be your perfume. I am allergic to Elderberry.",
-    "firstNight": 49,
-    "otherNight": 68
+    "firstNight": 51,
+    "otherNight": 70
   },
   {
     "id": "undertaker",
@@ -144,7 +144,7 @@
     "ability": "Each night*, you learn which character died by execution today.",
     "flavor": "Hmmm....what have we here? The left boot is worn down to the heel, with flint shavings under the tongue. This is the garb of a Military man.",
     "firstNight": 0,
-    "otherNight": 69
+    "otherNight": 71
   },
   {
     "id": "monk",
@@ -160,7 +160,7 @@
     "ability": "Each night*, choose a player (not yourself): they are safe from the Demon tonight.",
     "flavor": "'Tis an ill and deathly wind that blows tonight. Come, my brother, take shelter in the abbey while the storm rages. By my word, or by my life, you will be safe.",
     "firstNight": 0,
-    "otherNight": 18
+    "otherNight": 20
   },
   {
     "id": "ravenkeeper",
@@ -174,7 +174,7 @@
     "ability": "If you die at night, you are woken to choose a player: you learn their character.",
     "flavor": "My birds will avenge me! Fly! Fly, my sweet and dutiful pets! To the manor and to the river! To the alleys and to the salons! Fly!",
     "firstNight": 0,
-    "otherNight": 66
+    "otherNight": 68
   },
   {
     "id": "virgin",
@@ -249,8 +249,14 @@
     "setup": false,
     "ability": "Each night, choose a player (not yourself): tomorrow, you may only vote if they are voting too.",
     "flavor": "Yes, sir... No, sir... Certainly, sir.",
-    "firstNight": 50,
-    "otherNight": 82
+    "firstNight": 52,
+    "otherNight": 84,
+    "jinxes": [
+      {
+        "id": "organgrinder",
+        "reason": "If the Organ Grinder is causing eyes closed voting, the Butler may raise their hand to vote but their vote is only counted if their master voted too."
+      }
+    ]
   },
   {
     "id": "drunk",
@@ -320,8 +326,8 @@
     "setup": false,
     "ability": "Each night, choose a player: they are poisoned tonight and tomorrow day.",
     "flavor": "Add compound Alpha to compound Beta... NOT TOO MUCH!",
-    "firstNight": 26,
-    "otherNight": 12
+    "firstNight": 27,
+    "otherNight": 13
   },
   {
     "id": "spy",
@@ -341,12 +347,12 @@
     ],
     "ability": "Each night, you see the Grimoire. You might register as good & as a Townsfolk or Outsider, even if dead.",
     "flavor": "Any brewmaster worth their liquor, knows no concoction pours trouble quicker, than one where spies seem double.",
-    "firstNight": 64,
-    "otherNight": 83,
+    "firstNight": 66,
+    "otherNight": 85,
     "jinxes": [
       {
         "id": "alchemist",
-        "reason": "The Alchemist can not have the Spy ability."
+        "reason": "If the Alchemist has the Spy ability, they do not see the Grimoire, and the real Spy cannot register falsely."
       },
       {
         "id": "magician",
@@ -357,16 +363,8 @@
         "reason": "If the Poppy Grower is in play, the Spy does not see the Grimoire until the Poppy Grower dies."
       },
       {
-        "id": "plaguedoctor",
-        "reason": "If the Plague Doctor dies, a living Minion gains the Spy ability in addition to their own ability, and learns this."
-      },
-      {
         "id": "damsel",
         "reason": "If the Spy is (or has been) in play, the Damsel is poisoned."
-      },
-      {
-        "id": "heretic",
-        "reason": "Only 1 jinxed character can be in play."
       },
       {
         "id": "ogre",
@@ -388,11 +386,15 @@
     "ability": "If there are 5 or more players alive & the Demon dies, you become the Demon. (Travellers don't count.)",
     "flavor": "You have shown me the secrets of the Council of the Purple Flame. We have lain together in fire and in lust and in beastly commune, and I am forever your servant. But tonight, my dear, I am your master.",
     "firstNight": 0,
-    "otherNight": 27,
+    "otherNight": 29,
     "jinxes": [
       {
-        "id": "plaguedoctor",
-        "reason": "If the Plague Doctor dies, a living Minion gains the Scarlet Woman ability in addition to their own ability, and learns this."
+        "id": "fanggu",
+        "reason": "If the Fang Gu chooses an Outsider and dies, the Scarlet Woman does not become the Fang Gu."
+      },
+      {
+        "id": "alhadikhia",
+        "reason": "If there are two living Al-Hadikhias, the Scarlet Woman Al-Hadikhia becomes the Scarlet Woman again."
       }
     ]
   },
@@ -408,17 +410,7 @@
     "ability": "There are extra Outsiders in play. [+2 Outsiders]",
     "flavor": "This town has gone to the dogs, what? Cheap foreign labor... that's the ticket. Stuff them in the mine, I say. A bit of hard work never hurt anyone, and a clip'o'the ears to any brigand who says otherwise. It's all about the bottom line, what?",
     "firstNight": 0,
-    "otherNight": 0,
-    "jinxes": [
-      {
-        "id": "heretic",
-        "reason": "The Baron might only add 1 Outsider, not 2."
-      },
-      {
-        "id": "plaguedoctor",
-        "reason": "If the Storyteller gains the Baron ability, up to two players become not-in-play Outsiders."
-      }
-    ]
+    "otherNight": 0
   },
   {
     "id": "imp",
@@ -434,13 +426,13 @@
     "ability": "Each night*, choose a player: they die. If you kill yourself this way, a Minion becomes the Imp.",
     "flavor": "We must keep our wits sharp and our sword sharper. Evil walks among us, and will stop at nothing to destroy us good, simple folk, bringing our fine town to ruin. Trust no-one. But, if you must trust someone, trust me.",
     "firstNight": 0,
-    "otherNight": 33
+    "otherNight": 35
   },
   {
     "id": "bureaucrat",
     "name": "Bureaucrat",
     "edition": "tb",
-    "team": "traveler",
+    "team": "traveller",
     "firstNightReminder": "The Bureaucrat chooses a player. :reminder:",
     "otherNightReminder": "The Bureaucrat chooses a player. :reminder:",
     "reminders": [
@@ -463,7 +455,7 @@
     "id": "thief",
     "name": "Thief",
     "edition": "tb",
-    "team": "traveler",
+    "team": "traveller",
     "firstNightReminder": "The Thief chooses a player. :reminder:",
     "otherNightReminder": "The Thief chooses a player. :reminder:",
     "reminders": [
@@ -486,7 +478,7 @@
     "id": "gunslinger",
     "name": "Gunslinger",
     "edition": "tb",
-    "team": "traveler",
+    "team": "traveller",
     "firstNightReminder": "",
     "otherNightReminder": "",
     "reminders": [],
@@ -500,7 +492,7 @@
     "id": "scapegoat",
     "name": "Scapegoat",
     "edition": "tb",
-    "team": "traveler",
+    "team": "traveller",
     "firstNightReminder": "",
     "otherNightReminder": "",
     "reminders": [],
@@ -514,7 +506,7 @@
     "id": "beggar",
     "name": "Beggar",
     "edition": "tb",
-    "team": "traveler",
+    "team": "traveller",
     "firstNightReminder": "",
     "otherNightReminder": "",
     "reminders": [],
@@ -538,8 +530,8 @@
     "setup": false,
     "ability": "You start knowing a good player & their character. If the Demon kills them, you die too.",
     "flavor": "Take a jacket if you go outside, dearie. And your thermos. And your scarf. I have a weak heart, you know. Whatever would I do if you caught cold...or worse?",
-    "firstNight": 51,
-    "otherNight": 65
+    "firstNight": 53,
+    "otherNight": 67
   },
   {
     "id": "sailor",
@@ -568,14 +560,8 @@
     "setup": false,
     "ability": "Each night, choose 2 alive players (not yourself): you learn how many woke tonight due to their ability.",
     "flavor": "I aint seen nothin' untoward, Milady. Begging your pardon, but if I did see somethin', it certainly weren't the master o' the house sneaking into the professor's laboratory 'round eleven o'clock and mixing up fancy potions, just like you said, Miss.",
-    "firstNight": 68,
-    "otherNight": 86,
-    "jinxes": [
-      {
-        "id": "mathematician",
-        "reason": "The Chambermaid learns if the Mathematician wakes tonight or not, even though the Chambermaid wakes first."
-      }
-    ]
+    "firstNight": 70,
+    "otherNight": 88
   },
   {
     "id": "exorcist",
@@ -591,7 +577,7 @@
     "ability": "Each night*, choose a player (different to last night): the Demon, if chosen, learns who you are then doesn't wake tonight.",
     "flavor": "We cast you out, every unclean spirit, every satanic power, every onslaught of the infernal adversary, every legion, every diabolical group and sect, in the name and by the power of Our Lord Jesus Christ. We command you, begone and fly far from the Church of God, from the souls made by God in His image and redeemed by the precious blood of the divine Lamb.",
     "firstNight": 0,
-    "otherNight": 30
+    "otherNight": 32
   },
   {
     "id": "innkeeper",
@@ -609,7 +595,7 @@
     "ability": "Each night*, choose 2 players: they can't die tonight, but 1 is drunk until dusk.",
     "flavor": "Come inside, fair traveller, and rest your weary bones. Drink and be merry, for the legions of the Dark One shall not harass thee tonight.",
     "firstNight": 0,
-    "otherNight": 14
+    "otherNight": 15
   },
   {
     "id": "gambler",
@@ -625,7 +611,7 @@
     "ability": "Each night*, choose a player & guess their character: if you guess wrong, you die.",
     "flavor": "Heads, I win. Tails, you lose.",
     "firstNight": 0,
-    "otherNight": 15
+    "otherNight": 17
   },
   {
     "id": "gossip",
@@ -641,7 +627,7 @@
     "ability": "Each day, you may make a public statement. Tonight, if it was true, a player dies.",
     "flavor": "Blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah. Blah.",
     "firstNight": 0,
-    "otherNight": 51
+    "otherNight": 53
   },
   {
     "id": "courtier",
@@ -659,8 +645,8 @@
     "setup": false,
     "ability": "Once per game, at night, choose a character: they are drunk for 3 nights & 3 days.",
     "flavor": "I am more afraid of an army of one hundred sheep led by a lion than an army of one hundred lions led by a sheep.",
-    "firstNight": 28,
-    "otherNight": 13
+    "firstNight": 29,
+    "otherNight": 14
   },
   {
     "id": "professor",
@@ -677,7 +663,7 @@
     "ability": "Once per game, at night*, choose a dead player: if they are a Townsfolk, they are resurrected.",
     "flavor": "The process is simple. Attach the hydraulic confabulator to the modified chi matrix amplifier, add 20 CCs of pseudodorafine, keep his Z levels above 20%, and your husband will be fine. Now, all we need is a lightning strike.",
     "firstNight": 0,
-    "otherNight": 57
+    "otherNight": 59
   },
   {
     "id": "minstrel",
@@ -737,7 +723,7 @@
       "No Ability"
     ],
     "setup": false,
-    "ability": "The first time you die, you don't.",
+    "ability": "The 1st time you die, you don't.",
     "flavor": "...and the King said 'What?! I've never even owned a pair of rubber pantaloons, let alone a custard cannon!' Ho-ho! Jolly day!",
     "firstNight": 0,
     "otherNight": 0
@@ -756,7 +742,7 @@
     "ability": "You might die at any time.",
     "flavor": "I think I see the problem. Luckily, I have an idea! This catapult will shoot twice as far with just a minor adjustment...",
     "firstNight": 0,
-    "otherNight": 63
+    "otherNight": 65
   },
   {
     "id": "moonchild",
@@ -772,7 +758,7 @@
     "ability": "When you learn that you died, publicly choose 1 alive player. Tonight, if it was a good player, they die.",
     "flavor": "Scorpio looks sideways at the lovers, and you have a choice to make. With silver cross my palm, and your fate shall be revealed. With steel cross my throat, and by the stars you shall regret it.",
     "firstNight": 0,
-    "otherNight": 64
+    "otherNight": 66
   },
   {
     "id": "goon",
@@ -806,13 +792,7 @@
     "ability": "You think you are a Demon, but you are not. The Demon knows who you are & who you choose at night.",
     "flavor": "I am the night... I think.",
     "firstNight": 16,
-    "otherNight": 29,
-    "jinxes": [
-      {
-        "id": "mathematician",
-        "reason": "The Mathematician learns if the Lunatic attacks a different player(s) than the real Demon attacked."
-      }
-    ]
+    "otherNight": 31
   },
   {
     "id": "godfather",
@@ -828,14 +808,8 @@
     "setup": true,
     "ability": "You start knowing which Outsiders are in play. If 1 died today, choose a player tonight: they die. [-1 or +1 Outsider]",
     "flavor": "Normally, it's just business. But when you insult my daughter, you insult me. And when you insult me, you insult my family. You really should be more careful - it would be a shame if you had an unfortunate accident.",
-    "firstNight": 30,
-    "otherNight": 50,
-    "jinxes": [
-      {
-        "id": "heretic",
-        "reason": "Only 1 jinxed character can be in play."
-      }
-    ]
+    "firstNight": 32,
+    "otherNight": 52
   },
   {
     "id": "devilsadvocate",
@@ -850,8 +824,8 @@
     "setup": false,
     "ability": "Each night, choose a living player (different to last night): if executed tomorrow, they don't die.",
     "flavor": "My client, should the objection be overruled, pleads innocent by virtue of the prosecution's non-observance of statute 27.B - incorrect or misleading conjugation of a verb. The fact that nine of the jury died last night is simply prima facie, which is, as Wills vs Thule set precedent for, further reason to acquit.",
-    "firstNight": 32,
-    "otherNight": 20
+    "firstNight": 34,
+    "otherNight": 22
   },
   {
     "id": "assassin",
@@ -868,7 +842,7 @@
     "ability": "Once per game, at night*, choose a player: they die, even if for some reason they could not.",
     "flavor": "...",
     "firstNight": 0,
-    "otherNight": 49
+    "otherNight": 51
   },
   {
     "id": "mastermind",
@@ -905,7 +879,7 @@
     "ability": "Each night*, if no-one died today, choose a player: they die. The 1st time you die, you live but register as dead.",
     "flavor": "I do not. Understand. Your ways. Fellow human. Show me. The dirt. Where the holy. Lay. Sleeping. I too. Must sleep. Soon.",
     "firstNight": 0,
-    "otherNight": 34
+    "otherNight": 36
   },
   {
     "id": "pukka",
@@ -922,8 +896,8 @@
     "setup": false,
     "ability": "Each night, choose a player: they are poisoned. The previously poisoned player dies then becomes healthy.",
     "flavor": "You truly have been kind welcoming me into your beautiful home. I am so sorry I accidentally scratched you. A little thing. No matter. But please, take this golden toothpick as a humble token of my regret.",
-    "firstNight": 39,
-    "otherNight": 35
+    "firstNight": 41,
+    "otherNight": 37
   },
   {
     "id": "shabaloth",
@@ -941,7 +915,7 @@
     "ability": "Each night*, choose 2 players: they die. A dead player you chose last night might be regurgitated.",
     "flavor": "Blarg f'taag nm mataan! No sho gumtha m'sik na yuuu. Fluuuuuuuuurg h-sikkkh.",
     "firstNight": 0,
-    "otherNight": 36
+    "otherNight": 38
   },
   {
     "id": "po",
@@ -960,13 +934,13 @@
     "ability": "Each night*, you may choose a player: they die. If your last choice was no-one, choose 3 players tonight.",
     "flavor": "Would you like a flower? I'm so lonely.",
     "firstNight": 0,
-    "otherNight": 37
+    "otherNight": 39
   },
   {
     "id": "apprentice",
     "name": "Apprentice",
     "edition": "bmr",
-    "team": "traveler",
+    "team": "traveller",
     "firstNightReminder": "Show the Apprentice the 'You are' card, then a Townsfolk or Minion token. In the Grimoire, replace the Apprentice token with that character token, and put the Apprentice's 'Is the Apprentice' reminder by that character token.",
     "otherNightReminder": "",
     "reminders": [
@@ -989,7 +963,7 @@
     "id": "matron",
     "name": "Matron",
     "edition": "bmr",
-    "team": "traveler",
+    "team": "traveller",
     "firstNightReminder": "",
     "otherNightReminder": "",
     "reminders": [],
@@ -1003,7 +977,7 @@
     "id": "judge",
     "name": "Judge",
     "edition": "bmr",
-    "team": "traveler",
+    "team": "traveller",
     "firstNightReminder": "",
     "otherNightReminder": "",
     "reminders": [
@@ -1019,7 +993,7 @@
     "id": "bishop",
     "name": "Bishop",
     "edition": "bmr",
-    "team": "traveler",
+    "team": "traveller",
     "firstNightReminder": "",
     "otherNightReminder": "",
     "reminders": [
@@ -1036,7 +1010,7 @@
     "id": "voudon",
     "name": "Voudon",
     "edition": "bmr",
-    "team": "traveler",
+    "team": "traveller",
     "firstNightReminder": "",
     "otherNightReminder": "",
     "reminders": [],
@@ -1057,7 +1031,7 @@
     "setup": false,
     "ability": "You start knowing how many steps from the Demon to its nearest Minion.",
     "flavor": "Do not disturb me. The tick must continue, for the circle is a symbol of life and contains all things - all answers - in its divine machinery. I must work.",
-    "firstNight": 52,
+    "firstNight": 54,
     "otherNight": 0
   },
   {
@@ -1069,10 +1043,10 @@
     "otherNightReminder": "The Dreamer points to a player. Show 1 good & 1 evil character token, 1 of which is their character.",
     "reminders": [],
     "setup": false,
-    "ability": "Each night, choose a player (not yourself or Travellers): you learn 1 good and 1 evil character, 1 of which is correct.",
+    "ability": "Each night, choose a player (not yourself or Travellers): you learn 1 good & 1 evil character, 1 of which is correct.",
     "flavor": "I remember the Clockmaker. The sky was red and it was raining fractal triangles. There was a smell of violets and a bubbling sound. A woman with glowing eyes and a scraggly beard was hissing at the sky. Then, I awoke.",
-    "firstNight": 53,
-    "otherNight": 70
+    "firstNight": 55,
+    "otherNight": 72
   },
   {
     "id": "snakecharmer",
@@ -1087,8 +1061,8 @@
     "setup": false,
     "ability": "Each night, choose an alive player: a chosen Demon swaps characters & alignments with you & is then poisoned.",
     "flavor": "Effendi... I am but a humble man, but my pipe is golden and a single tune will tame the wildest djinn, Inshallah. They say that greed hangs more men than rope. But not I, Effendi... not I.",
-    "firstNight": 29,
-    "otherNight": 17
+    "firstNight": 31,
+    "otherNight": 19
   },
   {
     "id": "mathematician",
@@ -1107,8 +1081,18 @@
     "setup": false,
     "ability": "Each night, you learn how many players’ abilities worked abnormally (since dawn) due to another character's ability.",
     "flavor": "Any consistent formal system x, within which a certain amount of elementary arithmetic can be carried out is incomplete; that is, there are statements of the language of x which can neither be proved nor disproved in x. Ergo, you are drunk.",
-    "firstNight": 69,
-    "otherNight": 87
+    "firstNight": 71,
+    "otherNight": 89,
+    "jinxes": [
+      {
+        "id": "chambermaid",
+        "reason": "The Chambermaid learns if the Mathematician wakes tonight or not, even though the Chambermaid wakes first."
+      },
+      {
+        "id": "lunatic",
+        "reason": "The Mathematician learns if the Lunatic attacks a different player(s) than the real Demon attacked."
+      }
+    ]
   },
   {
     "id": "flowergirl",
@@ -1125,7 +1109,7 @@
     "ability": "Each night*, you learn if a Demon voted today.",
     "flavor": "Yesterday's violets have withered and died, but today my poppies bloom.",
     "firstNight": 0,
-    "otherNight": 71
+    "otherNight": 73
   },
   {
     "id": "towncrier",
@@ -1142,7 +1126,7 @@
     "ability": "Each night*, you learn if a Minion nominated today.",
     "flavor": "Hear ye! Hear ye! Witchcraft in the labyrinth! Genius savant reveals all! Town in danger! Hear Ye!",
     "firstNight": 0,
-    "otherNight": 72
+    "otherNight": 74
   },
   {
     "id": "oracle",
@@ -1156,7 +1140,7 @@
     "ability": "Each night*, you learn how many dead players are evil.",
     "flavor": "Only the chosen may gaze beyond the veil. The dead are restless, and they point in silence toward the icy north.",
     "firstNight": 0,
-    "otherNight": 73
+    "otherNight": 75
   },
   {
     "id": "savant",
@@ -1185,8 +1169,8 @@
     "setup": false,
     "ability": "Once per game, at night, choose 2 players (not yourself): you learn if they are the same alignment.",
     "flavor": "Did you hear that stranger in the cashmere coat put the word on our young Belle? And she said yes? Well, that's nothing compared to what Harry and that juggler got up to at the fair! The things I could say if I was a tattletale... my, yes.",
-    "firstNight": 54,
-    "otherNight": 74
+    "firstNight": 56,
+    "otherNight": 76
   },
   {
     "id": "philosopher",
@@ -1211,13 +1195,7 @@
     ],
     "flavor": "If anything is real, beer is real. Drink, for tomorrow we may die.",
     "firstNight": 9,
-    "otherNight": 7,
-    "jinxes": [
-      {
-        "id": "bountyhunter",
-        "reason": "If the Philosopher gains the Bounty Hunter ability, a Townsfolk might turn evil."
-      }
-    ]
+    "otherNight": 7
   },
   {
     "id": "artist",
@@ -1253,7 +1231,7 @@
     "ability": "On your 1st day, publicly guess up to 5 players' characters. That night, you learn how many you got correct.",
     "flavor": "For my next trick, as per request, I will need a flower, a bag of beans, a toy snake, a paintbrush, and a motorized gasoline-powered hedge trimming device. I warn you, this trick may be my last. Oh dear.",
     "firstNight": 0,
-    "otherNight": 75
+    "otherNight": 77
   },
   {
     "id": "sage",
@@ -1267,7 +1245,7 @@
     "ability": "If the Demon kills you, you learn that it is 1 of 2 players.",
     "flavor": "These mountainous tomes guard the secret, I am sure of it! Twixt word and word, it lies in wait. More candles, boy! More ink! These notes may look arcane, but the infernal puzzle is revealing itself.",
     "firstNight": 0,
-    "otherNight": 55
+    "otherNight": 57
   },
   {
     "id": "mutant",
@@ -1297,7 +1275,7 @@
     "ability": "When you die, 1 player is drunk from now on.",
     "flavor": "I will never forget her. Never.",
     "firstNight": 0,
-    "otherNight": 54
+    "otherNight": 56
   },
   {
     "id": "barber",
@@ -1313,7 +1291,7 @@
     "ability": "If you died today or tonight, the Demon may choose 2 players (not another Demon) to swap characters.",
     "flavor": "Did you know that barbery and surgery were once the same profession? No? Well, now you do.",
     "firstNight": 0,
-    "otherNight": 53
+    "otherNight": 55
   },
   {
     "id": "klutz",
@@ -1342,14 +1320,8 @@
     "setup": false,
     "ability": "You & an opposing player know each other. If the good player is executed, evil wins. Good can't win if you both live.",
     "flavor": "I'm not Sara! I'm Clara! SHE is Sara! Sara is the evil one! Not me!",
-    "firstNight": 33,
-    "otherNight": 0,
-    "jinxes": [
-      {
-        "id": "plaguedoctor",
-        "reason": "The Storyteller cannot gain the Evil Twin ability if the Plague Doctor dies."
-      }
-    ]
+    "firstNight": 35,
+    "otherNight": 0
   },
   {
     "id": "witch",
@@ -1364,8 +1336,8 @@
     "setup": false,
     "ability": "Each night, choose a player: if they nominate tomorrow, they die. If just 3 players live, you lose this ability.",
     "flavor": "Three drops of goat's blood. A lock of hair, torn in anger. The name is spoken, the shadow cast. Walk left foot first down that brambled path, and don't look back.",
-    "firstNight": 34,
-    "otherNight": 21
+    "firstNight": 36,
+    "otherNight": 23
   },
   {
     "id": "cerenovus",
@@ -1380,8 +1352,8 @@
     "setup": false,
     "ability": "Each night, choose a player & a good character: they are “mad” they are this character tomorrow, or might be executed.",
     "flavor": "Reality is merely an opinion. Specifically, my opinion.",
-    "firstNight": 35,
-    "otherNight": 22,
+    "firstNight": 37,
+    "otherNight": 24,
     "jinxes": [
       {
         "id": "goblin",
@@ -1401,12 +1373,8 @@
     "ability": "Each night*, choose a player & a character they become (if not-in-play). If a Demon is made, deaths tonight are arbitrary.",
     "flavor": "Round about the cauldron go; In the poison'd entrails throw; Toad, that under cold stone; Days and nights has thirty-one; Sweated venom sleeping got; Boil thou first in the charmed pot.",
     "firstNight": 0,
-    "otherNight": 23,
+    "otherNight": 25,
     "jinxes": [
-      {
-        "id": "heretic",
-        "reason": "A Pit-Hag can not create a Heretic."
-      },
       {
         "id": "damsel",
         "reason": "If a Pit-Hag creates a Damsel, the Storyteller chooses which player it is."
@@ -1448,13 +1416,7 @@
     "ability": "Each night*, choose a player: they die. The 1st Outsider this kills becomes an evil Fang Gu & you die instead. [+1 Outsider]",
     "flavor": "Your walls and your weapons are but smoke in dreams.",
     "firstNight": 0,
-    "otherNight": 38,
-    "jinxes": [
-      {
-        "id": "scarletwoman",
-        "reason": "If the Fang Gu chooses an Outsider and dies, the Scarlet Woman does not become the Fang Gu."
-      }
-    ]
+    "otherNight": 40
   },
   {
     "id": "vigormortis",
@@ -1476,7 +1438,7 @@
     "ability": "Each night*, choose a player: they die. Minions you kill keep their ability & poison 1 Townsfolk neighbor. [-1 Outsider]",
     "flavor": "All doors are one door. All keys are one key. All cups are one cup, but whosoever drinketh of the water that I give shall never thirst, but the water shall be in him a well springing up into everlasting life.",
     "firstNight": 0,
-    "otherNight": 42
+    "otherNight": 44
   },
   {
     "id": "nodashii",
@@ -1494,7 +1456,7 @@
     "ability": "Each night*, choose a player: they die. Your 2 Townsfolk neighbors are poisoned.",
     "flavor": "By the sins of Arnoch, I feel thy laden stench. By the curs-ed sun and her foul legion of tiny grinning gods, I corrupt thee. By the blessed night and the hidden depths of the horrid and unholy sea, I end thy squalid life upon this plane.",
     "firstNight": 0,
-    "otherNight": 39
+    "otherNight": 41
   },
   {
     "id": "vortox",
@@ -1510,7 +1472,7 @@
     "ability": "Each night*, choose a player: they die. Townsfolk abilities yield false info. Each day, if no-one is executed, evil wins.",
     "flavor": "Black is White. Right is Wrong. Left is Right. Up is Long. Down is Sight. Short is Blind. Follow me. Answers find.",
     "firstNight": 0,
-    "otherNight": 40,
+    "otherNight": 42,
     "jinxes": [
       {
         "id": "banshee",
@@ -1522,7 +1484,7 @@
     "id": "barista",
     "name": "Barista",
     "edition": "snv",
-    "team": "traveler",
+    "team": "traveller",
     "firstNightReminder": "Choose a player, wake them and tell them which Barista power is affecting them. Treat them accordingly (sober/healthy/true info or activate their ability twice).",
     "otherNightReminder": "Choose a player, wake them and tell them which Barista power is affecting them. Treat them accordingly (sober/healthy/true info or activate their ability twice).",
     "reminders": [
@@ -1540,7 +1502,7 @@
     "id": "harlot",
     "name": "Harlot",
     "edition": "snv",
-    "team": "traveler",
+    "team": "traveller",
     "firstNightReminder": "",
     "otherNightReminder": "The Harlot points at any living player. Then, put the Harlot to sleep. Wake the chosen player, show them the 'This character selected you' token, then the Harlot token. That player either nods their head yes or shakes their head no. If they nodded their head yes, wake the Harlot and show them the chosen player's character token. Then, you may decide that both players die.",
     "reminders": [
@@ -1557,7 +1519,7 @@
     "id": "butcher",
     "name": "Butcher",
     "edition": "snv",
-    "team": "traveler",
+    "team": "traveller",
     "firstNightReminder": "",
     "otherNightReminder": "",
     "reminders": [],
@@ -1571,7 +1533,7 @@
     "id": "bonecollector",
     "name": "Bone Collector",
     "edition": "snv",
-    "team": "traveler",
+    "team": "traveller",
     "firstNightReminder": "",
     "otherNightReminder": "The Bone Collector either shakes their head no or points at any dead player. If they pointed at any dead player, put the Bone Collector's 'Has Ability' reminder by the chosen player's character token. (They may need to be woken tonight to use it.)",
     "reminders": [
@@ -1588,7 +1550,7 @@
     "id": "deviant",
     "name": "Deviant",
     "edition": "snv",
-    "team": "traveler",
+    "team": "traveller",
     "firstNightReminder": "",
     "otherNightReminder": "",
     "reminders": [],
@@ -1613,7 +1575,7 @@
     "setup": false,
     "ability": "You start knowing 3 players, 1 and only 1 of which is evil.",
     "flavor": "Sarcasm is indeed the lowest form of wit. But speaking in response to your criticism, Sir, it is, nevertheless, a form of wit.",
-    "firstNight": 57,
+    "firstNight": 59,
     "otherNight": 0
   },
   {
@@ -1629,8 +1591,18 @@
     "setup": false,
     "ability": "You start knowing 1 evil player. If the player you know dies, you learn another evil player tonight. [1 Townsfolk is evil]",
     "flavor": "Alone, I walk these streets, paved with the sick stench of corruption. Its thickness worms its way into my nostrils, unbidden, burning with revulsion. And anticipation. The illness of this wretched place grows each night. And I... I am the cure.",
-    "firstNight": 61,
-    "otherNight": 79
+    "firstNight": 63,
+    "otherNight": 81,
+    "jinxes": [
+      {
+        "id": "philosopher",
+        "reason": "If the Philosopher gains the Bounty Hunter ability, a Townsfolk might turn evil."
+      },
+      {
+        "id": "kazali",
+        "reason": "An evil Townsfolk is only created if the Bounty Hunter is still in play after the Kazali acts."
+      }
+    ]
   },
   {
     "id": "pixie",
@@ -1646,7 +1618,7 @@
     "setup": false,
     "ability": "You start knowing 1 in-play Townsfolk. If you were mad that you were this character, you gain their ability when they die.",
     "flavor": "Round and round the garden, go. Little girls run to and fro. Little boys climb up the tree. Which of these should Pixie be? Ladies smile and go to town.  Lords with axe chop forest down. What’s yours is mine. What’s mine, divine. Silly little Pixie, me.",
-    "firstNight": 40,
+    "firstNight": 42,
     "otherNight": 0
   },
   {
@@ -1660,8 +1632,8 @@
     "setup": false,
     "ability": "Each night, you learn which alignment the Storyteller believes is winning: good, evil, or neither.",
     "flavor": "I don’t have time for quotes.",
-    "firstNight": 67,
-    "otherNight": 85
+    "firstNight": 69,
+    "otherNight": 87
   },
   {
     "id": "preacher",
@@ -1693,7 +1665,7 @@
     "ability": "Each night, if the dead equal or outnumber the living, you learn 1 alive character. The Demon knows you are the King.",
     "flavor": "Betwixt the unknown strains of mortal strife / And morbid night, sweet with mystery and woe / Lies unfettered joys of fate’s long and colored life / Who’s garden blooms with each painted Face to Show.",
     "firstNight": 19,
-    "otherNight": 78
+    "otherNight": 80
   },
   {
     "id": "balloonist",
@@ -1708,8 +1680,8 @@
     "setup": true,
     "ability": "Each night, you learn a player of a different character type than last night. [+0 or +1 Outsider]",
     "flavor": "More heat! Higher! Higher! Più alto! Ahhh... it is so beautiful from up here, don't you agree? Can you see the children fishing by the river, under the willow? Can you see the  glint of the sun on the circus tent-poles? What's this? An old man, alone, passed out in the vineyard? Less heat! Lower! Lower! Vai più in basso!",
-    "firstNight": 58,
-    "otherNight": 76
+    "firstNight": 60,
+    "otherNight": 78
   },
   {
     "id": "cultleader",
@@ -1722,8 +1694,8 @@
     "setup": false,
     "ability": "Each night, you become the alignment of an alive neighbor. If all good players choose to join your cult, your team wins.",
     "flavor": "Thinking themselves wise, they became fools.",
-    "firstNight": 63,
-    "otherNight": 81
+    "firstNight": 65,
+    "otherNight": 83
   },
   {
     "id": "lycanthrope",
@@ -1733,22 +1705,22 @@
     "firstNightReminder": "",
     "otherNightReminder": "The Lycanthrope chooses a player :reminder:",
     "reminders": [
-      "Appears Evil",
+      "Faux Paw",
       "Dead"
     ],
     "setup": false,
     "ability": "Each night*, choose an alive player. If good, they die & the Demon doesn’t kill tonight. One good player registers as evil.",
     "flavor": "Beneath the thin veneer of civilisation lies a howling madness.",
     "firstNight": 0,
-    "otherNight": 31
+    "otherNight": 33
   },
   {
     "id": "amnesiac",
     "name": "Amnesiac",
     "edition": "",
     "team": "townsfolk",
-    "firstNightReminder": "",
-    "otherNightReminder": "",
+    "firstNightReminder": "Run the Amnesiac's ability, if applicable.",
+    "otherNightReminder": "Run the Amnesiac's ability, if applicable.",
     "reminders": [
       "?",
       "?",
@@ -1757,8 +1729,8 @@
     "setup": false,
     "ability": "You do not know what your ability is. Each day, privately guess what it is: you learn how accurate you are.",
     "flavor": "Wait. What. Who? Oh, ok. Wait. What?",
-    "firstNight": 43,
-    "otherNight": 61
+    "firstNight": 45,
+    "otherNight": 63
   },
   {
     "id": "nightwatchman",
@@ -1773,8 +1745,8 @@
     "setup": false,
     "ability": "Once per game, at night, choose a player: they learn you are the Nightwatchman.",
     "flavor": "The night is cold and lonely, but I have the moon, the stars, the crisp wind and the soft thud of leather boots on cobbled stone for company. Yonder, candlelight flickers behind a murky window...",
-    "firstNight": 62,
-    "otherNight": 80
+    "firstNight": 64,
+    "otherNight": 82
   },
   {
     "id": "engineer",
@@ -1821,22 +1793,22 @@
     "setup": true,
     "ability": "Once per game, at night, choose a living player: the Damsel, if chosen, becomes a not-in-play Townsfolk. [+the Damsel]",
     "flavor": "My cabin is warm and sturdy. My axe by the door, my boots drying by the fire, and elk stew a-simmering… Hark! A scream echoes through the valley! The rain and the mud and the cold, cold wind mask the scent of the wolves, but I know the path and my pace is steady. I am coming.",
-    "firstNight": 41,
-    "otherNight": 59
+    "firstNight": 43,
+    "otherNight": 61
   },
   {
     "id": "alchemist",
     "name": "Alchemist",
     "edition": "",
     "team": "townsfolk",
-    "firstNightReminder": "Show the *YOU ARE* token and the character token of a not in play Minion.",
+    "firstNightReminder": "Show the *YOU ARE* token and the character token of a Minion.",
     "otherNightReminder": "",
     "reminders": [],
     "remindersGlobal": [
       "Is The Alchemist"
     ],
     "setup": false,
-    "ability": "You have a not-in-play Minion ability.",
+    "ability": "You have a Minion ability. When using this, the Storyteller may prompt you to choose differently.",
     "special": [
       {
         "type": "reveal",
@@ -1859,7 +1831,7 @@
     "ability": "When you die at night, an alive good player becomes a Farmer.",
     "flavor": "Even the high and mighty need food on the table. Without us, the city starves.",
     "firstNight": 0,
-    "otherNight": 62
+    "otherNight": 64
   },
   {
     "id": "magician",
@@ -1887,7 +1859,7 @@
     "ability": "If the Demon kills the King, you learn which player is the Demon. [+the King]",
     "flavor": "I saw it, I did. I was in the pews, tidying the hymn books, when a dreadful tune started from the pipe organ. The organist had a long cloak, and long fingers on the keys. And a hat that looked… just like… yours.",
     "firstNight": 0,
-    "otherNight": 58
+    "otherNight": 60
   },
   {
     "id": "poppygrower",
@@ -1934,7 +1906,7 @@
     "otherNightReminder": "Wake the Cannibal and treat them like they have the ability of the most recently killed executee.",
     "reminders": [
       "Poisoned",
-      "Died Today"
+      "Lunch"
     ],
     "setup": false,
     "ability": "You have the ability of the recently killed executee. If they are evil, you are poisoned until a good player dies by execution.",
@@ -1989,7 +1961,7 @@
     "ability": "Each night*, choose a player: if they are or become drunk or poisoned tonight, you die.",
     "flavor": "Welcome, one and all, to the greatest show on earth.",
     "firstNight": 0,
-    "otherNight": 16
+    "otherNight": 18
   },
   {
     "id": "puzzlemaster",
@@ -2020,7 +1992,37 @@
     "ability": "Whoever wins, loses & whoever loses, wins, even if you are dead.",
     "flavor": "After the hail has smashed the roof and splintered the glass of the Cathedral windows, it melts again into the earth, like a dying lamb in the desert sun. Such is the parable of the madman.",
     "firstNight": 0,
-    "otherNight": 0
+    "otherNight": 0,
+    "jinxes": [
+      {
+        "id": "godfather",
+        "reason": "Only 1 jinxed character can be in play."
+      },
+      {
+        "id": "baron",
+        "reason": "The Baron might only add 1 Outsider, not 2."
+      },
+      {
+        "id": "pithag",
+        "reason": "A Pit-Hag can not create a Heretic."
+      },
+      {
+        "id": "spy",
+        "reason": "Only 1 jinxed character can be in play."
+      },
+      {
+        "id": "widow",
+        "reason": "Only 1 jinxed character can be in play."
+      },
+      {
+        "id": "lleech",
+        "reason": "If the Lleech has poisoned the Heretic then the Lleech dies, the Heretic remains poisoned."
+      },
+      {
+        "id": "boffin",
+        "reason": "The Demon cannot have the Heretic ability."
+      }
+    ]
   },
   {
     "id": "damsel",
@@ -2035,8 +2037,8 @@
     "setup": false,
     "ability": "All Minions know a Damsel is in play. If a Minion publicly guesses you (once), your team loses.",
     "flavor": "Don't touch the hair, honey.",
-    "firstNight": 42,
-    "otherNight": 60
+    "firstNight": 44,
+    "otherNight": 62
   },
   {
     "id": "golem",
@@ -2091,12 +2093,12 @@
     ],
     "ability": "On your 1st night, look at the Grimoire and choose a player: they are poisoned. 1 good player knows a Widow is in play.",
     "flavor": "More wine? Château d’Ergot ’07 is a very special vintage. My yes, very special indeed.",
-    "firstNight": 27,
+    "firstNight": 28,
     "otherNight": 0,
     "jinxes": [
       {
         "id": "alchemist",
-        "reason": "The Alchemist can not have the Widow ability."
+        "reason": "If the Alchemist has the Widow ability, they do not see the Grimoire."
       },
       {
         "id": "magician",
@@ -2109,10 +2111,6 @@
       {
         "id": "damsel",
         "reason": "If the Widow is (or has been) in play, the Damsel is poisoned."
-      },
-      {
-        "id": "heretic",
-        "reason": "Only 1 jinxed character can be in play."
       }
     ]
   },
@@ -2129,14 +2127,8 @@
     "setup": false,
     "ability": "Each night, choose a player. If you nominate & execute them, their team loses. All players know if you choose a new player.",
     "flavor": "Beware of gazing long into the Abyss, lest the Abyss also gaze into you.",
-    "firstNight": 36,
-    "otherNight": 24,
-    "jinxes": [
-      {
-        "id": "plaguedoctor",
-        "reason": "If the Plague Doctor dies, a living Minion gains the Fearmonger ability in addition to their own ability, and learns this."
-      }
-    ]
+    "firstNight": 38,
+    "otherNight": 26
   },
   {
     "id": "psychopath",
@@ -2166,13 +2158,7 @@
     "ability": "If you publicly claim to be the Goblin when nominated & are executed that day, your team wins.",
     "flavor": "You don’t want to insult the goblins. You really, really don’t. On a completely different note… can I have another piece of cake?",
     "firstNight": 0,
-    "otherNight": 0,
-    "jinxes": [
-      {
-        "id": "plaguedoctor",
-        "reason": "If the Plague Doctor dies, a living Minion gains the Goblin ability in addition to their own ability, and learns this."
-      }
-    ]
+    "otherNight": 0
   },
   {
     "id": "mezepheles",
@@ -2188,8 +2174,8 @@
     "setup": false,
     "ability": "You start knowing a secret word. The 1st good player to say this word becomes evil that night.",
     "flavor": "That which issues from the heart alone, will bend the hearts of others to your own.",
-    "firstNight": 38,
-    "otherNight": 26
+    "firstNight": 40,
+    "otherNight": 28
   },
   {
     "id": "marionette",
@@ -2239,10 +2225,6 @@
         "reason": "The Marionette does not learn that a Damsel is in play."
       },
       {
-        "id": "plaguedoctor",
-        "reason": "If the Demon has a neighbor who is alive and a Townsfolk or Outsider when the Plague Doctor dies, that player becomes an evil Marionette. If there is already an extra evil player, this does not happen."
-      },
-      {
         "id": "huntsman",
         "reason": "If the Marionette thinks that they are the Huntsman, the Damsel was added."
       }
@@ -2267,13 +2249,7 @@
     ],
     "flavor": "Tick... Tick... Tick... TOCK.",
     "firstNight": 0,
-    "otherNight": 0,
-    "jinxes": [
-      {
-        "id": "plaguedoctor",
-        "reason": "If the Plague Doctor is executed and the Storyteller would gain the Boomdandy ability, the Boomdandy ability triggers immediately."
-      }
-    ]
+    "otherNight": 0
   },
   {
     "id": "lilmonsta",
@@ -2303,7 +2279,7 @@
     ],
     "flavor": "Step 1: Be cute. Step 2: World domination. Step 3: Bweakfast.",
     "firstNight": 24,
-    "otherNight": 46,
+    "otherNight": 48,
     "jinxes": [
       {
         "id": "poppygrower",
@@ -2342,7 +2318,7 @@
     "ability": "Each night*, choose a player: they die. You start by choosing a player: they are poisoned. You die if & only if they are dead.",
     "flavor": "Tasty, tasty, tasty, tasty, tasty, tasty, tasty, tasty brai- I mean pie! Yes. Tasty pie. That’s what I meant to say.",
     "firstNight": 25,
-    "otherNight": 45,
+    "otherNight": 47,
     "jinxes": [
       {
         "id": "mastermind",
@@ -2351,10 +2327,6 @@
       {
         "id": "slayer",
         "reason": "If the Slayer slays the Lleech's host, the host dies."
-      },
-      {
-        "id": "heretic",
-        "reason": "If the Lleech has poisoned the Heretic then the Lleech dies, the Heretic remains poisoned."
       }
     ]
   },
@@ -2371,16 +2343,10 @@
       "3"
     ],
     "setup": false,
-    "ability": "Each night*, choose 3 players (all players learn who): each silently chooses to live or die, but if all live, all die.",
+    "ability": "Each night*, you may choose 3 players (all players learn who): each silently chooses to live or die, but if all live, all die.",
     "flavor": "Alsukut min dhahab.",
     "firstNight": 0,
-    "otherNight": 44,
-    "jinxes": [
-      {
-        "id": "scarletwoman",
-        "reason": "If there are two living Al-Hadikhias, the Scarlet Woman Al-Hadikhia becomes the Scarlet Woman again."
-      }
-    ]
+    "otherNight": 46
   },
   {
     "id": "legion",
@@ -2403,7 +2369,7 @@
     ],
     "flavor": "We are the chill wind on a winter’s day. We are the shadow in the moonless night. We are the poison in your tea and the whisper in your ear. We are everywhere.",
     "firstNight": 0,
-    "otherNight": 32,
+    "otherNight": 34,
     "jinxes": [
       {
         "id": "engineer",
@@ -2445,40 +2411,52 @@
     "setup": false,
     "ability": "If more than 1 good player is executed, evil wins. All players know you are in play. After day 5, evil wins.",
     "flavor": "To the last, I grapple with thee. From Hell’s heart, I stab at thee. For hate’s sake, I spit my last breath at thee.",
-    "firstNight": 71,
-    "otherNight": 89,
+    "firstNight": 73,
+    "otherNight": 91,
     "jinxes": [
       {
         "id": "soldier",
-        "reason": "If Leviathan nominates and executes the Soldier, the Soldier does not die."
+        "reason": "If the Leviathan is in play, the Soldier is safe from all evil abilities."
       },
       {
         "id": "monk",
-        "reason": "If Leviathan nominates and executes the player the Monk chose, that player does not die."
+        "reason": "If the Leviathan is in play, the Monk-protected-player is safe from all evil abilities."
       },
       {
         "id": "innkeeper",
-        "reason": "If Leviathan nominates and executes a player the Innkeeper chose, that player does not die."
+        "reason": "If the Leviathan is in play, the Innkeeper-protected-players are safe from all evil abilities."
       },
       {
         "id": "ravenkeeper",
-        "reason": "If Leviathan is in play & the Ravenkeeper dies by execution, they wake that night to use their ability. They are drunk if their nominator was good."
+        "reason": "Each night*, the Leviathan chooses an alive player (different to previous nights): a chosen Ravenkeeper uses their ability but does not die."
       },
       {
         "id": "banshee",
-        "reason": "If Leviathan is in play, and the Banshee dies by execution, all players learn that the Banshee has died, and the Banshee gains their ability."
+        "reason": "Each night*, the Leviathan chooses an alive good player (different to previous nights): a chosen Banshee dies & gains their ability."
       },
       {
         "id": "sage",
-        "reason": "If Leviathan is in play & the Sage dies by execution, they wake that night to use their ability. They are drunk if their nominator was good."
+        "reason": "Each night*, the Leviathan chooses an alive good player (different to previous nights): a chosen Sage uses their ability but does not die."
       },
       {
         "id": "farmer",
-        "reason": "If Leviathan is in play & a Farmer dies by execution, a good player becomes a Farmer that night."
+        "reason": "Each night*, the Leviathan chooses an alive good player (different to previous nights): a chosen Farmer uses their ability but does not die."
       },
       {
         "id": "mayor",
-        "reason": "If Leviathan is in play & no execution occurs on day 5, good wins."
+        "reason": "If the Leviathan is in play & no execution occurs on day 5, good wins."
+      },
+      {
+        "id": "exorcist",
+        "reason": "Evil does not win when more than 1 good player has been executed, if the Exorcist is alive and has ever successfully chosen the Leviathan."
+      },
+      {
+        "id": "grandmother",
+        "reason": "If Leviathan is in play and the Grandchild dies by execution, evil wins."
+      },
+      {
+        "id": "king",
+        "reason": "If the Leviathan is in play, and at least 1 player is dead, the King learns an alive character each night."
       },
       {
         "id": "hatter",
@@ -2499,136 +2477,54 @@
     "otherNightReminder": "",
     "reminders": [],
     "setup": true,
-    "ability": "Nominees die, but may nominate again immediately (on day 3, they must). After day 3, evil wins. [All Minions are Riot]",
-    "special": [
-      {
-        "type": "selection",
-        "name": "bag-duplicate"
-      }
-    ],
+    "ability": "On day 3, Minions become Riot & nominees die but nominate an alive player immediately. This must happen.",
     "flavor": "Larga vida a la revolución! Mi revolucion!",
     "firstNight": 0,
     "otherNight": 0,
     "jinxes": [
       {
-        "id": "engineer",
-        "reason": "Riot and the Engineer can not both be in play at the start of the game. If the Engineer creates Riot, the evil players become Riot."
-      },
-      {
-        "id": "golem",
-        "reason": "If the Golem nominates Riot, the Riot player does not die."
-      },
-      {
-        "id": "snitch",
-        "reason": "If the Snitch is in play, each Riot player gets an extra 3 bluffs."
-      },
-      {
-        "id": "saint",
-        "reason": "If a good player nominates and kills the Saint, the Saint's team loses."
-      },
-      {
-        "id": "butler",
-        "reason": "The Butler can not nominate their master."
-      },
-      {
-        "id": "pithag",
-        "reason": "If the Pit-Hag creates Riot, all evil players become Riot. If the Pit-Hag creates Riot after day 3, the game continues for one more day."
-      },
-      {
         "id": "mayor",
-        "reason": "If the 3rd day begins with just three players alive, the players may choose (as a group) not to nominate at all. If so (and a Mayor is alive) then the Mayor's team wins."
+        "reason": "The Mayor may choose to stop nominations. If they do so when only 1 Riot is alive, good wins. Otherwise, evil wins."
       },
       {
         "id": "monk",
-        "reason": "If a Riot player nominates and kills the Monk-protected-player, the Monk-protected-player does not die."
+        "reason": "If Riot is in play, the Monk-protected player is safe from all evil abilities."
       },
       {
         "id": "farmer",
-        "reason": "If a Riot player nominates and kills a Farmer, the Farmer uses their ability tonight."
+        "reason": "Each night*, Riot chooses an alive good player (different to previous nights): a chosen Farmer uses their ability but does not die."
       },
       {
         "id": "innkeeper",
-        "reason": "If a Riot player nominates an Innkeeper-protected-player, the Innkeeper-protected-player does not die."
+        "reason": "If Riot is in play, the Innkeeper-protected player is safe from all evil abilities."
       },
       {
         "id": "sage",
-        "reason": "If a Riot player nominates and kills a Sage, the Sage uses their ability tonight."
+        "reason": "Each night*, Riot chooses an alive good player (different to previous nights): a chosen Sage uses their ability but does not die."
       },
       {
         "id": "banshee",
-        "reason": "If Riot nominates and kills the Banshee, all players learn that the Banshee has died, and the Banshee may nominate two players immediately."
+        "reason": "Each night*, Riot chooses an alive good player (different to previous nights): a chosen Banshee dies & gains their ability."
       },
       {
         "id": "ravenkeeper",
-        "reason": "If a Riot player nominates and kills the Ravenkeeper, the Ravenkeeper uses their ability tonight."
+        "reason": "Each night*, Riot chooses an alive good player (different to previous nights): a chosen Ravenkeeper uses their ability but does not die."
       },
       {
         "id": "soldier",
-        "reason": "If a Riot player nominates the Soldier, the Soldier does not die."
+        "reason": "If Riot is in play, the Soldier is safe from all evil abilities."
       },
       {
         "id": "grandmother",
-        "reason": "If a Riot player nominates and kills the Grandchild, the Grandmother dies too."
+        "reason": "If Riot is in play and the Grandchild dies during the day, the Grandmother dies too."
       },
       {
         "id": "king",
-        "reason": "If a Riot player nominates and kills the King and the Choirboy is alive, the Choirboy uses their ability tonight."
+        "reason": "If Riot is in play, and at least 1 player is dead, the King learns an alive character each night."
       },
       {
         "id": "exorcist",
-        "reason": "Only 1 jinxed character can be in play."
-      },
-      {
-        "id": "minstrel",
-        "reason": "Only 1 jinxed character can be in play."
-      },
-      {
-        "id": "flowergirl",
-        "reason": "Only 1 jinxed character can be in play."
-      },
-      {
-        "id": "undertaker",
-        "reason": "Players that die by nomination register as being executed to the Undertaker."
-      },
-      {
-        "id": "cannibal",
-        "reason": "Players that die by nomination register as being executed to the Cannibal."
-      },
-      {
-        "id": "pacifist",
-        "reason": "Players that die by nomination register as being executed to the Pacifist."
-      },
-      {
-        "id": "devilsadvocate",
-        "reason": "Players that die by nomination register as being executed to the Devil's Advocate."
-      },
-      {
-        "id": "investigator",
-        "reason": "Riot registers as a Minion to the Investigator."
-      },
-      {
-        "id": "clockmaker",
-        "reason": "Riot registers as a Minion to the Clockmaker."
-      },
-      {
-        "id": "towncrier",
-        "reason": "Riot registers as a Minion to the Town Crier."
-      },
-      {
-        "id": "damsel",
-        "reason": "Riot registers as a Minion to the Damsel."
-      },
-      {
-        "id": "preacher",
-        "reason": "Riot registers as a Minion to the Preacher."
-      },
-      {
-        "id": "hatter",
-        "reason": "If the Hatter dies, Riot is in play and a Riot chooses a different Demon, a normal evil team is created from the Riot players. If the Hatter dies and the Demon chooses Riot, Minions become Riot too."
-      },
-      {
-        "id": "zealot",
-        "reason": "If you are nominated, you must nominate again, even if dead."
+        "reason": "If the Exorcist chooses Riot on the 3rd night, Minions do not become Riot."
       }
     ]
   },
@@ -2636,7 +2532,7 @@
     "id": "gangster",
     "name": "Gangster",
     "edition": "",
-    "team": "traveler",
+    "team": "traveller",
     "firstNightReminder": "",
     "otherNightReminder": "",
     "reminders": [],
@@ -2666,14 +2562,8 @@
       }
     ],
     "flavor": "Round and round the handles go. The more you dance the less you know.",
-    "firstNight": 31,
-    "otherNight": 19,
-    "jinxes": [
-      {
-        "id": "butler",
-        "reason": "If the Organ Grinder is causing eyes closed voting, the Butler may raise their hand to vote but their vote is only counted if their master voted too."
-      }
-    ]
+    "firstNight": 33,
+    "otherNight": 21
   },
   {
     "id": "vizier",
@@ -2685,7 +2575,7 @@
     "setup": false,
     "ability": "All players know you are the Vizier. You can not die during the day. If good voted, you may choose to execute immediately.",
     "flavor": "An excellent decision, as always, sire. Such a petty crime as bumping into the Bishop indeed deserves your ‘justice’ and ‘mercy’. Take a stroll in the gardens. Visit the gallery and peruse the sculptures of Von Strauf. Relax, sire. Leave everything… to me.",
-    "firstNight": 72,
+    "firstNight": 74,
     "otherNight": 0,
     "jinxes": [
       {
@@ -2699,10 +2589,6 @@
       {
         "id": "courtier",
         "reason": "If the Vizier loses their ability, they learn this. If the Vizier is executed while they have their ability, their team wins."
-      },
-      {
-        "id": "alchemist",
-        "reason": "If the Alchemist has the Vizier ability, they may only choose to execute immediately if three or more players voted, regardless of those players' alignment."
       },
       {
         "id": "magician",
@@ -2739,7 +2625,7 @@
     "setup": false,
     "ability": "You start knowing 2 players that are not the Demon.",
     "flavor": "When a man lies, he murders some part of the world.",
-    "firstNight": 56,
+    "firstNight": 58,
     "otherNight": 0
   },
   {
@@ -2754,7 +2640,7 @@
     "setup": false,
     "ability": "You start knowing 1 good player.",
     "flavor": "How DARE you accuse Her Ladyship of wrongdoing? I’ve known her my entire life! All nine years!",
-    "firstNight": 55,
+    "firstNight": 57,
     "otherNight": 0
   },
   {
@@ -2768,8 +2654,8 @@
     "setup": false,
     "ability": "Each night, learn which player the Storyteller believes you should talk to most.",
     "flavor": "There is life behind the personality that uses personalities as masks. There are times when life puts off the mask and deep answers to deep.",
-    "firstNight": 66,
-    "otherNight": 84
+    "firstNight": 68,
+    "otherNight": 86
   },
   {
     "id": "harpy",
@@ -2785,8 +2671,8 @@
     "setup": false,
     "ability": "Each night, choose 2 players: tomorrow, the 1st player is mad that the 2nd is evil, or one or both might die.",
     "flavor": "So fair a day I never did see, nor so fowl a presence hanging over me.",
-    "firstNight": 37,
-    "otherNight": 25
+    "firstNight": 39,
+    "otherNight": 27
   },
   {
     "id": "plaguedoctor",
@@ -2802,7 +2688,41 @@
     "ability": "When you die, the Storyteller gains a Minion ability.",
     "flavor": "Pleauze shtay shtill. Thinks nid tiime for hillink. Myrhh-myrhh.",
     "firstNight": 0,
-    "otherNight": 0
+    "otherNight": 0,
+    "jinxes": [
+      {
+        "id": "eviltwin",
+        "reason": "The Storyteller cannot gain the Evil Twin ability if the Plague Doctor dies."
+      },
+      {
+        "id": "fearmonger",
+        "reason": "If the Plague Doctor dies, a living Minion gains the Fearmonger ability in addition to their own ability, and learns this."
+      },
+      {
+        "id": "goblin",
+        "reason": "If the Plague Doctor dies, a living Minion gains the Goblin ability in addition to their own ability, and learns this."
+      },
+      {
+        "id": "spy",
+        "reason": "If the Plague Doctor dies, a living Minion gains the Spy ability in addition to their own ability, and learns this."
+      },
+      {
+        "id": "scarletwoman",
+        "reason": "If the Plague Doctor dies, a living Minion gains the Scarlet Woman ability in addition to their own ability, and learns this."
+      },
+      {
+        "id": "boomdandy",
+        "reason": "If the Plague Doctor is executed and the Storyteller would gain the Boomdandy ability, the Boomdandy ability triggers immediately."
+      },
+      {
+        "id": "baron",
+        "reason": "If the Storyteller gains the Baron ability, up to two players become not-in-play Outsiders."
+      },
+      {
+        "id": "marionette",
+        "reason": "If the Demon has a neighbor who is alive and a Townsfolk or Outsider when the Plague Doctor dies, that player becomes an evil Marionette. If there is already an extra evil player, this does not happen."
+      }
+    ]
   },
   {
     "id": "shugenja",
@@ -2815,7 +2735,7 @@
     "setup": false,
     "ability": "You start knowing if your closest evil player is clockwise or anti-clockwise. If equidistant, this info is arbitrary.",
     "flavor": "これは夢。それも夢。すべて夢です。",
-    "firstNight": 59,
+    "firstNight": 61,
     "otherNight": 0
   },
   {
@@ -2832,7 +2752,7 @@
     "ability": "Each night*, choose a character: they die. If they are not in play, the Storyteller chooses who dies.",
     "flavor": "Like a bonfire on a moonless night… I see you, mortal.",
     "firstNight": 0,
-    "otherNight": 43
+    "otherNight": 45
   },
   {
     "id": "hatter",
@@ -2848,7 +2768,7 @@
     "ability": "If you died today or tonight, the Minion & Demon players may choose new Minion & Demon characters to be.",
     "flavor": "One Hat. Too Hat. Three Hat. Tea Hat. Fore Hat. Thrive Hat. Six Hat. Sticks Hat.",
     "firstNight": 0,
-    "otherNight": 52
+    "otherNight": 54
   },
   {
     "id": "kazali",
@@ -2864,12 +2784,8 @@
     "ability": "Each night*, choose a player: they die. [You choose which players are which Minions. -? to +? Outsiders]",
     "flavor": "Gon(z)a7les6. Take cau8tun. The mech4an4ion is iNvert10d. E99ors insy6tum. Reco{7}fig.",
     "firstNight": 3,
-    "otherNight": 48,
+    "otherNight": 50,
     "jinxes": [
-      {
-        "id": "bountyhunter",
-        "reason": "An evil Townsfolk is only created if the Bounty Hunter is still in play after the Kazali acts."
-      },
       {
         "id": "goon",
         "reason": "The Kazali can choose that the Goon player is one of their evil Minions."
@@ -2911,8 +2827,8 @@
       }
     ],
     "flavor": "Roses are blue, and violets are red, Please reverse what I just said.",
-    "firstNight": 60,
-    "otherNight": 77
+    "firstNight": 62,
+    "otherNight": 79
   },
   {
     "id": "yaggababble",
@@ -2930,7 +2846,7 @@
     "ability": "You start knowing a secret phrase. For each time you said it publicly today, a player might die.",
     "flavor": "Murders inside the Rue Morgue? Фальшивые новости! Hounds on the Baskerville moor? Фальшивые новости! Death while sailing the Nile? Фальшивые новости!",
     "firstNight": 12,
-    "otherNight": 47,
+    "otherNight": 49,
     "jinxes": [
       {
         "id": "exorcist",
@@ -2954,7 +2870,7 @@
     "ability": "You get 3 bluffs. On the 3rd night, choose a player: they become an evil Demon of your choice. [No Demon]",
     "flavor": "Hail the guardians of the north; by my intellect, thou art cut. Hail the guardians of the east; by my will, thou art dominated. Hail the guardians of the south; by that which lies beyond, the mystery is revealed. Hail the guardians of the west; a shield in the darkness",
     "firstNight": 17,
-    "otherNight": 28,
+    "otherNight": 30,
     "jinxes": [
       {
         "id": "clockmaker",
@@ -2997,10 +2913,6 @@
         "reason": "The Summoner may choose a player to become the Pukka on the 2nd night."
       },
       {
-        "id": "riot",
-        "reason": "If the Summoner creates Riot, all Minions also become Riot."
-      },
-      {
         "id": "legion",
         "reason": "If the Summoner creates Legion, most players (including all evil players) become evil Legion."
       },
@@ -3032,7 +2944,7 @@
     "ability": "If the Demon kills you, all players learn this. From now on, you may nominate twice per day and vote twice per nomination.",
     "flavor": "Gorm do shúile, dearg do ghruaig, ní bheidh sé i bhfad, is a mbeidh tú san uaigh.",
     "firstNight": 0,
-    "otherNight": 56
+    "otherNight": 58
   },
   {
     "id": "ogre",
@@ -3046,7 +2958,7 @@
     "setup": false,
     "ability": "On your 1st night, choose a player (not yourself): you become their alignment (you don't know which) even if drunk or poisoned.",
     "flavor": "<grunt><grin></grunt>",
-    "firstNight": 65,
+    "firstNight": 67,
     "otherNight": 0,
     "jinxes": [
       {
@@ -3093,7 +3005,7 @@
     "ability": "Each night*, choose a player: they die. [Evil characters are in a line. You are in the middle. +1 Minion. -? to +? Outsiders]",
     "flavor": "In the shadowed and forgotten corners of the cosmos, where the stars whisper secrets to the void, lies a truth so profound that the merest glimpse of it unravels the sanity of mortal minds.",
     "firstNight": 2,
-    "otherNight": 41
+    "otherNight": 43
   },
   {
     "id": "boffin",
@@ -3108,10 +3020,6 @@
     "firstNight": 8,
     "otherNight": 0,
     "jinxes": [
-      {
-        "id": "heretic",
-        "reason": "The Demon cannot have the Heretic ability."
-      },
       {
         "id": "cultleader",
         "reason": "If the Demon has the Cult Leader ability, they can’t turn good due to this ability."
@@ -3146,7 +3054,7 @@
     "id": "gnome",
     "name": "Gnome",
     "edition": "",
-    "team": "traveler",
+    "team": "traveller",
     "firstNightReminder": "",
     "otherNightReminder": "",
     "reminders": [
@@ -3157,6 +3065,42 @@
     "flavor": "Four the score or seven beers, no shows are goes for me and my. A prank to crack the cranks and planks o’ the floor foundation length, so incontravertabubbilly mini. The large essays down streams of joyse, no greater than is scene,not inherdt. Ha-urrumph.",
     "firstNight": 0,
     "otherNight": 0
+  },
+  {
+    "id": "xaan",
+    "name": "Xaan",
+    "edition": "",
+    "team": "minion",
+    "firstNightReminder": "Mark the Xaan with the *NIGHT 1* reminder. If X is 1, mark the Xaan with the *X* reminder token. :reminder: :reminder:",
+    "otherNightReminder": "Change the Xaan reminder token to the relevant night. If it is night X, mark the Xaan with the *X* reminder token. :reminder: :reminder:",
+    "reminders": [
+      "Night 1",
+      "Night 2",
+      "Night 3",
+      "X"
+    ],
+    "setup": true,
+    "ability": "On night X, all Townsfolk are poisoned until dusk. [X Outsiders]",
+    "flavor": "Down they fall. One by one. By two, by three, by five.",
+    "firstNight": 26,
+    "otherNight": 12
+  },
+  {
+    "id": "wizard",
+    "name": "Wizard",
+    "edition": "",
+    "team": "minion",
+    "firstNightReminder": "Run the Wizard's ability, if applicable.",
+    "otherNightReminder": "Run the Wizard's ability, if applicable.",
+    "reminders": [
+      "?",
+      "?"
+    ],
+    "setup": false,
+    "ability": "Once per game, choose to make a wish. If granted, it might have a price & leave a clue as to its nature.",
+    "flavor": "Genies are overrated.",
+    "firstNight": 30,
+    "otherNight": 16
   },
   {
     "id": "doomsayer",
