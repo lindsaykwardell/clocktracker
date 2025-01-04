@@ -194,25 +194,25 @@ export async function fetchGames(user_id: string, me: User | null) {
           },
         },
       },
-      // demon_bluffs: {
-      //   include: {
-      //     role: {
-      //       select: {
-      //         token_url: true,
-      //         type: true,
-      //       },
-      //     },
-      //   },
-      // },
-      // fabled: {
-      //   include: {
-      //     role: {
-      //       select: {
-      //         token_url: true,
-      //       },
-      //     },
-      //   },
-      // },
+      demon_bluffs: {
+        include: {
+          role: {
+            select: {
+              token_url: true,
+              type: true,
+            },
+          },
+        },
+      },
+      fabled: {
+        include: {
+          role: {
+            select: {
+              token_url: true,
+            },
+          },
+        },
+      },
       grimoire: {
         include: {
           tokens: {
@@ -231,16 +231,16 @@ export async function fetchGames(user_id: string, me: User | null) {
           },
         },
       },
-      // parent_game: {
-      //   select: {
-      //     user: {
-      //       select: {
-      //         username: true,
-      //         display_name: true,
-      //       },
-      //     },
-      //   },
-      // },
+      parent_game: {
+        select: {
+          user: {
+            select: {
+              username: true,
+              display_name: true,
+            },
+          },
+        },
+      },
       community: {
         select: {
           slug: true,
@@ -288,18 +288,7 @@ export async function fetchGames(user_id: string, me: User | null) {
   }));
 
   for (const game of games) {
-    anonymizedGames.push(
-      await anonymizeGame(
-        {
-          ...game,
-          // grimoire: [],
-          demon_bluffs: [],
-          fabled: [],
-        } as GameRecord,
-        me,
-        isFriend
-      )
-    );
+    anonymizedGames.push(await anonymizeGame(game as GameRecord, me, isFriend));
   }
 
   return anonymizedGames;
