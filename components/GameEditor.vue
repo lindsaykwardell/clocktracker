@@ -1094,8 +1094,8 @@ watchEffect(async () => {
       fabled.forEach((fabledRole) => {
         if (!props.game.fabled.some((fabled) => fabled.role?.token_url === fabledRole.token_url))
         props.game.fabled.push({
-          name: "",
-          role_id: null,
+          name: fabledRole.name,
+          role_id: fabledRole.id,
           role: {
             token_url: fabledRole.token_url,
             type: fabledRole.type,
