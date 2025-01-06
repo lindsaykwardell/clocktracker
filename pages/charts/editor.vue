@@ -163,8 +163,8 @@ const options = reactive<{
   data: "WIN",
   include_tags: [],
   exclude_tags: [],
-  width: 300,
-  height: 300,
+  width: 250,
+  height: 250,
 });
 
 const selectedIncludeTag = ref<string | null>(null);

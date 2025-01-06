@@ -54,11 +54,14 @@ export default defineEventHandler(async (handler) => {
     const script_ = { ...scripts[0], roles: undefined };
 
     try {
-      await getScriptVersions(script_, me);
+      const versions = await getScriptVersions(script_, me);
 
       scripts = await prisma.script.findMany({
         where: {
           name,
+          id: {
+            in: versions.map((version) => version.id),
+          }
         },
         include: {
           roles: {
