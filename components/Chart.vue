@@ -272,14 +272,14 @@ const chartData = computed(() => {
     ).length;
     const small = games.filter(
       (game) =>
-        game.player_count && game.player_count > 6 && game.player_count <= 10
+        game.player_count && game.player_count > 6 && game.player_count < 10
     ).length;
     const medium = games.filter(
       (game) =>
-        game.player_count && game.player_count > 10 && game.player_count <= 13
+        game.player_count && game.player_count >= 10 && game.player_count < 13
     ).length;
     const large = games.filter(
-      (game) => game.player_count && game.player_count > 13
+      (game) => game.player_count && game.player_count >= 13
     ).length;
     const total = teensy + small + medium + large;
     return {
