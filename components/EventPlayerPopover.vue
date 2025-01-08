@@ -23,12 +23,12 @@
         leave-to-class="transform scale-95 opacity-0"
       >
         <MenuItems
-          class="absolute bottom-[100%] z-10 bg-stone-950 p-2 rounded shadow-md whitespace-nowrap flex flex-col items-start"
+          class="absolute bottom-[100%] z-10 bg-stone-50 dark:bg-stone-950 p-2 rounded shadow-md whitespace-nowrap flex flex-col items-start"
         >
           <MenuItem v-for="option in options">
             <button
               @click="option.action"
-              class="hover:text-stone-300 w-full text-left"
+              class="hover:text-stone-500 dark:hover:text-stone-300 w-full text-left"
             >
               {{ option.label }}
             </button>
