@@ -144,7 +144,7 @@
             </div>
           </div>
           <nuxt-link
-            v-if="!readonly"
+            v-if="isMyGame(game)"
             class="text-white font-bold px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial"
             :to="`/game/${game.id}/edit`"
             ><svg
@@ -169,6 +169,7 @@
 import { displayWinIcon } from "~/composables/useGames";
 const gamesStore = useGames();
 const users = useUsers();
+const me = useMe();
 
 const config = useRuntimeConfig();
 const scripts = useScripts();
@@ -176,7 +177,6 @@ const selectMultipleGames = useSelectMultipleGames();
 
 const props = defineProps<{
   games: GameRecord[];
-  readonly?: boolean;
   cardWidth?: string;
   onCardClick?: (game: GameRecord) => void;
 }>();
@@ -209,6 +209,12 @@ function isFavorite(game: GameRecord) {
   if (user.status !== Status.SUCCESS) return false;
 
   return user.data.favorites.some((f) => f.game_id === game.id);
+}
+
+function isMyGame(game: GameRecord) {
+  if (me.value.status !== Status.SUCCESS) return false;
+
+  return me.value?.data.user_id === game.user_id;
 }
 
 const taggedPlayers = computed(
