@@ -53,7 +53,7 @@ for (const role of all_raw_roles) {
     minions.push(role.name);
   } else if (role.team === "demon") {
     demons.push(role.name);
-  } else if (role.team === "traveler") {
+  } else if (role.team === "traveller") {
     travelers.push(role.name);
   } else if (role.team === "fabled") {
     fabled.push(role.name);
