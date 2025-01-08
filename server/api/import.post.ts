@@ -298,6 +298,7 @@ async function normalizePlayerCharacter(
         equals: role_input,
         mode: "insensitive",
       },
+      custom_role: false,
     },
   });
 
@@ -308,6 +309,7 @@ async function normalizePlayerCharacter(
           equals: related_input,
           mode: "insensitive",
         },
+        custom_role: false,
       },
     });
   }
