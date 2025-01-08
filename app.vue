@@ -1,6 +1,6 @@
 <template>
   <NuxtPage />
-  <AnnouncementDialog v-if="shouldShowAnnouncement" id="sept-2024">
+  <!-- <AnnouncementDialog v-if="shouldShowAnnouncement" id="sept-2024">
     <template #title>
       <h1 class="text-2xl font-bold font-dumbledor">
         Changelog for September 2024
@@ -76,7 +76,7 @@
       Please let me know on Discord if you have any issues or feedback. Thank
       you!
     </p>
-  </AnnouncementDialog>
+  </AnnouncementDialog> -->
   <VitePwaManifest />
 </template>
 

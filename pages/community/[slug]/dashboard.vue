@@ -139,13 +139,13 @@
                   <div class="flex justify-end gap-2">
                     <button
                       @click="approveUser(member.user_id)"
-                      class="whitespace-nowrap rounded transition duration-150 border border-green-800 hover:bg-green-900 text-white px-4 py-2 mt-2 w-[125px]"
+                      class="whitespace-nowrap rounded transition duration-150 border border-green-800 hover:bg-green-900 dark:text-white px-4 py-2 mt-2 w-[125px]"
                     >
                       Approve
                     </button>
                     <button
                       @click="denyUser(member.user_id)"
-                      class="whitespace-nowrap rounded transition duration-150 border border-red-800 hover:bg-red-900 text-white px-4 py-2 mt-2 w-[125px]"
+                      class="whitespace-nowrap rounded transition duration-150 border border-red-800 hover:bg-red-900 dark:text-white px-4 py-2 mt-2 w-[125px]"
                     >
                       Ignore
                     </button>
@@ -257,7 +257,7 @@
                   <div class="flex justify-end gap-2">
                     <button
                       @click="unbanUser(member.user_id)"
-                      class="whitespace-nowrap rounded transition duration-150 border border-red-800 hover:bg-red-900 text-white px-4 py-2 mt-2 w-[125px]"
+                      class="whitespace-nowrap rounded transition duration-150 border border-red-800 hover:bg-red-900 dark:text-white px-4 py-2 mt-2 w-[125px]"
                     >
                       Unban
                     </button>
