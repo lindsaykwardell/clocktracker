@@ -20,7 +20,6 @@
           v-if="recentGames.data.length > 0"
           :games="recentGames.data"
           cardWidth="w-1/2 lg:w-1/4"
-          readonly
         />
         <template v-else>
           <p class="text-center py-3 text-stone-400">

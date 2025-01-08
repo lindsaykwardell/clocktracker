@@ -213,7 +213,7 @@
         </div>
       </div>
     </section>
-    <GameOverviewGrid :games="relatedGames" readonly />
+    <GameOverviewGrid :games="relatedGames" />
   </StandardTemplate>
 </template>
 

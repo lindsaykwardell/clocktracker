@@ -505,15 +505,10 @@
             </div>
           </div>
           <div class="w-screen md:w-auto overflow-hidden">
-            <GameOverviewGrid
-              v-if="gameView === 'grid'"
-              :games="sortedGames"
-              :readonly="!myPage"
-            />
+            <GameOverviewGrid v-if="gameView === 'grid'" :games="sortedGames" />
             <GameOverviewList
               v-if="gameView === 'table'"
               :games="sortedGames"
-              :readonly="!myPage"
             />
             <p
               v-if="!sortedGames.length"
