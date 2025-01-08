@@ -647,7 +647,20 @@ const myScripts = computed(() => {
 });
 
 const myLocations = computed(() => {
-  return allGames.getLocationsByPlayer(props.player?.username || "");
+  if (props.games.status !== Status.SUCCESS) {
+    return [];
+  }
+  return naturalOrder([
+    ...new Set(
+      props.games.data
+        .filter((game) => game.location)
+        .map((game) => game.location)
+    ),
+  ]).sort();
+  // if (props.communitySlug) {
+  //   return allGames.getLocationsByCommunity(props.communitySlug);
+  // }
+  // return allGames.getLocationsByPlayer(props.player?.username || "");
 });
 
 const ready = ref(false);
@@ -751,6 +764,7 @@ const props = defineProps<{
     location: string | null;
   } | null;
   games: FetchStatus<GameRecord[]>;
+  communitySlug?: string;
 }>();
 
 const activeFilters = computed(() => {
