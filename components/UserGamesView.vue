@@ -505,15 +505,10 @@
             </div>
           </div>
           <div class="w-screen md:w-auto overflow-hidden">
-            <GameOverviewGrid
-              v-if="gameView === 'grid'"
-              :games="sortedGames"
-              :readonly="!myPage"
-            />
+            <GameOverviewGrid v-if="gameView === 'grid'" :games="sortedGames" />
             <GameOverviewList
               v-if="gameView === 'table'"
               :games="sortedGames"
-              :readonly="!myPage"
             />
             <p
               v-if="!sortedGames.length"
@@ -647,7 +642,20 @@ const myScripts = computed(() => {
 });
 
 const myLocations = computed(() => {
-  return allGames.getLocationsByPlayer(props.player?.username || "");
+  if (props.games.status !== Status.SUCCESS) {
+    return [];
+  }
+  return naturalOrder([
+    ...new Set(
+      props.games.data
+        .filter((game) => game.location)
+        .map((game) => game.location)
+    ),
+  ]).sort();
+  // if (props.communitySlug) {
+  //   return allGames.getLocationsByCommunity(props.communitySlug);
+  // }
+  // return allGames.getLocationsByPlayer(props.player?.username || "");
 });
 
 const ready = ref(false);
@@ -751,6 +759,7 @@ const props = defineProps<{
     location: string | null;
   } | null;
   games: FetchStatus<GameRecord[]>;
+  communitySlug?: string;
 }>();
 
 const activeFilters = computed(() => {

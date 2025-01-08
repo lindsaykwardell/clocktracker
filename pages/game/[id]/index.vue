@@ -381,7 +381,6 @@
           </template>
           <GameOverviewGrid
             :games="similarGames"
-            readonly
             cardWidth="w-1/2 lg:w-1/3"
             :onCardClick="confirmMergeGame"
           />
@@ -504,7 +503,7 @@
                         </div>
                       </button>
                     </MenuItem>
-                    <MenuItem v-if="game.data.waiting_for_confirmation">
+                    <MenuItem v-if="game.data.parent_game_id">
                       <button
                         @click="deleteGame(true)"
                         class="flex gap-1 w-full items-center dark:text-white text-sm px-2"
@@ -530,7 +529,10 @@
                             fill="currentColor"
                           />
                         </svg>
-                        Ignore and Untag Myself
+                        <template v-if="game.data.waiting_for_confirmation"
+                          >Ignore</template
+                        >
+                        <template v-else>Delete</template> and Untag Myself
                       </button>
                     </MenuItem>
                   </div>

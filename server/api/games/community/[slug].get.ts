@@ -87,6 +87,59 @@ export default defineEventHandler(async (handler) => {
           },
         },
       },
+      demon_bluffs: {
+        include: {
+          role: {
+            select: {
+              token_url: true,
+              type: true,
+            },
+          },
+        },
+      },
+      fabled: {
+        include: {
+          role: {
+            select: {
+              token_url: true,
+            },
+          },
+        },
+      },
+      grimoire: {
+        include: {
+          tokens: {
+            include: {
+              role: true,
+              related_role: true,
+              reminders: true,
+              player: {
+                select: {
+                  display_name: true,
+                  username: true,
+                  avatar: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      parent_game: {
+        select: {
+          user: {
+            select: {
+              username: true,
+              display_name: true,
+            },
+          },
+        },
+      },
+      community: {
+        select: {
+          slug: true,
+          icon: true,
+        },
+      },
       associated_script: {
         select: {
           version: true,
@@ -96,9 +149,17 @@ export default defineEventHandler(async (handler) => {
         },
       },
     },
-    orderBy: {
-      date: "desc",
-    },
+    orderBy: [
+      {
+        date: "desc",
+      },
+      {
+        created_at: "desc",
+      },
+      {
+        id: "desc",
+      },
+    ],
   });
 
   const anonymizedGames: GameRecord[] = [];
