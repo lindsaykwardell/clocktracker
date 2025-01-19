@@ -148,11 +148,11 @@ const chartData = computed(() => {
     const total = townsfolk + outsider + minion + demon + traveler;
     return {
       labels: [
-        `Townsfolk (${Math.round((townsfolk / total) * 100)}%)`,
-        `Outsider (${Math.round((outsider / total) * 100)}%)`,
-        `Minion (${Math.round((minion / total) * 100)}%)`,
-        `Demon (${Math.round((demon / total) * 100)}%)`,
-        `Traveler (${Math.round((traveler / total) * 100)}%)`,
+        `Townsfolk`,
+        `Outsider`,
+        `Minion`,
+        `Demon`,
+        `Traveler`,
       ],
       datasets: getPivot(
         games,
@@ -207,8 +207,8 @@ const chartData = computed(() => {
     const total = good + evil;
     return {
       labels: [
-        `Good (${Math.round((good / total) * 100)}%)`,
-        `Evil (${Math.round((evil / total) * 100)}%)`,
+        `Good`,
+        `Evil`,
       ],
       datasets: getPivot(
         games,
@@ -245,10 +245,10 @@ const chartData = computed(() => {
       troubleBrewing + badMoonRising + sectsAndViolets + customScript;
     return {
       labels: [
-        `Trouble Brewing (${Math.round((troubleBrewing / total) * 100)}%)`,
-        `Bad Moon Rising (${Math.round((badMoonRising / total) * 100)}%)`,
-        `Sects and Violets (${Math.round((sectsAndViolets / total) * 100)}%)`,
-        `Custom Script (${Math.round((customScript / total) * 100)}%)`,
+        `Trouble Brewing`,
+        `Bad Moon Rising`,
+        `Sects and Violets`,
+        `Custom Script`,
       ],
       datasets: getPivot(
         games,
@@ -284,10 +284,10 @@ const chartData = computed(() => {
     const total = teensy + small + medium + large;
     return {
       labels: [
-        `Teensy (${Math.round((teensy / total) * 100)}%)`,
-        `1 Minion (${Math.round((small / total) * 100)}%)`,
-        `2 Minions (${Math.round((medium / total) * 100)}%)`,
-        `3 Minions (${Math.round((large / total) * 100)}%)`,
+        `Teensy`,
+        `1 Minion`,
+        `2 Minions`,
+        `3 Minions`,
       ],
       datasets: getPivot(
         games,
@@ -338,8 +338,8 @@ const chartData = computed(() => {
     const total = win + loss;
     return {
       labels: [
-        `Win (${Math.round((win / total) * 100)}%)`,
-        `Loss (${Math.round((loss / total) * 100)}%)`,
+        `Win`,
+        `Loss`,
       ],
       datasets: getPivot(
         games,
@@ -447,37 +447,27 @@ function getPivot(
 
     return [
       {
-        label: `Townsfolk (${Math.round(
-          (townsfolk.reduce((acc, curr) => acc + curr, 0) / total) * 100
-        )}%)`,
+        label: `Townsfolk`,
         data: townsfolk,
         backgroundColor: getColor(colors.townsfolk),
       },
       {
-        label: `Outsider (${Math.round(
-          (outsider.reduce((acc, curr) => acc + curr, 0) / total) * 100
-        )}%)`,
+        label: `Outsider`,
         data: outsider,
         backgroundColor: getColor(colors.outsider),
       },
       {
-        label: `Minion (${Math.round(
-          (minion.reduce((acc, curr) => acc + curr, 0) / total) * 100
-        )}%)`,
+        label: `Minion`,
         data: minion,
         backgroundColor: getColor(colors.minion),
       },
       {
-        label: `Demon (${Math.round(
-          (demon.reduce((acc, curr) => acc + curr, 0) / total) * 100
-        )}%)`,
+        label: `Demon`,
         data: demon,
         backgroundColor: getColor(colors.demon),
       },
       {
-        label: `Traveler (${Math.round(
-          (traveler.reduce((acc, curr) => acc + curr, 0) / total) * 100
-        )}%)`,
+        label: `Traveler`,
         data: traveler,
         backgroundColor: getColor(colors.traveler),
       },
@@ -502,16 +492,12 @@ function getPivot(
     const total = [...good, ...evil].reduce((acc, curr) => acc + curr, 0);
     return [
       {
-        label: `Good (${Math.round(
-          (good.reduce((acc, curr) => acc + curr, 0) / total) * 100
-        )}%)`,
+        label: `Good`,
         data: good,
         backgroundColor: getColor(colors.good),
       },
       {
-        label: `Evil (${Math.round(
-          (evil.reduce((acc, curr) => acc + curr, 0) / total) * 100
-        )}%)`,
+        label: `Evil`,
         data: evil,
         backgroundColor: getColor(colors.evil),
       },
@@ -548,30 +534,22 @@ function getPivot(
     ].reduce((acc, curr) => acc + curr, 0);
     return [
       {
-        label: `Trouble Brewing (${Math.round(
-          (troubleBrewing.reduce((acc, curr) => acc + curr, 0) / total) * 100
-        )}%)`,
+        label: `Trouble Brewing`,
         data: troubleBrewing,
         backgroundColor: getColor(colors.tb),
       },
       {
-        label: `Bad Moon Rising (${Math.round(
-          (badMoonRising.reduce((acc, curr) => acc + curr, 0) / total) * 100
-        )}%)`,
+        label: `Bad Moon Rising`,
         data: badMoonRising,
         backgroundColor: getColor(colors.bmr),
       },
       {
-        label: `Sects and Violets (${Math.round(
-          (sectsAndViolets.reduce((acc, curr) => acc + curr, 0) / total) * 100
-        )}%)`,
+        label: `Sects and Violets`,
         data: sectsAndViolets,
         backgroundColor: getColor(colors.snv),
       },
       {
-        label: `Custom Script (${Math.round(
-          (customScript.reduce((acc, curr) => acc + curr, 0) / total) * 100
-        )}%)`,
+        label: `Custom Script`,
         data: customScript,
         backgroundColor: getColor(colors.custom),
       },
@@ -617,30 +595,22 @@ function getPivot(
     );
     return [
       {
-        label: `Teensy (${Math.round(
-          (teensy.reduce((acc, curr) => acc + curr, 0) / total) * 100
-        )}%)`,
+        label: `Teensy`,
         data: teensy,
         backgroundColor: getColor(colors.teensy),
       },
       {
-        label: `1 Minion (${Math.round(
-          (small.reduce((acc, curr) => acc + curr, 0) / total) * 100
-        )}%)`,
+        label: `1 Minion`,
         data: small,
         backgroundColor: getColor(colors.small),
       },
       {
-        label: `2 Minions (${Math.round(
-          (medium.reduce((acc, curr) => acc + curr, 0) / total) * 100
-        )}%)`,
+        label: `2 Minions`,
         data: medium,
         backgroundColor: getColor(colors.medium),
       },
       {
-        label: `3 Minions (${Math.round(
-          (large.reduce((acc, curr) => acc + curr, 0) / total) * 100
-        )}%)`,
+        label: `3 Minions`,
         data: large,
         backgroundColor: getColor(colors.large),
       },
@@ -681,16 +651,12 @@ function getPivot(
     const total = [...win, ...loss].reduce((acc, curr) => acc + curr, 0);
     return [
       {
-        label: `Win (${Math.round(
-          (win.reduce((acc, curr) => acc + curr, 0) / total) * 100
-        )}%)`,
+        label: `Win`,
         data: win,
         backgroundColor: getColor(colors.win),
       },
       {
-        label: `Loss (${Math.round(
-          (loss.reduce((acc, curr) => acc + curr, 0) / total) * 100
-        )}%)`,
+        label: `Loss`,
         data: loss,
         backgroundColor: getColor(colors.loss),
       },
