@@ -33,8 +33,10 @@
             {{ data.games_played === 1 ? "game" : "games" }} this year, which is
             <span
               >{{
-                Math.abs(
-                  Math.round(data.games_played - data.average_games_played)
+                Math.round(
+                  (Math.abs(data.average_games_played - data.games_played) /
+                    data.average_games_played) *
+                    100
                 )
               }}%</span
             >
@@ -73,10 +75,12 @@
             is
             <span
               >{{
-                Math.abs(
-                  Math.round(
-                    data.games_storytold - data.average_games_storytold
-                  )
+                Math.round(
+                  (Math.abs(
+                    data.average_games_storytold - data.games_storytold
+                  ) /
+                    data.average_games_storytold) *
+                    100
                 )
               }}%</span
             >
@@ -516,7 +520,9 @@ const mostWinningRole = computed(() => {
     return null;
   }
 
-  const winningRole = data.value.winning_roles[0];
+  const winningRole = data.value.winning_roles.reduce((prev, current) =>
+    prev.win_count > current.win_count ? prev : current
+  );
 
   if (!winningRole) {
     return null;
@@ -534,7 +540,9 @@ const mostLosingRole = computed(() => {
     return null;
   }
 
-  const losingRole = data.value.losing_roles[0];
+  const losingRole = data.value.losing_roles.reduce((prev, current) =>
+    prev.loss_count > current.loss_count ? prev : current
+  );
 
   if (!losingRole) {
     return null;
