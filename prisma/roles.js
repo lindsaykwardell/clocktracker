@@ -66,6 +66,15 @@ for (const role of all_raw_roles) {
         reminder,
       });
     }
+
+    if (role.remindersGlobal) {
+      for (reminder of role.remindersGlobal) {
+        reminders.push({
+          role_id,
+          reminder,
+        });
+      }
+    }
   }
 
   if (role.ability) {
