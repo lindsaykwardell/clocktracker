@@ -15,6 +15,7 @@
         </label>
         <input
           v-model="roleFilter"
+          ref="roleFilterRef"
           type="text"
           placeholder="Filter roles"
           class="p-2 mt-2 border border-gray-300 rounded-md text-black"
@@ -96,6 +97,7 @@ const travelerRoles = computed(() =>
 const fabledRoles = computed(() => roles.getRoleByType(RoleType.FABLED));
 
 const roleFilter = ref("");
+const roleFilterRef = ref<HTMLInputElement | null>();
 const show = computed({
   get: () => props.visible,
   set: (value) => emit("update:visible", value),
@@ -197,6 +199,7 @@ function formatRoleAsCharacter(
 watchEffect(() => {
   if (show.value) {
     roleFilter.value = "";
+    roleFilterRef.value?.focus();
   }
 });
 
