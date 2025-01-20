@@ -319,65 +319,67 @@ export default defineEventHandler(async (handler) => {
     }[]
   );
 
-  try {
-    await prisma.game.create({
-      data: {
-        ...game,
-        id: undefined,
-        community: undefined,
-        associated_script: undefined,
-        user: undefined,
-        parent_game: undefined,
-        parent_game_id: game.parent_game_id || game.id,
-        child_games: undefined,
-        user_id: user.id,
-        player_characters: {
-          create: [...player_characters],
+  if (game.user_id !== user.id) {
+    try {
+      await prisma.game.create({
+        data: {
+          ...game,
+          id: undefined,
+          community: undefined,
+          associated_script: undefined,
+          user: undefined,
+          parent_game: undefined,
+          parent_game_id: game.parent_game_id || game.id,
+          child_games: undefined,
+          user_id: user.id,
+          player_characters: {
+            create: [...player_characters],
+          },
+          demon_bluffs: {
+            create: [
+              ...game.demon_bluffs.map((d) => ({
+                ...d,
+                id: undefined,
+                game_id: undefined,
+              })),
+            ],
+          },
+          fabled: {
+            create: [
+              ...game.fabled.map((f) => ({
+                ...f,
+                id: undefined,
+                game_id: undefined,
+              })),
+            ],
+          },
+          // map the already created grimoires to the new game
+          grimoire: {
+            connect: game.grimoire.map((g) => ({ id: g.id })),
+          },
+          waiting_for_confirmation: false,
+          is_storyteller: false,
         },
-        demon_bluffs: {
-          create: [
-            ...game.demon_bluffs.map((d) => ({
-              ...d,
-              id: undefined,
-              game_id: undefined,
-            })),
-          ],
-        },
-        fabled: {
-          create: [
-            ...game.fabled.map((f) => ({
-              ...f,
-              id: undefined,
-              game_id: undefined,
-            })),
-          ],
-        },
-        // map the already created grimoires to the new game
-        grimoire: {
-          connect: game.grimoire.map((g) => ({ id: g.id })),
-        },
-        waiting_for_confirmation: false,
-        is_storyteller: false,
-      },
-    });
-  } catch (err: any) {
-    const messageLines = err.message.split("\n");
-    const message =
-      messageLines[messageLines.length - 1].length > 0
-        ? messageLines[messageLines.length - 1]
-        : err.message;
-    // get the name from the game.grimoire
-    const taggedPlayer =
-      game.grimoire
-        .flatMap((g) => g.tokens)
-        .find((t) => t.player_id === user.id)?.player_name || "Unknown";
+      });
+    } catch (err: any) {
+      const messageLines = err.message.split("\n");
+      const message =
+        messageLines[messageLines.length - 1].length > 0
+          ? messageLines[messageLines.length - 1]
+          : err.message;
+      // get the name from the game.grimoire
+      const taggedPlayer =
+        game.grimoire
+          .flatMap((g) => g.tokens)
+          .find((t) => t.player_id === user.id)?.player_name || "Unknown";
 
-    console.error(`Error saving for ${taggedPlayer}: ${message}`);
+      console.error(`Error saving for ${taggedPlayer}: ${message}`);
 
-    throw createError({
-      status: 500,
-      statusMessage: `Error saving for ${taggedPlayer}: ${message}`,
-    });
+      throw createError({
+        status: 500,
+        statusMessage: `Error saving for ${taggedPlayer}: ${message}`,
+      });
+    }
   }
 
   return fetchGame(gameId, user, false);

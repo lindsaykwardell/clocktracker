@@ -33,8 +33,10 @@
             {{ data.games_played === 1 ? "game" : "games" }} this year, which is
             <span
               >{{
-                Math.abs(
-                  Math.round(data.games_played - data.average_games_played)
+                Math.round(
+                  (Math.abs(data.average_games_played - data.games_played) /
+                    data.average_games_played) *
+                    100
                 )
               }}%</span
             >
@@ -73,10 +75,12 @@
             is
             <span
               >{{
-                Math.abs(
-                  Math.round(
-                    data.games_storytold - data.average_games_storytold
-                  )
+                Math.round(
+                  (Math.abs(
+                    data.average_games_storytold - data.games_storytold
+                  ) /
+                    data.average_games_storytold) *
+                    100
                 )
               }}%</span
             >
@@ -178,8 +182,8 @@
             class="text-lg md:text-3xl flex flex-wrap justify-around items-center"
           >
             <li
-              v-for="role in data.roles.slice(0, 5)"
-              :key="role.role.id"
+              v-for="(role, index) in data.roles.slice(0, 5)"
+              :key="index"
               class="w-1/3 flex flex-col items-center gap-1"
             >
               <Token
@@ -208,8 +212,8 @@
             class="text-lg md:text-3xl flex flex-wrap justify-around items-center"
           >
             <li
-              v-for="role in data.roles.toReversed().slice(0, 5)"
-              :key="role.role.id"
+              v-for="(role, index) in data.roles.toReversed().slice(0, 5)"
+              :key="index"
               class="w-1/3 flex flex-col items-center gap-1"
             >
               <Token
@@ -244,7 +248,7 @@
             <li
               v-for="(change, index) in data.largest_character_change
                 .characters"
-              :key="change.role.id"
+              :key="index"
               class="flex items-center gap-1 w-1/3 justify-around"
             >
               <div class="flex flex-col items-center justify-center">
@@ -516,14 +520,16 @@ const mostWinningRole = computed(() => {
     return null;
   }
 
-  const winningRole = data.value.winning_roles[0];
+  const winningRole = data.value.winning_roles.reduce((prev, current) =>
+    prev.win_count > current.win_count ? prev : current
+  );
 
   if (!winningRole) {
     return null;
   }
 
   return {
-    role: data.value.roles.find((role) => role.role.id === winningRole.role_id)!
+    role: data.value.roles.find((role) => role.role?.id === winningRole.role_id)!
       .role,
     win_count: winningRole.win_count,
   };
@@ -534,14 +540,16 @@ const mostLosingRole = computed(() => {
     return null;
   }
 
-  const losingRole = data.value.losing_roles[0];
+  const losingRole = data.value.losing_roles.reduce((prev, current) =>
+    prev.loss_count > current.loss_count ? prev : current
+  );
 
   if (!losingRole) {
     return null;
   }
 
   return {
-    role: data.value.roles.find((role) => role.role.id === losingRole.role_id)!
+    role: data.value.roles.find((role) => role.role?.id === losingRole.role_id)!
       .role,
     loss_count: losingRole.loss_count,
   };
