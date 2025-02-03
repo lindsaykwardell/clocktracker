@@ -6,8 +6,13 @@ const { v4: uuidv4 } = require("uuid");
 const dayjs = require("dayjs");
 const { roles, roleNames, reminders } = require("./roles");
 const citySeed = require("./city-seed.json");
+const { createClient } = require("@supabase/supabase-js");
 
 const prisma = new PrismaClient();
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_KEY
+);
 
 async function main() {
   const scriptList = [
@@ -629,11 +634,9 @@ async function main() {
     },
   });
 
-  console.log("Seeding users");
-
   const testUser = await prisma.userSettings.create({
     data: {
-      user_id: "1d6f5c04-8df4-4bc5-a073-23552f99c011",
+      user_id: uuidv4(),
       username: "test",
       finished_welcome: true,
       avatar: "/img/default.png",
@@ -649,7 +652,7 @@ async function main() {
 
   const testUser2 = await prisma.userSettings.create({
     data: {
-      user_id: "8e5b6688-1688-424a-be33-6a42916e2256",
+      user_id: uuidv4(),
       username: "test2",
       finished_welcome: true,
       avatar: "/img/default.png",
@@ -663,16 +666,25 @@ async function main() {
     },
   });
 
-  const lindsaykwardell = await prisma.userSettings.create({
+  const myUsername = process.env.LOCAL_USERNAME || "ClockTrackerDeveloper";
+  const myPassword = process.env.LOCAL_PASSWORD || "password123";
+  const email = process.env.LOCAL_PASSWORD || "dev@clocktracker.app"
+
+  const data = await supabase.auth.signUp({
+    email,
+    password: myPassword,
+  });
+
+  const me = await prisma.userSettings.create({
     data: {
-      user_id: "52a24807-0789-4cb3-8fd2-155b465a4e63",
-      username: "lindsaykwardell",
+      user_id: data.data.user.id,
+      username: myUsername,
       finished_welcome: true,
       avatar:
-        "https://cdn.discordapp.com/avatars/645112854265069591/5fd0619567d5a1799be521833cfa8168.png",
-      email: "veryme@me.me",
-      display_name: "Lindsay Wardell 🏳️‍⚧️",
-      bio: "Writing code, killing demons, even when evil.",
+        "https://fly.storage.tigris.dev/clocktracker-storage/avatars/14a762ee-3909-4e9a-a613-cb27b92c17b8",
+      email,
+      display_name: myUsername,
+      bio: "During a hellish thunderstorm, a scream echoes through the sleepy town of Ravenswood Bluff. The townsfolk rush to investigate and find the beloved local storyteller has been murdered, their body hanging limp from the clocktower. As blood drips onto the cobblestones below, a realisation slowly dawns… a demon has been unleashed, killing by night and taking on human form by day. Can good find the demon in time? Or will evil overrun this once peaceful town?",
       is_admin: true,
       privacy: "FRIENDS_ONLY",
       city_id: portland.id,
@@ -680,7 +692,7 @@ async function main() {
     },
   });
 
-  const users = [testUser, testUser2, lindsaykwardell];
+  const users = [testUser, testUser2, me];
 
   for (let i = 0; i < 100; i++) {
     const { username, display_name, randomRole } = generateName();
@@ -747,7 +759,7 @@ async function main() {
     data: [
       {
         user_id: testUser.user_id,
-        from_user_id: lindsaykwardell.user_id,
+        from_user_id: me.user_id,
         accepted: true,
       },
       {
@@ -762,10 +774,10 @@ async function main() {
     data: [
       {
         user_id: testUser.user_id,
-        friend_id: lindsaykwardell.user_id,
+        friend_id: me.user_id,
       },
       {
-        user_id: lindsaykwardell.user_id,
+        user_id: me.user_id,
         friend_id: testUser.user_id,
       },
       {
@@ -1000,12 +1012,12 @@ async function main() {
     false,
     [
       {
-        user_id: lindsaykwardell.user_id,
+        user_id: me.user_id,
       },
     ],
     [
       "https://clocktracker.app/",
-      "https://twitter.com/lindsaykwardell",
+      "https://twitter.com/me",
       "https://discord.gg/KwMz8ThamT",
     ],
     portland
@@ -1032,7 +1044,7 @@ async function main() {
   for (const index in users) {
     const user = users[index];
     const gameCount = (() => {
-      if (user.user_id === lindsaykwardell.user_id) {
+      if (user.user_id === me.user_id) {
         return 100;
       } else if (user.user_id === testUser.user_id) {
         return 200;
@@ -1187,6 +1199,12 @@ async function main() {
   }
 
   console.log("Done!");
+  console.log(`Login details:
+    
+Email: ${email}
+Password: ${myPassword}
+
+Run "npm run dev" and go to http://localhost:3000/`);
 }
 
 function generateName() {

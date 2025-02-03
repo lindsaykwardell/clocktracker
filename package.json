@@ -4,6 +4,7 @@
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
+    "db:reset": "supabase db reset && prisma migrate reset --force",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
@@ -24,7 +25,7 @@
     "progress": "^2.0.3",
     "sass": "^1.79.3",
     "start-server-and-test": "^2.0.8",
-    "supabase": "^1.192.5",
+    "supabase": "^1.226.4",
     "typescript": "^5.6.2"
   },
   "dependencies": {
