@@ -1,82 +1,56 @@
 <template>
   <NuxtPage />
-  <!-- <AnnouncementDialog v-if="shouldShowAnnouncement" id="sept-2024">
+  <AnnouncementDialog id="fundraising-0225">
     <template #title>
       <h1 class="text-2xl font-bold font-sorts">
-        Changelog for September 2024
+        Changelog
       </h1>
       <div class="text-lg text-stone-400">{{ formattedAnnouncementDate }}</div>
     </template>
     <p class="p-2">
-      There's a number of fun changes that have come out this month! Here are the changes for September 2024:
+      There's been a large number of changes since the last update, so I wanted to
+      take a moment to highlight some of the most important ones. 
+    </p>
+    <p class="p-2">
+      Before we dive in, though, ClockTracker is a free and open-source project, but it costs to run the servers and services. Please consider supporting this project on Ko-Fi in order to ensure that it remains available for the Clocktower community!
+    </p>
+    <p class="p-2">
+      You can support ClockTracker by using <a href="https://ko-fi.com/clocktracker" class="text-blue-500 hover:underline">our Ko-Fi page</a>!
+    </p>
+    <p class="p-2">
+      With that out of the way, here's a summary of the changes:
     </p>
     <ul class="list-disc list-inside p-2">
       <li>
-        The new Boffin role has been added to the list of roles.
+        Enable claiming seats in an existing game (as long as you are friends with or in a community with the game's owner)
       </li>
       <li>
-        Add a new "Dashboard" page that shows recent activity and upcoming events the user has signed up for.
+        Implement geolocation for finding communities and events
       </li>
       <li>
-        Add a public profile page for users, displaying favorite games and all played roles.
+        Implement color shifting tokens depending on their alignment
       </li>
       <li>
-        Add percentages to charts (instead of just the total count).
+        When entering a grimoire, only display the tokens of players with details. This allows for "empty seats" if travelers enter late or leave early.
       </li>
       <li>
-        Add links to communities on the "Communities" page.
+        Enable creating private events (rather than just community-based events)
       </li>
       <li>
-        Limit games shown on the roles and scripts page to the current user's, instead of all public games in the database.
+        Added support and documentation for running a development version of ClockTracker locally
       </li>
       <li>
-        Add functionality to copy a grimoire from a previous game.
+        Auto focus the search box on the role selection dialog, and auto select the first option when "Enter" (or "Return") is pressed.
       </li>
       <li>
-        Add support for up to 25 players in a game.
-      </li>
-      <li>
-        Add new date, player count, script, and location filters to the games view.
-      </li>
-      <li>
-        Allow users to tag themselves as a co-storyteller for a game.
-      </li>
-      <li>
-        Improve search functionality.
-      </li>
-      <li>
-        Improve the style of the "Games over time" chart.
-      </li>
-      <li>
-        Improve transitions between pages to be smoother.
-      </li>
-      <li>
-        Properly alphabetize the roles in the "all roles" view of player profiles.
-      </li>
-      <li>
-        Expand the range for games to be merged so that they don't need to be recorded on the same exact date.
-      </li>
-      <li>
-        Change how saving a game works to only warn users if the game is being created on the current day.
-      </li>
-      <li>
-        When multiple games are being edited, the user is now returned to the games list instead of the dashbaord.
-      </li>
-      <li>
-        Fix a bug related to displaying stats in scripts.
-      </li>
-      <li>
-        Fix multiple bugs related to fetching roles for scripts.
-      </li>
-      <li>
-        Fix a bug where a player name in the grimoire would try to default to a previously-entered name that was similar.
+        Lots of bugfixes and performance improvements
       </li>
     </ul>
     <p class="p-2">
       Please let me know on Discord if you have any issues or feedback. Thank
       you!
     </p>
-  </AnnouncementDialog> -->
+  </AnnouncementDialog>
   <VitePwaManifest />
 </template>
 
@@ -135,7 +109,7 @@ watch(
   }
 );
 
-const announcementDate = dayjs.tz("2024-10-01", "America/Los_Angeles");
+const announcementDate = dayjs.tz("2025-02-03", "America/Los_Angeles");
 const maintenanceMode = featureFlags.maintenanceIsScheduled;
 
 const formattedAnnouncementDate = computed(() => {
