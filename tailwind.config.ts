@@ -6,7 +6,7 @@ export default <Partial<Config>>{
   theme: {
     extend: {
       fontFamily: {
-        dumbledor: ["Dumbledor", "serif"],
+        sorts: ["Sorts Mill Goudy", "serif"],
         gothic: ["Trade Gothic", "sans-serif"],
       },
       colors: {

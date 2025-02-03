@@ -1,15 +1,13 @@
 <template>
   <component :is="template" moderatorOnly :slug="existingEvent.community?.slug">
-    <h2 class="font-dumbledor text-2xl lg:text-3xl my-4 text-center">
-      Edit Event
-    </h2>
+    <h2 class="font-sorts text-2xl lg:text-3xl my-4 text-center">Edit Event</h2>
     <EventEditor
       :event="event"
       :inFlight="inFlight"
       :errors="errors"
       @save="saveEvent"
     />
-    <h3 class="font-dumbledor text-xl lg:text-2xl my-4 text-center">
+    <h3 class="font-sorts text-xl lg:text-2xl my-4 text-center">
       Registered Players
     </h3>
     <ClientOnly>

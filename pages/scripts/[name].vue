@@ -13,12 +13,12 @@
           />
           <div class="flex flex-col md:flex-row gap-4 items-center">
             <div class="flex-grow">
-              <h2 class="text-3xl font-dumbledor">
+              <h2 class="text-3xl font-sorts">
                 {{ script.name }}
               </h2>
               <div class="flex flex-col md:flex-row gap-2">
                 <div
-                  class="font-dumbledor text-lg font-bold bottom-[20px] text-stone-500"
+                  class="font-sorts text-lg font-bold bottom-[20px] text-stone-500"
                 >
                   By {{ script.author }}
                 </div>
@@ -27,7 +27,7 @@
                 v-if="scripts.some((s) => s.version)"
                 class="flex flex-col md:flex-row gap-2"
               >
-                <div class="font-dumbledor text-lg font-bold bottom-[20px]">
+                <div class="font-sorts text-lg font-bold bottom-[20px]">
                   <select
                     v-model="version"
                     class="bg-stone-100 text-stone-900 rounded-md p-2"
@@ -46,7 +46,7 @@
           </div>
           <div v-for="roleGroup in roleGroups" class="break-inside-avoid">
             <template v-if="roleGroup.roles.length">
-              <h3 class="mt-4 mb-2 mx-4 text-xl font-bold font-dumbledor">
+              <h3 class="mt-4 mb-2 mx-4 text-xl font-bold font-sorts">
                 {{ roleGroup.name }}
               </h3>
               <div class="flex flex-wrap justify-around gap-3 p-4">
@@ -158,14 +158,14 @@
             </svg>
           </a>
           <hr class="border-stone-400 w-full" />
-          <h3 class="font-dumbledor text-xl text-center">Activity</h3>
+          <h3 class="font-sorts text-xl text-center">Activity</h3>
           <div class="m-auto h-[75px]">
             <Line :data="past12MonthsData" :options="past12MonthsOptions" />
           </div>
           <div class="text-right">{{ scriptStats.count }} games played</div>
           <div class="text-right">{{ averageGamesPlayed }} games per week</div>
           <hr class="border-stone-400 w-full" />
-          <h3 class="font-dumbledor text-xl text-center">Win Rate</h3>
+          <h3 class="font-sorts text-xl text-center">Win Rate</h3>
           <div class="m-auto w-1/2">
             <Pie :data="winRatioData" :options="winRatioOptions" />
           </div>
@@ -174,7 +174,7 @@
           </div>
           <hr class="border-stone-400 w-full" />
           <div class="break-inside-avoid">
-            <h3 class="font-dumbledor text-xl text-center">Role Frequency</h3>
+            <h3 class="font-sorts text-xl text-center">Role Frequency</h3>
             <table class="w-full">
               <thead>
                 <tr>

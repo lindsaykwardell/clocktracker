@@ -51,7 +51,7 @@
                 }"
               />
               <div class="flex-grow">
-                <h2 class="text-3xl font-dumbledor">
+                <h2 class="text-3xl font-sorts">
                   <nuxt-link
                     class="hover:underline"
                     :to="`/@${player.data.username}`"
@@ -62,13 +62,13 @@
                 <div class="flex flex-col md:flex-row gap-2">
                   <div
                     v-if="game.data.is_storyteller"
-                    class="font-dumbledor text-xl font-bold bottom-[20px]"
+                    class="font-sorts text-xl font-bold bottom-[20px]"
                   >
                     Storyteller
                   </div>
                   <div
                     v-for="(character, i) in game.data.player_characters"
-                    class="font-dumbledor text-xl font-bold bottom-[20px]"
+                    class="font-sorts text-xl font-bold bottom-[20px]"
                     :class="{
                       'text-blue-800': character.alignment === 'GOOD',
                       'text-red-800': character.alignment === 'EVIL',
@@ -101,7 +101,7 @@
                 v-if="
                   last_character.name || last_character.alignment !== 'NEUTRAL'
                 "
-                class="font-dumbledor text-2xl"
+                class="font-sorts text-2xl"
               >
                 <nuxt-link
                   :to="`/roles/${last_character?.role_id}`"
@@ -293,7 +293,7 @@
           />
         </div>
         <div v-if="game.data.notes || game.data.image_urls.length" class="px-4">
-          <h3 class="font-dumbledor text-2xl">Notes and Images</h3>
+          <h3 class="font-sorts text-2xl">Notes and Images</h3>
           <div
             v-if="game.data.notes"
             class="notes bg-stone-100 p-4 shadow-lg my-3"
@@ -340,7 +340,7 @@
             type="button"
             @click="grimPage -= 1"
             v-if="grimPage !== 0"
-            class="absolute bottom-0 left-1 flex items-center font-dumbledor z-10"
+            class="absolute bottom-0 left-1 flex items-center font-sorts z-10"
           >
             <span
               class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded"
@@ -352,7 +352,7 @@
             v-if="grimPage !== game.data.grimoire.length - 1"
             type="button"
             @click="grimPage += 1"
-            class="absolute bottom-0 right-1 flex items-center font-dumbledor z-10"
+            class="absolute bottom-0 right-1 flex items-center font-sorts z-10"
           >
             <span
               class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded"
@@ -377,7 +377,7 @@
         </div>
         <Dialog v-model:visible="showSimilarGamesDialog" size="lg">
           <template #title>
-            <h2 class="text-2xl font-dumbledor">Similar Games</h2>
+            <h2 class="text-2xl font-sorts">Similar Games</h2>
           </template>
           <GameOverviewGrid
             :games="similarGames"
@@ -1007,22 +1007,22 @@ const tour = [
 <style>
 .notes {
   h1 {
-    @apply text-3xl font-dumbledor;
+    @apply text-3xl font-sorts;
   }
   h2 {
-    @apply text-2xl font-dumbledor;
+    @apply text-2xl font-sorts;
   }
   h3 {
-    @apply text-xl font-dumbledor;
+    @apply text-xl font-sorts;
   }
   h4 {
-    @apply text-lg font-dumbledor;
+    @apply text-lg font-sorts;
   }
   h5 {
-    @apply text-base font-dumbledor;
+    @apply text-base font-sorts;
   }
   h6 {
-    @apply text-sm font-dumbledor;
+    @apply text-sm font-sorts;
   }
 
   ul {
