@@ -1,7 +1,7 @@
 <template>
   <component :is="template" moderatorOnly :slug="slug">
     <template v-if="!slug || community_id">
-      <h2 class="font-dumbledor text-2xl lg:text-3xl my-4 text-center">
+      <h2 class="font-sorts text-2xl lg:text-3xl my-4 text-center">
         Create Event
       </h2>
       <EventEditor

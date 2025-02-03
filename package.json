@@ -34,6 +34,7 @@
     "@aws-sdk/lib-storage": "^3.654.0",
     "@aws-sdk/s3-request-presigner": "^3.654.0",
     "@faker-js/faker": "^9.2.0",
+    "@fontsource/sorts-mill-goudy": "^5.1.1",
     "@globalhive/vuejs-tour": "^1.6.1",
     "@headlessui/vue": "^1.7.23",
     "@pinia/nuxt": "^0.7.0",

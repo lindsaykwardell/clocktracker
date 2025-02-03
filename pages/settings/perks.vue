@@ -3,7 +3,7 @@
     <section
       class="w-full flex flex-col items-center justify-center gap-12 py-4"
     >
-      <h2 class="font-dumbledor text-4xl text-center">Ko-Fi Perks</h2>
+      <h2 class="font-sorts text-4xl text-center">Ko-Fi Perks</h2>
       <form
         v-if="kofiLevel"
         class="flex flex-col gap-4 items-center w-full"
@@ -40,11 +40,11 @@
           </a>
         </p>
       </div>
-      <!-- <h2 class="font-dumbledor text-4xl text-center">
+      <!-- <h2 class="font-sorts text-4xl text-center">
         Current Supporter Perks
       </h2> -->
       <!-- <section>
-        <h3 class="font-dumbledor text-2xl">Advanced Game Editor</h3>
+        <h3 class="font-sorts text-2xl">Advanced Game Editor</h3>
         <p class="p-2">
           I have been working on some adjustments to the game editor. The most
           obvious change is to how the grimoire is entered. Since Clocktracker

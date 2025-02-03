@@ -1,7 +1,7 @@
 <template>
   <div class="chart-container">
     <div class="flex gap-2 justify-center">
-      <div class="text-xl font-dumbledor text-center">{{ options.title }}</div>
+      <div class="text-xl font-sorts text-center">{{ options.title }}</div>
       <div v-if="showControls" class="flex gap-2">
         <nuxt-link :to="`/charts/editor?chart_id=${options.id}`">
           <svg
@@ -147,13 +147,7 @@ const chartData = computed(() => {
     ).length;
     const total = townsfolk + outsider + minion + demon + traveler;
     return {
-      labels: [
-        `Townsfolk`,
-        `Outsider`,
-        `Minion`,
-        `Demon`,
-        `Traveler`,
-      ],
+      labels: [`Townsfolk`, `Outsider`, `Minion`, `Demon`, `Traveler`],
       datasets: getPivot(
         games,
         [
@@ -206,10 +200,7 @@ const chartData = computed(() => {
     ).length;
     const total = good + evil;
     return {
-      labels: [
-        `Good`,
-        `Evil`,
-      ],
+      labels: [`Good`, `Evil`],
       datasets: getPivot(
         games,
         [
@@ -283,12 +274,7 @@ const chartData = computed(() => {
     ).length;
     const total = teensy + small + medium + large;
     return {
-      labels: [
-        `Teensy`,
-        `1 Minion`,
-        `2 Minions`,
-        `3 Minions`,
-      ],
+      labels: [`Teensy`, `1 Minion`, `2 Minions`, `3 Minions`],
       datasets: getPivot(
         games,
         [
@@ -337,10 +323,7 @@ const chartData = computed(() => {
     }).length;
     const total = win + loss;
     return {
-      labels: [
-        `Win`,
-        `Loss`,
-      ],
+      labels: [`Win`, `Loss`],
       datasets: getPivot(
         games,
         [

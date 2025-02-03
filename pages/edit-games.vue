@@ -1,7 +1,7 @@
 <template>
   <StandardTemplate>
     <section class="py-6">
-      <h2 class="font-dumbledor text-4xl text-center">Edit Multiple Games</h2>
+      <h2 class="font-sorts text-4xl text-center">Edit Multiple Games</h2>
       <ClientOnly>
         <GameEditor
           :game="game"

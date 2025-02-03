@@ -2,7 +2,7 @@
   <template v-if="me.status === Status.SUCCESS">
     <div class="dashboard">
       <div class="content hidden lg:flex flex-col gap-4 p-4 dark:bg-stone-950">
-        <h1 class="text-xl font-dumbledor text-center">My Profile</h1>
+        <h1 class="text-xl font-sorts text-center">My Profile</h1>
         <ul class="px-4">
           <li>
             <nuxt-link
@@ -27,7 +27,7 @@
           </li>
         </ul>
         <hr class="border-stone-600" />
-        <h1 class="text-xl font-dumbledor text-center">Role of the Day</h1>
+        <h1 class="text-xl font-sorts text-center">Role of the Day</h1>
         <nuxt-link
           class="flex flex-col items-center"
           :to="`/roles/${roleOfTheDay.data.value?.id}`"
@@ -45,7 +45,7 @@
         </nuxt-link>
         <hr class="border-stone-600" />
         <template v-if="games.getRecentScripts.length > 0">
-          <h1 class="text-xl font-dumbledor text-center">Recent Scripts</h1>
+          <h1 class="text-xl font-sorts text-center">Recent Scripts</h1>
           <ul class="px-4">
             <li v-for="script in games.getRecentScripts">
               <nuxt-link :to="script.url" class="hover:underline">
@@ -56,7 +56,7 @@
           <hr class="border-stone-600" />
         </template>
         <template v-if="(myCommunities?.length ?? 0) > 0">
-          <h1 class="font-dumbledor text-xl text-center">Communities</h1>
+          <h1 class="font-sorts text-xl text-center">Communities</h1>
           <ul>
             <li
               v-for="community in myCommunities"

@@ -9,7 +9,7 @@
         class="w-36 md:w-48 h-36 md:h-48"
       />
       <div class="flex-grow flex flex-col gap-2">
-        <h2 class="font-dumbledor text-xl lg:text-2xl">
+        <h2 class="font-sorts text-xl lg:text-2xl">
           {{ script.name }}
         </h2>
         <p class="dark:text-stone-200 text-sm lg:text-base">

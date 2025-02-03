@@ -6,13 +6,13 @@
         alt="ClockTracker Logo"
         class="w-40 md:w-52 pb-8 md:pb-20"
       />
-      <h1 class="text-center font-dumbledor">
+      <h1 class="text-center font-sorts">
         <span class="text-3xl md:text-5xl">ClockTracker</span> <br />
         <span class="text-2xl md:text-4xl">Year in Review</span> <br />
         <span class="text-xl md:text-3xl">{{ data.year }}</span>
       </h1>
       <Avatar :value="data.avatar" size="lg" />
-      <h2 class="text-center font-dumbledor text-2xl md:text-3xl">
+      <h2 class="text-center font-sorts text-2xl md:text-3xl">
         {{ data.display_name }}
       </h2>
     </section>
@@ -23,7 +23,7 @@
         'bg-blue-950': mostCommonRole?.role.initial_alignment === 'GOOD',
       }"
     >
-      <h3 class="text-center font-dumbledor text-3xl md:text-4xl pb-4">
+      <h3 class="text-center font-sorts text-3xl md:text-4xl pb-4">
         Games Played
       </h3>
       <div class="flex flex-col md:flex-row justify-around items-center gap-12">
@@ -64,7 +64,7 @@
       </div>
     </section>
     <section v-if="data.games_storytold > 0" class="bg-primary-darkest">
-      <h3 class="text-center font-dumbledor text-3xl md:text-4xl pb-4">
+      <h3 class="text-center font-sorts text-3xl md:text-4xl pb-4">
         Storytelling
       </h3>
       <div class="flex flex-col md:flex-row justify-around items-center gap-12">
@@ -115,7 +115,7 @@
           Math.round((data.win_rate / data.games_played) * 100) < 0.5,
       }"
     >
-      <h3 class="text-center font-dumbledor text-3xl md:text-4xl pb-4">
+      <h3 class="text-center font-sorts text-3xl md:text-4xl pb-4">
         Win / Loss
       </h3>
       <div class="flex flex-col md:flex-row justify-around items-center gap-12">
@@ -170,7 +170,7 @@
     </section>
     <section v-if="data.roles.length > 0" class="bg-yellow-800">
       <!-- Most common roles -->
-      <h3 class="text-center font-dumbledor text-3xl md:text-4xl pb-4">
+      <h3 class="text-center font-sorts text-3xl md:text-4xl pb-4">
         Most Common Roles
       </h3>
       <div class="flex flex-col md:flex-row justify-around items-center gap-12">
@@ -200,7 +200,7 @@
     </section>
     <section v-if="data.roles.length > 0" class="bg-primary-dark">
       <!-- Least common roles -->
-      <h3 class="text-center font-dumbledor text-3xl md:text-4xl pb-4">
+      <h3 class="text-center font-sorts text-3xl md:text-4xl pb-4">
         Least Common Roles
       </h3>
       <div class="flex flex-col md:flex-row justify-around items-center gap-12">
@@ -230,7 +230,7 @@
     </section>
     <section v-if="data.largest_character_change !== null">
       <!-- Largest character change -->
-      <h3 class="text-center font-dumbledor text-3xl md:text-4xl pb-4">
+      <h3 class="text-center font-sorts text-3xl md:text-4xl pb-4">
         Largest Character Change
       </h3>
       <div class="flex flex-col md:flex-row justify-around items-center gap-12">
@@ -286,7 +286,7 @@
     >
       <div class="bg-black/45 w-screen h-screen">
         <!-- Most common scripts -->
-        <h3 class="text-center font-dumbledor text-3xl md:text-4xl pb-4">
+        <h3 class="text-center font-sorts text-3xl md:text-4xl pb-4">
           Most Common Scripts
         </h3>
         <div
@@ -324,7 +324,7 @@
     >
       <div class="bg-black/45 w-screen h-screen">
         <!-- Most common scripts -->
-        <h3 class="text-center font-dumbledor text-3xl md:text-4xl pb-4">
+        <h3 class="text-center font-sorts text-3xl md:text-4xl pb-4">
           Most Commonly Storytold Scripts
         </h3>
         <div
@@ -358,9 +358,7 @@
       class="bg-gradient-to-br from-red-950 via-primary-darkest to-blue-950"
     >
       <!-- Most common players -->
-      <h3 class="text-center font-dumbledor text-3xl md:text-4xl pb-4">
-        Players
-      </h3>
+      <h3 class="text-center font-sorts text-3xl md:text-4xl pb-4">Players</h3>
       <div class="flex flex-col md:flex-row justify-around items-center gap-12">
         <div class="text-center flex flex-col gap-5">
           <div class="text-lg md:text-3xl">
@@ -394,7 +392,7 @@
     </section>
     <section>
       <!-- Wrap up and farewell -->
-      <h3 class="text-center font-dumbledor text-3xl md:text-4xl pb-4">
+      <h3 class="text-center font-sorts text-3xl md:text-4xl pb-4">
         That's a wrap!
       </h3>
 
@@ -461,13 +459,13 @@
         alt="ClockTracker Logo"
         class="w-40 md:w-52 pb-8 md:pb-20"
       />
-      <h1 class="text-center font-dumbledor">
+      <h1 class="text-center font-sorts">
         <span class="text-3xl md:text-5xl">ClockTracker</span> <br />
         <span class="text-2xl md:text-4xl">Year in Review</span> <br />
         <span class="text-xl md:text-3xl">{{ data.year }}</span>
       </h1>
       <Avatar :value="data.avatar" size="lg" />
-      <h2 class="text-center font-dumbledor text-2xl md:text-3xl">
+      <h2 class="text-center font-sorts text-2xl md:text-3xl">
         {{ data.display_name }}
       </h2>
     </section>
@@ -529,8 +527,9 @@ const mostWinningRole = computed(() => {
   }
 
   return {
-    role: data.value.roles.find((role) => role.role?.id === winningRole.role_id)!
-      .role,
+    role: data.value.roles.find(
+      (role) => role.role?.id === winningRole.role_id
+    )!.role,
     win_count: winningRole.win_count,
   };
 });

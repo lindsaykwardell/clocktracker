@@ -20,7 +20,7 @@
         </Button>
       </div>
       <div class="w-full lg:w-[800px] m-auto flex flex-col items-center gap-4">
-        <h1 class="font-dumbledor text-4xl lg:text-3xl">Communities</h1>
+        <h1 class="font-sorts text-4xl lg:text-3xl">Communities</h1>
         <CommunityCard
           v-for="community in myCommunities"
           :community="community"
