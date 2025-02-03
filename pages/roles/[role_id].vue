@@ -10,10 +10,10 @@
           <Token :character="character" size="lg" class="md:hidden m-auto" />
           <div class="flex flex-col md:flex-row gap-4 items-center">
             <div class="flex-grow">
-              <h1 class="text-center md:text-left text-3xl font-dumbledor">
+              <h1 class="text-center md:text-left text-3xl font-sorts">
                 {{ role_data.role.name }}
               </h1>
-              <h2 class="text-center md:text-left text-xl font-dumbledor">
+              <h2 class="text-center md:text-left text-xl font-sorts">
                 {{ role_data.role.type }}
               </h2>
               <p
@@ -87,14 +87,14 @@
             </svg>
           </a>
           <hr class="border-stone-400 w-full" />
-          <h3 class="font-dumbledor text-xl text-center">Activity</h3>
+          <h3 class="font-sorts text-xl text-center">Activity</h3>
           <div class="m-auto h-[75px]">
             <Line :data="past12MonthsData" :options="past12MonthsOptions" />
           </div>
           <div class="text-right">{{ role_data.count }} games played</div>
           <div class="text-right">{{ averageGamesPlayed }} games per week</div>
           <hr class="border-stone-400 w-full" />
-          <h3 class="font-dumbledor text-xl text-center">Win Rate</h3>
+          <h3 class="font-sorts text-xl text-center">Win Rate</h3>
           <div class="m-auto w-1/2">
             <Pie :data="winRatioData" :options="winRatioOptions" />
           </div>
@@ -103,7 +103,7 @@
           </div>
           <hr class="border-stone-400 w-full" />
           <div class="break-inside-avoid">
-            <h3 class="font-dumbledor text-xl text-center">Popular Scripts</h3>
+            <h3 class="font-sorts text-xl text-center">Popular Scripts</h3>
             <table class="w-full">
               <thead>
                 <tr>

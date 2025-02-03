@@ -11,7 +11,7 @@
         }"
       >
         <button @click="backOneMonth">＜</button>
-        <h2 class="font-dumbledor">
+        <h2 class="font-sorts">
           {{ formattedYearAndMonth }}
         </h2>
         <button @click="forwardOneMonth">＞</button>

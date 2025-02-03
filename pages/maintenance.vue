@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col items-center justify-center h-screen">
-    <h1 class="text-4xl font-bold font-dumbledor text-center">
+    <h1 class="text-4xl font-bold font-sorts text-center">
       Maintenance in Progress
     </h1>
     <img src="/img/role/engineer.png" class="w-[300px] h-[300px]" />

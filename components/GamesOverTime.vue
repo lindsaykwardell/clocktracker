@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h3 class="font-dumbledor text-2xl text-center">Games Over Time</h3>
+    <h3 class="font-sorts text-2xl text-center">Games Over Time</h3>
     <Line id="games-over-time" :data="chartData" :options="chartOptions" />
   </div>
 </template>

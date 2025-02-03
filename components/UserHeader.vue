@@ -11,7 +11,7 @@
           class="border-2 shadow-xl flex-shrink row-span-3"
           size="lg"
         />
-        <h3 class="font-dumbledor text-2xl xl:text-3xl col-span-2">
+        <h3 class="font-sorts text-2xl xl:text-3xl col-span-2">
           {{ player.display_name }}
         </h3>
         <div class="row-start-2 col-start-2">
@@ -72,9 +72,7 @@
               v-if="gamesAsPlayer.length"
               class="flex gap-1 items-center"
               v-tooltip="
-                `Player in ${
-                  gamesAsPlayer.length
-                } games (Most common role: ${
+                `Player in ${gamesAsPlayer.length} games (Most common role: ${
                   mostCommonCharacter?.name || ''
                 })`
               "
@@ -102,7 +100,10 @@
           v-if="player.communities?.length"
           class="flex flex-wrap justify-start row-start-4 col-span-3"
         >
-          <nuxt-link v-for="community in player.communities" :to="`/community/${community.slug}`">
+          <nuxt-link
+            v-for="community in player.communities"
+            :to="`/community/${community.slug}`"
+          >
             <Avatar
               :value="community.icon"
               size="xs"

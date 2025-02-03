@@ -281,7 +281,7 @@
       <div
         class="border border-stone-600 rounded p-4 flex justify-center items-center aspect-square"
       >
-        <Token outline size="lg" class="font-dumbledor">
+        <Token outline size="lg" class="font-sorts">
           <button type="button" @click="addCharacter" class="w-full h-full">
             Add Character
           </button>
@@ -307,7 +307,7 @@
         }"
       >
         <div
-          class="font-dumbledor text-white bg-black/60 p-4 text-xl rounded shadow-md text-center"
+          class="font-sorts text-white bg-black/60 p-4 text-xl rounded shadow-md text-center"
         >
           <p class="p-2">Select player count to begin</p>
           <p class="p-2">OR</p>
@@ -360,7 +360,7 @@
           type="button"
           @click="pageBackward"
           v-if="grimPage !== 0"
-          class="absolute bottom-1 left-1 font-dumbledor"
+          class="absolute bottom-1 left-1 font-sorts"
           font-size="sm"
         >
           <span> {{ "<" }} Previous page </span>
@@ -368,7 +368,7 @@
         <Button
           type="button"
           @click="pageForward"
-          class="absolute bottom-1 right-1 font-dumbledor"
+          class="absolute bottom-1 right-1 font-sorts"
           font-size="sm"
         >
           <span v-if="grimPage <= game.grimoire.length - 1">
@@ -440,7 +440,7 @@
             v-if="game.demon_bluffs.length < 3"
             class="border border-stone-600 rounded p-4 flex justify-center items-center aspect-square"
           >
-            <Token outline size="md" class="font-dumbledor">
+            <Token outline size="md" class="font-sorts">
               <button
                 type="button"
                 @click="addDemonBluff"
@@ -491,7 +491,7 @@
           <div
             class="border border-stone-600 rounded p-4 flex justify-center items-center aspect-square"
           >
-            <Token outline size="md" class="font-dumbledor">
+            <Token outline size="md" class="font-sorts">
               <button
                 type="button"
                 @click="addFabled"
@@ -1093,15 +1093,19 @@ watchEffect(async () => {
 
     if (fabled.length > 0) {
       fabled.forEach((fabledRole) => {
-        if (!props.game.fabled.some((fabled) => fabled.role?.token_url === fabledRole.token_url))
-        props.game.fabled.push({
-          name: fabledRole.name,
-          role_id: fabledRole.id,
-          role: {
-            token_url: fabledRole.token_url,
-            type: fabledRole.type,
-          },
-        });
+        if (
+          !props.game.fabled.some(
+            (fabled) => fabled.role?.token_url === fabledRole.token_url
+          )
+        )
+          props.game.fabled.push({
+            name: fabledRole.name,
+            role_id: fabledRole.id,
+            role: {
+              token_url: fabledRole.token_url,
+              type: fabledRole.type,
+            },
+          });
       });
     }
 

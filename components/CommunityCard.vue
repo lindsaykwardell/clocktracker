@@ -6,7 +6,7 @@
     <div class="flex flex-col md:flex-row gap-3 items-top">
       <Avatar :value="community.icon" size="lg" class="m-auto" />
       <div class="flex-grow">
-        <h2 class="font-dumbledor text-xl lg:text-2xl">
+        <h2 class="font-sorts text-xl lg:text-2xl">
           {{ community.name }}
         </h2>
         <div

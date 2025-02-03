@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h3 class="font-dumbledor text-2xl text-center">Top Characters</h3>
+    <h3 class="font-sorts text-2xl text-center">Top Characters</h3>
     <ol class="list-decimal columns-2 list-inside">
       <li v-for="character in characters" :key="character.name">
         <a

@@ -93,14 +93,14 @@
             </template>
 
             <template #no-content>
-              <p class="text-center text-2xl my-4 font-dumbledor">
+              <p class="text-center text-2xl my-4 font-sorts">
                 No tagged games
               </p>
             </template>
           </UserGamesView>
         </template>
         <template v-else>
-          <p class="text-center text-2xl my-4 font-dumbledor">
+          <p class="text-center text-2xl my-4 font-sorts">
             This account is private
           </p>
         </template>
@@ -108,7 +108,7 @@
       <template v-else-if="playerFetchStatus === Status.ERROR">
         <div class="flex gap-3 items-center justify-center h-screen">
           <img src="/img/role/imp.png" class="inline-block w-16 h-16" />
-          <p class="text-center text-2xl my-4 font-dumbledor">
+          <p class="text-center text-2xl my-4 font-sorts">
             This account is not available
           </p>
           <img src="/img/role/imp.png" class="inline-block w-16 h-16" />

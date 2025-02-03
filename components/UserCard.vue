@@ -11,7 +11,7 @@
       />
       <div class="flex flex-col md:flex-row md:items-center gap-3 w-full">
         <div class="flex-grow flex flex-col">
-          <h3 class="font-dumbledor text-xl">
+          <h3 class="font-sorts text-xl">
             {{ player.display_name }}
           </h3>
           <div class="dark:text-stone-400">

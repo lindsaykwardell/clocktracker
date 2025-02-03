@@ -6,7 +6,7 @@
     <div class="flex flex-col md:flex-row gap-3 items-top">
       <Token :character="character" size="lg" />
       <div class="flex-grow flex flex-col gap-2">
-        <h2 class="font-dumbledor text-xl lg:text-2xl">
+        <h2 class="font-sorts text-xl lg:text-2xl">
           {{ role.name }}
         </h2>
 

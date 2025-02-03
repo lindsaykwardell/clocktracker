@@ -13,7 +13,7 @@
             />
             <div class="flex-grow flex flex-col justify-start gap-3 w-full">
               <div class="flex flex-col items-center md:items-start">
-                <h1 class="font-dumbledor text-1xl lg:text-2xl">
+                <h1 class="font-sorts text-1xl lg:text-2xl">
                   {{ community.data.name }}
                 </h1>
                 <div
@@ -185,10 +185,14 @@ function join() {
 }
 
 watch(community, () => {
-  if (community.value.status === Status.SUCCESS && props.moderatorOnly && !isModerator.value) {
+  if (
+    community.value.status === Status.SUCCESS &&
+    props.moderatorOnly &&
+    !isModerator.value
+  ) {
     router.push(`/community/${slug}`);
   }
-})
+});
 
 onMounted(() => {
   communities.fetchCommunity(slug);

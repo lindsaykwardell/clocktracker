@@ -15,7 +15,7 @@
       <LoginWithDiscord />
     </div>
     <h1
-      class="text-xl sm:text-2xl md:text-4xl font-bold font-dumbledor text-center"
+      class="text-xl sm:text-2xl md:text-4xl font-bold font-sorts text-center"
     >
       Tell Your Clocktower Story
     </h1>
@@ -83,7 +83,7 @@
       </p>
     </section>
     <h1
-      class="text-xl sm:text-2xl md:text-4xl font-bold font-dumbledor text-center"
+      class="text-xl sm:text-2xl md:text-4xl font-bold font-sorts text-center"
     >
       What will your story be?
     </h1>
