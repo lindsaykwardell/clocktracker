@@ -11,7 +11,7 @@
         >
           Upload new avatar
         </button>
-        <h1 class="font-dumbledor text-lg hidden md:block py-2">
+        <h1 class="font-sorts text-lg hidden md:block py-2">
           {{ displayName }}
         </h1>
         <ul class="w-full py-4">

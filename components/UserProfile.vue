@@ -18,7 +18,7 @@
           </button>
         </div>
       </template>
-      <p v-else class="text-center text-2xl font-dumbledor">No games yet!</p>
+      <p v-else class="text-center text-2xl font-sorts">No games yet!</p>
     </div>
     <div
       class="row-start-1 md:row-start-auto p-4 grid grid-cols-2 xl:grid-cols-4 gap-4"

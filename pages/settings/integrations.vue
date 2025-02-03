@@ -3,7 +3,7 @@
     <section
       class="w-full flex flex-col items-center justify-center gap-12 py-4"
     >
-      <h2 class="font-dumbledor text-4xl text-center">Integrations</h2>
+      <h2 class="font-sorts text-4xl text-center">Integrations</h2>
       <div class="text-left w-full">
         <h3 class="text-2xl">BoardGameGeek</h3>
         <p class="text-stone-500">

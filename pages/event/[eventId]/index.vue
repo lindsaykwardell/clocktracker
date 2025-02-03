@@ -182,7 +182,7 @@
         </template>
       </EventCard>
       <Dialog v-model:visible="showRegisterDialog" size="sm">
-        <h3 class="font-dumbledor text-xl lg:text-2xl mb-4 text-center">
+        <h3 class="font-sorts text-xl lg:text-2xl mb-4 text-center">
           Register
         </h3>
         <form

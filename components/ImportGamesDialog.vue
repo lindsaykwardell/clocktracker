@@ -1,7 +1,7 @@
 <template>
   <Dialog v-model:visible="show" size="sm">
     <template #title>
-      <h3 class="text-2xl font-bold font-dumbledor">Import Games</h3>
+      <h3 class="text-2xl font-bold font-sorts">Import Games</h3>
     </template>
     <div v-if="show" class="p-4">
       <template v-if="!inFlight">

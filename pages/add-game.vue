@@ -1,7 +1,7 @@
 <template>
   <StandardTemplate>
     <section class="py-6">
-      <h2 class="font-dumbledor text-4xl text-center">Add Game</h2>
+      <h2 class="font-sorts text-4xl text-center">Add Game</h2>
       <p class="text-center italic text-stone-400 pt-6 text-sm">
         Adding more than one game?
         <button

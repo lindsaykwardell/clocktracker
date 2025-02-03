@@ -2,9 +2,7 @@
   <Dialog v-model:visible="show" size="lg">
     <template #title>
       <div class="flex flex-col md:flex-row w-full gap-2">
-        <h2 class="flex-grow text-2xl font-bold font-dumbledor">
-          Select a Role
-        </h2>
+        <h2 class="flex-grow text-2xl font-bold font-sorts">Select a Role</h2>
         <label v-if="!hideAllRolesToggle" class="flex items-center">
           <input v-model="showAllRoles" type="checkbox" class="mr-2" />
           <span>All Roles</span>
@@ -26,7 +24,7 @@
     <div v-if="show">
       <div v-for="roleGroup in roleGroups">
         <template v-if="roleGroup.roles.length">
-          <h3 class="mt-4 mb-2 mx-4 text-xl font-bold font-dumbledor">
+          <h3 class="mt-4 mb-2 mx-4 text-xl font-bold font-sorts">
             {{ roleGroup.name }}
           </h3>
           <div class="flex flex-wrap justify-around gap-3 p-4">

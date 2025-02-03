@@ -2,7 +2,7 @@
   <NuxtPage />
   <!-- <AnnouncementDialog v-if="shouldShowAnnouncement" id="sept-2024">
     <template #title>
-      <h1 class="text-2xl font-bold font-dumbledor">
+      <h1 class="text-2xl font-bold font-sorts">
         Changelog for September 2024
       </h1>
       <div class="text-lg text-stone-400">{{ formattedAnnouncementDate }}</div>
@@ -81,6 +81,8 @@
 </template>
 
 <script setup lang="ts">
+import "@fontsource/sorts-mill-goudy";
+
 import {
   Chart as ChartJS,
   Title,
