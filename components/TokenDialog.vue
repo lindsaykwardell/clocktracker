@@ -11,14 +11,16 @@
           <input v-model="showFabled" type="checkbox" class="mr-2" />
           <span>Show Fabled</span>
         </label>
-        <input
-          v-model="roleFilter"
-          ref="roleFilterRef"
-          type="text"
-          placeholder="Filter roles"
-          class="p-2 mt-2 border border-gray-300 rounded-md text-black"
-          aria-label="Filter roles"
-        />
+        <form @submit.prevent="selectMatchingRole">
+          <input
+            v-model="roleFilter"
+            ref="roleFilterRef"
+            type="text"
+            placeholder="Filter roles"
+            class="p-2 mt-2 border border-gray-300 rounded-md text-black"
+            aria-label="Filter roles"
+          />
+        </form>
       </div>
     </template>
     <div v-if="show">
@@ -192,6 +194,15 @@ function formatRoleAsCharacter(
     alignment: role.type === "TRAVELER" ? "NEUTRAL" : role.initial_alignment,
     role,
   };
+}
+
+function selectMatchingRole() {
+  // Select the first role shown
+  if (filteredRoles.value.length) {
+    emit("selectRole", filteredRoles.value[0]);
+  } else {
+    emit("selectRole", blankRole.value);
+  }
 }
 
 watchEffect(() => {
