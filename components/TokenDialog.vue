@@ -2,9 +2,7 @@
   <Dialog v-model:visible="show" size="lg">
     <template #title>
       <div class="flex flex-col md:flex-row w-full gap-2">
-        <h2 class="flex-grow text-2xl font-bold font-dumbledor">
-          Select a Role
-        </h2>
+        <h2 class="flex-grow text-2xl font-bold font-sorts">Select a Role</h2>
         <label v-if="!hideAllRolesToggle" class="flex items-center">
           <input v-model="showAllRoles" type="checkbox" class="mr-2" />
           <span>All Roles</span>
@@ -13,20 +11,22 @@
           <input v-model="showFabled" type="checkbox" class="mr-2" />
           <span>Show Fabled</span>
         </label>
-        <input
-          v-model="roleFilter"
-          ref="roleFilterRef"
-          type="text"
-          placeholder="Filter roles"
-          class="p-2 mt-2 border border-gray-300 rounded-md text-black"
-          aria-label="Filter roles"
-        />
+        <form @submit.prevent="selectMatchingRole">
+          <input
+            v-model="roleFilter"
+            ref="roleFilterRef"
+            type="text"
+            placeholder="Filter roles"
+            class="p-2 mt-2 border border-gray-300 rounded-md text-black"
+            aria-label="Filter roles"
+          />
+        </form>
       </div>
     </template>
     <div v-if="show">
       <div v-for="roleGroup in roleGroups">
         <template v-if="roleGroup.roles.length">
-          <h3 class="mt-4 mb-2 mx-4 text-xl font-bold font-dumbledor">
+          <h3 class="mt-4 mb-2 mx-4 text-xl font-bold font-sorts">
             {{ roleGroup.name }}
           </h3>
           <div class="flex flex-wrap justify-around gap-3 p-4">
@@ -194,6 +194,15 @@ function formatRoleAsCharacter(
     alignment: role.type === "TRAVELER" ? "NEUTRAL" : role.initial_alignment,
     role,
   };
+}
+
+function selectMatchingRole() {
+  // Select the first role shown
+  if (filteredRoles.value.length) {
+    emit("selectRole", filteredRoles.value[0]);
+  } else {
+    emit("selectRole", blankRole.value);
+  }
 }
 
 watchEffect(() => {

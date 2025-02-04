@@ -114,7 +114,7 @@
         >
       </div>
       <h2
-        class="font-dumbledor"
+        class="font-sorts"
         :class="{
           'text-lg lg:text-xl': size !== 'sm',
           'text-base': size === 'sm',

@@ -3,7 +3,7 @@
     <section
       class="w-full flex flex-col items-center justify-center gap-12 py-4"
     >
-      <h2 class="font-dumbledor text-4xl text-center">Profile</h2>
+      <h2 class="font-sorts text-4xl text-center">Profile</h2>
       <form
         class="flex flex-col gap-4 items-center w-full"
         @submit.prevent="saveSettings"

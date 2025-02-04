@@ -4,7 +4,7 @@
     class="w-full h-screen flex flex-col items-center gap-6 py-4"
   >
     <img class="w-[300px]" src="/logo.png" alt="ClockTracker" />
-    <h1 class="text-stone-200 text-2xl font-dumbledor">
+    <h1 class="text-stone-200 text-2xl font-sorts">
       Welcome, {{ user?.user_metadata.full_name }}
     </h1>
     <form

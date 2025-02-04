@@ -2,9 +2,7 @@
   <Dialog v-model:visible="showScriptDialog">
     <template #title>
       <div class="flex">
-        <h2 class="text-2xl font-bold font-dumbledor flex-grow">
-          Select Script
-        </h2>
+        <h2 class="text-2xl font-bold font-sorts flex-grow">Select Script</h2>
         <button
           v-if="scriptSelected"
           @click.prevent="clearSelectedScript"

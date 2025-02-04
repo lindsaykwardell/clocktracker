@@ -1,7 +1,7 @@
 <template>
   <StandardTemplate>
     <section class="py-6">
-      <h2 class="font-dumbledor text-4xl text-center">Create Community</h2>
+      <h2 class="font-sorts text-4xl text-center">Create Community</h2>
       <form
         class="max-w-[1000px] m-auto py-6 flex flex-col gap-4"
         @submit.prevent="createCommunity"

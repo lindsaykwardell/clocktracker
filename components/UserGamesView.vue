@@ -512,7 +512,7 @@
             />
             <p
               v-if="!sortedGames.length"
-              class="text-center text-2xl my-4 font-dumbledor"
+              class="text-center text-2xl my-4 font-sorts"
             >
               No games match!
             </p>
@@ -523,7 +523,7 @@
     <div v-else class="flex flex-col items-center gap-6">
       <slot name="no-content">
         <div class="flex flex-col items-center gap-6">
-          <p class="text-center text-2xl font-dumbledor">No games yet!</p>
+          <p class="text-center text-2xl font-sorts">No games yet!</p>
           <template v-if="player && user && user.id === player.user_id">
             <Button
               component="nuxt-link"

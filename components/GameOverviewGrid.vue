@@ -61,7 +61,7 @@
             />
           </div>
           <div
-            class="flex-grow items-center justify-center flex font-dumbledor text-3xl"
+            class="flex-grow items-center justify-center flex font-sorts text-3xl"
           >
             <Token
               v-if="

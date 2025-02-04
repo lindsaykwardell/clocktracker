@@ -2,7 +2,7 @@
   <Dialog v-model:visible="show" slze="lg">
     <template #title>
       <div class="flex flex-col md:flex-row w-full gap-2">
-        <h2 class="flex-grow text-2xl font-bold font-dumbledor">
+        <h2 class="flex-grow text-2xl font-bold font-sorts">
           Select a Reminder
         </h2>
       </div>
