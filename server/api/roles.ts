@@ -7,6 +7,9 @@ export default defineEventHandler(async () => {
     include: {
       reminders: true,
     },
+    where: {
+      custom_role: false,
+    },
   });
 
   // order roles by type. This is important for the UI
