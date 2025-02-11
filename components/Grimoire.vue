@@ -99,7 +99,9 @@
             :character="token"
             size="md"
             :class="{ 'cursor-pointer': !props.readonly }"
-            :alwaysShowAlignment="!props.readonly && (!!token.role || !!token.player_name)"
+            :alwaysShowAlignment="
+              !props.readonly && (!!token.role || !!token.player_name)
+            "
             :tokenTooltip="token.role?.name"
           />
         </a>
@@ -119,7 +121,9 @@
           :class="{
             'cursor-pointer': !props.readonly,
           }"
-          :alwaysShowAlignment="!props.readonly && (!!token.role || !!token.player_name)"
+          :alwaysShowAlignment="
+            !props.readonly && (!!token.role || !!token.player_name)
+          "
         />
         <div v-if="!props.readonly" class="relative z-50">
           <ClientOnly>
@@ -285,6 +289,7 @@ const props = defineProps<{
     token_url: string;
     name: string;
     initial_alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
+    reminders: { id: number; reminder: string; role_id: string }[];
   }[];
   readonly?: boolean;
   excludePlayers?: string[];
@@ -302,11 +307,61 @@ const orderedTokens = computed(() =>
 const reminders = computed(() => {
   const fabled = roles.getRoleByType(RoleType.FABLED);
   const travelers = roles.getRoleByType(RoleType.TRAVELER);
-  return roles.getRemindersForRoles([
-    ...(props.availableRoles?.map((r) => r.id) ?? []),
-    ...travelers.map((r) => r.id),
-    ...fabled.map((r) => r.id),
-  ]);
+
+  const fabledReminders =
+    roles.getRemindersForRoles(fabled.map((r) => r.id)) ?? [];
+  const travelersReminders =
+    roles.getRemindersForRoles(travelers.map((r) => r.id)) ?? [];
+
+  for (const role of props.availableRoles ?? []) {
+    if (role.type === RoleType.FABLED) {
+      fabledReminders.push(
+        ...role.reminders.map((m) => ({ ...m, token_url: role.token_url }))
+      );
+    } else if (role.type === RoleType.TRAVELER) {
+      travelersReminders.push(
+        ...role.reminders.map((m) => ({ ...m, token_url: role.token_url }))
+      );
+    }
+  }
+
+  const otherReminders =
+    props.availableRoles
+      ?.filter(
+        (r) =>
+          [RoleType.FABLED, RoleType.TRAVELER].includes(r.type) === false
+      )
+      .toSorted((a, b) => {
+        // First sort by type
+        // Order: Townsfolk, Outsider, Minion, Demon, Traveler, Fabled
+
+        // Then, sort by name ascending
+        // If the names are the same, sort by id ascending
+
+        const typeOrder = {
+          [RoleType.TOWNSFOLK]: 0,
+          [RoleType.OUTSIDER]: 1,
+          [RoleType.MINION]: 2,
+          [RoleType.DEMON]: 3,
+          [RoleType.TRAVELER]: 4,
+          [RoleType.FABLED]: 5,
+        };
+        const aTypeOrder = typeOrder[a.type];
+        const bTypeOrder = typeOrder[b.type];
+        if (aTypeOrder !== bTypeOrder) {
+          return aTypeOrder - bTypeOrder;
+        }
+        return a.name.localeCompare(b.name);
+      })
+      .flatMap((r) =>
+        r.reminders.map((m) => ({ ...m, token_url: r.token_url }))
+      ) ?? [];
+
+  return [
+    ...otherReminders,
+    ...travelersReminders.toSorted((a, b) => a.role_id.localeCompare(b.role_id)),
+    ...fabledReminders.toSorted((a, b) => a.role_id.localeCompare(b.role_id)),
+  ];
 });
 
 const showRoleSelectionDialog = ref(false);
