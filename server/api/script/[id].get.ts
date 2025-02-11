@@ -38,7 +38,11 @@ export default defineEventHandler(async (handler) => {
       ],
     },
     include: {
-      roles: true,
+      roles: {
+        include: {
+          reminders: true,
+        },
+      },
     },
   });
 
@@ -109,7 +113,11 @@ export default defineEventHandler(async (handler) => {
           },
         },
         include: {
-          roles: true,
+          roles: {
+            include: {
+              reminders: true,
+            }
+          },
         },
       });
 
@@ -124,6 +132,9 @@ export default defineEventHandler(async (handler) => {
         script.roles = await prisma.role.findMany({
           where: {
             custom_role: false,
+          },
+          include: {
+            reminders: true,
           },
         });
       }
