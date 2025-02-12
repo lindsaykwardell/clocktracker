@@ -7,6 +7,7 @@ const dayjs = require("dayjs");
 const { roles, roleNames, reminders } = require("./roles");
 const citySeed = require("./city-seed.json");
 const { createClient } = require("@supabase/supabase-js");
+const scripts = require("./scripts.json");
 
 const prisma = new PrismaClient();
 const supabase = createClient(
@@ -15,558 +16,6 @@ const supabase = createClient(
 );
 
 async function main() {
-  const scriptList = [
-    {
-      id: 5000,
-      script_id: "133",
-      name: "Trouble Brewing",
-      version: "1.0.0",
-      author: "The Pandemonium Institute",
-      type: "Full",
-      json_url:
-        "https://botc-scripts.azurewebsites.net/script/133/1.0.0/download",
-      pdf_url:
-        "https://botc-scripts.azurewebsites.net/script/133/1.0.0/download_pdf",
-      characters_last_updated: "2023-08-17T16:27:04.586Z",
-      roles: [
-        {
-          id: "chef",
-          name: "Chef",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/chef.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "empath",
-          name: "Empath",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/empath.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "fortune_teller",
-          name: "Fortune Teller",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/fortuneteller.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "investigator",
-          name: "Investigator",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/investigator.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "librarian",
-          name: "Librarian",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/librarian.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "mayor",
-          name: "Mayor",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/mayor.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "monk",
-          name: "Monk",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/monk.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "ravenkeeper",
-          name: "Ravenkeeper",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/ravenkeeper.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "slayer",
-          name: "Slayer",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/slayer.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "soldier",
-          name: "Soldier",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/soldier.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "undertaker",
-          name: "Undertaker",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/undertaker.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "virgin",
-          name: "Virgin",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/virgin.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "washerwoman",
-          name: "Washerwoman",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/washerwoman.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "butler",
-          name: "Butler",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/butler.png",
-          type: "OUTSIDER",
-        },
-        {
-          id: "drunk",
-          name: "Drunk",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/drunk.png",
-          type: "OUTSIDER",
-        },
-        {
-          id: "recluse",
-          name: "Recluse",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/recluse.png",
-          type: "OUTSIDER",
-        },
-        {
-          id: "saint",
-          name: "Saint",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/saint.png",
-          type: "OUTSIDER",
-        },
-        {
-          id: "baron",
-          name: "Baron",
-          initial_alignment: "EVIL",
-          token_url: "/img/role/baron.png",
-          type: "MINION",
-        },
-        {
-          id: "poisoner",
-          name: "Poisoner",
-          initial_alignment: "EVIL",
-          token_url: "/img/role/poisoner.png",
-          type: "MINION",
-        },
-        {
-          id: "scarlet_woman",
-          name: "Scarlet Woman",
-          initial_alignment: "EVIL",
-          token_url: "/img/role/scarletwoman.png",
-          type: "MINION",
-        },
-        {
-          id: "spy",
-          name: "Spy",
-          initial_alignment: "EVIL",
-          token_url: "/img/role/spy.png",
-          type: "MINION",
-        },
-        {
-          id: "imp",
-          name: "Imp",
-          initial_alignment: "EVIL",
-          token_url: "/img/role/imp.png",
-          type: "DEMON",
-        },
-      ],
-    },
-    {
-      id: 5001,
-      script_id: "135",
-      name: "Bad Moon Rising",
-      version: "1.0.0",
-      author: "The Pandemonium Institute",
-      type: "Full",
-      json_url:
-        "https://botc-scripts.azurewebsites.net/script/135/1.0.0/download",
-      pdf_url:
-        "https://botc-scripts.azurewebsites.net/script/135/1.0.0/download_pdf",
-      characters_last_updated: "2023-08-18T00:47:56.577Z",
-      roles: [
-        {
-          id: "chambermaid",
-          name: "Chambermaid",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/chambermaid.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "courtier",
-          name: "Courtier",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/courtier.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "exorcist",
-          name: "Exorcist",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/exorcist.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "fool",
-          name: "Fool",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/fool.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "gambler",
-          name: "Gambler",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/gambler.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "gossip",
-          name: "Gossip",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/gossip.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "grandmother",
-          name: "Grandmother",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/grandmother.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "innkeeper",
-          name: "Innkeeper",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/innkeeper.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "minstrel",
-          name: "Minstrel",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/minstrel.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "pacifist",
-          name: "Pacifist",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/pacifist.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "professor",
-          name: "Professor",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/professor.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "sailor",
-          name: "Sailor",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/sailor.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "tea_lady",
-          name: "Tea Lady",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/tealady.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "goon",
-          name: "Goon",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/goon.png",
-          type: "OUTSIDER",
-        },
-        {
-          id: "lunatic",
-          name: "Lunatic",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/lunatic.png",
-          type: "OUTSIDER",
-        },
-        {
-          id: "moonchild",
-          name: "Moonchild",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/moonchild.png",
-          type: "OUTSIDER",
-        },
-        {
-          id: "tinker",
-          name: "Tinker",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/tinker.png",
-          type: "OUTSIDER",
-        },
-        {
-          id: "assassin",
-          name: "Assassin",
-          initial_alignment: "EVIL",
-          token_url: "/img/role/assassin.png",
-          type: "MINION",
-        },
-        {
-          id: "devils_advocate",
-          name: "Devil's Advocate",
-          initial_alignment: "EVIL",
-          token_url: "/img/role/devilsadvocate.png",
-          type: "MINION",
-        },
-        {
-          id: "godfather",
-          name: "Godfather",
-          initial_alignment: "EVIL",
-          token_url: "/img/role/godfather.png",
-          type: "MINION",
-        },
-        {
-          id: "mastermind",
-          name: "Mastermind",
-          initial_alignment: "EVIL",
-          token_url: "/img/role/mastermind.png",
-          type: "MINION",
-        },
-        {
-          id: "po",
-          name: "Po",
-          initial_alignment: "EVIL",
-          token_url: "/img/role/po.png",
-          type: "DEMON",
-        },
-        {
-          id: "pukka",
-          name: "Pukka",
-          initial_alignment: "EVIL",
-          token_url: "/img/role/pukka.png",
-          type: "DEMON",
-        },
-        {
-          id: "shabaloth",
-          name: "Shabaloth",
-          initial_alignment: "EVIL",
-          token_url: "/img/role/shabaloth.png",
-          type: "DEMON",
-        },
-        {
-          id: "zombuul",
-          name: "Zombuul",
-          initial_alignment: "EVIL",
-          token_url: "/img/role/zombuul.png",
-          type: "DEMON",
-        },
-      ],
-    },
-    {
-      id: 5002,
-      script_id: "134",
-      name: "Sects and Violets",
-      version: "1.0.0",
-      author: "The Pandemonium Institute",
-      type: "Full",
-      json_url:
-        "https://botc-scripts.azurewebsites.net/script/134/1.0.0/download",
-      pdf_url:
-        "https://botc-scripts.azurewebsites.net/script/134/1.0.0/download_pdf",
-      characters_last_updated: "2023-08-18T00:48:18.192Z",
-      roles: [
-        {
-          id: "artist",
-          name: "Artist",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/artist.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "clockmaker",
-          name: "Clockmaker",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/clockmaker.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "dreamer",
-          name: "Dreamer",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/dreamer.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "flowergirl",
-          name: "Flowergirl",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/flowergirl.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "juggler",
-          name: "Juggler",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/juggler.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "mathematician",
-          name: "Mathematician",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/mathematician.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "oracle",
-          name: "Oracle",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/oracle.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "philosopher",
-          name: "Philosopher",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/philosopher.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "sage",
-          name: "Sage",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/sage.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "savant",
-          name: "Savant",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/savant.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "seamstress",
-          name: "Seamstress",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/seamstress.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "snake_charmer",
-          name: "Snake Charmer",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/snakecharmer.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "town_crier",
-          name: "Town Crier",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/towncrier.png",
-          type: "TOWNSFOLK",
-        },
-        {
-          id: "barber",
-          name: "Barber",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/barber.png",
-          type: "OUTSIDER",
-        },
-        {
-          id: "klutz",
-          name: "Klutz",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/klutz.png",
-          type: "OUTSIDER",
-        },
-        {
-          id: "mutant",
-          name: "Mutant",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/mutant.png",
-          type: "OUTSIDER",
-        },
-        {
-          id: "sweetheart",
-          name: "Sweetheart",
-          initial_alignment: "GOOD",
-          token_url: "/img/role/sweetheart.png",
-          type: "OUTSIDER",
-        },
-        {
-          id: "cerenovus",
-          name: "Cerenovus",
-          initial_alignment: "EVIL",
-          token_url: "/img/role/cerenovus.png",
-          type: "MINION",
-        },
-        {
-          id: "evil_twin",
-          name: "Evil Twin",
-          initial_alignment: "EVIL",
-          token_url: "/img/role/eviltwin.png",
-          type: "MINION",
-        },
-        {
-          id: "pit-hag",
-          name: "Pit-Hag",
-          initial_alignment: "EVIL",
-          token_url: "/img/role/pithag.png",
-          type: "MINION",
-        },
-        {
-          id: "witch",
-          name: "Witch",
-          initial_alignment: "EVIL",
-          token_url: "/img/role/witch.png",
-          type: "MINION",
-        },
-        {
-          id: "fang_gu",
-          name: "Fang Gu",
-          initial_alignment: "EVIL",
-          token_url: "/img/role/fanggu.png",
-          type: "DEMON",
-        },
-        {
-          id: "no_dashii",
-          name: "No Dashii",
-          initial_alignment: "EVIL",
-          token_url: "/img/role/nodashii.png",
-          type: "DEMON",
-        },
-        {
-          id: "vigormortis",
-          name: "Vigormortis",
-          initial_alignment: "EVIL",
-          token_url: "/img/role/vigormortis.png",
-          type: "DEMON",
-        },
-        {
-          id: "vortox",
-          name: "Vortox",
-          initial_alignment: "EVIL",
-          token_url: "/img/role/vortox.png",
-          type: "DEMON",
-        },
-      ],
-    },
-  ];
-
   // Upsert all the roles
   console.log("Upserting roles...");
   for (const role of roles) {
@@ -577,6 +26,80 @@ async function main() {
       update: role,
       create: role,
     });
+  }
+
+  const scriptList = [];
+
+  // Get ten random scripts from the `scripts` JSON file
+  const randomScripts = scripts.sort(() => 0.5 - Math.random()).slice(0, 10);
+
+  // Get base 3
+  const base3 = ["133", "134", "135"];
+
+  for (base of base3) {
+    if (scriptList.some((s) => s.script_id === base)) {
+      continue;
+    }
+
+    const script = scripts.find((s) => s.script_id === base);
+    if (!script) {
+      continue;
+    }
+
+    randomScripts.push(script);
+  }
+
+  // Add the random scripts to the `scriptList`
+  for (const script of randomScripts) {
+    const roleIds = (
+      await fetch(script.json_url).then((res) => res.json())
+    ).filter((role) => role.id !== "_meta");
+
+    const existingRoleIds = roles.map((role) => ({
+      id: role.id,
+      map_id: role.id,
+    }));
+
+    roles.forEach((role) => {
+      if (role.id.includes("_")) {
+        existingRoleIds.push({
+          id: role.id.replaceAll("_", ""),
+          map_id: role.id,
+        });
+      } else if (role.id.includes("-")) {
+        existingRoleIds.push({
+          id: role.id.replaceAll("-", ""),
+          map_id: role.id,
+        });
+      }
+    });
+
+    const knownRoles = roleIds
+      .map((role) => {
+        const existingRoleId = existingRoleIds.find(
+          (existingRole) => existingRole.id === role.id
+        );
+
+        if (existingRoleId) {
+          return { ...role, id: existingRoleId.map_id };
+        }
+        return role;
+      })
+      .filter((role) =>
+        existingRoleIds.some((existingRole) => existingRole.id === role.id)
+      );
+
+    const savedRoles = await prisma.role.findMany({
+      where: {
+        id: {
+          in: knownRoles.map((role) => role.id),
+        },
+      }
+    })
+
+    script.roles = savedRoles;
+
+    scriptList.push(script);
   }
 
   // Upsert the reminders
@@ -593,8 +116,9 @@ async function main() {
     });
   }
 
+  console.log("Seeding scripts");
   for (const script of scriptList) {
-    await prisma.script.create({
+    const savedScript = await prisma.script.create({
       data: {
         script_id: script.script_id,
         name: script.name,
@@ -608,6 +132,8 @@ async function main() {
         },
       },
     });
+
+    script.id = savedScript.id;
   }
 
   console.log("Seeding locations");
@@ -668,7 +194,7 @@ async function main() {
 
   const myUsername = process.env.LOCAL_USERNAME || "ClockTrackerDeveloper";
   const myPassword = process.env.LOCAL_PASSWORD || "password123";
-  const email = process.env.LOCAL_PASSWORD || "dev@clocktracker.app"
+  const email = process.env.LOCAL_PASSWORD || "dev@clocktracker.app";
 
   const data = await supabase.auth.signUp({
     email,
