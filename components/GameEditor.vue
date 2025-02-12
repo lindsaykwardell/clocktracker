@@ -775,6 +775,7 @@ const roles = ref<
     token_url: string;
     name: string;
     initial_alignment: Alignment;
+    reminders: { id: number; reminder: string; role_id: string }[];
   }[]
 >([]);
 const scriptVersions = ref<{ id: number; version: string }[]>([]);
@@ -1085,6 +1086,7 @@ watchEffect(async () => {
         token_url: string;
         name: string;
         initial_alignment: Alignment;
+        reminders: { id: number; reminder: string; role_id: string }[];
       }[];
     }>(`/api/script/${props.game.script_id}`);
     roles.value = result.roles ?? [];
@@ -1217,6 +1219,12 @@ function copyGrimoire(game: GameRecord) {
 
   props.game.player_count = game.player_count;
   props.game.traveler_count = game.traveler_count;
+  props.game.storyteller = game.storyteller ?? "";
+  props.game.co_storytellers.push(...game.co_storytellers);
+  props.game.location = game.location ?? "";
+  props.game.location_type = game.location_type ?? undefined;
+  props.game.community_name = game.community_name ?? "";
+  props.game.community_id = game.community_id ?? null;
 
   showCopyGrimoireDialog.value = false;
 }
