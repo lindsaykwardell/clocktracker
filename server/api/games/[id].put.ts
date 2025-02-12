@@ -222,6 +222,11 @@ export default defineEventHandler(async (handler) => {
       },
     },
     include: {
+      user: {
+        select: {
+          username: true,
+        },
+      },
       player_characters: true,
       demon_bluffs: true,
       fabled: true,
@@ -358,6 +363,10 @@ export default defineEventHandler(async (handler) => {
             parent_game_id: game.parent_game_id || game.id,
             waiting_for_confirmation: true,
             is_storyteller: false,
+            storyteller:
+              game.is_storyteller && game.user
+                ? `@${game.user.username}`
+                : game.storyteller,
           },
         });
       } else {
