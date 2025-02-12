@@ -94,7 +94,7 @@
         </nuxt-link>
         <template v-if="me.status === Status.SUCCESS">
           <NavLink
-            v-if="isJanuary"
+            v-if="isJanuaryOrFebruary"
             id="year-in-review"
             to="/year-in-review"
             icon="fanggu"
@@ -261,7 +261,7 @@ function search() {
   }
 }
 
-const isJanuary = computed(() => dayjs().month() === 0);
+const isJanuaryOrFebruary = computed(() => dayjs().month() <= 1);
 
 watchDebounced(
   query,
