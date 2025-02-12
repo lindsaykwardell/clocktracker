@@ -1219,6 +1219,7 @@ function copyGrimoire(game: GameRecord) {
 
   props.game.player_count = game.player_count;
   props.game.traveler_count = game.traveler_count;
+  props.game.is_storyteller = game.is_storyteller;
   props.game.storyteller = game.storyteller ?? "";
   props.game.co_storytellers.push(...game.co_storytellers);
   props.game.location = game.location ?? "";
