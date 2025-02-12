@@ -2,9 +2,9 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-const wait = () =>
+const wait = (time?: number) =>
   new Promise((resolve) => {
-    setTimeout(resolve, Math.random() * 10000);
+    setTimeout(resolve, time ?? Math.random() * 10000);
   });
 
 export async function performLockedTask(
@@ -30,6 +30,9 @@ export async function performLockedTask(
   });
 
   await callback(prisma);
+  
+  // Wait a minute
+  await wait(60 * 1000);
 
   await prisma.cronLock.delete({
     where: {
