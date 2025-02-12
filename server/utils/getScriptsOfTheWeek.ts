@@ -19,10 +19,8 @@ export async function getScriptsOfTheWeek(prisma: PrismaClient, limit = 5) {
         },
         is_custom_script: false,
       },
-      // Games played last week (sunday to saturday)
       date: {
-        gte: dayjs().subtract(7, "day").startOf("week").startOf("day").toDate(),
-        lte: dayjs().subtract(7, "day").endOf("week").endOf("day").toDate(),
+        gte: dayjs().subtract(7, "day").startOf("day").toDate(),
       },
     },
     select: {
