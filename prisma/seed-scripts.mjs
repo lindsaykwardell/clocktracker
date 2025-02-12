@@ -1,6 +1,9 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
 import { Alignment, PrismaClient, RoleType } from "@prisma/client";
+import fs from "fs";
+import path from "path";
+import ProgressBar from "progress";
 
 const url = "https://botcscripts.com";
 const prisma = new PrismaClient();
@@ -9,7 +12,6 @@ async function main() {
   const scriptList = [];
 
   async function parsePage(page) {
-    console.log(`Parsing page ${page}...`);
     const response = await axios.get(url + "?page=" + page);
     const $ = cheerio.load(response.data);
     // Iterate over the table rows
@@ -57,7 +59,11 @@ async function main() {
   const $ = cheerio.load(response.data);
   const lastPage = parseInt($("ul.pagination li:nth-last-child(2) a").text());
   console.log(`Found ${lastPage} pages.`);
+  const pageBar = new ProgressBar(":current / :total [:bar] :elapseds", {
+    total: lastPage,
+  });
   for (let i = 1; i <= lastPage; i++) {
+    pageBar.tick();
     await parsePage(i);
   }
 
@@ -80,6 +86,12 @@ async function main() {
       },
     });
   }
+
+  console.log("Caching scripts...");
+  fs.writeFileSync(
+    path.join(import.meta.dirname, "../prisma/scripts.json"),
+    JSON.stringify(scriptList, null, 2)
+  );
 
   console.log("Done!");
 }
