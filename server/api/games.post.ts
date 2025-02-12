@@ -175,7 +175,7 @@ export default defineEventHandler(async (handler) => {
         storyteller:
           newGame.is_storyteller && newGame.user
             ? `@${newGame.user.username}`
-            : "",
+            : newGame.storyteller,
         date: new Date(body.date),
         user_id: id,
         player_characters: {
