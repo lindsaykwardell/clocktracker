@@ -325,11 +325,18 @@ const reminders = computed(() => {
     }
   }
 
+  const roleIdsInGrimoire = orderedTokens.value
+    .map((t) => t.role_id)
+    .filter((r) => !!r) as string[];
+
+  const rolesInGrimoire = roles
+    .getAllRoles()
+    .filter((r) => roleIdsInGrimoire.includes(r.id));
+
   const otherReminders =
-    props.availableRoles
-      ?.filter(
-        (r) =>
-          [RoleType.FABLED, RoleType.TRAVELER].includes(r.type) === false
+    [...(props.availableRoles ?? []), ...rolesInGrimoire]
+      .filter(
+        (r) => [RoleType.FABLED, RoleType.TRAVELER].includes(r.type) === false
       )
       .toSorted((a, b) => {
         // First sort by type
@@ -359,7 +366,9 @@ const reminders = computed(() => {
 
   return [
     ...otherReminders,
-    ...travelersReminders.toSorted((a, b) => a.role_id.localeCompare(b.role_id)),
+    ...travelersReminders.toSorted((a, b) =>
+      a.role_id.localeCompare(b.role_id)
+    ),
     ...fabledReminders.toSorted((a, b) => a.role_id.localeCompare(b.role_id)),
   ];
 });
