@@ -15,8 +15,11 @@
     />
     <div
       v-if="reminderText"
-      class="text-center relative -top-2"
-      :class="reminderTextSize"
+      class="text-center relative"
+      :class="{
+        [reminderTextSize]: true,
+        '-top-2': image !== undefined,
+      }"
     >
       {{ reminderText }}
     </div>
