@@ -589,13 +589,19 @@ const mySelectedPlayers = computed(() => {
   if (props.games.status === Status.SUCCESS) {
     return [
       ...new Set(
-        naturalOrder(
-          props.games.data.flatMap((game) =>
+        naturalOrder([
+          ...props.games.data.flatMap((game) =>
             game.grimoire.flatMap((g) =>
               g.tokens.map((t) => t.player?.display_name || t.player_name)
             )
-          )
-        )
+          ),
+          ...props.games.data.map(
+            (game) =>
+              (game.is_storyteller ? game.user.username : game.storyteller) ??
+              ""
+          ),
+          ...props.games.data.flatMap((game) => game.co_storytellers),
+        ])
           .sort()
           .filter((n) => n !== "")
       ),
@@ -857,14 +863,22 @@ const sortedGames = computed(() => {
         (!selectedTags.value.length ||
           selectedTags.value.every((tag) => game.tags.includes(tag))) &&
         (!selectedPlayers.value.length ||
-          selectedPlayers.value.every((tag) =>
-            game.grimoire
-              .flatMap((g) =>
-                g.tokens.map((t) =>
-                  t.player?.display_name ? t.player.display_name : t.player_name
+          selectedPlayers.value.every(
+            (tag) =>
+              game.grimoire
+                .flatMap((g) =>
+                  g.tokens.map((t) =>
+                    t.player?.display_name
+                      ? t.player.display_name
+                      : t.player_name
+                  )
                 )
-              )
-              .includes(tag)
+                .includes(tag) ||
+              (me.value.status === "SUCCESS" &&
+                me.value?.data.username === tag &&
+                game.is_storyteller) ||
+              (game.storyteller === tag && !game.is_storyteller) ||
+              game.co_storytellers.includes(tag)
           )) &&
         (!selectedRole.value ||
           game.player_characters.some((c) => c.name === selectedRole.value) ||
