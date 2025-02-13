@@ -51,12 +51,12 @@ export default defineEventHandler(async (handler) => {
 
     // Verify that the username contains only alphanumeric characters, underscores, and dashes.
 
-    const usernameRegex = /^[a-zA-Z0-9_-]*$/;
+    const usernameRegex = /^[a-zA-Z0-9\._-]*$/;
 
     if (!usernameRegex.test(body.username)) {
       throw createError({
         status: 409,
-        statusMessage: "Username can only contain letters, numbers, underscores, and dashes.",
+        statusMessage: "Username can only contain letters, numbers, periods, underscores, and dashes.",
       });
     }
   }
