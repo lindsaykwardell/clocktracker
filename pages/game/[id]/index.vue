@@ -925,15 +925,20 @@ async function claimSeat(token: { order: number }) {
     return;
   }
 
-  try {
-    const result = await $fetch<GameRecord>(`/api/games/${gameId}/claim_seat`, {
-      method: "PUT",
-      body: { order: token.order },
-    });
+  if (confirm("Are you sure you want to claim this seat?")) {
+    try {
+      const result = await $fetch<GameRecord>(
+        `/api/games/${gameId}/claim_seat`,
+        {
+          method: "PUT",
+          body: { order: token.order },
+        }
+      );
 
-    games.games.set(gameId, { status: Status.SUCCESS, data: result });
-  } catch (error: any) {
-    alert(`There was a problem claiming this seat: ${error.statusMessage}`);
+      games.games.set(gameId, { status: Status.SUCCESS, data: result });
+    } catch (error: any) {
+      alert(`There was a problem claiming this seat: ${error.statusMessage}`);
+    }
   }
 }
 
