@@ -44,12 +44,15 @@
           </h2>
         </nuxt-link>
         <hr class="border-stone-600" />
-        <template v-if="games.getRecentScripts.length > 0">
-          <h1 class="text-xl font-sorts text-center">Recent Scripts</h1>
+        <template v-if="scriptsOfTheWeek.data.value">
+          <h1 class="text-xl font-sorts text-center">Popular Scripts</h1>
           <ul class="px-4">
-            <li v-for="script in games.getRecentScripts">
-              <nuxt-link :to="script.url" class="hover:underline">
-                {{ script.name }}
+            <li v-for="script in scriptsOfTheWeek.data.value">
+              <nuxt-link
+                :to="getScriptLink(script)"
+                class="hover:underline"
+              >
+                {{ script.script }}
               </nuxt-link>
             </li>
           </ul>
@@ -367,6 +370,7 @@ const games = useGames();
 const featureFlags = useFeatureFlags();
 const updates = await useFetch("/api/dashboard/recent");
 const roleOfTheDay = await useFetch("/api/role_of_the_day");
+const scriptsOfTheWeek = await useFetch("/api/scripts_of_the_week");
 
 const { data: events } = await useFetch<Event[]>("/api/events");
 const selectedDay = ref<dayjs.Dayjs | null>(dayjs());
@@ -484,6 +488,22 @@ async function copyCalendarLink() {
     }
   } catch (e) {
     // Do nothing
+  }
+}
+
+function getScriptLink(script: {
+  script_id: string;
+  script: string;
+  version: string;
+  author: string;
+  games: number;
+}) {
+  if (script.script === "Sects & Violets") return "/scripts/Sects_and_Violets";
+
+  if (script.script_id) {
+    return `/scripts/${script.script.replaceAll(" ", "_")}?version=${
+      script.version
+    }`;
   }
 }
 
