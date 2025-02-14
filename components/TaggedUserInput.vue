@@ -8,25 +8,32 @@
         :class="inputClass"
         :placeholder="placeholder"
       />
-      <ComboboxOptions
-        v-if="filteredPeople.length > 0"
-        class="absolute text-sm bg-stone-200 dark:bg-stone-900 border border-stone-300 dark:border-stone-500 max-h-[150px] min-w-[200px] w-full overflow-y-scroll overflow-x-hidden z-10"
-        :class="{
-          'bottom-8': renderListOnTop,
-        }"
-      >
-        <ComboboxOption
-          class="cursor-pointer p-1 flex gap-2 overflow-ellipsis whitespace-nowrap"
-          v-for="person in filteredPeople"
-          :value="person.username"
+      <Transition @afterLeave="emit('optionSelected')">
+        <ComboboxOptions
+          v-if="filteredPeople.length > 0"
+          class="absolute text-sm bg-stone-200 dark:bg-stone-900 border border-stone-300 dark:border-stone-500 max-h-[150px] min-w-[200px] w-full overflow-y-scroll overflow-x-hidden z-10"
+          :class="{
+            'bottom-8': renderListOnTop,
+          }"
         >
-          <Avatar :value="person.avatar" size="xs" />
-          <div class="flex flex-col gap-1">
-            <span>{{ person.display_name }}</span>
-            <span class="text-xs text-stone-400">{{ person.username }}</span>
-          </div>
-        </ComboboxOption>
-      </ComboboxOptions>
+          <ComboboxOption
+            v-for="person in filteredPeople"
+            :value="person.username"
+          >
+            <div
+              class="cursor-pointer p-1 flex gap-2 overflow-ellipsis whitespace-nowrap"
+            >
+              <Avatar :value="person.avatar" size="xs" />
+              <div class="flex flex-col gap-1">
+                <span>{{ person.display_name }}</span>
+                <span class="text-xs text-stone-400">{{
+                  person.username
+                }}</span>
+              </div>
+            </div>
+          </ComboboxOption>
+        </ComboboxOptions>
+      </Transition>
     </Combobox>
   </div>
 </template>
@@ -53,7 +60,7 @@ const props = defineProps<{
   placeholder?: string;
 }>();
 
-const emit = defineEmits(["inputFocused", "update:value"]);
+const emit = defineEmits(["inputFocused", "optionSelected", "update:value"]);
 
 const value = computed({
   get: () => props.value,

@@ -48,6 +48,13 @@
                 <div>{{ player.name }}</div>
               </div>
             </li>
+            <li>
+              <EventTaggedUserInput
+                :slug="existingEvent.community?.slug"
+                :alreadyRegisteredUserIds="alreadyRegisteredUserIds"
+                @add-player="registerPlayer"
+              />
+            </li>
           </ul>
         </div>
         <div
@@ -133,6 +140,14 @@
                   <div>{{ player.name }}</div>
                 </div>
               </li>
+              <li>
+                <EventTaggedUserInput
+                  :slug="existingEvent.community?.slug"
+                  :alreadyRegisteredUserIds="alreadyRegisteredUserIds"
+                  :waitlistId="waitlist.id"
+                  @add-player="registerPlayer"
+                />
+              </li>
             </ul>
           </template>
         </div>
@@ -200,6 +215,41 @@ const event = reactive<{
 
 const registered_players = ref(existingEvent.registered_players);
 const waitlists = ref(existingEvent.waitlists);
+const alreadyRegisteredUserIds = computed(
+  () =>
+    [
+      ...registered_players.value.map((p) => p.user?.user_id),
+      ...waitlists.value.flatMap((w) => w.users.map((u) => u.user?.user_id)),
+    ].filter(Boolean) as string[]
+);
+
+async function registerPlayer({
+  user,
+  waitlistId,
+}: {
+  user: { user_id: string; display_name: string };
+  waitlistId?: number;
+}) {
+  const response = await $fetch(`/api/event/${eventId}/add_player`, {
+    method: "POST",
+    body: JSON.stringify({
+      name: user.display_name,
+      user_id: user.user_id,
+      waitlist_id: waitlistId,
+    }),
+  });
+
+  registered_players.value = response.registered_players;
+  waitlists.value = response.waitlists;
+
+  setTimeout(() => {
+    // scroll to bottom
+    window.scrollTo({
+      top: document.body.scrollHeight,
+      behavior: "smooth",
+    });
+  }, 1);
+}
 
 const formattedEvent = computed(() => {
   return {
