@@ -19,12 +19,72 @@
           <ReminderToken :reminder="reminder" />
         </button>
       </div>
+      <form
+        class="flex flex-col gap-2 p-4"
+        @submit.prevent="
+          $emit('selectReminder', {
+            reminder: customReminder,
+            token_url: tokenUrl,
+          })
+        "
+      >
+        <label for="custom-reminder" class="text-lg font-bold">
+          Custom Reminder
+        </label>
+        <div class="flex gap-4">
+          <Popover class="relative" v-slot="{ close }">
+            <PopoverButton>
+              <Token
+                :character="{ role: { token_url: tokenUrl as string, type: '' } }"
+                size="reminder"
+                :reminderText="customReminder"
+              />
+            </PopoverButton>
+
+            <PopoverPanel
+              class="absolute z-10 bottom-0 max-h-[225px] w-[475px] overflow-y-scroll bg-stone-950 flex flex-row flex-wrap p-3"
+            >
+              <div>
+                <button type="button" @click="setTokenUrlAndClose('', close)">
+                  <Token
+                    :character="{ role: { token_url: '', type: '' } }"
+                    size="reminder"
+                  />
+                </button>
+              </div>
+              <div v-for="url in availableTokenUrls" :key="url">
+                <button type="button" @click="setTokenUrlAndClose(url, close)">
+                  <Token
+                    :character="{ role: { token_url: url, type: '' } }"
+                    size="reminder"
+                  />
+                </button>
+              </div>
+            </PopoverPanel>
+          </Popover>
+          <Input type="text" v-model="customReminder" />
+          <Button
+            type="submit"
+            :disabled="customReminder.length === 0"
+            @click="
+              $emit('selectReminder', {
+                reminder: customReminder,
+                token_url: tokenUrl,
+              })
+            "
+            fontSize="sm"
+          >
+            Add Custom Reminder
+          </Button>
+        </div>
+      </form>
     </template>
   </Dialog>
 </template>
 
 <script setup lang="ts">
 import type { RoleReminder } from "@prisma/client";
+import { Popover, PopoverButton, PopoverPanel } from "@headlessui/vue";
 
 const props = defineProps<{
   visible: boolean;
@@ -32,9 +92,26 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits(["update:visible", "selectReminder"]);
+const customReminder = ref("");
+const tokenUrl = ref<string | undefined>(undefined);
+
+function setTokenUrlAndClose(url: string, close: () => void) {
+  tokenUrl.value = url;
+  close();
+}
+
+const availableTokenUrls = computed(() => {
+  return [...new Set(props.reminders.map((reminder) => reminder.token_url))];
+});
 
 const show = computed({
   get: () => props.visible,
   set: (value) => emit("update:visible", value),
+});
+
+watchEffect(() => {
+  if (show.value) {
+    customReminder.value = "";
+  }
 });
 </script>

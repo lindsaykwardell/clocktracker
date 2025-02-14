@@ -41,8 +41,8 @@ export default defineEventHandler(async (handler) => {
       deleted: false,
       user_id: me.id,
       date: {
-        lte: dayjs(game.date).add(1, "day").toDate(),
-        gte: dayjs(game.date).subtract(1, "day").toDate(),
+        lte: dayjs(game.date).add(2, "days").startOf("day").toDate(),
+        gte: dayjs(game.date).subtract(2, "days").endOf("day").toDate(),
       },
       parent_game_id: null,
       OR: [
