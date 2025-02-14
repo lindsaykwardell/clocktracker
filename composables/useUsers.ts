@@ -35,7 +35,7 @@ export type User = {
     slug: string;
     description: string;
     icon: string;
-    location: string
+    location: string;
     _count: {
       members: number;
       admins: number;
@@ -106,6 +106,7 @@ export const useUsers = defineStore("users", {
 
       games.fetchPlayerGames(me.username);
       friends.fetchFriends();
+      friends.fetchCommunityMembers();
       friends.fetchRequests();
 
       setInterval(() => {
