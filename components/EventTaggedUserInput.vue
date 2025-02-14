@@ -69,7 +69,11 @@ const addableUsers = computed(() => {
     ])
       .orderBy("asc")
       .sort(["display_name", "username"])
-      .filter((m) => !props.alreadyRegisteredUserIds?.includes(m.user_id));
+      .filter(
+        (m, i, a) =>
+          a.findIndex((_m) => m.user_id === _m.user_id) === i &&
+          !props.alreadyRegisteredUserIds?.includes(m.user_id)
+      );
   }
 });
 
