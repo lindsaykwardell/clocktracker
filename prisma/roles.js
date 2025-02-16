@@ -101,19 +101,37 @@ fs.writeFileSync(
 function toRole(name, type, alignment) {
   const id = nameToId(name);
 
+  const image_name = name
+    .toLowerCase()
+    .replace(/ /g, "")
+    .replace(/'/g, "")
+    .replace(/-/g, "")
+    .replace(/\(/g, "")
+    .replace(/\)/g, "");
+
+  const token_url = `/img/role/${image_name}.png`;
+  const alternate_token_urls = [];
+
+  // Check the image folder to see if the alternate images exist
+  const alternate_image_names = [`${image_name}_g`, `${image_name}_e`];
+  for (const alternate_image_name of alternate_image_names) {
+    const alternate_image_path = path.join(
+      __dirname,
+      `../public/img/role/${alternate_image_name}.webp`
+    );
+    if (fs.existsSync(alternate_image_path)) {
+      alternate_token_urls.push(`/img/role/${alternate_image_name}.webp`);
+    }
+  }
+
   return {
     id,
     name,
     type,
     initial_alignment: alignment,
     ability: abilities.find((ability) => ability.role_id === id)?.ability || "",
-    token_url: `/img/role/${name
-      .toLowerCase()
-      .replace(/ /g, "")
-      .replace(/'/g, "")
-      .replace(/-/g, "")
-      .replace(/\(/g, "")
-      .replace(/\)/g, "")}.png`,
+    token_url,
+    alternate_token_urls,
   };
 }
 

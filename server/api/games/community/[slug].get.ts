@@ -76,6 +76,7 @@ export default defineEventHandler(async (handler) => {
           role: {
             select: {
               token_url: true,
+              alternate_token_urls: true,
               type: true,
               initial_alignment: true,
             },

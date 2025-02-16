@@ -189,6 +189,7 @@ type Token = {
   role_id: string | null;
   role?: {
     token_url: string;
+    alternate_token_urls?: string[];
     type: string;
     initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
     ability?: string;
@@ -388,6 +389,7 @@ function selectRoleForToken(role: {
   type: RoleType;
   id: string;
   token_url: string;
+  alternate_token_urls?: string[];
   name: string;
   initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
 }) {
@@ -396,7 +398,9 @@ function selectRoleForToken(role: {
       if (role.id) {
         focusedToken.value.role = {
           token_url: role.token_url,
-          initial_alignment: role.initial_alignment,
+          alternate_token_urls: role.alternate_token_urls,
+          initial_alignment:
+            role.type === "TRAVELER" ? "NEUTRAL" : role.initial_alignment,
           type: role.type,
           name: role.name,
         };
@@ -432,16 +436,20 @@ function selectRoleForToken(role: {
 }
 
 function toggleAlignment(token: Token) {
-  if (token.role) {
-    token.alignment = token.alignment === "GOOD" ? "EVIL" : "GOOD";
-  } else {
-    if (token.alignment === "GOOD") {
+  switch (token.alignment) {
+    case "GOOD":
       token.alignment = "EVIL";
-    } else if (token.alignment === "EVIL") {
-      token.alignment = "NEUTRAL";
-    } else {
+      break;
+    case "EVIL":
+      if (token.role?.initial_alignment === "NEUTRAL") {
+        token.alignment = "NEUTRAL";
+      } else {
+        token.alignment = "GOOD";
+      }
+      break;
+    case "NEUTRAL":
       token.alignment = "GOOD";
-    }
+      break;
   }
 }
 
