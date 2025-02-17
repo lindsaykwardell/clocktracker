@@ -183,6 +183,7 @@ export async function fetchGames(user_id: string, me: User | null) {
           role: {
             select: {
               token_url: true,
+              alternate_token_urls: true,
               type: true,
               initial_alignment: true,
             },
@@ -428,6 +429,7 @@ export async function fetchGame(
           role: {
             select: {
               token_url: true,
+              alternate_token_urls: true,
               type: true,
               initial_alignment: true,
             },

@@ -66,6 +66,7 @@ const props = defineProps<{
         related?: string | null;
         role?: {
           token_url: string;
+          alternate_token_urls?: string[];
           type: string;
           initial_alignment?: "GOOD" | "EVIL" | "NEUTRAL";
           name?: string;
@@ -116,6 +117,11 @@ const tokenClass = computed(() => {
 
 const dynamicTokenClass = computed(() => {
   let classes = imageSize.value;
+
+  // If the character has alternate token URLs, we don't want to apply any filters
+  if ((props.character?.role?.alternate_token_urls?.length ?? 0) > 0) {
+    return classes;
+  }
 
   if (props.character?.role?.type === "TRAVELER") {
     if (props.character.alignment === "GOOD") {
@@ -176,13 +182,50 @@ const relatedImageSize = computed(() => {
 });
 
 const image = computed(() => {
+  if (!props.character?.role) {
+    return undefined;
+  }
+  if ((props.character?.role?.alternate_token_urls?.length ?? 0) > 0) {
+    console.log("We have alternate token URLs");
+    if (
+      (props.character?.alignment === "GOOD" &&
+        props.character?.role?.initial_alignment === "EVIL") ||
+      (props.character?.alignment === "EVIL" &&
+        props.character?.role?.initial_alignment === "GOOD")
+    ) {
+      console.log("An initially good or evil character");
+      return props.character.role.alternate_token_urls?.[0];
+    }
+    if (props.character?.role?.initial_alignment === "NEUTRAL") {
+      console.log("A neutral character");
+      console.log(props.character.role);
+      if (
+        props.character?.alignment === "GOOD" &&
+        (props.character.role.alternate_token_urls?.length ?? 0) >= 1
+      ) {
+        console.log("A good neutral character");
+        return props.character.role.alternate_token_urls?.[0];
+      }
+      if (
+        props.character?.alignment === "EVIL" &&
+        (props.character.role.alternate_token_urls?.length ?? 0) >= 2
+      ) {
+        console.log("An evil neutral character");
+        return props.character.role.alternate_token_urls?.[1];
+      }
+    }
+  }
+  console.log("Returning the default token URL");
   if (props.character?.role?.token_url) {
     return props.character.role.token_url;
   }
+  console.log("No token URL found");
   if (props.character?.alignment === "GOOD") {
+    console.log("Returning the good token URL");
     return "/img/role/good.png";
   }
   if (props.character?.alignment === "EVIL") {
+    console.log("Returning the evil token URL");
     return "/img/role/evil.png";
   }
 });
