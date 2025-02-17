@@ -124,6 +124,17 @@ function toRole(name, type, alignment) {
     }
   }
 
+  // Sort the alternate images to match the order of alternate_image_names
+
+  alternate_token_urls.sort((a, b) => {
+    const a_name = a.split("/").pop().split(".")[0];
+    const b_name = b.split("/").pop().split(".")[0];
+    return (
+      alternate_image_names.indexOf(a_name) -
+      alternate_image_names.indexOf(b_name)
+    );
+  });
+
   return {
     id,
     name,
