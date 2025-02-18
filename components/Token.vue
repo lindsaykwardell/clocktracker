@@ -13,6 +13,31 @@
       :alt="character?.name || character?.role?.name || 'Unknown'"
       v-tooltip="tokenTooltip"
     />
+    <svg
+      v-if="!hideName && (character?.name || character?.role?.name)"
+      data-v-deec739a=""
+      viewBox="0 0 150 150"
+      class="absolute font-sorts text-lg font-bold"
+    >
+      <path
+        data-v-deec739a=""
+        d="M 13 75 C 13 160, 138 160, 138 75"
+        id="curve"
+        fill="transparent"
+      ></path>
+      <text
+        data-v-deec739a=""
+        width="150"
+        x="66.6%"
+        text-anchor="middle"
+        font-size="90%"
+        class="label mozilla"
+      >
+        <textPath data-v-deec739a="" xlink:href="#curve">
+          {{ character?.name || character?.role?.name }}
+        </textPath>
+      </text>
+    </svg>
     <div
       v-if="reminderText"
       class="text-center relative"
@@ -25,7 +50,7 @@
     </div>
     <div
       v-if="alwaysShowAlignment"
-      class="token bg-center bg-cover absolute bottom-0 -left-3 rounded-full shadow-xl border border-black flex justify-center items-center"
+      class="token bg-center bg-cover absolute -bottom-3 -left-6 rounded-full shadow-xl border border-black flex justify-center items-center"
       :class="relatedSize"
       @click.stop="emit('clickAlignment')"
     >
@@ -40,7 +65,7 @@
     <div
       v-if="character?.related_role && !hideRelated"
       :id="relatedId"
-      class="token related bg-center bg-cover absolute bottom-0 -right-3 rounded-full shadow-xl border border-black flex justify-center items-center"
+      class="token related bg-center bg-cover absolute -bottom-3 -right-6 rounded-full shadow-xl border border-black flex justify-center items-center"
       :class="relatedSize"
       @click.stop="emit('clickRelated')"
     >
@@ -77,6 +102,7 @@ const props = defineProps<{
   size?: "sm" | "reminder" | "md" | "lg";
   alwaysShowAlignment?: boolean;
   hideRelated?: boolean;
+  hideName?: boolean;
   outline?: boolean;
   relatedId?: string;
   reminderText?: string;
