@@ -155,33 +155,12 @@ export default defineEventHandler(async (handler) => {
     })();
 
     const token_url = (() => {
-      // Going to need to rewrite this to handle multiple images
-      // But for now, just grab the first one because it should
-      // be the correct one
       if (role.image && role.image.length > 0) {
         if (typeof role.image === "string") {
           return role.image;
         } else if (Array.isArray(role.image)) {
           return role.image[0];
         }
-
-        // if (typeof role.image === "string") {
-        //   return role.image;
-        // } else if (role.image.length === 1) {
-        //   return role.image[0];
-        // } else {
-        //   // Get the correct image for the role type
-        //   switch (role_type) {
-        //     case RoleType.TOWNSFOLK:
-        //     case RoleType.OUTSIDER:
-        //       return role.image[0];
-        //     case RoleType.MINION:
-        //     case RoleType.DEMON:
-        //       return role.image[1];
-        //     default:
-        //       return role.image[0];
-        //   }
-        // }
       }
       if (initial_alignment === Alignment.GOOD) {
         return "/img/role/good.png";
@@ -190,6 +169,16 @@ export default defineEventHandler(async (handler) => {
       }
 
       return "/img/default.png";
+    })();
+    const alternate_token_urls = (() => {
+      if (role.image && role.image.length > 0) {
+        if (typeof role.image === "string") {
+          return [];
+        } else if (Array.isArray(role.image)) {
+          return role.image.slice(1);
+        }
+      }
+      return [];
     })();
 
     role.id = role.id + "-" + nanoid(6);
@@ -201,6 +190,7 @@ export default defineEventHandler(async (handler) => {
         initial_alignment,
         ability: role.ability ?? "",
         token_url,
+        alternate_token_urls,
         type: role_type,
         custom_role: true,
         reminders: {
