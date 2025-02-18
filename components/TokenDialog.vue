@@ -40,7 +40,6 @@
                 :character="formatRoleAsCharacter(role as any)"
                 size="md"
               />
-              <span>{{ role.name }}</span>
             </button>
           </div>
         </template>
