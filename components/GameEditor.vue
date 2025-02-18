@@ -237,7 +237,7 @@
 
       <div
         v-for="(character, i) in game.player_characters"
-        class="relative border border-stone-600 rounded p-4 flex justify-center items-center aspect-square"
+        class="relative rounded p-4 flex justify-center items-center aspect-square"
       >
         <button
           type="button"
@@ -279,7 +279,7 @@
         />
       </div>
       <div
-        class="border border-stone-600 rounded p-4 flex justify-center items-center aspect-square"
+        class=" rounded p-4 flex justify-center items-center aspect-square"
       >
         <Token outline size="lg" class="font-sorts">
           <button type="button" @click="addCharacter" class="w-full h-full">
@@ -1163,7 +1163,8 @@ function selectRoleForToken(role: {
         focusedToken.role = {
           token_url: role.token_url,
           alternate_token_urls: role.alternate_token_urls,
-          initial_alignment: role.type === "TRAVELER" ? "NEUTRAL" : role.initial_alignment,
+          initial_alignment:
+            role.type === "TRAVELER" ? "NEUTRAL" : role.initial_alignment,
           type: role.type,
         };
         focusedToken.role_id = role.id;
