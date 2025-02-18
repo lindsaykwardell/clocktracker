@@ -32,6 +32,8 @@ async function main() {
 
         if (!savedRole) continue;
 
+        console.log("Updating character", character.id, script.id);
+
         await prisma.role.update({
           where: {
             id: character.id,
