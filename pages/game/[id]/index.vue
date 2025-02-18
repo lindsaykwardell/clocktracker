@@ -232,12 +232,14 @@
               >
                 <span class="block">Demon Bluffs</span>
                 <div class="flex flex-wrap gap-2">
-                  <Token
+                  <a
                     v-for="bluff in game.data.demon_bluffs"
-                    :key="bluff.id"
-                    :character="bluff"
-                    size="sm"
-                  />
+                    :href="`/roles/${bluff.role_id}`"
+                    class="block"
+                    target="_blank"
+                  >
+                    <Token :key="bluff.id" :character="bluff" size="sm" />
+                  </a>
                 </div>
               </label>
               <label
@@ -246,12 +248,15 @@
               >
                 <span class="block">Fabled</span>
                 <div class="flex flex-wrap gap-2">
-                  <Token
+                  <a
                     v-for="fabled in game.data.fabled"
                     :key="fabled.id"
-                    :character="fabled"
-                    size="sm"
-                  />
+                    :href="`/roles/${fabled.role_id}`"
+                    target="_blank"
+                    class="block"
+                  >
+                    <Token :key="fabled.id" :character="fabled" size="sm" />
+                  </a>
                 </div>
               </label>
             </div>

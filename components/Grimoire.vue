@@ -213,16 +213,6 @@ const { isDone } = useDids();
 
 const me = useMe();
 
-function getRoleAbility(role_id: string | null) {
-  if (!role_id) {
-    return "";
-  }
-
-  const role = roles.getRole(role_id);
-
-  return role?.ability ?? "";
-}
-
 const communityMembersWhoArentFriends = computed(() =>
   friends.getCommunityMembers.filter(
     (member) =>
