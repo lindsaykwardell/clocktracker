@@ -175,10 +175,7 @@ const topTenScripts = computed(() =>
 const role_data = await $fetch(`/api/role/${role_id}`);
 
 const character = computed(() => ({
-  alignment:
-    role_data.role.type === "TRAVELER"
-      ? "NEUTRAL"
-      : role_data.role.initial_alignment,
+  alignment: role_data.role.initial_alignment,
   name: role_data.role.name,
   role: role_data.role,
 }));

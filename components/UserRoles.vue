@@ -28,10 +28,7 @@
               <Token
                 :character="{
                   role: role,
-                  alignment:
-                    role.type === 'TRAVELER'
-                      ? 'NEUTRAL'
-                      : role.initial_alignment,
+                  alignment: role.initial_alignment,
                 }"
                 size="sm"
                 v-tooltip="`${role.name}`"

@@ -151,7 +151,9 @@ const roles = [
   ...outsiders.map((role) => toRole(role, RoleType.OUTSIDER, Alignment.GOOD)),
   ...minions.map((role) => toRole(role, RoleType.MINION, Alignment.EVIL)),
   ...demons.map((role) => toRole(role, RoleType.DEMON, Alignment.EVIL)),
-  ...travelers.map((role) => toRole(role, RoleType.TRAVELER, Alignment.GOOD)),
+  ...travelers.map((role) =>
+    toRole(role, RoleType.TRAVELER, Alignment.NEUTRAL)
+  ),
   ...fabled.map((role) => toRole(role, RoleType.FABLED, Alignment.NEUTRAL)),
 ];
 
