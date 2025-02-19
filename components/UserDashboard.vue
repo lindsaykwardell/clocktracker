@@ -39,19 +39,13 @@
           roleOfTheDay.data.value?.initial_alignment, role:
           roleOfTheDay.data.value!, }"
           />
-          <h2 class="text-center font-bold">
-            {{ roleOfTheDay.data.value?.name }}
-          </h2>
         </nuxt-link>
         <hr class="border-stone-600" />
         <template v-if="scriptsOfTheWeek.data.value">
           <h1 class="text-xl font-sorts text-center">Popular Scripts</h1>
           <ul class="px-4">
             <li v-for="script in scriptsOfTheWeek.data.value">
-              <nuxt-link
-                :to="getScriptLink(script)"
-                class="hover:underline"
-              >
+              <nuxt-link :to="getScriptLink(script)" class="hover:underline">
                 {{ script.script }}
               </nuxt-link>
             </li>
