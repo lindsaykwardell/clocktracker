@@ -40,8 +40,7 @@ const props = defineProps<{
 }>();
 
 const character = computed(() => ({
-  alignment:
-    props.role.type === "TRAVELER" ? "NEUTRAL" : props.role.initial_alignment,
+  alignment: props.role.initial_alignment,
   name: props.role.name,
   role: props.role,
 }));

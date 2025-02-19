@@ -34,10 +34,11 @@
         >
           <Token
             size="lg"
-            :character="{ name: roleOfTheDay.data.value?.name,
-          alignment: roleOfTheDay.data.value?.type === 'TRAVELER' ? 'NEUTRAL' :
-          roleOfTheDay.data.value?.initial_alignment, role:
-          roleOfTheDay.data.value!, }"
+            :character="{ 
+              name: roleOfTheDay.data.value?.name,
+              alignment: roleOfTheDay.data.value?.initial_alignment,
+              role: roleOfTheDay.data.value!, 
+            }"
           />
         </nuxt-link>
         <hr class="border-stone-600" />
