@@ -389,8 +389,7 @@ function selectRoleForToken(role: {
         focusedToken.value.role = {
           token_url: role.token_url,
           alternate_token_urls: role.alternate_token_urls,
-          initial_alignment:
-            role.type === "TRAVELER" ? "NEUTRAL" : role.initial_alignment,
+          initial_alignment: role.initial_alignment,
           type: role.type,
           name: role.name,
         };
