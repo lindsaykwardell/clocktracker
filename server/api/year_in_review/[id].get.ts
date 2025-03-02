@@ -82,6 +82,11 @@ export default defineEventHandler(async (handler) => {
           role: true,
           related_role: true,
         },
+        where: {
+          name: {
+            not: "",
+          },
+        },
       },
       demon_bluffs: {
         include: {
