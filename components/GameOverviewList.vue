@@ -26,6 +26,13 @@
               ? onClick(game)
               : null
           "
+          :style="
+            game.associated_script?.background
+              ? {
+                  backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${game.associated_script.background})`,
+                }
+              : {}
+          "
           :class="{
             'trouble-brewing': game.script === 'Trouble Brewing',
             'sects-and-violets': game.script === 'Sects and Violets',
@@ -35,7 +42,8 @@
                 'Trouble Brewing',
                 'Sects and Violets',
                 'Bad Moon Rising',
-              ].indexOf(game.script) === -1,
+              ].indexOf(game.script) === -1 &&
+              !game.associated_script?.background,
             'select-multiple': selectMultipleGames.enabled,
             selected: selectMultipleGames.selectedGames.includes(game.id),
           }"

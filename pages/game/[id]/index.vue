@@ -210,6 +210,20 @@
                 }}
               </label>
               <label
+                v-if="game.data.ls_game?.campaign"
+                class="flex gap-3 items-center"
+              >
+                <img src="/img/living-scripts.webp" class="w-6 h-6" />
+                <span class="block">Campaign</span>
+                <a
+                  class="hover:underline text-blue-800 hover:text-blue-700"
+                  :href="`https://chillclocktower.com/living-script/campaign.php?view=${game.data.ls_game.campaign.id}`"
+                  target="_blank"
+                >
+                  {{ game.data.ls_game.campaign.title }}
+                </a>
+              </label>
+              <label
                 v-if="game.data.parent_game"
                 class="flex gap-3 items-center"
               >
@@ -328,6 +342,11 @@
             game.data.grimoire[0] &&
             game.data.grimoire[0].tokens.some((token) => token.role)
           "
+          :style="
+            game.data.associated_script?.background
+              ? { backgroundImage: `url(${game.data.associated_script.background})` }
+              : {}
+          "
           class="bg-center bg-cover relative text-white"
           :class="{
             'trouble-brewing': game.data.script === 'Trouble Brewing',
@@ -338,7 +357,7 @@
                 'Trouble Brewing',
                 'Sects and Violets',
                 'Bad Moon Rising',
-              ].indexOf(game.data.script) === -1,
+              ].indexOf(game.data.script) === -1 && !game.data.associated_script?.background,
           }"
         >
           <button

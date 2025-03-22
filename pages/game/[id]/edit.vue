@@ -39,6 +39,7 @@ const game = reactive<{
   script: string;
   script_id: number | null;
   bgg_id: number | null;
+  ls_game_id: number | null;
   storyteller: string;
   co_storytellers: string[];
   is_storyteller: boolean;
@@ -110,6 +111,7 @@ const game = reactive<{
   script: savedGame.data.value?.script || "",
   script_id: savedGame.data.value?.script_id || null,
   bgg_id: savedGame.data.value?.bgg_id || null,
+  ls_game_id: savedGame.data.value?.ls_game_id || null,
   storyteller: savedGame.data.value?.storyteller || "",
   co_storytellers: savedGame.data.value?.co_storytellers || [],
   is_storyteller: savedGame.data.value?.is_storyteller || false,

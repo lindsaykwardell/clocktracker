@@ -34,17 +34,19 @@
             v-model:visible="showScriptDialog"
             :scriptSelected="!!game.script"
             @selectScript="selectScript"
+            @selectLSGame="selectLSGame"
           />
         </label>
         <div
           v-if="
             !isBaseScript(game.script) &&
-            (scriptVersions.length > 1 || fetchingScriptVersions)
+            (scriptVersions.length > 1 || fetchingScriptVersions) &&
+            game.ls_game_id === null
           "
           class="flex flex-col gap-1"
         >
           <label>
-            <span class="block">Script Version</span>
+            <span class="block"> Script Version </span>
             <Input
               mode="select"
               v-if="!fetchingScriptVersions"
@@ -278,9 +280,7 @@
           }"
         />
       </div>
-      <div
-        class=" rounded p-4 flex justify-center items-center aspect-square"
-      >
+      <div class="rounded p-4 flex justify-center items-center aspect-square">
         <Token outline size="lg" class="font-sorts">
           <button type="button" @click="addCharacter" class="w-full h-full">
             Add Character
@@ -295,6 +295,11 @@
       <legend>Grimoire</legend>
       <div
         v-if="!game.player_count"
+        :style="
+          customBackground
+            ? { backgroundImage: `url(${customBackground})` }
+            : {}
+        "
         class="pt-3 relative bg-center bg-cover w-full h-[200px] flex justify-center items-center"
         :class="{
           'trouble-brewing': game.script === 'Trouble Brewing',
@@ -303,7 +308,7 @@
           'custom-script':
             ['Trouble Brewing', 'Sects and Violets', 'Bad Moon Rising'].indexOf(
               game.script
-            ) === -1,
+            ) === -1 && !customBackground,
         }"
       >
         <div
@@ -324,6 +329,11 @@
       </div>
       <div
         v-else
+        :style="
+          customBackground
+            ? { backgroundImage: `url(${customBackground})` }
+            : {}
+        "
         class="pt-3 relative bg-center bg-cover w-full"
         :class="{
           'trouble-brewing': game.script === 'Trouble Brewing',
@@ -332,7 +342,7 @@
           'custom-script':
             ['Trouble Brewing', 'Sects and Violets', 'Bad Moon Rising'].indexOf(
               game.script
-            ) === -1,
+            ) === -1 && !customBackground,
         }"
       >
         <Button
@@ -633,6 +643,7 @@ import type { RoleType } from "~/composables/useRoles";
 import naturalOrder from "natural-order";
 import { useLocalStorage } from "@vueuse/core";
 import { WinStatus_V2, type GameRecord } from "~/composables/useGames";
+import dayjs from "dayjs";
 
 const props = defineProps<{
   inFlight: boolean;
@@ -642,6 +653,7 @@ const props = defineProps<{
     script: string;
     script_id: number | null;
     bgg_id: number | null;
+    ls_game_id: number | null;
     storyteller: string;
     co_storytellers: string[];
     is_storyteller: boolean | undefined;
@@ -765,6 +777,7 @@ const games = useGames();
 const friends = useFriends();
 const { isBaseScript, fetchScriptVersions } = useScripts();
 const allRoles = useRoles();
+const route = useRoute();
 
 const showScriptDialog = ref(false);
 const showRoleSelectionDialog = ref(false);
@@ -792,6 +805,7 @@ const grimPage = ref(props.game.grimoire.length - 1);
 const tagsInput = ref("");
 const bggIdInput = ref("");
 const bggIdIsValid = ref(true);
+const customBackground = ref<string | null>(null);
 
 watch(bggIdInput, () => {
   // Validate the URL
@@ -1071,7 +1085,26 @@ async function removeFile(name: string) {
 function selectScript(script: { name: string; id: number | null }) {
   props.game.script = script.name;
   props.game.script_id = script.id;
+  props.game.ls_game_id = null;
   showScriptDialog.value = false;
+}
+
+function selectLSGame(game: {
+  name: string;
+  game_id: number;
+  script_id: number;
+  game_number: number;
+  notes: string | null;
+  date: string | null;
+}) {
+  props.game.script = game.name;
+  props.game.ls_game_id = game.game_id;
+  props.game.script_id = game.script_id;
+  props.game.notes = game.notes ?? "";
+  showScriptDialog.value = false;
+  if (game.date !== null) {
+    props.game.date = dayjs(game.date).format("YYYY-MM-DD");
+  }
 }
 
 watchEffect(async () => {
@@ -1080,39 +1113,46 @@ watchEffect(async () => {
 
   if (props.game.script_id) {
     fetchingScriptVersions.value = true;
-    const result = await $fetch<{
-      roles: {
-        type: RoleType;
-        id: string;
-        token_url: string;
-        name: string;
-        initial_alignment: Alignment;
-        reminders: { id: number; reminder: string; role_id: string }[];
-      }[];
-    }>(`/api/script/${props.game.script_id}`);
-    roles.value = result.roles ?? [];
+    try {
+      const result = await $fetch<{
+        background?: string;
+        roles: {
+          type: RoleType;
+          id: string;
+          token_url: string;
+          name: string;
+          initial_alignment: Alignment;
+          reminders: { id: number; reminder: string; role_id: string }[];
+        }[];
+      }>(`/api/script/${props.game.script_id}`);
+      roles.value = result.roles ?? [];
+      customBackground.value = result.background ?? null;
 
-    const fabled = roles.value.filter((role) => role.type === "FABLED");
+      const fabled = roles.value.filter((role) => role.type === "FABLED");
 
-    if (fabled.length > 0) {
-      fabled.forEach((fabledRole) => {
-        if (
-          !props.game.fabled.some(
-            (fabled) => fabled.role?.token_url === fabledRole.token_url
+      if (fabled.length > 0) {
+        fabled.forEach((fabledRole) => {
+          if (
+            !props.game.fabled.some(
+              (fabled) => fabled.role?.token_url === fabledRole.token_url
+            )
           )
-        )
-          props.game.fabled.push({
-            name: fabledRole.name,
-            role_id: fabledRole.id,
-            role: {
-              token_url: fabledRole.token_url,
-              type: fabledRole.type,
-            },
-          });
-      });
-    }
+            props.game.fabled.push({
+              name: fabledRole.name,
+              role_id: fabledRole.id,
+              role: {
+                token_url: fabledRole.token_url,
+                type: fabledRole.type,
+              },
+            });
+        });
+      }
 
-    scriptVersions.value = await fetchScriptVersions(props.game.script_id);
+      scriptVersions.value = await fetchScriptVersions(props.game.script_id);
+    } catch {
+      alert("Unable to load the selected script!");
+      // Do nothing
+    }
     fetchingScriptVersions.value = false;
   } else {
     roles.value = allRoles.getAllRoles();
@@ -1455,7 +1495,7 @@ watch(
   }
 );
 
-onMounted(() => {
+onMounted(async () => {
   friends.fetchCommunityMembers();
   if (me.value.status === Status.SUCCESS) {
     games.fetchPlayerGames(me.value.data.username);
@@ -1463,6 +1503,28 @@ onMounted(() => {
 
   if (props.game.bgg_id) {
     bggIdInput.value = `https://boardgamegeek.com/play/details/${props.game.bgg_id}`;
+  }
+
+  if (route.query["living-script"]) {
+    const lsCampaign = route.query["living-script"] as string;
+    const lsGame = route.query["game"] as string;
+
+    const result = await $fetch(`/api/living_scripts/${lsCampaign}`);
+    if (!result) {
+      return;
+    }
+    const game = result.games.find((g) => g.game_number === parseInt(lsGame));
+    if (!game || game.script_id === null) {
+      return;
+    }
+    selectLSGame({
+      name: result.title,
+      game_id: game.id,
+      script_id: game.script_id,
+      game_number: game.game_number,
+      date: game.submitted,
+      notes: game.notes,
+    });
   }
 });
 </script>
