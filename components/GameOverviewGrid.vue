@@ -26,6 +26,11 @@
           @click="handleCardClick(game)"
           :to="`/game/${game.id}`"
           class="w-full bg-stone-900 flex flex-col items-center cursor-pointer rounded overflow-hidden text-black h-48 md:h-72 bg-cover bg-center"
+          :style="
+            game.associated_script?.background
+              ? { backgroundImage: `url(${game.associated_script.background})` }
+              : {}
+          "
           :class="{
             'trouble-brewing': game.script === 'Trouble Brewing',
             'sects-and-violets': game.script === 'Sects and Violets',
@@ -35,7 +40,8 @@
                 'Trouble Brewing',
                 'Sects and Violets',
                 'Bad Moon Rising',
-              ].indexOf(game.script) === -1,
+              ].indexOf(game.script) === -1 &&
+              !game.associated_script?.background,
           }"
         >
           <img
@@ -49,6 +55,9 @@
           >
             <div v-if="isFavorite(game)" class="text-primary">
               <Star class="w-6" />
+            </div>
+            <div v-if="game.ls_game?.campaign?.id">
+              <img src="/img/living-scripts.webp" class="w-8 h-8" />
             </div>
             <div>{{ formatDate(game.date) }}</div>
           </div>
@@ -138,7 +147,12 @@
                     game.associated_script && !scripts.isBaseScript(game.script)
                   "
                 >
-                  v{{ game.associated_script.version }}
+                  <template v-if="game.ls_game_id">
+                    (Game {{ game.associated_script.version }})
+                  </template>
+                  <template v-else>
+                    v{{ game.associated_script.version }}
+                  </template>
                 </template>
               </div>
             </div>
