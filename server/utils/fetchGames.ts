@@ -172,6 +172,16 @@ export async function fetchGames(user_id: string, me: User | null) {
       ],
     },
     include: {
+      ls_game: {
+        select: {
+          campaign: {
+            select: {
+              title: true,
+              id: true,
+            }
+          }
+        }
+      },
       user: {
         select: {
           privacy: true,
@@ -254,6 +264,7 @@ export async function fetchGames(user_id: string, me: User | null) {
           script_id: true,
           is_custom_script: true,
           logo: true,
+          background: true,
         },
       },
     },
@@ -418,6 +429,16 @@ export async function fetchGame(
       ],
     },
     include: {
+      ls_game: {
+        select: {
+          campaign: {
+            select: {
+              title: true,
+              id: true,
+            }
+          }
+        }
+      },
       user: {
         select: {
           privacy: true,
@@ -503,6 +524,7 @@ export async function fetchGame(
           script_id: true,
           is_custom_script: true,
           logo: true,
+          background: true,
         },
       },
     },
