@@ -41,6 +41,12 @@ export type FullFabled = Fabled & {
 };
 
 export type GameRecord = Omit<Game, "win_v2"> & {
+  ls_game?: {
+    campaign?: {
+      title: string;
+      id: string;
+    };
+  };
   win_v2: WinStatus_V2;
   player_characters: FullCharacter[];
   demon_bluffs: FullDemonBluff[];
@@ -80,6 +86,7 @@ export type GameRecord = Omit<Game, "win_v2"> & {
     script_id: string;
     is_custom_script: boolean;
     logo: string | null;
+    background: string | null;
   };
 };
 

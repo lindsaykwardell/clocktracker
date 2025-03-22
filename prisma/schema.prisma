@@ -23,6 +23,8 @@ model FeatureFlag {
 model Game {
   id                       String         @id @default(uuid())
   bgg_id                   Int?           @unique
+  ls_game_id               Int?           @unique
+  ls_game                  LSGame?        @relation(fields: [ls_game_id], references: [id])
   user_id                  String
   created_at               DateTime?      @default(now()) @db.Timestamptz(6)
   date                     DateTime       @default(now()) @db.Date
@@ -162,12 +164,14 @@ model Script {
   json_url         String
   pdf_url          String
   description      String        @default("")
+  background       String?
   json             String?
   user             UserSettings? @relation(fields: [user_id], references: [user_id])
   user_id          String?
   roles            Role[]
   games            Game[]
   events           Event[]
+  ls_game          LSGame?
 
   @@unique([script_id, version])
 }
@@ -189,6 +193,10 @@ model Role {
   demon_bluffs         DemonBluff[]
   fabled               Fabled[]
   reminders            RoleReminder[]
+  ls_campaigns         LSCampaign[]
+  ls_games             LSGame[]       @relation("Games")
+  ls_game_deaths       LSGame[]       @relation("Deaths")
+  ls_game_retires      LSGame[]       @relation("Retire")
 }
 
 model RoleReminder {
@@ -507,4 +515,40 @@ model City {
 model CronLock {
   task_id    String   @id
   created_at DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model LSCampaign {
+  id                    String   @id
+  title                 String
+  author                String
+  end_condition         String?
+  end_value             String   @default("")
+  max_townsfolk         Int
+  max_outsiders         Int
+  max_minions           Int
+  max_demons            Int
+  script_growth_speed   String   @default("off")
+  script_truncate_speed String   @default("off")
+  like_surprises        Boolean  @default(false)
+  reserved_characters   Role[]
+  games                 LSGame[]
+}
+
+model LSGame {
+  id             Int          @id
+  game_number    Int
+  characters     Role[]       @relation("Games")
+  deaths         Role[]       @relation("Deaths")
+  retire         Role[]       @relation("Retire")
+  created        DateTime
+  submitted      DateTime?
+  win            WinStatus_V2 @default(NOT_RECORDED)
+  notes          String       @default("")
+  campaign       LSCampaign   @relation(fields: [ls_campaign_id], references: [id])
+  ls_campaign_id String
+  game           Game[]
+  script         Script?      @relation(fields: [script_id], references: [id])
+  script_id      Int?         @unique
+
+  @@unique([id, game_number])
 }

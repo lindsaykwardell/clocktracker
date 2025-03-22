@@ -111,6 +111,16 @@ export default defineEventHandler(async (handler) => {
       ],
     },
     include: {
+      ls_game: {
+        select: {
+          campaign: {
+            select: {
+              title: true,
+              id: true,
+            }
+          }
+        }
+      },
       user: {
         select: {
           username: true,
@@ -193,6 +203,7 @@ export default defineEventHandler(async (handler) => {
           script_id: true,
           is_custom_script: true,
           logo: true,
+          background: true,
         },
       },
     },

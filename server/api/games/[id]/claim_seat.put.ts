@@ -104,6 +104,16 @@ export default defineEventHandler(async (handler) => {
       },
     },
     include: {
+      ls_game: {
+        select: {
+          campaign: {
+            select: {
+              title: true,
+              id: true,
+            }
+          }
+        }
+      },
       user: {
         select: {
           username: true,
@@ -162,6 +172,7 @@ export default defineEventHandler(async (handler) => {
           script_id: true,
           is_custom_script: true,
           logo: true,
+          background: true,
         },
       },
     },
@@ -329,6 +340,7 @@ export default defineEventHandler(async (handler) => {
       await prisma.game.create({
         data: {
           ...game,
+          ls_game: undefined,
           id: undefined,
           community: undefined,
           associated_script: undefined,
