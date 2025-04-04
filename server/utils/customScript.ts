@@ -34,7 +34,7 @@ export type UploadedScript = [
 
 export async function saveCustomScript(body: UploadedScript, user: User) {
   const [script, ...roles] = body;
-  console.log("Saving custom script", script, JSON.stringify(roles));
+  console.log("Saving custom script", script, JSON.stringify(roles, null, 2));
 
   if (!script.name) {
     throw createError({
@@ -138,6 +138,8 @@ export async function saveCustomScript(body: UploadedScript, user: User) {
 
     role.id = role.id + "-" + nanoid(6);
 
+    console.log("Creating role", role);
+
     await prisma.role.create({
       data: {
         id: role.id,
@@ -169,6 +171,12 @@ export async function saveCustomScript(body: UploadedScript, user: User) {
         user_id: user.id,
       },
     })) + 1;
+
+  console.log(
+    "Creating script",
+    JSON.stringify(script, null, 2),
+    JSON.stringify(roles, null, 2)
+  );
 
   return prisma.script.create({
     data: {
