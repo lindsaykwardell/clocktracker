@@ -40,6 +40,7 @@ export default defineEventHandler(async (handler) => {
     for (const game of existing_campaign.games) {
       if (!game.script_id) {
         const script = await getLSGameJson(game.id);
+        script[0].name = existing_campaign.title;
         try {
           const uploadedScript = await saveCustomScript(script, user!);
           if (uploadedScript) {
@@ -96,6 +97,7 @@ export default defineEventHandler(async (handler) => {
       let script_id: number | undefined = undefined;
       if (user) {
         const script = await getLSGameJson(game.game_id);
+        script[0].name = existing_campaign.title;
         const uploadedScript = await saveCustomScript(script, user);
         if (uploadedScript) {
           script_id = uploadedScript.id;
@@ -161,15 +163,16 @@ export default defineEventHandler(async (handler) => {
     const game_data = [];
 
     for (const game of games) {
+      console.log("Game", game);
       const characters: (string | undefined)[] = await Promise.all(
         JSON.parse(game.characters).map(mapOfficialIdToClocktrackerId)
       );
       const deaths: (string | undefined)[] = await Promise.all(
-        JSON.parse(game.deaths).map(mapOfficialIdToClocktrackerId)
+        JSON.parse(game.deaths ?? "[]").map(mapOfficialIdToClocktrackerId)
       );
       const retire: (string | undefined)[] = await Promise.all(
         game.retire
-          ? JSON.parse(game.retire).map(mapOfficialIdToClocktrackerId)
+          ? JSON.parse(game.retire ?? "[]").map(mapOfficialIdToClocktrackerId)
           : []
       );
       const win =
@@ -182,6 +185,7 @@ export default defineEventHandler(async (handler) => {
       let script_id: number | undefined = undefined;
       if (user) {
         const script = await getLSGameJson(game.game_id);
+        script[0].name = campaign.title;
         const uploadedScript = await saveCustomScript(script, user);
         if (uploadedScript) {
           script_id = uploadedScript.id;
@@ -215,7 +219,7 @@ export default defineEventHandler(async (handler) => {
         max_demons: campaign.campaign_options.max_demon,
         script_growth_speed: campaign.campaign_options.script_growth_speed,
         script_truncate_speed: campaign.campaign_options.script_truncate_speed,
-        like_surprises: campaign.campaign_options.like_surprises,
+        like_surprises: campaign.campaign_options.like_surprises === 1,
         reserved_characters: {
           connect: reserved_characters.map((id) => ({
             id,
