@@ -15,10 +15,10 @@ export type LSCampaignResponse = {
     script_truncate_speed: string;
     custom_datasets: "";
     reserved_characters: string[];
-    like_surprises: boolean;
-    eliminate_linked: "0" | "1";
-    show_evil_winning: "0" | "1";
-    show_graveyard: "0" | "1";
+    like_surprises: 0 | 1;
+    eliminate_linked: 0 | 1;
+    show_evil_winning: 0 | 1;
+    show_graveyard: 0 | 1;
   };
   maxGameNum: number;
   error?: string;
