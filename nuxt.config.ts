@@ -15,6 +15,7 @@ export default defineNuxtConfig({
     "floating-vue/nuxt",
     "nuxt-cron",
     "nuxt-bugsnag",
+    "nuxt-graphql-server",
   ],
 
   app: {
