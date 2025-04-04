@@ -1,0 +1,108 @@
+enum WinStatus {
+  GOOD_WINS
+  EVIL_WINS
+  NOT_RECORDED
+}
+
+enum LocationType {
+  ONLINE
+  IN_PERSON
+}
+
+enum PrivacySetting {
+  PUBLIC
+  PRIVATE
+  FRIENDS_ONLY
+  PERSONAL
+}
+
+enum Alignment {
+  GOOD
+  EVIL
+  NEUTRAL
+}
+
+enum RoleType {
+  TOWNSFOLK
+  OUTSIDER
+  MINION
+  DEMON
+  TRAVELER
+  FABLED
+}
+
+type Script {
+  id: ID!
+  scriptId: String!
+  logo: String
+  website: String
+  name: String!
+  version: String!
+  author: String!
+  type: String!
+  jsonUrl: String!
+  pdfUrl: String!
+  description: String!
+  roles: [Role!]!
+}
+
+"""
+Root query type providing access to all readable data
+"""
+type Query {
+  roles(
+    ids: [ID!]
+    offset: Int
+    limit: Int
+    type: RoleType
+    scriptId: ID
+  ): [Role!]
+  role(id: ID!, withIds: [ID!]): Role
+  scripts(offset: Int, limit: Int, roles: [ID!]): [Script!]
+  script(id: ID!): Script
+}
+
+"""
+Role type representing a character role in the game
+"""
+type Role {
+  id: ID!
+  name: String!
+  initialAlignment: Alignment!
+  ability: String!
+  tokenUrl: String!
+  alternateTokenUrls: [String!]!
+  type: RoleType!
+  customRole: Boolean!
+  winLoss: WinLoss
+  popularScripts(limit: Int): [PopularScript!]
+  gamesByMonth: JSONObject
+  count: Int
+}
+
+"""
+Win/Loss statistics for a role
+"""
+type WinLoss {
+  wins: Int!
+  losses: Int!
+  pct: Float!
+}
+"""
+Popular script statistics for a role
+"""
+type PopularScript {
+  scriptId: Int
+  script: String!
+  version: String
+  customScriptId: String
+  logo: String
+  wins: Int!
+  pct: Float!
+  count: Int!
+}
+
+"""
+Generic JSON object scalar type
+"""
+scalar JSONObject
