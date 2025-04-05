@@ -67,7 +67,7 @@ export default defineEventHandler(async (handler) => {
 
     // Get only the new games
     const lastGameNum =
-      existing_campaign.games[existing_campaign.games.length - 1].game_number;
+      existing_campaign.games[existing_campaign.games.length - 1]?.game_number ?? 0;
 
     for (let index = lastGameNum; index < campaign.maxGameNum; index++) {
       const game = await getLSGameInfo(view_code, index);
