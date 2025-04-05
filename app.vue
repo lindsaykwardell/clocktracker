@@ -1,51 +1,65 @@
 <template>
   <NuxtPage />
-  <AnnouncementDialog id="fundraising-0225">
+  <AnnouncementDialog id="fleshandbone-040525-">
     <template #title>
       <h1 class="text-2xl font-bold font-sorts">
-        Changelog
+        Announcing "Living Scripts" integration!
       </h1>
       <div class="text-lg text-stone-400">{{ formattedAnnouncementDate }}</div>
     </template>
     <p class="p-2">
-      There's been a large number of changes since the last update, so I wanted to
-      take a moment to highlight some of the most important ones. 
+      A new integration is now available for ClockTracker:
+      <strong>"Living Scripts"</strong>!
+    </p>
+    <p class="p-2">From the Living Scripts website:</p>
+    <p
+      class="p-2 pl-6 border-l-4 border-stone-300 dark:border-stone-700 text-stone-600 dark:text-stone-400 italic"
+    >
+      <em>
+        If you've ever gathered your group to play Blood on the Clocktower and
+        wondered, "What script should we play?"—you're in the right place.
+        Living Scripts takes the game you love and transforms it into an
+        evolving, dynamic campaign system that builds tension, bonds, and a
+        story you’ll remember long after the games end. Think of it as Blood on
+        the Clocktower—but with consequences that ripple across multiple
+        sessions.
+      </em>
     </p>
     <p class="p-2">
-      Before we dive in, though, ClockTracker is a free and open-source project, but it costs to run the servers and services. Please consider supporting this project on Ko-Fi in order to ensure that it remains available for the Clocktower community!
+      Living Scripts is a new way to play Blood on the Clocktower that allows
+      you to connect your games together into a campaign, with a "living" script
+      that changes every game. With this integration, ClockTracker now supports
+      a built-in method of supporting Living Scripts, by importing the campaign
+      and script information directly.
     </p>
     <p class="p-2">
-      You can support ClockTracker by using <a href="https://ko-fi.com/clocktracker" class="text-blue-500 hover:underline">our Ko-Fi page</a>!
+      When you are adding a game, you can now select to use a Living Script
+      campaign from the script selection dialog. There are two options: Classic
+      (a standard script) or Living Scripts.
     </p>
+    <img src="/img/ls-1.png" />
     <p class="p-2">
-      With that out of the way, here's a summary of the changes:
+      Once you select a Living Script campaign, you will be able to choose from
+      the available scripts in that campaign. Details such as the notes and the
+      game date, will be automatically filled in, and the custom background
+      image (if any) will be used for the game session.
     </p>
-    <ul class="list-disc list-inside p-2">
-      <li>
-        Enable claiming seats in an existing game (as long as you are friends with or in a community with the game's owner)
-      </li>
-      <li>
-        Implement geolocation for finding communities and events
-      </li>
-      <li>
-        Implement color shifting tokens depending on their alignment
-      </li>
-      <li>
-        When entering a grimoire, only display the tokens of players with details. This allows for "empty seats" if travelers enter late or leave early.
-      </li>
-      <li>
-        Enable creating private events (rather than just community-based events)
-      </li>
-      <li>
-        Added support and documentation for running a development version of ClockTracker locally
-      </li>
-      <li>
-        Auto focus the search box on the role selection dialog, and auto select the first option when "Enter" (or "Return") is pressed.
-      </li>
-      <li>
-        Lots of bugfixes and performance improvements
-      </li>
-    </ul>
+    <img src="/img/ls-2.png" />
+    <p class="p-2">
+      You can also add a Living Scripts game directly to ClockTracker usign the
+      provided button on the Living Scripts website.
+    </p>
+    <img src="/img/ls-3.png" />
+    <p class="p-2">
+      Living Scripts is an exciting, new way to play ClockTower, and I highly
+      recommend you check it out! The website is
+      <a
+        href="https://fleshandbone.app/"
+        target="_blank"
+        class="text-violet-600 hover:text-violet-800 dark:text-violet-400 dark:hover:text-violet-600"
+        >fleshandbone.app</a
+      >.
+    </p>
     <p class="p-2">
       Please let me know on Discord if you have any issues or feedback. Thank
       you!
