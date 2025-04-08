@@ -21,6 +21,9 @@ export default defineEventHandler(async (handler) => {
         contains: author,
         mode: "insensitive",
       },
+      ls_game: {
+        is: null,
+      },
       OR: [
         {
           user_id: me?.id || "",
