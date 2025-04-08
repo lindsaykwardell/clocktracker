@@ -138,8 +138,6 @@ export async function saveCustomScript(body: UploadedScript, user: User) {
 
     role.id = role.id + "-" + nanoid(6);
 
-    console.log("Creating role", role);
-
     await prisma.role.create({
       data: {
         id: role.id,
@@ -164,19 +162,17 @@ export async function saveCustomScript(body: UploadedScript, user: User) {
     });
   }
 
-  const version =
-    (await prisma.script.count({
-      where: {
-        name: script.name,
-        user_id: user.id,
-      },
-    })) + 1;
+  const existingScripts = await prisma.script.findMany({
+    where: {
+      name: script.name,
+      user_id: user.id,
+    },
+  });
 
-  console.log(
-    "Creating script",
-    JSON.stringify(script, null, 2),
-    JSON.stringify(roles, null, 2)
-  );
+  const version =
+    existingScripts.length > 0
+      ? existingScripts[existingScripts.length - 1].version
+      : 1;
 
   return prisma.script.create({
     data: {
@@ -188,7 +184,10 @@ export async function saveCustomScript(body: UploadedScript, user: User) {
       pdf_url: "",
       user_id: user.id,
       is_custom_script: true,
-      script_id: nanoid(8),
+      script_id:
+        existingScripts.length > 0
+          ? existingScripts[existingScripts.length - 1].script_id
+          : nanoid(8),
       json: JSON.stringify(body),
       logo: script.logo ?? null,
       website: script.almanac ?? null,
