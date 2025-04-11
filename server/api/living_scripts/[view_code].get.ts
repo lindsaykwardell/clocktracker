@@ -1,6 +1,7 @@
 import { PrismaClient, WinStatus_V2 } from "@prisma/client";
 import { mapOfficialIdToClocktrackerId } from "~/server/utils/getRoleMap";
 import { User } from "@supabase/supabase-js";
+import { updateCustomScript } from "~/server/utils/customScript";
 
 const prisma = new PrismaClient();
 
@@ -55,9 +56,33 @@ export default defineEventHandler(async (handler) => {
       } else {
         const script = await getLSGameJson(game.game_id);
         script[0].name = campaign.title;
-        const uploadedScript = await saveCustomScript(script, user);
-        if (uploadedScript) {
-          script_id = uploadedScript.id;
+        try {
+          const uploadedScript = await saveCustomScript(script, user);
+          if (uploadedScript) {
+            script_id = uploadedScript.id;
+          }
+        } catch (e) {
+          // Check to see if there's a version of this script that's already uploaded for this user
+          const existingScripts = await prisma.script.findMany({
+            where: {
+              name: script[0].name,
+              user_id: user.id,
+            },
+          });
+          const scriptMatchingVersion = existingScripts.find(
+            (script) =>
+              script.version ===
+              (
+                games.findIndex((g) => g.game_id === game.game_id) + 1
+              ).toString()
+          );
+          if (scriptMatchingVersion) {
+            script_id = scriptMatchingVersion.id;
+            await updateCustomScript(scriptMatchingVersion.id, script, user);
+          }
+
+          // Guess it wasn't this problem! 
+          throw e;
         }
       }
     }
