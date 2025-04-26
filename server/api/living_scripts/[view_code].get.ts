@@ -1,7 +1,6 @@
 import { PrismaClient, WinStatus_V2 } from "@prisma/client";
 import { mapOfficialIdToClocktrackerId } from "~/server/utils/getRoleMap";
 import { User } from "@supabase/supabase-js";
-import { updateCustomScript } from "~/server/utils/customScript";
 
 const prisma = new PrismaClient();
 
@@ -16,6 +15,7 @@ export default defineEventHandler(async (handler) => {
   }
 
   const games = await getAllLSGameInfo(view_code);
+  console.log("Got games");
   const reserved_characters = [];
   for (const character of campaign.campaign_options.reserved_characters) {
     reserved_characters.push(await mapOfficialIdToClocktrackerId(character));
@@ -23,7 +23,8 @@ export default defineEventHandler(async (handler) => {
 
   const game_data = [];
 
-  for (const game of games) {
+  for (const index in games) {
+    const game = games[index];
     const characters: (string | undefined)[] = await Promise.all(
       JSON.parse(game.characters ?? "[]").map(mapOfficialIdToClocktrackerId)
     );
@@ -52,38 +53,18 @@ export default defineEventHandler(async (handler) => {
         },
       });
       if (existing_script) {
+        console.log(`Game ${index}`, "Script already exists");
         script_id = existing_script.id;
       } else {
+        console.log(`Game ${index}`, "Uploading script");
         const script = await getLSGameJson(game.game_id);
         script[0].name = campaign.title;
-        try {
-          const uploadedScript = await saveCustomScript(script, user);
-          if (uploadedScript) {
-            script_id = uploadedScript.id;
-          }
-        } catch (e) {
-          // Check to see if there's a version of this script that's already uploaded for this user
-          const existingScripts = await prisma.script.findMany({
-            where: {
-              name: script[0].name,
-              user_id: user.id,
-            },
-          });
-          const scriptMatchingVersion = existingScripts.find(
-            (script) =>
-              script.version ===
-              (
-                games.findIndex((g) => g.game_id === game.game_id) + 1
-              ).toString()
-          );
-          if (scriptMatchingVersion) {
-            script_id = scriptMatchingVersion.id;
-            await updateCustomScript(scriptMatchingVersion.id, script, user);
-          }
 
-          // Guess it wasn't this problem! 
-          throw e;
-        }
+        const uploadedScript = await saveCustomScript(script, user, {
+          version: +index + 1,
+        });
+
+        script_id = uploadedScript.id;
       }
     }
 
@@ -100,6 +81,11 @@ export default defineEventHandler(async (handler) => {
       script_id,
     });
   }
+
+  console.log(
+    "game_data",
+    game_data.map((game) => game.script_id)
+  );
 
   return prisma.lSCampaign.upsert({
     where: {
@@ -166,6 +152,7 @@ export default defineEventHandler(async (handler) => {
         upsert: game_data.map((game) => ({
           where: { id: game.id },
           update: {
+            ...game,
             game_number: game.game_number,
             characters: {
               connect: game.characters.filter(Boolean).map((id) => ({ id })),
