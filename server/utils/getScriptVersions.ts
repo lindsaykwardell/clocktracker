@@ -14,7 +14,18 @@ export async function getScriptVersions(script: Script, me: User | null) {
     const scripts = await prisma.script.findMany({
       where: {
         name: script.name,
+        // We _should_ be pulling by script_id, but we aren't right now.
+        // Why??
         OR: [
+          // If someone owns this script
+          // This is weird and I need to come back to it,
+          // but since uploaded scripts are _technically_ public,
+          // we can just fetch any versions,
+          {
+            user_id: {
+              equals: script.user_id,
+            },
+          },
           // If you own this script
           {
             user_id: {
