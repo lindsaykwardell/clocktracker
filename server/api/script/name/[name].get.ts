@@ -61,7 +61,7 @@ export default defineEventHandler(async (handler) => {
           name,
           id: {
             in: versions.map((version) => version.id),
-          }
+          },
         },
         include: {
           roles: {
