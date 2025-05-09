@@ -15,76 +15,77 @@ export default defineEventHandler(async (handler) => {
   }
 
   const games = await getAllLSGameInfo(view_code);
-  console.log("Got games");
   const reserved_characters = [];
   for (const character of campaign.campaign_options.reserved_characters) {
     reserved_characters.push(await mapOfficialIdToClocktrackerId(character));
   }
 
-  const game_data = [];
+  const game_data = await Promise.all(
+    games.map(async (game, index) => {
+      const character_ids_official = JSON.parse(game.characters ?? "[]");
+      const death_ids_official = JSON.parse(game.deaths ?? "[]");
+      const retire_ids_official = game.retire
+        ? JSON.parse(game.retire ?? "[]")
+        : [];
 
-  for (const index in games) {
-    const game = games[index];
-    const characters: (string | undefined)[] = await Promise.all(
-      JSON.parse(game.characters ?? "[]").map(mapOfficialIdToClocktrackerId)
-    );
-    const deaths: (string | undefined)[] = await Promise.all(
-      JSON.parse(game.deaths ?? "[]").map(mapOfficialIdToClocktrackerId)
-    );
-    const retire: (string | undefined)[] = await Promise.all(
-      game.retire
-        ? JSON.parse(game.retire ?? "[]").map(mapOfficialIdToClocktrackerId)
-        : []
-    );
-    const win =
-      game.goodWon === 1
-        ? WinStatus_V2.GOOD_WINS
-        : game.goodWon === 0
-        ? WinStatus_V2.EVIL_WINS
-        : WinStatus_V2.NOT_RECORDED;
+      const [characters_resolved, deaths_resolved, retire_resolved] =
+        await Promise.all([
+          Promise.all(
+            character_ids_official.map(mapOfficialIdToClocktrackerId)
+          ),
+          Promise.all(death_ids_official.map(mapOfficialIdToClocktrackerId)),
+          Promise.all(retire_ids_official.map(mapOfficialIdToClocktrackerId)),
+        ]);
 
-    let script_id: number | undefined = undefined;
-    if (user) {
-      const existing_script = await prisma.script.findFirst({
-        where: {
-          ls_game: {
-            id: game.game_id,
+      const characters = characters_resolved as (string | undefined)[];
+      const deaths = deaths_resolved as (string | undefined)[];
+      const retire = retire_resolved as (string | undefined)[];
+
+      const win =
+        game.goodWon === 1
+          ? WinStatus_V2.GOOD_WINS
+          : game.goodWon === 0
+          ? WinStatus_V2.EVIL_WINS
+          : WinStatus_V2.NOT_RECORDED;
+
+      let script_id: number | undefined = undefined;
+      if (user) {
+        const existing_script = await prisma.script.findFirst({
+          where: {
+            ls_game: {
+              id: game.game_id,
+            },
           },
-        },
-      });
-      if (existing_script) {
-        console.log(`Game ${index}`, "Script already exists");
-        script_id = existing_script.id;
-      } else {
-        console.log(`Game ${index}`, "Uploading script");
-        const script = await getLSGameJson(game.game_id);
-        script[0].name = campaign.title;
-
-        const uploadedScript = await saveCustomScript(script, user, {
-          version: +index + 1,
         });
+        if (existing_script) {
+          script_id = existing_script.id;
+        } else {
+          const script = await getLSGameJson(game.game_id);
+          if (script && script.length > 0) {
+            script[0].name = campaign.title;
+          }
 
-        script_id = uploadedScript.id;
+          const uploadedScript = await saveCustomScript(script, user, {
+            version: index + 1,
+          });
+
+          script_id = uploadedScript.id;
+        }
       }
-    }
 
-    game_data.push({
-      id: game.game_id,
-      game_number: game.gameNum,
-      characters,
-      deaths,
-      retire,
-      created: new Date(game.created),
-      submitted: game.submitted ? new Date(game.submitted) : null,
-      win,
-      notes: game.notes ?? undefined,
-      script_id,
-    });
-  }
-
-  console.log(
-    "game_data",
-    game_data.map((game) => game.script_id)
+      return {
+        id: game.game_id,
+        game_number: game.gameNum,
+        characters,
+        deaths,
+        retire,
+        created: new Date(game.created),
+        submitted: game.submitted ? new Date(game.submitted) : null,
+        win,
+        notes: game.notes ?? undefined,
+        script_id,
+      };
+    })
   );
 
   return prisma.lSCampaign.upsert({

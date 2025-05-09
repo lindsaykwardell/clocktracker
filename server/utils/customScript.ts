@@ -69,16 +69,8 @@ export async function saveCustomScript(
   const version = options?.version
     ? options.version
     : existingScripts.length > 0
-    ? existingScripts[existingScripts.length - 1].version
+    ? +existingScripts[existingScripts.length - 1].version + 1
     : 1;
-
-  console.log(
-    "Saving custom script",
-    `Script name: ${script.name}`,
-    `Script id: ${scriptId}`,
-    `Version: ${version}`,
-    `User id: ${user.id}`
-  );
 
   const roleMap = await getRoleMap();
 
