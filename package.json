@@ -7,12 +7,16 @@
     "db:reset": "supabase db reset && prisma migrate reset --force",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "test": "playwright test"
   },
   "devDependencies": {
+    "@faker-js/faker": "^9.2.0",
     "@nuxt/devtools": "^1.5.0",
+    "@nuxt/test-utils": "^3.18.0",
     "@nuxtjs/supabase": "^1.4.0",
     "@nuxtjs/tailwindcss": "^6.12.1",
+    "@playwright/test": "^1.52.0",
     "@types/formidable": "^3.4.5",
     "@types/node": "^20.16.5",
     "@types/papaparse": "^5.3.14",
@@ -21,6 +25,7 @@
     "@vite-pwa/nuxt": "^0.10.6",
     "nuxt": "^3.14.159",
     "nuxt-bugsnag": "^8.0.0",
+    "playwright-core": "^1.52.0",
     "prisma": "^5.19.1",
     "progress": "^2.0.3",
     "sass": "^1.79.3",
@@ -33,7 +38,6 @@
     "@aws-sdk/client-s3": "^3.654.0",
     "@aws-sdk/lib-storage": "^3.654.0",
     "@aws-sdk/s3-request-presigner": "^3.654.0",
-    "@faker-js/faker": "^9.2.0",
     "@fontsource/sorts-mill-goudy": "^5.1.1",
     "@globalhive/vuejs-tour": "^1.6.1",
     "@headlessui/vue": "^1.7.23",
