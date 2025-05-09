@@ -226,6 +226,11 @@
       >
         Upload a script
       </button>
+      <template v-if="mode === 'living' && isLoading">
+        <div class="flex justify-center items-center">
+          <Loading />
+        </div>
+      </template>
       <template v-if="mode === 'living' && lsCampaign">
         <div class="flex gap-4">
           <div class="flex-grow">
@@ -301,6 +306,7 @@ const scripts = ref<{ id: number; name: string }[]>([]);
 const baseScripts = ref<{ id: number; name: string }[]>([]);
 const lsCampaign = ref<LoadedLSCampaign | null>(null);
 const selectedLSGame = ref<LSGame | null>(null);
+const isLoading = ref(false);
 
 const recentScripts = computed(() =>
   games.getRecentScripts.filter(
@@ -343,7 +349,7 @@ async function searchScripts() {
   scripts.value = result.data.value ?? [];
 }
 
-async function seaarchLSCampaign() {
+async function searchLSCampaign() {
   if (mode.value === "classic") {
     return;
   }
@@ -353,14 +359,16 @@ async function seaarchLSCampaign() {
     return;
   }
 
+  isLoading.value = true;
   const result = await $fetch(`/api/living_scripts/${input.value}`);
   if (result) {
     lsCampaign.value = result as any as LoadedLSCampaign;
   }
+  isLoading.value = false;
 }
 
 watchDebounced(input, searchScripts, { debounce: 500 });
-watchDebounced(input, seaarchLSCampaign, { debounce: 500 });
+watchDebounced(input, searchLSCampaign, { debounce: 500 });
 
 async function handleUploadScript() {
   const script = (await uploadScript()) as Promise<{
