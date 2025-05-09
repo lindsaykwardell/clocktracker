@@ -26,3 +26,6 @@ logs
 .netlify
 
 tmp
+test-results/*
+playwright-report/*
+tests/e2e/test-account.json
