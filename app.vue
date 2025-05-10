@@ -20,7 +20,7 @@
         wondered, "What script should we play?"—you're in the right place.
         Living Scripts takes the game you love and transforms it into an
         evolving, dynamic campaign system that builds tension, bonds, and a
-        story you’ll remember long after the games end. Think of it as Blood on
+        story you'll remember long after the games end. Think of it as Blood on
         the Clocktower—but with consequences that ripple across multiple
         sessions.
       </em>
@@ -102,6 +102,28 @@ const featureFlags = useFeatureFlags();
 await featureFlags.init();
 await featureFlags.fetchScheduledMaintenance();
 
+// Fetch user settings during SSR
+const { data: userSettings } = await useAsyncData(
+  "userSettings",
+  async () => {
+    if (!user.value?.id) return null;
+
+    try {
+      const settings = await $fetch<User>("/api/settings");
+      users.storeUser(settings);
+      return settings;
+    } catch (e) {
+      console.error("Error fetching user settings:", e);
+      return null;
+    }
+  },
+  {
+    server: true,
+    immediate: true,
+  }
+);
+
+// Only handle client-side updates after initial SSR
 watch(
   user,
   async (current, previous) => {
@@ -109,9 +131,9 @@ watch(
       return;
     }
 
-    if (current?.id !== previous?.id) {
+    if (current?.id && current?.id !== previous?.id && !userSettings.value) {
       try {
-        await users.fetchMe(current?.id);
+        await users.fetchMe(current.id);
       } catch (e) {
         console.error("Error fetching user settings", e);
       }
