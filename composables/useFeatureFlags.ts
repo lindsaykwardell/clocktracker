@@ -19,8 +19,10 @@ export const useFeatureFlags = defineStore("featureFlags", {
 
         // 2. Check if the flag is enabled via URL query parameter
         let urlEnabled = false;
-        if (queryParams?.featureFlags) {
-          const featureFlagsQuery = queryParams.featureFlags;
+        const params = queryParams || useRoute().query;
+
+        if (params?.featureFlags) {
+          const featureFlagsQuery = params.featureFlags;
 
           if (
             typeof featureFlagsQuery === "string" &&
