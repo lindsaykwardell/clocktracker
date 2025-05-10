@@ -17,6 +17,8 @@ jobs:
           node-version: 18.x
       - name: Install dependencies
         run: npm install
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
       - name: Start Supabase
         run: supabase start
         env:
