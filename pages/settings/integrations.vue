@@ -59,11 +59,11 @@ definePageMeta({
   middleware: "auth",
 });
 
-const settings = await useFetch("/api/settings");
+const settings = await $fetch("/api/settings");
 const users = useUsers();
 const user = useSupabaseUser();
-const bgg_username = ref(settings.data.value?.bgg_username);
-const enable_bgstats = ref(settings.data.value?.enable_bgstats || false);
+const bgg_username = ref(settings?.bgg_username);
+const enable_bgstats = ref(settings?.enable_bgstats || false);
 
 const username = ref("");
 const password = ref("");
