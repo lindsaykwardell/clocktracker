@@ -11,7 +11,7 @@ export enum PrivacySetting {
 
 export type User = {
   location: string | null;
-  city_id: number | null;
+  city_id: string | number | null;
   user_id: string;
   username: string;
   display_name: string;
@@ -83,7 +83,10 @@ export const useUsers = defineStore("users", {
 
         this.storeUser(user);
       } catch (err) {
-        this.users.set(username, { status: Status.ERROR, error: err });
+        this.users.set(username, {
+          status: Status.ERROR,
+          error: err instanceof Error ? err.message : "Unknown error",
+        });
       }
     },
     storeUser(user: User) {
@@ -100,22 +103,33 @@ export const useUsers = defineStore("users", {
       if (!user_id) return;
       this.users.set(user_id, { status: Status.LOADING });
 
-      const me = await $fetch<User>("/api/settings");
+      try {
+        const me = await $fetch<User>("/api/settings");
 
-      this.storeUser(me);
+        this.storeUser(me);
 
-      games.fetchPlayerGames(me.username);
-      friends.fetchFriends();
-      friends.fetchCommunityMembers();
-      friends.fetchRequests();
+        // Only run these on client side
+        if (!process.server) {
+          games.fetchPlayerGames(me.username);
+          friends.fetchFriends();
+          friends.fetchCommunityMembers();
+          friends.fetchRequests();
 
-      setInterval(() => {
-        friends.fetchRequests();
-        // one minute
-      }, 1000 * 60);
+          setInterval(() => {
+            friends.fetchRequests();
+            // one minute
+          }, 1000 * 60);
 
-      if (!me.finished_welcome) {
-        router.push("/welcome");
+          if (!me.finished_welcome) {
+            router.push("/welcome");
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching user settings:", err);
+        this.users.set(user_id, {
+          status: Status.ERROR,
+          error: err instanceof Error ? err.message : "Unknown error",
+        });
       }
     },
   },

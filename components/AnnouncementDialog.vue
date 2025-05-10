@@ -22,6 +22,8 @@
 const me = useMe();
 const { did, isDone } = useDids();
 
+const route = useRoute();
+
 const props = defineProps<{
   id: string;
 }>();
@@ -30,7 +32,11 @@ const show = ref(false);
 
 onMounted(() => {
   setTimeout(() => {
-    if (me.value.status === Status.SUCCESS && !isDone(props.id)) {
+    if (
+      me.value.status === Status.SUCCESS &&
+      me.value.data.finished_welcome &&
+      !isDone(props.id)
+    ) {
       show.value = true;
     }
   }, 1000);
@@ -38,7 +44,11 @@ onMounted(() => {
 
 watch(me, () => {
   setTimeout(() => {
-    if (me.value.status === Status.SUCCESS && !isDone(props.id)) {
+    if (
+      me.value.status === Status.SUCCESS &&
+      me.value.data.finished_welcome &&
+      !isDone(props.id)
+    ) {
       show.value = true;
     }
   }, 1000);

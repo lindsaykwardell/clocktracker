@@ -133,27 +133,25 @@ async function uploadAvatar(event: Event) {
 
 async function saveSettings() {
   inFlight.value = true;
-  const { error } = await useFetch("/api/settings", {
-    method: "POST",
-    body: JSON.stringify({
-      username: username.value,
-      display_name: displayName.value,
-      pronouns: pronouns.value,
-      location: location.value,
-      finished_welcome: true,
-      avatar: avatar.value,
-      privacy: privacy.value,
-    }),
-  });
-
-  if (error.value) {
+  try {
+    await $fetch("/api/settings", {
+      method: "POST",
+      body: JSON.stringify({
+        username: username.value,
+        display_name: displayName.value,
+        pronouns: pronouns.value,
+        location: location.value,
+        finished_welcome: true,
+        avatar: avatar.value,
+        privacy: privacy.value,
+      }),
+    });
+    router.push("/");
+  } catch (error: any) {
     console.error(error);
-    errorMessage.value = error.value.statusMessage;
+    errorMessage.value = error.message || "An error occurred";
     inFlight.value = false;
-    return;
   }
-
-  router.push("/");
 }
 </script>
 
