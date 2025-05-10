@@ -86,20 +86,20 @@ const inFlight = ref(false);
 const errorMessage = ref<string>();
 
 const user = useSupabaseUser();
-const settings = await useFetch("/api/settings");
+const settings = await $fetch("/api/settings");
 
-if (settings.data.value?.finished_welcome) {
+if (settings?.finished_welcome) {
   router.push("/");
 } else {
   render.value = true;
 }
 
-const avatar = ref(settings.data.value?.avatar || "");
-const username = ref(settings.data.value?.username);
-const displayName = ref(settings.data.value?.display_name);
-const pronouns = ref(settings.data.value?.pronouns);
-const location = ref(settings.data.value?.location);
-const privacy = ref(settings.data.value?.privacy);
+const avatar = ref(settings?.avatar || "");
+const username = ref(settings?.username);
+const displayName = ref(settings?.display_name);
+const pronouns = ref(settings?.pronouns);
+const location = ref(settings?.location);
+const privacy = ref(settings?.privacy);
 
 watchEffect(() => (username.value = username.value?.replaceAll(" ", "")));
 
@@ -133,27 +133,25 @@ async function uploadAvatar(event: Event) {
 
 async function saveSettings() {
   inFlight.value = true;
-  const { error } = await useFetch("/api/settings", {
-    method: "POST",
-    body: JSON.stringify({
-      username: username.value,
-      display_name: displayName.value,
-      pronouns: pronouns.value,
-      location: location.value,
-      finished_welcome: true,
-      avatar: avatar.value,
-      privacy: privacy.value,
-    }),
-  });
-
-  if (error.value) {
+  try {
+    await $fetch("/api/settings", {
+      method: "POST",
+      body: JSON.stringify({
+        username: username.value,
+        display_name: displayName.value,
+        pronouns: pronouns.value,
+        location: location.value,
+        finished_welcome: true,
+        avatar: avatar.value,
+        privacy: privacy.value,
+      }),
+    });
+    router.push("/");
+  } catch (error: any) {
     console.error(error);
-    errorMessage.value = error.value.statusMessage;
+    errorMessage.value = error.message || "An error occurred";
     inFlight.value = false;
-    return;
   }
-
-  router.push("/");
 }
 </script>
 

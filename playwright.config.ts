@@ -18,7 +18,7 @@ export default defineConfig<ConfigOptions>({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like \`await page.goto('/')\`. */
-    baseURL: "http://localhost:4173", // Your Nuxt app's URL for testing
+    baseURL: "http://localhost:3000", // Your Nuxt app's URL for testing
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
@@ -39,15 +39,15 @@ export default defineConfig<ConfigOptions>({
       use: { ...devices["Desktop Chrome"] },
     },
 
-    {
-      name: "firefox",
-      use: { ...devices["Desktop Firefox"] },
-    },
+    // {
+    //   name: "firefox",
+    //   use: { ...devices["Desktop Firefox"] },
+    // },
 
-    {
-      name: "webkit",
-      use: { ...devices["Desktop WebKit"] },
-    },
+    // {
+    //   name: "webkit",
+    //   use: { ...devices["Desktop WebKit"] },
+    // },
 
     /* Test against mobile viewports. */
     // {
@@ -72,8 +72,8 @@ export default defineConfig<ConfigOptions>({
 
   /* Optionally, run your local dev server before starting the tests */
   webServer: {
-    command: "npm run dev -- --port 4173",
-    url: "http://localhost:4173",
+    command: "npm run dev",
+    url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000, // Optional: Increase timeout for server to start
   },

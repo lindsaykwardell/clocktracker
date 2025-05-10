@@ -43,6 +43,8 @@ const game = reactive<{
   date: string;
   script: string;
   script_id: number | null;
+  bgg_id: number | null;
+  ls_game_id: number | null;
   storyteller: string;
   co_storytellers: string[];
   is_storyteller: boolean | undefined;
@@ -80,6 +82,7 @@ const game = reactive<{
     role_id: string | null;
     role?: {
       token_url: string;
+      type: string;
     };
   }[];
   win_v2: WinStatus_V2 | undefined;
@@ -110,6 +113,8 @@ const game = reactive<{
   date: "",
   script: "",
   script_id: null,
+  bgg_id: null,
+  ls_game_id: null,
   storyteller: "",
   co_storytellers: [],
   is_storyteller: undefined,
@@ -170,17 +175,16 @@ async function submitGame() {
   ) {
     inFlight.value = true;
 
-    const { data, error } = await useFetch("/api/games", {
-      method: "PUT",
-      body: JSON.stringify(formattedGame.value),
-    });
-
-    if (error.value) {
-      inFlight.value = false;
-      console.error(error.value);
-    } else {
+    try {
+      await $fetch("/api/games", {
+        method: "PUT",
+        body: JSON.stringify(formattedGame.value),
+      });
       inFlight.value = false;
       router.back();
+    } catch (error) {
+      inFlight.value = false;
+      console.error(error);
     }
   }
 }
