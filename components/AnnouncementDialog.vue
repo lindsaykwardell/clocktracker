@@ -32,7 +32,11 @@ const show = ref(false);
 
 onMounted(() => {
   setTimeout(() => {
-    if (me.value.status === Status.SUCCESS && !isDone(props.id) && route.path !== '/welcome') {
+    if (
+      me.value.status === Status.SUCCESS &&
+      me.value.data.finished_welcome &&
+      !isDone(props.id)
+    ) {
       show.value = true;
     }
   }, 1000);
@@ -40,7 +44,11 @@ onMounted(() => {
 
 watch(me, () => {
   setTimeout(() => {
-    if (me.value.status === Status.SUCCESS && !isDone(props.id) && route.path !== '/welcome') {
+    if (
+      me.value.status === Status.SUCCESS &&
+      me.value.data.finished_welcome &&
+      !isDone(props.id)
+    ) {
       show.value = true;
     }
   }, 1000);

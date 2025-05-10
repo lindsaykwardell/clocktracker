@@ -4,7 +4,7 @@ import { test, expect } from "@playwright/test";
 // const MAINTENANCE_FLAG_NAME = "maintenance"; // No longer needed
 
 test.describe("Maintenance Page", () => {
-  test("should display maintenance information when flag is active via URL", async ({
+  test("should display maintenance information when flag is active", async ({
     page,
   }) => {
     // Navigate to the maintenance page with the feature flag in the URL
