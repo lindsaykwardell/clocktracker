@@ -345,8 +345,8 @@ async function searchScripts() {
     return;
   }
 
-  const result = await useFetch(`/api/script?query=${input.value}`);
-  scripts.value = result.data.value ?? [];
+  const result = await $fetch(`/api/script?query=${input.value}`);
+  scripts.value = result ?? [];
 }
 
 async function searchLSCampaign() {
