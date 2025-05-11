@@ -25,6 +25,9 @@ export default defineConfig<ConfigOptions>({
     /* Capture screenshot only when a test fails. */
     screenshot: "only-on-failure",
 
+    /* Set dark mode for all tests */
+    colorScheme: "dark",
+
     /* Nuxt-specific options */
     nuxt: {
       rootDir: ".",
