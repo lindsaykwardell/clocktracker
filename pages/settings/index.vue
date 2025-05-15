@@ -99,16 +99,16 @@ const savedSuccessfully = ref(false);
 const users = useUsers();
 const user = useSupabaseUser();
 
-const settings = await useFetch("/api/settings");
+const settings = await $fetch("/api/settings");
 
-const username = ref(settings.data.value?.username);
-const displayName = ref(settings.data.value?.display_name);
-const pronouns = ref(settings.data.value?.pronouns);
-const location = ref(settings.data.value?.location);
-const city_id = ref(settings.data.value?.city_id);
-const bio = ref(settings.data.value?.bio);
-const privacy = ref(settings.data.value?.privacy);
-const tutorials = ref(settings.data.value?.disable_tutorials);
+const username = ref(settings?.username);
+const displayName = ref(settings?.display_name);
+const pronouns = ref(settings?.pronouns);
+const location = ref(settings?.location);
+const city_id = ref(settings?.city_id);
+const bio = ref(settings?.bio);
+const privacy = ref(settings?.privacy);
+const tutorials = ref(settings?.disable_tutorials);
 
 const _location = computed({
   get: () => location.value,
@@ -129,32 +129,31 @@ async function saveSettings() {
   savedSuccessfully.value = false;
   errorMessage.value = "";
 
-  const { error } = await useFetch("/api/settings", {
-    method: "POST",
-    body: JSON.stringify({
-      username: username.value,
-      display_name: displayName.value,
-      pronouns: pronouns.value,
-      location: location.value,
-      city_id: city_id.value,
-      finished_welcome: true,
-      bio: bio.value,
-      privacy: privacy.value,
-      disable_tutorials: tutorials.value,
-    }),
-  });
+  try {
+    await $fetch("/api/settings", {
+      method: "POST",
+      body: JSON.stringify({
+        username: username.value,
+        display_name: displayName.value,
+        pronouns: pronouns.value,
+        location: location.value,
+        city_id: city_id.value,
+        finished_welcome: true,
+        bio: bio.value,
+        privacy: privacy.value,
+        disable_tutorials: tutorials.value,
+      }),
+    });
 
-  if (error.value) {
-    console.error(error);
-    errorMessage.value = error.value.statusMessage;
     inFlight.value = false;
-    return;
+    savedSuccessfully.value = true;
+
+    users.fetchMe(user.value?.id);
+  } catch (error: any) {
+    console.error(error);
+    errorMessage.value = error.message || "An error occurred";
+    inFlight.value = false;
   }
-
-  inFlight.value = false;
-  savedSuccessfully.value = true;
-
-  users.fetchMe(user.value?.id);
 }
 </script>
 

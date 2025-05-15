@@ -46,7 +46,7 @@ useHead({
 
 const router = useRouter();
 const inFlight = ref(false);
-const userSettings = await useFetch("/api/settings");
+const userSettings = await $fetch("/api/settings");
 
 const importGamesDialogVisible = ref(false);
 
@@ -191,7 +191,7 @@ const game = reactive<{
   ],
   ignore_for_stats: false,
   tags: [],
-  privacy: userSettings.data.value?.privacy || "PUBLIC",
+  privacy: userSettings?.privacy || "PUBLIC",
 });
 
 watch(game, () => {
@@ -327,7 +327,7 @@ function resetGame() {
       ],
       ignore_for_stats: false,
       tags: [],
-      privacy: userSettings.data.value?.privacy || "PUBLIC",
+      privacy: userSettings?.privacy || "PUBLIC",
     });
   }
 }
