@@ -99,16 +99,16 @@ const savedSuccessfully = ref(false);
 const users = useUsers();
 const user = useSupabaseUser();
 
-const settings = await $fetch("/api/settings");
+const settings = await useFetch("/api/settings");
 
-const username = ref(settings?.username);
-const displayName = ref(settings?.display_name);
-const pronouns = ref(settings?.pronouns);
-const location = ref(settings?.location);
-const city_id = ref(settings?.city_id);
-const bio = ref(settings?.bio);
-const privacy = ref(settings?.privacy);
-const tutorials = ref(settings?.disable_tutorials);
+const username = ref(settings.data?.value?.username);
+const displayName = ref(settings.data?.value?.display_name);
+const pronouns = ref(settings.data?.value?.pronouns);
+const location = ref(settings.data?.value?.location);
+const city_id = ref(settings.data?.value?.city_id);
+const bio = ref(settings.data?.value?.bio);
+const privacy = ref(settings.data?.value?.privacy);
+const tutorials = ref(settings.data?.value?.disable_tutorials);
 
 const _location = computed({
   get: () => location.value,
