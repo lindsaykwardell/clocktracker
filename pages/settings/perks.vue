@@ -78,33 +78,32 @@ const kofiLevel = computed(() => {
   return u.data.kofi_level;
 });
 
-const settings = await useFetch("/api/settings");
+const settings = await $fetch("/api/settings");
 
-const opt_into_testing = ref(settings.data.value?.opt_into_testing || false);
+const opt_into_testing = ref(settings?.opt_into_testing || false);
 
 async function saveSettings() {
   inFlight.value = true;
   savedSuccessfully.value = false;
   errorMessage.value = "";
 
-  const { error } = await useFetch("/api/settings", {
-    method: "POST",
-    body: JSON.stringify({
-      opt_into_testing: opt_into_testing.value,
-    }),
-  });
+  try {
+    await $fetch("/api/settings", {
+      method: "POST",
+      body: JSON.stringify({
+        opt_into_testing: opt_into_testing.value,
+      }),
+    });
 
-  if (error.value) {
-    console.error(error);
-    errorMessage.value = error.value.statusMessage;
     inFlight.value = false;
-    return;
+    savedSuccessfully.value = true;
+
+    users.fetchMe(user.value?.id);
+  } catch (error: any) {
+    console.error(error);
+    errorMessage.value = error.message || "An error occurred";
+    inFlight.value = false;
   }
-
-  inFlight.value = false;
-  savedSuccessfully.value = true;
-
-  users.fetchMe(user.value?.id);
 }
 </script>
 
