@@ -34,8 +34,6 @@ roles.forEach((role) => {
   }
 });
 
-console.log(existingRoleIds);
-
 async function main() {
   // Upsert all the roles
   console.log("Upserting roles...");
@@ -62,8 +60,6 @@ async function main() {
 
     const roleIds = script.roles;
 
-    console.log(roleIds);
-
     const knownRoles = roleIds
       .map((role) => {
         const existingRoleId = existingRoleIds.find(
@@ -78,8 +74,6 @@ async function main() {
       .filter((role) =>
         existingRoleIds.some((existingRole) => existingRole.id === role.id)
       );
-
-    console.log(knownRoles);
 
     const savedRoles = await prisma.role.findMany({
       where: {
