@@ -15,6 +15,27 @@ const supabase = createClient(
   process.env.SUPABASE_KEY
 );
 
+const existingRoleIds = roles.map((role) => ({
+  id: role.id,
+  map_id: role.id,
+}));
+
+roles.forEach((role) => {
+  if (role.id.includes("_")) {
+    existingRoleIds.push({
+      id: role.id.replaceAll("_", ""),
+      map_id: role.id,
+    });
+  } else if (role.id.includes("-")) {
+    existingRoleIds.push({
+      id: role.id.replaceAll("-", ""),
+      map_id: role.id,
+    });
+  }
+});
+
+console.log(existingRoleIds);
+
 async function main() {
   // Upsert all the roles
   console.log("Upserting roles...");
@@ -30,49 +51,18 @@ async function main() {
 
   const scriptList = [];
 
-  // Get ten random scripts from the `scripts` JSON file
-  const randomScripts = scripts.sort(() => 0.5 - Math.random()).slice(0, 10);
-
-  // Get base 3
-  const base3 = ["133", "134", "135"];
-
-  for (base of base3) {
-    if (scriptList.some((s) => s.script_id === base)) {
-      continue;
-    }
-
-    const script = scripts.find((s) => s.script_id === base);
-    if (!script) {
-      continue;
-    }
-
-    randomScripts.push(script);
-  }
+  // Assortment of scripts to add to the `scriptList`
+  const scriptIds = [76, 65, 77, 491, 133, 441, 427, 42, 135, 134, 1774, 136];
 
   // Add the random scripts to the `scriptList`
-  for (const script of randomScripts) {
-    const roleIds = (
-      await fetch(script.json_url).then((res) => res.json())
-    ).filter((role) => role.id !== "_meta");
+  for (const scriptId of scriptIds) {
+    const script = scripts.find(
+      (s) => s.script_id.toString() == scriptId.toString()
+    );
 
-    const existingRoleIds = roles.map((role) => ({
-      id: role.id,
-      map_id: role.id,
-    }));
+    const roleIds = script.roles;
 
-    roles.forEach((role) => {
-      if (role.id.includes("_")) {
-        existingRoleIds.push({
-          id: role.id.replaceAll("_", ""),
-          map_id: role.id,
-        });
-      } else if (role.id.includes("-")) {
-        existingRoleIds.push({
-          id: role.id.replaceAll("-", ""),
-          map_id: role.id,
-        });
-      }
-    });
+    console.log(roleIds);
 
     const knownRoles = roleIds
       .map((role) => {
@@ -89,13 +79,15 @@ async function main() {
         existingRoleIds.some((existingRole) => existingRole.id === role.id)
       );
 
+    console.log(knownRoles);
+
     const savedRoles = await prisma.role.findMany({
       where: {
         id: {
           in: knownRoles.map((role) => role.id),
         },
-      }
-    })
+      },
+    });
 
     script.roles = savedRoles;
 
