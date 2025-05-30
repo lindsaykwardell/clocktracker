@@ -78,9 +78,9 @@ const kofiLevel = computed(() => {
   return u.data.kofi_level;
 });
 
-const settings = await $fetch("/api/settings");
+const settings = await useFetch("/api/settings");
 
-const opt_into_testing = ref(settings?.opt_into_testing || false);
+const opt_into_testing = ref(settings.data?.value?.opt_into_testing || false);
 
 async function saveSettings() {
   inFlight.value = true;

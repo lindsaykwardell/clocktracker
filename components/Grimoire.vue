@@ -361,7 +361,12 @@ const reminders = computed(() => {
       a.role_id.localeCompare(b.role_id)
     ),
     ...fabledReminders.toSorted((a, b) => a.role_id.localeCompare(b.role_id)),
-  ];
+  ].filter(
+    (r, i, a) =>
+      a.findIndex(
+        (r2) => r2.role_id === r.role_id && r2.reminder === r.reminder
+      ) === i
+  );
 });
 
 const showRoleSelectionDialog = ref(false);
