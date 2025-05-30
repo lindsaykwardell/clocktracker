@@ -36096,7 +36096,78 @@
     "author": "Ryback",
     "type": "Full",
     "json_url": "https://botcscripts.com/script/1774/0.1.0/download",
-    "pdf_url": "https://botcscripts.com/script/1774/0.1.0/download_pdf"
+    "pdf_url": "https://botcscripts.com/script/1774/0.1.0/download_pdf",
+    "roles": [
+      {
+        "id": "noble"
+      },
+      {
+        "id": "chef"
+      },
+      {
+        "id": "washerwoman"
+      },
+      {
+        "id": "librarian"
+      },
+      {
+        "id": "empath"
+      },
+      {
+        "id": "fortuneteller"
+      },
+      {
+        "id": "monk"
+      },
+      {
+        "id": "slayer"
+      },
+      {
+        "id": "soldier"
+      },
+      {
+        "id": "ravenkeeper"
+      },
+      {
+        "id": "virgin"
+      },
+      {
+        "id": "mayor"
+      },
+      {
+        "id": "cannibal"
+      },
+      {
+        "id": "butler"
+      },
+      {
+        "id": "saint"
+      },
+      {
+        "id": "recluse"
+      },
+      {
+        "id": "drunk"
+      },
+      {
+        "id": "poisoner"
+      },
+      {
+        "id": "spy"
+      },
+      {
+        "id": "baron"
+      },
+      {
+        "id": "scarletwoman"
+      },
+      {
+        "id": "marionette"
+      },
+      {
+        "id": "imp"
+      }
+    ]
   },
   {
     "script_id": "1772",
@@ -44520,7 +44591,99 @@
     "author": "Viva La Sam",
     "type": "Full",
     "json_url": "https://botcscripts.com/script/42/5.1.0/download",
-    "pdf_url": "https://botcscripts.com/script/42/5.1.0/download_pdf"
+    "pdf_url": "https://botcscripts.com/script/42/5.1.0/download_pdf",
+    "roles": [
+      {
+        "id": "investigator"
+      },
+      {
+        "id": "pixie"
+      },
+      {
+        "id": "empath"
+      },
+      {
+        "id": "dreamer"
+      },
+      {
+        "id": "mathematician"
+      },
+      {
+        "id": "oracle"
+      },
+      {
+        "id": "monk"
+      },
+      {
+        "id": "artist"
+      },
+      {
+        "id": "fisherman"
+      },
+      {
+        "id": "huntsman"
+      },
+      {
+        "id": "soldier"
+      },
+      {
+        "id": "ravenkeeper"
+      },
+      {
+        "id": "cannibal"
+      },
+      {
+        "id": "puzzlemaster"
+      },
+      {
+        "id": "recluse"
+      },
+      {
+        "id": "mutant"
+      },
+      {
+        "id": "damsel"
+      },
+      {
+        "id": "barber"
+      },
+      {
+        "id": "poisoner"
+      },
+      {
+        "id": "spy"
+      },
+      {
+        "id": "scarletwoman"
+      },
+      {
+        "id": "boomdandy"
+      },
+      {
+        "id": "marionette"
+      },
+      {
+        "id": "nodashii"
+      },
+      {
+        "id": "bishop"
+      },
+      {
+        "id": "bonecollector"
+      },
+      {
+        "id": "bureaucrat"
+      },
+      {
+        "id": "butcher"
+      },
+      {
+        "id": "matron"
+      },
+      {
+        "id": "sentinel"
+      }
+    ]
   },
   {
     "script_id": "499",
@@ -45060,7 +45223,84 @@
     "author": "Ian (UrbanMinotaur)",
     "type": "Full",
     "json_url": "https://botcscripts.com/script/491/1.1.0/download",
-    "pdf_url": "https://botcscripts.com/script/491/1.1.0/download_pdf"
+    "pdf_url": "https://botcscripts.com/script/491/1.1.0/download_pdf",
+    "roles": [
+      {
+        "id": "investigator"
+      },
+      {
+        "id": "clockmaker"
+      },
+      {
+        "id": "fortuneteller"
+      },
+      {
+        "id": "mathematician"
+      },
+      {
+        "id": "towncrier"
+      },
+      {
+        "id": "monk"
+      },
+      {
+        "id": "savant"
+      },
+      {
+        "id": "fisherman"
+      },
+      {
+        "id": "slayer"
+      },
+      {
+        "id": "professor"
+      },
+      {
+        "id": "seamstress"
+      },
+      {
+        "id": "ravenkeeper"
+      },
+      {
+        "id": "cannibal"
+      },
+      {
+        "id": "recluse"
+      },
+      {
+        "id": "mutant"
+      },
+      {
+        "id": "klutz"
+      },
+      {
+        "id": "politician"
+      },
+      {
+        "id": "godfather"
+      },
+      {
+        "id": "witch"
+      },
+      {
+        "id": "cerenovus"
+      },
+      {
+        "id": "scarletwoman"
+      },
+      {
+        "id": "imp"
+      },
+      {
+        "id": "shabaloth"
+      },
+      {
+        "id": "po"
+      },
+      {
+        "id": "fanggu"
+      }
+    ]
   },
   {
     "script_id": "482",
@@ -45186,7 +45426,84 @@
     "author": "Ian (UrbanMinotaur)",
     "type": "Full",
     "json_url": "https://botcscripts.com/script/427/1.1.0/download",
-    "pdf_url": "https://botcscripts.com/script/427/1.1.0/download_pdf"
+    "pdf_url": "https://botcscripts.com/script/427/1.1.0/download_pdf",
+    "roles": [
+      {
+        "id": "noble"
+      },
+      {
+        "id": "librarian"
+      },
+      {
+        "id": "balloonist"
+      },
+      {
+        "id": "fortuneteller"
+      },
+      {
+        "id": "flowergirl"
+      },
+      {
+        "id": "undertaker"
+      },
+      {
+        "id": "innkeeper"
+      },
+      {
+        "id": "huntsman"
+      },
+      {
+        "id": "sage"
+      },
+      {
+        "id": "farmer"
+      },
+      {
+        "id": "goon"
+      },
+      {
+        "id": "recluse"
+      },
+      {
+        "id": "mutant"
+      },
+      {
+        "id": "damsel"
+      },
+      {
+        "id": "drunk"
+      },
+      {
+        "id": "golem"
+      },
+      {
+        "id": "moonchild"
+      },
+      {
+        "id": "lunatic"
+      },
+      {
+        "id": "godfather"
+      },
+      {
+        "id": "cerenovus"
+      },
+      {
+        "id": "baron"
+      },
+      {
+        "id": "marionette"
+      },
+      {
+        "id": "pukka"
+      },
+      {
+        "id": "imp"
+      },
+      {
+        "id": "fanggu"
+      }
+    ]
   },
   {
     "script_id": "479",
@@ -45474,7 +45791,84 @@
     "author": "Ian (UrbanMinotaur)",
     "type": "Full",
     "json_url": "https://botcscripts.com/script/441/1.1.0/download",
-    "pdf_url": "https://botcscripts.com/script/441/1.1.0/download_pdf"
+    "pdf_url": "https://botcscripts.com/script/441/1.1.0/download_pdf",
+    "roles": [
+      {
+        "id": "sailor"
+      },
+      {
+        "id": "chambermaid"
+      },
+      {
+        "id": "fortuneteller"
+      },
+      {
+        "id": "snakecharmer"
+      },
+      {
+        "id": "monk"
+      },
+      {
+        "id": "lycanthrope"
+      },
+      {
+        "id": "exorcist"
+      },
+      {
+        "id": "nightwatchman"
+      },
+      {
+        "id": "courtier"
+      },
+      {
+        "id": "seamstress"
+      },
+      {
+        "id": "pacifist"
+      },
+      {
+        "id": "alchemist"
+      },
+      {
+        "id": "mayor"
+      },
+      {
+        "id": "cannibal"
+      },
+      {
+        "id": "tinker"
+      },
+      {
+        "id": "recluse"
+      },
+      {
+        "id": "drunk"
+      },
+      {
+        "id": "moonchild"
+      },
+      {
+        "id": "poisoner"
+      },
+      {
+        "id": "devilsadvocate"
+      },
+      {
+        "id": "witch"
+      },
+      {
+        "id": "scarletwoman"
+      },
+      {
+        "id": "pukka"
+      },
+      {
+        "id": "vigormortis"
+      },
+      {
+        "id": "fanggu"
+      }
+    ]
   },
   {
     "script_id": "440",
@@ -47553,7 +47947,84 @@
     "author": "Ben Burns",
     "type": "Full",
     "json_url": "https://botcscripts.com/script/136/1.0.0/download",
-    "pdf_url": "https://botcscripts.com/script/136/1.0.0/download_pdf"
+    "pdf_url": "https://botcscripts.com/script/136/1.0.0/download_pdf",
+    "roles": [
+      {
+        "id": "washerwoman"
+      },
+      {
+        "id": "librarian"
+      },
+      {
+        "id": "investigator"
+      },
+      {
+        "id": "chef"
+      },
+      {
+        "id": "empath"
+      },
+      {
+        "id": "fortuneteller"
+      },
+      {
+        "id": "undertaker"
+      },
+      {
+        "id": "monk"
+      },
+      {
+        "id": "ravenkeeper"
+      },
+      {
+        "id": "virgin"
+      },
+      {
+        "id": "slayer"
+      },
+      {
+        "id": "soldier"
+      },
+      {
+        "id": "mayor"
+      },
+      {
+        "id": "butler"
+      },
+      {
+        "id": "drunk"
+      },
+      {
+        "id": "recluse"
+      },
+      {
+        "id": "saint"
+      },
+      {
+        "id": "eviltwin"
+      },
+      {
+        "id": "witch"
+      },
+      {
+        "id": "cerenovus"
+      },
+      {
+        "id": "pithag"
+      },
+      {
+        "id": "fanggu"
+      },
+      {
+        "id": "vigormortis"
+      },
+      {
+        "id": "nodashii"
+      },
+      {
+        "id": "vortox"
+      }
+    ]
   },
   {
     "script_id": "135",
@@ -47562,7 +48033,84 @@
     "author": "The Pandemonium Institute",
     "type": "Full",
     "json_url": "https://botcscripts.com/script/135/1.0.0/download",
-    "pdf_url": "https://botcscripts.com/script/135/1.0.0/download_pdf"
+    "pdf_url": "https://botcscripts.com/script/135/1.0.0/download_pdf",
+    "roles": [
+      {
+        "id": "grandmother"
+      },
+      {
+        "id": "sailor"
+      },
+      {
+        "id": "chambermaid"
+      },
+      {
+        "id": "exorcist"
+      },
+      {
+        "id": "innkeeper"
+      },
+      {
+        "id": "gambler"
+      },
+      {
+        "id": "gossip"
+      },
+      {
+        "id": "courtier"
+      },
+      {
+        "id": "professor"
+      },
+      {
+        "id": "minstrel"
+      },
+      {
+        "id": "tealady"
+      },
+      {
+        "id": "pacifist"
+      },
+      {
+        "id": "fool"
+      },
+      {
+        "id": "tinker"
+      },
+      {
+        "id": "moonchild"
+      },
+      {
+        "id": "goon"
+      },
+      {
+        "id": "lunatic"
+      },
+      {
+        "id": "godfather"
+      },
+      {
+        "id": "devilsadvocate"
+      },
+      {
+        "id": "assassin"
+      },
+      {
+        "id": "mastermind"
+      },
+      {
+        "id": "zombuul"
+      },
+      {
+        "id": "pukka"
+      },
+      {
+        "id": "shabaloth"
+      },
+      {
+        "id": "po"
+      }
+    ]
   },
   {
     "script_id": "134",
@@ -47571,7 +48119,84 @@
     "author": "The Pandemonium Institute",
     "type": "Full",
     "json_url": "https://botcscripts.com/script/134/1.0.0/download",
-    "pdf_url": "https://botcscripts.com/script/134/1.0.0/download_pdf"
+    "pdf_url": "https://botcscripts.com/script/134/1.0.0/download_pdf",
+    "roles": [
+      {
+        "id": "clockmaker"
+      },
+      {
+        "id": "dreamer"
+      },
+      {
+        "id": "snakecharmer"
+      },
+      {
+        "id": "mathematician"
+      },
+      {
+        "id": "flowergirl"
+      },
+      {
+        "id": "towncrier"
+      },
+      {
+        "id": "oracle"
+      },
+      {
+        "id": "savant"
+      },
+      {
+        "id": "seamstress"
+      },
+      {
+        "id": "philosopher"
+      },
+      {
+        "id": "artist"
+      },
+      {
+        "id": "juggler"
+      },
+      {
+        "id": "sage"
+      },
+      {
+        "id": "mutant"
+      },
+      {
+        "id": "sweetheart"
+      },
+      {
+        "id": "barber"
+      },
+      {
+        "id": "klutz"
+      },
+      {
+        "id": "eviltwin"
+      },
+      {
+        "id": "witch"
+      },
+      {
+        "id": "cerenovus"
+      },
+      {
+        "id": "pithag"
+      },
+      {
+        "id": "fanggu"
+      },
+      {
+        "id": "vigormortis"
+      },
+      {
+        "id": "nodashii"
+      },
+      {
+        "id": "vortox"
+      }
+    ]
   },
   {
     "script_id": "133",
@@ -47580,7 +48205,75 @@
     "author": "The Pandemonium Institute",
     "type": "Full",
     "json_url": "https://botcscripts.com/script/133/1.0.0/download",
-    "pdf_url": "https://botcscripts.com/script/133/1.0.0/download_pdf"
+    "pdf_url": "https://botcscripts.com/script/133/1.0.0/download_pdf",
+    "roles": [
+      {
+        "id": "washerwoman"
+      },
+      {
+        "id": "librarian"
+      },
+      {
+        "id": "investigator"
+      },
+      {
+        "id": "chef"
+      },
+      {
+        "id": "empath"
+      },
+      {
+        "id": "fortuneteller"
+      },
+      {
+        "id": "undertaker"
+      },
+      {
+        "id": "monk"
+      },
+      {
+        "id": "ravenkeeper"
+      },
+      {
+        "id": "virgin"
+      },
+      {
+        "id": "slayer"
+      },
+      {
+        "id": "soldier"
+      },
+      {
+        "id": "mayor"
+      },
+      {
+        "id": "butler"
+      },
+      {
+        "id": "drunk"
+      },
+      {
+        "id": "recluse"
+      },
+      {
+        "id": "saint"
+      },
+      {
+        "id": "poisoner"
+      },
+      {
+        "id": "spy"
+      },
+      {
+        "id": "scarletwoman"
+      },
+      {
+        "id": "baron"
+      },
+      {
+        "id": "imp"
+      }
+    ]
   },
   {
     "script_id": "132",
@@ -47949,7 +48642,42 @@
     "author": "Steven Medway",
     "type": "Teensyville",
     "json_url": "https://botcscripts.com/script/77/1.0.0/download",
-    "pdf_url": "https://botcscripts.com/script/77/1.0.0/download_pdf"
+    "pdf_url": "https://botcscripts.com/script/77/1.0.0/download_pdf",
+    "roles": [
+      {
+        "id": "clockmaker"
+      },
+      {
+        "id": "investigator"
+      },
+      {
+        "id": "empath"
+      },
+      {
+        "id": "chambermaid"
+      },
+      {
+        "id": "artist"
+      },
+      {
+        "id": "sage"
+      },
+      {
+        "id": "drunk"
+      },
+      {
+        "id": "klutz"
+      },
+      {
+        "id": "scarletwoman"
+      },
+      {
+        "id": "baron"
+      },
+      {
+        "id": "imp"
+      }
+    ]
   },
   {
     "script_id": "76",
@@ -47958,7 +48686,42 @@
     "author": "Steven Medway",
     "type": "Teensyville",
     "json_url": "https://botcscripts.com/script/76/1.0.0/download",
-    "pdf_url": "https://botcscripts.com/script/76/1.0.0/download_pdf"
+    "pdf_url": "https://botcscripts.com/script/76/1.0.0/download_pdf",
+    "roles": [
+      {
+        "id": "balloonist"
+      },
+      {
+        "id": "savant"
+      },
+      {
+        "id": "amnesiac"
+      },
+      {
+        "id": "fisherman"
+      },
+      {
+        "id": "artist"
+      },
+      {
+        "id": "cannibal"
+      },
+      {
+        "id": "mutant"
+      },
+      {
+        "id": "lunatic"
+      },
+      {
+        "id": "widow"
+      },
+      {
+        "id": "goblin"
+      },
+      {
+        "id": "leviathan"
+      }
+    ]
   },
   {
     "script_id": "67",
@@ -47976,7 +48739,45 @@
     "author": "OJ",
     "type": "Teensyville",
     "json_url": "https://botcscripts.com/script/65/2.1.1/download",
-    "pdf_url": "https://botcscripts.com/script/65/2.1.1/download_pdf"
+    "pdf_url": "https://botcscripts.com/script/65/2.1.1/download_pdf",
+    "roles": [
+      {
+        "id": "pixie"
+      },
+      {
+        "id": "undertaker"
+      },
+      {
+        "id": "exorcist"
+      },
+      {
+        "id": "fisherman"
+      },
+      {
+        "id": "slayer"
+      },
+      {
+        "id": "juggler"
+      },
+      {
+        "id": "drunk"
+      },
+      {
+        "id": "lunatic"
+      },
+      {
+        "id": "devilsadvocate"
+      },
+      {
+        "id": "marionette"
+      },
+      {
+        "id": "lleech"
+      },
+      {
+        "id": "sentinel"
+      }
+    ]
   },
   {
     "script_id": "64",
