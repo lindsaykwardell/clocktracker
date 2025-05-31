@@ -941,7 +941,7 @@
     "name": "Apprentice",
     "edition": "bmr",
     "team": "traveller",
-    "firstNightReminder": "Show the Apprentice the 'You are' card, then a Townsfolk or Minion token. In the Grimoire, replace the Apprentice token with that character token, and put the Apprentice's 'Is the Apprentice' reminder by that character token.",
+    "firstNightReminder": "Show the Apprentice the *YOU ARE* card, then a Townsfolk or Minion token. In the Grimoire, replace the Apprentice token with that character token, and put the Apprentice's *IS THE APPRENTICE* reminder by that character token.",
     "otherNightReminder": "",
     "reminders": [
       "Is The Apprentice"
@@ -1015,7 +1015,7 @@
     "otherNightReminder": "",
     "reminders": [],
     "setup": false,
-    "ability": "Only you and the dead can vote. They don't need a vote token to do so. A 50% majority is not required.",
+    "ability": "Only you & the dead can vote. They don't need a vote token to do so. A 50% majority isn't required.",
     "flavor": "Bien venu. Sit down. Breathe deep. Enter the land of the dead. See with their eyes. Speak with their voice. Yon sel lang se janm ase.",
     "firstNight": 0,
     "otherNight": 0
@@ -1370,7 +1370,7 @@
     "otherNightReminder": "The Pit-Hag chooses a player & a character. If they chose a character that is not in play: Put the Pit-Hag to sleep. Wake the target. Show the *YOU ARE* token & their new character token.",
     "reminders": [],
     "setup": false,
-    "ability": "Each night*, choose a player & a character they become (if not-in-play). If a Demon is made, deaths tonight are arbitrary.",
+    "ability": "Each night*, choose a player & a character they become (if not in play). If a Demon is made, deaths tonight are arbitrary.",
     "flavor": "Round about the cauldron go; In the poison'd entrails throw; Toad, that under cold stone; Days and nights has thirty-one; Sweated venom sleeping got; Boil thou first in the charmed pot.",
     "firstNight": 0,
     "otherNight": 25,
@@ -1488,12 +1488,13 @@
     "firstNightReminder": "Choose a player, wake them and tell them which Barista power is affecting them. Treat them accordingly (sober/healthy/true info or activate their ability twice).",
     "otherNightReminder": "Choose a player, wake them and tell them which Barista power is affecting them. Treat them accordingly (sober/healthy/true info or activate their ability twice).",
     "reminders": [
-      "Sober and Healthy",
+      "Sober & Healthy",
       "Acts Twice",
+      "?",
       "?"
     ],
     "setup": false,
-    "ability": "Each night, until dusk, 1) a player becomes sober, healthy and gets true info, or 2) their ability works twice. They learn which.",
+    "ability": "Each night, until dusk, 1) a player becomes sober, healthy & gets true info, or 2) their ability works twice. They learn which.",
     "flavor": "A cup of coffee with no cream, Monsieur? I’m terribly sorry, but we’re fresh out of cream — how about with no milk?",
     "firstNight": 5,
     "otherNight": 2
@@ -1504,7 +1505,7 @@
     "edition": "snv",
     "team": "traveller",
     "firstNightReminder": "",
-    "otherNightReminder": "The Harlot points at any living player. Then, put the Harlot to sleep. Wake the chosen player, show them the 'This character selected you' token, then the Harlot token. That player either nods their head yes or shakes their head no. If they nodded their head yes, wake the Harlot and show them the chosen player's character token. Then, you may decide that both players die.",
+    "otherNightReminder": "The Harlot points at any living player. Then, put the Harlot to sleep. Wake the chosen player, show them the *THIS CHARACTER SELECTED YOU* token, then the Harlot token. That player either nods their head yes or shakes their head no. If they nodded their head yes, wake the Harlot and show them the chosen player's character token. Then, you may decide that both players die.",
     "reminders": [
       "Dead",
       "Dead"
@@ -1703,7 +1704,7 @@
     "edition": "",
     "team": "townsfolk",
     "firstNightReminder": "",
-    "otherNightReminder": "The Lycanthrope chooses a player :reminder:",
+    "otherNightReminder": "The Lycanthrope chooses a player. :reminder:",
     "reminders": [
       "Faux Paw",
       "Dead"
@@ -1886,7 +1887,7 @@
     "otherNightReminder": "",
     "reminders": [],
     "setup": true,
-    "ability": "The Storyteller can break the game rules & if executed, good wins, even if you are dead. [No evil characters]",
+    "ability": "The Storyteller can break the game rules, and if executed, good wins, even if you are dead. [No evil characters]",
     "special": [
       {
         "type": "selection",
@@ -2004,7 +2005,7 @@
       },
       {
         "id": "pithag",
-        "reason": "A Pit-Hag can not create a Heretic."
+        "reason": "A Pit-Hag cannot create a Heretic."
       },
       {
         "id": "spy",
@@ -2029,7 +2030,7 @@
     "name": "Damsel",
     "edition": "",
     "team": "outsider",
-    "firstNightReminder": "Wake each Minion. Show the Damsel token. Put each Minion to sleep.",
+    "firstNightReminder": "If the Damsel was chosen by the Huntsman, show them the *YOU ARE* info token and their new character token.",
     "otherNightReminder": "If the Damsel was chosen by the Huntsman, show them the *YOU ARE* info token and their new character token.",
     "reminders": [
       "Guess Used"
@@ -2078,11 +2079,10 @@
     "firstNightReminder": "Show the Grimoire for as long as the Widow needs. The Widow chooses a player. :reminder:",
     "otherNightReminder": "",
     "reminders": [
-      "Poisoned"
-    ],
-    "remindersGlobal": [
+      "Poisoned",
       "Knows"
     ],
+    "remindersGlobal": [],
     "setup": false,
     "special": [
       {
@@ -2091,7 +2091,7 @@
         "time": "night"
       }
     ],
-    "ability": "On your 1st night, look at the Grimoire and choose a player: they are poisoned. 1 good player knows a Widow is in play.",
+    "ability": "On your 1st night, look at the Grimoire & choose a player: they are poisoned. 1 good player knows a Widow is in play.",
     "flavor": "More wine? Château d’Ergot ’07 is a very special vintage. My yes, very special indeed.",
     "firstNight": 28,
     "otherNight": 0,
@@ -2125,7 +2125,7 @@
       "Fear"
     ],
     "setup": false,
-    "ability": "Each night, choose a player. If you nominate & execute them, their team loses. All players know if you choose a new player.",
+    "ability": "Each night, choose a player: if you nominate & execute them, their team loses. All players know if you choose a new player.",
     "flavor": "Beware of gazing long into the Abyss, lest the Abyss also gaze into you.",
     "firstNight": 38,
     "otherNight": 26
@@ -2166,7 +2166,7 @@
     "edition": "",
     "team": "minion",
     "firstNightReminder": "Show the written word.",
-    "otherNightReminder": "If a player is marked with the *TURNS EVIL* reminder, wake them. Show the *YOU ARE* info token and a thumbs down. The Mezepheles loses their ability :reminder:",
+    "otherNightReminder": "If a player is marked with the *TURNS EVIL* reminder, wake them. Show the *YOU ARE* info token and a thumbs down. The Mezepheles loses their ability. :reminder:",
     "reminders": [
       "Turns Evil",
       "No Ability"
@@ -2256,8 +2256,8 @@
     "name": "Lil' Monsta",
     "edition": "",
     "team": "demon",
-    "firstNightReminder": "Wake all Minions, allow them to choose a babysitter :reminder:",
-    "otherNightReminder": "Wake all Minions, allow them to choose a babysitter :reminder: A player might die :reminder:",
+    "firstNightReminder": "Wake all Minions, allow them to choose a babysitter. :reminder:",
+    "otherNightReminder": "Wake all Minions, allow them to choose a babysitter. :reminder: A player might die. :reminder:",
     "reminders": [],
     "remindersGlobal": [
       "Is The Demon",
@@ -2373,7 +2373,7 @@
     "jinxes": [
       {
         "id": "engineer",
-        "reason": "Legion and the Engineer can not both be in play at the start of the game. If the Engineer creates Legion, most players (including all evil players) become evil Legion."
+        "reason": "Legion and the Engineer cannot both be in play at the start of the game. If the Engineer creates Legion, most players (including all evil players) become evil Legion."
       },
       {
         "id": "preacher",
@@ -2475,8 +2475,12 @@
     "team": "demon",
     "firstNightReminder": "",
     "otherNightReminder": "",
-    "reminders": [],
-    "setup": true,
+    "reminders": [
+      "Day 1",
+      "Day 2",
+      "Day 3"
+    ],
+    "setup": false,
     "ability": "On day 3, Minions become Riot & nominees die but nominate an alive player immediately. This must happen.",
     "flavor": "Larga vida a la revolución! Mi revolucion!",
     "firstNight": 0,
@@ -2554,7 +2558,7 @@
       "Drunk"
     ],
     "setup": false,
-    "ability": "All players keep their eyes closed when voting and the vote tally is secret. Each night, choose if you are drunk or not.",
+    "ability": "All players keep their eyes closed when voting and the vote tally is secret. Each night, choose if you are drunk until dusk.",
     "special": [
       {
         "type": "vote",
@@ -2573,7 +2577,7 @@
     "firstNightReminder": "Announce the Vizier player to the group.",
     "reminders": [],
     "setup": false,
-    "ability": "All players know you are the Vizier. You can not die during the day. If good voted, you may choose to execute immediately.",
+    "ability": "All players know you are the Vizier. You cannot die during the day. If good voted, you may choose to execute immediately.",
     "flavor": "An excellent decision, as always, sire. Such a petty crime as bumping into the Bishop indeed deserves your ‘justice’ and ‘mercy’. Take a stroll in the gardens. Visit the gallery and peruse the sculptures of Von Strauf. Relax, sire. Leave everything… to me.",
     "firstNight": 74,
     "otherNight": 0,
@@ -2800,7 +2804,7 @@
       },
       {
         "id": "choirboy",
-        "reason": "The Kazali can not choose the King to become a Minion if a Choirboy is in play."
+        "reason": "The Kazali cannot choose the King to become a Minion if a Choirboy is in play."
       },
       {
         "id": "soldier",
@@ -3062,7 +3066,7 @@
     ],
     "setup": false,
     "ability": "All players start knowing a player of your alignment. You may choose to kill anyone who nominates them.",
-    "flavor": "Four the score or seven beers, no shows are goes for me and my. A prank to crack the cranks and planks o’ the floor foundation length, so incontravertabubbilly mini. The large essays down streams of joyse, no greater than is scene,not inherdt. Ha-urrumph.",
+    "flavor": "Four the score or seven beers, no shows are goes for me and my. A prank to crack the cranks and planks o’ the floor foundation length, so incontravertabubbilly mini. The large essays down streams of joyse, no greater than is scene, not inherdt. Ha-urrumph.",
     "firstNight": 0,
     "otherNight": 0
   },
@@ -3098,7 +3102,7 @@
     ],
     "setup": false,
     "ability": "Once per game, choose to make a wish. If granted, it might have a price & leave a clue as to its nature.",
-    "flavor": "Genies are overrated.",
+    "flavor": "Every man and every woman is a star. Love is the law, love under will.",
     "firstNight": 30,
     "otherNight": 16
   },
@@ -3117,7 +3121,7 @@
   {
     "id": "angel",
     "firstNight": 1,
-    "firstNightReminder": "Announce which players are protected by the Angel. Add the \"Protected\" token to the relevant players.",
+    "firstNightReminder": "Announce which players are protected by the Angel. Add the *PROTECTED* token to the relevant players.",
     "otherNightReminder": "",
     "reminders": [
       "Protected",
@@ -3198,7 +3202,7 @@
     "firstNight": 1,
     "firstNightReminder": "Resolve the Minion Info and Demon Info steps even though there are fewer than 7 players.",
     "otherNight": 1,
-    "otherNightReminder": "If it is a night when a Demon attack could end the game, and the Demon is marked “Final night: No Attack,” then the Demon does not act tonight. (Do not wake them.)",
+    "otherNightReminder": "If it is a night when a Demon attack could end the game, and the Demon is marked *FINAL NIGHT: NO ATTACK*, then the Demon does not act tonight. (Do not wake them.)",
     "reminders": [
       "Final Night: No Attack"
     ],
@@ -3227,7 +3231,7 @@
     "id": "duchess",
     "firstNightReminder": "",
     "otherNight": 1,
-    "otherNightReminder": "Wake each player marked “Visitor” or “False Info” one at a time. Show them the Duchess token, then fingers (1, 2, 3) equaling the number of evil players marked “Visitor” or, if you are waking the player marked “False Info,” show them any number of fingers except the number of evil players marked “Visitor.”",
+    "otherNightReminder": "Wake each player marked *VISITOR* or *FALSE INFO* one at a time. Show them the Duchess token, then fingers (1, 2, 3) equaling the number of evil players marked “Visitor” or, if you are waking the player marked “False Info,” show them any number of fingers except the number of evil players marked “Visitor.”",
     "reminders": [
       "Visitor",
       "Visitor",
@@ -3281,7 +3285,7 @@
   {
     "id": "stormcatcher",
     "firstNight": 1,
-    "firstNightReminder": "At the start of the night, announce which character is favoured by the Storm Catcher. If that character is in play, mark that player as \"Safe\". Wake each evil player and show them the character token, then the marked player.\n If not in play, wake each evil player, show them the \"These Characters Are Not In Play\" info token and the relevant character token.",
+    "firstNightReminder": "At the start of the night, announce which character is favoured by the Storm Catcher. If that character is in play, mark that player as *SAFE*. Wake each evil player and show them the character token, then the marked player.\n If not in play, wake each evil player, show them the *THESE CHARACTERS ARE NOT IN PLAY* info token and the relevant character token.",
     "otherNightReminder": "",
     "reminders": [
       "Safe"
