@@ -32,6 +32,10 @@ async function main() {
     });
   }
 
+  // Delete all the cron locks
+  console.log("Deleting all cron locks...");
+  await prisma.cronLock.deleteMany();
+
   console.log("Done!");
 }
 
