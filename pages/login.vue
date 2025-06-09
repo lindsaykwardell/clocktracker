@@ -89,7 +89,7 @@ async function register() {
     friends.fetchFriends();
     friends.fetchRequests();
 
-    router.push("/");
+    router.push("/welcome");
   }
 }
 
