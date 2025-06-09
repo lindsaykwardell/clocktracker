@@ -239,7 +239,9 @@ const filteredTaggablePlayers = computed(() => {
   return allTaggablePlayers.value.filter(
     (player) =>
       !player ||
-      (!props.tokens.find((token) => token.player_name === player.username) &&
+      (!props.tokens.find(
+        (token) => token.player_name === player.username.slice(1)
+      ) &&
         !props.excludePlayers?.includes(player.username))
   );
 });
