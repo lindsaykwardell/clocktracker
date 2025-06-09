@@ -505,10 +505,15 @@
             </div>
           </div>
           <div class="w-screen md:w-auto overflow-hidden">
-            <GameOverviewGrid v-if="gameView === 'grid'" :games="sortedGames" />
+            <GameOverviewGrid
+              v-if="gameView === 'grid'"
+              :games="sortedGames"
+              :showCommunityCard="showCommunityCard"
+            />
             <GameOverviewList
               v-if="gameView === 'table'"
               :games="sortedGames"
+              :showCommunityCard="showCommunityCard"
             />
             <p
               v-if="!sortedGames.length"
@@ -766,6 +771,7 @@ const props = defineProps<{
   } | null;
   games: FetchStatus<GameRecord[]>;
   communitySlug?: string;
+  showCommunityCard?: boolean;
 }>();
 
 const activeFilters = computed(() => {

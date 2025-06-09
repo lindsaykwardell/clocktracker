@@ -4,7 +4,7 @@
       <thead>
         <tr>
           <th></th>
-          <th>Character</th>
+          <th v-if="!props.showCommunityCard">Character</th>
           <th class="hidden md:table-cell">Date</th>
           <th>Script</th>
           <th class="hidden md:table-cell">Location</th>
@@ -17,7 +17,7 @@
         <component
           :is="componentIs"
           v-for="game in games"
-          :to="`/game/${game.id}`"
+          :to="getGameLink(game)"
           class="table-row cursor-pointer bg-cover bg-center"
           @click="
             selectMultipleGames.enabled
@@ -57,7 +57,7 @@
               <img src="/img/bgg.png" class="w-8 md:w-12" />
             </a>
           </td>
-          <td>
+          <td v-if="!props.showCommunityCard">
             <Token
               v-if="
                 gamesStore.getLastCharater(game.id).name ||
@@ -112,7 +112,7 @@
             <div class="flex gap-1">
               <img
                 class="w-8 h-8 md:w-12 md:h-12 col-span-auto z-10"
-                :src="displayWinIcon(game)"
+                :src="displayWinIcon(game, props.showCommunityCard)"
               />
               <nuxt-link
                 v-if="isMyGame(game)"
@@ -147,16 +147,35 @@ const { isBaseScript } = useScripts();
 const users = useUsers();
 const me = useMe();
 
-const props = defineProps<{
-  games: GameRecord[];
-  onClick?: (game: GameRecord) => void;
-}>();
+const props = withDefaults(
+  defineProps<{
+    games: GameRecord[];
+    onClick?: (game: GameRecord) => void;
+    showCommunityCard?: boolean;
+  }>(),
+  {
+    showCommunityCard: false,
+  }
+);
 
 function formatDate(date: Date) {
   return new Intl.DateTimeFormat(navigator.language, {
     timeZone: "UTC",
   }).format(new Date(date));
 }
+
+const getGameLink = (game: GameRecord) => {
+  if (me.value && me.value.status === Status.SUCCESS) {
+    const userId = me.value.data.user_id;
+    if (game.child_games) {
+      const childGame = game.child_games.find((g) => g.user_id === userId);
+      if (childGame) {
+        return `/game/${childGame.id}`;
+      }
+    }
+  }
+  return `/game/${game.id}`;
+};
 
 const nuxtLink = resolveComponent("nuxt-link");
 

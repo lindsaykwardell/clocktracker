@@ -71,9 +71,9 @@ export default defineEventHandler(async (handler) => {
             select: {
               title: true,
               id: true,
-            }
-          }
-        }
+            },
+          },
+        },
       },
       user: {
         select: {
@@ -143,6 +143,12 @@ export default defineEventHandler(async (handler) => {
               display_name: true,
             },
           },
+        },
+      },
+      child_games: {
+        select: {
+          id: true,
+          user_id: true,
         },
       },
       community: {

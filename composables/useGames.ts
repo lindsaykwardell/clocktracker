@@ -77,6 +77,10 @@ export type GameRecord = Omit<Game, "win_v2"> & {
       display_name: string;
     };
   };
+  child_games?: {
+    id: string;
+    user_id: string;
+  }[];
   community?: {
     slug: string;
     icon: string;
@@ -529,8 +533,8 @@ export const useGames = defineStore("games", {
   },
 });
 
-export function displayWinIcon(game: GameRecord) {
-  return game.is_storyteller
+export function displayWinIcon(game: GameRecord, showTeamWin: boolean = false) {
+  return game.is_storyteller || showTeamWin
     ? game.win_v2 === WinStatus_V2.GOOD_WINS
       ? "/img/role/good.png"
       : game.win_v2 === WinStatus_V2.EVIL_WINS
