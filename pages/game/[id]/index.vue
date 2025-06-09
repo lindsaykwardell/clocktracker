@@ -103,12 +103,19 @@
                 "
                 class="font-sorts text-2xl"
               >
-                <nuxt-link
-                  :to="`/roles/${last_character?.role_id}`"
-                  class="hover:underline flex flex-col items-center"
-                >
-                  <Token :character="last_character" size="md" />
-                </nuxt-link>
+                <template v-if="!game.data.is_storyteller">
+                  <nuxt-link
+                    :to="`/roles/${last_character?.role_id}`"
+                    class="hover:underline flex flex-col items-center"
+                  >
+                    <Token :character="last_character" size="md" />
+                  </nuxt-link>
+                </template>
+                <template v-else>
+                  <div class="flex flex-col items-center">
+                    <Token :character="last_character" size="md" />
+                  </div>
+                </template>
               </div>
             </div>
             <div class="flex flex-col md:flex-row gap-4 mt-4">
