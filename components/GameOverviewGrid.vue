@@ -24,7 +24,7 @@
         <component
           :is="componentIs"
           @click="handleCardClick(game)"
-          :to="`/game/${game.id}`"
+          :to="getGameLink(game)"
           class="w-full bg-stone-900 flex flex-col items-center cursor-pointer rounded overflow-hidden text-black h-48 md:h-72 bg-cover bg-center"
           :style="
             game.associated_script?.background
@@ -74,8 +74,9 @@
           >
             <Token
               v-if="
-                gamesStore.getLastCharater(game.id).name ||
-                gamesStore.getLastCharater(game.id).alignment !== 'NEUTRAL'
+                showCommunityCard === false &&
+                (gamesStore.getLastCharater(game.id).name ||
+                  gamesStore.getLastCharater(game.id).alignment !== 'NEUTRAL')
               "
               :character="gamesStore.getLastCharater(game.id)"
               size="lg"
@@ -93,7 +94,7 @@
           <div class="absolute w-full top-0 left-0" />
           <img
             class="absolute top-2 right-2 w-8 h-8 md:w-12 md:h-12"
-            :src="displayWinIcon(game)"
+            :src="displayWinIcon(game, props.showCommunityCard)"
           />
         </component>
         <div
@@ -124,7 +125,7 @@
                 class="tagged-players"
                 :style="`--i: ${index}`"
               >
-                <Avatar size="xs" :value="player?.avatar" />
+                <Avatar size="xs" :value="player?.avatar" class="bg-stone-300 dark:bg-stone-950" />
               </div>
             </div>
           </div>
@@ -189,11 +190,30 @@ const config = useRuntimeConfig();
 const scripts = useScripts();
 const selectMultipleGames = useSelectMultipleGames();
 
-const props = defineProps<{
-  games: GameRecord[];
-  cardWidth?: string;
-  onCardClick?: (game: GameRecord) => void;
-}>();
+const props = withDefaults(
+  defineProps<{
+    games: GameRecord[];
+    cardWidth?: string;
+    onCardClick?: (game: GameRecord) => void;
+    showCommunityCard?: boolean;
+  }>(),
+  {
+    showCommunityCard: false,
+  }
+);
+
+const getGameLink = (game: GameRecord) => {
+  if (me.value?.status === Status.SUCCESS) {
+    const user_id = me.value.data.user_id;
+    const childGame = game.child_games?.find(
+      (g: { user_id: string }) => g.user_id === user_id
+    );
+    if (childGame) {
+      return `/game/${childGame.id}`;
+    }
+  }
+  return `/game/${game.id}`;
+};
 
 const componentIs = computed(() => {
   if (!props.games.length) return "div";
