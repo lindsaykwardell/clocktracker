@@ -36,19 +36,25 @@ export const useFriends = defineStore("friends", {
     },
     getFriendStatus(): (user_id: string) => FriendStatus {
       return (user_id: string): FriendStatus => {
-        if (
-          this.friends.status === Status.SUCCESS &&
-          this.requests.status === Status.SUCCESS
-        ) {
+        // If we have friends data, check if they're a friend
+        if (this.friends.status === Status.SUCCESS) {
           const friend = this.friends.data.find(
             (friend) => friend.user_id === user_id
           );
-          const request = this.getFriendRequest(user_id);
-
           if (friend) return FriendStatus.FRIENDS;
-          if (request?.user_id === user_id) return FriendStatus.REQUEST_SENT;
-          if (request?.from_user_id === user_id)
-            return FriendStatus.REQUEST_RECEIVED;
+        }
+
+        // If we have requests data, check for pending requests
+        if (this.requests.status === Status.SUCCESS) {
+          const request = this.requests.data.find(
+            (request) =>
+              request.user_id === user_id || request.from_user_id === user_id
+          );
+          if (request) {
+            if (request.user_id === user_id) return FriendStatus.REQUEST_SENT;
+            if (request.from_user_id === user_id)
+              return FriendStatus.REQUEST_RECEIVED;
+          }
         }
 
         return FriendStatus.NOT_FRIENDS;
@@ -244,6 +250,9 @@ export const useFriends = defineStore("friends", {
           (friend) => friend.username !== username
         );
       }
+    },
+    async fetchFriendsAndRequests() {
+      await Promise.all([this.fetchFriends(), this.fetchRequests()]);
     },
   },
 });
