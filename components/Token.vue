@@ -49,7 +49,7 @@
       {{ reminderText }}
     </div>
     <div
-      v-if="alwaysShowAlignment"
+      v-if="alwaysShowAlignment || (!character?.role && character?.alignment)"
       class="token bg-center bg-cover absolute -bottom-3 -left-6 rounded-full shadow-xl border border-black flex justify-center items-center"
       :class="relatedSize"
       @click.stop="emit('clickAlignment')"
