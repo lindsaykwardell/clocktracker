@@ -40,7 +40,7 @@
     </svg>
     <div
       v-if="reminderText"
-      class="text-center relative"
+      class="text-center relative text-white"
       :class="{
         [reminderTextSize]: true,
         '-top-2': image !== undefined,
