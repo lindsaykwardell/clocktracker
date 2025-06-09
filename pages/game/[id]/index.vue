@@ -340,11 +340,15 @@
         <div
           v-if="
             game.data.grimoire[0] &&
-            game.data.grimoire[0].tokens.some((token) => token.role)
+            game.data.grimoire[0].tokens.some(
+              (token) => token.player_name.length > 0 || token.role
+            )
           "
           :style="
             game.data.associated_script?.background
-              ? { backgroundImage: `url(${game.data.associated_script.background})` }
+              ? {
+                  backgroundImage: `url(${game.data.associated_script.background})`,
+                }
               : {}
           "
           class="bg-center bg-cover relative text-white"
@@ -357,7 +361,8 @@
                 'Trouble Brewing',
                 'Sects and Violets',
                 'Bad Moon Rising',
-              ].indexOf(game.data.script) === -1 && !game.data.associated_script?.background,
+              ].indexOf(game.data.script) === -1 &&
+              !game.data.associated_script?.background,
           }"
         >
           <button
