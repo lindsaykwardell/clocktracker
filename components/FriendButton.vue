@@ -22,12 +22,23 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted } from "vue";
+
 const friends = useFriends();
 
 const props = defineProps<{
   user_id: string;
   username: string;
 }>();
+
+onMounted(async () => {
+  if (friends.friends.status === Status.IDLE) {
+    await friends.fetchFriends();
+  }
+  if (friends.requests.status === Status.IDLE) {
+    await friends.fetchRequests();
+  }
+});
 
 const friendButtonText = computed(() => {
   switch (friends.getFriendStatus(props.user_id)) {
@@ -45,7 +56,7 @@ const friendButtonText = computed(() => {
 const friendButtonClass = computed(() => {
   switch (friends.getFriendStatus(props.user_id)) {
     case FriendStatus.FRIENDS:
-      return "friends bg-green-950 hover:bg-transparent border border-transparent hover:border-red-950";
+      return "friends bg-green-950 hover:bg-transparent border border-transparent hover:border-red-950 text-white hover:text-black dark:hover:text-white";
     case FriendStatus.REQUEST_SENT:
       return "request-sent border border-purple-500 dark:border-purple-800 hover:bg-purple-600 dark:hover:bg-purple-900";
     case FriendStatus.REQUEST_RECEIVED:
