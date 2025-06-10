@@ -111,13 +111,32 @@ const width = computed(() => (props.options.width || 250) + "px");
 const height = computed(() => (props.options.height || 250) + "px");
 
 const chartData = computed(() => {
-  const games = props.games.filter(
+  // Base filter for all games
+  const baseFilteredGames = props.games.filter(
     (game) =>
       !game.ignore_for_stats &&
       !game.is_storyteller &&
       props.options.include_tags.every((tag) => game.tags.includes(tag)) &&
       props.options.exclude_tags.every((tag) => !game.tags.includes(tag))
   );
+
+  // Filter games based on the data type we're displaying
+  const games = baseFilteredGames.filter((game) => {
+    const lastCharacter =
+      game.player_characters[game.player_characters.length - 1];
+    if (!lastCharacter) return false;
+
+    switch (props.options.data) {
+      case "ROLE":
+        return !!lastCharacter.role?.type;
+      case "ALIGNMENT":
+        return !!lastCharacter.alignment;
+      case "WIN":
+        return !!lastCharacter.alignment && !!game.win_v2;
+      default:
+        return true;
+    }
+  });
 
   if (props.options.data === "ROLE") {
     const townsfolk = games.filter(
@@ -188,28 +207,32 @@ const chartData = computed(() => {
       ],
     };
   } else if (props.options.data === "ALIGNMENT") {
-    const good = games.filter(
-      (game) =>
-        game.player_characters[game.player_characters.length - 1]?.alignment ===
-        "GOOD"
-    ).length;
-    const evil = games.filter(
-      (game) =>
-        game.player_characters[game.player_characters.length - 1]?.alignment ===
-        "EVIL"
-    ).length;
+    const good = games.filter((game) => {
+      const lastCharacter =
+        game.player_characters[game.player_characters.length - 1];
+      return lastCharacter?.alignment === "GOOD";
+    }).length;
+    const evil = games.filter((game) => {
+      const lastCharacter =
+        game.player_characters[game.player_characters.length - 1];
+      return lastCharacter?.alignment === "EVIL";
+    }).length;
     const total = good + evil;
     return {
       labels: [`Good`, `Evil`],
       datasets: getPivot(
         games,
         [
-          (game) =>
-            game.player_characters[game.player_characters.length - 1]
-              ?.alignment === "GOOD",
-          (game) =>
-            game.player_characters[game.player_characters.length - 1]
-              ?.alignment === "EVIL",
+          (game) => {
+            const lastCharacter =
+              game.player_characters[game.player_characters.length - 1];
+            return lastCharacter?.alignment === "GOOD";
+          },
+          (game) => {
+            const lastCharacter =
+              game.player_characters[game.player_characters.length - 1];
+            return lastCharacter?.alignment === "EVIL";
+          },
         ],
         [colors.good, colors.evil]
       ) ?? [
@@ -381,43 +404,43 @@ function getPivot(
   if (props.options.pivot === "ROLE") {
     const townsfolk = validators.map(
       (validator, index) =>
-        games.filter(
-          (game) =>
-            game.player_characters[game.player_characters.length - 1]?.role
-              ?.type === "TOWNSFOLK" && validator(game)
-        ).length
+        games.filter((game) => {
+          const lastCharacter =
+            game.player_characters[game.player_characters.length - 1];
+          return lastCharacter?.role?.type === "TOWNSFOLK" && validator(game);
+        }).length
     );
     const outsider = validators.map(
       (validator) =>
-        games.filter(
-          (game) =>
-            game.player_characters[game.player_characters.length - 1]?.role
-              ?.type === "OUTSIDER" && validator(game)
-        ).length
+        games.filter((game) => {
+          const lastCharacter =
+            game.player_characters[game.player_characters.length - 1];
+          return lastCharacter?.role?.type === "OUTSIDER" && validator(game);
+        }).length
     );
     const minion = validators.map(
       (validator) =>
-        games.filter(
-          (game) =>
-            game.player_characters[game.player_characters.length - 1]?.role
-              ?.type === "MINION" && validator(game)
-        ).length
+        games.filter((game) => {
+          const lastCharacter =
+            game.player_characters[game.player_characters.length - 1];
+          return lastCharacter?.role?.type === "MINION" && validator(game);
+        }).length
     );
     const demon = validators.map(
       (validator) =>
-        games.filter(
-          (game) =>
-            game.player_characters[game.player_characters.length - 1]?.role
-              ?.type === "DEMON" && validator(game)
-        ).length
+        games.filter((game) => {
+          const lastCharacter =
+            game.player_characters[game.player_characters.length - 1];
+          return lastCharacter?.role?.type === "DEMON" && validator(game);
+        }).length
     );
     const traveler = validators.map(
       (validator) =>
-        games.filter(
-          (game) =>
-            game.player_characters[game.player_characters.length - 1]?.role
-              ?.type === "TRAVELER" && validator(game)
-        ).length
+        games.filter((game) => {
+          const lastCharacter =
+            game.player_characters[game.player_characters.length - 1];
+          return lastCharacter?.role?.type === "TRAVELER" && validator(game);
+        }).length
     );
 
     const total = [
@@ -458,19 +481,19 @@ function getPivot(
   } else if (props.options.pivot === "ALIGNMENT") {
     const good = validators.map(
       (validator) =>
-        games.filter(
-          (game) =>
-            game.player_characters[game.player_characters.length - 1]
-              ?.alignment === "GOOD" && validator(game)
-        ).length
+        games.filter((game) => {
+          const lastCharacter =
+            game.player_characters[game.player_characters.length - 1];
+          return lastCharacter?.alignment === "GOOD" && validator(game);
+        }).length
     );
     const evil = validators.map(
       (validator) =>
-        games.filter(
-          (game) =>
-            game.player_characters[game.player_characters.length - 1]
-              ?.alignment === "EVIL" && validator(game)
-        ).length
+        games.filter((game) => {
+          const lastCharacter =
+            game.player_characters[game.player_characters.length - 1];
+          return lastCharacter?.alignment === "EVIL" && validator(game);
+        }).length
     );
     const total = [...good, ...evil].reduce((acc, curr) => acc + curr, 0);
     return [

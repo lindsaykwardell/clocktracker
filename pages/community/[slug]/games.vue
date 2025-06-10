@@ -1,6 +1,10 @@
 <template>
   <CommunityTemplate>
-    <UserGamesView :games="communityGames" :player="null" />
+    <UserGamesView
+      :games="communityGames"
+      :player="null"
+      :showCommunityCard="true"
+    />
   </CommunityTemplate>
 </template>
 

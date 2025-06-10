@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col items-center gap-2 m-auto py-4">
     <nuxt-link to="/">
-      <img src="/logo.png" class="w-48" alt="ClockTracker" />
+      <img src="/logo.png" class="w-48 bg-stone-900 rounded-full" alt="ClockTracker" />
     </nuxt-link>
     <h1>Sign in</h1>
     <form @submit.prevent="login" class="flex flex-col items-center gap-2">
@@ -89,7 +89,7 @@ async function register() {
     friends.fetchFriends();
     friends.fetchRequests();
 
-    router.push("/");
+    router.push("/welcome");
   }
 }
 
