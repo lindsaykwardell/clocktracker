@@ -3107,6 +3107,22 @@
     "otherNight": 16
   },
   {
+    "id": "hermit",
+    "name": "Hermit",
+    "team": "outsider",
+    "edition": "",
+    "reminders": [
+      "1",
+      "2",
+      "3"
+    ],
+    "setup": true,
+    "ability": "You have all Outsider abilities. [-0 or -1 Outsider]",
+    "flavor": "In the lost and forgotten places of the earth, the soul’s light beckons.",
+    "firstNight": 0,
+    "otherNight": 0
+  },
+  {
     "id": "doomsayer",
     "firstNightReminder": "",
     "otherNightReminder": "",
