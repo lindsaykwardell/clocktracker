@@ -1,44 +1,43 @@
 <template>
   <NuxtPage />
-  <AnnouncementDialog id="hermit-added">
+  <AnnouncementDialog id="deusexfiasco-added">
     <template #title>
-      <h1 class="text-2xl font-bold font-sorts">Hermit Added!</h1>
+      <h1 class="text-2xl font-bold font-sorts">Deus Ex Fiasco Added!</h1>
       <div class="text-lg text-stone-400">{{ formattedAnnouncementDate }}</div>
     </template>
     <div class="p-2">
       <Token
         size="lg"
         :character="{
-          name: 'Hermit',
-          alignment: 'GOOD',
+          name: 'Deus Ex Fiasco',
           role: {
-            token_url: '/img/role/hermit.png',
-            type: 'Outsider',
-            initial_alignment: 'GOOD',
-            name: 'Hermit',
+            token_url: '/img/role/deusexfiasco.png',
+            type: 'Fabled',
+            initial_alignment: 'NEUTRAL',
+            name: 'Deus Ex Fiasco',
           },
         }"
         class="m-auto"
       />
       <p class="text-center text-lg font-bold p-2">
-        You have all Outsider abilities. [-0 or -1 Outsider]
+        At least once per game, the Storyteller will make a mistake, correct it, and publicly admit to it.
       </p>
       <p class="text-center italic w-2/3 m-auto text-sm">
-        In the lost and forgotten places of the earth, the soul’s light beckons.
+        It’s not a bug, it’s a feature. It’s not an error, it’s a tweak. It’s not broken, it’s quirky.
       </p>
       <p class="p-2 pt-6">
-        The Hermit has now been added to ClockTracker! If you haven't read about
+        The latest fabled character, Deus Ex Fiasco, has now been added to ClockTracker! If you haven't read about
         it already, check it out on
         <a
-          href="https://wiki.bloodontheclocktower.com/Hermit"
+          href="https://wiki.bloodontheclocktower.com/Deus_ex_Fiasco"
           target="_blank"
           class="underline"
           >the official Wiki page.</a
         >
-        As games are played, you can see data on how it's playing on
+        <!-- As games are played, you can see data on how it's playing on
         <NuxtLink to="/roles/hermit" class="underline" target="_blank">
           its ClockTracker page.
-        </NuxtLink>
+        </NuxtLink> -->
       </p>
     </div>
   </AnnouncementDialog>
@@ -169,7 +168,7 @@ watch(
   }
 );
 
-const announcementDate = dayjs.tz("2025-06-13", "America/Los_Angeles");
+const announcementDate = dayjs.tz("2025-06-21", "America/Los_Angeles");
 const maintenanceMode = featureFlags.maintenanceIsScheduled;
 
 const formattedAnnouncementDate = computed(() => {
