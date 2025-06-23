@@ -1,43 +1,43 @@
 <template>
   <NuxtPage />
-  <AnnouncementDialog id="deusexfiasco-added">
+  <AnnouncementDialog id="princess-added">
     <template #title>
-      <h1 class="text-2xl font-bold font-sorts">Deus Ex Fiasco Added!</h1>
+      <h1 class="text-2xl font-bold font-sorts">Princess Added!</h1>
       <div class="text-lg text-stone-400">{{ formattedAnnouncementDate }}</div>
     </template>
     <div class="p-2">
       <Token
         size="lg"
         :character="{
-          name: 'Deus Ex Fiasco',
+          name: 'Princess',
           role: {
-            token_url: '/img/role/deusexfiasco.png',
-            type: 'Fabled',
-            initial_alignment: 'NEUTRAL',
-            name: 'Deus Ex Fiasco',
+            token_url: '/img/role/princess.png',
+            type: 'Townsfolk',
+            initial_alignment: 'GOOD',
+            name: 'Princess',
           },
         }"
         class="m-auto"
       />
       <p class="text-center text-lg font-bold p-2">
-        At least once per game, the Storyteller will make a mistake, correct it, and publicly admit to it.
+        On your 1st day, if you nominated & executed a player, the Demon doesn't kill tonight.
       </p>
       <p class="text-center italic w-2/3 m-auto text-sm">
-        It’s not a bug, it’s a feature. It’s not an error, it’s a tweak. It’s not broken, it’s quirky.
+        Our words are hounds, bound by silken threads, dear lords. Let kindness weave them true, lest the reigns unravel and rend our court.
       </p>
       <p class="p-2 pt-6">
-        The latest fabled character, Deus Ex Fiasco, has now been added to ClockTracker! If you haven't read about
+        The latest Townsfolk, the Princess, has now been added to ClockTracker! If you haven't read about
         it already, check it out on
         <a
-          href="https://wiki.bloodontheclocktower.com/Deus_ex_Fiasco"
+          href="https://wiki.bloodontheclocktower.com/Princess"
           target="_blank"
           class="underline"
           >the official Wiki page.</a
         >
-        <!-- As games are played, you can see data on how it's playing on
-        <NuxtLink to="/roles/hermit" class="underline" target="_blank">
+        As games are played, you can see data on how it's playing on
+        <NuxtLink to="/roles/princess" class="underline" target="_blank">
           its ClockTracker page.
-        </NuxtLink> -->
+        </NuxtLink>
       </p>
     </div>
   </AnnouncementDialog>
@@ -168,7 +168,7 @@ watch(
   }
 );
 
-const announcementDate = dayjs.tz("2025-06-21", "America/Los_Angeles");
+const announcementDate = dayjs.tz("2025-06-23", "America/Los_Angeles");
 const maintenanceMode = featureFlags.maintenanceIsScheduled;
 
 const formattedAnnouncementDate = computed(() => {
