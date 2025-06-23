@@ -28,20 +28,6 @@ const all_raw_roles = [
     firstNight: 0,
     otherNight: 50,
   },
-  {
-    id: "deusexfiasco",
-    firstNightReminder: "",
-    otherNightReminder: "",
-    reminders: ["WHOOPSIE"],
-    setup: false,
-    name: "Deus Ex Fiasco",
-    team: "fabled",
-    edition: "fabled",
-    ability:
-      "At least once per game, the Storyteller will make a mistake, correct it, and publicly admit to it.",
-    flavor:
-      "It’s not a bug, it’s a feature. It’s not an error, it’s a tweak. It’s not broken, it’s quirky.",
-  },
 ];
 const reminders = [];
 const abilities = [];
