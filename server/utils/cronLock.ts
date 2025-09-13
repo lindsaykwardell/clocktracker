@@ -29,14 +29,18 @@ export async function performLockedTask(
     },
   });
 
-  await callback(prisma);
-  
-  // Wait a minute
-  await wait(60 * 1000);
+  try {
+    await callback(prisma);
+  } catch (e) {
+    console.error(e)
+  } finally {
+    // Wait a minute
+    await wait(60 * 1000);
 
-  await prisma.cronLock.delete({
-    where: {
-      task_id: task_id,
-    },
-  });
+    await prisma.cronLock.delete({
+      where: {
+        task_id: task_id,
+      },
+    });
+  }
 }

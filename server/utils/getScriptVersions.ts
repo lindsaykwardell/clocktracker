@@ -63,7 +63,11 @@ export async function getScriptVersions(script: Script, me: User | null) {
     },
   });
 
-  if (versions.length === 1 && !versionOne.includes(versions[0].version)) {
+  if (
+    versions.length === 1 &&
+    !versionOne.includes(versions[0].version) &&
+    !isNaN(Number(script.script_id))
+  ) {
     // If there is only one version and it's not the first, assume there are more that we need to fetch.
     try {
       const fetchedVersions = await fetchVersions(script.script_id);
