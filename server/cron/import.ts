@@ -30,7 +30,7 @@ export default defineCronHandler(
             version: string;
             author: string;
           }[];
-        }>(url + "/api/scripts?page=" + page);
+        }>(`${url}"/api/scripts?page=${page}&all_versions=true`);
 
         // Iterate over the table rows
         response.data.results.forEach((script) => {
