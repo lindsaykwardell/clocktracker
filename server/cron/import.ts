@@ -92,7 +92,7 @@ export default defineCronHandler(
     }),
   {
     timeZone: "America/New_York",
-    runOnInit: true, //process.env.NODE_ENV !== "development",
+    runOnInit: process.env.NODE_ENV !== "development",
   }
 );
 
