@@ -1176,13 +1176,18 @@ function toggleAlignment(token: Character) {
       token.alignment = "EVIL";
       break;
     case "EVIL":
-      if (token.role?.initial_alignment === "NEUTRAL") {
+      if (!token.role || token.role?.initial_alignment === "NEUTRAL") {
         token.alignment = "NEUTRAL";
       } else {
         token.alignment = "GOOD";
       }
       break;
     case "NEUTRAL":
+      token.alignment = "GOOD";
+      break;
+    case undefined:
+    default:
+      // If no alignment is set, start with GOOD
       token.alignment = "GOOD";
       break;
   }
@@ -1379,6 +1384,29 @@ watch(
                 },
                 related_role: {
                   token_url: token.related_role?.token_url ?? "/1x1.png",
+                },
+              });
+            }
+          } else if (token.alignment && token.alignment !== "NEUTRAL") {
+            // Handle alignment-only tokens (no specific role)
+            // See if there's already an alignment-only character for this alignment
+            const existingAlignmentCharacter = myCharacters.find(
+              (character) =>
+                !character.role_id && character.alignment === token.alignment
+            );
+
+            // If it's not there, let's add it!
+            if (!existingAlignmentCharacter) {
+              myCharacters.push({
+                name: "",
+                alignment: token.alignment,
+                related: "",
+                showRelated: false,
+                role_id: null,
+                related_role_id: null,
+                role: undefined,
+                related_role: {
+                  token_url: "/1x1.png",
                 },
               });
             }
