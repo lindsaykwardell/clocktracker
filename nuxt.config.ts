@@ -7,6 +7,10 @@ export default defineNuxtConfig({
 
   devtools: { enabled: false },
 
+  devServer: {
+    port: 3001,
+  },
+
   modules: [
     "@nuxtjs/tailwindcss",
     "@nuxtjs/supabase",

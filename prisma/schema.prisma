@@ -340,17 +340,18 @@ model Friend {
 }
 
 model Chart {
-  id           Int          @id @default(autoincrement())
-  user         UserSettings @relation(fields: [user_id], references: [user_id])
-  user_id      String
-  title        String
-  type         ChartType
-  data         DataField
-  pivot        DataField?
-  include_tags String[]
-  exclude_tags String[]
-  width        Int
-  height       Int
+  id               Int          @id @default(autoincrement())
+  user             UserSettings @relation(fields: [user_id], references: [user_id])
+  user_id          String
+  title            String
+  type             ChartType
+  data             DataField
+  pivot            DataField?
+  include_tags     String[]
+  exclude_tags     String[]
+  width            Int
+  height           Int
+  storyteller_only Boolean      @default(false)
 }
 
 enum ChartType {

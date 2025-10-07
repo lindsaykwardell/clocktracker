@@ -1,43 +1,31 @@
 <template>
   <NuxtPage />
-  <AnnouncementDialog id="princess-added">
+  <AnnouncementDialog id="storyteller-charts-added">
     <template #title>
-      <h1 class="text-2xl font-bold font-sorts">Princess Added!</h1>
+      <h1 class="text-2xl font-bold font-sorts">
+        Storyteller Charts Now Supported!
+      </h1>
       <div class="text-lg text-stone-400">{{ formattedAnnouncementDate }}</div>
     </template>
     <div class="p-2">
       <Token
         size="lg"
         :character="{
-          name: 'Princess',
+          name: 'Storyteller',
           role: {
-            token_url: '/img/role/princess.png',
-            type: 'Townsfolk',
-            initial_alignment: 'GOOD',
-            name: 'Princess',
+            token_url: '/img/role/storyteller.png',
+            type: 'Traveler',
+            initial_alignment: 'NEUTRAL',
+            name: '',
           },
         }"
         class="m-auto"
       />
-      <p class="text-center text-lg font-bold p-2">
-        On your 1st day, if you nominated & executed a player, the Demon doesn't kill tonight.
-      </p>
-      <p class="text-center italic w-2/3 m-auto text-sm">
-        Our words are hounds, bound by silken threads, dear lords. Let kindness weave them true, lest the reigns unravel and rend our court.
-      </p>
       <p class="p-2 pt-6">
-        The latest Townsfolk, the Princess, has now been added to ClockTracker! If you haven't read about
-        it already, check it out on
-        <a
-          href="https://wiki.bloodontheclocktower.com/Princess"
-          target="_blank"
-          class="underline"
-          >the official Wiki page.</a
-        >
-        As games are played, you can see data on how it's playing on
-        <NuxtLink to="/roles/princess" class="underline" target="_blank">
-          its ClockTracker page.
-        </NuxtLink>
+        A long requested feature, you can now create charts that filter down
+        down games where you were the storyteller! Check it out in your
+        <NuxtLink to="/charts/editor" class="underline">charts editor</NuxtLink
+        >.
       </p>
     </div>
   </AnnouncementDialog>
@@ -168,7 +156,7 @@ watch(
   }
 );
 
-const announcementDate = dayjs.tz("2025-06-23", "America/Los_Angeles");
+const announcementDate = dayjs.tz("2025-10-07", "America/Los_Angeles");
 const maintenanceMode = featureFlags.maintenanceIsScheduled;
 
 const formattedAnnouncementDate = computed(() => {

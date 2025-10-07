@@ -20,6 +20,7 @@ async function main() {
   // Upsert the reminders
   console.log("Upserting reminders...");
   for (const reminder of reminders) {
+    console.log(`Upserting reminder`, reminder);
     await prisma.roleReminder.upsert({
       where: {
         role_id_reminder: {
