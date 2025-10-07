@@ -69,6 +69,7 @@ const colors = {
   minion: "#D08C7F",
   demon: "#8C0E12",
   traveler: "#6b21a8",
+  storyteller: "#FFA500",
 
   good: "#3297F4",
   evil: "#8C0E12",
@@ -101,6 +102,7 @@ const props = defineProps<{
     exclude_tags: string[];
     width: number;
     height: number;
+    storyteller_only?: boolean;
   };
   showControls?: boolean;
 }>();
@@ -115,7 +117,9 @@ const chartData = computed(() => {
   const baseFilteredGames = props.games.filter(
     (game) =>
       !game.ignore_for_stats &&
-      !game.is_storyteller &&
+      // If storyteller_only is true, only include games where user was storyteller
+      // If storyteller_only is false/undefined, include all games (both player and storyteller)
+      (props.options.storyteller_only ? game.is_storyteller : true) &&
       props.options.include_tags.every((tag) => game.tags.includes(tag)) &&
       props.options.exclude_tags.every((tag) => !game.tags.includes(tag))
   );
@@ -124,15 +128,15 @@ const chartData = computed(() => {
   const games = baseFilteredGames.filter((game) => {
     const lastCharacter =
       game.player_characters[game.player_characters.length - 1];
-    if (!lastCharacter) return false;
 
     switch (props.options.data) {
       case "ROLE":
-        return !!lastCharacter.role?.type;
+        // For storyteller games, we don't need a character - they're counted separately
+        return game.is_storyteller || !!lastCharacter?.role?.type;
       case "ALIGNMENT":
-        return !!lastCharacter.alignment;
+        return !!lastCharacter?.alignment;
       case "WIN":
-        return !!lastCharacter.alignment && !!game.win_v2;
+        return !!lastCharacter?.alignment && !!game.win_v2;
       default:
         return true;
     }
@@ -164,9 +168,18 @@ const chartData = computed(() => {
         game.player_characters[game.player_characters.length - 1]?.role
           ?.type === "TRAVELER"
     ).length;
-    const total = townsfolk + outsider + minion + demon + traveler;
+    const storyteller = games.filter((game) => game.is_storyteller).length;
+    const total =
+      townsfolk + outsider + minion + demon + traveler + storyteller;
     return {
-      labels: [`Townsfolk`, `Outsider`, `Minion`, `Demon`, `Traveler`],
+      labels: [
+        `Townsfolk`,
+        `Outsider`,
+        `Minion`,
+        `Demon`,
+        `Traveler`,
+        `Storyteller`,
+      ],
       datasets: getPivot(
         games,
         [
@@ -185,6 +198,7 @@ const chartData = computed(() => {
           (game) =>
             game.player_characters[game.player_characters.length - 1]?.role
               ?.type === "TRAVELER",
+          (game) => game.is_storyteller,
         ],
         [
           colors.townsfolk,
@@ -192,16 +206,18 @@ const chartData = computed(() => {
           colors.minion,
           colors.demon,
           colors.traveler,
+          colors.storyteller,
         ]
       ) ?? [
         {
-          data: [townsfolk, outsider, minion, demon, traveler],
+          data: [townsfolk, outsider, minion, demon, traveler, storyteller],
           backgroundColor: [
             colors.townsfolk,
             colors.outsider,
             colors.minion,
             colors.demon,
             colors.traveler,
+            colors.storyteller,
           ],
         },
       ],
@@ -326,63 +342,93 @@ const chartData = computed(() => {
       ],
     };
   } else if (props.options.data === "WIN") {
-    const win = games.filter((game) => {
-      const lastAlignment =
-        game.player_characters[game.player_characters.length - 1]?.alignment;
-
-      return (
-        (lastAlignment === "GOOD" && game.win_v2 === WinStatus_V2.GOOD_WINS) ||
-        (lastAlignment === "EVIL" && game.win_v2 === WinStatus_V2.EVIL_WINS)
-      );
-    }).length;
-    const loss = games.filter((game) => {
-      const lastAlignment =
-        game.player_characters[game.player_characters.length - 1]?.alignment;
-
-      return (
-        (lastAlignment === "GOOD" && game.win_v2 === WinStatus_V2.EVIL_WINS) ||
-        (lastAlignment === "EVIL" && game.win_v2 === WinStatus_V2.GOOD_WINS)
-      );
-    }).length;
-    const total = win + loss;
-    return {
-      labels: [`Win`, `Loss`],
-      datasets: getPivot(
-        games,
-        [
-          (game) => {
-            const lastAlignment =
-              game.player_characters[game.player_characters.length - 1]
-                ?.alignment;
-
-            return (
-              (lastAlignment === "GOOD" &&
-                game.win_v2 === WinStatus_V2.GOOD_WINS) ||
-              (lastAlignment === "EVIL" &&
-                game.win_v2 === WinStatus_V2.EVIL_WINS)
-            );
-          },
-          (game) => {
-            const lastAlignment =
-              game.player_characters[game.player_characters.length - 1]
-                ?.alignment;
-
-            return (
-              (lastAlignment === "GOOD" &&
-                game.win_v2 === WinStatus_V2.EVIL_WINS) ||
-              (lastAlignment === "EVIL" &&
-                game.win_v2 === WinStatus_V2.GOOD_WINS)
-            );
+    // For storyteller games, show good vs evil wins instead of personal win/loss
+    if (props.options.storyteller_only) {
+      const goodWins = games.filter(
+        (game) => game.win_v2 === WinStatus_V2.GOOD_WINS
+      ).length;
+      const evilWins = games.filter(
+        (game) => game.win_v2 === WinStatus_V2.EVIL_WINS
+      ).length;
+      const total = goodWins + evilWins;
+      return {
+        labels: [`Good Wins`, `Evil Wins`],
+        datasets: getPivot(
+          games,
+          [
+            (game) => game.win_v2 === WinStatus_V2.GOOD_WINS,
+            (game) => game.win_v2 === WinStatus_V2.EVIL_WINS,
+          ],
+          [colors.good, colors.evil]
+        ) ?? [
+          {
+            data: [goodWins, evilWins],
+            backgroundColor: [colors.good, colors.evil],
           },
         ],
-        [colors.win, colors.loss]
-      ) ?? [
-        {
-          data: [win, loss],
-          backgroundColor: [colors.win, colors.loss],
-        },
-      ],
-    };
+      };
+    } else {
+      // Original logic for player games (personal win/loss)
+      const win = games.filter((game) => {
+        const lastAlignment =
+          game.player_characters[game.player_characters.length - 1]?.alignment;
+
+        return (
+          (lastAlignment === "GOOD" &&
+            game.win_v2 === WinStatus_V2.GOOD_WINS) ||
+          (lastAlignment === "EVIL" && game.win_v2 === WinStatus_V2.EVIL_WINS)
+        );
+      }).length;
+      const loss = games.filter((game) => {
+        const lastAlignment =
+          game.player_characters[game.player_characters.length - 1]?.alignment;
+
+        return (
+          (lastAlignment === "GOOD" &&
+            game.win_v2 === WinStatus_V2.EVIL_WINS) ||
+          (lastAlignment === "EVIL" && game.win_v2 === WinStatus_V2.GOOD_WINS)
+        );
+      }).length;
+      const total = win + loss;
+      return {
+        labels: [`Win`, `Loss`],
+        datasets: getPivot(
+          games,
+          [
+            (game) => {
+              const lastAlignment =
+                game.player_characters[game.player_characters.length - 1]
+                  ?.alignment;
+
+              return (
+                (lastAlignment === "GOOD" &&
+                  game.win_v2 === WinStatus_V2.GOOD_WINS) ||
+                (lastAlignment === "EVIL" &&
+                  game.win_v2 === WinStatus_V2.EVIL_WINS)
+              );
+            },
+            (game) => {
+              const lastAlignment =
+                game.player_characters[game.player_characters.length - 1]
+                  ?.alignment;
+
+              return (
+                (lastAlignment === "GOOD" &&
+                  game.win_v2 === WinStatus_V2.EVIL_WINS) ||
+                (lastAlignment === "EVIL" &&
+                  game.win_v2 === WinStatus_V2.GOOD_WINS)
+              );
+            },
+          ],
+          [colors.win, colors.loss]
+        ) ?? [
+          {
+            data: [win, loss],
+            backgroundColor: [colors.win, colors.loss],
+          },
+        ],
+      };
+    }
   }
 
   return {
@@ -442,6 +488,10 @@ function getPivot(
           return lastCharacter?.role?.type === "TRAVELER" && validator(game);
         }).length
     );
+    const storyteller = validators.map(
+      (validator) =>
+        games.filter((game) => game.is_storyteller && validator(game)).length
+    );
 
     const total = [
       ...townsfolk,
@@ -449,6 +499,7 @@ function getPivot(
       ...minion,
       ...demon,
       ...traveler,
+      ...storyteller,
     ].reduce((acc, curr) => acc + curr, 0);
 
     return [
@@ -476,6 +527,11 @@ function getPivot(
         label: `Traveler`,
         data: traveler,
         backgroundColor: getColor(colors.traveler),
+      },
+      {
+        label: `Storyteller`,
+        data: storyteller,
+        backgroundColor: getColor(colors.storyteller),
       },
     ];
   } else if (props.options.pivot === "ALIGNMENT") {
@@ -622,51 +678,84 @@ function getPivot(
       },
     ];
   } else if (props.options.pivot === "WIN") {
-    const win = validators.map(
-      (validator) =>
-        games.filter((game) => {
-          const lastAlignment =
-            game.player_characters[game.player_characters.length - 1]
-              ?.alignment;
+    // For storyteller games, show good vs evil wins instead of personal win/loss
+    if (props.options.storyteller_only) {
+      const goodWins = validators.map(
+        (validator) =>
+          games.filter(
+            (game) => game.win_v2 === WinStatus_V2.GOOD_WINS && validator(game)
+          ).length
+      );
+      const evilWins = validators.map(
+        (validator) =>
+          games.filter(
+            (game) => game.win_v2 === WinStatus_V2.EVIL_WINS && validator(game)
+          ).length
+      );
+      const total = [...goodWins, ...evilWins].reduce(
+        (acc, curr) => acc + curr,
+        0
+      );
+      return [
+        {
+          label: `Good Wins`,
+          data: goodWins,
+          backgroundColor: getColor(colors.good),
+        },
+        {
+          label: `Evil Wins`,
+          data: evilWins,
+          backgroundColor: getColor(colors.evil),
+        },
+      ];
+    } else {
+      // Original logic for player games (personal win/loss)
+      const win = validators.map(
+        (validator) =>
+          games.filter((game) => {
+            const lastAlignment =
+              game.player_characters[game.player_characters.length - 1]
+                ?.alignment;
 
-          return (
-            ((lastAlignment === "GOOD" &&
-              game.win_v2 === WinStatus_V2.GOOD_WINS) ||
-              (lastAlignment === "EVIL" &&
-                game.win_v2 === WinStatus_V2.EVIL_WINS)) &&
-            validator(game)
-          );
-        }).length
-    );
-    const loss = validators.map(
-      (validator) =>
-        games.filter((game) => {
-          const lastAlignment =
-            game.player_characters[game.player_characters.length - 1]
-              ?.alignment;
+            return (
+              ((lastAlignment === "GOOD" &&
+                game.win_v2 === WinStatus_V2.GOOD_WINS) ||
+                (lastAlignment === "EVIL" &&
+                  game.win_v2 === WinStatus_V2.EVIL_WINS)) &&
+              validator(game)
+            );
+          }).length
+      );
+      const loss = validators.map(
+        (validator) =>
+          games.filter((game) => {
+            const lastAlignment =
+              game.player_characters[game.player_characters.length - 1]
+                ?.alignment;
 
-          return (
-            ((lastAlignment === "GOOD" &&
-              game.win_v2 === WinStatus_V2.EVIL_WINS) ||
-              (lastAlignment === "EVIL" &&
-                game.win_v2 === WinStatus_V2.GOOD_WINS)) &&
-            validator(game)
-          );
-        }).length
-    );
-    const total = [...win, ...loss].reduce((acc, curr) => acc + curr, 0);
-    return [
-      {
-        label: `Win`,
-        data: win,
-        backgroundColor: getColor(colors.win),
-      },
-      {
-        label: `Loss`,
-        data: loss,
-        backgroundColor: getColor(colors.loss),
-      },
-    ];
+            return (
+              ((lastAlignment === "GOOD" &&
+                game.win_v2 === WinStatus_V2.EVIL_WINS) ||
+                (lastAlignment === "EVIL" &&
+                  game.win_v2 === WinStatus_V2.GOOD_WINS)) &&
+              validator(game)
+            );
+          }).length
+      );
+      const total = [...win, ...loss].reduce((acc, curr) => acc + curr, 0);
+      return [
+        {
+          label: `Win`,
+          data: win,
+          backgroundColor: getColor(colors.win),
+        },
+        {
+          label: `Loss`,
+          data: loss,
+          backgroundColor: getColor(colors.loss),
+        },
+      ];
+    }
   }
 
   return null;

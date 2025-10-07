@@ -42,6 +42,19 @@ const all_raw_roles = [
       "Ra'āb ina pān ṣilli ša dāri. Rigim qallu ina šūri, šītu ša šunātīka iredde, u napšutka idlul ina pān maṣṣartī dāriti.”",
     setup: false,
   },
+  {
+    id: "cacklejack",
+    name: "Cacklejack",
+    edition: "",
+    team: "traveller",
+    firstNightReminder: "",
+    otherNightReminder: "",
+    reminders: ["NOT ME"],
+    ability:
+      "Each day, choose a player: a different player changes character tonight.",
+    flavor:
+      "Wire α To wire β. LigHt oN. BuZZer off. GAzOinks! Arms STra1ght. FingER 2 nose. hOooLd stiLL. BoiNgo-banGo! Ha-ha-ha!",
+  },
 ];
 const reminders = [];
 const abilities = [];

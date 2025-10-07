@@ -15,6 +15,14 @@
             Title
             <Input type="text" v-model="options.title" />
           </label>
+          <label class="flex items-center gap-2">
+            <input
+              type="checkbox"
+              v-model="options.storyteller_only"
+              class="rounded"
+            />
+            <span>Storyteller games only</span>
+          </label>
         </div>
         <div class="flex flex-col md:flex-row gap-2 w-full">
           <label class="flex-1 flex items-center gap-1">
@@ -156,6 +164,7 @@ const options = reactive<{
   exclude_tags: string[];
   width: number;
   height: number;
+  storyteller_only: boolean;
 }>({
   title: "My Games",
   type: "BAR",
@@ -165,6 +174,7 @@ const options = reactive<{
   exclude_tags: [],
   width: 250,
   height: 250,
+  storyteller_only: false,
 });
 
 const selectedIncludeTag = ref<string | null>(null);
@@ -217,6 +227,7 @@ onMounted(async () => {
     options.exclude_tags = chart.exclude_tags;
     options.width = chart.width;
     options.height = chart.height;
+    options.storyteller_only = chart.storyteller_only || false;
     loadedChart.value = true;
   }
 });
