@@ -437,13 +437,18 @@ function toggleAlignment(token: Token) {
       token.alignment = "EVIL";
       break;
     case "EVIL":
-      if (token.role?.initial_alignment === "NEUTRAL") {
+      if (!token.role || token.role?.initial_alignment === "NEUTRAL") {
         token.alignment = "NEUTRAL";
       } else {
         token.alignment = "GOOD";
       }
       break;
     case "NEUTRAL":
+      token.alignment = "GOOD";
+      break;
+    case undefined:
+    default:
+      // If no alignment is set, start with GOOD
       token.alignment = "GOOD";
       break;
   }
