@@ -3,7 +3,7 @@
     v-model="value"
     :class="{
       'bg-purple-500 dark:bg-purple-800': value,
-      'bg-purple-900 dark:bg-purple-950': !value,
+      'bg-stone-300 dark:bg-stone-700': !value,
       'h-[24px] w-[60px]': !props.size || props.size === 'md',
       'h-[16px] w-[36px]': props.size === 'sm',
     }"
