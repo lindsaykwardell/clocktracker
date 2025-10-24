@@ -57,11 +57,12 @@
 import { Bar, Pie, PolarArea } from "vue-chartjs";
 import { colord, extend } from "colord";
 import mixPlugin from "colord/plugins/mix";
-import { WinStatus_V2 } from "~/composables/useGames";
+import { WinStatus_V2, type GameRecord } from "~/composables/useGames";
 
 extend([mixPlugin]);
 
 const { Script, isBaseScript } = useScripts();
+const me = useMe()
 
 const colors = {
   townsfolk: "#3297F4",
@@ -107,6 +108,11 @@ const props = defineProps<{
   showControls?: boolean;
 }>();
 
+function is_storyteller(game: GameRecord) {
+  if (me.value.status !== Status.SUCCESS) return false;
+  return game.is_storyteller || game.storyteller === me.value.data.username || game.co_storytellers.includes(me.value.data.username)
+} 
+
 const emit = defineEmits(["deleteChart"]);
 
 const width = computed(() => (props.options.width || 250) + "px");
@@ -119,7 +125,7 @@ const chartData = computed(() => {
       !game.ignore_for_stats &&
       // If storyteller_only is true, only include games where user was storyteller
       // If storyteller_only is false/undefined, include all games (both player and storyteller)
-      (props.options.storyteller_only ? game.is_storyteller : true) &&
+      (props.options.storyteller_only ? is_storyteller(game) : true) &&
       props.options.include_tags.every((tag) => game.tags.includes(tag)) &&
       props.options.exclude_tags.every((tag) => !game.tags.includes(tag))
   );
@@ -132,7 +138,7 @@ const chartData = computed(() => {
     switch (props.options.data) {
       case "ROLE":
         // For storyteller games, we don't need a character - they're counted separately
-        return game.is_storyteller || !!lastCharacter?.role?.type;
+        return is_storyteller(game) || !!lastCharacter?.role?.type;
       case "ALIGNMENT":
         return !!lastCharacter?.alignment;
       case "WIN":
@@ -168,7 +174,7 @@ const chartData = computed(() => {
         game.player_characters[game.player_characters.length - 1]?.role
           ?.type === "TRAVELER"
     ).length;
-    const storyteller = games.filter((game) => game.is_storyteller).length;
+    const storyteller = games.filter((game) => is_storyteller(game)).length;
     const total =
       townsfolk + outsider + minion + demon + traveler + storyteller;
     return {
@@ -198,7 +204,7 @@ const chartData = computed(() => {
           (game) =>
             game.player_characters[game.player_characters.length - 1]?.role
               ?.type === "TRAVELER",
-          (game) => game.is_storyteller,
+          (game) => is_storyteller(game),
         ],
         [
           colors.townsfolk,
