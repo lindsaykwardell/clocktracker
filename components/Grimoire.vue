@@ -141,7 +141,7 @@
               ? `@${token.player.username}`
               : token.player_name
           }`"
-          class="bg-green-800 rounded p-1 border-2 border-green-700 text-center text-ellipsis text-xs md:text-sm max-w-[5rem] md:max-w-[7rem] overflow-hidden whitespace-nowrap hover:bg-blue-800 hover:border-blue-700 transition duration-150 hover:underline"
+          class="bg-purple-800 rounded p-1 border-2 border-purple-700 text-center text-ellipsis text-xs md:text-sm max-w-[5rem] md:max-w-[7rem] overflow-hidden whitespace-nowrap hover:bg-blue-800 hover:border-blue-700 transition duration-150 hover:underline"
         >
           {{ token.player?.display_name || token.player_name }}
         </nuxt-link>
@@ -298,7 +298,11 @@ const orderedTokens = computed(() =>
 );
 
 const reminders = computed(() => {
-  const fabled = roles.getRoleByType(RoleType.FABLED);
+  const fabled = [
+    ...roles.getRoleByType(RoleType.FABLED),
+    ...roles.getRoleByType(RoleType.LORIC),
+  ];
+
   const travelers = roles.getRoleByType(RoleType.TRAVELER);
 
   const fabledReminders =
@@ -307,7 +311,7 @@ const reminders = computed(() => {
     roles.getRemindersForRoles(travelers.map((r) => r.id)) ?? [];
 
   for (const role of props.availableRoles ?? []) {
-    if (role.type === RoleType.FABLED) {
+    if (role.type === RoleType.FABLED || role.type === RoleType.LORIC) {
       fabledReminders.push(
         ...role.reminders.map((m) => ({ ...m, token_url: role.token_url }))
       );
@@ -329,11 +333,11 @@ const reminders = computed(() => {
   const otherReminders =
     [...(props.availableRoles ?? []), ...rolesInGrimoire]
       .filter(
-        (r) => [RoleType.FABLED, RoleType.TRAVELER].includes(r.type) === false
+        (r) => [RoleType.FABLED, RoleType.LORIC, RoleType.TRAVELER].includes(r.type) === false
       )
       .toSorted((a, b) => {
         // First sort by type
-        // Order: Townsfolk, Outsider, Minion, Demon, Traveler, Fabled
+        // Order: Townsfolk, Outsider, Minion, Demon, Traveler, Fabled, Loric
 
         // Then, sort by name ascending
         // If the names are the same, sort by id ascending
@@ -345,6 +349,7 @@ const reminders = computed(() => {
           [RoleType.DEMON]: 3,
           [RoleType.TRAVELER]: 4,
           [RoleType.FABLED]: 5,
+          [RoleType.LORIC]: 6,
         };
         const aTypeOrder = typeOrder[a.type];
         const bTypeOrder = typeOrder[b.type];
@@ -553,7 +558,7 @@ const viewTour = [
   {
     target: ".token-seat:first-child",
     content:
-      "Each individual seat includes data such as the role, player name, and aligment. If this player has an account on ClockTracker and was tagged, their name will have a green background and be a link to their profile.",
+      "Each individual seat includes data such as the role, player name, and aligment. If this player has an account on ClockTracker and was tagged, their name will have a purple background and be a link to their profile.",
   },
   {
     target: ".token-seat:first-child",
