@@ -29,20 +29,6 @@ const all_raw_roles = [
     otherNight: 50,
   },
   {
-    id: "wraith",
-    name: "Wraith",
-    edition: "",
-    team: "minion",
-    firstNightReminder: "",
-    otherNightReminder: "",
-    reminders: [],
-    ability:
-      "You may choose to open your eyes at night. You wake when other evil players do.",
-    flavor:
-      "Ra'āb ina pān ṣilli ša dāri. Rigim qallu ina šūri, šītu ša šunātīka iredde, u napšutka idlul ina pān maṣṣartī dāriti.”",
-    setup: false,
-  },
-  {
     id: "cacklejack",
     name: "Cacklejack",
     edition: "",
@@ -64,6 +50,7 @@ const minions = [];
 const demons = [];
 const travelers = [];
 const fabled = [];
+const loric = [];
 
 for (const role of all_raw_roles) {
   const role_id = nameToId(role.name);
@@ -84,6 +71,8 @@ for (const role of all_raw_roles) {
     travelers.push(role.name);
   } else if (role.team === "fabled") {
     fabled.push(role.name);
+  } else if (role.team === "loric") {
+    loric.push(role.name);
   }
 
   if (role.reminders) {
@@ -182,6 +171,7 @@ const roles = [
     toRole(role, RoleType.TRAVELER, Alignment.NEUTRAL)
   ),
   ...fabled.map((role) => toRole(role, RoleType.FABLED, Alignment.NEUTRAL)),
+  ...loric.map((role) => toRole(role, RoleType.LORIC, Alignment.NEUTRAL)),
 ];
 
 module.exports = {
@@ -191,6 +181,7 @@ module.exports = {
   minions,
   demons,
   fabled,
+  loric,
   roleNames,
   roles,
   reminders,

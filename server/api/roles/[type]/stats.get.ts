@@ -170,6 +170,7 @@ export default defineEventHandler(async (handler) => {
           role: {
             select: {
               token_url: true,
+              type: true,
             },
           },
         },

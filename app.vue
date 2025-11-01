@@ -2,30 +2,14 @@
   <NuxtPage />
   <AnnouncementDialog id="storyteller-charts-added">
     <template #title>
-      <h1 class="text-2xl font-bold font-sorts">
-        Storyteller Charts Now Supported!
-      </h1>
+      <h1 class="text-2xl font-bold font-sorts">Loric is now live!</h1>
       <div class="text-lg text-stone-400">{{ formattedAnnouncementDate }}</div>
     </template>
     <div class="p-2">
-      <Token
-        size="lg"
-        :character="{
-          name: 'Storyteller',
-          role: {
-            token_url: '/img/role/storyteller.png',
-            type: 'Traveler',
-            initial_alignment: 'NEUTRAL',
-            name: '',
-          },
-        }"
-        class="m-auto"
-      />
       <p class="p-2 pt-6">
-        A long requested feature, you can now create charts that filter down
-        down games where you were the storyteller! Check it out in your
-        <NuxtLink to="/charts/editor" class="underline">charts editor</NuxtLink
-        >.
+        Loric has now been added as a role type! You can find them beneath
+        Fabled characters in the role selection screen. Have fun, and good demon
+        hunting!
       </p>
     </div>
   </AnnouncementDialog>
@@ -156,7 +140,7 @@ watch(
   }
 );
 
-const announcementDate = dayjs.tz("2025-10-07", "America/Los_Angeles");
+const announcementDate = dayjs.tz("2025-11-01", "America/Los_Angeles");
 const maintenanceMode = featureFlags.maintenanceIsScheduled;
 
 const formattedAnnouncementDate = computed(() => {
