@@ -8,6 +8,7 @@ export enum RoleType {
   DEMON = "DEMON",
   TRAVELER = "TRAVELER",
   FABLED = "FABLED",
+  LORIC = "LORIC",
 }
 
 export type RoleRecord = Omit<Role, "type"> & {

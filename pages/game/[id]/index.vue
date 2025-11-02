@@ -267,7 +267,25 @@
                 v-if="game.data.fabled.length"
                 class="flex gap-3 items-center"
               >
-                <span class="block">Fabled</span>
+                <span class="block">
+                  <template
+                    v-if="
+                      game.data.fabled.some((r) => r.role?.type === 'FABLED')
+                    "
+                  >
+                    Fabled
+                  </template>
+                  <template v-if="game.data.fabled.some((r) => r.role?.type === 'FABLED') && game.data.fabled.some((r) => r.role?.type === 'LORIC')">
+                    {{" "}}&{{" "}}
+                  </template>
+                  <template
+                    v-if="
+                      game.data.fabled.some((r) => r.role?.type === 'LORIC')
+                    "
+                  >
+                    Loric
+                  </template>
+                </span>
                 <div class="flex flex-wrap gap-2">
                   <a
                     v-for="fabled in game.data.fabled"

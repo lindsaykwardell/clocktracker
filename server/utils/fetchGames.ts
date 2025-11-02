@@ -178,9 +178,9 @@ export async function fetchGames(user_id: string, me: User | null) {
             select: {
               title: true,
               id: true,
-            }
-          }
-        }
+            },
+          },
+        },
       },
       user: {
         select: {
@@ -220,6 +220,7 @@ export async function fetchGames(user_id: string, me: User | null) {
           role: {
             select: {
               token_url: true,
+              type: true,
             },
           },
         },
@@ -435,9 +436,9 @@ export async function fetchGame(
             select: {
               title: true,
               id: true,
-            }
-          }
-        }
+            },
+          },
+        },
       },
       user: {
         select: {
@@ -477,6 +478,7 @@ export async function fetchGame(
           role: {
             select: {
               token_url: true,
+              type: true,
             },
           },
         },

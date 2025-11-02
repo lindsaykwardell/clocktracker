@@ -9,7 +9,7 @@
         </label>
         <label v-if="!alwaysShowFabled" class="flex items-center">
           <input v-model="showFabled" type="checkbox" class="mr-2" />
-          <span>Show Fabled</span>
+          <span>Show Fabled and Loric</span>
         </label>
         <form @submit.prevent="selectMatchingRole">
           <input
@@ -93,7 +93,10 @@ const travelerRoles = computed(() =>
     .getRoleByType(RoleType.TRAVELER)
     .map((role) => ({ ...role, initial_alignment: "NEUTRAL" }))
 );
-const fabledRoles = computed(() => roles.getRoleByType(RoleType.FABLED));
+const fabledRoles = computed(() => [
+  ...roles.getRoleByType(RoleType.FABLED),
+  ...roles.getRoleByType(RoleType.LORIC),
+]);
 
 const roleFilter = ref("");
 const roleFilterRef = ref<HTMLInputElement | null>();
@@ -110,7 +113,7 @@ const filteredRoles = computed(() => {
   return naturalOrder(
     [
       ...(showAllRoles.value ? allRoles.value : props.availableRoles).filter(
-        (role) => role.type !== "FABLED"
+        (role) => role.type !== "FABLED" && role.type !== "LORIC"
       ),
       ...(providedRolesIncludesTravelers.value ? [] : travelerRoles.value),
       ...(showFabled.value || props.alwaysShowFabled ? fabledRoles.value : []),
@@ -153,6 +156,10 @@ const fabled = computed(() => {
   return filteredRoles.value.filter((role) => role.type === "FABLED");
 });
 
+const loric = computed(() => {
+  return filteredRoles.value.filter(role => role.type === "LORIC")
+})
+
 const roleGroups = computed(() => {
   return [
     {
@@ -183,6 +190,10 @@ const roleGroups = computed(() => {
       name: "Fabled",
       roles: fabled.value,
     },
+    {
+      name: "Loric",
+      roles: loric.value,
+    }
   ];
 });
 
