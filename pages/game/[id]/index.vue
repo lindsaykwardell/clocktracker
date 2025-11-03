@@ -275,8 +275,13 @@
                   >
                     Fabled
                   </template>
-                  <template v-if="game.data.fabled.some((r) => r.role?.type === 'FABLED') && game.data.fabled.some((r) => r.role?.type === 'LORIC')">
-                    {{" "}}&{{" "}}
+                  <template
+                    v-if="
+                      game.data.fabled.some((r) => r.role?.type === 'FABLED') &&
+                      game.data.fabled.some((r) => r.role?.type === 'LORIC')
+                    "
+                  >
+                    {{ " " }}&{{ " " }}
                   </template>
                   <template
                     v-if="
@@ -425,10 +430,14 @@
             <div
               v-if="grimPage === game.data.grimoire.length - 1"
               class="winning-team"
-              :class="game.data?.win_v2 === WinStatus_V2.GOOD_WINS ? 'good' : 'evil'"
+              :class="
+                game.data?.win_v2 === WinStatus_V2.GOOD_WINS ? 'good' : 'evil'
+              "
             >
               <span>
-                {{ game.data?.win_v2 === WinStatus_V2.GOOD_WINS ? 'Good' : 'Evil' }}
+                {{
+                  game.data?.win_v2 === WinStatus_V2.GOOD_WINS ? "Good" : "Evil"
+                }}
               </span>
               won!
             </div>
@@ -1082,14 +1091,22 @@ const tour = [
   font-weight: 500;
   text-transform: uppercase;
   text-align: center;
-  filter: drop-shadow(0 1px .25rem #000);
-  line-height: .8;
+  filter: drop-shadow(0 1px 0.25rem #000);
+  line-height: 0.8;
+  background: radial-gradient(
+    rgba(0, 0, 0, 0.5),
+    rgba(0, 0, 0, 0.2),
+    rgba(0, 0, 0, 0),
+    rgba(0, 0, 0, 0)
+  );
+  border-radius: 9999px;
+  padding: 20px;
 
   &.evil {
     --color-winner-start: #ee4a05;
     --color-winner-end: #cc1a04;
   }
-  
+
   &.good {
     --color-winner-start: #4ec4ea;
     --color-winner-end: #3186e4;
@@ -1098,12 +1115,15 @@ const tour = [
   > span {
     display: block;
     font-size: clamp(2.3328rem, 1.5393rem + 3.5267vw, 4.2725rem);
-    background-image: linear-gradient(0deg, var(--color-winner-end), var(--color-winner-start));
+    background-image: linear-gradient(
+      0deg,
+      var(--color-winner-end),
+      var(--color-winner-start)
+    );
     background-clip: text;
     color: transparent;
   }
 }
-
 </style>
 
 <style>
