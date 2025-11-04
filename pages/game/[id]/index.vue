@@ -275,8 +275,13 @@
                   >
                     Fabled
                   </template>
-                  <template v-if="game.data.fabled.some((r) => r.role?.type === 'FABLED') && game.data.fabled.some((r) => r.role?.type === 'LORIC')">
-                    {{" "}}&{{" "}}
+                  <template
+                    v-if="
+                      game.data.fabled.some((r) => r.role?.type === 'FABLED') &&
+                      game.data.fabled.some((r) => r.role?.type === 'LORIC')
+                    "
+                  >
+                    {{ " " }}&{{ " " }}
                   </template>
                   <template
                     v-if="
@@ -422,6 +427,20 @@
               :canClaimSeat="canClaimSeat"
               @claimSeat="claimSeat"
             />
+            <div
+              v-if="grimPage === game.data.grimoire.length - 1"
+              class="winning-team"
+              :class="
+                game.data?.win_v2 === WinStatus_V2.GOOD_WINS ? 'good' : 'evil'
+              "
+            >
+              <span>
+                {{
+                  game.data?.win_v2 === WinStatus_V2.GOOD_WINS ? "Good" : "Evil"
+                }}
+              </span>
+              won!
+            </div>
           </div>
           <div
             class="text-center bg-gradient-to-b from-transparent via-stone-800 to-stone-800"
@@ -1060,6 +1079,50 @@ const tour = [
 
 .custom-script {
   background-image: url("/img/custom-script-bg.webp");
+}
+
+.winning-team {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  transform: translate(-50%, -50%);
+  font-size: clamp(1.944rem, 1.7405rem + 0.9044vw, 2.4414rem);
+  font-family: "Times New Roman", serif;
+  font-weight: 500;
+  text-transform: uppercase;
+  text-align: center;
+  filter: drop-shadow(0 1px 0.25rem #000);
+  line-height: 0.8;
+  background: radial-gradient(
+    rgba(0, 0, 0, 0.5),
+    rgba(0, 0, 0, 0.2),
+    rgba(0, 0, 0, 0),
+    rgba(0, 0, 0, 0)
+  );
+  border-radius: 9999px;
+  padding: 20px;
+
+  &.evil {
+    --color-winner-start: #ee4a05;
+    --color-winner-end: #cc1a04;
+  }
+
+  &.good {
+    --color-winner-start: #4ec4ea;
+    --color-winner-end: #3186e4;
+  }
+
+  > span {
+    display: block;
+    font-size: clamp(2.3328rem, 1.5393rem + 3.5267vw, 4.2725rem);
+    background-image: linear-gradient(
+      0deg,
+      var(--color-winner-end),
+      var(--color-winner-start)
+    );
+    background-clip: text;
+    color: transparent;
+  }
 }
 </style>
 
