@@ -13,7 +13,7 @@ onMounted(async () => {
     const yirId = await $fetch("/api/year_in_review");
 
     if (yirId) {
-      router.push(`/year-in-review/2024/${yirId}`);
+      router.push(`/year-in-review/${new Date().getFullYear()}/${yirId}`);
     } else {
       router.push("/404");
     }

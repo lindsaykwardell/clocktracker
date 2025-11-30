@@ -93,15 +93,7 @@
           />
         </nuxt-link>
         <template v-if="me.status === Status.SUCCESS">
-          <NavLink
-            v-if="isJanuaryOrFebruary"
-            id="year-in-review"
-            to="/year-in-review"
-            icon="fanggu"
-            class="bg-purple-400 dark:bg-primary-darkest rounded-full transition duration-200"
-          >
-            Year in Review
-          </NavLink>
+          <YearInReviewLink />
           <NavLink id="dashboard" to="/" icon="innkeeper"> Home </NavLink>
           <NavLink
             id="my-games"
@@ -260,8 +252,6 @@ function search() {
     router.push({ path: "/search", query: { query: query.value } });
   }
 }
-
-const isJanuaryOrFebruary = computed(() => dayjs().month() <= 1);
 
 watchDebounced(
   query,
