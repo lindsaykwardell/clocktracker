@@ -4,7 +4,7 @@
       <slot name="title" />
     </template>
     <div class="p-4">
-      <slot />
+      <slot :close="() => (show = false)" />
     </div>
     <div class="flex justify-center p-4">
       <a
@@ -27,6 +27,8 @@ const route = useRoute();
 const props = defineProps<{
   id: string;
 }>();
+
+const emit = defineEmits(["onClose"]);
 
 const show = ref(false);
 
