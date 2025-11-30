@@ -2,6 +2,7 @@
   <template v-if="me.status === Status.SUCCESS">
     <div class="dashboard">
       <div class="content hidden lg:flex flex-col gap-4 p-4 dark:bg-stone-950">
+        <YearInReviewLink />
         <h1 class="text-xl font-sorts text-center">My Profile</h1>
         <ul class="px-4">
           <li>
