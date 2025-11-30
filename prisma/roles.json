@@ -3122,7 +3122,23 @@
     "name": "Tor",
     "team": "loric",
     "edition": "loric",
-    "ability": "Players don't know their character or alignment. They learn them after they die.",
+    "ability": "Players don't know their character or alignment. They learn them when they die.",
     "flavor": "With thunder as my voice and lightning as my blade, I, the eternal guardian, feast upon the fools who dare approach the forbidden gate. Behold, my sacred goal! To purge the beetle from the belly of the rocky earth, to ensnare it in a net of stars, on the hilltop where heaven meets earth."
+  },
+  {
+    "id": "zenomancer",
+    "firstNightReminder": "",
+    "otherNightReminder": "",
+    "reminders": [
+      "Goal",
+      "Goal",
+      "Goal"
+    ],
+    "setup": false,
+    "name": "Zenomancer",
+    "team": "loric",
+    "edition": "loric",
+    "ability": "One or more players each have a goal. When achieved, that player learns a piece of true info.",
+    "flavor": "The universe is a verb not a noun, they say, and it is turtles, turtles all the way down. Turtles all the way down, my friend, turtles all the way down."
   }
 ]
