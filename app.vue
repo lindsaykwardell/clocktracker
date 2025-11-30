@@ -1,17 +1,33 @@
 <template>
   <NuxtPage />
-  <AnnouncementDialog id="storyteller-charts-added">
+  <AnnouncementDialog
+    id="year-in-review-2025"
+    v-if="shouldShowAnnouncement"
+  >
     <template #title>
-      <h1 class="text-2xl font-bold font-sorts">Loric is now live!</h1>
+      <h1 class="text-2xl font-bold font-sorts">Year In Review Begins!</h1>
       <div class="text-lg text-stone-400">{{ formattedAnnouncementDate }}</div>
     </template>
-    <div class="p-2">
-      <p class="p-2 pt-6">
-        Loric has now been added as a role type! You can find them beneath
-        Fabled characters in the role selection screen. Have fun, and good demon
-        hunting!
-      </p>
-    </div>
+    <template v-slot="{ close }">
+      <div class="p-2">
+        <p class="p-2 pt-6">
+          We've reached the end of the year once again, and it's time to see how
+          your corner of Ravenswood Bluff has been handling all these demon
+          attacks!
+        </p>
+        <div class="w-[300px] m-auto" @click="close">
+          <YearInReviewLink />
+        </div>
+        <p class="p-2 pt-6">
+          Check out your "Year In Review" to see how you've fared over the past
+          year, which characters did the best for you, your favorite scripts,
+          and more.
+        </p>
+        <p class="p-2 pt-6">
+          Your year in review is available starting now through January!
+        </p>
+      </div>
+    </template>
   </AnnouncementDialog>
   <VitePwaManifest />
 </template>
@@ -140,7 +156,7 @@ watch(
   }
 );
 
-const announcementDate = dayjs.tz("2025-11-01", "America/Los_Angeles");
+const announcementDate = dayjs.tz("2025-12-01", "America/Los_Angeles");
 const maintenanceMode = featureFlags.maintenanceIsScheduled;
 
 const formattedAnnouncementDate = computed(() => {

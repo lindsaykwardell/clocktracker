@@ -15,7 +15,7 @@
         <img :src="`/img/role/${icon}.png`" class="md:max-w-[125%]" alt="" />
       </div>
     </div>
-    <span class="">
+    <span class="w-full">
       <slot />
     </span>
   </nuxt-link>
