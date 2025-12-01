@@ -14,7 +14,7 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  const year = 2024;
+  const year = new Date().getFullYear();
   const yearInReview = await prisma.yearInReview.findFirst({
     where: {
       user_id: me.id,
