@@ -12,7 +12,7 @@
         <div v-if="isMe" class="flex justify-center items-center">
           <button
             @click="showFavoritesDialog = !showFavoritesDialog"
-            class="p-4 text-gray-400 hover:text-gray-200"
+            class="p-4 text-gray-800 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 hover:underline"
           >
             Manage Favorite Games
           </button>
@@ -46,8 +46,19 @@
         {{ totalWins }} {{ totalWins === 1 ? "win" : "wins" }}
       </div>
     </div>
-    <UserRoles :games="userGames" condensed />
+    <div class="p-4">
+      <UserRoles 
+        :games="userGames" 
+        condensed 
+      />
+    </div>
+    
   </section>
+  <StatsGamesOverTime
+    v-if="userGames.status === Status.SUCCESS"
+    :games="userGames.data"
+    class="h-[250px] px-8 mb-16"
+  />
   <Dialog v-if="isMe" v-model:visible="showFavoritesDialog" size="xl">
     <template #title>
       <h2 class="text-2xl font-bold">Manage Favorites</h2>
