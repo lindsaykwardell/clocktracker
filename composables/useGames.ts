@@ -558,3 +558,33 @@ export function displayWinIcon(game: GameRecord, showTeamWin: boolean = false) {
       : "/1x1.png"
     : "/1x1.png";
 }
+
+export function isStorytellerForGame<
+  T extends {
+    storyteller?: string | null;
+    co_storytellers?: string[] | null;
+    is_storyteller?: boolean | null;
+  }
+>(game: T, username: string): boolean {
+  const isPrimaryST = game.storyteller === username;
+  const isCoST = Array.isArray(game.co_storytellers)
+    ? game.co_storytellers.includes(username)
+    : false;
+  const isFlagST = game.is_storyteller === true;
+
+  return isPrimaryST || isCoST || isFlagST;
+}
+
+export function filterStorytellerGames<
+  T extends {
+    ignore_for_stats?: boolean | null;
+    storyteller?: string | null;
+    co_storytellers?: string[] | null;
+    is_storyteller?: boolean | null;
+  }
+>(games: T[], username: string): T[] {
+  return games.filter((game) => {
+    if (game.ignore_for_stats) return false;
+    return isStorytellerForGame(game, username);
+  });
+}

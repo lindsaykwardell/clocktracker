@@ -4,14 +4,14 @@
       class="flex flex-col items-center w-full md:w-3/4 lg:w-2/3 xl:w-1/2 m-auto pt-4"
     >
       <div
-        class="grid grid-cols-[8rem_1fr_8rem] md:grid-cols-[10rem_1fr_10rem] gap-4 w-full"
+        class="grid grid-cols-[8rem_1fr_1fr] md:grid-cols-[10rem_1fr_10rem] px-4 md:px-0 gap-2 lg:gap-4 w-full"
       >
         <Avatar
           :value="player.avatar || ''"
           class="border-2 shadow-xl flex-shrink row-span-3"
           size="lg"
         />
-        <h3 class="font-sorts text-2xl xl:text-3xl col-span-2">
+        <h3 class="font-sorts text-xl md:text-2xl xl:text-3xl col-span-2">
           {{ player.display_name }}
         </h3>
         <div class="row-start-2 col-start-2">

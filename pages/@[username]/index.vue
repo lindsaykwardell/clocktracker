@@ -9,7 +9,7 @@
               player.user_id === user?.id ||
               friends.getFriendStatus(player.user_id) === FriendStatus.FRIENDS
             "
-            class="flex justify-start w-screen md:w-full gap-1 h-12"
+            class="flex flex-wrap justify-start w-screen md:w-full gap-1 h-12"
           >
             <nuxt-link
               :to="`/@${username}`"
@@ -43,11 +43,18 @@
               <span>Tagged</span>
             </nuxt-link>
             <nuxt-link
-              :to="`/@${username}?view=stats`"
+              :to="`/@${username}?view=stats-player`"
               class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-200 dark:hover:bg-stone-700"
-              :class="currentTabClass('stats')"
+              :class="currentTabClass('stats-player')"
             >
-              Stats
+              Player Stats
+            </nuxt-link>
+            <nuxt-link
+              :to="`/@${username}?view=stats-storyteller`"
+              class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-200 dark:hover:bg-stone-700"
+              :class="currentTabClass('stats-storyteller')"
+            >
+              Storyteller Stats
             </nuxt-link>
           </div>
         </UserHeader>
@@ -58,11 +65,21 @@
             friends.getFriendStatus(player.user_id) === FriendStatus.FRIENDS
           "
         >
-          <UserProfile v-if="currentTab === 'profile'" :player="player" />
+          <UserProfile 
+            v-if="currentTab === 'profile'" 
+            :player="player" 
+          />
           <UserCharts
-            v-if="currentTab === 'stats'"
+            v-if="currentTab === 'stats-player'"
             :games="games"
             :username="username"
+            mode="player"
+          />
+          <UserCharts
+            v-if="currentTab === 'stats-storyteller'"
+            :games="games"
+            :username="username"
+            mode="storyteller"
           />
           <UserGamesView
             v-if="currentTab === 'games'"
@@ -164,7 +181,10 @@ const currentTab = computed(() => {
   switch (route.query.view) {
     case "charts":
     case "stats":
-      return "stats";
+    case "stats-player":
+      return "stats-player";
+    case "stats-storyteller":
+      return "stats-storyteller";
     case "pending":
       return "pending";
     case "games":
