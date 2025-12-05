@@ -38,21 +38,14 @@
                       >
                         {{ activeFilters.length }}
                       </span>
-                      <Button class="font-normal w-full whitespace-nowrap">
+                      <Button 
+                        class="font-normal w-full whitespace-nowrap"
+                        hasIcon
+                      >
                         <div
                           class="w-full flex gap-2 items-center md:justify-center"
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="28"
-                            height="28"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              fill="currentColor"
-                              d="M10 18v-2h4v2zm-4-5v-2h12v2zM3 8V6h18v2z"
-                            />
-                          </svg>
+                          <IconUI id="filter" />
                           Filter Games
                         </div>
                       </Button>
@@ -363,40 +356,18 @@
                 class="w-[100px]"
                 @click="gameView = 'grid'"
                 :disabled="gameView === 'grid'"
+                hasIcon
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="32"
-                  height="32"
-                  viewBox="0 0 32 32"
-                >
-                  <path
-                    fill="currentColor"
-                    d="M12 4H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 8H6V6h6zm14-8h-6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 8h-6V6h6zm-14 6H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2zm0 8H6v-6h6zm14-8h-6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2zm0 8h-6v-6h6z"
-                  />
-                </svg>
+                <IconUI id="grid" />
                 Grid
               </Button>
               <Button
                 class="w-[100px]"
                 @click="gameView = 'table'"
                 :disabled="gameView === 'table'"
+                hasIcon
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="32"
-                  height="32"
-                  viewBox="0 0 32 32"
-                >
-                  <path
-                    fill="currentColor"
-                    d="M12 29H5a2.002 2.002 0 0 1-2-2v-7a2.002 2.002 0 0 1 2-2h7a2.002 2.002 0 0 1 2 2v7a2.002 2.002 0 0 1-2 2Zm-7-9v7h7v-7Z"
-                  />
-                  <path
-                    fill="currentColor"
-                    d="M27 3H5a2 2 0 0 0-2 2v10h2v-4h10v4h2v-4h10v7H17v2h10v7H17v2h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm0 6H5V5h22Z"
-                  />
-                </svg>
+                <IconUI id="table" />
                 Table
               </Button>
             </div>
