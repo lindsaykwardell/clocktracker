@@ -297,15 +297,15 @@
         v-if="!game.player_count"
         :style="
           customBackground
-            ? { backgroundImage: `url(${customBackground})` }
+            ? { '--bg-image-url' : `url(${customBackground})` }
             : {}
         "
-        class="pt-3 relative bg-center bg-cover w-full h-[200px] flex justify-center items-center"
+        class="pt-3 relative bg-center bg-cover w-full h-[200px] flex justify-center items-center script-bg"
         :class="{
-          'trouble-brewing': game.script === 'Trouble Brewing',
-          'sects-and-violets': game.script === 'Sects and Violets',
-          'bad-moon-rising': game.script === 'Bad Moon Rising',
-          'custom-script':
+          'is-trouble-brewing': game.script === 'Trouble Brewing',
+          'is-sects-and-violets': game.script === 'Sects and Violets',
+          'is-bad-moon-rising': game.script === 'Bad Moon Rising',
+          'is-custom-script':
             ['Trouble Brewing', 'Sects and Violets', 'Bad Moon Rising'].indexOf(
               game.script
             ) === -1 && !customBackground,
@@ -331,15 +331,15 @@
         v-else
         :style="
           customBackground
-            ? { backgroundImage: `url(${customBackground})` }
+            ? { '--bg-image-url' : `url(${customBackground})` }
             : {}
         "
-        class="pt-3 relative bg-center bg-cover w-full"
+        class="pt-3 relative bg-center bg-cover w-full script-bg"
         :class="{
-          'trouble-brewing': game.script === 'Trouble Brewing',
-          'sects-and-violets': game.script === 'Sects and Violets',
-          'bad-moon-rising': game.script === 'Bad Moon Rising',
-          'custom-script':
+          'is-trouble-brewing': game.script === 'Trouble Brewing',
+          'is-sects-and-violets': game.script === 'Sects and Violets',
+          'is-bad-moon-rising': game.script === 'Bad Moon Rising',
+          'is-custom-script':
             ['Trouble Brewing', 'Sects and Violets', 'Bad Moon Rising'].indexOf(
               game.script
             ) === -1 && !customBackground,
@@ -623,11 +623,11 @@
   />
   <Dialog v-model:visible="showCopyGrimoireDialog" size="xl">
     <template #title>
-      <h2 class="text-2xl font-bold">Manage Favorites</h2>
-      <p class="text-lg text-stone-400 p-4">
-        Click on a game to add or remove it from your favorites. Only six
-        favorites are shown on your profile, but you can favorite as many games
-        as you like.
+      <h2 class="text-2xl font-bold">Copy Existing Grimoire</h2>
+      <p class="text-lg text-stone-400 py-4">
+        Click on a game to copy the grimoire data to this game.
+        (Grimoire data includes player count, player data, 
+        location, community, ...)
       </p>
     </template>
 
@@ -1558,19 +1558,23 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.trouble-brewing {
-  background-image: url("/img/trouble-brewing-bg.webp");
-}
+.script-bg {
+  background-image: var(--bg-image-url);
 
-.sects-and-violets {
-  background-image: url("/img/sects-and-violets-bg.webp");
-}
+  &.is-trouble-brewing {
+    --bg-image-url: url("/img/scripts/trouble-brewing-bg.webp");
+  }
 
-.bad-moon-rising {
-  background-image: url("/img/bad-moon-rising-bg.webp");
-}
+  &.is-sects-and-violets {
+    --bg-image-url: url("/img/scripts/sects-and-violets-bg.webp");
+  }
 
-.custom-script {
-  background-image: url("/img/custom-script-bg.webp");
+  &.is-bad-moon-rising {
+    --bg-image-url: url("/img/scripts/bad-moon-rising-bg.webp");
+  }
+
+  &.is-custom-script {
+    --bg-image-url: url("/img/scripts/custom-script-bg.webp");
+  }
 }
 </style>
