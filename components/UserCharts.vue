@@ -21,6 +21,7 @@
             @click.prevent="selectedTags.splice(index, 1)"
             :title="`Remove ${tag} tag`"
             hasIcon
+            tag
           >
             {{ tag }}<IconUI id="x" />
           </Button>

@@ -179,15 +179,17 @@ const roleWasStorytold = (roleId: string) =>
 
 const roleTooltip = (role: { id: string; name: string }) => {
   const usage = roleUsage.value.get(role.id);
-  const lines = [`<strong>${role.name}</strong>`];
+  
 
   if (props.condensed) {
-    return lines;
+    return `${role.name}`; // Only output the role name.
   }
 
   if (!usage) {
     return `<strong>${role.name}</strong><br>Not storytold yet`;
   }
+
+  const lines = [`<strong>${role.name}</strong>`];
 
   if (usage.storytold > 0) {
     lines.push(`Storytold: ${usage.storytold}`);

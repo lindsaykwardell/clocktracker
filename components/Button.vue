@@ -1,11 +1,13 @@
 <template>
   <component
     :is="is"
-    class="text-center transition duration-150 dark:text-white font-bold rounded flex justify-center items-center"
+    class="text-center transition duration-150 dark:text-white rounded flex justify-center items-center p-1 px-2"
     :class="{
       [computedClasses]: true,
-      'gap-1 py-1 pl-1 pr-2': hasIcon,
-      'gap-4 p-1': !hasIcon
+      'gap-2': hasIcon,
+      'gap-4': !hasIcon,
+      'gap-x-1': tag,
+      'font-bold': !tag,
     }"
     :disabled="disabled"
   >
@@ -26,6 +28,7 @@ const props = defineProps<{
   fontSize?: "sm" | "md" | "lg" | "xl";
   disabled?: boolean;
   hasIcon?: boolean;
+  tag?: boolean;
 }>();
 
 const nuxtLink = resolveComponent("nuxt-link");

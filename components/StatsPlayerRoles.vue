@@ -203,13 +203,14 @@ const formatPercent = (wins: number, losses: number) => {
 
 const roleTooltip = (role: { id: string; name: string }) => {
   const stats = roleStats.value.get(role.id);
+  if (props.condensed) {
+    return `${role.name}`;
+  }
+
   if (!stats) {
     return `<strong>${role.name}</strong><br>Not played yet`;
   }
 
-  if (props.condensed) {
-    return `<strong>${role.name}</strong>`;
-  }
   else {
     return `<strong>${role.name}</strong><br>Games: ${stats.plays}<br>W/L: ${stats.wins}-${stats.losses} (${formatPercent(stats.wins, stats.losses)})`;
   }
