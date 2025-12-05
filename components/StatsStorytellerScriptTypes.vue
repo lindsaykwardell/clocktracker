@@ -58,10 +58,7 @@ const scriptCounts = computed<ScriptCounts>(() => {
   for (const game of storytellerGames.value) {
     const scriptName = (game.script ?? "").trim();
 
-    // // Ignore games with no script.
-    // if (!script || script.trim() === "") continue;
-
-    // No script / empty script → Unknown
+    // No script / empty script = Unknown
     if (!scriptName) {
       counts.unknownScript++;
       continue;

@@ -1,27 +1,10 @@
 <template>
-  <section
+  <div
     v-if="userGames.status === Status.SUCCESS"
-    class="grid grid-cols-1 md:grid-cols-2"
+    class="space-y-8 md:space-y-12 xl:space-y-16 pb-4 lg:pb-8"
   >
-    <div class="row-span-3">
-      <template v-if="favoriteGames.length > 0">
-        <GameOverviewGrid
-          :games="favoriteGames"
-          cardWidth="w-1/2 md:w-full lg:w-1/2"
-        />
-        <div v-if="isMe" class="flex justify-center items-center">
-          <button
-            @click="showFavoritesDialog = !showFavoritesDialog"
-            class="p-4 text-gray-800 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 hover:underline"
-          >
-            Manage Favorite Games
-          </button>
-        </div>
-      </template>
-      <p v-else class="text-center text-2xl font-sorts">No games yet!</p>
-    </div>
-    <div
-      class="row-start-1 md:row-start-auto p-4 grid grid-cols-2 xl:grid-cols-4 gap-4"
+    <section
+      class="px-4 lg:px-8 grid grid-cols-2 xl:grid-cols-4 gap-4 w-3/4 mx-auto"
     >
       <div
         class="border rounded border-stone-500 p-2 text-center text-lg font-bold bg-purple-200 dark:bg-purple-950"
@@ -45,20 +28,41 @@
       >
         {{ totalWins }} {{ totalWins === 1 ? "win" : "wins" }}
       </div>
-    </div>
-    <div class="p-4">
-      <UserRoles 
+    </section>
+
+    <section>
+      <template v-if="favoriteGames.length > 0">
+        <GameOverviewGrid
+          :games="favoriteGames"
+          cardWidth="w-1/2 lg:w-1/4"
+        />
+        <div v-if="isMe" class="flex justify-center items-center">
+          <button
+            @click="showFavoritesDialog = !showFavoritesDialog"
+            class="p-4 text-gray-800 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 hover:underline"
+          >
+            Manage Favorite Games
+          </button>
+        </div>
+      </template>
+      <p v-else class="text-center text-2xl font-sorts">No games yet!</p>
+    </section>
+
+    <section class="px-4 lg:px-8">
+      <StatsPlayerRoles 
         :games="userGames" 
         condensed 
       />
-    </div>
-    
-  </section>
-  <StatsGamesOverTime
-    v-if="userGames.status === Status.SUCCESS"
-    :games="userGames.data"
-    class="h-[250px] px-8 mb-16"
-  />
+    </section>
+
+    <section class="px-4 lg:px-8">
+      <StatsStorytellerRoles 
+        :games="userGames"
+        :username="player.username";
+        condensed 
+      />
+    </section>
+  </div>
   <Dialog v-if="isMe" v-model:visible="showFavoritesDialog" size="xl">
     <template #title>
       <h2 class="text-2xl font-bold">Manage Favorites</h2>
@@ -175,7 +179,7 @@ const favoriteGames = computed(() => {
   )
     .orderBy("desc")
     .sort(["date"])
-    .slice(0, 6);
+    .slice(0, 8);
 
   if (favorites.length > 0) {
     return favorites;
@@ -183,7 +187,7 @@ const favoriteGames = computed(() => {
     return naturalOrder(userGames.value.data)
       .orderBy("desc")
       .sort(["date"])
-      .slice(0, 6);
+      .slice(0, 8);
   }
 });
 

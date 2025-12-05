@@ -235,8 +235,8 @@ async function saveChart() {
   if (me.value.status === Status.SUCCESS) {
     const username = me.value.data.username;
     const view = options.storyteller_only
-      ? "stats-storyteller"
-      : "stats-player";
+      ? "stats&storyteller=1"
+      : "stats";
 
     router.push(`/@${username}?view=${view}`);
   } else {

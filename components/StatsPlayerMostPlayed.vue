@@ -1,8 +1,14 @@
 <template>
   <div>
-    <h2 class="font-sorts text-center text-xl lg:text-2xl mb-2 lg:mb-4">
-      Most played by type
+    <h2 class="font-sorts text-center text-xl lg:text-2xl mb-1 lg:mb-2">
+      Most played
     </h2>
+    
+    <div class="text-center text-balance max-w-[80ch] mb-2 lg:mb-4 mx-auto text-stone-800 dark:text-stone-300 space-y-2">
+      <p>
+        An overview of {{ props.isMe ? 'your' : `this player's` }} most played characters by type.
+      </p>
+    </div>
 
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-4">
       <div
@@ -29,7 +35,6 @@
                   },
                 }"
                 size="md"
-                v-tooltip="`${roleCharacters[0].name} (${roleCharacters[0].count}×)`"
               />
             </nuxt-link>
 
@@ -41,8 +46,7 @@
           </div>
           <div 
             v-else
-            dir="rtl"
-            class="relative col-end-5 row-start-3"
+            class="relative mb-8 col-start-2 col-span-2 row-span-2 z-[1]"
           >
             <Token
               :character="{
@@ -71,23 +75,19 @@
                   },
                 }"
                 size="sm"
-                v-tooltip="`${roleCharacters[1].name} (${roleCharacters[1].count}×)`"
+                v-tooltip="`${roleCharacters[1].name}`"
               />
             </nuxt-link>
 
             <span
               class="absolute left-3 -bottom-2 z-20 text-xs leading-none flex items-center justify-center w-5 h-5 px-1 py-0.5 rounded-full text-white bg-stone-600"
             >
-            <!-- <span 
-              class="absolute -right-3 top-2/3 -translate-y-1/2 z-20 text-xs leading-none flex items-center justify-center w-5 h-5 px-1 py-0.5 rounded-full text-black bg-slate-300 border border-slate-500"
-            > -->
               {{ roleCharacters[1].count }}
             </span>
           </div>
           <div 
             v-else
-            dir="rtl"
-            class="relative col-end-5 row-start-3"
+            class="relative col-start-1 row-start-3"
           >
             <Token
               :character="{
@@ -100,7 +100,7 @@
             />
           </div>
 
-          <!-- 🥉 3rd place: bottom right -->
+          <!-- 3rd: bottom right -->
           <div
             v-if="roleCharacters[2]"
             dir="rtl"
@@ -117,7 +117,7 @@
                   },
                 }"
                 size="sm"
-                v-tooltip="`${roleCharacters[2].name} (${roleCharacters[2].count}×)`"
+                v-tooltip="`${roleCharacters[2].name}`"
               />
             </nuxt-link>
             <span 
@@ -170,6 +170,7 @@ type GameWithChars = Game & {
 
 const props = defineProps<{
   games: GameWithChars[];
+  isMe?: boolean;
 }>();
 
 /**
@@ -240,11 +241,22 @@ const topCharactersByRole = computed<Record<RoleType, CharacterStat[]>>(() => {
     tokenByName[character.name] = tokenUrl;
   }
 
-  const result: Record<RoleType, CharacterStat[]> = {};
+  // Start with all known role types so we render even empty categories
+  const result: Record<RoleType, CharacterStat[]> = Object.keys(ROLE_LABELS).reduce(
+    (acc, roleType) => {
+      acc[roleType] = [];
+      return acc;
+    },
+    {} as Record<RoleType, CharacterStat[]>
+  );
 
   for (const [roleType, roleCounts] of Object.entries(counts)) {
     const topThree = Object.entries(roleCounts)
-      .sort((a, b) => b[1] - a[1]) // High to low
+      .sort((a, b) => {
+        const countDiff = b[1] - a[1];
+        if (countDiff !== 0) return countDiff;
+        return a[0].localeCompare(b[0], undefined, { sensitivity: "base" });
+      }) // High to low, alphabetical tiebreak
       .slice(0, 3) // Top 3 per role
       .map(([name, count]) => ({
         name,

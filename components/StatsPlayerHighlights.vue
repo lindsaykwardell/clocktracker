@@ -6,8 +6,8 @@
 
     <div class="grid gap-2 md:gap-4 grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       <!-- Most played -->
-      <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40">
-        <h3 class="font-sorts text-center text-lg lg:text-xl mb-2 md:mb-3">
+      <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-2 md:gap-3">
+        <h3 class="font-sorts text-center text-lg lg:text-xl">
           Most Played
         </h3>
 
@@ -24,24 +24,25 @@
                 },
               }"
               size="lg"
-              v-tooltip="`${mostPlayed.role.name} (${mostPlayed.plays} games)`"
             />
           </nuxt-link>
 
           <div class="text-center text-sm text-balance max-w-44">
-            Has been {{ roleArticle(mostPlayed.role.name) }}<span class="font-semibold">{{ mostPlayed.role.name }}</span> 
+            {{ props.isMe ? `You've` : `This player has` }} been {{ roleArticle(mostPlayed.role.name) }}<span class="font-semibold">{{ mostPlayed.role.name }}</span> 
             a total of {{ mostPlayed.plays }} game<span v-if="mostPlayed.plays !== 1">s</span>.
           </div>
         </div>
 
-        <p v-else class="text-center text-sm text-stone-400">
-          Not enough data.
-        </p>
+        <div v-else class="flex items-center justify-center flex-grow">
+          <p class="text-center text-sm text-stone-400">
+            Not enough data (No recorded games).
+          </p>
+        </div>
       </div>
 
       <!-- Best performing -->
-      <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40">
-        <h3 class="font-sorts text-center text-lg lg:text-xl mb-2 md:mb-3">
+      <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-2 md:gap-3">
+        <h3 class="font-sorts text-center text-lg lg:text-xl">
           Best Performing
         </h3>
 
@@ -58,26 +59,28 @@
                 },
               }"
               size="lg"
-              v-tooltip="`${bestPerforming.role.name} (${bestPerforming.wins} wins)`"
             />
           </nuxt-link>
 
           <div class="text-center text-sm text-balance max-w-44">
-            Was {{ roleArticle(bestPerforming.role.name) }}<span class="font-semibold">{{ bestPerforming.role.name }}</span> 
+            {{ props.isMe ? `You were` : `This player has been` }} {{ roleArticle(bestPerforming.role.name) }}<span class="font-semibold">{{ bestPerforming.role.name }}</span> 
             in {{ bestPerforming.plays }} game<span v-if="bestPerforming.plays !== 1">s</span> and 
             <span v-if="bestPerforming.losses > 0">won {{ bestPerforming.wins }} of those!</span>
             <span v-else>didn't lose a single one!</span>
           </div>
         </div>
 
-        <p v-else class="text-center text-sm text-stone-400">
-          Not enough data (No character with at least {{ MIN_PLAYS_FOR_PERFORMANCE }} plays).
-        </p>
+        <div v-else class="flex items-center justify-center flex-grow">
+          <p class="text-center text-sm text-stone-400 text-balance">
+            Not enough data (No character with at least {{ MIN_PLAYS_FOR_PERFORMANCE }} plays).
+          </p>
+        </div>
+        
       </div>
 
       <!-- Worst performing -->
-      <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40">
-        <h3 class="font-sorts text-center text-lg lg:text-xl mb-2 md:mb-3">
+      <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-2 md:gap-3">
+        <h3 class="font-sorts text-center text-lg lg:text-xl">
           Worst Performing
         </h3>
 
@@ -94,36 +97,37 @@
                 },
               }"
               size="lg"
-              v-tooltip="`${worstPerforming.role.name} (${worstPerforming.losses} losses)`"
             />
           </nuxt-link>
 
-          <div class="text-center text-sm text-balance max-w-40">
-            Was {{ roleArticle(worstPerforming.role.name) }}<span class="font-semibold">{{ worstPerforming.role.name }}</span> 
+          <div class="text-center text-sm text-balance max-w-44">
+            {{ props.isMe ? `You were` : `This player has been` }} {{ roleArticle(worstPerforming.role.name) }}<span class="font-semibold">{{ worstPerforming.role.name }}</span> 
             in {{ worstPerforming.plays }} game<span v-if="worstPerforming.plays !== 1">s</span> and 
             <span v-if="worstPerforming.wins > 0">won only {{ worstPerforming.wins }} of those.</span>
             <span v-else>tragically lost all of those...</span>
           </div>
         </div>
 
-        <p v-else class="text-center text-sm text-stone-400">
-          Not enough data (No character with at least {{ MIN_PLAYS_FOR_PERFORMANCE }} plays).
-        </p>
+        <div v-else class="flex items-center justify-center flex-grow">
+          <p class="text-center text-sm text-stone-400 text-balance">
+            Not enough data (No character with at least {{ MIN_PLAYS_FOR_PERFORMANCE }} plays).
+          </p>
+        </div>
       </div>
 
-      <!-- Win rate -->
+      <!-- Alignment -->
       <div class="lg:col-span-3 xl:col-span-1 p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40">
         <h3 class="font-sorts text-center text-lg lg:text-xl mb-2 md:mb-3">
-          Win Rate
+          Alignment Insights
         </h3>
 
-        <StatsPlayerWinRateOverTime 
+        <StatsPlayerAlignmentWins 
           :games="games" 
           class="w-full mb-2" 
         />
 
         <div v-if="alignmentStats">
-          <div class="flex flex-col text-center text-sm md:text-base">
+          <div class="flex flex-col text-center after:content-[''] after:mx-auto after:my-1 after:w-8 after:h-[1px] after:bg-stone-400 ">
             <div class="text-center text-sm text-balance max-w-64 mx-auto">
               <span v-if="strongestAlignment === 'GOOD'">
                 You win more often as
@@ -134,34 +138,74 @@
                 <span class="font-semibold" :style="`color: ${chartColors.evil}`">Evil</span>.
               </span>
               <span v-else>
-                You're <span class="font-semibold">equally deadly</span> on both sides.
+                Whichever team you end up on, the results are... remarkably similar.
               </span>
             </div>
-
-            <div class="flex w-full justify-between gap-4 mt-2 text-xs md:text-sm">
-              <div class="flex-1 text-left">
-                <div class="font-semibold text-sm" :style="`color: ${chartColors.good}`">Good</div>
-                <!-- <div>
-                  Games: {{ goodStats.plays }}
-                </div> -->
-                <div>
-                  W/L: {{ goodStats.wins }}/{{ goodStats.losses }} ({{ formatPercent(goodStats.wins, goodStats.plays) }})
-                </div>
-              </div>
-
-              <div class="flex-1 text-right">
-                <div class="font-semibold text-sm" :style="`color: ${chartColors.evil}`">Evil</div>
-                <!-- <div>
-                  Games: {{ evilStats.plays }}
-                </div> -->
-                <div>
-                   W/L: {{ evilStats.wins }}/{{ evilStats.losses }} ({{ formatPercent(evilStats.wins, evilStats.plays) }})
-                </div>
-              </div>
-            </div>
           </div>
-        </div>
 
+          <div
+            v-if="evilBias"
+            class="text-center text-sm text-balance max-w-64 mx-auto cursor-help"
+            v-tooltip="{
+              content: `
+                <div class='w-56 text-sm'>
+                  <div class='w-48 text-sm space-y-3'>
+                    <p>
+                      Each game gives a player a specific chance of pulling an Evil token, based on the total number of players.
+                    </p>
+                    <p>
+                      Clocktracker compares those expected chances to the actual results to show whether a player's outcomes
+                      skew toward Evil, lean toward Good, or stay in line with probability.
+                    </p>
+                    <p>
+                      Based on the ${evilBias?.games} games played, 
+                      ${ props.isMe ? 'you were' : `this player` } was expected to draw an Evil token ${evilBias?.expectedEvil.toFixed(1)} times (${Math.round(evilBias?.expectedRate * 100)}%),
+                      but actually drew one ${evilBias?.actualEvil} times (${Math.round(evilBias?.actualRate * 100)}%).
+                      This is a difference of ${(evilBias?.diffRate > 0 ? '+' : '') + Math.round(evilBias?.diffRate * 100)}%
+                    </p>
+                  </div>
+
+                  <div>
+                  </div>
+                </div>
+                
+              `,
+              html: true
+            }"
+          >
+            <!-- Strongly above -->
+            <template v-if="evilBias.diffRate >= 0.40">
+              {{ props.isMe ? 'Your hands' : `This player's hands` }} are a magnet for <span class="font-semibold" :style="`color: ${chartColors.evil}`">Evil</span> tokens.
+            </template>
+
+            <!-- Clearly above -->
+            <template v-else-if="evilBias.diffRate >= 0.20">
+              It's statistically suspicious how often {{ props.isMe ? 'you draw' : `This player draws` }} an <span class="font-semibold" :style="`color: ${chartColors.evil}`">Evil</span> token.
+            </template>
+
+            <!-- Slightly above -->
+            <template v-else-if="evilBias.diffRate >= 0.05">
+              {{ props.isMe ? 'You show' : `This player shows` }} a slight pull toward <span class="font-semibold" :style="`color: ${chartColors.evil}`">Evil</span> tokens.
+            </template>
+
+            <!-- Slightly below -->
+            <template v-else-if="evilBias.diffRate <= -0.05 && evilBias.diffRate > -0.20">
+              {{ props.isMe ? 'You show' : `This player shows` }} a slight pull toward <span class="font-semibold" :style="`color: ${chartColors.good}`">Good</span> tokens.
+            </template>
+
+            <!-- Clearly below -->
+            <template v-else-if="evilBias.diffRate <= -0.20">
+              {{ props.isMe ? 'Your hands' : `This player's hands` }} seem blessed, <span class="font-semibold" :style="`color: ${chartColors.good}`">Good</span> tokens find {{ props.isMe ? 'you' : `them` }} often.
+            </template>
+
+            <!-- Basically equal -->
+            <template v-else>
+              {{ props.isMe ? 'You land' : `This player draws` }} <span class="font-semibold" :style="`color: ${chartColors.good}`">Good</span> and 
+              <span class="font-semibold" :style="`color: ${chartColors.evil}`">Evil</span> tokens exactly as probability predicts.
+            </template>
+            <!-- <IconUI id="info" size="sm" /> -->
+          </div>
+        </div>  
         <p v-else class="text-center text-sm text-stone-400">
           Not enough data.
         </p>
@@ -180,9 +224,30 @@ const MIN_PLAYS_FOR_PERFORMANCE = 3;
 
 type Alignment = "GOOD" | "EVIL" | null;
 
+type GrimoireToken = {
+  alignment?: Alignment | null;
+  role_id?: string | null;
+  player_id?: string | null;
+  player_name?: string | null;
+  player?: { username?: string | null } | null;
+  role?: {
+    initial_alignment?: Alignment | null;
+  } | null;
+};
+
+type GrimoirePage = {
+  tokens?: GrimoireToken[];
+};
+
 type GameWithChars = Game & {
   ignore_for_stats?: boolean | null;
   win_v2?: string | null; // "GOOD_WINS" | "EVIL_WINS" | etc.
+  player_count?: number | null;
+  traveler_count?: number | null;
+  grimoire?: GrimoirePage[] | null;
+  user?: {
+    username?: string | null;
+  } | null;
   player_characters: (Character & {
     name: string | null;
     alignment?: Alignment;
@@ -200,6 +265,8 @@ type GameWithChars = Game & {
 
 const props = defineProps<{
   games: GameWithChars[];
+  isMe?: boolean;
+  username: string;
 }>();
 
 type RoleSummary = {
@@ -343,6 +410,58 @@ const strongestAlignment = computed<"GOOD" | "EVIL" | "BALANCED">(() => {
   return goodRate > evilRate ? "GOOD" : "EVIL";
 });
 
+type EvilBias = {
+  games: number;
+  actualEvil: number;
+  expectedEvil: number;
+  actualRate: number;
+  expectedRate: number;
+  diffRate: number;
+};
+
+/**
+ * Compare actual evil games to what would be expected based on player counts.
+ * Traveler count is deliberately ignored.
+ */
+const evilBias = computed<EvilBias | null>(() => {
+  let games = 0;
+  let actualEvil = 0;
+  let expectedEvil = 0;
+
+  for (const game of props.games) {
+    const playerCount = game.player_count ?? 0;
+    if (playerCount <= 0) continue;
+
+    const alignment = getInitialAlignment(game);
+    if (!alignment) continue;
+
+    const evilSlots = evilSlotsForPlayers(playerCount);
+    if (evilSlots <= 0) continue;
+
+    games++;
+
+    if (alignment === "EVIL") {
+      actualEvil++;
+    }
+
+    expectedEvil += evilSlots / playerCount;
+  }
+
+  if (!games) return null;
+
+  const actualRate = actualEvil / games;
+  const expectedRate = expectedEvil / games;
+
+  return {
+    games,
+    actualEvil,
+    expectedEvil,
+    actualRate,
+    expectedRate,
+    diffRate: actualRate - expectedRate,
+  };
+});
+
 /**
  * Determine "Most Played" character.
  */
@@ -455,6 +574,45 @@ function getStatsCharacter(game: GameWithChars) {
 }
 
 /**
+ * Determine the player's starting alignment using the first grimoire page.
+ * Falls back to the first recorded character if the grimoire is missing.
+ */
+function getInitialAlignment(game: GameWithChars): Alignment {
+  const firstPage = game.grimoire?.[0];
+  const username = game.user?.username ?? null;
+
+  const token =
+    firstPage?.tokens?.find(
+      (t) =>
+        (username &&
+          (t.player?.username === username ||
+            t.player_name === username ||
+            t.player_name === `@${username}`)) ||
+        t.player_id === game.user_id
+    ) ?? null;
+
+  if (token) {
+    const tokenAlignment = token.alignment as Alignment;
+    if (tokenAlignment === "GOOD" || tokenAlignment === "EVIL") {
+      return tokenAlignment;
+    }
+
+    const roleAlignment = token.role?.initial_alignment as Alignment;
+    if (roleAlignment === "GOOD" || roleAlignment === "EVIL") {
+      return roleAlignment;
+    }
+  }
+
+  const firstCharacter = game.player_characters.at(0);
+  const alignment = firstCharacter?.alignment as Alignment;
+  if (alignment === "GOOD" || alignment === "EVIL") {
+    return alignment;
+  }
+
+  return null;
+}
+
+/**
  * Return a link to a characters detail page.
  */
 function roleLink(name?: string) {
@@ -468,6 +626,23 @@ function roleLink(name?: string) {
 function formatPercent(wins: number, plays: number): string {
   if (!plays) return "0%";
   return `${Math.round((wins / plays) * 100)}%`;
+}
+
+/**
+ * Map player count (excluding travelers) to expected number of evil slots.
+ */
+function evilSlotsForPlayers(playerCount: number): number {
+  if (playerCount <= 0) return 0;
+  if (playerCount <= 9) return 2; // 1 demon + 1 minion
+  if (playerCount <= 12) return 3; // 1 demon + 2 minions
+  return 4; // 1 demon + 3 minions
+}
+
+/**
+ * Format a fractional rate (0-1) as a percent string.
+ */
+function formatRate(rate: number): string {
+  return `${Math.round(rate * 100)}%`;
 }
 
 /**
