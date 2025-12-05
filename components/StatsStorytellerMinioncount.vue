@@ -200,7 +200,7 @@ const chartOptions = computed(() => ({
                   (gameSize.totalCount / grandTotal.value) * 100
                 );
 
-          return `${gameSize.label} – ${gameSize.totalCount} game${
+          return `${gameSize.label} - ${gameSize.totalCount} game${
             gameSize.totalCount === 1 ? "" : "s"
           } (${gameSizePct}%)`;
         },

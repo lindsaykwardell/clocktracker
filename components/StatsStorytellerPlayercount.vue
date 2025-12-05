@@ -155,7 +155,7 @@ const chartOptions = computed(() => ({
               ? 0
               : Math.round((group.totalCount / grandTotal.value) * 100);
 
-          return `${group.effectiveCount} players – ${group.totalCount} game${
+          return `${group.effectiveCount} players - ${group.totalCount} game${
             group.totalCount === 1 ? "" : "s"
           } (${groupPct}%)`;
         },

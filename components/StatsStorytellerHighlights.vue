@@ -7,9 +7,9 @@
     <div class="grid gap-2 md:gap-4 grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       <!-- Most storytold character -->
       <div
-        class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40"
+        class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-2 md:gap-3"
       >
-        <h3 class="font-sorts text-center text-lg lg:text-xl mb-2 md:mb-3">
+        <h3 class="font-sorts text-center text-lg lg:text-xl">
           Most Storytold<span class="sr-only xl:not-sr-only"> Character</span>
         </h3>
 
@@ -35,16 +35,18 @@
           </div>
         </div>
 
-        <p v-else class="text-center text-sm text-stone-400">
-          Not enough data yet.
-        </p>
+        <div v-else class="flex items-center justify-center flex-grow">
+          <p class="text-center text-sm text-stone-400">
+            No characters recorded yet.
+          </p>
+        </div>
       </div>
 
       <!-- Favorite bluff -->
       <div
-        class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40"
+        class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-2 md:gap-3"
       >
-        <h3 class="font-sorts text-center text-lg lg:text-xl mb-2 md:mb-3">
+        <h3 class="font-sorts text-center text-lg lg:text-xl">
           Favorite Bluff
         </h3>
 
@@ -70,16 +72,18 @@
           </div>
         </div>
 
-        <p v-else class="text-center text-sm text-stone-400">
-          No bluffs recorded yet.
-        </p>
+        <div v-else class="flex items-center justify-center flex-grow">
+          <p class="text-center text-sm text-stone-400">
+            No bluffs recorded yet.
+          </p>
+        </div>
       </div>
 
       <!-- Favorite NPC (Fabled / Loric) -->
       <div
-        class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40"
+        class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-2 md:gap-3"
       >
-        <h3 class="font-sorts text-center text-lg lg:text-xl mb-2 md:mb-3">
+        <h3 class="font-sorts text-center text-lg lg:text-xl">
           Favorite NPC
         </h3>
 
@@ -105,9 +109,11 @@
           </div>
         </div>
 
-        <p v-else class="text-center text-sm text-stone-400">
-          No NPCs used yet.
-        </p>
+        <div v-else class="flex items-center justify-center flex-grow">
+          <p class="text-center text-sm text-stone-400">
+            No NPCs used yet.
+          </p>
+        </div>
       </div>
 
       <!-- Game balance -->

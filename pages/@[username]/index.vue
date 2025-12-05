@@ -43,18 +43,11 @@
               <span>Tagged</span>
             </nuxt-link>
             <nuxt-link
-              :to="`/@${username}?view=stats-player`"
+              :to="`/@${username}?view=stats`"
               class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-200 dark:hover:bg-stone-700"
-              :class="currentTabClass('stats-player')"
+              :class="currentTabClass('stats')"
             >
-              Player Stats
-            </nuxt-link>
-            <nuxt-link
-              :to="`/@${username}?view=stats-storyteller`"
-              class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-200 dark:hover:bg-stone-700"
-              :class="currentTabClass('stats-storyteller')"
-            >
-              Storyteller Stats
+              Stats
             </nuxt-link>
           </div>
         </UserHeader>
@@ -70,16 +63,9 @@
             :player="player" 
           />
           <UserCharts
-            v-if="currentTab === 'stats-player'"
+            v-if="currentTab === 'stats'"
             :games="games"
             :username="username"
-            mode="player"
-          />
-          <UserCharts
-            v-if="currentTab === 'stats-storyteller'"
-            :games="games"
-            :username="username"
-            mode="storyteller"
           />
           <UserGamesView
             v-if="currentTab === 'games'"
@@ -181,10 +167,7 @@ const currentTab = computed(() => {
   switch (route.query.view) {
     case "charts":
     case "stats":
-    case "stats-player":
-      return "stats-player";
-    case "stats-storyteller":
-      return "stats-storyteller";
+      return "stats";
     case "pending":
       return "pending";
     case "games":

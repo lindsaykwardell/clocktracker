@@ -1,11 +1,13 @@
 <template>
-  <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40">
-    <h3 class="font-sorts text-center text-lg lg:text-xl mb-2 md:mb-3">
+  <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-2 md:gap-3">
+    <h3 class="font-sorts text-center text-lg lg:text-xl">
       Top Scripts
     </h3>
 
-    <div v-if="topScripts.length === 0" class="text-center mt-4">
-      No scripts storytold.
+    <div v-if="topScripts.length === 0" class="flex items-center justify-center flex-grow">
+      <p class="text-center text-sm text-stone-400">
+        No scripts storytold.
+      </p>
     </div>
 
     <div v-else class="flex items-center">

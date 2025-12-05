@@ -1,26 +1,47 @@
 <template>
   <div class="px-4 lg:px-8 pb-4 lg:pb-8 space-y-8 md:space-y-12 xl:space-y-16">
-    <div class="flex flex-col md:flex-row gap-3 px-4">
-      <label class="flex gap-2 items-center">
-        <span class="block whitespace-nowrap w-20 md:w-auto">Tags</span>
-        <Input mode="select" v-model="selectedTag">
-          <option :value="null">Filter by tag</option>
-          <option
-            v-for="tag in allTags.filter((tag) => !selectedTags.includes(tag))"
-            :key="tag"
+    <div class="flex flex-col lg:flex-row gap-3 px-4 justify-between">
+      <div class="flex flex-col md:flex-row gap-3 px-4">
+        <label class="flex gap-2 items-center">
+          <span class="block whitespace-nowrap w-20 md:w-auto">Tags</span>
+          <Input mode="select" v-model="selectedTag">
+            <option :value="null">Filter by tag</option>
+            <option
+              v-for="tag in allTags.filter((tag) => !selectedTags.includes(tag))"
+              :key="tag"
+            >
+              {{ tag }}
+            </option>
+          </Input>
+        </label>
+        <div class="flex flex-wrap gap-2 flex-grow">
+          <Button
+            v-for="(tag, index) in selectedTags"
+            class="px-2 gap-0"
+            @click.prevent="selectedTags.splice(index, 1)"
+            :title="`Remove ${tag} tag`"
+            hasIcon
           >
-            {{ tag }}
-          </option>
-        </Input>
-      </label>
-      <div class="flex flex-wrap gap-2 flex-grow">
+            {{ tag }}<IconUI id="x" />
+          </Button>
+        </div>
+      </div>
+      <div class="flex gap-2 items-center">
         <Button
-          v-for="(tag, index) in selectedTags"
-          class="px-2 gap-0"
-          @click.prevent="selectedTags.splice(index, 1)"
-          :title="`Remove ${tag} tag`"
+          @click="setMode('player')"
+          :disabled="mode === 'player'"
+          hasIcon
         >
-          {{ tag }}<IconUI id="x" />
+          <IconUI id="person" /> Player
+        </Button>
+
+        <Button
+          @click="setMode('storyteller')"
+          :disabled="mode === 'storyteller'"
+          hasIcon
+        >
+          <IconUI id="book" />
+          Storyteller
         </Button>
       </div>
     </div>
@@ -30,81 +51,100 @@
       Error loading games
     </template>
     <template v-else-if="games.status === Status.SUCCESS">
-      <!-- <GamesOverTime
-        :games="filteredGames"
-        class="h-[250px] w-screen md:w-3/5"
-      /> -->
+      <!-- Highlights -->
+      <section>
+        <StatsPlayerHighlights
+          v-if="mode === 'player'"
+          :games="filteredGames"
+          :is-me="isMe"
+          :username="username"
+          class="w-full xl:w-3/4 xl:mx-auto"
+        />
 
-      <!-- Fixed charts zone player -->
-      <StatsPlayerHighlights
-        v-if="mode === 'player'"
-        :games="filteredGames"
-        class="w-full xl:w-3/4 xl:mx-auto"
-      />
+        <StatsStorytellerHighlights
+          v-if="mode === 'storyteller'"
+          :games="filteredGames"
+          :username="username"
+          class="w-full xl:w-3/4 xl:mx-auto"
+        />
+      </section>
+      
+      <!-- Most played / Game Size + Scripts -->
+      <section>
+        <StatsPlayerMostPlayed
+          v-if="mode === 'player'"
+          :games="filteredGames"
+          :is-me="isMe"
+          class="w-full xl:w-3/4 xl:mx-auto"
+        />
 
-      <StatsPlayerMostPlayed
-        v-if="mode === 'player'"
-        :games="filteredGames"
-        class="w-full xl:w-3/4 xl:mx-auto"
-      />
-
-      <!-- Fixed charts zone Storyteller -->
-      <StatsStorytellerHighlights
-        v-if="mode === 'storyteller'"
-        :games="filteredGames"
-        :username="username"
-        class="w-full xl:w-3/4 xl:mx-auto"
-      />
-
-      <div
-        v-if="mode === 'storyteller'"
-        class="w-full xl:w-3/4 xl:mx-auto grid grid-cols-4 lg:grid-cols-5 gap-x-2 md:gap-x-4 gap-y-8 md:gap-y-12 gap-y-16"
-      >
-        <div class="col-span-4 lg:col-span-2 grid grid-cols-subgrid">
-          <h2 class="font-sorts text-center text-xl lg:text-2xl mb-2 lg:mb-4 col-span-4 lg:col-span-2">
-            Game Size
-          </h2>
-          
+        <div
+          v-if="mode === 'storyteller'"
+          class="w-full xl:w-3/4 xl:mx-auto grid grid-cols-4 lg:grid-cols-5 gap-x-2 md:gap-x-4 gap-y-8 md:gap-y-12 xl:gap-y-16"
+        >
           <div class="col-span-4 lg:col-span-2 grid grid-cols-subgrid">
-            <StatsStorytellerPlayercount
-              :games="filteredGames"
-              :username="username"
-              class="col-span-2 lg:col-span-1"
-            />
+            <h2 class="font-sorts text-center text-xl lg:text-2xl mb-2 lg:mb-4 col-span-4 lg:col-span-2">
+              Game Size
+            </h2>
+            
+            <div class="col-span-4 lg:col-span-2 grid grid-cols-subgrid">
+              <StatsStorytellerPlayercount
+                :games="filteredGames"
+                :username="username"
+                class="col-span-2 lg:col-span-1"
+              />
 
-            <StatsStorytellerMinioncount
-              :games="filteredGames"
-              :username="username"
-              class="col-span-2 lg:col-span-1"
-            />
+              <StatsStorytellerMinioncount
+                :games="filteredGames"
+                :username="username"
+                class="col-span-2 lg:col-span-1"
+              />
+            </div>
+            
           </div>
           
-        </div>
-        
-        <div class="col-span-4 lg:col-span-3 grid grid-cols-subgrid">
-          <h2 class="font-sorts text-center text-xl lg:text-2xl mb-2 lg:mb-4 col-span-4 lg:col-span-3">
-            Scripts Storytold
-          </h2>
-
           <div class="col-span-4 lg:col-span-3 grid grid-cols-subgrid">
-            <StatsStorytellerScriptTypes
-              :games="filteredGames"
-              :username="username"
-              class="col-span-2 lg:col-span-1"
-            />
+            <h2 class="font-sorts text-center text-xl lg:text-2xl mb-2 lg:mb-4 col-span-4 lg:col-span-3">
+              Scripts Storytold
+            </h2>
 
-            <StatsStorytellerTopScripts
-              :games="filteredGames"
-              :username="username"
-              class="col-span-2"
-            />
+            <div class="col-span-4 lg:col-span-3 grid grid-cols-subgrid">
+              <StatsStorytellerScriptTypes
+                :games="filteredGames"
+                :username="username"
+                class="col-span-2 lg:col-span-1"
+              />
+
+              <StatsStorytellerTopScripts
+                :games="filteredGames"
+                :username="username"
+                class="col-span-2"
+              />
+            </div>
           </div>
         </div>
-        
-      </div>
+      </section>
+      
+      <!-- Games over time -->
+      <section>
+        <StatsPlayerGamesOverTime
+          v-if="mode === 'player'"
+          :games="filteredGames"
+          :is-me="isMe"
+          class="w-full xl:w-3/4 xl:mx-auto"
+        />
+
+        <StatsStorytellerGamesOverTime
+          v-if="mode === 'storyteller'"
+          :games="filteredGames"
+          :is-me="isMe"
+          :username="username"
+          class="w-full xl:w-3/4 xl:mx-auto"
+        />
+      </section>
 
       <!-- Custom charts zone -->
-      <div class="w-full xl:w-3/4 xl:mx-auto">
+      <section v-if="chartsForMode.length > 0 || isMe" class="w-full xl:w-3/4 xl:mx-auto">
         <h2 class="font-sorts text-center text-xl lg:text-2xl mb-2 lg:mb-4">
           Custom Charts
         </h2>
@@ -126,31 +166,40 @@
             v-if="isMe"
             :to="addChartLink"
             primary
+            hasIcon
             font-size="md"
             class="px-3 py-2 mb-2 md:mb-0 inline-flex"
           >
+            <IconUI id="plus-lg" />
             Add Chart
           </Button>
         </div>
-      </div> 
-    </template>
+      </section>
 
-    <!-- Bottom stats player -->
-    <!-- @todo Should this use games or filteredGames? -->
-    <section>
-      <UserRoles
-        v-if="mode === 'player'"
-        :games="games"
-      />
-    </section>
-    
-    <!-- Bottom stats Storyteller -->
-    <StatsStorytellerBags
-      v-if="mode === 'storyteller'"
-      :games="filteredGames"
-      :username="username"
-      class="w-full xl:w-3/4 xl:mx-auto mb-12 md:mb-16"
-    />
+      <section v-if="isMe">
+        <StatsStorytellerBags
+          v-if="mode === 'storyteller'"
+          :games="filteredGames"
+          :username="username"
+          class="w-full xl:w-3/4 xl:mx-auto mb-12 md:mb-16"
+        />
+      </section>
+
+      <!-- Roles list -->
+      <!-- @todo Should this use games or filteredGames? -->
+      <section>
+        <StatsPlayerRoles
+          v-if="mode === 'player'"
+          :games="games"
+        />
+
+        <StatsStorytellerRoles
+          v-if="mode === 'storyteller'"
+          :games="games"
+          :username="username"
+        />
+      </section>
+    </template>    
   </div>
 </template>
 
@@ -158,14 +207,21 @@
 const props = defineProps<{
   games: FetchStatus<GameRecord[]>;
   username: string;
-  mode?: "player" | "storyteller";
 }>();
 
+const route = useRoute();
+const router = useRouter();
 const users = useUsers();
 const roles = useRoles();
 const allGames = useGames();
 const me = useSupabaseUser();
-const mode = computed(() => props.mode ?? "player");
+const storytellerQuery = computed<string | undefined>(() => {
+  const value = route.query.storyteller;
+  return Array.isArray(value) ? value[0] : value ?? undefined;
+});
+const mode = ref<"player" | "storyteller">(
+  storytellerQueryToMode(storytellerQuery.value)
+);
 
 const user = computed(() => {
   return users.getUser(props.username);
@@ -262,4 +318,43 @@ watch(
   },
   { deep: true }
 );
+
+watch(storytellerQuery, (value) => {
+  const nextMode = storytellerQueryToMode(value);
+  if (mode.value !== nextMode) {
+    mode.value = nextMode;
+  }
+});
+
+watch(mode, (value) => {
+  const storytellerParam = value === "storyteller" ? "1" : undefined;
+
+  if (storytellerQuery.value === storytellerParam) {
+    return;
+  }
+
+  const nextQuery = { ...route.query };
+
+  if (storytellerParam) {
+    nextQuery.storyteller = storytellerParam;
+  } else {
+    delete nextQuery.storyteller;
+  }
+
+  router.replace({ query: nextQuery });
+});
+
+function storytellerQueryToMode(
+  value: string | undefined
+): "player" | "storyteller" {
+  return value === "1" || value === "true" || value === "storyteller"
+    ? "storyteller"
+    : "player";
+}
+
+function setMode(nextMode: "player" | "storyteller") {
+  if (mode.value !== nextMode) {
+    mode.value = nextMode;
+  }
+}
 </script>

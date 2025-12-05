@@ -1,10 +1,25 @@
 <template>
   <div>
-    <h2 class="font-sorts text-center text-xl lg:text-2xl mb-2 lg:mb-4">
+    <h2 class="font-sorts text-center text-xl lg:text-2xl mb-1 lg:mb-2">
       Bag Composition Insights
     </h2>
 
-    <div v-if="!scriptBags.length" class="text-center">
+    <div class="text-center text-balance max-w-[80ch] mb-2 lg:mb-4 mx-auto text-stone-800 dark:text-stone-300 space-y-2">
+      <p>
+        This overview shows, for each script, which roles you frequently include in the bag, which ones you often use as bluffs, and which roles you've never used at all.<br />
+      </p>
+
+      <p class="text-stone-700 dark:text-stone-400 text-sm">
+        Remember to keep your players guessing!
+      </p>
+    </div>
+
+    <div v-if="isLoading" class="text-center py-4 text-sm">
+      <Loading />
+      Loading additional data...
+    </div>
+
+    <div v-else-if="!scriptBags.length" class="text-center">
       No games recorded with a script.
     </div>
 
@@ -258,6 +273,8 @@ function getUsedRoleIdsForScript(scriptName: string): Set<string> {
  * any Travelers / NPC roles that were used but not listed.
  */
 const scriptRoles = ref<Record<string, ScriptRole[]>>({});
+const scriptRolesBaseCache = new Map<string, ScriptRole[]>();
+const isLoading = ref(false);
 
 /**
  * Populate `scriptRoles`:
@@ -267,67 +284,81 @@ const scriptRoles = ref<Record<string, ScriptRole[]>>({});
  * - Always add used Travelers / NPC that aren't on the script.
  */
 async function loadScriptRoles() {
-  const result: Record<string, ScriptRole[]> = {};
-
   // Ensure global roles are loaded for fallback and extra-role lookup.
   await rolesStore.fetchRoles();
   const allRoles = rolesStore.getAllRoles();
 
-  for (const { scriptName, scriptId, rolesFromGame } of scripts.value) {
-    try {
-      let rolesForScript: ScriptRole[];
+  const result: Record<string, ScriptRole[]> = {};
 
-      if (rolesFromGame && rolesFromGame.length) {
-        rolesForScript = [...rolesFromGame];
-      } 
-      else if (scriptId) {
-        const data = await $fetch<{
-          background?: string;
-          roles: ScriptRole[];
-        }>(`/api/script/${scriptId}`);
+  await Promise.all(
+    scripts.value.map(async ({ scriptName, scriptId, rolesFromGame }) => {
+      try {
+        const cacheKey = scriptId ? `id:${scriptId}` : `name:${scriptName}`;
+        const cached = scriptRolesBaseCache.get(cacheKey);
+        let baseRoles: ScriptRole[];
 
-        rolesForScript = [...(data.roles ?? [])];
-      } 
-      else {
-        // Fallback to all roles if we have no script definition.
-        rolesForScript = [...allRoles];
-      }
+        if (cached) {
+          baseRoles = [...cached];
+        } else if (rolesFromGame && rolesFromGame.length) {
+          baseRoles = [...rolesFromGame];
+        } else if (scriptId) {
+          const data = await $fetch<{
+            background?: string;
+            roles: ScriptRole[];
+          }>(`/api/script/${scriptId}`);
 
-      // Add Travelers / NPC roles that were used but are not defined on the script.
-      const usedIds = getUsedRoleIdsForScript(scriptName);
-      const existingIds = new Set(rolesForScript.map((r) => r.id));
-
-      for (const usedId of usedIds) {
-        if (existingIds.has(usedId)) continue;
-
-        const extra = allRoles.find((r) => r.id === usedId);
-        if (!extra) continue;
-
-        if (
-          extra.type === "TRAVELER" ||
-          extra.type === "FABLED" ||
-          extra.type === "LORIC"
-        ) {
-          rolesForScript.push(extra);
-          existingIds.add(extra.id);
+          baseRoles = [...(data.roles ?? [])];
+        } else {
+          // Fallback to all roles if we have no script definition.
+          baseRoles = [...allRoles];
         }
-      }
 
-      result[scriptName] = rolesForScript;
-    } catch (e) {
-      console.error("Failed to load roles for script", scriptName, e);
-      result[scriptName] = [];
-    }
-  }
+        // Add Travelers / NPC roles that were used but are not defined on the script.
+        const rolesForScript = [...baseRoles];
+        const usedIds = getUsedRoleIdsForScript(scriptName);
+        const existingIds = new Set(rolesForScript.map((r) => r.id));
+
+        for (const usedId of usedIds) {
+          if (existingIds.has(usedId)) continue;
+
+          const extra = allRoles.find((r) => r.id === usedId);
+          if (!extra) continue;
+
+          if (
+            extra.type === "TRAVELER" ||
+            extra.type === "FABLED" ||
+            extra.type === "LORIC"
+          ) {
+            rolesForScript.push(extra);
+            existingIds.add(extra.id);
+          }
+        }
+
+        scriptRolesBaseCache.set(cacheKey, baseRoles);
+        result[scriptName] = rolesForScript;
+      } catch (e) {
+        console.error("Failed to load roles for script", scriptName, e);
+        result[scriptName] = [];
+      }
+    })
+  );
 
   scriptRoles.value = result;
 }
 
 watch(
   () => scripts.value,
-  () => {
-    if (scripts.value.length) {
-      loadScriptRoles();
+  async () => {
+    if (!scripts.value.length) {
+      scriptRoles.value = {};
+      return;
+    }
+
+    isLoading.value = true;
+    try {
+      await loadScriptRoles();
+    } finally {
+      isLoading.value = false;
     }
   },
   { immediate: true }
