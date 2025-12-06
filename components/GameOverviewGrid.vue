@@ -23,20 +23,14 @@
           class="w-full bg-stone-900 flex flex-col items-center cursor-pointer rounded overflow-hidden text-black h-48 md:h-72 bg-cover bg-center script-bg"
           :style="
             game.associated_script?.background
-              ? { backgroundImage: `url(${game.associated_script.background})` }
+              ? { '--bg-image-url': `url(${game.associated_script.background})` }
               : {}
           "
           :class="{
-            'is-trouble-brewing': game.script === 'Trouble Brewing',
-            'is-sects-and-violets': game.script === 'Sects and Violets',
-            'is-bad-moon-rising': game.script === 'Bad Moon Rising',
-            'is-custom-script':
-              [
-                'Trouble Brewing',
-                'Sects and Violets',
-                'Bad Moon Rising',
-              ].indexOf(game.script) === -1 &&
-              !game.associated_script?.background,
+            ...scripts.scriptBgClasses(
+              game.script,
+              !!game.associated_script?.background
+            ),
           }"
         >
           <img
@@ -312,6 +306,10 @@ th {
 
   &.is-custom-script {
     --bg-image-url: url("/img/scripts/custom-script-bg-grid.webp");
+  }
+
+  &.is-unknown-script {
+    --bg-image-url: url("/img/scripts/unknown-script-bg-grid.webp");
   }
 }
 

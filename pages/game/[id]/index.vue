@@ -388,18 +388,12 @@
               ? { '--bg-image-url' : `url(${game.data.associated_script.background})` }
               : {}
           "
-          class="bg-center bg-cover relative text-white script-bg"
+          class="grimoire bg-center bg-cover relative text-white script-bg"
           :class="{
-            'is-trouble-brewing': game.data.script === 'Trouble Brewing',
-            'is-sects-and-violets': game.data.script === 'Sects and Violets',
-            'is-bad-moon-rising': game.data.script === 'Bad Moon Rising',
-            'is-custom-script':
-              [
-                'Trouble Brewing',
-                'Sects and Violets',
-                'Bad Moon Rising',
-              ].indexOf(game.data.script) === -1 &&
-              !game.data.associated_script?.background,
+            ...scriptBgClasses(
+              game.data.script,
+              !!game.data.associated_script?.background
+            ),
           }"
         >
           <button
@@ -674,7 +668,7 @@ import VueMarkdown from "vue-markdown-render";
 import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
 import { Status } from "~/composables/useFetchStatus";
 
-const { scriptLogo, isBaseScript } = useScripts();
+const { scriptLogo, isBaseScript, scriptBgClasses } = useScripts();
 const config = useRuntimeConfig();
 const router = useRouter();
 const route = useRoute();
@@ -1090,6 +1084,10 @@ const tour = [
   &.is-custom-script {
     --bg-image-url: url("/img/scripts/custom-script-bg.webp");
   }
+
+  &.is-unknown-script {
+    --bg-image-url: url("/img/scripts/unknown-script-bg.webp");
+  }
 }
 
 .winning-team {
@@ -1138,6 +1136,21 @@ const tour = [
 </style>
 
 <style>
+.grimoire {
+  .overflow-scroll {
+    /* @todo Background image should be moved to this div, so it scrolls with tokens on mobile */
+    /* background-attachment: local, local; */
+
+    /* Compensate scrollbars (and page count) so tokens are centered */
+    padding-inline-start: 1rem;
+    padding-block-start: 2.5rem;
+
+    /* scrollbar-width: thin; */
+    scrollbar-color: oklch(44.4% 0.011 73.639) transparent;
+    scrollbar-gutter: stable;
+  }
+}
+
 .notes {
   h1 {
     @apply text-3xl font-sorts;

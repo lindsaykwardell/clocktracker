@@ -21,12 +21,7 @@
           :key="game.id"
           class="table-row game-row bg-cover bg-center script-bg"
           :class="{
-            'is-trouble-brewing': game.script === 'Trouble Brewing',
-            'is-sects-and-violets': game.script === 'Sects and Violets',
-            'is-bad-moon-rising': game.script === 'Bad Moon Rising',
-            'is-custom-script':
-              !['Trouble Brewing','Sects and Violets','Bad Moon Rising'].includes(game.script)
-              && !game.associated_script?.background,
+            ...scriptBgClasses(game.script, !!game.associated_script?.background),
             'select-multiple': selectMultipleGames.enabled,
             selected: selectMultipleGames.selectedGames.includes(game.id),
           }"
@@ -176,7 +171,7 @@ import { displayWinIconSvg } from "~/composables/useGames";
 
 const gamesStore = useGames();
 const selectMultipleGames = useSelectMultipleGames();
-const { isBaseScript } = useScripts();
+const { isBaseScript, scriptBgClasses } = useScripts();
 const users = useUsers();
 const me = useMe();
 
@@ -305,6 +300,10 @@ tr {
 
   &.is-custom-script {
     --bg-image-url: url("/img/scripts/custom-script-bg-thin.webp");
+  }
+
+  &.is-unknown-script {
+    --bg-image-url: url("/img/scripts/unknown-script-bg-thin.webp");
   }
 }
 </style>

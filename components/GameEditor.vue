@@ -300,15 +300,9 @@
             ? { '--bg-image-url' : `url(${customBackground})` }
             : {}
         "
-        class="pt-3 relative bg-center bg-cover w-full h-[200px] flex justify-center items-center script-bg"
+        class="grimoire pt-3 relative bg-center bg-cover w-full h-[200px] flex justify-center items-center script-bg"
         :class="{
-          'is-trouble-brewing': game.script === 'Trouble Brewing',
-          'is-sects-and-violets': game.script === 'Sects and Violets',
-          'is-bad-moon-rising': game.script === 'Bad Moon Rising',
-          'is-custom-script':
-            ['Trouble Brewing', 'Sects and Violets', 'Bad Moon Rising'].indexOf(
-              game.script
-            ) === -1 && !customBackground,
+          ...scriptBgClasses(game.script, !!customBackground),
         }"
       >
         <div
@@ -334,15 +328,9 @@
             ? { '--bg-image-url' : `url(${customBackground})` }
             : {}
         "
-        class="pt-3 relative bg-center bg-cover w-full script-bg"
+        class="grimoire pt-3 relative bg-center bg-cover w-full script-bg"
         :class="{
-          'is-trouble-brewing': game.script === 'Trouble Brewing',
-          'is-sects-and-violets': game.script === 'Sects and Violets',
-          'is-bad-moon-rising': game.script === 'Bad Moon Rising',
-          'is-custom-script':
-            ['Trouble Brewing', 'Sects and Violets', 'Bad Moon Rising'].indexOf(
-              game.script
-            ) === -1 && !customBackground,
+          ...scriptBgClasses(game.script, !!customBackground),
         }"
       >
         <Button
@@ -775,7 +763,7 @@ const user = useSupabaseUser();
 const me = useMe();
 const games = useGames();
 const friends = useFriends();
-const { isBaseScript, fetchScriptVersions } = useScripts();
+const { isBaseScript, fetchScriptVersions, scriptBgClasses } = useScripts();
 const allRoles = useRoles();
 const route = useRoute();
 
@@ -1575,6 +1563,10 @@ onMounted(async () => {
 
   &.is-custom-script {
     --bg-image-url: url("/img/scripts/custom-script-bg.webp");
+  }
+
+  &.is-unknown-script {
+    --bg-image-url: url("/img/scripts/unknown-script-bg.webp");
   }
 }
 </style>
