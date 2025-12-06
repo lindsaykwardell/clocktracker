@@ -32,7 +32,7 @@ import { chartColors } from "~/composables/useChartColors";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-const { Script } = useScripts();
+const { scriptCategory } = useScripts();
 
 const props = defineProps<{
   games: GameRecord[];
@@ -83,15 +83,15 @@ const monthlyCounts = computed(() => {
     const entry = counts[key];
     if (!entry) continue;
 
-    const script = game.script as string | null;
+    const category = scriptCategory(game.script);
 
-    if (!script) {
+    if (category === "unknown") {
       entry.unknownScript++;
-    } else if (script === Script.TroubleBrewing) {
+    } else if (category === "trouble-brewing") {
       entry.troubleBrewing++;
-    } else if (script === Script.SectsAndViolets) {
+    } else if (category === "sects-and-violets") {
       entry.sectsAndViolets++;
-    } else if (script === Script.BadMoonRising) {
+    } else if (category === "bad-moon-rising") {
       entry.badMoonRising++;
     } else {
       entry.customScript++;

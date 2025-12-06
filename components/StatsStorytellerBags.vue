@@ -34,16 +34,7 @@
             : {}
         "
         :class="{
-          'is-trouble-brewing': bag.scriptName === 'Trouble Brewing',
-          'is-sects-and-violets': bag.scriptName === 'Sects and Violets',
-          'is-bad-moon-rising': bag.scriptName === 'Bad Moon Rising',
-          'is-custom-script':
-            [
-              'Trouble Brewing',
-              'Sects and Violets',
-              'Bad Moon Rising',
-            ].indexOf(bag.scriptName) === -1 &&
-            !bag.background,
+          ...scriptBgClasses(bag.scriptName, !!bag.background),
         }"
       >
         <h3 class="absolute bottom-0 font-sorts text-xl text-white text-center bg-gradient-to-br from-black/75 via-black/50 to-black-0 p-2 w-full">
@@ -129,6 +120,7 @@ import type { GameRecord } from "~/composables/useGames";
 import { filterStorytellerGames } from "~/composables/useGames";
 
 const rolesStore = useRoles();
+const { scriptBgClasses } = useScripts();
 
 const props = defineProps<{
   games: GameRecord[];
@@ -569,19 +561,19 @@ function roleLink(id?: string) {
     var(--bg-image-url);
 
   &.is-trouble-brewing {
-    --bg-image-url: url("/img/trouble-brewing-bg.webp");
+    --bg-image-url: url("/img/scripts/trouble-brewing-bg.webp");
   }
 
   &.is-sects-and-violets {
-    --bg-image-url: url("/img/sects-and-violets-bg.webp");
+    --bg-image-url: url("/img/scripts/sects-and-violets-bg.webp");
   }
 
   &.is-bad-moon-rising {
-    --bg-image-url: url("/img/bad-moon-rising-bg.webp");
+    --bg-image-url: url("/img/scripts/bad-moon-rising-bg.webp");
   }
 
   &.is-custom-script {
-    --bg-image-url: url("/img/custom-script-bg.webp");
+    --bg-image-url: url("/img/scripts/custom-script-bg.webp");
   }
 }
 </style>
