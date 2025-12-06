@@ -1,14 +1,14 @@
 export const chartColors = {
   // Roles
-  townsfolk: "oklch(62.3% 0.214 259.815)", // #3297F4
-  outsider: "oklch(48.8% 0.243 264.376)", // #ADC9FA
-  minion: "oklch(63.7% 0.237 25.331)", // #D08C7F
-  demon: "oklch(50.5% 0.213 27.518)", // #8C0E12
+  townsfolk: "#0090D4", // Used to be #3297F4
+  outsider:  "#003EA8", // Used to be #ADC9FA
+  minion:    "#B0141A", // Used to be #D08C7F
+  demon:     "#8C0E12", // Used to be #8C0E12
   traveler: "#6B21A8",
   storyteller: "#FFA500",
 
   // Alignments
-  good: "#3297F4",
+  good: "#0090D4",
   evil: "#8C0E12",
 
   // Outcomes
@@ -23,14 +23,14 @@ export const chartColors = {
   tomb: "#B65AA5", // The Tomb
   mhd: "#2A6CC7", // Midnight in the House of the Damned
   gse: "#C47A2C", // The Greatest Show on Earth
-  custom: "oklch(27.9% 0.041 260.031)", // Custom scripts -> Slate-900
-  unknown: "oklch(70.4% 0.04 256.788)", // Unknown script -> Slate-400 (else #ff00aa?)
+  custom: "oklch(37.1% 0 0)", // Custom scripts -> Neutral 700
+  unknown: "oklch(70.8% 0 0)", // Unknown script -> Neutral-400 (else #ff00aa?)
 
   // Sizes
-  teensy: "#ADD8E6",
-  small: "oklch(63.7% 0.237 25.331)", // 1 Minion -> Red-500
-  medium: "oklch(50.5% 0.213 27.518)", // 2 Minion -> Red-700
-  large: "oklch(39.6% 0.141 25.723)", // 3 Minion -> Red-900
+  teensy: "#FF3547",
+  small: "#E11A2C",
+  medium: "#B0141A",
+  large: "#8C0E12",
 
   p5:  "oklch(38% 0.189 293.745)", // Violet-900
   p6:  "oklch(28.3% 0.141 291.089)", // Violet-950
