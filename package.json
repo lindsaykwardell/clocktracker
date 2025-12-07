@@ -47,6 +47,7 @@
     "@vueuse/core": "^13.1.0",
     "axios": "^1.7.7",
     "chart.js": "^4.4.4",
+    "chartjs-plugin-datalabels": "^2.2.0",
     "cheerio": "^1.0.0",
     "colord": "^2.9.3",
     "dayjs": "^1.11.13",
