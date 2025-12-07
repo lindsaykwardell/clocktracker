@@ -154,13 +154,17 @@ const roleStats = computed<Map<string, RoleStats>>(() => {
     const goodWins = game.win_v2 === WinStatus_V2.GOOD_WINS;
     const evilWins = game.win_v2 === WinStatus_V2.EVIL_WINS;
 
+    // Only count the final occurrence of each role_id per game to avoid double-counting role swaps.
+    const lastRolePerGame = new Map<string, typeof game.player_characters[number]>();
+
     for (const character of game.player_characters) {
       if (!character.name || !character.role_id) continue;
-      if (
-        character.role?.type === "FABLED" ||
-        character.role?.type === "LORIC"
-      )
-        continue;
+      if (character.role?.type === "FABLED" || character.role?.type === "LORIC") continue;
+
+      lastRolePerGame.set(character.role_id, character);
+    }
+
+    for (const character of lastRolePerGame.values()) {
 
       const alignment = character.alignment ?? character.role?.initial_alignment;
       const isGood = alignment === "GOOD";

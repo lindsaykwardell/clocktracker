@@ -211,7 +211,16 @@ function roleLink(name?: string) {
 const topCharactersByRole = computed<Record<RoleType, CharacterStat[]>>(() => {
   const allPlayedCharacters = props.games
     .filter((game) => !game.ignore_for_stats)
-    .flatMap((game) => game.player_characters)
+    .flatMap((game) => {
+      // Only count the final occurrence of each role_id per game to avoid double-counting role swaps.
+      const lastRolePerGame = new Map<string, typeof game.player_characters[number]>();
+      for (const character of game.player_characters) {
+        if (!character.name || !character.role_id) continue;
+        if (character.role?.type === "FABLED" || character.role?.type === "LORIC") continue;
+        lastRolePerGame.set(character.role_id, character);
+      }
+      return Array.from(lastRolePerGame.values());
+    })
     .filter((character) => character.name);
 
   // Count per role type, per character name  
