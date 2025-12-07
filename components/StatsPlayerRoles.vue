@@ -253,6 +253,9 @@ const sortRoles = (list: typeof townsfolk.value) => {
       const bRate = bTotal ? (bStats?.wins ?? 0) / bTotal : -1;
 
       if (bRate !== aRate) return bRate - aRate;
+
+      const playDiff = (bStats?.plays ?? 0) - (aStats?.plays ?? 0);
+      if (playDiff !== 0) return playDiff;
     }
 
     // Fallback to alphabetical for consistent ordering
