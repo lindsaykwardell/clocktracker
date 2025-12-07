@@ -63,13 +63,13 @@
                       >
                         <MenuItem>
                           <div class="flex gap-2 items-center">
-                            <span class="flex-shrink">Dates</span>
+                            <span class="flex-shrink text-stone-200">Dates</span>
                             <Input
                               @click.stop
                               type="date"
                               v-model="startDateRange"
                               aria-label="After Date"
-                              class="h-[32px] text-sm flex-grow"
+                              class="h-[32px] text-sm flex-grow text-black dark:text-white"
                               v-tooltip="'After Date'"
                             />
                             <Input
@@ -77,13 +77,13 @@
                               type="date"
                               v-model="endDateRange"
                               aria-label="Before Date"
-                              class="h-[32px] text-sm flex-grow"
+                              class="h-[32px] text-sm flex-grow text-black dark:text-white"
                               v-tooltip="'Before Date'"
                             />
                           </div>
                         </MenuItem>
                         <MenuItem>
-                          <div class="flex gap-2 items-center">
+                          <div class="flex gap-2 items-center text-stone-200">
                             Player Count
                             <Input
                               @click.stop
@@ -92,7 +92,7 @@
                               min="0"
                               placeholder="Min"
                               aria-label="Min Players"
-                              class="h-[32px] text-sm"
+                              class="h-[32px] text-sm text-black dark:text-white"
                               v-tooltip="'Min Players'"
                             />
                             <Input
@@ -102,7 +102,7 @@
                               max="25"
                               placeholder="Max"
                               aria-label="Max Players"
-                              class="h-[32px] text-sm"
+                              class="h-[32px] text-sm text-black dark:text-white"
                               v-tooltip="'Max Players'"
                             />
                           </div>
@@ -378,73 +378,104 @@
                 v-if="startDateRange !== null"
                 font-size="md"
                 @click.prevent="startDateRange = null"
+                :title="`Remove after ${formatDate(new Date(startDateRange))} date filter`"
+                hasIcon
+                tag
               >
-                After Date: {{ formatDate(new Date(startDateRange)) }}
+                After Date: {{ formatDate(new Date(startDateRange)) }}<IconUI id="x" />
               </Button>
               <Button
                 v-if="endDateRange !== null"
                 font-size="md"
                 @click.prevent="endDateRange = null"
+                :title="`Remove before ${formatDate(new Date(endDateRange))} date filter`"
+                hasIcon
+                tag
               >
-                Before Date: {{ formatDate(new Date(endDateRange)) }}
+                Before Date: {{ formatDate(new Date(endDateRange)) }}<IconUI id="x" />
               </Button>
               <Button
                 v-if="minPlayers !== null"
                 font-size="md"
                 @click.prevent="minPlayers = null"
+                :title="`Remove min ${minPlayers} playercount filter`"
+                hasIcon
+                tag
               >
-                Min Players: {{ minPlayers }}
+                Min Players: {{ minPlayers }}<IconUI id="x" />
               </Button>
               <Button
                 v-if="maxPlayers !== null"
                 font-size="md"
                 @click.prevent="maxPlayers = null"
+                :title="`Remove max ${maxPlayers} playercount filter `"
+                hasIcon
+                tag
               >
-                Max Players: {{ maxPlayers }}
+                Max Players: {{ maxPlayers }}<IconUI id="x" />
               </Button>
               <Button
                 v-if="selectedRole"
                 font-size="md"
                 @click.prevent="selectedRole = null"
+                :title="`Remove ${selectedRole} role filter`"
+                hasIcon
+                tag
               >
-                Character: {{ selectedRole }}
+                Character: {{ selectedRole }}<IconUI id="x" />
               </Button>
               <Button
                 v-if="selectedAlignment"
                 font-size="md"
                 @click.prevent="selectedAlignment = null"
+                :title="`Remove alignment`"
+                hasIcon
+                tag
               >
                 Alignment:
                 <template v-if="selectedAlignment === 'GOOD'">Good</template>
                 <template v-else-if="selectedAlignment === 'EVIL'"
                   >Evil</template
                 >
+                <IconUI id="x" />
               </Button>
               <Button
                 v-if="selectedScript"
                 font-size="md"
                 @click.prevent="selectedScript = null"
+                :title="`Remove ${selectedScript} script filter`"
+                hasIcon
+                tag
               >
-                Script: {{ selectedScript }}
+                Script: {{ selectedScript }}<IconUI id="x" />
               </Button>
               <Button
                 v-if="selectedLocation"
                 font-size="md"
                 @click.prevent="selectedLocation = null"
+                :title="`Remove ${selectedLocation} location filter`"
+                hasIcon
+                tag
               >
-                Location: {{ selectedLocation }}
+                Location: {{ selectedLocation }}<IconUI id="x" />
               </Button>
               <Button
                 v-if="selectedCommunity"
                 font-size="md"
                 @click.prevent="selectedCommunity = null"
+                :title="`Remove ${selectedCommunity} community filter`"
+                hasIcon
+                tag
               >
-                Community: {{ selectedCommunity }}
+                Community: {{ selectedCommunity }}<IconUI id="x" />
               </Button>
               <Button
                 v-if="selectedWinState"
                 font-size="md"
                 @click.prevent="selectedWinState = null"
+                :title="`Remove win/loss filter`"
+                hasIcon
+                tag
               >
                 Win/Loss:
                 <template v-if="selectedWinState === WinStatus_V2.GOOD_WINS"
@@ -458,20 +489,27 @@
                   v-else-if="selectedWinState === WinStatus_V2.NOT_RECORDED"
                   >Not recorded</template
                 >
+                <IconUI id="x" />
               </Button>
               <Button
                 v-for="(player, index) in selectedPlayers"
                 font-size="md"
                 @click.prevent="selectedPlayers.splice(index, 1)"
+                :title="`Remove ${player} player filter`"
+                hasIcon
+                tag
               >
-                Player: {{ player }}
+                Player: {{ player }}<IconUI id="x" />
               </Button>
               <Button
                 v-for="(tag, index) in selectedTags"
                 font-size="md"
                 @click.prevent="selectedTags.splice(index, 1)"
+                :title="`Remove ${tag} tag filter`"
+                hasIcon
+                tag
               >
-                Tag: {{ tag }}
+                Tag: {{ tag }}<IconUI id="x" />
               </Button>
             </div>
           </div>
