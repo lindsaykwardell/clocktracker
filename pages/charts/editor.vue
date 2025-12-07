@@ -251,8 +251,8 @@ const cancelLink = computed(() => {
 
   const username = me.value.data.username;
   const view = options.storyteller_only
-      ? "stats-storyteller"
-      : "stats-player";
+      ? "stats&storyteller=1"
+      : "stats";
 
   return `/@${username}?view=${view}`;
 });
