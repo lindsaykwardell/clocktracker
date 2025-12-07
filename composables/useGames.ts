@@ -117,6 +117,76 @@ export const useGames = defineStore("games", {
         return this.games.get(gameId) || { status: Status.IDLE };
       };
     },
+    /**
+     * Build the timeline of the main player's tokens from the grimoire.
+     * Keeps page order and only collapses exact consecutive duplicates.
+     */
+    getAlignmentTimeline(): (
+      gameId: string
+    ) => {
+      alignment: Alignment | null;
+      role_id: string | null;
+      related_role_id: string | null;
+      name: string | null;
+      role?: {
+        token_url?: string | null;
+        type?: string | null;
+        initial_alignment?: Alignment | null;
+      } | null;
+      related_role?: {
+        token_url?: string | null;
+      } | null;
+    }[] {
+      return (gameId: string) => {
+        const gameStatus = this.games.get(gameId);
+        if (!gameStatus || gameStatus.status !== Status.SUCCESS) return [];
+
+        const game = gameStatus.data;
+        const timeline: {
+          alignment: Alignment | null;
+          role_id: string | null;
+          related_role_id: string | null;
+          name: string | null;
+          role?: {
+            token_url?: string | null;
+            type?: string | null;
+            initial_alignment?: Alignment | null;
+          } | null;
+          related_role?: {
+            token_url?: string | null;
+          } | null;
+        }[] = [];
+
+        for (const page of game.grimoire) {
+          for (const token of page.tokens) {
+            if (token.player_id !== game.user_id) continue;
+
+            const entry = {
+              alignment: token.alignment,
+              role_id: token.role_id,
+              related_role_id: token.related_role_id,
+              name: token.role?.name ?? null,
+              role: token.role ?? null,
+              related_role: token.related_role ?? null,
+            };
+
+            const last = timeline.at(-1);
+            if (
+              last &&
+              last.alignment === entry.alignment &&
+              last.role_id === entry.role_id &&
+              last.related_role_id === entry.related_role_id
+            ) {
+              continue;
+            }
+
+            timeline.push(entry);
+          }
+        }
+
+        return timeline;
+      };
+    },
     getSimilarGames(): (gameId: string) => GameRecord[] {
       return (gameId: string) => {
         const similar = this.similar.get(gameId);
@@ -299,6 +369,22 @@ export const useGames = defineStore("games", {
 
         const characters = game.data.player_characters;
         if (characters.length === 0) return dummyCharacter;
+
+        // Prefer the last alignment/role in the grimoire timeline if available.
+        const grimAlignments = this.getAlignmentTimeline(gameId);
+        if (grimAlignments.length) {
+          const last = grimAlignments[grimAlignments.length - 1];
+          const lastChar = characters[characters.length - 1];
+          return {
+            ...lastChar,
+            alignment: last.alignment ?? lastChar.alignment,
+            name: last.name ?? lastChar.name,
+            role_id: last.role_id ?? lastChar.role_id,
+            related_role_id: last.related_role_id ?? lastChar.related_role_id,
+            role: last.role ?? lastChar.role,
+            related_role: last.related_role ?? lastChar.related_role,
+          };
+        }
 
         return characters[characters.length - 1];
       };

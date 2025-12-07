@@ -1348,56 +1348,45 @@ watch(
     value.forEach((page, i) => {
       page.tokens.forEach((token, j) => {
         if (!!token.player_id && token.player_id === user.value?.id) {
+          const lastCharacter = myCharacters.at(-1);
+          const sameAsLast =
+            lastCharacter &&
+            lastCharacter.role_id === token.role_id &&
+            lastCharacter.related_role_id === token.related_role_id &&
+            lastCharacter.alignment === token.alignment;
+
+          if (sameAsLast) return;
+
           if (token.role_id) {
-            // See if the role is already in the player_character list
-            const existingCharacter = myCharacters.find(
-              (character) =>
-                character.role_id === token.role_id &&
-                character.alignment === token.alignment
-            );
-
-            // If it's not there, let's add it!
-            if (!existingCharacter) {
-              myCharacters.push({
-                name: token.role?.name ?? "",
-                alignment: token.alignment,
-                related: token.related_role?.name ?? "",
-                showRelated: !!token.related_role_id,
-                role_id: token.role_id,
-                related_role_id: token.related_role_id,
-                role: {
-                  token_url: token.role?.token_url ?? "/1x1.png",
-                  type: token.role?.type ?? "",
-                  initial_alignment: token.role?.initial_alignment ?? "NEUTRAL",
-                },
-                related_role: {
-                  token_url: token.related_role?.token_url ?? "/1x1.png",
-                },
-              });
-            }
+            myCharacters.push({
+              name: token.role?.name ?? "",
+              alignment: token.alignment,
+              related: token.related_role?.name ?? "",
+              showRelated: !!token.related_role_id,
+              role_id: token.role_id,
+              related_role_id: token.related_role_id,
+              role: {
+                token_url: token.role?.token_url ?? "/1x1.png",
+                type: token.role?.type ?? "",
+                initial_alignment: token.role?.initial_alignment ?? "NEUTRAL",
+              },
+              related_role: {
+                token_url: token.related_role?.token_url ?? "/1x1.png",
+              },
+            });
           } else if (token.alignment && token.alignment !== "NEUTRAL") {
-            // Handle alignment-only tokens (no specific role)
-            // See if there's already an alignment-only character for this alignment
-            const existingAlignmentCharacter = myCharacters.find(
-              (character) =>
-                !character.role_id && character.alignment === token.alignment
-            );
-
-            // If it's not there, let's add it!
-            if (!existingAlignmentCharacter) {
-              myCharacters.push({
-                name: "",
-                alignment: token.alignment,
-                related: "",
-                showRelated: false,
-                role_id: null,
-                related_role_id: null,
-                role: undefined,
-                related_role: {
-                  token_url: "/1x1.png",
-                },
-              });
-            }
+            myCharacters.push({
+              name: "",
+              alignment: token.alignment,
+              related: "",
+              showRelated: false,
+              role_id: null,
+              related_role_id: null,
+              role: undefined,
+              related_role: {
+                token_url: "/1x1.png",
+              },
+            });
           }
         }
 
