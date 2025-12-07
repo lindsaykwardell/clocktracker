@@ -113,12 +113,39 @@ const chartData = computed(() => ({
   ],
 }));
 
+const scriptAbbreviations = ["TB", "S&V", "BMR", "Custom", "?"];
+const LABEL_MIN_PCT = 3; // Min percentage needed to display label
+
 const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
     legend: {
       display: false,
+    },
+    datalabels: {
+      display: true,
+      color: chartColors.labelColor,
+      anchor: "center",
+      align: "center",
+      clamp: true,
+      backgroundColor: chartColors.labelBackground,
+      borderRadius: chartColors.labelRadius,
+      padding: chartColors.labelPadding,
+      formatter(_value: number, context: any) {
+        const idx = context.dataIndex;
+        const value =
+          (context?.dataset?.data?.[idx] as number | undefined) ?? 0;
+        const total =
+          ((context?.chart?.data?.datasets?.[0]?.data as number[]) || []).reduce(
+            (sum, v) => sum + (v || 0),
+            0
+          );
+        const pct = total === 0 ? 0 : (value / total) * 100;
+        if (!value || pct < LABEL_MIN_PCT) return null;
+
+        return scriptAbbreviations[idx] ?? "?";
+      },
     },
     tooltip: {
       callbacks: {
