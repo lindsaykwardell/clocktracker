@@ -118,7 +118,7 @@
       <!-- Alignment -->
       <div class="lg:col-span-3 xl:col-span-1 p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40">
         <h3 class="font-sorts text-center text-lg lg:text-xl mb-2 md:mb-3">
-          Alignment Insights
+          Alignment
         </h3>
 
         <StatsPlayerAlignmentWins 
@@ -129,16 +129,20 @@
         <div v-if="alignmentStats">
           <div class="flex flex-col text-center after:content-[''] after:mx-auto after:my-1 after:w-8 after:h-[1px] after:bg-stone-400 ">
             <div class="text-center text-sm text-balance max-w-64 mx-auto">
-              <span v-if="strongestAlignment === 'GOOD'">
-                You win more often as
-                <span class="font-semibold" :style="`color: ${chartColors.good}`">Good</span>.
-              </span>
-              <span v-else-if="strongestAlignment === 'EVIL'">
-                You win more often as
-                <span class="font-semibold" :style="`color: ${chartColors.evil}`">Evil</span>.
+              <span v-if="alignmentSwitchStats">
+                {{ props.isMe ? `You've` : `This player has` }} switched alignment
+                <span class="font-semibold">{{ alignmentSwitchStats.switches }}</span>
+                time<span v-if="alignmentSwitchStats.switches !== 1">s</span>
+                <span v-if="alignmentSwitchStats.maxSwitchesInGame > 1">, {{
+                    alignmentSwitchStats.maxSwitchesInGame === 2
+                      ? 'twice'
+                      : alignmentSwitchStats.maxSwitchesInGame + ' times'
+                  }} in one game!
+                </span>
+                <span v-else>. </span>
               </span>
               <span v-else>
-                Whichever team you end up on, the results are... remarkably similar.
+                Not enough data.
               </span>
             </div>
           </div>
@@ -287,6 +291,12 @@ type SideSummary = {
   losses: number;
 };
 
+type AlignmentSwitchStats = {
+  trackedGames: number;
+  switches: number;
+  maxSwitchesInGame: number;
+};
+
 /**
  * Build stats map for roles.
  * 
@@ -386,28 +396,37 @@ const alignmentStats = computed(() => {
   return { good, evil };
 });
 
-const goodStats = computed(() =>
-  alignmentStats.value ? alignmentStats.value.good : { side: "GOOD", plays: 0, wins: 0, losses: 0 }
-);
+const alignmentSwitchStats = computed<AlignmentSwitchStats | null>(() => {
+  let trackedGames = 0;
+  let switches = 0;
+  let maxSwitchesInGame = 0;
 
-const evilStats = computed(() =>
-  alignmentStats.value ? alignmentStats.value.evil : { side: "EVIL", plays: 0, wins: 0, losses: 0 }
-);
+  for (const game of props.games) {
+    const timeline = getAlignmentTimeline(game);
+    if (!timeline.length) continue;
 
-/**
- * Determine the alignment a player is best at.
- */
-const strongestAlignment = computed<"GOOD" | "EVIL" | "BALANCED">(() => {
-  if (!alignmentStats.value) return "BALANCED";
+    trackedGames++;
 
-  const good = goodStats.value;
-  const evil = evilStats.value;
+    let gameSwitches = 0;
+    for (let i = 1; i < timeline.length; i++) {
+      if (timeline[i] && timeline[i] !== timeline[i - 1]) {
+        gameSwitches++;
+      }
+    }
 
-  const goodRate = good.plays ? good.wins / good.plays : 0;
-  const evilRate = evil.plays ? evil.wins / evil.plays : 0;
+    switches += gameSwitches;
+    if (gameSwitches > 0) {
+      maxSwitchesInGame = Math.max(maxSwitchesInGame, gameSwitches);
+    }
+  }
 
-  if (goodRate === evilRate) return "BALANCED";
-  return goodRate > evilRate ? "GOOD" : "EVIL";
+  if (!trackedGames) return null;
+
+  return {
+    trackedGames,
+    switches,
+    maxSwitchesInGame,
+  };
 });
 
 type EvilBias = {
@@ -573,35 +592,84 @@ function getStatsCharacter(game: GameWithChars) {
   return last;
 }
 
+function findPlayerToken(page: GrimoirePage | null | undefined, game: GameWithChars) {
+  if (!page?.tokens?.length) return null;
+
+  const username = game.user?.username ?? null;
+
+  return (
+    page.tokens.find(
+      (t) =>
+        (username &&
+          (t.player?.username === username ||
+            t.player_name === username ||
+            t.player_name === `@${username}`)) ||
+        t.player_id === (game as unknown as { user_id?: string }).user_id
+    ) ?? null
+  );
+}
+
+function alignmentFromToken(token?: GrimoireToken | null): Alignment {
+  if (!token) return null;
+
+  const alignment = token.alignment as Alignment;
+  if (alignment === "GOOD" || alignment === "EVIL") {
+    return alignment;
+  }
+
+  const roleAlignment = token.role?.initial_alignment as Alignment;
+  if (roleAlignment === "GOOD" || roleAlignment === "EVIL") {
+    return roleAlignment;
+  }
+
+  return null;
+}
+
+function getAlignmentsFromGrimoire(game: GameWithChars): Alignment[] {
+  const alignments: Alignment[] = [];
+  const pages = game.grimoire ?? [];
+
+  for (const page of pages) {
+    const token = findPlayerToken(page, game);
+    const alignment = alignmentFromToken(token);
+    if (alignment) {
+      alignments.push(alignment);
+    }
+  }
+
+  return alignments;
+}
+
+function getCharacterAlignments(game: GameWithChars): Alignment[] {
+  const alignments: Alignment[] = [];
+
+  for (const character of game.player_characters) {
+    if (character.role?.type === "FABLED" || character.role?.type === "LORIC") continue;
+
+    const alignment = character.alignment as Alignment;
+    if (alignment === "GOOD" || alignment === "EVIL") {
+      alignments.push(alignment);
+    }
+  }
+
+  return alignments;
+}
+
+function getAlignmentTimeline(game: GameWithChars): Alignment[] {
+  const fromGrimoire = getAlignmentsFromGrimoire(game);
+  if (fromGrimoire.length) return fromGrimoire;
+
+  return getCharacterAlignments(game);
+}
+
 /**
  * Determine the player's starting alignment using the first grimoire page.
  * Falls back to the first recorded character if the grimoire is missing.
  */
 function getInitialAlignment(game: GameWithChars): Alignment {
   const firstPage = game.grimoire?.[0];
-  const username = game.user?.username ?? null;
-
-  const token =
-    firstPage?.tokens?.find(
-      (t) =>
-        (username &&
-          (t.player?.username === username ||
-            t.player_name === username ||
-            t.player_name === `@${username}`)) ||
-        t.player_id === game.user_id
-    ) ?? null;
-
-  if (token) {
-    const tokenAlignment = token.alignment as Alignment;
-    if (tokenAlignment === "GOOD" || tokenAlignment === "EVIL") {
-      return tokenAlignment;
-    }
-
-    const roleAlignment = token.role?.initial_alignment as Alignment;
-    if (roleAlignment === "GOOD" || roleAlignment === "EVIL") {
-      return roleAlignment;
-    }
-  }
+  const tokenAlignment = alignmentFromToken(findPlayerToken(firstPage, game));
+  if (tokenAlignment) return tokenAlignment;
 
   const firstCharacter = game.player_characters.at(0);
   const alignment = firstCharacter?.alignment as Alignment;
@@ -621,14 +689,6 @@ function roleLink(name?: string) {
 }
 
 /**
- * Return percentage value.
- */
-function formatPercent(wins: number, plays: number): string {
-  if (!plays) return "0%";
-  return `${Math.round((wins / plays) * 100)}%`;
-}
-
-/**
  * Map player count (excluding travelers) to expected number of evil slots.
  */
 function evilSlotsForPlayers(playerCount: number): number {
@@ -636,13 +696,6 @@ function evilSlotsForPlayers(playerCount: number): number {
   if (playerCount <= 9) return 2; // 1 demon + 1 minion
   if (playerCount <= 12) return 3; // 1 demon + 2 minions
   return 4; // 1 demon + 3 minions
-}
-
-/**
- * Format a fractional rate (0-1) as a percent string.
- */
-function formatRate(rate: number): string {
-  return `${Math.round(rate * 100)}%`;
 }
 
 /**
