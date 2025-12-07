@@ -186,6 +186,26 @@ const chartOptions = computed(() => ({
     legend: {
       display: false,
     },
+    datalabels: {
+      display: true,
+      color: chartColors.labelColor,
+      anchor: "center",
+      align: "center",
+      clamp: true,
+      backgroundColor: chartColors.labelBackground,
+      borderRadius: chartColors.labelRadius,
+      padding: chartColors.labelPadding,
+      formatter(_value: number, context: any) {
+        const idx = context.dataIndex;
+        const gameSize = gameSizes.value[idx];
+        if (!gameSize) return "";
+
+        if (gameSize.key === "teensy") return "Teensy";
+        if (gameSize.key === "one") return "1 Minion";
+        if (gameSize.key === "two") return "2 Minions";
+        return "3 Minions";
+      },
+    },
     tooltip: {
       callbacks: {
         title(context: any) {

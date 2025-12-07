@@ -135,6 +135,21 @@ const chartOptions = computed(() => ({
     legend: {
       display: false,
     },
+    datalabels: {
+      display: true,
+      color: chartColors.labelColor,
+      anchor: "center",
+      align: "center",
+      clamp: true,
+      backgroundColor: chartColors.labelBackground,
+      borderRadius: chartColors.labelRadius,
+      padding: chartColors.labelPadding,
+      formatter(value: number, context: any) {
+        // Only label the win slice.
+        if (context.dataIndex !== 0) return null;
+        return `${Math.round(value)}%`;
+      },
+    },
     tooltip: {
       filter: (ctx: any) => ctx.dataIndex === 0, // hide tooltip on empty slice.
       callbacks: {

@@ -106,6 +106,23 @@ const chartOptions = computed(() => ({
     legend: {
       display: false,
     },
+    datalabels: {
+      display: true,
+      color: chartColors.labelColor,
+      anchor: "center",
+      align: "center",
+      clamp: true,
+      backgroundColor: chartColors.labelBackground,
+      borderRadius: chartColors.labelRadius,
+      padding: chartColors.labelPadding,
+      formatter(value: number) {
+        const total = totalGames.value || 0;
+        if (!value || total === 0) return null;
+
+        const pct = Math.round((value / total) * 100);
+        return `${pct}%`;
+      },
+    },
     tooltip: {
       enabled: true,
       callbacks: {
