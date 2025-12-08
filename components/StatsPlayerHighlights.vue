@@ -65,8 +65,8 @@
           <div class="text-center text-sm text-balance max-w-44">
             {{ props.isMe ? `You` : `This player` }} finished {{ bestPerforming.plays }} game<span v-if="bestPerforming.plays !== 1">s</span> as
             {{ roleArticle(bestPerforming.role.name) }}<span class="font-semibold">{{ bestPerforming.role.name }}</span> and
-            <span v-if="bestPerforming.losses > 0">won {{ bestPerforming.wins }} of those!</span>
-            <span v-else>didn't lose a single one!</span>
+            <span v-if="bestPerforming.losses > 0">won {{ bestPerforming.wins }} of those.</span>
+            <span v-else>all of those were wins!</span>
           </div>
         </div>
 
@@ -104,7 +104,7 @@
             {{ props.isMe ? `You` : `This player` }} finished {{ worstPerforming.plays }} game<span v-if="worstPerforming.plays !== 1">s</span> as
             {{ roleArticle(worstPerforming.role.name) }}<span class="font-semibold">{{ worstPerforming.role.name }}</span> and 
             <span v-if="worstPerforming.wins > 0">won only {{ worstPerforming.wins }} of those.</span>
-            <span v-else>tragically lost all of those...</span>
+            <span v-else>tragically all of those were losses...</span>
           </div>
         </div>
 
