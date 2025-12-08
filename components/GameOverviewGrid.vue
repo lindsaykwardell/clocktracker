@@ -59,25 +59,61 @@
             />
           </div>
           <div
-            class="flex-grow items-center justify-center flex font-sorts text-3xl"
+            class="flex-grow items-center justify-center flex font-sorts text-3xl "
           >
-            <Token
-              v-if="
-                showCommunityCard === false &&
-                (gamesStore.getLastCharater(game.id).name ||
-                  gamesStore.getLastCharater(game.id).alignment !== 'NEUTRAL')
-              "
-              :character="gamesStore.getLastCharater(game.id)"
-              size="lg"
-            />
-            <div v-else class="bg-black/25 flex justify-center">
-              <img
-                :src="
-                  game.associated_script?.logo ??
-                  scripts.scriptLogo(game.script)
+            <div class="relative token-solarsystem">
+              <Token
+                v-if="
+                  showCommunityCard === false &&
+                  (gamesStore.getLastCharater(game.id).name ||
+                    gamesStore.getLastCharater(game.id).alignment !== 'NEUTRAL')
                 "
-                class="w-2/3"
+                :character="gamesStore.getLastCharater(game.id)"
+                size="lg"
               />
+              <div v-else class="bg-black/25 flex justify-center">
+                <img
+                  :src="
+                    game.associated_script?.logo ??
+                    scripts.scriptLogo(game.script)
+                  "
+                  class="w-2/3"
+                />
+              </div>
+              <div
+                v-if="uniquePlayableRoles(game).length"
+              >
+              <Token
+                v-for="(role, i) in orbitRoles(game)"
+                :key="role.key"
+                :character="{
+                  alignment: role.alignment,
+                  role: {
+                    token_url: role.token_url,
+                    alternate_token_urls: role.alternate_token_urls,
+                    initial_alignment: role.initial_alignment,
+                  },
+                }"
+                size="sm"
+                class="orbit-token"
+                :class="`orbit-token--${i}`"
+                :style="{ '--pos': orbitPos(game, i + orbitOffset(game)) }"
+              />
+                <Token
+                  v-if="uniquePlayableRoles(game).length > 5"
+                  :character="{
+                    role: {
+                      name: '',
+                      token_url: '',
+                    },
+                  }"
+                  size="sm"
+                  class="orbit-token orbit-token--more"
+                  :style="{ '--pos': orbitPos(game, 0) }"
+                >
+                  <span class="font-sorts font-semibold text-lg text-black">+{{ uniquePlayableRoles(game).length - 4 }}</span>
+                </Token>
+              </div>
             </div>
           </div>
           <div class="absolute w-full top-0 left-0" />
@@ -279,6 +315,85 @@ function isMyGame(game: GameRecord) {
   return me.value?.data.user_id === game.user_id;
 }
 
+function uniquePlayableRoles(game: GameRecord) {
+  // Identify the final playable role to avoid duplicating it in the mini-row
+  const lastPlayable = [...game.player_characters]
+    .reverse()
+    .find(
+      (c) =>
+        c.role_id &&
+        c.role?.type !== "FABLED" &&
+        c.role?.type !== "LORIC"
+    );
+  const lastPlayableRoleId = lastPlayable?.role_id ?? null;
+  const lastPlayableAlignment = lastPlayable?.alignment ?? "UNKNOWN";
+
+  // Track which alignments we've already shown for each role_id (to avoid repeats).
+  const seenAlignmentsByRole = new Map<string, Set<string>>();
+
+  const roles: {
+    key: string;
+    name: string;
+    token_url: string | null;
+    alternate_token_urls?: string[] | null;
+    alignment: string | null;
+    initial_alignment: string | null;
+  }[] = [];
+
+  for (const [index, character] of game.player_characters.entries()) {
+    if (!character.role_id || !character.name) continue;
+    if (character.role?.type === "FABLED" || character.role?.type === "LORIC") continue;
+
+    // Skip entries that match the final role/alignment (shown as the main token).
+    if (
+      lastPlayableRoleId &&
+      character.role_id === lastPlayableRoleId &&
+      (character.alignment ?? "UNKNOWN") === lastPlayableAlignment
+    ) {
+      continue;
+    }
+
+    const alignmentKey = character.alignment ?? "UNKNOWN";
+    const seen = seenAlignmentsByRole.get(character.role_id) ?? new Set<string>();
+    if (seen.has(alignmentKey)) continue;
+    seen.add(alignmentKey);
+    seenAlignmentsByRole.set(character.role_id, seen);
+
+    roles.push({
+      key: `${character.role_id}:${alignmentKey}:${index}`,
+      name: character.name,
+      token_url: character.role?.token_url ?? character.related_role?.token_url ?? null,
+      alternate_token_urls: character.role?.alternate_token_urls ?? null,
+      alignment: character.alignment ?? null,
+      initial_alignment: character.role?.initial_alignment ?? null,
+    });
+  }
+
+  return roles;
+}
+
+const orbitRoles = (game: GameRecord) => {
+  const roles = uniquePlayableRoles(game);
+  if (roles.length > 5) {
+    // Keep the most recent 4 roles; oldest are summarized in +N.
+    return roles.slice(-4);
+  }
+  // Keep up to the most recent 5 roles.
+  return roles.slice(-5);
+};
+
+const orbitCount = (game: GameRecord) =>
+  Math.min(uniquePlayableRoles(game).length, 5);
+
+const orbitOffset = (game: GameRecord) =>
+  uniquePlayableRoles(game).length > 5 ? 1 : 0;
+
+const orbitPos = (game: GameRecord, index: number) => {
+  const count = orbitCount(game);
+  if (!count) return 0;
+  return index - (count - 1) / 2;
+};
+
 const taggedPlayers = computed(
   () => (game: GameRecord) =>
     game.grimoire
@@ -352,5 +467,71 @@ li.selected {
 
 .badge {
   padding: .125rem .25rem;
+}
+
+/* Container: radius controls distance from center */
+.token-solarsystem {
+  /* For w-36/h-36 + w-8/h-8 -> radius ≈ 6rem for ~0.5rem gap */
+  --orbit-radius: 6rem;
+}
+
+@media (min-width: 768px) {
+  .token-solarsystem {
+    /* For w-48/h-48 + w-12/h-12 -> radius ≈ 8rem for ~0.5rem gap */
+    --orbit-radius: 9rem;
+  }
+}
+
+/* Orbiting tokens */
+.orbit-token {
+  --angle-step: 22deg;
+  --scale: 1;
+  --offset: 0;
+
+  position: absolute;
+  top: calc(50% - 1.5rem);
+  left: calc(50% - 1.5rem);
+
+  /* Orbit rotation */
+  --orbit-transform:
+    rotate(calc(0deg + var(--pos) * var(--angle-step)))
+    translateX(var(--orbit-radius))
+    rotate(calc(-0deg + var(--pos) * var(--angle-step) * -1));
+  /* --orbit-transform:
+    rotate(calc(30deg + var(--offset) * var(--angle-step)))
+    translateX(var(--orbit-radius))
+    rotate(calc(-30deg + var(--offset) * var(--angle-step) * -1));   */
+  transform: var(--orbit-transform) scale(var(--scale));  
+  transform-origin: center center;
+
+  /* &:nth-child(1) {
+    --scale: 1.1;
+    --offset: 0;
+  }
+
+  &:nth-child(2) {
+    --scale: 1;
+    --offset: 1;
+  }
+
+  &:nth-child(3) {
+    --scale: .9;
+    --offset: 1.9;
+  }
+
+  &:nth-child(4) {
+    --scale: .8;
+    --offset: 2.7;
+  }
+
+  &:nth-child(5) {
+    --scale: .7;
+    --offset: 3.45;
+  }
+
+  &:nth-child(6) {
+    --scale: .6;
+    --offset: 4.1;
+  } */
 }
 </style>
