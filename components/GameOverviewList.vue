@@ -84,6 +84,12 @@
                 </template>
               </span>
             </template>
+            <span
+              v-if="game.ignore_for_stats"
+              class="inline-flex gap-1 items-center rounded-sm bg-red-700/60 text-xs font-medium text-white badge"
+            >
+              <IconUI id="disabled" size="xs"/><span class="sr-only">Ignore for </span>Stats
+            </span>
           </td>
           <td class="hidden md:table-cell text-start">
             <template v-if="game.location_type === 'IN_PERSON'">

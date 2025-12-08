@@ -77,6 +77,11 @@
         <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8m8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7"/>
       </template>
 
+      <template v-else-if="props.id === 'disabled'">
+        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+        <path d="M11.354 4.646a.5.5 0 0 0-.708 0l-6 6a.5.5 0 0 0 .708.708l6-6a.5.5 0 0 0 0-.708"/>
+      </template>
+
       
     </svg>
   </span>
@@ -87,7 +92,7 @@ const props = defineProps<{
   id: string;
   class?: string;
   rounded?: boolean;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'xs' | 'sm' | 'md' | 'lg';
 }>();
 </script>
 
@@ -112,6 +117,10 @@ svg {
 
   &.sm {
     block-size: .875rem;
+  }
+
+  &.xs {
+    block-size: .75rem;
   }
 }
 </style>

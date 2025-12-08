@@ -40,9 +40,15 @@
             crossorigin="anonymous"
           />
           <div
-            class="absolute top-0 left-0 text-white md:text-lg bg-gradient-to-br from-black/75 via-black/50 to-black-0 p-1 flex gap-1 items-center"
+            class="absolute top-0 left-0 text-white md:text-lg bg-gradient-to-br from-black/75 via-black/50 to-black-0 p-1 flex gap-2 items-center"
           >
             <div>{{ formatDate(game.date) }}</div>
+            <span
+              v-if="game.ignore_for_stats"
+              class="inline-flex gap-1 items-center rounded-sm bg-red-700/60 text-xs font-medium text-white badge"
+            >
+              <IconUI id="disabled" size="xs"/><span class="sr-only">Ignore for </span>Stats
+            </span>
           </div>
           <div class="absolute top-8 left-1 z-10">
             <Avatar
