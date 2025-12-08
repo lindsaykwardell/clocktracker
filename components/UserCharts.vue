@@ -1,6 +1,9 @@
 <template>
   <div class="px-4 lg:px-8 pb-4 lg:pb-8 space-y-8 md:space-y-12 xl:space-y-16">
-    <div class="flex flex-col gap-3 px-4">
+    <div
+      v-if="games.status === Status.SUCCESS"
+      class="flex flex-col gap-3 px-4"
+    >
       <div class="flex flex-col lg:flex-row gap-3 justify-between">
         <div class="flex flex-col md:flex-row gap-3 px-4">
           <div class="relative w-full md:w-auto">
