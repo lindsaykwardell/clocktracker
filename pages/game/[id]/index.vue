@@ -121,20 +121,29 @@
             <div class="flex flex-col md:flex-row gap-4 mt-4">
               <label class="flex gap-3 items-center">
                 <span>Script</span>
-                <nuxt-link
-                  class="hover:underline text-blue-800 hover:text-blue-700"
-                  :to="games.getScriptLink(game.data)"
-                >
-                  {{ game.data.script }}
+                <div class="inline-flex gap-1 items-center">
+                  <nuxt-link
+                    class="hover:underline text-blue-800 hover:text-blue-700"
+                    :to="games.getScriptLink(game.data)"
+                  >
+                    {{ game.data.script }}
+                  </nuxt-link>
                   <template
                     v-if="
                       game.data.associated_script?.version &&
                       !isBaseScript(game.data.script)
                     "
                   >
-                    v{{ game.data.associated_script.version }}
+                    <span class="inline-flex items-center rounded-sm bg-black/10 text-gray-800 text-xs font-medium badge">
+                      <template v-if="game.data.ls_game_id">
+                        Game {{ game.data.associated_script.version }}
+                      </template>
+                      <template v-else>
+                        {{ game.data.associated_script.version }}
+                      </template>
+                    </span>
                   </template>
-                </nuxt-link>
+                </div>
               </label>
               <label v-if="storytellers.length" class="flex gap-3 items-center">
                 <span
@@ -376,17 +385,15 @@
           "
           :style="
             game.data.associated_script?.background
-              ? {
-                  backgroundImage: `url(${game.data.associated_script.background})`,
-                }
+              ? { '--bg-image-url' : `url(${game.data.associated_script.background})` }
               : {}
           "
-          class="bg-center bg-cover relative text-white"
+          class="bg-center bg-cover relative text-white script-bg"
           :class="{
-            'trouble-brewing': game.data.script === 'Trouble Brewing',
-            'sects-and-violets': game.data.script === 'Sects and Violets',
-            'bad-moon-rising': game.data.script === 'Bad Moon Rising',
-            'custom-script':
+            'is-trouble-brewing': game.data.script === 'Trouble Brewing',
+            'is-sects-and-violets': game.data.script === 'Sects and Violets',
+            'is-bad-moon-rising': game.data.script === 'Bad Moon Rising',
+            'is-custom-script':
               [
                 'Trouble Brewing',
                 'Sects and Violets',
@@ -1065,20 +1072,24 @@ const tour = [
   @apply text-sm text-stone-500;
 }
 
-.trouble-brewing {
-  background-image: url("/img/trouble-brewing-bg.webp");
-}
+.script-bg {
+  background-image: var(--bg-image-url);
 
-.sects-and-violets {
-  background-image: url("/img/sects-and-violets-bg.webp");
-}
+  &.is-trouble-brewing {
+    --bg-image-url: url("/img/scripts/trouble-brewing-bg.webp");
+  }
 
-.bad-moon-rising {
-  background-image: url("/img/bad-moon-rising-bg.webp");
-}
+  &.is-sects-and-violets {
+    --bg-image-url: url("/img/scripts/sects-and-violets-bg.webp");
+  }
 
-.custom-script {
-  background-image: url("/img/custom-script-bg.webp");
+  &.is-bad-moon-rising {
+    --bg-image-url: url("/img/scripts/bad-moon-rising-bg.webp");
+  }
+
+  &.is-custom-script {
+    --bg-image-url: url("/img/scripts/custom-script-bg.webp");
+  }
 }
 
 .winning-team {

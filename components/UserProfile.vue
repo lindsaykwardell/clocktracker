@@ -51,7 +51,7 @@
   <Dialog v-if="isMe" v-model:visible="showFavoritesDialog" size="xl">
     <template #title>
       <h2 class="text-2xl font-bold">Manage Favorites</h2>
-      <p class="text-lg text-stone-400 p-4">
+      <p class="text-lg text-stone-400 py-4">
         Click on a game to add or remove it from your favorites. Only six
         favorites are shown on your profile, but you can favorite as many games
         as you like.
