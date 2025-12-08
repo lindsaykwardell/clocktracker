@@ -181,6 +181,7 @@ const storytellerGames = computed<StorytellerGameRecord[]>(() =>
 /**
  * Unique scripts (per name) and their metadata, sorted by play count.
  */
+const MAX_SCRIPTS = 5;
 const scripts = computed<ScriptMeta[]>(() => {
   const map = new Map<string, ScriptMeta>();
 
@@ -219,7 +220,9 @@ const scripts = computed<ScriptMeta[]>(() => {
     }
   }
 
-  return Array.from(map.values()).sort((a, b) => b.playCount - a.playCount);
+  return Array.from(map.values())
+    .sort((a, b) => b.playCount - a.playCount)
+    .slice(0, MAX_SCRIPTS);
 });
 
 /**
