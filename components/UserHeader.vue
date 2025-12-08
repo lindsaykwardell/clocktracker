@@ -62,7 +62,7 @@
               v-if="gamesAsPlayer.length"
               class="flex gap-1 items-center"
               v-tooltip="
-                `Player in ${gamesAsPlayer.length} games (Most common role: ${
+                `Player in ${gamesAsPlayer.length} games (Most played: ${
                   mostCommonCharacter?.name || ''
                 })`
               "
@@ -166,21 +166,26 @@ const gamesAsPlayer = computed(() => {
 const mostCommonCharacter = computed(() => {
   if (allGames.value.status !== Status.SUCCESS) return undefined;
 
-  const allPlayedCharacters = gamesAsPlayer.value
+  const characterCounts = gamesAsPlayer.value
     .filter((game) => !game.ignore_for_stats)
-    .flatMap((game) => game.player_characters)
-    .filter((character) => character?.role_id);
+    .reduce((acc, game) => {
+      // Count each distinct playable role_id once per game to avoid double-counting swaps.
+      const roleIds = new Set(
+        game.player_characters
+          .filter(
+            (character) =>
+              character?.role_id &&
+              character.role?.type !== "FABLED" &&
+              character.role?.type !== "LORIC"
+          )
+          .map((character) => character.role_id as string)
+      );
 
-  const characterCounts = allPlayedCharacters.reduce((acc, character) => {
-    if (!character?.role_id) return acc;
-
-    if (acc[character.role_id]) {
-      acc[character.role_id]++;
-    } else {
-      acc[character.role_id] = 1;
-    }
-    return acc;
-  }, {} as Record<string, number>);
+      for (const roleId of roleIds) {
+        acc[roleId] = (acc[roleId] || 0) + 1;
+      }
+      return acc;
+    }, {} as Record<string, number>);
 
   const sortedCharacters = Object.entries(characterCounts).sort(
     (a, b) => b[1] - a[1]
