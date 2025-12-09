@@ -1,6 +1,6 @@
 <template>
   <div class="w-full h-40 md:h-48">
-    <Doughnut id="win-rate-over-time" :data="chartData" :options="chartOptions" />
+    <Doughnut id="win-rate-alignment" :data="chartData" :options="chartOptions" />
   </div>
 </template>
 
@@ -104,7 +104,7 @@ const winPercentages = computed(() => {
 });
 
 const chartData = computed(() => ({
-  labels: ["Win %", "Remaining"],
+  labels: ["Win rate", "Remaining"],
   datasets: [
     {
       label: "Good",
