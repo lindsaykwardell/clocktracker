@@ -121,20 +121,29 @@
             <div class="flex flex-col md:flex-row gap-4 mt-4">
               <label class="flex gap-3 items-center">
                 <span>Script</span>
-                <nuxt-link
-                  class="hover:underline text-blue-800 hover:text-blue-700"
-                  :to="games.getScriptLink(game.data)"
-                >
-                  {{ game.data.script }}
+                <div class="inline-flex gap-1 items-center">
+                  <nuxt-link
+                    class="hover:underline text-blue-800 hover:text-blue-700"
+                    :to="games.getScriptLink(game.data)"
+                  >
+                    {{ game.data.script }}
+                  </nuxt-link>
                   <template
                     v-if="
                       game.data.associated_script?.version &&
                       !isBaseScript(game.data.script)
                     "
                   >
-                    v{{ game.data.associated_script.version }}
+                    <span class="inline-flex items-center rounded-sm bg-black/10 text-gray-800 text-xs font-medium badge">
+                      <template v-if="game.data.ls_game_id">
+                        Game {{ game.data.associated_script.version }}
+                      </template>
+                      <template v-else>
+                        {{ game.data.associated_script.version }}
+                      </template>
+                    </span>
                   </template>
-                </nuxt-link>
+                </div>
               </label>
               <label v-if="storytellers.length" class="flex gap-3 items-center">
                 <span
@@ -242,7 +251,7 @@
                   {{ game.data.parent_game.user.display_name }}
                 </nuxt-link>
               </label>
-            </div>
+            </div>            
             <div
               v-if="game.data.demon_bluffs.length || game.data.fabled.length"
               class="flex flex-col md:flex-row gap-4 mt-4 justify-start"
@@ -332,6 +341,12 @@
               >
                 <span>{{ tag }}</span>
               </span>
+              <span
+                v-if="game.data.ignore_for_stats"
+                class="inline-flex gap-1 items-center px-2 py-1 rounded bg-red-700/60 text-white badge"
+              >
+                <IconUI id="disabled"/>Ignored for Stats
+              </span>
             </div>
           </div>
           <img
@@ -376,23 +391,15 @@
           "
           :style="
             game.data.associated_script?.background
-              ? {
-                  backgroundImage: `url(${game.data.associated_script.background})`,
-                }
+              ? { '--bg-image-url' : `url(${game.data.associated_script.background})` }
               : {}
           "
-          class="bg-center bg-cover relative text-white"
+          class="grimoire bg-center bg-cover relative text-white script-bg"
           :class="{
-            'trouble-brewing': game.data.script === 'Trouble Brewing',
-            'sects-and-violets': game.data.script === 'Sects and Violets',
-            'bad-moon-rising': game.data.script === 'Bad Moon Rising',
-            'custom-script':
-              [
-                'Trouble Brewing',
-                'Sects and Violets',
-                'Bad Moon Rising',
-              ].indexOf(game.data.script) === -1 &&
-              !game.data.associated_script?.background,
+            ...scriptBgClasses(
+              game.data.script,
+              !!game.data.associated_script?.background
+            ),
           }"
         >
           <button
@@ -454,7 +461,6 @@
           </template>
           <GameOverviewGrid
             :games="similarGames"
-            cardWidth="w-1/2 lg:w-1/3"
             :onCardClick="confirmMergeGame"
           />
         </Dialog>
@@ -667,7 +673,7 @@ import VueMarkdown from "vue-markdown-render";
 import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
 import { Status } from "~/composables/useFetchStatus";
 
-const { scriptLogo, isBaseScript } = useScripts();
+const { scriptLogo, isBaseScript, scriptBgClasses } = useScripts();
 const config = useRuntimeConfig();
 const router = useRouter();
 const route = useRoute();
@@ -1065,20 +1071,28 @@ const tour = [
   @apply text-sm text-stone-500;
 }
 
-.trouble-brewing {
-  background-image: url("/img/trouble-brewing-bg.webp");
-}
+.script-bg {
+  background-image: var(--bg-image-url);
 
-.sects-and-violets {
-  background-image: url("/img/sects-and-violets-bg.webp");
-}
+  &.is-trouble-brewing {
+    --bg-image-url: url("/img/scripts/trouble-brewing-bg.webp");
+  }
 
-.bad-moon-rising {
-  background-image: url("/img/bad-moon-rising-bg.webp");
-}
+  &.is-sects-and-violets {
+    --bg-image-url: url("/img/scripts/sects-and-violets-bg.webp");
+  }
 
-.custom-script {
-  background-image: url("/img/custom-script-bg.webp");
+  &.is-bad-moon-rising {
+    --bg-image-url: url("/img/scripts/bad-moon-rising-bg.webp");
+  }
+
+  &.is-custom-script {
+    --bg-image-url: url("/img/scripts/custom-script-bg.webp");
+  }
+
+  &.is-unknown-script {
+    --bg-image-url: url("/img/scripts/unknown-script-bg.webp");
+  }
 }
 
 .winning-team {
@@ -1127,6 +1141,21 @@ const tour = [
 </style>
 
 <style>
+.grimoire {
+  .overflow-scroll {
+    /* @todo Background image should be moved to this div, so it scrolls with tokens on mobile */
+    /* background-attachment: local, local; */
+
+    /* Compensate scrollbars (and page count) so tokens are centered */
+    padding-inline-start: 1rem;
+    padding-block-start: 2.5rem;
+
+    /* scrollbar-width: thin; */
+    scrollbar-color: oklch(44.4% 0.011 73.639) transparent;
+    scrollbar-gutter: stable;
+  }
+}
+
 .notes {
   h1 {
     @apply text-3xl font-sorts;

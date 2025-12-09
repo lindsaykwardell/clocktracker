@@ -51,6 +51,7 @@ import {
   RadialLinearScale,
   Filler,
 } from "chart.js";
+import ChartDataLabels from "chartjs-plugin-datalabels";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
@@ -205,8 +206,14 @@ ChartJS.register(
   LineElement,
   PolarAreaController,
   Filler,
-  Colors
+  Colors,
+  ChartDataLabels
 );
+
+// Datalabels off by default.
+ChartJS.defaults.set("plugins.datalabels", {
+  display: false,
+});
 </script>
 
 <style>

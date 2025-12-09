@@ -1,23 +1,32 @@
 <template>
-  <div>
-    <h3 class="font-sorts text-2xl text-center">Games Over Time</h3>
-    <Line id="games-over-time" :data="chartData" :options="chartOptions" />
+  <div class="w-100">
+    <h3 class="font-sorts text-2xl text-center mb-4">
+      Games Over Time
+    </h3>
+    <Line 
+      id="games-over-time" 
+      :data="chartData" 
+      :options="chartOptions" 
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import type { Game } from "@prisma/client";
+import { computed } from "vue";
 import { Line } from "vue-chartjs";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
+import type { GameRecord } from "~/composables/useGames";
+import { chartColors } from "~/composables/useChartColors";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
 const { Script } = useScripts();
+
 const props = defineProps<{
-  games: Game[];
+  games: GameRecord[];
 }>();
 
 const months = Array.from(Array(12).keys())
@@ -28,13 +37,6 @@ const validMonths = Array.from(Array(12).keys()).map((i) =>
   dayjs().subtract(i, "month").format("YYYY MMMM")
 );
 
-const colors = {
-  tb: "#A00A23",
-  bmr: "#F4C43C",
-  snv: "#944CAC",
-  custom: "#008000",
-};
-
 const data = computed(() => {
   const data: {
     [key: string]: {
@@ -42,6 +44,7 @@ const data = computed(() => {
       sectsAndViolets: number;
       badMoonRising: number;
       customScript: number;
+      unknownScript: number;
     };
   } = {};
 
@@ -57,14 +60,27 @@ const data = computed(() => {
         sectsAndViolets: 0,
         badMoonRising: 0,
         customScript: 0,
+        unknownScript: 0,
       };
     }
 
-    if (game.script === Script.TroubleBrewing) data[month].troubleBrewing++;
-    else if (game.script === Script.SectsAndViolets)
+    const script = game.script as string | null;
+
+    if (!script) {
+      data[month].unknownScript++;
+    } 
+    else if (script === Script.TroubleBrewing) {
+      data[month].troubleBrewing++;
+    } 
+    else if (script === Script.SectsAndViolets) {
       data[month].sectsAndViolets++;
-    else if (game.script === Script.BadMoonRising) data[month].badMoonRising++;
-    else data[month].customScript++;
+    } 
+    else if (script === Script.BadMoonRising) {
+      data[month].badMoonRising++;
+    } 
+    else {
+      data[month].customScript++;
+    }
   }
 
   return data;
@@ -74,34 +90,43 @@ const chartData = computed(() => ({
   labels: months,
   datasets: [
     {
-      label: "Trouble Brewing",
-      data: months.map((month) => data.value[month]?.troubleBrewing ?? 0),
-      backgroundColor: colors.tb,
-      borderColor: colors.tb,
+      // Put unknown at the bottom of the chart since its probably rare.
+      label: "Unknown", 
+      data: months.map((month) => data.value[month]?.unknownScript ?? 0),
+      backgroundColor: chartColors.unknown,
+      borderColor: chartColors.unknown,
       tension: 0.1,
       fill: true,
     },
     {
-      label: "Sects and Violets",
+      label: "Trouble Brewing",
+      data: months.map((month) => data.value[month]?.troubleBrewing ?? 0),
+      backgroundColor: chartColors.tb,
+      borderColor: chartColors.tb,
+      tension: 0.1,
+      fill: true,
+    },
+    {
+      label: "Sects & Violets",
       data: months.map((month) => data.value[month]?.sectsAndViolets ?? 0),
-      backgroundColor: colors.snv,
-      borderColor: colors.snv,
+      backgroundColor: chartColors.snv,
+      borderColor: chartColors.snv,
       tension: 0.1,
       fill: true,
     },
     {
       label: "Bad Moon Rising",
       data: months.map((month) => data.value[month]?.badMoonRising ?? 0),
-      backgroundColor: colors.bmr,
-      borderColor: colors.bmr,
+      backgroundColor: chartColors.bmr,
+      borderColor: chartColors.bmr,
       tension: 0.1,
       fill: true,
     },
     {
-      label: "Custom Script",
+      label: "Custom",
       data: months.map((month) => data.value[month]?.customScript ?? 0),
-      backgroundColor: colors.custom,
-      borderColor: colors.custom,
+      backgroundColor: chartColors.custom,
+      borderColor: chartColors.custom,
       tension: 0.1,
       fill: true,
     },
@@ -111,11 +136,11 @@ const chartData = computed(() => ({
 const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
-  // plugins: {
-  //   legend: {
-  //     display: false,
-  //   },
-  // },
+  plugins: {
+    legend: {
+      display: false,
+    },
+  },
   scales: {
     x: {
       stacked: true,

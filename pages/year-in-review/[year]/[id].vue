@@ -280,7 +280,7 @@
     <section
       v-if="data.most_common_scripts.length > 0"
       style="
-        background: url('/img/trouble-brewing-bg.webp');
+        background: url('/img/scripts/trouble-brewing-bg.webp');
         background-position: center;
       "
     >
@@ -318,7 +318,7 @@
     <section
       v-if="data.most_common_storytold_scripts.length > 0"
       style="
-        background: url('/img/sects-and-violets-bg.webp');
+        background: url('/img/scripts/sects-and-violets-bg.webp');
         background-position: center;
       "
     >

@@ -9,7 +9,7 @@
               player.user_id === user?.id ||
               friends.getFriendStatus(player.user_id) === FriendStatus.FRIENDS
             "
-            class="flex justify-start w-screen md:w-full gap-1 h-12"
+            class="flex flex-wrap justify-start w-screen md:w-full gap-1 h-12"
           >
             <nuxt-link
               :to="`/@${username}`"
@@ -58,7 +58,10 @@
             friends.getFriendStatus(player.user_id) === FriendStatus.FRIENDS
           "
         >
-          <UserProfile v-if="currentTab === 'profile'" :player="player" />
+          <UserProfile 
+            v-if="currentTab === 'profile'" 
+            :player="player" 
+          />
           <UserCharts
             v-if="currentTab === 'stats'"
             :games="games"
