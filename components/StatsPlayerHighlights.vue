@@ -118,7 +118,7 @@
       <!-- Alignment -->
       <div class="lg:col-span-3 xl:col-span-1 p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40">
         <h3 class="font-sorts text-center text-lg lg:text-xl mb-2 md:mb-3">
-          Alignment
+          Win Rate
         </h3>
 
         <StatsPlayerAlignmentWins 
@@ -126,93 +126,22 @@
           class="w-full mb-2" 
         />
 
-        <div v-if="alignmentStats">
-          <div class="flex flex-col text-center after:content-[''] after:mx-auto after:my-1 after:w-8 after:h-[1px] after:bg-stone-400 ">
-            <div class="text-center text-sm text-balance max-w-64 mx-auto">
-              <span v-if="alignmentSwitchStats">
-                {{ props.isMe ? `You've` : `This player has` }} switched alignment
-                <span class="font-semibold">{{ alignmentSwitchStats.switches }}</span>
-                time<span v-if="alignmentSwitchStats.switches !== 1">s</span>
-                <span v-if="alignmentSwitchStats.maxSwitchesInGame > 1">, {{
-                    alignmentSwitchStats.maxSwitchesInGame === 2
-                      ? 'twice'
-                      : alignmentSwitchStats.maxSwitchesInGame + ' times'
-                  }} in one game!
-                </span>
-                <span v-else>. </span>
-              </span>
-              <span v-else>
-                Not enough data.
-              </span>
-            </div>
-          </div>
+        <div v-if="alignmentWinMessage" class="text-center text-sm text-balance max-w-64 mx-auto">
+          <template v-if="alignmentWinMessage.alignment === 'GOOD'">
+            {{ props.isMe ? 'You win' : 'This player wins' }} more games as
+            <span class="font-semibold" :style="`color: ${chartColors.good}`">Good</span>.
+          </template>
+          <template v-else-if="alignmentWinMessage.alignment === 'EVIL'">
+            {{ props.isMe ? 'You win' : 'This player wins' }} more games as
+            <span class="font-semibold" :style="`color: ${chartColors.evil}`">Evil</span>.
+          </template>
+          <template v-else>
+            {{ props.isMe ? 'You win' : 'This player wins' }} games equally as
+            <span class="font-semibold" :style="`color: ${chartColors.good}`">Good</span> and
+            <span class="font-semibold" :style="`color: ${chartColors.evil}`">Evil</span>.
+          </template>
+        </div>
 
-          <div
-            v-if="evilBias"
-            class="text-center text-sm text-balance max-w-64 mx-auto cursor-help"
-            v-tooltip="{
-              content: `
-                <div class='w-56 text-sm'>
-                  <div class='w-48 text-sm space-y-3'>
-                    <p>
-                      Each game gives a player a specific chance of pulling an Evil token, based on the total number of players.
-                    </p>
-                    <p>
-                      Clocktracker compares those expected chances to the actual results to show whether a player's outcomes
-                      skew toward Evil, lean toward Good, or stay in line with probability.
-                    </p>
-                    <p>
-                      Based on the ${evilBias?.games} games played, 
-                      ${ props.isMe ? 'you were' : `this player` } was expected to draw an Evil token ${evilBias?.expectedEvil.toFixed(1)} times (${Math.round(evilBias?.expectedRate * 100)}%),
-                      but actually drew one ${evilBias?.actualEvil} times (${Math.round(evilBias?.actualRate * 100)}%).
-                      This is a difference of ${(evilBias?.diffRate > 0 ? '+' : '') + Math.round(evilBias?.diffRate * 100)}%
-                    </p>
-                  </div>
-
-                  <div>
-                  </div>
-                </div>
-                
-              `,
-              html: true
-            }"
-          >
-            <!-- Strongly above -->
-            <template v-if="evilBias.diffRate >= 0.40">
-              {{ props.isMe ? 'Your hands' : `This player's hands` }} are a magnet for <span class="font-semibold" :style="`color: ${chartColors.evil}`">Evil</span> tokens.
-            </template>
-
-            <!-- Clearly above -->
-            <template v-else-if="evilBias.diffRate >= 0.20">
-              It's statistically suspicious how often {{ props.isMe ? 'you draw' : `This player draws` }} an <span class="font-semibold" :style="`color: ${chartColors.evil}`">Evil</span> token.
-            </template>
-
-            <!-- Slightly above -->
-            <template v-else-if="evilBias.diffRate >= 0.05">
-              {{ props.isMe ? 'You show' : `This player shows` }} a slight pull toward <span class="font-semibold" :style="`color: ${chartColors.evil}`">Evil</span> tokens.
-            </template>
-
-            <!-- Slightly below -->
-            <template v-else-if="evilBias.diffRate <= -0.05 && evilBias.diffRate > -0.20">
-              {{ props.isMe ? 'You show' : `This player shows` }} a slight pull toward <span class="font-semibold" :style="`color: ${chartColors.good}`">Good</span> tokens.
-            </template>
-
-            <!-- Clearly below -->
-            <template v-else-if="evilBias.diffRate <= -0.20">
-              {{ props.isMe ? 'Your hands' : `This player's hands` }} seem blessed, <span class="font-semibold" :style="`color: ${chartColors.good}`">Good</span> tokens find {{ props.isMe ? 'you' : `them` }} often.
-            </template>
-
-            <!-- Basically equal -->
-            <template v-else>
-              {{ props.isMe ? 'You land' : `This player draws` }} <span class="font-semibold" :style="`color: ${chartColors.good}`">Good</span> and 
-              <span class="font-semibold" :style="`color: ${chartColors.evil}`">Evil</span> tokens exactly as probability predicts.
-            </template>
-            <!-- <IconUI id="info" size="sm" /> -->
-          </div>
-        </div>  
-        <p v-else class="text-center text-sm text-stone-400">
-          Not enough data.
-        </p>
       </div>
     </div>
   </div>
@@ -230,40 +159,25 @@ type Alignment = "GOOD" | "EVIL" | null;
 
 type GrimoireToken = {
   alignment?: Alignment | null;
-  role_id?: string | null;
-  player_id?: string | null;
-  player_name?: string | null;
-  player?: { username?: string | null } | null;
   role?: {
-    initial_alignment?: Alignment | null;
+    type?: string | null;
+    token_url?: string | null;
+    initial_alignment?: Alignment;
   } | null;
-};
-
-type GrimoirePage = {
-  tokens?: GrimoireToken[];
+  related_role?: {
+    token_url?: string | null;
+  } | null;
 };
 
 type GameWithChars = Game & {
   ignore_for_stats?: boolean | null;
   win_v2?: string | null; // "GOOD_WINS" | "EVIL_WINS" | etc.
-  player_count?: number | null;
-  traveler_count?: number | null;
-  grimoire?: GrimoirePage[] | null;
-  user?: {
-    username?: string | null;
-  } | null;
   player_characters: (Character & {
     name: string | null;
     alignment?: Alignment;
     role_id?: string | null;
-    role?: {
-      type?: string | null;
-      token_url?: string | null;
-      initial_alignment?: Alignment;
-    } | null;
-    related_role?: {
-      token_url?: string | null;
-    } | null;
+    role?: GrimoireToken["role"];
+    related_role?: GrimoireToken["related_role"];
   })[];
 };
 
@@ -289,12 +203,6 @@ type SideSummary = {
   plays: number;
   wins: number;
   losses: number;
-};
-
-type AlignmentSwitchStats = {
-  trackedGames: number;
-  switches: number;
-  maxSwitchesInGame: number;
 };
 
 /**
@@ -396,89 +304,27 @@ const alignmentStats = computed(() => {
   return { good, evil };
 });
 
-const alignmentSwitchStats = computed<AlignmentSwitchStats | null>(() => {
-  let trackedGames = 0;
-  let switches = 0;
-  let maxSwitchesInGame = 0;
+const alignmentWinMessage = computed<{
+  alignment: "GOOD" | "EVIL" | null;
+} | null>(() => {
+  const stats = alignmentStats.value;
+  if (!stats) return null;
 
-  for (const game of props.games) {
-    const timeline = getAlignmentTimeline(game);
-    if (!timeline.length) continue;
+  const goodDecided = stats.good.wins + stats.good.losses;
+  const evilDecided = stats.evil.wins + stats.evil.losses;
 
-    trackedGames++;
+  if (!goodDecided && !evilDecided) return null;
 
-    let gameSwitches = 0;
-    for (let i = 1; i < timeline.length; i++) {
-      if (timeline[i] && timeline[i] !== timeline[i - 1]) {
-        gameSwitches++;
-      }
-    }
+  const goodRate = goodDecided ? stats.good.wins / goodDecided : 0;
+  const evilRate = evilDecided ? stats.evil.wins / evilDecided : 0;
 
-    switches += gameSwitches;
-    if (gameSwitches > 0) {
-      maxSwitchesInGame = Math.max(maxSwitchesInGame, gameSwitches);
-    }
+  if (goodDecided && evilDecided) {
+    if (goodRate > evilRate) return { alignment: "GOOD" };
+    if (evilRate > goodRate) return { alignment: "EVIL" };
+    return { alignment: null };
   }
 
-  if (!trackedGames) return null;
-
-  return {
-    trackedGames,
-    switches,
-    maxSwitchesInGame,
-  };
-});
-
-type EvilBias = {
-  games: number;
-  actualEvil: number;
-  expectedEvil: number;
-  actualRate: number;
-  expectedRate: number;
-  diffRate: number;
-};
-
-/**
- * Compare actual evil games to what would be expected based on player counts.
- * Traveler count is deliberately ignored.
- */
-const evilBias = computed<EvilBias | null>(() => {
-  let games = 0;
-  let actualEvil = 0;
-  let expectedEvil = 0;
-
-  for (const game of props.games) {
-    const playerCount = game.player_count ?? 0;
-    if (playerCount <= 0) continue;
-
-    const alignment = getInitialAlignment(game);
-    if (!alignment) continue;
-
-    const evilSlots = evilSlotsForPlayers(playerCount);
-    if (evilSlots <= 0) continue;
-
-    games++;
-
-    if (alignment === "EVIL") {
-      actualEvil++;
-    }
-
-    expectedEvil += evilSlots / playerCount;
-  }
-
-  if (!games) return null;
-
-  const actualRate = actualEvil / games;
-  const expectedRate = expectedEvil / games;
-
-  return {
-    games,
-    actualEvil,
-    expectedEvil,
-    actualRate,
-    expectedRate,
-    diffRate: actualRate - expectedRate,
-  };
+  return { alignment: goodDecided ? "GOOD" : "EVIL" };
 });
 
 /**
@@ -592,110 +438,12 @@ function getStatsCharacter(game: GameWithChars) {
   return last;
 }
 
-function findPlayerToken(page: GrimoirePage | null | undefined, game: GameWithChars) {
-  if (!page?.tokens?.length) return null;
-
-  const username = game.user?.username ?? null;
-
-  return (
-    page.tokens.find(
-      (t) =>
-        (username &&
-          (t.player?.username === username ||
-            t.player_name === username ||
-            t.player_name === `@${username}`)) ||
-        t.player_id === (game as unknown as { user_id?: string }).user_id
-    ) ?? null
-  );
-}
-
-function alignmentFromToken(token?: GrimoireToken | null): Alignment {
-  if (!token) return null;
-
-  const alignment = token.alignment as Alignment;
-  if (alignment === "GOOD" || alignment === "EVIL") {
-    return alignment;
-  }
-
-  const roleAlignment = token.role?.initial_alignment as Alignment;
-  if (roleAlignment === "GOOD" || roleAlignment === "EVIL") {
-    return roleAlignment;
-  }
-
-  return null;
-}
-
-function getAlignmentsFromGrimoire(game: GameWithChars): Alignment[] {
-  const alignments: Alignment[] = [];
-  const pages = game.grimoire ?? [];
-
-  for (const page of pages) {
-    const token = findPlayerToken(page, game);
-    const alignment = alignmentFromToken(token);
-    if (alignment) {
-      alignments.push(alignment);
-    }
-  }
-
-  return alignments;
-}
-
-function getCharacterAlignments(game: GameWithChars): Alignment[] {
-  const alignments: Alignment[] = [];
-
-  for (const character of game.player_characters) {
-    if (character.role?.type === "FABLED" || character.role?.type === "LORIC") continue;
-
-    const alignment = character.alignment as Alignment;
-    if (alignment === "GOOD" || alignment === "EVIL") {
-      alignments.push(alignment);
-    }
-  }
-
-  return alignments;
-}
-
-function getAlignmentTimeline(game: GameWithChars): Alignment[] {
-  const fromGrimoire = getAlignmentsFromGrimoire(game);
-  if (fromGrimoire.length) return fromGrimoire;
-
-  return getCharacterAlignments(game);
-}
-
-/**
- * Determine the player's starting alignment using the first grimoire page.
- * Falls back to the first recorded character if the grimoire is missing.
- */
-function getInitialAlignment(game: GameWithChars): Alignment {
-  const firstPage = game.grimoire?.[0];
-  const tokenAlignment = alignmentFromToken(findPlayerToken(firstPage, game));
-  if (tokenAlignment) return tokenAlignment;
-
-  const firstCharacter = game.player_characters.at(0);
-  const alignment = firstCharacter?.alignment as Alignment;
-  if (alignment === "GOOD" || alignment === "EVIL") {
-    return alignment;
-  }
-
-  return null;
-}
-
 /**
  * Return a link to a characters detail page.
  */
 function roleLink(name?: string) {
   if (!name) return "#";
   return `/roles/${name.toLowerCase().replace(/ /g, "_")}`;
-}
-
-/**
- * Map player count (excluding travelers) to expected number of evil slots.
- */
-function evilSlotsForPlayers(playerCount: number): number {
-  if (playerCount <= 0) return 0;
-  if (playerCount <= 9) return 2; // 1 demon + 1 minion
-  if (playerCount <= 12) return 3; // 1 demon + 2 minions
-  return 4; // 1 demon + 3 minions
 }
 
 /**
