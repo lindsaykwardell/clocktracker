@@ -251,7 +251,7 @@
                   {{ game.data.parent_game.user.display_name }}
                 </nuxt-link>
               </label>
-            </div>
+            </div>            
             <div
               v-if="game.data.demon_bluffs.length || game.data.fabled.length"
               class="flex flex-col md:flex-row gap-4 mt-4 justify-start"
@@ -340,6 +340,12 @@
                 class="bg-stone-300 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
               >
                 <span>{{ tag }}</span>
+              </span>
+              <span
+                v-if="game.data.ignore_for_stats"
+                class="inline-flex gap-1 items-center px-2 py-1 rounded bg-red-700/60 text-white badge"
+              >
+                <IconUI id="disabled"/>Ignored for Stats
               </span>
             </div>
           </div>

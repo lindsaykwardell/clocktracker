@@ -47,7 +47,7 @@
               v-if="game.ignore_for_stats"
               class="inline-flex gap-1 items-center rounded-sm bg-red-700/60 text-xs font-medium text-white badge"
             >
-              <IconUI id="disabled" size="xs"/><span class="sr-only">Ignore for </span>Stats
+              <IconUI id="disabled" size="xs"/><span class="sr-only">Ignored for </span>Stats
             </span>
           </div>
           <div class="absolute top-8 left-1 z-10">
@@ -469,15 +469,12 @@ li.selected {
   padding: .125rem .25rem;
 }
 
-/* Container: radius controls distance from center */
 .token-solarsystem {
-  /* For w-36/h-36 + w-8/h-8 -> radius ≈ 6rem for ~0.5rem gap */
   --orbit-radius: 6rem;
 }
 
 @media (min-width: 768px) {
   .token-solarsystem {
-    /* For w-48/h-48 + w-12/h-12 -> radius ≈ 8rem for ~0.5rem gap */
     --orbit-radius: 9rem;
   }
 }
@@ -497,41 +494,7 @@ li.selected {
     rotate(calc(0deg + var(--pos) * var(--angle-step)))
     translateX(var(--orbit-radius))
     rotate(calc(-0deg + var(--pos) * var(--angle-step) * -1));
-  /* --orbit-transform:
-    rotate(calc(30deg + var(--offset) * var(--angle-step)))
-    translateX(var(--orbit-radius))
-    rotate(calc(-30deg + var(--offset) * var(--angle-step) * -1));   */
   transform: var(--orbit-transform) scale(var(--scale));  
   transform-origin: center center;
-
-  /* &:nth-child(1) {
-    --scale: 1.1;
-    --offset: 0;
-  }
-
-  &:nth-child(2) {
-    --scale: 1;
-    --offset: 1;
-  }
-
-  &:nth-child(3) {
-    --scale: .9;
-    --offset: 1.9;
-  }
-
-  &:nth-child(4) {
-    --scale: .8;
-    --offset: 2.7;
-  }
-
-  &:nth-child(5) {
-    --scale: .7;
-    --offset: 3.45;
-  }
-
-  &:nth-child(6) {
-    --scale: .6;
-    --offset: 4.1;
-  } */
 }
 </style>
