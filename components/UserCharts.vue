@@ -261,7 +261,7 @@
           class="w-full xl:w-3/4 xl:mx-auto"
         />
       </section>
-      
+
       <!-- Most played / Game Size + Scripts -->
       <section>
         <StatsPlayerMostPlayed
@@ -316,6 +316,16 @@
             </div>
           </div>
         </div>
+      </section>
+
+      <!-- Player alignment -->
+      <section>
+        <StatsPlayerAlignment
+          v-if="mode === 'player'"
+          :games="filteredGames"
+          :is-me="isMe"
+          class="w-full xl:w-3/4 xl:mx-auto"
+        />
       </section>
       
       <!-- Games over time -->
