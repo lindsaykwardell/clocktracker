@@ -1,8 +1,14 @@
 <template>
   <component
     :is="is"
-    class="text-center transition duration-150 dark:text-white font-bold rounded flex justify-center gap-4 items-center p-1"
-    :class="computedClasses"
+    class="text-center transition duration-150 dark:text-white rounded flex justify-center items-center p-1 px-2"
+    :class="{
+      [computedClasses]: true,
+      'gap-2': hasIcon,
+      'gap-4': !hasIcon,
+      'gap-x-1': tag,
+      'font-bold': !tag,
+    }"
     :disabled="disabled"
   >
     <slot />
@@ -21,6 +27,8 @@ const props = defineProps<{
   discord?: boolean;
   fontSize?: "sm" | "md" | "lg" | "xl";
   disabled?: boolean;
+  hasIcon?: boolean;
+  tag?: boolean;
 }>();
 
 const nuxtLink = resolveComponent("nuxt-link");

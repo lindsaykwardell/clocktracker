@@ -3,30 +3,25 @@
     <template v-if="myGames.status !== Status.SUCCESS">
       <Loading class="h-screen" />
     </template>
-    <div v-else class="flex flex-col h-screen">
+    <div v-else class="flex flex-col md:flex-row h-[calc(100vh-50px)]">
       <div class="flex-grow flex justify-center items-center">
-        <Chart class="py-6 m-auto" :games="myGames.data" :options="options" />
+        <Chart 
+          class="py-12 m-auto" 
+          :games="myGames.data" 
+          :options="options" 
+        />
       </div>
       <div
-        class="p-6 m-6 border border-black rounded dark:border-transparent dark:bg-stone-950 flex flex-col gap-2"
+        class="w-100 md:w-1/2 lg:w-1/3 p-8 border-l dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40"
       >
-        <div class="flex gap-2">
-          <label class="flex items-center gap-1 flex-grow">
+        <!-- Form elements -->
+        <div class="grid grid-cols-[1fr_4fr] md:grid-cols-[1fr_3fr] gap-2 mb-8">
+          <label class="col-span-2 grid grid-cols-subgrid items-center">
             Title
             <Input type="text" v-model="options.title" />
           </label>
-          <label class="flex items-center gap-2">
-            <input
-              type="checkbox"
-              v-model="options.storyteller_only"
-              class="rounded"
-            />
-            <span>Storyteller games only</span>
-          </label>
-        </div>
-        <div class="flex flex-col md:flex-row gap-2 w-full">
-          <label class="flex-1 flex items-center gap-1">
-            <span class="w-[150px] md:w-auto">Chart Type</span>
+          <label class="col-span-2 grid grid-cols-subgrid items-center">
+            <span class="w-[150px] md:w-auto shrink-0">Chart Type</span>
             <Input mode="select" v-model="options.type">
               <option value="LIST">List</option>
               <option value="BAR">Bar</option>
@@ -34,7 +29,7 @@
               <option value="POLAR_AREA">Polar Area</option>
             </Input>
           </label>
-          <label class="flex-1 flex items-center gap-1">
+          <label class="col-span-2 grid grid-cols-subgrid items-center">
             <span class="w-[150px] md:w-auto">Data Field</span>
             <Input mode="select" v-model="options.data">
               <option value="ALIGNMENT">Alignment</option>
@@ -45,81 +40,105 @@
             </Input>
           </label>
           <!-- refactor the below radio buttons into a select dropdown -->
-          <label class="flex-1 flex items-center gap-1">
+          <label class="col-span-2 grid grid-cols-subgrid items-center">
             <span class="w-[150px] md:w-auto">Pivot Field</span>
-            <Input mode="select" v-model="options.pivot">
-              <option :value="null">Do not pivot</option>
-              <option value="ALIGNMENT">Alignment</option>
-              <option value="GAME_SIZE">Game Size</option>
-              <option value="ROLE">Role</option>
-              <option value="SCRIPT">Script</option>
-              <option value="WIN">Win</option>
-            </Input>
+            <div>
+              <Input mode="select" v-model="options.pivot">
+                <option :value="null">Do not pivot</option>
+                <option value="ALIGNMENT">Alignment</option>
+                <option value="GAME_SIZE">Game Size</option>
+                <option value="ROLE">Role</option>
+                <option value="SCRIPT">Script</option>
+                <option value="WIN">Win</option>
+              </Input>
+              <!-- <span class="text-xs leading-[1.3]">
+                Break the results down by another category (e.g., by Role or Script).
+              </span> -->
+            </div>
           </label>
-          <label class="flex-1 flex items-center gap-1">
+          <label class="col-span-2 grid grid-cols-subgrid items-center">
             <span class="w-[150px] md:w-auto">Width</span>
             <Input type="number" v-model="options.width" placeholder="250" />
           </label>
-          <label class="flex-1 flex items-center gap-1">
+          <label class="col-span-2 grid grid-cols-subgrid items-center">
             <span class="w-[150px] md:w-auto">Height</span>
             <Input type="number" v-model="options.height" placeholder="250" />
           </label>
-        </div>
-        <div class="flex flex-col md:flex-row gap-2 justify-between">
-          <div class="flex-1 flex gap-1">
-            <div class="w-[120px]">
-              <Input mode="select" v-model="selectedIncludeTag">
-                <option :value="null">Include Tag</option>
-                <option
-                  v-for="tag in myTags.filter(
-                    (tag) =>
-                      !options.include_tags.includes(tag) &&
-                      !options.exclude_tags.includes(tag)
-                  )"
+          <div class="col-span-2 grid grid-cols-subgrid gap-2">
+            <div>Filter</div>
+            <div class="flex flex-col gap-2">
+              <div class="flex flex-col gap-1">
+                <Input mode="select" v-model="selectedIncludeTag">
+                  <option :value="null">Include Tag</option>
+                  <option
+                    v-for="tag in myTags.filter(
+                      (tag) =>
+                        !options.include_tags.includes(tag) &&
+                        !options.exclude_tags.includes(tag)
+                    )"
+                  >
+                    {{ tag }}
+                  </option>
+                </Input>
+                <div
+                  v-if="options.include_tags.length"
+                  class="flex flex-wrap gap-1"
                 >
-                  {{ tag }}
-                </option>
-              </Input>
-            </div>
-            <div class="flex flex-wrap gap-2">
-              <button
-                v-for="(tag, index) in options.include_tags"
-                class="bg-blue-200 hover:bg-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
-                @click.prevent="options.include_tags.splice(index, 1)"
-              >
-                {{ tag }}
-              </button>
+                  <button
+                    v-for="(tag, index) in options.include_tags"
+                    class="bg-green-500 hover:bg-green-400 dark:bg-green-600 dark:hover:bg-green-700 transition duration-150 pl-2 py-1 rounded flex items-center"
+                    @click.prevent="options.include_tags.splice(index, 1)"
+                    :title="`Remove ${tag}`"
+                  >
+                    {{ tag }}
+                    <IconUI id="x" size="sm" />
+                  </button>
+                </div>
+              </div>
+              <div class="flex flex-col gap-1">
+                <Input mode="select" v-model="selectedExcludeTag">
+                  <option :value="null">Exclude Tag</option>
+                  <option
+                    v-for="tag in myTags.filter(
+                      (tag) =>
+                        !options.include_tags.includes(tag) &&
+                        !options.exclude_tags.includes(tag)
+                    )"
+                  >
+                    {{ tag }}
+                  </option>
+                </Input>
+                <div 
+                  v-if="options.exclude_tags.length"
+                  class="flex flex-wrap gap-1"
+                >
+                  <button
+                    v-for="(tag, index) in options.exclude_tags"
+                    class="bg-red-500 hover:bg-red-400 dark:bg-red-600 dark:hover:bg-red-700 transition duration-150 pl-2 py-1 rounded flex items-center"
+                    @click.prevent="options.exclude_tags.splice(index, 1)"
+                    :title="`Remove ${tag}`"
+                  >
+                    {{ tag }}
+                    <IconUI id="x" size="sm" />
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="flex-1 flex gap-1">
-            <div class="w-[120px]">
-              <Input mode="select" v-model="selectedExcludeTag">
-                <option :value="null">Exclude Tag</option>
-                <option
-                  v-for="tag in myTags.filter(
-                    (tag) =>
-                      !options.include_tags.includes(tag) &&
-                      !options.exclude_tags.includes(tag)
-                  )"
-                >
-                  {{ tag }}
-                </option>
-              </Input>
-            </div>
-            <div class="flex flex-wrap gap-2">
-              <button
-                v-for="(tag, index) in options.exclude_tags"
-                class="bg-red-200 hover:bg-red-300 dark:bg-red-600 dark:hover:bg-red-700 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
-                @click.prevent="options.exclude_tags.splice(index, 1)"
-              >
-                {{ tag }}
-              </button>
-            </div>
-          </div>
         </div>
-        <Button @click="saveChart" primary class="px-3 md:w-[300px] md:m-auto">
-          Save
-        </Button>
+        <!-- Form actions -->
+        <div class="col-span-2 flex gap-2 justify-end">
+          <nuxt-link
+            :to="cancelLink"
+            class="px-3 py-2 border rounded dark:border-stone-600 bg-stone-300/50 hover:bg-stone-300 dark:bg-stone-900/50 hover:dark:bg-stone-900"
+          >
+            Cancel
+          </nuxt-link>
+          <Button @click="saveChart" primary class="px-3">
+            Save
+          </Button>
+        </div>
+        
       </div>
     </div>
   </StandardTemplate>
@@ -136,6 +155,12 @@ const chartId = computed(() => {
   return route.query.chart_id as string | undefined;
 });
 const loadedChart = ref(false);
+
+const isStorytellerFromQuery = computed(() => {
+  // only use this for *new* charts
+  if (chartId.value) return false;
+  return route.query.storyteller_only === "1";
+});
 
 const me = computed(() => {
   return users.getUserById(user.value?.id);
@@ -174,7 +199,7 @@ const options = reactive<{
   exclude_tags: [],
   width: 250,
   height: 250,
-  storyteller_only: false,
+  storyteller_only: isStorytellerFromQuery.value
 });
 
 const selectedIncludeTag = ref<string | null>(null);
@@ -208,11 +233,29 @@ async function saveChart() {
   }
 
   if (me.value.status === Status.SUCCESS) {
-    router.push(`/@${me.value.data.username}?view=charts`);
+    const username = me.value.data.username;
+    const view = options.storyteller_only
+      ? "stats&storyteller=1"
+      : "stats";
+
+    router.push(`/@${username}?view=${view}`);
   } else {
     router.push("/");
   }
 }
+
+const cancelLink = computed(() => {
+  if (!me.value || me.value.status !== Status.SUCCESS) {
+    return "/";
+  }
+
+  const username = me.value.data.username;
+  const view = options.storyteller_only
+      ? "stats&storyteller=1"
+      : "stats";
+
+  return `/@${username}?view=${view}`;
+});
 
 onMounted(async () => {
   if (chartId.value) {

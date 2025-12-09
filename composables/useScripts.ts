@@ -13,6 +13,36 @@ const baseScripts = [
   Script.BadMoonRising,
 ];
 
+type ScriptCategory =
+  | "trouble-brewing"
+  | "sects-and-violets"
+  | "bad-moon-rising"
+  | "custom"
+  | "unknown";
+
+function scriptCategory(script?: Script | string | null): ScriptCategory {
+  if (!script) return "unknown";
+  if (script === Script.TroubleBrewing) return "trouble-brewing";
+  if (script === Script.SectsAndViolets) return "sects-and-violets";
+  if (script === Script.BadMoonRising) return "bad-moon-rising";
+  return "custom";
+}
+
+function scriptBgClasses(
+  script?: Script | string | null,
+  hasCustomBackground = false
+) {
+  const category = scriptCategory(script);
+  return {
+    "is-trouble-brewing": category === "trouble-brewing",
+    "is-sects-and-violets": category === "sects-and-violets",
+    "is-bad-moon-rising": category === "bad-moon-rising",
+    "is-custom-script":
+      category === "custom" && !hasCustomBackground && !!script,
+    "is-unknown-script": category === "unknown" && !hasCustomBackground,
+  };
+}
+
 export const useScripts = () => {
   return {
     Script,
@@ -31,6 +61,8 @@ export const useScripts = () => {
     isBaseScript: (script: Script | string) => {
       return baseScripts.includes(script as Script);
     },
+    scriptCategory,
+    scriptBgClasses,
     async fetchScriptVersions(script_id: number) {
       const versions = await $fetch(`/api/script/${script_id}/versions`);
 

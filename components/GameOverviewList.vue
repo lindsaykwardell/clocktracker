@@ -1,24 +1,49 @@
 <template>
   <div class="flex flex-wrap">
-    <table class="w-full">
+    <table class="w-full mx-3 md:mx-4">
       <thead>
         <tr>
+          <th v-if="selectMultipleGames.enabled" class="w-16 md:w-20">
+            Selected
+          </th>
           <th></th>
-          <th v-if="!props.showCommunityCard">Character</th>
+          <th v-if="!props.showCommunityCard" class="w-10 md:w-20">
+            Char<span class="sr-only">acter</span>
+          </th>
           <th class="hidden md:table-cell">Date</th>
-          <th>Script</th>
-          <th class="hidden md:table-cell">Location</th>
-          <th class="hidden md:table-cell">Community</th>
+          <th class="text-start">Script</th>
+          <th class="hidden md:table-cell text-start">Location</th>
+          <th class="hidden lg:table-cell text-start">Community</th>
           <th class="hidden md:table-cell">Players (+Travelers)</th>
-          <th>Win/Loss</th>
+          <th>Result</th>
+          <th
+            v-if="!selectMultipleGames.enabled && !props.readonly"
+            class="hidden md:table-cell"
+          >
+            Actions
+          </th>
         </tr>
       </thead>
       <tbody>
-        <component
-          :is="componentIs"
+        <tr
           v-for="game in games"
-          :to="getGameLink(game)"
-          class="table-row cursor-pointer bg-cover bg-center"
+          :key="game.id"
+          class="table-row game-row bg-cover bg-center script-bg"
+          :class="{
+            ...scriptBgClasses(
+              game.script,
+              !!game.associated_script?.background
+            ),
+            'select-multiple': selectMultipleGames.enabled,
+            selected: selectMultipleGames.selectedGames.includes(game.id),
+          }"
+          :style="
+            game.associated_script?.background
+              ? {
+                  '--bg-image-url': `url(${game.associated_script.background})`,
+                }
+              : {}
+          "
           @click="
             selectMultipleGames.enabled
               ? selectMultipleGames.toggleGame(game.id)
@@ -26,38 +51,33 @@
               ? onClick(game)
               : null
           "
-          :style="
-            game.associated_script?.background
-              ? {
-                  backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${game.associated_script.background})`,
-                }
-              : {}
-          "
-          :class="{
-            'trouble-brewing': game.script === 'Trouble Brewing',
-            'sects-and-violets': game.script === 'Sects and Violets',
-            'bad-moon-rising': game.script === 'Bad Moon Rising',
-            'custom-script':
-              [
-                'Trouble Brewing',
-                'Sects and Violets',
-                'Bad Moon Rising',
-              ].indexOf(game.script) === -1 &&
-              !game.associated_script?.background,
-            'select-multiple': selectMultipleGames.enabled,
-            selected: selectMultipleGames.selectedGames.includes(game.id),
-          }"
         >
-          <td class="w-12">
-            <a
-              v-if="game.bgg_id"
-              target="_blank"
-              :href="`https://boardgamegeek.com/play/details/${game.bgg_id}`"
-            >
-              <img src="/img/bgg.png" class="w-8 md:w-12" />
-            </a>
+          <td v-if="selectMultipleGames.enabled">
+            <div class="flex items-center justify-center select-status">
+              <span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="currentColor"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425z"
+                  />
+                </svg>
+              </span>
+            </div>
           </td>
-          <td v-if="!props.showCommunityCard">
+          <td class="w-4 md:w-6">
+            <div v-if="isFavorite(game)" class="text-primary">
+              <Star class="w-4 md:w-6" />
+            </div>
+          </td>
+          <td
+            v-if="!props.showCommunityCard"
+            class="flex items-center justify-center w-10 md:w-20"
+          >
             <Token
               v-if="
                 gamesStore.getLastCharater(game.id).name ||
@@ -67,31 +87,46 @@
               size="sm"
             />
           </td>
-          <td class="hidden md:table-cell">
-            <div class="flex gap-1 items-center">
-              <div v-if="isFavorite(game)" class="text-primary">
-                <Star class="w-6" />
-              </div>
-              <div>
-                {{ formatDate(game.date) }}
-              </div>
-            </div>
+          <td class="hidden md:table-cell text-center">
+            {{ formatDate(game.date) }}
           </td>
           <td>
-            {{ game.script }}
-            <template
-              v-if="game.associated_script && !isBaseScript(game.script)"
-            >
-              v{{ game.associated_script.version }}
-            </template>
+            <div class="flex items-center gap-1">
+              <span class="line-clamp-1 md:line-clamp-none max-w-40 md:max-w-none">
+                {{ game.script }}
+              </span>
+              <template
+                v-if="game.associated_script && !isBaseScript(game.script)"
+              >
+                <span
+                  class="inline-flex items-center rounded-sm bg-black/10 text-gray-800 dark:bg-black/40 dark:text-white text-xs font-medium badge"
+                >
+                  <template v-if="game.ls_game_id">
+                    Game {{ game.associated_script.version }}
+                  </template>
+                  <template v-else>
+                    {{ game.associated_script.version }}
+                  </template>
+                </span>
+              </template>
+              <span
+                v-if="game.ignore_for_stats"
+                class="inline-flex gap-1 items-center rounded bg-red-700/60 text-xs font-medium text-white p-[0.125rem]"
+              >
+                <IconUI id="disabled" size="xs" />
+                <span class="sr-only">
+                  Ignored for Stats
+                </span>
+              </span>
+            </div>
           </td>
-          <td class="hidden md:table-cell">
+          <td class="hidden md:table-cell text-start">
             <template v-if="game.location_type === 'IN_PERSON'">
               {{ game.location || "In Person" }}
             </template>
             <template v-else> Online </template>
           </td>
-          <td class="hidden md:table-cell">
+          <td class="hidden lg:table-cell">
             <div class="flex gap-2 items-center">
               <Avatar
                 v-if="game.community"
@@ -102,48 +137,95 @@
               {{ game.community_name }}
             </div>
           </td>
-          <td class="hidden md:table-cell">
+          <td class="hidden md:table-cell text-center">
             {{ game.player_count }}
             <template v-if="game.traveler_count && game.traveler_count > 0">
               (+{{ game.traveler_count }})
             </template>
           </td>
           <td>
-            <div class="flex gap-1">
-              <img
-                class="w-8 h-8 md:w-12 md:h-12 col-span-auto z-10"
-                :src="displayWinIcon(game, props.showCommunityCard)"
-              />
+            <div
+              class="flex gap-1 items-center justify-center game-winner game-winner--table"
+              v-html="displayWinIconSvg(game, props.showCommunityCard)"
+            ></div>
+          </td>
+          <td v-if="!selectMultipleGames.enabled && !props.readonly">
+            <div class="game-actions flex gap-2 items-center justify-center">
               <nuxt-link
                 v-if="isMyGame(game)"
-                class="dark:text-white font-bold px-4 rounded inline-flex items-center justify-center gap-1 flex-1 md:flex-initial z-10"
+                class="bg-white dark:text-white dark:bg-black hover:bg-purple-600 transition-colors duration-250 ease-in-out z-10 hidden md:flex"
+                :title="`Edit game - ${
+                  game.script && gamesStore.getLastCharater(game.id)?.name
+                    ? `${game.script} as ${
+                        gamesStore.getLastCharater(game.id).name
+                      }`
+                    : game.script ||
+                      gamesStore.getLastCharater(game.id)?.name ||
+                      ''
+                }, played on ${formatDate(game.date)}`"
                 :to="`/game/${game.id}/edit`"
-                ><svg
+              >
+                <IconUI id="edit" :rounded="true" />
+              </nuxt-link>
+              <a
+                v-if="game.bgg_id"
+                target="_blank"
+                class="bg-white dark:text-white dark:bg-black hover:bg-purple-600 transition-colors duration-250 ease-in-out z-10 hidden md:flex"
+                :title="`View this game on BoardGameGeek - ${
+                  game.script && gamesStore.getLastCharater(game.id)?.name
+                    ? `${game.script} as ${
+                        gamesStore.getLastCharater(game.id).name
+                      }`
+                    : game.script ||
+                      gamesStore.getLastCharater(game.id)?.name ||
+                      ''
+                }, played on ${formatDate(game.date)}`"
+                :href="`https://boardgamegeek.com/play/details/${game.bgg_id}`"
+              >
+                <!-- @todo use IconUI-->
+                <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="32"
-                  height="32"
-                  viewBox="0 0 32 32"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 25.4 37.9"
+                  aria-hidden="true"
                 >
                   <path
                     fill="currentColor"
-                    d="M2 26h28v2H2zM25.4 9c.8-.8.8-2 0-2.8l-3.6-3.6c-.8-.8-2-.8-2.8 0l-15 15V24h6.4l15-15zm-5-5L24 7.6l-3 3L17.4 7l3-3zM6 22v-3.6l10-10l3.6 3.6l-10 10H6z"
+                    d="m24.9 7-3.8 1 3.7-8L.9 8.8l1.3 10.5L0 21.5l6.6 16.4 14-5.1 4.8-11.4-2.1-2L24.9 7z"
                   />
                 </svg>
+              </a>
+              <nuxt-link
+                v-if="!selectMultipleGames.enabled && !props.readonly"
+                class="bg-white dark:text-white dark:bg-black hover:bg-purple-600 transition-colors duration-250 ease-in-out game-link"
+                :title="`View game - ${
+                  game.script && gamesStore.getLastCharater(game.id)?.name
+                    ? `${game.script} as ${
+                        gamesStore.getLastCharater(game.id).name
+                      }`
+                    : game.script ||
+                      gamesStore.getLastCharater(game.id)?.name ||
+                      ''
+                }, played on ${formatDate(game.date)}`"
+                :to="getGameLink(game)"
+              >
+                <IconUI id="view" :rounded="true" />
               </nuxt-link>
             </div>
           </td>
-        </component>
+        </tr>
       </tbody>
     </table>
   </div>
 </template>
 
 <script setup lang="ts">
-import { displayWinIcon } from "~/composables/useGames";
+import { displayWinIconSvg } from "~/composables/useGames";
 
 const gamesStore = useGames();
 const selectMultipleGames = useSelectMultipleGames();
-const { isBaseScript } = useScripts();
+const { isBaseScript, scriptBgClasses } = useScripts();
 const users = useUsers();
 const me = useMe();
 
@@ -152,9 +234,11 @@ const props = withDefaults(
     games: GameRecord[];
     onClick?: (game: GameRecord) => void;
     showCommunityCard?: boolean;
+    readonly?: boolean;
   }>(),
   {
     showCommunityCard: false,
+    readonly: false,
   }
 );
 
@@ -200,124 +284,141 @@ function isMyGame(game: GameRecord) {
 </script>
 
 <style scoped>
-th {
-  @apply cursor-pointer select-none;
+table {
+  border-collapse: separate;
+  border-spacing: 0 0.25rem;
+  margin-top: -0.25rem;
 }
 
-.dark {
-  .trouble-brewing {
-    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-      url("/img/trouble-brewing-bg.webp");
-
-    &:hover {
-      background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
-        url("/img/trouble-brewing-bg.webp");
-    }
-  }
-
-  .sects-and-violets {
-    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-      url("/img/sects-and-violets-bg.webp");
-
-    &:hover {
-      background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
-        url("/img/sects-and-violets-bg.webp");
-    }
-  }
-
-  .bad-moon-rising {
-    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-      url("/img/bad-moon-rising-bg.webp");
-
-    &:hover {
-      background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
-        url("/img/bad-moon-rising-bg.webp");
-    }
-  }
-
-  .custom-script {
-    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-      url("/img/custom-script-bg.webp");
-
-    &:hover {
-      background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
-        url("/img/custom-script-bg.webp");
-    }
-  }
-}
-
-.trouble-brewing {
-  background-image: linear-gradient(
-      rgba(255, 255, 255, 0.7),
-      rgba(255, 255, 255, 0.7)
-    ),
-    url("/img/trouble-brewing-bg.webp");
-
-  &:hover {
-    background-image: linear-gradient(
-        rgba(255, 255, 255, 0.5),
-        rgba(255, 255, 255, 0.5)
-      ),
-      url("/img/trouble-brewing-bg.webp");
-  }
-}
-
-.sects-and-violets {
-  background-image: linear-gradient(
-      rgba(255, 255, 255, 0.7),
-      rgba(255, 255, 255, 0.7)
-    ),
-    url("/img/sects-and-violets-bg.webp");
-
-  &:hover {
-    background-image: linear-gradient(
-        rgba(255, 255, 255, 0.5),
-        rgba(255, 255, 255, 0.5)
-      ),
-      url("/img/sects-and-violets-bg.webp");
-  }
-}
-
-.bad-moon-rising {
-  background-image: linear-gradient(
-      rgba(255, 255, 255, 0.7),
-      rgba(255, 255, 255, 0.7)
-    ),
-    url("/img/bad-moon-rising-bg.webp");
-
-  &:hover {
-    background-image: linear-gradient(
-        rgba(255, 255, 255, 0.5),
-        rgba(255, 255, 255, 0.5)
-      ),
-      url("/img/bad-moon-rising-bg.webp");
-  }
-}
-
-.custom-script {
-  background-image: linear-gradient(
-      rgba(255, 255, 255, 0.7),
-      rgba(255, 255, 255, 0.7)
-    ),
-    url("/img/custom-script-bg.webp");
-
-  &:hover {
-    background-image: linear-gradient(
-        rgba(255, 255, 255, 0.5),
-        rgba(255, 255, 255, 0.5)
-      ),
-      url("/img/custom-script-bg.webp");
-  }
-}
-
+th,
 td {
-  @apply h-12 md:h-16 p-2 transition duration-150;
   vertical-align: middle;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
 
-  .select-multiple.selected & {
-    @apply bg-primary;
+th {
+  @apply px-1 md:px-2 cursor-pointer select-none text-sm lg:text-base;
+}
+
+td {
+  @apply h-12 md:h-16 p-1 md:p-2 transition duration-150 text-sm lg:text-base;
+  border-style: solid none;
+
+  &:first-child {
+    @apply rounded-tl-lg md:rounded-tl-2xl rounded-bl-lg md:rounded-bl-2xl
+  }
+
+  &:last-child {
+    @apply rounded-tr-lg md:rounded-tr-2xl rounded-br-lg md:rounded-br-2xl
+  }
+}
+
+tr {
+  &.select-multiple:hover {
+    cursor: pointer;
+  }
+}
+
+.script-bg {
+  --bg-gradient-color: rgba(255, 255, 255, 0.7);
+  --bg-gradient-color-hover: rgba(255, 255, 255, 0.6);
+
+  background-image: linear-gradient(
+      var(--bg-gradient-color),
+      var(--bg-gradient-color)
+    ),
+    var(--bg-image-url);
+
+  &:hover {
+    background-image: linear-gradient(
+        var(--bg-gradient-color-hover),
+        var(--bg-gradient-color-hover)
+      ),
+      var(--bg-image-url);
+  }
+
+  .dark & {
+    --bg-gradient-color: rgba(0, 0, 0, 0.6);
+    --bg-gradient-color-hover: rgba(0, 0, 0, 0.5);
+  }
+
+  &.is-trouble-brewing {
+    --bg-image-url: url("/img/scripts/trouble-brewing-bg-thin.webp");
+  }
+
+  &.is-sects-and-violets {
+    --bg-image-url: url("/img/scripts/sects-and-violets-bg-thin.webp");
+  }
+
+  &.is-bad-moon-rising {
+    --bg-image-url: url("/img/scripts/bad-moon-rising-bg-thin.webp");
+  }
+
+  &.is-custom-script {
+    --bg-image-url: url("/img/scripts/custom-script-bg-thin.webp");
+  }
+
+  &.is-unknown-script {
+    --bg-image-url: url("/img/scripts/unknown-script-bg-thin.webp");
+  }
+}
+</style>
+
+<style scoped>
+.select-status {
+  > span {
+    @apply bg-white dark:text-white dark:bg-black;
+
+    position: relative;
+    z-index: 13;
+
+    .selected & {
+      @apply bg-purple-600 text-white dark:text-white dark:bg-purple-800;
+    }
+
+    .select-multiple:hover & {
+      @apply bg-purple-800 text-white dark:text-white dark:bg-purple-600;
+    }
+  }
+}
+
+.game-actions,
+.select-status {
+  > a,
+  > span {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+
+    @apply w-6 h-6 md:w-8 md:h-8;
+  }
+}
+
+.game-row {
+  position: relative;
+}
+
+.game-link::after {
+  content: "";
+  inset: 0;
+  position: absolute;
+}
+
+.game-winner {
+  z-index: 10;
+
+  svg {
+    inline-size: auto;
+  }
+}
+
+.game-winner--table {
+  position: relative;
+
+  svg {
+    block-size: 1.5rem;
   }
 }
 </style>

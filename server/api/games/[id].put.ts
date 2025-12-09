@@ -305,14 +305,13 @@ export default defineEventHandler(async (handler) => {
         const tokens = g.tokens?.filter((t) => t.player_id === id);
         if (tokens) {
           for (const token of tokens) {
-            // Don't add the token if it's identical to the last token
-            // in the player_characters array
-
+            // Avoid duplicating identical consecutive tokens (same role/related/alignment)
             const lastToken = acc[acc.length - 1];
             if (
               lastToken &&
               lastToken.role_id === token.role_id &&
-              lastToken.related_role_id === token.related_role_id
+              lastToken.related_role_id === token.related_role_id &&
+              lastToken.alignment === token.alignment
             ) {
               continue;
             }

@@ -1,36 +1,22 @@
 <template>
   <div class="chart-container">
-    <div class="flex gap-2 justify-center">
-      <div class="text-xl font-sorts text-center">{{ options.title }}</div>
-      <div v-if="showControls" class="flex gap-2">
-        <nuxt-link :to="`/charts/editor?chart_id=${options.id}`">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="32"
-            height="32"
-            viewBox="0 0 32 32"
-          >
-            <path
-              fill="currentColor"
-              d="M2 26h28v2H2zM25.4 9c.8-.8.8-2 0-2.8l-3.6-3.6c-.8-.8-2-.8-2.8 0l-15 15V24h6.4l15-15zm-5-5L24 7.6l-3 3L17.4 7l3-3zM6 22v-3.6l10-10l3.6 3.6l-10 10H6z"
-            />
-          </svg>
+    <div class="flex gap-2 justify-center mb-2 lg:mb-4">
+      <div class="font-sorts text-center text-lg lg:text-xl">
+        {{ options.title }}
+      </div>
+      <div v-if="showControls" class="flex gap-1 chart-actions">
+        <nuxt-link 
+          :to="`/charts/editor?chart_id=${options.id}`"
+          class="flex inline-flex items-center"
+          title="Edit chart"
+        >
+          <IconUI id="edit" :rounded="true" size="sm" />
         </nuxt-link>
-        <button @click="emit('deleteChart', options.id)">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="32"
-            height="32"
-            viewBox="0 0 512 512"
-          >
-            <path
-              d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
-              fill="currentColor"
-            />
-            <path d="M249 160h14v241h-14z" fill="currentColor" />
-            <path d="M320 160h-14.6l-10.7 241h14.6z" fill="currentColor" />
-            <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
-          </svg>
+        <button 
+          @click="emit('deleteChart', options.id)"
+          title="Delete chart"
+        >
+          <IconUI id="x-lg" :rounded="true" size="sm" />
         </button>
       </div>
     </div>
@@ -49,7 +35,10 @@
       :data="chartData"
       :options="chartOptions"
     />
-    <List v-if="options.type === 'LIST'" :data="chartData" />
+    <List 
+      v-if="options.type === 'LIST'" 
+      :data="chartData" 
+    />
   </div>
 </template>
 
@@ -58,36 +47,12 @@ import { Bar, Pie, PolarArea } from "vue-chartjs";
 import { colord, extend } from "colord";
 import mixPlugin from "colord/plugins/mix";
 import { WinStatus_V2, type GameRecord } from "~/composables/useGames";
+import { chartColors } from "~/composables/useChartColors";
 
 extend([mixPlugin]);
 
 const { Script, isBaseScript } = useScripts();
 const me = useMe()
-
-const colors = {
-  townsfolk: "#3297F4",
-  outsider: "#ADC9FA",
-  minion: "#D08C7F",
-  demon: "#8C0E12",
-  traveler: "#6b21a8",
-  storyteller: "#FFA500",
-
-  good: "#3297F4",
-  evil: "#8C0E12",
-
-  win: "#008000",
-  loss: "#A00A23",
-
-  tb: "#A00A23",
-  bmr: "#F4C43C",
-  snv: "#944CAC",
-  custom: "#008000",
-
-  teensy: "#ADD8E6",
-  small: "#0000FF",
-  medium: "#800080",
-  large: "#FF0000",
-};
 
 type DataType = "ROLE" | "ALIGNMENT" | "SCRIPT" | "GAME_SIZE" | "WIN";
 
@@ -120,15 +85,27 @@ const height = computed(() => (props.options.height || 250) + "px");
 
 const chartData = computed(() => {
   // Base filter for all games
-  const baseFilteredGames = props.games.filter(
-    (game) =>
-      !game.ignore_for_stats &&
-      // If storyteller_only is true, only include games where user was storyteller
-      // If storyteller_only is false/undefined, include all games (both player and storyteller)
-      (props.options.storyteller_only ? is_storyteller(game) : true) &&
-      props.options.include_tags.every((tag) => game.tags.includes(tag)) &&
-      props.options.exclude_tags.every((tag) => !game.tags.includes(tag))
-  );
+    const baseFilteredGames = props.games.filter((game) => {
+    if (game.ignore_for_stats) return false;
+
+    // Tag filters
+    if (!props.options.include_tags.every((tag) => game.tags.includes(tag))) {
+      return false;
+    }
+
+    if (!props.options.exclude_tags.every((tag) => !game.tags.includes(tag))) {
+      return false;
+    }
+
+    // Split storyteller vs non-storyteller completely
+    if (props.options.storyteller_only) {
+      // Only storyteller / co-storyteller games
+      return is_storyteller(game);
+    }
+
+    // Only non-storyteller games for player stats
+    return !is_storyteller(game);
+  });
 
   // Filter games based on the data type we're displaying
   const games = baseFilteredGames.filter((game) => {
@@ -142,6 +119,11 @@ const chartData = computed(() => {
       case "ALIGNMENT":
         return !!lastCharacter?.alignment;
       case "WIN":
+        // For storyteller games, we don't need a character - they're counted separately
+        if (props.options.storyteller_only) {
+          return !!game.win_v2;
+        }
+
         return !!lastCharacter?.alignment && !!game.win_v2;
       default:
         return true;
@@ -207,23 +189,23 @@ const chartData = computed(() => {
           (game) => is_storyteller(game),
         ],
         [
-          colors.townsfolk,
-          colors.outsider,
-          colors.minion,
-          colors.demon,
-          colors.traveler,
-          colors.storyteller,
+          chartColors.townsfolk,
+          chartColors.outsider,
+          chartColors.minion,
+          chartColors.demon,
+          chartColors.traveler,
+          chartColors.storyteller,
         ]
       ) ?? [
         {
           data: [townsfolk, outsider, minion, demon, traveler, storyteller],
           backgroundColor: [
-            colors.townsfolk,
-            colors.outsider,
-            colors.minion,
-            colors.demon,
-            colors.traveler,
-            colors.storyteller,
+            chartColors.townsfolk,
+            chartColors.outsider,
+            chartColors.minion,
+            chartColors.demon,
+            chartColors.traveler,
+            chartColors.storyteller,
           ],
         },
       ],
@@ -256,15 +238,16 @@ const chartData = computed(() => {
             return lastCharacter?.alignment === "EVIL";
           },
         ],
-        [colors.good, colors.evil]
+        [chartColors.good, chartColors.evil]
       ) ?? [
         {
           data: [good, evil],
-          backgroundColor: [colors.good, colors.evil],
+          backgroundColor: [chartColors.good, chartColors.evil],
         },
       ],
     };
   } else if (props.options.data === "SCRIPT") {
+    // Base script
     const troubleBrewing = games.filter(
       (game) => game.script === Script.TroubleBrewing
     ).length;
@@ -274,17 +257,30 @@ const chartData = computed(() => {
     const sectsAndViolets = games.filter(
       (game) => game.script === Script.SectsAndViolets
     ).length;
+
+    // Custom scripts
     const customScript = games.filter(
-      (game) => !isBaseScript(game.script)
+      (game) =>
+        !!game.script &&
+        game.script.trim().length > 0 &&
+        !isBaseScript(game.script)
     ).length;
-    const total =
-      troubleBrewing + badMoonRising + sectsAndViolets + customScript;
+
+    // No script / empty script
+    const unknownScript = games.filter(
+      (game) => !game.script || !game.script.trim().length
+    ).length;
+
+    // @todo Is this still relevant? Seems unused.
+    const total = troubleBrewing + badMoonRising + sectsAndViolets + customScript + unknownScript;
+
     return {
       labels: [
         `Trouble Brewing`,
         `Bad Moon Rising`,
-        `Sects and Violets`,
-        `Custom Script`,
+        `Sects & Violets`,
+        `Custom`,
+        `Unknown`,
       ],
       datasets: getPivot(
         games,
@@ -292,13 +288,17 @@ const chartData = computed(() => {
           (game) => game.script === Script.TroubleBrewing,
           (game) => game.script === Script.BadMoonRising,
           (game) => game.script === Script.SectsAndViolets,
-          (game) => !isBaseScript(game.script),
+          (game) =>
+            !!game.script &&
+            game.script.trim().length > 0 &&
+            !isBaseScript(game.script),
+          (game) => !game.script || !game.script.trim().length,
         ],
-        [colors.tb, colors.bmr, colors.snv, colors.custom]
+        [chartColors.tb, chartColors.bmr, chartColors.snv, chartColors.custom, chartColors.unknown]
       ) ?? [
         {
-          data: [troubleBrewing, badMoonRising, sectsAndViolets, customScript],
-          backgroundColor: [colors.tb, colors.bmr, colors.snv, colors.custom],
+          data: [troubleBrewing, badMoonRising, sectsAndViolets, customScript, unknownScript],
+          backgroundColor: [chartColors.tb, chartColors.bmr, chartColors.snv, chartColors.custom, chartColors.unknown],
         },
       ],
     };
@@ -334,15 +334,15 @@ const chartData = computed(() => {
             game.player_count <= 13,
           (game) => !!game.player_count && game.player_count > 13,
         ],
-        [colors.teensy, colors.small, colors.medium, colors.large]
+        [chartColors.teensy, chartColors.small, chartColors.medium, chartColors.large]
       ) ?? [
         {
           data: [teensy, small, medium, large],
           backgroundColor: [
-            colors.teensy,
-            colors.small,
-            colors.medium,
-            colors.large,
+            chartColors.teensy,
+            chartColors.small,
+            chartColors.medium,
+            chartColors.large,
           ],
         },
       ],
@@ -365,11 +365,11 @@ const chartData = computed(() => {
             (game) => game.win_v2 === WinStatus_V2.GOOD_WINS,
             (game) => game.win_v2 === WinStatus_V2.EVIL_WINS,
           ],
-          [colors.good, colors.evil]
+          [chartColors.good, chartColors.evil]
         ) ?? [
           {
             data: [goodWins, evilWins],
-            backgroundColor: [colors.good, colors.evil],
+            backgroundColor: [chartColors.good, chartColors.evil],
           },
         ],
       };
@@ -426,11 +426,11 @@ const chartData = computed(() => {
               );
             },
           ],
-          [colors.win, colors.loss]
+          [chartColors.win, chartColors.loss]
         ) ?? [
           {
             data: [win, loss],
-            backgroundColor: [colors.win, colors.loss],
+            backgroundColor: [chartColors.win, chartColors.loss],
           },
         ],
       };
@@ -512,32 +512,32 @@ function getPivot(
       {
         label: `Townsfolk`,
         data: townsfolk,
-        backgroundColor: getColor(colors.townsfolk),
+        backgroundColor: getColor(chartColors.townsfolk),
       },
       {
         label: `Outsider`,
         data: outsider,
-        backgroundColor: getColor(colors.outsider),
+        backgroundColor: getColor(chartColors.outsider),
       },
       {
         label: `Minion`,
         data: minion,
-        backgroundColor: getColor(colors.minion),
+        backgroundColor: getColor(chartColors.minion),
       },
       {
         label: `Demon`,
         data: demon,
-        backgroundColor: getColor(colors.demon),
+        backgroundColor: getColor(chartColors.demon),
       },
       {
         label: `Traveler`,
         data: traveler,
-        backgroundColor: getColor(colors.traveler),
+        backgroundColor: getColor(chartColors.traveler),
       },
       {
         label: `Storyteller`,
         data: storyteller,
-        backgroundColor: getColor(colors.storyteller),
+        backgroundColor: getColor(chartColors.storyteller),
       },
     ];
   } else if (props.options.pivot === "ALIGNMENT") {
@@ -562,12 +562,12 @@ function getPivot(
       {
         label: `Good`,
         data: good,
-        backgroundColor: getColor(colors.good),
+        backgroundColor: getColor(chartColors.good),
       },
       {
         label: `Evil`,
         data: evil,
-        backgroundColor: getColor(colors.evil),
+        backgroundColor: getColor(chartColors.evil),
       },
     ];
   } else if (props.options.pivot === "SCRIPT") {
@@ -591,35 +591,54 @@ function getPivot(
     );
     const customScript = validators.map(
       (validator) =>
-        games.filter((game) => !isBaseScript(game.script) && validator(game))
-          .length
+        games.filter(
+          (game) =>
+            !!game.script &&
+            game.script.trim().length > 0 &&
+            !isBaseScript(game.script) &&
+            validator(game)
+        ).length
+    );
+
+    const unknownScript = validators.map(
+      (validator) =>
+        games.filter(
+          (game) =>
+            (!game.script || !game.script.trim().length) && validator(game)
+        ).length
     );
     const total = [
       ...troubleBrewing,
       ...badMoonRising,
       ...sectsAndViolets,
       ...customScript,
+      ...unknownScript,
     ].reduce((acc, curr) => acc + curr, 0);
     return [
       {
         label: `Trouble Brewing`,
         data: troubleBrewing,
-        backgroundColor: getColor(colors.tb),
+        backgroundColor: getColor(chartColors.tb),
       },
       {
         label: `Bad Moon Rising`,
         data: badMoonRising,
-        backgroundColor: getColor(colors.bmr),
+        backgroundColor: getColor(chartColors.bmr),
       },
       {
         label: `Sects and Violets`,
         data: sectsAndViolets,
-        backgroundColor: getColor(colors.snv),
+        backgroundColor: getColor(chartColors.snv),
       },
       {
         label: `Custom Script`,
         data: customScript,
-        backgroundColor: getColor(colors.custom),
+        backgroundColor: getColor(chartColors.custom),
+      },
+      {
+        label: `Unknown Script`,
+        data: unknownScript,
+        backgroundColor: getColor(chartColors.unknown),
       },
     ];
   } else if (props.options.pivot === "GAME_SIZE") {
@@ -665,22 +684,22 @@ function getPivot(
       {
         label: `Teensy`,
         data: teensy,
-        backgroundColor: getColor(colors.teensy),
+        backgroundColor: getColor(chartColors.teensy),
       },
       {
         label: `1 Minion`,
         data: small,
-        backgroundColor: getColor(colors.small),
+        backgroundColor: getColor(chartColors.small),
       },
       {
         label: `2 Minions`,
         data: medium,
-        backgroundColor: getColor(colors.medium),
+        backgroundColor: getColor(chartColors.medium),
       },
       {
         label: `3 Minions`,
         data: large,
-        backgroundColor: getColor(colors.large),
+        backgroundColor: getColor(chartColors.large),
       },
     ];
   } else if (props.options.pivot === "WIN") {
@@ -706,12 +725,12 @@ function getPivot(
         {
           label: `Good Wins`,
           data: goodWins,
-          backgroundColor: getColor(colors.good),
+          backgroundColor: getColor(chartColors.good),
         },
         {
           label: `Evil Wins`,
           data: evilWins,
-          backgroundColor: getColor(colors.evil),
+          backgroundColor: getColor(chartColors.evil),
         },
       ];
     } else {
@@ -753,12 +772,12 @@ function getPivot(
         {
           label: `Win`,
           data: win,
-          backgroundColor: getColor(colors.win),
+          backgroundColor: getColor(chartColors.win),
         },
         {
           label: `Loss`,
           data: loss,
-          backgroundColor: getColor(colors.loss),
+          backgroundColor: getColor(chartColors.loss),
         },
       ];
     }
