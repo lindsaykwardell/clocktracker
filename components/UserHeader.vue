@@ -11,11 +11,11 @@
           class="border-2 shadow-xl flex-shrink row-span-3"
           size="lg"
         />
-        <h3 class="font-sorts text-xl md:text-2xl xl:text-3xl col-span-2">
+        <h3 class="font-sorts text-xl md:text-2xl xl:text-3xl col-span-2 break-all">
           {{ player.display_name }}
         </h3>
         <div class="row-start-2 col-start-2">
-          <div class="md:text-lg dark:text-stone-400">
+          <div class="md:text-lg dark:text-stone-400 break-all">
             <h4>{{ player.username }}</h4>
             <template v-if="player.pronouns">
               <span>{{ player.pronouns }}</span>

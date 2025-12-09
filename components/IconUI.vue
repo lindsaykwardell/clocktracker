@@ -3,8 +3,11 @@
     :class="[
       'inline-flex items-center justify-center',
       props.size,
-      props.rounded &&
-        'icon-rounded rounded-full bg-white text-black dark:bg-black dark:text-white hover:bg-purple-600 transition-colors duration-200 ease-in-out z-10'
+      {
+        'icon-rounded rounded-full dark:bg-black dark:text-white hover:bg-purple-600 transition-colors duration-200 ease-in-out z-10': props.rounded,
+        'bg-black text-white': props.rounded && props.dark,
+        'bg-white text-black': props.rounded && !props.dark
+      }
     ]"
   >
     <svg 
@@ -92,6 +95,7 @@ const props = defineProps<{
   id: string;
   class?: string;
   rounded?: boolean;
+  dark?: boolean;
   size?: 'xs' | 'sm' | 'md' | 'lg';
 }>();
 </script>
@@ -102,25 +106,24 @@ span.icon-rounded {
   justify-content: center;
   align-items: center;
   border-radius: 50%;
-  block-size: 2rem;
-  inline-size: 2rem;
+  
+  @apply w-6 h-6 md:w-8 md:h-8;
 
   &.sm {
-    block-size: 1.5rem;
-    inline-size: 1.5rem;
+    @apply w-4 h-4 md:w-6 md:h-6;
   }
 }
 
 svg {
   inline-size: auto;
-  block-size: 1.125rem;
+  @apply h-[0.875rem] md:h-[1.125rem];
 
   &.sm {
-    block-size: .875rem;
+    @apply h-[0.75rem] md:h-[.875rem];
   }
 
   &.xs {
-    block-size: .75rem;
+    @apply h-[0.625rem] md:h-[.75rem];
   }
 }
 </style>

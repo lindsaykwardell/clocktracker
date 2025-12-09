@@ -1,14 +1,14 @@
 <template>
   <div class="flex flex-wrap">
-    <table class="w-full mx-4">
+    <table class="w-full mx-3 md:mx-4">
       <thead>
         <tr>
           <th v-if="selectMultipleGames.enabled" class="w-16 md:w-20">
             Selected
           </th>
           <th></th>
-          <th v-if="!props.showCommunityCard" class="w-16 md:w-20">
-            Character
+          <th v-if="!props.showCommunityCard" class="w-10 md:w-20">
+            Char<span class="sr-only">acter</span>
           </th>
           <th class="hidden md:table-cell">Date</th>
           <th class="text-start">Script</th>
@@ -69,14 +69,14 @@
               </span>
             </div>
           </td>
-          <td class="w-6">
+          <td class="w-4 md:w-6">
             <div v-if="isFavorite(game)" class="text-primary">
-              <Star class="w-6" />
+              <Star class="w-4 md:w-6" />
             </div>
           </td>
           <td
             v-if="!props.showCommunityCard"
-            class="flex items-center justify-center w-16 md:w-20"
+            class="flex items-center justify-center w-10 md:w-20"
           >
             <Token
               v-if="
@@ -91,29 +91,34 @@
             {{ formatDate(game.date) }}
           </td>
           <td>
-            {{ game.script }}
-            <template
-              v-if="game.associated_script && !isBaseScript(game.script)"
-            >
-              <span
-                class="inline-flex items-center rounded-sm bg-black/10 text-gray-800 dark:bg-black/40 dark:text-white text-xs font-medium badge"
-              >
-                <template v-if="game.ls_game_id">
-                  Game {{ game.associated_script.version }}
-                </template>
-                <template v-else>
-                  {{ game.associated_script.version }}
-                </template>
+            <div class="flex items-center gap-1">
+              <span class="line-clamp-1 md:line-clamp-none max-w-40 md:max-w-none">
+                {{ game.script }}
               </span>
-            </template>
-            <span
-              v-if="game.ignore_for_stats"
-              class="inline-flex gap-1 items-center rounded-sm bg-red-700/60 text-xs font-medium text-white badge"
-            >
-              <IconUI id="disabled" size="xs" /><span class="sr-only"
-                >Ignore for </span
-              >Stats
-            </span>
+              <template
+                v-if="game.associated_script && !isBaseScript(game.script)"
+              >
+                <span
+                  class="inline-flex items-center rounded-sm bg-black/10 text-gray-800 dark:bg-black/40 dark:text-white text-xs font-medium badge"
+                >
+                  <template v-if="game.ls_game_id">
+                    Game {{ game.associated_script.version }}
+                  </template>
+                  <template v-else>
+                    {{ game.associated_script.version }}
+                  </template>
+                </span>
+              </template>
+              <span
+                v-if="game.ignore_for_stats"
+                class="inline-flex gap-1 items-center rounded bg-red-700/60 text-xs font-medium text-white p-[0.125rem]"
+              >
+                <IconUI id="disabled" size="xs" />
+                <span class="sr-only">
+                  Ignored for Stats
+                </span>
+              </span>
+            </div>
           </td>
           <td class="hidden md:table-cell text-start">
             <template v-if="game.location_type === 'IN_PERSON'">
@@ -193,7 +198,7 @@
               </a>
               <nuxt-link
                 v-if="!selectMultipleGames.enabled && !props.readonly"
-                class="bg-white dark:text-white dark:bg-black hover:bg-purple-600 transition-colors duration-250 ease-in-out game-link opacity-0 md:opacity-100"
+                class="bg-white dark:text-white dark:bg-black hover:bg-purple-600 transition-colors duration-250 ease-in-out game-link"
                 :title="`View game - ${
                   game.script && gamesStore.getLastCharater(game.id)?.name
                     ? `${game.script} as ${
@@ -301,13 +306,11 @@ td {
   border-style: solid none;
 
   &:first-child {
-    border-top-left-radius: 1rem;
-    border-bottom-left-radius: 1rem;
+    @apply rounded-tl-lg md:rounded-tl-2xl rounded-bl-lg md:rounded-bl-2xl
   }
 
   &:last-child {
-    border-bottom-right-radius: 1rem;
-    border-top-right-radius: 1rem;
+    @apply rounded-tr-lg md:rounded-tr-2xl rounded-br-lg md:rounded-br-2xl
   }
 }
 
@@ -384,16 +387,12 @@ tr {
 .select-status {
   > a,
   > span {
+    display: flex;
     justify-content: center;
     align-items: center;
     border-radius: 50%;
-    block-size: 2rem;
-    inline-size: 2rem;
-  }
 
-  svg {
-    block-size: 1.125rem;
-    inline-size: auto;
+    @apply w-6 h-6 md:w-8 md:h-8;
   }
 }
 

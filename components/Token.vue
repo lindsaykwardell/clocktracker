@@ -50,8 +50,8 @@
     </div>
     <div
       v-if="alwaysShowAlignment || (!character?.role && character?.alignment)"
-      class="token bg-center bg-cover absolute -bottom-3 -left-6 rounded-full shadow-xl border border-black flex justify-center items-center"
-      :class="relatedSize"
+      class="token bg-center bg-cover absolute rounded-full shadow-xl border border-black flex justify-center items-center"
+      :class="[relatedSize, relatedPos]"
       @click.stop="emit('clickAlignment')"
     >
       <img
@@ -65,8 +65,10 @@
     <div
       v-if="character?.related_role && !hideRelated"
       :id="relatedId"
-      class="token related bg-center bg-cover absolute -bottom-3 -right-6 rounded-full shadow-xl border border-black flex justify-center items-center"
-      :class="relatedSize"
+      class="token related bg-center bg-cover -bottom-3 -left-6 absolute rounded-full shadow-xl border border-black flex justify-center items-center"
+      :class="{
+        relatedSize
+      }"
       @click.stop="emit('clickRelated')"
     >
       <img
@@ -193,6 +195,17 @@ const relatedSize = computed(() => {
       return "w-8 h-8 md:w-12 md:h-12";
     case "lg":
       return "w-12 h-12 md:w-16 md:h-16";
+  }
+});
+
+const relatedPos = computed(() => {
+  switch (props.size) {
+    case "sm":
+      return "-bottom-1 md:-bottom-2 -left-1 md:-left-2";
+    case "md":
+      return "-bottom-3 -right-6";
+    case "lg":
+      return "-bottom-3 -right-6";
   }
 });
 

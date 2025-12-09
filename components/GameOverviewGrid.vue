@@ -1,10 +1,9 @@
 <template>
-  <ul class="flex flex-wrap">
+  <ul class="grid grid-cols-[repeat(auto-fill,_minmax(260px,_1fr))] md:grid-cols-[repeat(auto-fill,_minmax(360px,_1fr))] bg-stone-300/30 dark:bg-stone-700/30">
     <li
       v-for="game in games"
       class="border border-black transition duration-150 ease-in-out"
       :class="
-        cardWidth +
         (selectMultipleGames.selectedGames.includes(game.id) ? ' selected' : '')
       "
     >
@@ -82,7 +81,7 @@
                   class="w-2/3"
                 />
               </div>
-              <div v-if="uniquePlayableRoles(game).length" class="hidden md:block">
+              <div v-if="uniquePlayableRoles(game).length">
                 <Token
                   v-for="(role, i) in orbitRoles(game)"
                   :key="role.key"
@@ -195,7 +194,7 @@
               </div>
             </div>
             <div
-              class="game-actions gap-2 items-center justify-center hidden md:flex"
+              class="game-actions gap-1 md:gap-2 items-center justify-center flex"
             >
               <nuxt-link
                 v-if="!selectMultipleGames.enabled && isMyGame(game)"
@@ -211,17 +210,7 @@
                 }, played on ${formatDate(game.date)}`"
                 :to="`/game/${game.id}/edit`"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  fill="currentColor"
-                  viewBox="0 0 16 16"
-                >
-                  <path
-                    d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z"
-                  />
-                </svg>
+                <IconUI id="edit" :rounded="true" :dark="true" />
               </nuxt-link>
               <a
                 v-if="!selectMultipleGames.enabled && game.bgg_id"
@@ -265,18 +254,7 @@
                 }, played on ${formatDate(game.date)}`"
                 :to="getGameLink(game)"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  fill="currentColor"
-                  viewBox="0 0 16 16"
-                >
-                  <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0" />
-                  <path
-                    d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8m8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7"
-                  />
-                </svg>
+                <IconUI id="view" :rounded="true" :dark="true" />
               </nuxt-link>
             </div>
             <div
@@ -317,7 +295,6 @@ const selectMultipleGames = useSelectMultipleGames();
 const props = withDefaults(
   defineProps<{
     games: GameRecord[];
-    cardWidth?: string;
     onCardClick?: (game: GameRecord) => void;
     showCommunityCard?: boolean;
   }>(),
@@ -354,8 +331,6 @@ function fullImageUrl(file: string) {
   if (file.startsWith("http")) return file;
   return `${config.public.supabase.url}/storage/v1/object/public/game-attachments/${file}`;
 }
-
-const cardWidth = computed(() => props.cardWidth || "w-1/2 lg:w-1/3 xl:w-1/4");
 
 function handleCardClick(game: GameRecord) {
   if (props.onCardClick) props.onCardClick(game);
@@ -544,13 +519,8 @@ li.selected {
     justify-content: center;
     align-items: center;
     border-radius: 50%;
-    block-size: 2rem;
-    inline-size: 2rem;
-  }
 
-  svg {
-    block-size: 1.125rem;
-    inline-size: auto;
+    @apply w-6 h-6 md:w-8 md:h-8;
   }
 }
 
@@ -563,28 +533,16 @@ li.selected {
   inset: 0;
   position: absolute;
 }
-
-.game-winner {
-  z-index: 10;
-
-  svg {
-    inline-size: auto;
-  }
-}
-
-.game-winner--table {
-  position: relative;
-
-  svg {
-    block-size: 1.5rem;
-  }
-}
 </style>
 
 <style>
 .game-winner--grid {
+  z-index: 10;
+
   svg {
-    block-size: 2rem;
+    @apply h-6 md:h-8;
+
+    inline-size: auto;
   }
 }
 
@@ -609,8 +567,10 @@ li.selected {
   --offset: 0;
 
   position: absolute;
-  top: calc(50% - 1.5rem);
+  top: calc(50% - (1.5rem));
   left: calc(50% - 1.5rem);
+
+  @apply top-[calc(50%-1rem)] left-[calc(50%-1rem)] md:top-[calc(50%-1.5rem)] md:left-[calc(50%-1.5rem)];
 
   /* Orbit rotation */
   --orbit-transform: rotate(calc(0deg + var(--pos) * var(--angle-step)))
