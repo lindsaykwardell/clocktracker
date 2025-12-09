@@ -3,16 +3,25 @@
     <table class="w-full mx-4">
       <thead>
         <tr>
-          <th v-if="selectMultipleGames.enabled" class="w-16 md:w-20">Selected</th>
+          <th v-if="selectMultipleGames.enabled" class="w-16 md:w-20">
+            Selected
+          </th>
           <th></th>
-          <th v-if="!props.showCommunityCard" class="w-16 md:w-20">Character</th>
+          <th v-if="!props.showCommunityCard" class="w-16 md:w-20">
+            Character
+          </th>
           <th class="hidden md:table-cell">Date</th>
           <th class="text-start">Script</th>
           <th class="hidden md:table-cell text-start">Location</th>
           <th class="hidden lg:table-cell text-start">Community</th>
           <th class="hidden md:table-cell">Players (+Travelers)</th>
           <th>Result</th>
-          <th v-if="!selectMultipleGames.enabled && !props.readonly">Actions</th>
+          <th
+            v-if="!selectMultipleGames.enabled && !props.readonly"
+            class="hidden md:table-cell"
+          >
+            Actions
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -21,13 +30,18 @@
           :key="game.id"
           class="table-row game-row bg-cover bg-center script-bg"
           :class="{
-            ...scriptBgClasses(game.script, !!game.associated_script?.background),
+            ...scriptBgClasses(
+              game.script,
+              !!game.associated_script?.background
+            ),
             'select-multiple': selectMultipleGames.enabled,
             selected: selectMultipleGames.selectedGames.includes(game.id),
           }"
           :style="
             game.associated_script?.background
-              ? { '--bg-image-url': `url(${game.associated_script.background})` }
+              ? {
+                  '--bg-image-url': `url(${game.associated_script.background})`,
+                }
               : {}
           "
           @click="
@@ -38,13 +52,19 @@
               : null
           "
         >
-          <td 
-            v-if="selectMultipleGames.enabled"
-          >
+          <td v-if="selectMultipleGames.enabled">
             <div class="flex items-center justify-center select-status">
               <span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                  <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425z"/>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="currentColor"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425z"
+                  />
                 </svg>
               </span>
             </div>
@@ -54,7 +74,7 @@
               <Star class="w-6" />
             </div>
           </td>
-          <td 
+          <td
             v-if="!props.showCommunityCard"
             class="flex items-center justify-center w-16 md:w-20"
           >
@@ -75,7 +95,9 @@
             <template
               v-if="game.associated_script && !isBaseScript(game.script)"
             >
-              <span class="inline-flex items-center rounded-sm bg-black/10 text-gray-800 dark:bg-black/40 dark:text-white text-xs font-medium badge">
+              <span
+                class="inline-flex items-center rounded-sm bg-black/10 text-gray-800 dark:bg-black/40 dark:text-white text-xs font-medium badge"
+              >
                 <template v-if="game.ls_game_id">
                   Game {{ game.associated_script.version }}
                 </template>
@@ -88,7 +110,9 @@
               v-if="game.ignore_for_stats"
               class="inline-flex gap-1 items-center rounded-sm bg-red-700/60 text-xs font-medium text-white badge"
             >
-              <IconUI id="disabled" size="xs"/><span class="sr-only">Ignore for </span>Stats
+              <IconUI id="disabled" size="xs" /><span class="sr-only"
+                >Ignore for </span
+              >Stats
             </span>
           </td>
           <td class="hidden md:table-cell text-start">
@@ -115,50 +139,69 @@
             </template>
           </td>
           <td>
-            <div 
-              class="flex gap-1 items-center justify-center game-winner game-winner--table" 
-              v-html="displayWinIconSvg(game, props.showCommunityCard)">
-            </div>
+            <div
+              class="flex gap-1 items-center justify-center game-winner game-winner--table"
+              v-html="displayWinIconSvg(game, props.showCommunityCard)"
+            ></div>
           </td>
-          <td
-            v-if="!selectMultipleGames.enabled && !props.readonly"
-          >
+          <td v-if="!selectMultipleGames.enabled && !props.readonly">
             <div class="game-actions flex gap-2 items-center justify-center">
               <nuxt-link
                 v-if="isMyGame(game)"
-                class="bg-white dark:text-white dark:bg-black hover:bg-purple-600 transition-colors duration-250 ease-in-out z-10"
+                class="bg-white dark:text-white dark:bg-black hover:bg-purple-600 transition-colors duration-250 ease-in-out z-10 hidden md:flex"
                 :title="`Edit game - ${
                   game.script && gamesStore.getLastCharater(game.id)?.name
-                    ? `${game.script} as ${gamesStore.getLastCharater(game.id).name}`
-                    : game.script || gamesStore.getLastCharater(game.id)?.name || ''
+                    ? `${game.script} as ${
+                        gamesStore.getLastCharater(game.id).name
+                      }`
+                    : game.script ||
+                      gamesStore.getLastCharater(game.id)?.name ||
+                      ''
                 }, played on ${formatDate(game.date)}`"
                 :to="`/game/${game.id}/edit`"
-                >
+              >
                 <IconUI id="edit" :rounded="true" />
               </nuxt-link>
               <a
                 v-if="game.bgg_id"
                 target="_blank"
-                class="bg-white dark:text-white dark:bg-black hover:bg-purple-600 transition-colors duration-250 ease-in-out z-10"
+                class="bg-white dark:text-white dark:bg-black hover:bg-purple-600 transition-colors duration-250 ease-in-out z-10 hidden md:flex"
                 :title="`View this game on BoardGameGeek - ${
                   game.script && gamesStore.getLastCharater(game.id)?.name
-                    ? `${game.script} as ${gamesStore.getLastCharater(game.id).name}`
-                    : game.script || gamesStore.getLastCharater(game.id)?.name || ''
+                    ? `${game.script} as ${
+                        gamesStore.getLastCharater(game.id).name
+                      }`
+                    : game.script ||
+                      gamesStore.getLastCharater(game.id)?.name ||
+                      ''
                 }, played on ${formatDate(game.date)}`"
                 :href="`https://boardgamegeek.com/play/details/${game.bgg_id}`"
               >
                 <!-- @todo use IconUI-->
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 25.4 37.9" aria-hidden="true">
-                  <path fill="currentColor" d="m24.9 7-3.8 1 3.7-8L.9 8.8l1.3 10.5L0 21.5l6.6 16.4 14-5.1 4.8-11.4-2.1-2L24.9 7z"/>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 25.4 37.9"
+                  aria-hidden="true"
+                >
+                  <path
+                    fill="currentColor"
+                    d="m24.9 7-3.8 1 3.7-8L.9 8.8l1.3 10.5L0 21.5l6.6 16.4 14-5.1 4.8-11.4-2.1-2L24.9 7z"
+                  />
                 </svg>
               </a>
               <nuxt-link
                 v-if="!selectMultipleGames.enabled && !props.readonly"
-                class="bg-white dark:text-white dark:bg-black hover:bg-purple-600 transition-colors duration-250 ease-in-out game-link"
+                class="bg-white dark:text-white dark:bg-black hover:bg-purple-600 transition-colors duration-250 ease-in-out game-link opacity-0 md:opacity-100"
                 :title="`View game - ${
                   game.script && gamesStore.getLastCharater(game.id)?.name
-                    ? `${game.script} as ${gamesStore.getLastCharater(game.id).name}`
-                    : game.script || gamesStore.getLastCharater(game.id)?.name || ''
+                    ? `${game.script} as ${
+                        gamesStore.getLastCharater(game.id).name
+                      }`
+                    : game.script ||
+                      gamesStore.getLastCharater(game.id)?.name ||
+                      ''
                 }, played on ${formatDate(game.date)}`"
                 :to="getGameLink(game)"
               >
@@ -236,11 +279,10 @@ function isMyGame(game: GameRecord) {
 </script>
 
 <style scoped>
-
-table { 
-  border-collapse: separate; 
-  border-spacing: 0 .25rem; 
-  margin-top: -.25rem;
+table {
+  border-collapse: separate;
+  border-spacing: 0 0.25rem;
+  margin-top: -0.25rem;
 }
 
 th,
@@ -259,13 +301,13 @@ td {
   border-style: solid none;
 
   &:first-child {
-    border-top-left-radius: 1rem; 
+    border-top-left-radius: 1rem;
     border-bottom-left-radius: 1rem;
   }
 
   &:last-child {
-    border-bottom-right-radius: 1rem; 
-    border-top-right-radius: 1rem; 
+    border-bottom-right-radius: 1rem;
+    border-top-right-radius: 1rem;
   }
 }
 
@@ -279,11 +321,17 @@ tr {
   --bg-gradient-color: rgba(255, 255, 255, 0.7);
   --bg-gradient-color-hover: rgba(255, 255, 255, 0.6);
 
-  background-image: linear-gradient(var(--bg-gradient-color), var(--bg-gradient-color)),
-      var(--bg-image-url);
+  background-image: linear-gradient(
+      var(--bg-gradient-color),
+      var(--bg-gradient-color)
+    ),
+    var(--bg-image-url);
 
   &:hover {
-    background-image: linear-gradient(var(--bg-gradient-color-hover), var(--bg-gradient-color-hover)),
+    background-image: linear-gradient(
+        var(--bg-gradient-color-hover),
+        var(--bg-gradient-color-hover)
+      ),
       var(--bg-image-url);
   }
 
@@ -314,8 +362,7 @@ tr {
 }
 </style>
 
-
-<style>
+<style scoped>
 .select-status {
   > span {
     @apply bg-white dark:text-white dark:bg-black;
@@ -337,7 +384,6 @@ tr {
 .select-status {
   > a,
   > span {
-    display: flex;
     justify-content: center;
     align-items: center;
     border-radius: 50%;

@@ -38,7 +38,7 @@
                       >
                         {{ activeFilters.length }}
                       </span>
-                      <Button 
+                      <Button
                         class="font-normal w-full whitespace-nowrap"
                         hasIcon
                       >
@@ -63,7 +63,9 @@
                       >
                         <MenuItem>
                           <div class="flex gap-2 items-center">
-                            <span class="flex-shrink text-stone-200">Dates</span>
+                            <span class="flex-shrink text-stone-200"
+                              >Dates</span
+                            >
                             <Input
                               @click.stop
                               type="date"
@@ -378,21 +380,27 @@
                 v-if="startDateRange !== null"
                 font-size="md"
                 @click.prevent="startDateRange = null"
-                :title="`Remove after ${formatDate(new Date(startDateRange))} date filter`"
+                :title="`Remove after ${formatDate(
+                  new Date(startDateRange)
+                )} date filter`"
                 hasIcon
                 tag
               >
-                After Date: {{ formatDate(new Date(startDateRange)) }}<IconUI id="x" />
+                After Date: {{ formatDate(new Date(startDateRange))
+                }}<IconUI id="x" />
               </Button>
               <Button
                 v-if="endDateRange !== null"
                 font-size="md"
                 @click.prevent="endDateRange = null"
-                :title="`Remove before ${formatDate(new Date(endDateRange))} date filter`"
+                :title="`Remove before ${formatDate(
+                  new Date(endDateRange)
+                )} date filter`"
                 hasIcon
                 tag
               >
-                Before Date: {{ formatDate(new Date(endDateRange)) }}<IconUI id="x" />
+                Before Date: {{ formatDate(new Date(endDateRange))
+                }}<IconUI id="x" />
               </Button>
               <Button
                 v-if="minPlayers !== null"
