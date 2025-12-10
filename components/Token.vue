@@ -66,9 +66,7 @@
       v-if="character?.related_role && !hideRelated"
       :id="relatedId"
       class="token related bg-center bg-cover -bottom-3 -left-6 absolute rounded-full shadow-xl border border-black flex justify-center items-center"
-      :class="{
-        relatedSize
-      }"
+      :class="[relatedSize]"
       @click.stop="emit('clickRelated')"
     >
       <img
