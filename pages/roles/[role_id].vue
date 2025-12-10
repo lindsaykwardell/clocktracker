@@ -139,12 +139,13 @@
         </div>
       </div>
     </section>
-    <GameOverviewGrid :games="myGamesWithRole" cardWidth="w-1/2 xl:w-1/3" />
+    <GameOverviewGrid :games="myGamesWithRole" />
   </StandardTemplate>
 </template>
 
 <script setup lang="ts">
 import { Line, Pie } from "vue-chartjs";
+import { chartColors } from "~/composables/useChartColors";
 
 const route = useRoute();
 const role_id = route.params.role_id as string;
@@ -231,7 +232,7 @@ const winRatioData = computed(() => ({
     {
       data: [role_data.win_loss.wins, role_data.win_loss.losses],
       hoverOffset: 4,
-      backgroundColor: ["blue", "red"],
+      backgroundColor: [chartColors.win, chartColors.loss],
     },
   ],
 }));
@@ -243,7 +244,7 @@ function perScriptRadioData(wins: number, losses: number) {
       {
         data: [wins, losses],
         hoverOffset: 4,
-        backgroundColor: ["blue", "red"],
+        backgroundColor: [chartColors.win, chartColors.loss],
       },
     ],
   };

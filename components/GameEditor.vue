@@ -297,18 +297,12 @@
         v-if="!game.player_count"
         :style="
           customBackground
-            ? { backgroundImage: `url(${customBackground})` }
+            ? { '--bg-image-url' : `url(${customBackground})` }
             : {}
         "
-        class="pt-3 relative bg-center bg-cover w-full h-[200px] flex justify-center items-center"
+        class="grimoire pt-3 relative bg-center bg-cover w-full h-[200px] flex justify-center items-center script-bg"
         :class="{
-          'trouble-brewing': game.script === 'Trouble Brewing',
-          'sects-and-violets': game.script === 'Sects and Violets',
-          'bad-moon-rising': game.script === 'Bad Moon Rising',
-          'custom-script':
-            ['Trouble Brewing', 'Sects and Violets', 'Bad Moon Rising'].indexOf(
-              game.script
-            ) === -1 && !customBackground,
+          ...scriptBgClasses(game.script, !!customBackground),
         }"
       >
         <div
@@ -331,18 +325,12 @@
         v-else
         :style="
           customBackground
-            ? { backgroundImage: `url(${customBackground})` }
+            ? { '--bg-image-url' : `url(${customBackground})` }
             : {}
         "
-        class="pt-3 relative bg-center bg-cover w-full"
+        class="grimoire pt-3 relative bg-center bg-cover w-full script-bg"
         :class="{
-          'trouble-brewing': game.script === 'Trouble Brewing',
-          'sects-and-violets': game.script === 'Sects and Violets',
-          'bad-moon-rising': game.script === 'Bad Moon Rising',
-          'custom-script':
-            ['Trouble Brewing', 'Sects and Violets', 'Bad Moon Rising'].indexOf(
-              game.script
-            ) === -1 && !customBackground,
+          ...scriptBgClasses(game.script, !!customBackground),
         }"
       >
         <Button
@@ -623,11 +611,11 @@
   />
   <Dialog v-model:visible="showCopyGrimoireDialog" size="xl">
     <template #title>
-      <h2 class="text-2xl font-bold">Manage Favorites</h2>
-      <p class="text-lg text-stone-400 p-4">
-        Click on a game to add or remove it from your favorites. Only six
-        favorites are shown on your profile, but you can favorite as many games
-        as you like.
+      <h2 class="text-2xl font-bold">Copy Existing Grimoire</h2>
+      <p class="text-lg text-stone-400 py-4">
+        Click on a game to copy the grimoire data to this game.
+        (Grimoire data includes player count, player data, 
+        location, community, ...)
       </p>
     </template>
 
@@ -775,7 +763,7 @@ const user = useSupabaseUser();
 const me = useMe();
 const games = useGames();
 const friends = useFriends();
-const { isBaseScript, fetchScriptVersions } = useScripts();
+const { isBaseScript, fetchScriptVersions, scriptBgClasses } = useScripts();
 const allRoles = useRoles();
 const route = useRoute();
 
@@ -1360,56 +1348,45 @@ watch(
     value.forEach((page, i) => {
       page.tokens.forEach((token, j) => {
         if (!!token.player_id && token.player_id === user.value?.id) {
+          const lastCharacter = myCharacters.at(-1);
+          const sameAsLast =
+            lastCharacter &&
+            lastCharacter.role_id === token.role_id &&
+            lastCharacter.related_role_id === token.related_role_id &&
+            lastCharacter.alignment === token.alignment;
+
+          if (sameAsLast) return;
+
           if (token.role_id) {
-            // See if the role is already in the player_character list
-            const existingCharacter = myCharacters.find(
-              (character) =>
-                character.role_id === token.role_id &&
-                character.alignment === token.alignment
-            );
-
-            // If it's not there, let's add it!
-            if (!existingCharacter) {
-              myCharacters.push({
-                name: token.role?.name ?? "",
-                alignment: token.alignment,
-                related: token.related_role?.name ?? "",
-                showRelated: !!token.related_role_id,
-                role_id: token.role_id,
-                related_role_id: token.related_role_id,
-                role: {
-                  token_url: token.role?.token_url ?? "/1x1.png",
-                  type: token.role?.type ?? "",
-                  initial_alignment: token.role?.initial_alignment ?? "NEUTRAL",
-                },
-                related_role: {
-                  token_url: token.related_role?.token_url ?? "/1x1.png",
-                },
-              });
-            }
+            myCharacters.push({
+              name: token.role?.name ?? "",
+              alignment: token.alignment,
+              related: token.related_role?.name ?? "",
+              showRelated: !!token.related_role_id,
+              role_id: token.role_id,
+              related_role_id: token.related_role_id,
+              role: {
+                token_url: token.role?.token_url ?? "/1x1.png",
+                type: token.role?.type ?? "",
+                initial_alignment: token.role?.initial_alignment ?? "NEUTRAL",
+              },
+              related_role: {
+                token_url: token.related_role?.token_url ?? "/1x1.png",
+              },
+            });
           } else if (token.alignment && token.alignment !== "NEUTRAL") {
-            // Handle alignment-only tokens (no specific role)
-            // See if there's already an alignment-only character for this alignment
-            const existingAlignmentCharacter = myCharacters.find(
-              (character) =>
-                !character.role_id && character.alignment === token.alignment
-            );
-
-            // If it's not there, let's add it!
-            if (!existingAlignmentCharacter) {
-              myCharacters.push({
-                name: "",
-                alignment: token.alignment,
-                related: "",
-                showRelated: false,
-                role_id: null,
-                related_role_id: null,
-                role: undefined,
-                related_role: {
-                  token_url: "/1x1.png",
-                },
-              });
-            }
+            myCharacters.push({
+              name: "",
+              alignment: token.alignment,
+              related: "",
+              showRelated: false,
+              role_id: null,
+              related_role_id: null,
+              role: undefined,
+              related_role: {
+                token_url: "/1x1.png",
+              },
+            });
           }
         }
 
@@ -1558,19 +1535,27 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.trouble-brewing {
-  background-image: url("/img/trouble-brewing-bg.webp");
-}
+.script-bg {
+  background-image: var(--bg-image-url);
 
-.sects-and-violets {
-  background-image: url("/img/sects-and-violets-bg.webp");
-}
+  &.is-trouble-brewing {
+    --bg-image-url: url("/img/scripts/trouble-brewing-bg.webp");
+  }
 
-.bad-moon-rising {
-  background-image: url("/img/bad-moon-rising-bg.webp");
-}
+  &.is-sects-and-violets {
+    --bg-image-url: url("/img/scripts/sects-and-violets-bg.webp");
+  }
 
-.custom-script {
-  background-image: url("/img/custom-script-bg.webp");
+  &.is-bad-moon-rising {
+    --bg-image-url: url("/img/scripts/bad-moon-rising-bg.webp");
+  }
+
+  &.is-custom-script {
+    --bg-image-url: url("/img/scripts/custom-script-bg.webp");
+  }
+
+  &.is-unknown-script {
+    --bg-image-url: url("/img/scripts/unknown-script-bg.webp");
+  }
 }
 </style>
