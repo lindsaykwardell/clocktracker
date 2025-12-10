@@ -216,7 +216,6 @@
                   <div>
                     <GameOverviewGrid
                       :games="getGame(update.game.id)"
-                      cardWidth="w-full"
                     />
                   </div>
                 </template>
