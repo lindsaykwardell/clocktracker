@@ -94,7 +94,7 @@
         </div>
 
         <div 
-          v-if="alignmentSwitchStats.gamesWithSwitch > 0"
+          v-if="alignmentSwitchStats && alignmentSwitchStats.gamesWithSwitch > 0"
           class="flex flex-col text-center"
         >
           <div class="text-center text-sm text-pretty space-y-2">
