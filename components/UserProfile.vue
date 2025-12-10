@@ -57,7 +57,7 @@
     <section class="px-4 lg:px-8">
       <StatsStorytellerRoles 
         :games="userGames"
-        :username="player.username";
+        :username="player.username"
         condensed 
       />
     </section>
