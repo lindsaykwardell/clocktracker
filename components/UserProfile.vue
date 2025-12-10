@@ -34,7 +34,6 @@
       <template v-if="favoriteGames.length > 0">
         <GameOverviewGrid
           :games="favoriteGames"
-          cardWidth="w-1/2 lg:w-1/4"
         />
         <div v-if="isMe" class="flex justify-center items-center">
           <button
@@ -58,7 +57,7 @@
     <section class="px-4 lg:px-8">
       <StatsStorytellerRoles 
         :games="userGames"
-        :username="player.username";
+        :username="player.username"
         condensed 
       />
     </section>

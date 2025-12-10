@@ -72,7 +72,7 @@
 
         <div v-else class="flex items-center justify-center flex-grow">
           <p class="text-center text-sm text-stone-400 text-balance">
-            Not enough data (No character with at least {{ MIN_PLAYS_FOR_PERFORMANCE }} plays).
+            Not enough data (No character with at least {{ MIN_PLAYS_FOR_PERFORMANCE }} plays and a win rate of 50% or higher).
           </p>
         </div>
         
@@ -110,7 +110,7 @@
 
         <div v-else class="flex items-center justify-center flex-grow">
           <p class="text-center text-sm text-stone-400 text-balance">
-            Not enough data (No character with at least {{ MIN_PLAYS_FOR_PERFORMANCE }} plays).
+            Not enough data (No character with at least {{ MIN_PLAYS_FOR_PERFORMANCE }} plays and a win rate lower than 50%).
           </p>
         </div>
       </div>
@@ -154,6 +154,8 @@ import { chartColors } from "~/composables/useChartColors";
 
 // Minimum number of games required for a character to be considered in best/worst performance.
 const MIN_PLAYS_FOR_PERFORMANCE = 3;
+const MIN_WIN_RATE_FOR_BEST = 0.5;
+const MAX_WIN_RATE_FOR_WORST = 0.49;
 
 type Alignment = "GOOD" | "EVIL" | null;
 
@@ -353,24 +355,24 @@ const bestPerforming = computed<RoleSummary | null>(() => {
 
   for (const stats of roleStatsMap.value.values()) {
     if (stats.plays < MIN_PLAYS_FOR_PERFORMANCE) continue;
-    if (stats.wins === 0) continue;
 
     const total = stats.wins + stats.losses;
     const winRate = total > 0 ? stats.wins / total : 0;
 
-    if (!best) {
-      best = stats;
-      continue;
-    }
+    if (total === 0) continue;
+    if (winRate < MIN_WIN_RATE_FOR_BEST) continue;
 
-    const bestTotal = best.wins + best.losses;
-    const bestRate = bestTotal > 0 ? best.wins / bestTotal : 0;
+    const bestWins = best?.wins ?? 0;
+    const bestLosses = best?.losses ?? 0;
+    const bestTotal = bestWins + bestLosses;
+    const bestRate = bestTotal > 0 ? bestWins / bestTotal : 0;
 
     if (
-      stats.wins > best.wins ||
-      (stats.wins === best.wins && winRate > bestRate) ||
-      (stats.wins === best.wins &&
-        winRate === bestRate &&
+      !best ||
+      winRate > bestRate ||
+      (winRate === bestRate && stats.wins > bestWins) ||
+      (winRate === bestRate &&
+        stats.wins === bestWins &&
         stats.plays > best.plays)
     ) {
       best = stats;
@@ -391,24 +393,25 @@ const worstPerforming = computed<RoleSummary | null>(() => {
 
   for (const stats of roleStatsMap.value.values()) {
     if (stats.plays < MIN_PLAYS_FOR_PERFORMANCE) continue;
-    if (stats.losses === 0) continue;
 
     const total = stats.wins + stats.losses;
     const winRate = total > 0 ? stats.wins / total : 0;
 
-    if (!worst) {
-      worst = stats;
-      continue;
-    }
+    if (total === 0) continue;
+    if (winRate > MAX_WIN_RATE_FOR_WORST) continue;
+    if (stats.losses === 0) continue;
 
-    const worstTotal = worst.wins + worst.losses;
-    const worstRate = worstTotal > 0 ? worst.wins / worstTotal : 0;
+    const worstWins = worst?.wins ?? 0;
+    const worstLosses = worst?.losses ?? 0;
+    const worstTotal = worstWins + worstLosses;
+    const worstRate = worstTotal > 0 ? worstWins / worstTotal : 0;
 
     if (
-      stats.losses > worst.losses ||
-      (stats.losses === worst.losses && winRate < worstRate) ||
-      (stats.losses === worst.losses &&
-        winRate === worstRate &&
+      !worst ||
+      winRate < worstRate ||
+      (winRate === worstRate && stats.losses > worstLosses) ||
+      (winRate === worstRate &&
+        stats.losses === worstLosses &&
         stats.plays > worst.plays)
     ) {
       worst = stats;
