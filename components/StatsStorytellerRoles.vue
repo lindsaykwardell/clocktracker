@@ -1,7 +1,7 @@
 <template>
   <div>
     <h2 class="font-sorts text-center text-xl lg:text-2xl mb-2 lg:mb-4">
-      Storytold Roles
+      Storytold Characters
     </h2>
 
     <div v-if="!condensed" class="flex justify-center gap-2 mb-2 lg:mb-4">
