@@ -48,7 +48,7 @@
               </template>
               <template v-else-if="evilBias.diffRate < 0.05 && evilBias.diffRate > -0.05">
                 {{ props.isMe ? 'You' : `This player` }} drew one {{ evilBias?.actualEvil }} times, 
-                which is only a small a difference of 
+                which is only a small difference of 
                 <span class="font-semibold" :style="`color: ${evilBias?.diffRate > 0 ? chartColors.evil : chartColors.good}`">
                   {{ (evilBias?.diffRate > 0 ? '+' : '') + Math.round(evilBias?.diffRate * 100) }}%
                 </span>
@@ -94,7 +94,7 @@
         </div>
 
         <div 
-          v-if="alignmentSwitchStats.gamesWithSwitch > 0"
+          v-if="alignmentSwitchStats && alignmentSwitchStats.gamesWithSwitch > 0"
           class="flex flex-col text-center"
         >
           <div class="text-center text-sm text-pretty space-y-2">
