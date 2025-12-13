@@ -396,8 +396,14 @@ tr {
   }
 }
 
-.game-row {
-  position: relative;
+tr.game-row {
+  /*
+    Safari doesn't support `position: relative` on `<tr>` elements,
+    but these two properties can be used as an alternative.
+    Source: https://mtsknn.fi/blog/relative-tr-in-safari/
+  */
+  transform: translate(0);
+  clip-path: inset(0);
 }
 
 .game-link::after {
