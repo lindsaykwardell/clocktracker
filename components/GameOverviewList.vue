@@ -17,10 +17,15 @@
           <th class="hidden md:table-cell">Players (+Travelers)</th>
           <th>Result</th>
           <th
-            v-if="!selectMultipleGames.enabled && !props.readonly"
+            v-if="!props.readonly && !selectMultipleGames.enabled"
             class="hidden md:table-cell"
           >
             Actions
+          </th>
+          <th
+            v-else-if="selectMultipleGames.enabled"
+          >
+            BGG
           </th>
         </tr>
       </thead>
@@ -149,10 +154,10 @@
               v-html="displayWinIconSvg(game, props.showCommunityCard)"
             ></div>
           </td>
-          <td v-if="!selectMultipleGames.enabled && !props.readonly">
+          <td v-if="!props.readonly">
             <div class="game-actions flex gap-2 items-center justify-center">
               <nuxt-link
-                v-if="isMyGame(game)"
+                v-if="isMyGame(game) && !selectMultipleGames.enabled"
                 class="bg-white dark:text-white dark:bg-black hover:bg-purple-600 transition-colors duration-250 ease-in-out z-10 hidden md:flex"
                 :title="`Edit game - ${
                   game.script && gamesStore.getLastCharater(game.id)?.name
@@ -167,35 +172,56 @@
               >
                 <IconUI id="edit" :rounded="true" />
               </nuxt-link>
-              <a
-                v-if="game.bgg_id"
-                target="_blank"
-                class="bg-white dark:text-white dark:bg-black hover:bg-purple-600 transition-colors duration-250 ease-in-out z-10 hidden md:flex"
-                :title="`View this game on BoardGameGeek - ${
-                  game.script && gamesStore.getLastCharater(game.id)?.name
-                    ? `${game.script} as ${
-                        gamesStore.getLastCharater(game.id).name
-                      }`
-                    : game.script ||
-                      gamesStore.getLastCharater(game.id)?.name ||
-                      ''
-                }, played on ${formatDate(game.date)}`"
-                :href="`https://boardgamegeek.com/play/details/${game.bgg_id}`"
-              >
-                <!-- @todo use IconUI-->
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 25.4 37.9"
-                  aria-hidden="true"
+              <template v-if="game.bgg_id && !selectMultipleGames.enabled">
+                <a
+                  target="_blank"
+                  class="bg-white dark:text-white dark:bg-black hover:bg-purple-600 transition-colors duration-250 ease-in-out z-10"
+                  :title="`View this game on BoardGameGeek - ${
+                    game.script && gamesStore.getLastCharater(game.id)?.name
+                      ? `${game.script} as ${
+                          gamesStore.getLastCharater(game.id).name
+                        }`
+                      : game.script ||
+                        gamesStore.getLastCharater(game.id)?.name ||
+                        ''
+                  }, played on ${formatDate(game.date)}`"
+                  :href="`https://boardgamegeek.com/play/details/${game.bgg_id}`"
                 >
-                  <path
-                    fill="currentColor"
-                    d="m24.9 7-3.8 1 3.7-8L.9 8.8l1.3 10.5L0 21.5l6.6 16.4 14-5.1 4.8-11.4-2.1-2L24.9 7z"
-                  />
-                </svg>
-              </a>
+                  <!-- @todo use IconUI-->
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 25.4 37.9"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fill="currentColor"
+                      d="m24.9 7-3.8 1 3.7-8L.9 8.8l1.3 10.5L0 21.5l6.6 16.4 14-5.1 4.8-11.4-2.1-2L24.9 7z"
+                    />
+                  </svg>
+                </a>
+              </template>
+              <template v-else-if="game.bgg_id">
+                <span
+                  class="bg-white dark:text-white dark:bg-black z-10"
+                >
+                  <!-- @todo use IconUI-->
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 25.4 37.9"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fill="currentColor"
+                      d="m24.9 7-3.8 1 3.7-8L.9 8.8l1.3 10.5L0 21.5l6.6 16.4 14-5.1 4.8-11.4-2.1-2L24.9 7z"
+                    />
+                  </svg>
+                </span>
+              </template>
+              
               <nuxt-link
                 v-if="!selectMultipleGames.enabled && !props.readonly"
                 class="bg-white dark:text-white dark:bg-black hover:bg-purple-600 transition-colors duration-250 ease-in-out game-link"
