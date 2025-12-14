@@ -210,34 +210,58 @@
               >
                 <IconUI id="edit" :rounded="true" :dark="true" />
               </nuxt-link>
-              <a
+              <template
                 v-if="!selectMultipleGames.enabled && game.bgg_id"
-                target="_blank"
-                class="text-white bg-black hover:bg-purple-600 transition-colors duration-250 ease-in-out z-10"
-                :title="`View this game on BoardGameGeek - ${
-                  game.script && gamesStore.getLastCharater(game.id)?.name
-                    ? `${game.script} as ${
-                        gamesStore.getLastCharater(game.id).name
-                      }`
-                    : game.script ||
-                      gamesStore.getLastCharater(game.id)?.name ||
-                      ''
-                }, played on ${formatDate(game.date)}`"
-                :href="`https://boardgamegeek.com/play/details/${game.bgg_id}`"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 25.4 37.9"
-                  aria-hidden="true"
+                <a
+                  target="_blank"
+                  class="text-white bg-black hover:bg-purple-600 transition-colors duration-250 ease-in-out z-10"
+                  :title="`View this game on BoardGameGeek - ${
+                    game.script && gamesStore.getLastCharater(game.id)?.name
+                      ? `${game.script} as ${
+                          gamesStore.getLastCharater(game.id).name
+                        }`
+                      : game.script ||
+                        gamesStore.getLastCharater(game.id)?.name ||
+                        ''
+                  }, played on ${formatDate(game.date)}`"
+                  :href="`https://boardgamegeek.com/play/details/${game.bgg_id}`"
                 >
-                  <path
-                    fill="currentColor"
-                    d="m24.9 7-3.8 1 3.7-8L.9 8.8l1.3 10.5L0 21.5l6.6 16.4 14-5.1 4.8-11.4-2.1-2L24.9 7z"
-                  />
-                </svg>
-              </a>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 25.4 37.9"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fill="currentColor"
+                      d="m24.9 7-3.8 1 3.7-8L.9 8.8l1.3 10.5L0 21.5l6.6 16.4 14-5.1 4.8-11.4-2.1-2L24.9 7z"
+                    />
+                  </svg>
+                </a>
+              </template>
+              <template
+                v-else-if="game.bgg_id"
+              >
+                <span
+                  class="text-white bg-black z-10"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 25.4 37.9"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fill="currentColor"
+                      d="m24.9 7-3.8 1 3.7-8L.9 8.8l1.3 10.5L0 21.5l6.6 16.4 14-5.1 4.8-11.4-2.1-2L24.9 7z"
+                    />
+                  </svg>
+                </span>
+              </template>
+              
               <nuxt-link
                 v-if="!selectMultipleGames.enabled"
                 class="text-white bg-black hover:bg-purple-600 transition-colors duration-250 ease-in-out game-link"
@@ -254,24 +278,24 @@
               >
                 <IconUI id="view" :rounded="true" :dark="true" />
               </nuxt-link>
-            </div>
-            <div
-              class="flex items-center justify-center select-status"
-              v-if="selectMultipleGames.enabled"
-            >
-              <span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  fill="currentColor"
-                  viewBox="0 0 16 16"
-                >
-                  <path
-                    d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425z"
-                  />
-                </svg>
-              </span>
+              <div
+                class="flex items-center justify-center select-status"
+                v-if="selectMultipleGames.enabled"
+              >
+                <span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    fill="currentColor"
+                    viewBox="0 0 16 16"
+                  >
+                    <path
+                      d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425z"
+                    />
+                  </svg>
+                </span>
+              </div>
             </div>
           </div>
         </div>
