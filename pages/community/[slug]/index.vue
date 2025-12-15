@@ -1,15 +1,17 @@
 <template>
   <CommunityTemplate>
     <template #header="{ community }">
-      <div class="flex flex-wrap w-11/12 m-auto pb-2">
+      <div class="flex flex-wrap w-11/12 m-auto py-8">
         <nuxt-link
           v-for="member in community.data.members"
           :to="`/@${member.username}`"
+          :aria-label="`View ${member.username}'s profile`"
         >
           <Avatar
             :value="member.avatar"
             :size="community.data.members.length > 50 ? 'xs' : 'sm'"
             class="border-stone-800"
+            v-tooltip="member.username"
           />
         </nuxt-link>
       </div>
