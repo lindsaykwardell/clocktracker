@@ -93,6 +93,7 @@
           <nuxt-link
             v-for="community in player.communities"
             :to="`/community/${community.slug}`"
+            :aria-label="`View the ${community.name} community`"
           >
             <Avatar
               :value="community.icon"
