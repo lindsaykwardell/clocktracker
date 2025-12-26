@@ -770,6 +770,7 @@ const route = useRoute();
 const showScriptDialog = ref(false);
 const showRoleSelectionDialog = ref(false);
 const advancedModeEnabled_ = useLocalStorage("advancedModeEnabled", "false");
+const grimoireOverride = ref(false); // Override to show grimoire without changing user preference
 const roles = ref<
   {
     type: RoleType;
@@ -827,8 +828,10 @@ const noChangeToIsStoryteller = computed({
 });
 
 const advancedModeEnabled = computed({
-  get: () => advancedModeEnabled_.value === "true",
+  get: () => grimoireOverride.value || advancedModeEnabled_.value === "true",
   set: (value) => {
+    // When user manually toggles, update both the override and the saved preference
+    grimoireOverride.value = value;
     advancedModeEnabled_.value = value ? "true" : "false";
   },
 });
@@ -1504,6 +1507,11 @@ onMounted(async () => {
   friends.fetchCommunityMembers();
   if (me.value.status === Status.SUCCESS) {
     games.fetchPlayerGames(me.value.data.username);
+  }
+
+  // If the game has grimoire data with tokens, enable Record Grimoire without changing user preference
+  if (props.game.grimoire.some((g) => g.tokens.length > 0 && g.tokens.some((t) => t.role_id))) {
+    grimoireOverride.value = true;
   }
 
   if (props.game.bgg_id) {
