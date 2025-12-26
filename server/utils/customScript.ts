@@ -147,9 +147,9 @@ export async function saveCustomScript(
         }
       }
       if (initial_alignment === Alignment.GOOD) {
-        return "/img/role/good.png";
+        return "/img/role/good.webp";
       } else if (initial_alignment === Alignment.EVIL) {
-        return "/img/role/evil.png";
+        return "/img/role/evil.webp";
       }
 
       return "/img/default.png";

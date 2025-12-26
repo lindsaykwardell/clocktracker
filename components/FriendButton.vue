@@ -5,7 +5,7 @@
       class="whitespace-nowrap flex gap-1 items-center justify-center py-1 w-[150px] rounded transition duration-150"
       :class="friendButtonClass"
     >
-      <img src="/img/role/empath.png" class="w-8 h-8" />
+      <img src="/img/role/48x48/empath.webp" class="w-8 h-8" />
       <span :aria-label="friendButtonText"></span>
     </button>
     <button
@@ -15,7 +15,7 @@
       @click.prevent="rejectFriendship"
       class="whitespace-nowrap flex gap-1 items-center justify-center py-1 w-[150px] rounded transition duration-150 border border-red-900 hover:border-red-950 hover:bg-red-950"
     >
-      <img src="/img/role/empath.png" class="w-8 h-8" />
+      <img src="/img/role/48x48/empath.webp" class="w-8 h-8" />
       <span>Delete</span>
     </button>
   </div>

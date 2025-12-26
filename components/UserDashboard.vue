@@ -323,21 +323,21 @@
           class="flex-1 flex flex-col items-center text-xs"
           @click="selectedTab = 'updates'"
         >
-          <img :src="`/img/role/towncrier.png`" class="w-10 m-auto" />
+          <img :src="`/img/role/48x48/towncrier.webp`" class="w-10 m-auto" />
           Updates
         </button>
         <button
           class="flex-1 flex flex-col items-center text-xs"
           @click="selectedTab = 'events'"
         >
-          <img :src="`/img/role/clockmaker.png`" class="w-10 m-auto" />
+          <img :src="`/img/role/48x48/clockmaker.webp`" class="w-10 m-auto" />
           Events
         </button>
         <nuxt-link
           class="flex-1 flex flex-col items-center text-xs"
           to="/add-game"
         >
-          <img :src="`/img/role/mezepheles.png`" class="w-10 m-auto" />
+          <img :src="`/img/role/48x48/mezepheles.webp`" class="w-10 m-auto" />
           Add Game
         </nuxt-link>
       </div>

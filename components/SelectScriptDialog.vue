@@ -187,7 +187,7 @@
           @click="searchScripts"
           class="absolute right-2 -top-3 w-16 h-16"
         >
-          <img v-if="mode === 'classic'" src="/img/role/investigator.png" />
+          <img v-if="mode === 'classic'" src="/img/role/48x48/investigator.webp" />
           <img v-else src="/img/living-scripts.webp" />
         </button>
       </div>

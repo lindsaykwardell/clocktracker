@@ -24,7 +24,7 @@
               }"
             >
               <div class="w-[30px] overflow-hidden">
-                <img src="/img/role/investigator.png" />
+                <img src="/img/role/48x48/investigator.webp" />
               </div>
               <template v-if="editingMultipleGames">Not updated</template>
               <template v-else-if="game.script === ''">Select Script</template>
