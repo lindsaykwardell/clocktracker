@@ -8,7 +8,7 @@
         class="bg-blue-100 px-4 py-2 text-blue-800"
       >
         <div class="flex items-center gap-2">
-          <img src="/img/role/good.png" class="w-6 h-6" />
+          <img src="/img/role/48x48/good.webp" class="w-6 h-6" />
           <div>
             {{ isNew ? "Game added!" : "Game updated!" }}
             <template v-if="isNew">

@@ -45,12 +45,12 @@
               v-tooltip="`Storyteller in ${gamesAsStoryteller.length} games`"
             >
               <img
-                :src="`/img/role/storyteller_inv.png`"
+                :src="`/img/role/48x48/storyteller_inv.webp`"
                 alt="Storyteller Count"
                 class="hidden dark:block w-8"
               />
               <img
-                :src="`/img/role/storyteller.png`"
+                :src="`/img/role/48x48/storyteller.webp`"
                 alt="Storyteller Count"
                 class="block dark:hidden w-8"
               />
@@ -69,7 +69,7 @@
             >
               <img
                 :src="
-                  mostCommonCharacter?.token_url || `/img/role/amnesiac.png`
+                  mostCommonCharacter?.token_url || `/img/role/48x48/amnesiac.webp`
                 "
                 alt="Player Count"
                 class="w-8"

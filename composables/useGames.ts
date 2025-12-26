@@ -360,7 +360,7 @@ export const useGames = defineStore("games", {
             ...dummyCharacter,
             name: "STORYTELLER",
             role: {
-              token_url: "/img/role/storyteller.png",
+              token_url: "/img/role/storyteller.webp",
               initial_alignment: "NEUTRAL",
               type: "STORYTELLER",
             },
@@ -622,9 +622,9 @@ export const useGames = defineStore("games", {
 export function displayWinIcon(game: GameRecord, showTeamWin: boolean = false) {
   return game.is_storyteller || showTeamWin
     ? game.win_v2 === WinStatus_V2.GOOD_WINS
-      ? "/img/role/good.png"
+      ? "/img/role/good.webp"
       : game.win_v2 === WinStatus_V2.EVIL_WINS
-      ? "/img/role/evil.png"
+      ? "/img/role/evil.webp"
       : "/1x1.png"
     : game.player_characters.length > 0
     ? (game.win_v2 === WinStatus_V2.GOOD_WINS &&
@@ -633,7 +633,7 @@ export function displayWinIcon(game: GameRecord, showTeamWin: boolean = false) {
       (game.win_v2 === WinStatus_V2.EVIL_WINS &&
         game.player_characters[game.player_characters.length - 1].alignment ===
           "EVIL")
-      ? "/img/win.png"
+      ? "/img/win."
       : (game.win_v2 === WinStatus_V2.EVIL_WINS &&
           game.player_characters[game.player_characters.length - 1]
             .alignment === "GOOD") ||
