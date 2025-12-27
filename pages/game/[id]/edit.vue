@@ -217,6 +217,10 @@ const formattedGame = computed(() => ({
     name: fabled.name,
     role_id: fabled.role_id,
   })),
+  // If the game was waiting for confirmation, mark it as confirmed when saving
+  waiting_for_confirmation: savedGame.data.value?.waiting_for_confirmation
+    ? false
+    : undefined,
 }));
 
 async function submitGame() {
