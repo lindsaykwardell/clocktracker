@@ -90,6 +90,13 @@
               Games
             </nuxt-link>
             <nuxt-link
+              :to="`/community/${community.data.slug}/stats`"
+              class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-200 dark:hover:bg-stone-700"
+              :class="currentTabClass('stats')"
+            >
+              Stats
+            </nuxt-link>
+            <nuxt-link
               v-if="isModerator"
               :to="`/community/${community.data.slug}/dashboard`"
               class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-200 dark:hover:bg-stone-700"
