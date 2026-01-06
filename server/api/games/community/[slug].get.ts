@@ -186,7 +186,11 @@ export default defineEventHandler(async (handler) => {
   for (const game of games) {
     anonymizedGames.push(
       await anonymizeGame(
-        { ...game, grimoire: [], demon_bluffs: [], fabled: [] } as GameRecord,
+        {
+          ...game,
+          demon_bluffs: [],
+          fabled: [],
+        } as GameRecord,
         me,
         false // always default to anonymous when loading on a community page
       )
