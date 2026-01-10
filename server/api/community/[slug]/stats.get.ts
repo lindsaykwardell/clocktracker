@@ -69,6 +69,14 @@ export default defineEventHandler(async (handler) => {
     },
     select: {
       id: true,
+      date: true,
+      created_at: true,
+      player_count: true,
+      traveler_count: true,
+      location: true,
+      location_type: true,
+      tags: true,
+      script: true,
       user: {
         select: {
           user_id: true,
@@ -86,6 +94,9 @@ export default defineEventHandler(async (handler) => {
           tokens: {
             select: {
               alignment: true,
+              is_dead: true,
+              used_ghost_vote: true,
+              order: true,
               role: {
                 select: {
                   name: true,
@@ -98,6 +109,7 @@ export default defineEventHandler(async (handler) => {
                 select: {
                   user_id: true,
                   username: true,
+                  display_name: true,
                   avatar: true,
                 },
               },
@@ -369,6 +381,48 @@ export default defineEventHandler(async (handler) => {
       players: players.length,
     },
     players,
+    games: games.map((g) => ({
+      id: g.id,
+      date: g.date,
+      created_at: g.created_at,
+      player_count: g.player_count,
+      traveler_count: g.traveler_count,
+      location: g.location,
+      location_type: g.location_type,
+      tags: g.tags,
+      script: g.script,
+      win_v2: g.win_v2,
+      ignore_for_stats: g.ignore_for_stats,
+      grimoire:
+        g.grimoire?.map((page) => ({
+          tokens:
+            page.tokens?.map((token) => ({
+              alignment: token.alignment,
+              is_dead: token.is_dead,
+              used_ghost_vote: token.used_ghost_vote,
+              order: token.order,
+              role: token.role
+                ? {
+                    name: token.role.name,
+                    type: token.role.type,
+                    initial_alignment: token.role.initial_alignment,
+                    token_url: token.role.token_url,
+                  }
+                : null,
+              player: token.player
+                ? {
+                    user_id: token.player.user_id,
+                    username: token.player.username,
+                    display_name: token.player.display_name,
+                    avatar: token.player.avatar,
+                  }
+                : null,
+              player_name: token.player_name,
+              reminders: [],
+            })) ?? [],
+        })) ?? [],
+      player_characters: [],
+    })),
   };
 });
 

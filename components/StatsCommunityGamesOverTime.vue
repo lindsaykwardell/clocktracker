@@ -33,7 +33,7 @@ import { chartColors } from "~/composables/useChartColors";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-const { Script } = useScripts();
+const { scriptCategory } = useScripts();
 
 const props = defineProps<{
   games: GameRecord[];
@@ -47,6 +47,9 @@ const monthKeys = months.map((m) => m.format("YYYY-MM"));
 const monthLabels = months.map((m) => m.format("MMM YY"));
 const validMonths = new Set(monthKeys);
 
+/**
+ * Community games within the last 12 months.
+ */
 const filteredGames = computed(() =>
   props.games.filter(
     (game) =>
@@ -82,15 +85,15 @@ const monthlyCounts = computed(() => {
     const entry = counts[key];
     if (!entry) continue;
 
-    const script = game.script as string | null;
+    const category = scriptCategory(game.script);
 
-    if (!script) {
+    if (category === "unknown") {
       entry.unknownScript++;
-    } else if (script === Script.TroubleBrewing) {
+    } else if (category === "trouble-brewing") {
       entry.troubleBrewing++;
-    } else if (script === Script.SectsAndViolets) {
+    } else if (category === "sects-and-violets") {
       entry.sectsAndViolets++;
-    } else if (script === Script.BadMoonRising) {
+    } else if (category === "bad-moon-rising") {
       entry.badMoonRising++;
     } else {
       entry.customScript++;
@@ -100,6 +103,9 @@ const monthlyCounts = computed(() => {
   return counts;
 });
 
+/**
+ * Monthly community outcomes (good/evil wins).
+ */
 const monthlyOutcomes = computed(() => {
   const outcomes: Record<string, { good: number; evil: number }> = {};
   for (const key of monthKeys) {
@@ -118,6 +124,9 @@ const monthlyOutcomes = computed(() => {
   return outcomes;
 });
 
+/**
+ * Cumulative balance of Good wins (%) through time.
+ */
 const cumulativeBalance = computed(() => {
   let good = 0;
   let evil = 0;
@@ -279,7 +288,11 @@ const chartOptions = computed(() => ({
       callbacks: {
         label: (ctx: any) => {
           if (ctx.dataset.yAxisID === "balance") {
+            const detail = cumulativeBalance.value[ctx.dataIndex];
             const pct = ctx.parsed.y ?? 0;
+            const good = detail?.good ?? 0;
+            const evil = detail?.evil ?? 0;
+            const total = detail?.total ?? 0;
             return `Balance: ${pct.toFixed(0)}% good wins`;
           }
           return `${ctx.dataset.label}: ${ctx.parsed.y}`;
@@ -289,6 +302,7 @@ const chartOptions = computed(() => ({
   },
 }));
 
+// Force the balance line to render after bars
 const lineOnTop = {
   id: "lineOnTop",
   afterDatasetsDraw(chart: any) {

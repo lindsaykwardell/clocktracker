@@ -66,7 +66,8 @@
 <script setup lang="ts">
 import naturalOrder from "natural-order";
 import { WinStatus_V2, type GameRecord } from "~/composables/useGames";
-import { Status } from "~/composables/useFetchStatus";
+import { Status, type FetchStatus } from "~/composables/useFetchStatus";
+import type { RoleType } from "~/composables/useRoles";
 
 const roles = useRoles();
 
@@ -78,9 +79,15 @@ const props = defineProps<{
   }[];
 }>();
 
+/**
+ * Filter out legacy roles from lists.
+ */
 const filterLegacyRoles = <T extends { name: string }>(list?: T[]) =>
   (list ?? []).filter((role) => !role.name.includes("(Legacy)"));
 
+/**
+ * Role groups by type.
+ */
 const townsfolk = computed(() => {
   return naturalOrder(filterLegacyRoles(roles.getRoleByType(RoleType.TOWNSFOLK)))
     .orderBy("asc")
@@ -111,6 +118,9 @@ const travelers = computed(() => {
     .sort(["name"]);
 });
 
+/**
+ * Ensure all role groups loaded before rendering.
+ */
 const allRolesLoaded = computed(() => {
   return (
     townsfolk.value.length &&
@@ -138,6 +148,9 @@ const sortOptions: { label: string; value: SortMode }[] = [
 
 const sortMode = ref<SortMode>("alphabetical");
 
+/**
+ * Lookup for role name -> role id.
+ */
 const roleNameToId = computed(() => {
   const map = new Map<string, string>();
   [
@@ -152,6 +165,10 @@ const roleNameToId = computed(() => {
   return map;
 });
 
+/**
+ * Stats per role (plays, wins, losses, top player).
+ * Prefers grimoire tokens; falls back to player_characters.
+ */
 const roleStats = computed<Map<string, RoleStats>>(() => {
   const stats = new Map<string, RoleStats>();
 
@@ -271,16 +288,25 @@ const roleStats = computed<Map<string, RoleStats>>(() => {
   return stats;
 });
 
+/**
+ * Set of played role IDs for quick lookup.
+ */
 const playedRoleIds = computed<Set<string>>(
   () => new Set(roleStats.value.keys())
 );
 
+/**
+ * Format win percentage for tooltips.
+ */
 const formatPercent = (wins: number, losses: number) => {
   const total = wins + losses;
   if (!total) return "0%";
   return `${Math.round((wins / total) * 100)}%`;
 };
 
+/**
+ * Tooltip content per role.
+ */
 const roleTooltip = (role: { id: string; name: string }) => {
   const stats = roleStats.value.get(role.id);
 
@@ -292,6 +318,9 @@ const roleTooltip = (role: { id: string; name: string }) => {
   return `<strong>${role.name}</strong><br>Games: ${stats.plays}<br>W/L: ${stats.wins}-${stats.losses} (${formatPercent(stats.wins, stats.losses)})${topLine}`;
 };
 
+/**
+ * Sort roles by selected mode.
+ */
 const sortRoles = (list: typeof townsfolk.value) => {
   const rolesCopy = [...list];
 
@@ -334,6 +363,9 @@ const sortRoles = (list: typeof townsfolk.value) => {
   });
 };
 
+/**
+ * Role groups with played counts.
+ */
 const allRoles = computed(() => {
   const baseGroups = [
     { name: "Townsfolk", roles: townsfolk.value },

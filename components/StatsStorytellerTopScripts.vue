@@ -10,30 +10,39 @@
       </p>
     </div>
 
-    <div v-else class="flex items-center">
+    <div v-else class="flex items-center overflow-hidden">
       <ol
-        class="list-decimal list-outside pl-4 text-sm md:text-base"
+        class="relative -top-px list-none w-full text-sm md:text-base divide-y divide-stone-300 dark:divide-stone-700/40"
         :class="{
           'lg:columns-2': topScripts.length >= 5,
-          'mx-auto': topScripts.length < 5,
+          'mx-auto max-w-[15rem]': topScripts.length < 5,
         }"
       >
         <li
           v-for="(script, index) in topScripts"
           :key="script.name"
-          class="text-balance"
+          class="text-balance flex items-center justify-between gap-3 py-1 break-inside-avoid"
           :class="{
-            'sr-only md:not-sr-only': index >= 3,
-            'sr-only lg:not-sr-only': index >= 5
+            'hidden md:flex py-1': index >= 3,
+            'hidden lg:flex py-1': index >= 5
           }"
         >
-          <nuxt-link
-            :to="getScriptLinkForName(script.name)"
-            class="hover:underline"
-          >
-            {{ script.name }}
-          </nuxt-link>
-          <span class="text-xs md:text-base"> ({{ script.count }})</span>
+          <div class="flex items-center gap-2">
+            <div
+              class="rounded-full w-3 md:w-4 h-3 md:h-4 aspect-square border"
+              :style="{ backgroundColor: colorForScript(script.name) }"
+            />
+            <nuxt-link
+              :to="getScriptLinkForName(script.name)"
+              class="hover:underline"
+            >
+              {{ script.name }}
+            </nuxt-link>
+          </div>
+
+          <span class="text-xs md:text-sm text-stone-800 px-1 bg-stone-300 rounded-md leading-none">
+            {{ script.count }}
+          </span>
         </li>
       </ol>
     </div>
@@ -44,6 +53,7 @@
 import { computed } from "vue";
 import type { GameRecord } from "~/composables/useGames";
 import { filterStorytellerGames } from "~/composables/useGames";
+import { chartColors } from "~/composables/useChartColors";
 
 const { Script } = useScripts();
 
@@ -96,4 +106,12 @@ const topScripts = computed<ScriptSummary[]>(() => {
     .sort((a, b) => b.count - a.count)
     .slice(0, 10);
 });
+
+function colorForScript(name: string) {
+  if (name === Script.TroubleBrewing) return chartColors.tb;
+  if (name === Script.SectsAndViolets) return chartColors.snv;
+  if (name === Script.BadMoonRising) return chartColors.bmr;
+  if (!name) return chartColors.unknown;
+  return chartColors.custom;
+}
 </script>

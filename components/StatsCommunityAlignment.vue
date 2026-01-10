@@ -7,7 +7,7 @@
     <div class="grid gap-2 md:gap-4 grid-cols-1 lg:grid-cols-3">
       <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-2">
         <h3 class="font-sorts text-center text-lg lg:text-xl">Draw Bias</h3>
-        <div class="flex flex-col divide-y divide-stone-400 dark:divide-stone-700/40">
+        <div class="flex flex-col divide-y divide-stone-300 dark:divide-stone-700/40">
           <div
             v-for="item in biasItems"
             :key="item.title"
@@ -48,7 +48,7 @@
 
       <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-3">
         <h3 class="font-sorts text-center text-lg lg:text-xl">Switches</h3>
-        <div class="flex flex-col divide-y divide-stone-400 dark:divide-stone-700/40">
+        <div class="flex flex-col divide-y divide-stone-300 dark:divide-stone-700/40">
           <div
             v-for="item in switchItems"
             :key="item.title"
@@ -88,7 +88,7 @@
 
       <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-3">
         <h3 class="font-sorts text-center text-lg lg:text-xl">Streaks</h3>
-        <div class="flex flex-col divide-y divide-stone-400 dark:divide-stone-700/40">
+        <div class="flex flex-col divide-y divide-stone-300 dark:divide-stone-700/40">
           <div
             v-if="currentStreakEntry"
             class="flex items-center justify-between gap-3 text-sm md:text-base py-2"
@@ -154,19 +154,11 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { WinStatus_V2 } from "~/composables/useGames";
 import type { GameRecord } from "~/composables/useGames";
 import { chartColors } from "~/composables/useChartColors";
 import { Status } from "~/composables/useFetchStatus";
-
-type PlayerSummary = {
-  user_id: string | null;
-  username: string;
-  avatar: string | null;
-  plays: number;
-  good_plays: number;
-  evil_plays: number;
-  roles: Record<string, number>;
-};
+import type { PlayerSummary } from "~/composables/useCommunityStats";
 
 type Entry = {
   name: string;
@@ -197,6 +189,7 @@ type PlayerGame = {
   date: Date | null;
   expectedEvilProb: number;
   switches: number;
+  win_v2: WinStatus_V2 | null;
 };
 
 const perPlayerGames = computed<Map<string, PlayerGame[]>>(() => {
@@ -271,6 +264,7 @@ const perPlayerGames = computed<Map<string, PlayerGame[]>>(() => {
         date,
         expectedEvilProb: expectedProb,
         switches,
+        win_v2: game.win_v2 ?? null,
       };
       const list = map.get(name) ?? [];
       list.push(entry);
@@ -380,11 +374,11 @@ const switchEntries = computed(() => {
         if (g.alignment === "GOOD") {
           toGood += 1;
           // Successful if good team wins
-          if ((g as any).win_v2 === "GOOD_WINS") winGood += 1;
+          if (g.win_v2 === WinStatus_V2.GOOD_WINS) winGood += 1;
         }
         if (g.alignment === "EVIL") {
           toEvil += 1;
-          if ((g as any).win_v2 === "EVIL_WINS") winEvil += 1;
+          if (g.win_v2 === WinStatus_V2.EVIL_WINS) winEvil += 1;
         }
       }
     }

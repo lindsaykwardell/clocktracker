@@ -38,11 +38,14 @@ type SplitInfo = {
 
 type PlayerCountGroup = {
   label: string;
-  effectiveCount: number;
-  totalCount: number;
-  splits: SplitInfo[];
+  effectiveCount: number; // players + travelers
+  totalCount: number; // total games with effectiveCount
+  splits: SplitInfo[]; // e.g. 11, 10+1, 9+2
 };
 
+/**
+ * One group per effective player count (players + travelers).
+ */
 const groups = computed<PlayerCountGroup[]>(() => {
   const groupMap = new Map<number, Map<number, SplitInfo>>();
 
@@ -91,6 +94,9 @@ const grandTotal = computed(() =>
   groups.value.reduce((sum, g) => sum + g.totalCount, 0)
 );
 
+/**
+ * Assign a color per effective player count.
+ */
 const backgroundColors = computed(() =>
   groups.value.map((group) => colorForTotalPlayers(group.effectiveCount))
 );
@@ -131,6 +137,7 @@ const chartOptions = computed(() => ({
     },
     tooltip: {
       callbacks: {
+        // @ts-expect-error Chart.js context typing
         title(context: any) {
           const idx = context[0].dataIndex;
           const group = groups.value[idx];
@@ -143,6 +150,7 @@ const chartOptions = computed(() => ({
             group.totalCount === 1 ? "" : "s"
           } (${pct}%)`;
         },
+        // @ts-expect-error Chart.js context typing
         label(context: any) {
           const idx = context.dataIndex;
           const group = groups.value[idx];

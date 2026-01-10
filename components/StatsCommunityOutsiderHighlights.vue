@@ -27,43 +27,18 @@
                 v-if="!item.player?.user_id"
                 class="absolute top-0 left-0 w-full h-full bg-neutral-200/75 dark:bg-stone-800/75 rounded-full z-10"
               />
-              <!-- <div class="absolute -bottom-2 -right-2">
-                <Token
-                  v-if="item.token"
-                  :character="{
-                    name: item.token.name,
-                    role: {
-                      name: item.token.name,
-                      token_url: item.token.token_url || '',
-                      type: item.token.type || 'TOWNSFOLK',
-                      initial_alignment: item.token.initial_alignment || 'GOOD',
-                    },
-                  }"
-                  size="sm"
-                  hide-name
-                />
-              </div> -->
             </div>
-
             <div class="text-center text-sm text-balance max-w-44">
               <span class="font-semibold">{{ item.player.username }}</span> has been {{ roleArticle(item.role) }}<span class="font-semibold">{{ item.role }}</span>
               {{ item.count }} time<span v-if="item.count !== 1">s</span>.
             </div>
           </template>
           <template v-else>
-            <div class="text-stone-400 text-sm">Not enough data.</div>
+            <div
+              class="rounded-full shadow-lg w-36 h-36 md:w-48 md:h-48 aspect-square bg-stone-200 dark:bg-stone-800 border border-stone-400"
+            />
+            <div class="text-center text-stone-400 text-sm text-balance max-w-44">No plays recorded for this character.</div>
           </template>
-
-          <!-- <div v-if="item.games.length" class="text-xs text-stone-500 flex flex-wrap gap-2 justify-center">
-            <NuxtLink
-              v-for="gameId in item.games"
-              :key="gameId"
-              :to="`/game/${gameId}`"
-              class="underline text-primary"
-            >
-              Game {{ gameId }}
-            </NuxtLink>
-          </div> -->
         </div>
       </div>
     </div>
@@ -71,37 +46,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, resolveComponent } from "vue";
-
-type PlayerSummary = {
-  user_id: string | null;
-  username: string;
-  avatar: string | null;
-  priority?: number;
-  plays: number;
-  wins: number;
-  losses: number;
-  good_plays: number;
-  evil_plays: number;
-  drunk_plays: number;
-  lunatic_plays: number;
-  mutant_plays: number;
-  damsel_plays: number;
-  role_details: Record<
-    string,
-    { token_url: string | null; type: string | null; initial_alignment: string | null }
-  >;
-  role_tokens: Record<string, string | null>;
-  role_games: Record<string, string[]>;
-  roles: Record<string, number>;
-};
+import { computed } from "vue";
+import type { PlayerSummary } from "~/composables/useCommunityStats";
 
 const props = defineProps<{
   players: PlayerSummary[];
 }>();
 
-const NuxtLink = resolveComponent("nuxt-link");
-
+/**
+ * Build highlight items for each tracked outsider role.
+ */
 const roleItems = computed(() => {
   const makeItem = (
     role: string,
@@ -137,6 +91,9 @@ const roleItems = computed(() => {
   ];
 });
 
+/**
+ * Pick the top player for a given role field, breaking ties by priority.
+ */
 function pickTop(role: string, field: keyof PlayerSummary) {
   if (!props.players?.length) return null;
   return (
@@ -150,11 +107,17 @@ function pickTop(role: string, field: keyof PlayerSummary) {
   );
 }
 
+/**
+ * Games where this player played the given role.
+ */
 function roleGames(player: PlayerSummary | null, role: string) {
   if (!player) return [];
   return player.role_games?.[role] ?? [];
 }
 
+/**
+ * Return "the " for most roles, but omit it for plural/group names or names starting with "The ".
+ */
 function roleArticle(name: string): "" | "the " {
   const pluralRoles = ["Legion", "Lil' Monsta", "Riot"];
   if (pluralRoles.includes(name)) return "";

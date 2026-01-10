@@ -29,7 +29,12 @@
             <span class="font-semibold" :style="`color: ${chartColors.good}`">Good</span>.
           </div>
         </template>
-        <p v-else class="text-stone-400 text-sm">Not enough data.</p>
+        <template v-else>
+          <div
+            class="rounded-full shadow-lg w-36 h-36 md:w-48 md:h-48 aspect-square bg-stone-200 dark:bg-stone-800 border border-stone-400"
+          />
+          <div class="text-stone-400 text-sm">No eligible player.</div>
+        </template>
       </div>
 
       <!-- Most Evil -->
@@ -56,7 +61,12 @@
             <span class="font-semibold" :style="`color: ${chartColors.evil}`">Evil</span>.
           </div>
         </template>
-        <p v-else class="text-stone-400 text-sm">Not enough data.</p>
+        <template v-else>
+          <div
+            class="rounded-full shadow-lg w-36 h-36 md:w-48 md:h-48 aspect-square bg-stone-200 dark:bg-stone-800 border border-stone-400"
+          />
+          <div class="text-stone-400 text-sm">No eligible player.</div>
+        </template>
       </div>
 
       <!-- Best win rate -->
@@ -82,14 +92,25 @@
             <span class="font-semibold">{{ bestWinRate.rate }}%</span> win rate, winning {{ bestWinRate.wins }} out of {{ bestWinRate.total }} games.
           </div>
         </template>
-        <p v-else class="text-stone-400 text-sm">Not enough data.</p>
+        <template v-else>
+          <div
+            class="rounded-full shadow-lg w-36 h-36 md:w-48 md:h-48 aspect-square bg-stone-200 dark:bg-stone-800 border border-stone-400"
+          />
+          <div class="text-stone-400 text-sm">No eligible player.</div>
+        </template>
       </div>
 
-      <StatsCommunityBalance 
-        v-if="games?.length"
-        :games="games" 
-        class="w-full" 
-      />
+      <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-2">
+        <h3 class="font-sorts text-center text-lg lg:text-xl">
+          Game Balance
+        </h3>
+
+        <StatsCommunityBalance 
+          v-if="games?.length"
+          :games="games" 
+          class="w-full" 
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -98,31 +119,7 @@
 import { computed } from "vue";
 import type { GameRecord } from "~/composables/useGames";
 import { chartColors } from "~/composables/useChartColors";
-
-type PlayerSummary = {
-  user_id: string | null;
-  username: string;
-  avatar: string | null;
-  priority?: number;
-  plays: number;
-  wins: number;
-  losses: number;
-  good_plays: number;
-  evil_plays: number;
-  traveler_plays: number;
-  storyteller_plays: number;
-  drunk_plays: number;
-  lunatic_plays: number;
-  mutant_plays: number;
-  damsel_plays: number;
-  role_details: Record<
-    string,
-    { token_url: string | null; type: string | null; initial_alignment: string | null }
-  >;
-  role_tokens: Record<string, string | null>;
-  role_games: Record<string, string[]>;
-  roles: Record<string, number>;
-};
+import type { PlayerSummary } from "~/composables/useCommunityStats";
 
 const props = defineProps<{
   players: PlayerSummary[];
@@ -133,6 +130,9 @@ const mostGood = computed(() => makeAlignmentCard("good"));
 const mostEvil = computed(() => makeAlignmentCard("evil"));
 const bestWinRate = computed(() => makeWinRateCard());
 
+/**
+ * Pick the top player by a numeric field, breaking ties by priority.
+ */
 function pickTop(field: keyof PlayerSummary) {
   if (!props.players?.length) return null;
   return (
@@ -146,6 +146,9 @@ function pickTop(field: keyof PlayerSummary) {
   );
 }
 
+/**
+ * Build the alignment highlight card.
+ */
 function makeAlignmentCard(field: "good" | "evil") {
   const p = pickTop(field === "good" ? "good_plays" : "evil_plays");
   if (!p) return null;
@@ -156,6 +159,9 @@ function makeAlignmentCard(field: "good" | "evil") {
   };
 }
 
+/**
+ * Build the win rate highlight card.
+ */
 function makeWinRateCard() {
   const p = pickBestWinRate();
   if (!p) return null;
@@ -168,6 +174,9 @@ function makeWinRateCard() {
   };
 }
 
+/**
+ * Determine the player with the best win rate.
+ */
 function pickBestWinRate() {
   if (!props.players?.length) return null;
   return (
@@ -185,4 +194,3 @@ function pickBestWinRate() {
 }
 
 </script>
-

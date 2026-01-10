@@ -24,6 +24,9 @@ const props = defineProps<{
   games: GameRecord[];
 }>();
 
+/**
+ * Game size keys.
+ */
 type GameSizeKey = "teensy" | "one" | "two" | "three";
 
 type SplitInfo = {
@@ -40,6 +43,9 @@ type Bucket = {
   splits: SplitInfo[];
 };
 
+/**
+ * Map player count (excluding travelers) to a gameSize.
+ */
 function getGameSizeKey(playerCount: number | null | undefined): GameSizeKey | null {
   if (!playerCount) return null;
   if (playerCount <= 6) return "teensy";
@@ -48,6 +54,9 @@ function getGameSizeKey(playerCount: number | null | undefined): GameSizeKey | n
   return "three";
 }
 
+/**
+ * Labels and colors for each gameSize.
+ */
 const gameSizeMeta: Record<GameSizeKey, { label: string; color: string }> = {
   teensy: {
     label: "Teensy (1 Minion)",
@@ -67,6 +76,9 @@ const gameSizeMeta: Record<GameSizeKey, { label: string; color: string }> = {
   },
 };
 
+/**
+ * Build gameSizes based on player_count, with splits per (player_count, traveler_count).
+ */
 const gameSizes = computed<Bucket[]>(() => {
   const gameSizeMap = new Map<GameSizeKey, Map<string, SplitInfo>>();
 
