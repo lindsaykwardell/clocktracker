@@ -38,6 +38,9 @@ export const chartColors = {
   medium: "#B0141A",
   large: "#8C0E12",
 
+  // Location
+  online: "#00C2A8",
+
   // p5:  "oklch(38% 0.189 293.745)", // Violet-900
   // p6:  "oklch(28.3% 0.141 291.089)", // Violet-950
   // p7:  "oklch(90.2% 0.063 306.703)",

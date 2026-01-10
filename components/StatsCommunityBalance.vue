@@ -1,34 +1,28 @@
 <template>
-  <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-2">
-    <h3 class="font-sorts text-center text-lg lg:text-xl">
-      Game Balance
-    </h3>
+  <div class="h-36 md:h-48">
+    <Pie
+      id="community-win-balance"
+      :data="chartData"
+      :options="chartOptions"
+    />
+  </div>
 
-    <div class="h-36 md:h-48">
-      <Pie
-        id="community-win-balance"
-        :data="chartData"
-        :options="chartOptions"
-      />
-    </div>
-
-    <div v-if="hasGames" class="text-center text-sm text-balance max-w-60 mt-2 mx-auto">
-      <span v-if="goodPct >= 0.75">
-        <span class="font-semibold" :style="`color: ${chartColors.good}`">Good</span> often prevails here.
-      </span>
-      <span v-else-if="goodPct >= 0.60">
-        <span class="font-semibold" :style="`color: ${chartColors.good}`">Good</span> has a gentle edge.
-      </span>
-      <span v-else-if="evilPct >= 0.75">
-        <span class="font-semibold" :style="`color: ${chartColors.evil}`">Evil</span> often triumphs here.
-      </span>
-      <span v-else-if="evilPct >= 0.60">
-        <span class="font-semibold" :style="`color: ${chartColors.evil}`">Evil</span> has a subtle advantage.
-      </span>
-      <span v-else>
-        Games look <span class="font-semibold">balanced</span> between both teams.
-      </span>
-    </div>
+  <div v-if="hasGames" class="text-center text-sm text-balance max-w-60 mt-2 mx-auto">
+    <span v-if="goodPct >= 0.75">
+      <span class="font-semibold" :style="`color: ${chartColors.good}`">Good</span> often prevails here.
+    </span>
+    <span v-else-if="goodPct >= 0.60">
+      <span class="font-semibold" :style="`color: ${chartColors.good}`">Good</span> has a gentle edge.
+    </span>
+    <span v-else-if="evilPct >= 0.75">
+      <span class="font-semibold" :style="`color: ${chartColors.evil}`">Evil</span> often triumphs here.
+    </span>
+    <span v-else-if="evilPct >= 0.60">
+      <span class="font-semibold" :style="`color: ${chartColors.evil}`">Evil</span> has a subtle advantage.
+    </span>
+    <span v-else>
+      Games look <span class="font-semibold">balanced</span> between both teams.
+    </span>
   </div>
 </template>
 
@@ -43,10 +37,16 @@ const props = defineProps<{
   games: GameRecord[];
 }>();
 
+/**
+ * Community games that count toward stats.
+ */
 const communityGames = computed(() =>
   props.games.filter((g) => !g.ignore_for_stats)
 );
 
+/**
+ * Aggregate wins by team.
+ */
 const winCounts = computed(() => {
   let good = 0;
   let evil = 0;
@@ -64,6 +64,9 @@ const evilWins = computed(() => winCounts.value.evil);
 const totalGames = computed(() => goodWins.value + evilWins.value);
 const hasGames = computed(() => totalGames.value > 0);
 
+/**
+ * Percentages for balance copy.
+ */
 const goodPct = computed(() =>
   hasGames.value ? goodWins.value / totalGames.value : 0
 );
@@ -71,6 +74,9 @@ const evilPct = computed(() =>
   hasGames.value ? evilWins.value / totalGames.value : 0
 );
 
+/**
+ * Chart data and config.
+ */
 const chartData = computed(() => ({
   labels: ["Good wins", "Evil wins"],
   datasets: [
@@ -85,6 +91,9 @@ const chartData = computed(() => ({
 const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
+  layout: {
+    padding: 0,
+  },
   plugins: {
     legend: {
       display: false,

@@ -35,12 +35,6 @@
               class="relative"
               :key="person.username + (person.user_id || '')"
             >
-              <!-- <div
-                v-if="!person.user_id"
-                class="rounded-full object-cover shadow-lg border w-8 md:w-10 h-8 md:h-10 aspect-square flex items-center justify-center"
-                :class="`text-${colorForName(person.username)}-200 bg-${colorForName(person.username)}-700 border-${colorForName(person.username)}-700`"
-                v-tooltip="{ content: person.tooltip, html: true }"
-              > -->
               <div
                 v-if="!person.user_id"
                 class="rounded-full object-cover shadow-lg border w-8 md:w-10 h-8 md:h-10 aspect-square flex items-center justify-center text-stone-100 bg-stone-800"
@@ -65,21 +59,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
-
-type PlayerSummary = {
-  user_id: string | null;
-  username: string;
-  avatar: string | null;
-  plays: number;
-  storyteller_plays?: number;
-  wins: number;
-  roles: Record<string, number>;
-  role_details: Record<
-    string,
-    { token_url: string | null; type: string | null; initial_alignment: string | null }
-  >;
-};
+import { computed, ref } from "vue";
+import type { PlayerSummary } from "~/composables/useCommunityStats";
 
 const props = defineProps<{
   players: PlayerSummary[];
@@ -104,6 +85,9 @@ const sortOptions: { label: string; value: SortMode }[] = [
 
 const sortMode = ref<SortMode>("alphabetical");
 
+/**
+ * Group players by membership and apply sorting within each group.
+ */
 const grouped = computed(() => {
   const members = new Set(props.memberIds || []);
 
@@ -139,7 +123,6 @@ const grouped = computed(() => {
     if (bucket) bucket.people.push(person);
   }
 
-  // Optional: sort by plays desc within each group
   groups.forEach((g) => {
     g.people.sort((a, b) => comparePeople(a, b));
   });
@@ -147,6 +130,9 @@ const grouped = computed(() => {
   return groups.filter((g) => g.people.length);
 });
 
+/**
+ * Compare two people according to the selected sort mode.
+ */
 function comparePeople(a: Person, b: Person) {
   const pa = props.players.find((p) => p.username === a.username && p.user_id === a.user_id);
   const pb = props.players.find((p) => p.username === b.username && p.user_id === b.user_id);
@@ -182,6 +168,9 @@ function comparePeople(a: Person, b: Person) {
   return 0;
 }
 
+/**
+ * Build tooltip HTML for a player summary.
+ */
 function buildTooltip(player: PlayerSummary) {
   const games = player.plays ?? 0;
   const wins = player.wins ?? 0;
@@ -193,6 +182,11 @@ function buildTooltip(player: PlayerSummary) {
   return `<strong>${player.username}</strong><br>Games played: ${games}<br>Games storytold: ${stories}<br>W/L: ${wins}-${losses} (${rate}%)<br>Most played: ${roleText}`;
 }
 
+/**
+ * Initials for anonymous (non-user) players.
+ * 
+ * Ab for single name, AB for others.
+ */
 function initials(name: string) {
   if (!name) return "";
   const parts = name.trim().split(/\s+/);
@@ -206,36 +200,9 @@ function initials(name: string) {
   return firstChar + secondChar;
 }
 
-const bgPalette = [
-  "amber",
-  "blue",
-  "emerald",
-  "pink",
-  "sky",
-  "violet",
-  "rose",
-  "lime",
-  "cyan",
-  "indigo",
-];
-
-function hashString(input: string) {
-  let hash = 0;
-  for (let i = 0; i < input.length; i++) {
-    hash = (hash << 5) - hash + input.charCodeAt(i);
-    hash |= 0;
-  }
-  return hash;
-}
-
-function colorForName(name: string) {
-  const clean = name?.trim() || "anon";
-  const lastChar = clean[clean.length - 1] ?? "";
-  const offset = clean.length + lastChar.charCodeAt(0);
-  const idx = Math.abs(hashString(clean + offset)) % bgPalette.length;
-  return bgPalette[idx] || "bg-stone-200";
-}
-
+/**
+ * Most-played role summary for tooltips.
+ */
 function mostPlayedRole(player: PlayerSummary) {
   let best: { name: string; count: number } | null = null;
   for (const [name, count] of Object.entries(player.roles || {})) {

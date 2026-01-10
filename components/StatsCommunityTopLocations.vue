@@ -29,7 +29,6 @@ const props = defineProps<{
 
 const showDetailedLocations = computed(() => props.isMember !== false);
 
-const ONLINE_COLOR = "#00C2A8"; // teal-ish digital hue
 const inPersonPalette = [
   chartColors.p5,
   chartColors.p7,
@@ -47,6 +46,11 @@ type LocationSlice = {
   color: string;
 };
 
+/**
+ * Aggregate game counts per location.
+ * - Members see detailed per-location slices.
+ * - Non-members see only Online vs In Person.
+ */
 const locationSlices = computed<LocationSlice[]>(() => {
   const counts = new Map<string, number>();
 
@@ -67,7 +71,7 @@ const locationSlices = computed<LocationSlice[]>(() => {
     }
 
     const slices: LocationSlice[] = [];
-    if (online > 0) slices.push({ name: "Online", count: online, color: ONLINE_COLOR });
+    if (online > 0) slices.push({ name: "Online", count: online, color: chartColors.online });
     if (inPerson > 0) slices.push({ name: "In Person", count: inPerson, color: inPersonPalette[0] });
     return slices;
   }
@@ -80,7 +84,7 @@ const locationSlices = computed<LocationSlice[]>(() => {
   return entries.map(({ name, count }) => {
     const isOnline = name === "Online";
     const color = isOnline
-      ? ONLINE_COLOR
+      ? chartColors.online
       : inPersonPalette[inPersonColorIdx++ % inPersonPalette.length];
     return { name, count, color };
   });
@@ -99,6 +103,9 @@ const chartData = computed(() => ({
 
 const LABEL_MIN_PCT = 5;
 
+/**
+ * Pie chart options with label formatting.
+ */
 const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
@@ -131,6 +138,7 @@ const chartOptions = computed(() => ({
     },
     tooltip: {
       callbacks: {
+        // @ts-expect-error Chart.js context typing
         label(context: any) {
           const label = context.label || "";
           const value = context.parsed as number;
@@ -145,6 +153,9 @@ const chartOptions = computed(() => ({
   },
 }));
 
+/**
+ * Generate summary sentence.
+ */
 const summaryText = computed(() => {
   let online = 0;
   let inPerson = 0;
@@ -155,13 +166,13 @@ const summaryText = computed(() => {
   }
   if (online === 0 && inPerson === 0) return "";
   if (online > 0 && inPerson === 0) {
-    return "This community plays all of its games online.";
+    return 'This community plays all of its games <span class="font-semibold">online</span>.';
   }
   if (inPerson > 0 && online === 0) {
-    return "This community plays all of its games in person.";
+    return 'This community plays all of its games <span class="font-semibold">in person</span>.';
   }
   if (online > inPerson) {
-    return "This community plays most of its games online.";
+    return 'This community plays most of its games <span class="font-semibold">online</span>.';
   }
   if (inPerson > online) {
     return 'This community plays most of its games <span class="font-semibold">in person</span>.';

@@ -26,6 +26,9 @@ const props = defineProps<{
   games: GameRecord[];
 }>();
 
+/**
+ * Count games per script type.
+ */
 type ScriptCounts = {
   troubleBrewing: number;
   sectsAndViolets: number;
@@ -34,6 +37,9 @@ type ScriptCounts = {
   unknownScript: number;
 };
 
+/**
+ * Aggregate script counts across community games.
+ */
 const scriptCounts = computed<ScriptCounts>(() => {
   const counts: ScriptCounts = {
     troubleBrewing: 0,
@@ -63,6 +69,9 @@ const scriptCounts = computed<ScriptCounts>(() => {
   return counts;
 });
 
+/**
+ * Chart data and config.
+ */
 const chartData = computed(() => ({
   labels: [
     "Trouble Brewing",
@@ -127,6 +136,7 @@ const chartOptions = computed(() => ({
     },
     tooltip: {
       callbacks: {
+        // @ts-expect-error Chart.js context typing
         label(context: any) {
           const label = context.label || "";
           const value = context.parsed as number;

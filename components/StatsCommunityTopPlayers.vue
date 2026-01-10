@@ -8,7 +8,7 @@
       No data available.
     </div>
 
-    <ol v-else class="flex flex-col text-sm md:text-base divide-y divide-stone-400 dark:divide-stone-700/40">
+    <ol v-else class="flex flex-col text-sm md:text-base divide-y divide-stone-300 dark:divide-stone-700/40">
       <li
         v-for="item in items"
         :key="item.username"
@@ -46,15 +46,7 @@
 
 <script setup lang="ts">
 import { computed, resolveComponent } from "vue";
-
-type PlayerSummary = {
-  user_id: string | null;
-  username: string;
-  avatar: string | null;
-  priority?: number;
-  plays: number;
-  storyteller_plays: number;
-};
+import type { PlayerSummary } from "~/composables/useCommunityStats";
 
 const props = defineProps<{
   players: PlayerSummary[];
@@ -64,6 +56,9 @@ const props = defineProps<{
 
 const NuxtLink = resolveComponent("nuxt-link");
 
+/**
+ * Top players/storytellers by count, with priority tie-breaker.
+ */
 const items = computed(() => {
   const list = [...props.players];
   const field = props.mode === "players" ? "plays" : "storyteller_plays";
