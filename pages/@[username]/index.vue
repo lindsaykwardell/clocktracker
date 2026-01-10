@@ -9,18 +9,18 @@
               player.user_id === user?.id ||
               friends.getFriendStatus(player.user_id) === FriendStatus.FRIENDS
             "
-            class="flex flex-wrap justify-start w-screen md:w-full gap-1 h-12"
+            class="flex flex-wrap justify-center md:justify-start w-100 md:-mx-3 md:w-[calc(100%+1.5rem)] gap-2 md:gap-1 py-2 md:py-0"
           >
             <nuxt-link
               :to="`/@${username}`"
-              class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-200 dark:hover:bg-stone-700"
+              class="font-bold leading-none md:text-lg whitespace-nowrap rounded md:rounded-none bg-stone-100 md:bg-transparent border-2 md:border-x-0 md:border-t-0 md:border-b-4 py-2 md:py-1 px-3 hover:bg-stone-300 dark:hover:bg-stone-700"
               :class="currentTabClass('profile')"
             >
               Profile
             </nuxt-link>
             <nuxt-link
               :to="`/@${username}?view=games`"
-              class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-200 dark:hover:bg-stone-700"
+              class="font-bold leading-none md:text-lg whitespace-nowrap rounded md:rounded-none bg-stone-100 md:bg-transparent border-2 md:border-x-0 md:border-t-0 md:border-b-4 py-2 md:py-1 px-3 hover:bg-stone-300 dark:hover:bg-stone-700"
               :class="currentTabClass('games')"
             >
               Games
@@ -28,7 +28,7 @@
             <nuxt-link
               v-if="me?.username === username"
               :to="`/@${username}?view=pending`"
-              class="relative font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-200 dark:hover:bg-stone-700"
+              class="relative font-bold leading-none md:text-lg whitespace-nowrap rounded md:rounded-none bg-stone-100 md:bg-transparent border-2 md:border-x-0 md:border-t-0 md:border-b-4 py-2 md:py-1 px-3 hover:bg-stone-300 dark:hover:bg-stone-700"
               :class="currentTabClass('pending')"
             >
               <span
@@ -44,7 +44,7 @@
             </nuxt-link>
             <nuxt-link
               :to="`/@${username}?view=stats`"
-              class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-200 dark:hover:bg-stone-700"
+              class="font-bold leading-none md:text-lg whitespace-nowrap rounded md:rounded-none bg-stone-100 md:bg-transparent border-2 md:border-x-0 md:border-t-0 md:border-b-4 py-2 md:py-1 px-3 hover:bg-stone-300 dark:hover:bg-stone-700"
               :class="currentTabClass('stats')"
             >
               Stats

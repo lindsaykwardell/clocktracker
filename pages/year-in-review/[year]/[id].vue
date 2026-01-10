@@ -578,7 +578,7 @@ const wonMostInMonth = computed(() => {
 });
 
 useHead({
-  title: `Year in Review ${data.value?.year} | ${data.value?.display_name}`,
+  title: `Year in Review ${data.value?.year} - ${data.value?.display_name}`,
   meta: [
     {
       name: "description",
@@ -586,7 +586,7 @@ useHead({
     },
     {
       property: "og:title",
-      content: `Year in Review ${data.value?.year} | ${data.value?.display_name}`,
+      content: `Year in Review ${data.value?.year} - ${data.value?.display_name}`,
     },
     {
       property: "og:description",
@@ -610,7 +610,7 @@ useHead({
     },
     {
       property: "twitter:title",
-      content: `Year in Review ${data.value?.year} | ${data.value?.display_name}`,
+      content: `Year in Review ${data.value?.year} - ${data.value?.display_name}`,
     },
     {
       property: "twitter:description",

@@ -10,109 +10,55 @@
         v-if="!event.data.community && createdBy"
         :player="createdBy"
       />
-      <EventCard
-        v-if="event"
-        :event="event.data"
-        class="m-auto my-6"
-        :canModifyEvent="isAllowedToEdit"
-        @deleted="eventDeleted"
-      >
-        <template #register>
-          <Button
-            v-if="shareIsSupported || copyIsSupported"
-            class="py-2 px-4"
-            font-size="md"
-            @click="getShareLink"
-            v-tooltip="{
-              content: 'Copied!',
-              shown: showShareTooltip,
-              triggers: [],
-            }"
-          >
-            Share
-          </Button>
-          <Button
-            v-if="isAllowedToRegister"
-            :disabled="inFlight"
-            @click="initRegister()"
-            class="py-2 px-4"
-            font-size="md"
-            :primary="!alreadyRegistered"
-            :outline="alreadyRegistered"
-          >
-            <template v-if="inFlight"><Spinner /></template>
-            <template v-else-if="alreadyRegistered">Unregister</template>
-            <template v-else>Register</template>
-          </Button>
-        </template>
-        <template #footer>
-          <div class="flex flex-col md:flex-row gap-4">
-            <div class="flex-1">
-              <h3 class="font-bold">Players</h3>
-              <ul>
-                <li
-                  v-for="player in event.data.player_count
-                    ? event.data.registered_players.slice(
-                        0,
-                        event.data.player_count
-                      )
-                    : event.data.registered_players"
-                >
-                  <nuxt-link
-                    v-if="player.user"
-                    :to="`/@${player.user.username}`"
-                    class="flex gap-2 items-center hover:underline"
-                  >
-                    <Avatar
-                      :value="player.user.avatar"
-                      size="xs"
-                      class="border-stone-800"
-                    />
-                    <div>{{ player.name }}</div>
-                  </nuxt-link>
-                  <div
-                    v-else-if="player.discord_user_id"
-                    class="flex gap-2 items-center"
-                  >
-                    <Avatar
-                      value="/img/discord.png"
-                      size="xs"
-                      class="border-stone-800"
-                    />
-                    <div>{{ player.name }}</div>
-                  </div>
-                  <div v-else class="flex gap-2 items-center">
-                    <Avatar
-                      value="/img/default.png"
-                      size="xs"
-                      class="border-stone-800"
-                    />
-                    <div>{{ player.name }}</div>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div
-              v-if="
-                (event.data.player_count &&
-                  event.data.registered_players.length >
-                    event.data.player_count) ||
-                event.data.waitlists.length > 0
-              "
-              class="flex-1 flex flex-col gap-2"
+      <section class="px-4 lg:px-8 pb-4 lg:pb-8">
+        <EventCard
+          v-if="event"
+          :event="event.data"
+          class="m-auto"
+          :canModifyEvent="isAllowedToEdit"
+          @deleted="eventDeleted"
+          display="detail"
+        >
+          <template #register>
+            <Button
+              v-if="isAllowedToRegister"
+              :disabled="inFlight"
+              @click="initRegister()"
+              class="py-2 px-4"
+              font-size="md"
+              :primary="!alreadyRegistered"
+              :outline="alreadyRegistered"
             >
-              <template
-                v-if="
-                  event.data.player_count &&
-                  event.data.registered_players.length > event.data.player_count
-                "
-              >
-                <h3 class="font-bold">Waitlist</h3>
-                <ul>
+              <template v-if="inFlight"><Spinner /></template>
+              <template v-else-if="alreadyRegistered">Unregister</template>
+              <template v-else>Register</template>
+            </Button>
+            <Button
+              v-if="shareIsSupported || copyIsSupported"
+              class="py-2 px-4"
+              font-size="md"
+              @click="getShareLink"
+              v-tooltip="{
+                content: 'Copied!',
+                shown: showShareTooltip,
+                triggers: [],
+              }"
+            >
+              Share
+            </Button>
+          </template>
+          <template #footer>
+            <div class="flex flex-col md:flex-row gap-4">
+              <div class="flex-1 flex flex-col gap-2">
+                <h3 class="card-label">Players</h3>
+                <ul class="flex flex-col gap-1">
                   <li
-                    v-for="player in event.data.registered_players.slice(
-                      event.data.player_count
-                    )"
+                    v-for="player in event.data.player_count
+                      ? event.data.registered_players.slice(
+                          0,
+                          event.data.player_count
+                        )
+                      : event.data.registered_players"
                   >
                     <nuxt-link
                       v-if="player.user"
@@ -126,33 +72,17 @@
                       />
                       <div>{{ player.name }}</div>
                     </nuxt-link>
-                    <div v-else class="flex gap-2 items-center">
-                      <Avatar
-                        value="/img/default.png"
-                        size="xs"
-                        class="border-stone-800"
-                      />
-                      <div>{{ player.name }}</div>
-                    </div>
-                  </li>
-                </ul>
-              </template>
-              <template v-for="waitlist in event.data.waitlists">
-                <h3 class="font-bold">{{ waitlist.name }}</h3>
-                <ul>
-                  <li v-for="player in waitlist.users">
-                    <nuxt-link
-                      v-if="player.user"
-                      :to="`/@${player.user.username}`"
-                      class="flex gap-2 items-center hover:underline"
+                    <div
+                      v-else-if="player.discord_user_id"
+                      class="flex gap-2 items-center"
                     >
                       <Avatar
-                        :value="player.user.avatar"
+                        value="/img/discord.png"
                         size="xs"
                         class="border-stone-800"
                       />
                       <div>{{ player.name }}</div>
-                    </nuxt-link>
+                    </div>
                     <div v-else class="flex gap-2 items-center">
                       <Avatar
                         value="/img/default.png"
@@ -163,24 +93,101 @@
                     </div>
                   </li>
                 </ul>
-                <button
-                  xv-if="
-                  !inFlight &&
-                  (event.who_can_register === 'ANYONE' ? true : isMember)
+              </div>
+              <div
+                v-if="
+                  (event.data.player_count &&
+                    event.data.registered_players.length >
+                      event.data.player_count) ||
+                  event.data.waitlists.length > 0
                 "
-                  v-if="!inFlight"
-                  @click="initRegister(waitlist.id)"
-                  class="transition duration-150 text-stone-400 hover:text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
+                class="flex-1 flex flex-col gap-4"
+              >
+                <template
+                  v-if="
+                    event.data.player_count &&
+                    event.data.registered_players.length > event.data.player_count
+                  "
                 >
-                  <template v-if="!alreadyRegistered">
-                    Register for {{ waitlist.name }}
-                  </template>
-                </button>
-              </template>
+                  <div class="flex flex-col gap-2">
+                    <h3 class="card-label">Waitlist</h3>
+                    <ul class="flex flex-col gap-1">
+                      <li
+                        v-for="player in event.data.registered_players.slice(
+                          event.data.player_count
+                        )"
+                      >
+                        <nuxt-link
+                          v-if="player.user"
+                          :to="`/@${player.user.username}`"
+                          class="flex gap-2 items-center hover:underline"
+                        >
+                          <Avatar
+                            :value="player.user.avatar"
+                            size="xs"
+                            class="border-stone-800"
+                          />
+                          <div>{{ player.name }}</div>
+                        </nuxt-link>
+                        <div v-else class="flex gap-2 items-center">
+                          <Avatar
+                            value="/img/default.png"
+                            size="xs"
+                            class="border-stone-800"
+                          />
+                          <div>{{ player.name }}</div>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                </template>
+                <template v-for="waitlist in event.data.waitlists">
+                  <div class="flex flex-col gap-2">
+                    <h3 class="card-label">{{ waitlist.name }}</h3>
+                    <ul v-if="waitlist.users.length > 0" class="flex flex-col gap-1">
+                      <li v-for="player in waitlist.users">
+                        <nuxt-link
+                          v-if="player.user"
+                          :to="`/@${player.user.username}`"
+                          class="flex gap-2 items-center hover:underline"
+                        >
+                          <Avatar
+                            :value="player.user.avatar"
+                            size="xs"
+                            class="border-stone-800"
+                          />
+                          <div>{{ player.name }}</div>
+                        </nuxt-link>
+                        <div v-else class="flex gap-2 items-center">
+                          <Avatar
+                            value="/img/default.png"
+                            size="xs"
+                            class="border-stone-800"
+                          />
+                          <div>{{ player.name }}</div>
+                        </div>
+                      </li>
+                    </ul>
+                    <button
+                      xv-if="
+                      !inFlight &&
+                      (event.who_can_register === 'ANYONE' ? true : isMember)
+                    "
+                      v-if="!inFlight"
+                      @click="initRegister(waitlist.id)"
+                      class="transition duration-150 hover:underline flex items-center gap-2"
+                    >
+                      <template v-if="!alreadyRegistered">
+                        <IconUI id="sign" />Register for {{ waitlist.name }}
+                      </template>
+                    </button>
+                  </div>
+                </template>
+              </div>
             </div>
-          </div>
-        </template>
-      </EventCard>
+          </template>
+        </EventCard>
+      </section>
       <Dialog v-model:visible="showRegisterDialog" size="sm">
         <h3 class="font-sorts text-xl lg:text-2xl mb-4 text-center">
           Register
@@ -336,7 +343,7 @@ watch(event, () => {
       title: `${
         event.value.data.community?.name ??
         event.value.data.created_by?.display_name
-      } | ${event.value.data.title}`,
+      } - ${event.value.data.title}`,
       meta: [
         {
           hid: "description",
@@ -353,7 +360,7 @@ watch(event, () => {
           content: `${
             event.value.data.community?.name ??
             event.value.data.created_by?.display_name
-          } | ${event.value.data.title}`,
+          } - ${event.value.data.title}`,
         },
         {
           property: "og:description",
@@ -385,7 +392,7 @@ watch(event, () => {
           content: `${
             event.value.data.community?.name ??
             event.value.data.created_by?.display_name
-          } | ${event.value.data.title}`,
+          } - ${event.value.data.title}`,
         },
         {
           property: "twitter:description",

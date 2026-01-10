@@ -1,47 +1,47 @@
 <template>
   <StandardTemplate>
-    <template v-if="community.status === Status.SUCCESS">
-      <div class="dark:bg-stone-950 shadow-lg">
-        <div
-          class="flex flex-col items-center w-full md:w-3/4 lg:w-2/3 xl:w-1/2 m-auto"
-        >
-          <div class="flex gap-3 items-center w-full">
-            <Avatar
-              :value="community.data.icon"
-              size="lg"
-              class="flex-shrink"
-            />
-            <div class="flex-grow flex flex-col justify-start gap-3 w-full">
-              <div class="flex flex-col items-center md:items-start">
-                <h1 class="font-sorts text-1xl lg:text-2xl">
-                  {{ community.data.name }}
-                </h1>
-                <div
-                  v-if="community.data.location"
-                  class="md:text-lg dark:text-stone-400 flex gap-2 items-center"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="32"
-                    height="32"
-                    viewBox="0 0 32 32"
+    <div class="w-full flex flex-col gap-8">
+      <template v-if="community.status === Status.SUCCESS">
+        <div class="bg-stone-200 dark:bg-stone-950 shadow-lg">
+          <div
+            class="flex flex-col items-center w-full lg:w-2/3 m-auto pt-4 px-8 lg:px-0 gap-4"
+          >
+            <div class="flex flex-col md:flex-row gap-4 md:gap-2 lg:gap-3 xl:gap-4 items-center w-full">
+              <Avatar
+                :value="community.data.icon"
+                size="lg"
+                class="flex-shrink"
+              />
+              <div class="flex-grow flex flex-col justify-start gap-3 w-full">
+                <div class="flex flex-col items-center md:items-start gap-2">
+                  <h1 class="font-sorts text-2xl xl:text-3xl text-center md:text-start">
+                    {{ community.data.name }}
+                  </h1>
+                  <div
+                    v-if="community.data.location"
+                    class="md:text-lg dark:text-stone-400 flex gap-2 items-center justify-center md:justify-start"
                   >
-                    <path
-                      fill="currentColor"
-                      d="M16 2a14 14 0 1 0 14 14A14.016 14.016 0 0 0 16 2ZM4.02 16.394l1.338.446L7 19.303v1.283a1 1 0 0 0 .293.707L10 24v2.377a11.994 11.994 0 0 1-5.98-9.983ZM16 28a11.968 11.968 0 0 1-2.572-.285L14 26l1.805-4.512a1 1 0 0 0-.097-.926l-1.411-2.117a1 1 0 0 0-.832-.445h-4.93l-1.248-1.873L9.414 14H11v2h2v-2.734l3.868-6.77l-1.736-.992L14.277 7h-2.742L10.45 5.371A11.861 11.861 0 0 1 20 4.7V8a1 1 0 0 0 1 1h1.465a1 1 0 0 0 .832-.445l.877-1.316A12.033 12.033 0 0 1 26.894 11H22.82a1 1 0 0 0-.98.804l-.723 4.47a1 1 0 0 0 .54 1.055L25 19l.685 4.056A11.98 11.98 0 0 1 16 28Z"
-                    />
-                  </svg>
-                  <span>{{ community.data.location }}</span>
+                    <IconUI id="globe" />
+                    <span class="sr-only">Location: </span><span>{{ community.data.location }}</span>
+                  </div>
+                  <div class="flex gap-2 flex-wrap justify-center md:justify-start">
+                    <SocialLink
+                      v-for="link in community.data.links"
+                      :href="link"
+                      class="hover:text-primary dark:hover:text-primary-light transition duration-150 hover:underline"
+                    >
+                      {{ link.replace(/https?:\/\//, "").replace(/\/$/, "") }}
+                    </SocialLink>
+                  </div>
                 </div>
               </div>
               <button
                 v-if="user && !isBanned"
                 @click="isMember ? leave() : join()"
-                class="whitespace-nowrap flex gap-1 items-center justify-center py-1 w-[150px] rounded transition duration-150 hover:bg-blue-900"
+                class="whitespace-nowrap flex gap-1 items-center justify-center px-3 py-2 rounded transition duration-150"
                 :class="{
-                  'bg-blue-950': !isMember,
-                  'border border-blue-950 text-blue-700 hover:text-white':
-                    isMember,
+                  'text-white bg-purple-500 hover:bg-purple-600': !isMember,
+                  'text-white bg-red-700 hover:bg-red-800': isMember,
                 }"
               >
                 <template v-if="isMember"> Leave Community </template>
@@ -50,64 +50,97 @@
                 <template v-else> Join Community </template>
               </button>
             </div>
-          </div>
-          <div class="flex gap-2 flex-col md:flex-row md:flex-wrap">
-            <SocialLink
-              v-for="link in community.data.links"
-              :href="link"
-              class="hover:text-primary dark:hover:text-primary-light transition duration-150 hover:underline"
+            <div class="flex flex-col gap-1 w-full">
+              <h2 class="text-xs text-stone-600 text-center md:text-start uppercase">
+                Moderators
+              </h2>
+              <div
+                v-if="moderators.length"
+                class="flex flex-wrap justify-center md:justify-start gap-[0.125rem]"
+              >
+                <nuxt-link
+                  v-for="moderator in moderators"
+                  :key="moderator.user_id"
+                  :to="`/@${moderator.username}`"
+                >
+                  <Avatar
+                    :value="moderator.avatar || ''"
+                    size="xs"
+                    class="flex-shrink bg-stone-300 dark:bg-stone-950"
+                    v-tooltip="moderator.display_name || moderator.username"
+                    background
+                  />
+                </nuxt-link>
+              </div>
+            </div>
+            <hr class="border-stone-100 w-full" />
+            <p class="whitespace-pre-wrap w-full text-center md:text-start text-balance">
+              {{ community.data.description }}
+            </p>
+            <nav
+              v-if="!isNotAllowed"
+              class="flex flex-wrap justify-center md:justify-start w-100 md:-mx-3 md:w-[calc(100%+1.5rem)] gap-2 md:gap-1 py-2 md:py-0"
             >
-              {{ link.replace(/https?:\/\//, "").replace(/\/$/, "") }}
-            </SocialLink>
+              <nuxt-link
+                :to="`/community/${community.data.slug}`"
+                class="font-bold leading-none md:text-lg whitespace-nowrap rounded md:rounded-none bg-stone-100 md:bg-transparent border-2 md:border-x-0 md:border-t-0 md:border-b-4 py-2 md:py-1 px-3 hover:bg-stone-300 dark:hover:bg-stone-700"
+                :class="currentTabClass('')"
+              >
+                Home
+              </nuxt-link>
+              <nuxt-link
+                :to="`/community/${community.data.slug}/events`"
+                class="font-bold leading-none md:text-lg whitespace-nowrap rounded md:rounded-none bg-stone-100 md:bg-transparent border-2 md:border-x-0 md:border-t-0 md:border-b-4 py-2 md:py-1 px-3 hover:bg-stone-300 dark:hover:bg-stone-700"
+                :class="currentTabClass('events')"
+              >
+                Events
+              </nuxt-link>
+              <nuxt-link
+                :to="`/community/${community.data.slug}/games`"
+                class="font-bold leading-none md:text-lg whitespace-nowrap rounded md:rounded-none bg-stone-100 md:bg-transparent border-2 md:border-x-0 md:border-t-0 md:border-b-4 py-2 md:py-1 px-3 hover:bg-stone-300 dark:hover:bg-stone-700"
+                :class="currentTabClass('games')"
+              >
+                Games
+              </nuxt-link>
+              <nuxt-link
+                :to="`/community/${community.data.slug}/stats`"
+                class="font-bold leading-none md:text-lg whitespace-nowrap rounded md:rounded-none bg-stone-100 md:bg-transparent border-2 md:border-x-0 md:border-t-0 md:border-b-4 py-2 md:py-1 px-3 hover:bg-stone-300 dark:hover:bg-stone-700"
+                :class="currentTabClass('stats')"
+              >
+                Stats
+              </nuxt-link>
+              <nuxt-link
+                v-if="isModerator"
+                :to="`/community/${community.data.slug}/dashboard`"
+                class="font-bold leading-none md:text-lg whitespace-nowrap rounded md:rounded-none bg-stone-100 md:bg-transparent border-2 md:border-x-0 md:border-t-0 md:border-b-4 py-2 md:py-1 px-3 hover:bg-stone-300 dark:hover:bg-stone-700"
+                :class="currentTabClass('dashboard')"
+              >
+                Moderator Dashboard
+              </nuxt-link>
+            </nav>
           </div>
-          <hr class="border-stone-100 w-full my-4" />
-          <p class="whitespace-pre-wrap text-left w-full py-4">
-            {{ community.data.description }}
+          <slot
+            name="header"
+            :community="community"
+            :isMember="isMember"
+            :isModerator="isModerator"
+            :isBanned="isBanned"
+            :isNotAllowed="isNotAllowed"
+            :isPending="isPending"
+          />
+        </div>
+        <div v-if="isBanned">
+          <p class="text-center py-3 text-stone-400">
+            You have been banned from this community.
           </p>
-          <nav
-            v-if="!isNotAllowed"
-            class="flex justify-start w-screen md:w-full gap-1 h-12"
-          >
-            <nuxt-link
-              :to="`/community/${community.data.slug}`"
-              class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-200 dark:hover:bg-stone-700"
-              :class="currentTabClass('')"
-            >
-              Home
-            </nuxt-link>
-            <nuxt-link
-              :to="`/community/${community.data.slug}/events`"
-              class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-200 dark:hover:bg-stone-700"
-              :class="currentTabClass('events')"
-            >
-              Events
-            </nuxt-link>
-            <nuxt-link
-              :to="`/community/${community.data.slug}/games`"
-              class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-200 dark:hover:bg-stone-700"
-              :class="currentTabClass('games')"
-            >
-              Games
-            </nuxt-link>
-            <nuxt-link
-              :to="`/community/${community.data.slug}/stats`"
-              class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-200 dark:hover:bg-stone-700"
-              :class="currentTabClass('stats')"
-            >
-              Stats
-            </nuxt-link>
-            <nuxt-link
-              v-if="isModerator"
-              :to="`/community/${community.data.slug}/dashboard`"
-              class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-200 dark:hover:bg-stone-700"
-              :class="currentTabClass('dashboard')"
-            >
-              Moderator Dashboard
-            </nuxt-link>
-          </nav>
+        </div>
+        <div v-else-if="isNotAllowed">
+          <p class="text-center py-3 text-stone-400">
+            This community is private. You must join to view it.
+          </p>
         </div>
         <slot
-          name="header"
+          v-else-if="!props.moderatorOnly || isModerator"
           :community="community"
           :isMember="isMember"
           :isModerator="isModerator"
@@ -115,32 +148,13 @@
           :isNotAllowed="isNotAllowed"
           :isPending="isPending"
         />
-      </div>
-      <div v-if="isBanned">
-        <p class="text-center py-3 text-stone-400">
-          You have been banned from this community.
-        </p>
-      </div>
-      <div v-else-if="isNotAllowed">
-        <p class="text-center py-3 text-stone-400">
-          This community is private. You must join to view it.
-        </p>
-      </div>
-      <slot
-        v-else-if="!props.moderatorOnly || isModerator"
-        :community="community"
-        :isMember="isMember"
-        :isModerator="isModerator"
-        :isBanned="isBanned"
-        :isNotAllowed="isNotAllowed"
-        :isPending="isPending"
-      />
-    </template>
-    <template v-else>
-      <div class="flex justify-center items-center h-screen">
-        <Loading />
-      </div>
-    </template>
+      </template>
+      <template v-else>
+        <div class="flex justify-center items-center h-screen">
+          <Loading />
+        </div>
+      </template>
+    </div>
   </StandardTemplate>
 </template>
 
@@ -165,6 +179,17 @@ const isModerator = computed(() =>
 );
 const isBanned = computed(() => communities.isBanned(slug, user.value?.id));
 const isPending = computed(() => communities.isPending(slug, user.value?.id));
+const moderators = computed(() => {
+  if (community.value.status !== Status.SUCCESS) return [];
+
+  const adminIds = new Set(
+    community.value.data.admins.map((admin) => admin.user_id)
+  );
+
+  return community.value.data.members.filter((member) =>
+    adminIds.has(member.user_id)
+  );
+});
 const isNotAllowed = computed(() => {
   if (community.value.status !== Status.SUCCESS) return true;
 

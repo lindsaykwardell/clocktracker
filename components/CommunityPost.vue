@@ -1,87 +1,67 @@
 <template>
   <div
-    class="shadow p-3 rounded bg-stone-200 dark:bg-stone-900 dark:text-stone-300 text-sm"
+    class="p-4 flex flex-col gap-8 rounded border dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40"
   >
-    <div class="flex items-start">
-      <div class="flex flex-grow flex-wrap items-center gap-4 md:h-12">
-        <Avatar :value="post.user.avatar" size="xs" />
-        <div class="flex flex-col flex-grow">
-          <div
-            :class="{
-              'text-green-600 dark:text-green-500': isUserModerator(
-                post.user.user_id
-              ),
-            }"
-          >
-            {{ post.user.display_name }}
-          </div>
-          <div class="text-sm">
+    <div class="flex gap-4 items-start">
+      <Avatar :value="post.user.avatar" size="xs" background />
+      <div class="flex flex-grow flex-wrap items-center gap-4">
+        <div class="flex flex-col flex-grow text-sm">
+          <div class="flex flex-row flex-wrap gap-x-1 md:gap-x-2">
+            <span class="font-semibold"
+              :class="{
+                'text-green-600 dark:text-green-500': isUserModerator(
+                  post.user.user_id
+                ),
+              }"
+            >
+              {{ post.user.display_name }}
+            </span>
             <nuxt-link
               :to="`/@${post.user.username}`"
-              class="decoration-stone-400"
+              class="decoration-stone-400 text-stone-500 dark:text-stone-400"
             >
-              <span class="text-stone-500 dark:text-stone-400">
-                {{ post.user.username }}
-              </span>
+              (@{{ post.user.username }})
             </nuxt-link>
           </div>
+          <time class="text-stone-500 dark:text-stone-400">
+            {{ formatDate(post.created_at) }}
+          </time>
         </div>
-      </div>
-      <div>
-        <button
-          v-if="isMe(post.user.user_id) || isModerator"
-          @click="deletePost(post.id)"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="32"
-            height="32"
-            viewBox="0 0 512 512"
-          >
-            <path
-              d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
-              fill="currentColor"
-            />
-            <path d="M249 160h14v241h-14z" fill="currentColor" />
-            <path d="M320 160h-14.6l-10.7 241h14.6z" fill="currentColor" />
-            <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
-          </svg>
-        </button>
-      </div>
-    </div>
-    <VueMarkdown class="post" :source="post.content" />
-    <div
-      class="text-sm flex gap-4 px-4 pt-3 text-stone-500 dark:text-stone-400"
-    >
-      <div class="flex gap-4 md:gap-12 flex-grow">
-        <div class="flex gap-3 items-center">
-          <button @click="toggleReply">
-            <svg width="24" height="24" viewBox="0 0 28 28">
-              <path
-                fill="currentColor"
-                d="M10.03 5.47a.75.75 0 0 1 0 1.06L5.56 11h8.69C20.187 11 25 15.813 25 21.75a.75.75 0 0 1-1.5 0a9.25 9.25 0 0 0-9.25-9.25H5.56l4.47 4.47a.75.75 0 1 1-1.06 1.06l-5.75-5.75a.75.75 0 0 1 0-1.06l5.75-5.75a.75.75 0 0 1 1.06 0Z"
-              />
-            </svg>
+        
+        <div class="w-full">
+          <VueMarkdown class="post text-sm max-w-[80ch]" :source="post.content" />
+        </div>
+  
+        <div class="flex gap-4 items-center text-stone-600 dark:text-stone-400">
+          <span class="flex gap-2 items-center leading-none">
+            <IconUI id="reply" />
+            <span class="sr-only">Reply count:</span>{{ post._count.replies }}
+          </span>
+          <button @click="toggleReply" class="text-sm font-semibold hover:underline leading-none">
+            Reply
           </button>
-          {{ post._count.replies }}
         </div>
       </div>
-      <div class="flex gap-2 md:gap-4 flex-shrink items-center">
-        <time class="text-stone-500 dark:text-stone-400">{{
-          formatDate(post.created_at)
-        }}</time>
-      </div>
+      <button
+        v-if="isMe(post.user.user_id) || isModerator"
+        @click="deletePost(post.id)"
+        :title="`Delete post by ${post.user.display_name}`"
+      >
+        <IconUI id="x" :rounded="true" size="sm" />
+      </button>
     </div>
-    <div v-if="post.replies.length > 0" class="mt-4 ml-12">
+
+    <div v-if="post.replies.length > 0" class="flex flex-col gap-6 md:gap-8 ml-10 md:ml-12">
       <div
         v-for="reply in post.replies"
-        class="shadow rounded my-4 bg-stone-300 dark:bg-stone-800 dark:text-stone-300 text-sm p-2"
+        class="reply flex gap-4 items-start"
       >
-        <div class="flex items-start">
-          <div class="flex flex-grow flex-wrap items-center gap-4 md:h-12">
-            <Avatar :value="reply.user.avatar" size="xs" />
-            <div class="flex flex-col flex-grow">
-              <div
+        <Avatar :value="reply.user.avatar" size="xs" background />
+        <div class="flex flex-grow flex-wrap items-center gap-2">
+          <div class="flex flex-col flex-grow text-sm">
+            <div class="flex flex-row flex-wrap gap-x-1 md:gap-x-2">
+              <span
+                class="font-semibold"
                 :class="{
                   'text-green-600 dark:text-green-500': isUserModerator(
                     reply.user.user_id
@@ -89,59 +69,50 @@
                 }"
               >
                 {{ reply.user.display_name }}
-              </div>
-              <div class="text-sm">
-                <nuxt-link
-                  :to="`/@${reply.user.username}`"
-                  class="decoration-stone-400"
-                >
-                  <span class="text-stone-500 dark:text-stone-400">
-                    {{ reply.user.username }}
-                  </span>
-                </nuxt-link>
-              </div>
-            </div>
-          </div>
-          <div>
-            <button
-              v-if="isMe(reply.user.user_id) || isModerator"
-              @click="deletePost(reply.id)"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="32"
-                height="32"
-                viewBox="0 0 512 512"
+              </span>
+              <nuxt-link
+                :to="`/@${reply.user.username}`"
+                class="decoration-stone-400 text-stone-500 dark:text-stone-400"
               >
-                <path
-                  d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
-                  fill="currentColor"
-                />
-                <path d="M249 160h14v241h-14z" fill="currentColor" />
-                <path d="M320 160h-14.6l-10.7 241h14.6z" fill="currentColor" />
-                <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
-              </svg>
-            </button>
+                (@{{ reply.user.username }})
+              </nuxt-link>
+            </div>
+            <time class="text-stone-500 dark:text-stone-400">
+              {{ formatDate(reply.created_at) }}
+            </time>
           </div>
+          <div class="w-full">
+            <VueMarkdown class="post text-sm max-w-[80ch]" :source="reply.content" />
+          </div>
+          
         </div>
-        <VueMarkdown class="post" :source="reply.content" />
-        <div
-          class="flex justify-end px-4 gap-2 md:gap-4 flex-shrink items-center"
-        >
-          <time class="text-stone-500 dark:text-stone-400">
-            {{ formatDate(reply.created_at) }}
-          </time>
+        <div>
+          <button
+            v-if="isMe(reply.user.user_id) || isModerator"
+            @click="deletePost(reply.id)"
+            :title="`Delete post by ${post.user.display_name}`"
+          >
+            <IconUI id="x" :rounded="true" size="sm" />
+          </button>
         </div>
       </div>
     </div>
-    <label v-if="showReply" class="block pt-4">
-      <form @submit.prevent="submitReply">
-        <ExpandingTextarea v-model="newReply" />
-        <Button type="submit" primary font-size="md" class="px-4 py-2 mt-2">
-          Send
-        </Button>
+
+    <div v-if="showReply" class="flex gap-4 items-start ml-12">
+      <!-- @todo User avater here? -->
+      <Avatar size="xs" background />
+      <form @submit.prevent="submitReply" class="flex-grow flex flex-col gap-2">
+        <div>
+          <label for="reply-input">Add comment...</label>
+          <ExpandingTextarea v-model="newReply" />
+        </div>
+        <div>
+          <Button type="submit" primary font-size="md" class="px-3 py-2">
+            Send
+          </Button>
+        </div>
       </form>
-    </label>
+    </div>
   </div>
 </template>
 
@@ -255,7 +226,9 @@ async function deletePost(post_id: string) {
   table,
   pre,
   img {
-    @apply my-2;
+    &:not(:last-child) {
+      @apply mb-2;
+    }
   }
 
   table {
@@ -278,6 +251,43 @@ async function deletePost(post_id: string) {
   }
   hr {
     @apply my-4 border-stone-300;
+  }
+}
+
+.reply {
+  position: relative;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    display: block;
+    z-index: -1;
+    transform: translateX(-50%);
+
+    @apply bg-stone-300 dark:bg-stone-700/50 w-1 left-4 md:left-5;
+  }
+
+  &::before {
+    @apply -top-8 h-12 md:h-14;
+
+    &:first-child {
+      @apply -top-6 h-10 md:h-12;
+    }
+  }
+
+  &::after {
+    bottom: 0;
+
+    @apply top-4 md:top-5;
+
+    
+  }
+
+  &:last-child {
+    &::after {
+      content: unset;
+    }
   }
 }
 </style>

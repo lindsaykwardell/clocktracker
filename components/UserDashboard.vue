@@ -1,7 +1,7 @@
 <template>
   <template v-if="me.status === Status.SUCCESS">
     <div class="dashboard">
-      <div class="content hidden lg:flex flex-col gap-4 p-4 dark:bg-stone-950">
+      <div class="content custom-scrollbar hidden lg:flex flex-col gap-4 p-4 dark:bg-stone-950">
         <YearInReviewLink />
         <h1 class="text-xl font-sorts text-center">My Profile</h1>
         <ul class="px-4">
@@ -27,7 +27,7 @@
             >
           </li>
         </ul>
-        <hr class="border-stone-600" />
+        <hr class="border-stone-300 dark:border-stone-700/50" />
         <h1 class="text-xl font-sorts text-center">Role of the Day</h1>
         <nuxt-link
           class="flex flex-col items-center"
@@ -42,7 +42,7 @@
             }"
           />
         </nuxt-link>
-        <hr class="border-stone-600" />
+        <hr class="border-stone-300 dark:border-stone-700/50" />
         <template v-if="scriptsOfTheWeek.data.value">
           <h1 class="text-xl font-sorts text-center">Popular Scripts</h1>
           <ul class="px-4">
@@ -52,11 +52,11 @@
               </nuxt-link>
             </li>
           </ul>
-          <hr class="border-stone-600" />
+          <hr class="border-stone-300 dark:border-stone-700/50" />
         </template>
         <template v-if="(myCommunities?.length ?? 0) > 0">
           <h1 class="font-sorts text-xl text-center">Communities</h1>
-          <ul>
+          <ul class="flex flex-col gap-1">
             <li
               v-for="community in myCommunities"
               class="flex gap-2 items-center"
@@ -72,15 +72,15 @@
         </template>
       </div>
       <div
-        class="content md:overflow-y-scroll pb-20 md:pb-0"
+        class="content custom-scrollbar md:overflow-y-scroll pb-20 md:pb-0"
         :class="{
           block: selectedTab === 'updates',
           'hidden md:block': selectedTab === 'events',
         }"
       >
         <ClientOnly>
-          <ul class="px-4">
-            <li v-for="update in updates.data.value" class="py-3">
+          <ul class="px-4 py-8 flex flex-col gap-3 lg:gap-4 items-center">
+            <li v-for="update in updates.data.value" class="max-w-[800px]">
               <div class="flex flex-col gap-2">
                 <template v-if="update.kind === 'new_event'">
                   <div class="flex gap-2 items-center">
@@ -91,7 +91,7 @@
                           New Event in
                           <nuxt-link
                             :to="`/community/${update.event.community?.slug}`"
-                            class="hover:underline"
+                            class="font-semibold hover:underline"
                             >{{ update.event.community?.name }}</nuxt-link
                           >
                         </template>
@@ -118,14 +118,13 @@
                       </span>
                     </div>
                   </div>
-                  <nuxt-link :to="`/event/${update.event.id}`">
-                    <EventCard
-                      v-if="update.kind === 'new_event'"
-                      :event="update.event"
-                      width="full"
-                    />
-                  </nuxt-link>
+                  <EventCard
+                    v-if="update.kind === 'new_event'"
+                    :event="update.event"
+                    display="large"
+                  />
                 </template>
+
                 <template v-else-if="update.kind === 'new_post'">
                   <div class="flex gap-2 items-center">
                     <Avatar :value="update.post.community?.icon" size="xs" />
@@ -135,8 +134,9 @@
                         <nuxt-link
                           :to="`/community/${update.post.community?.slug}`"
                           class="hover:underline"
-                          >{{ update.post.community?.name }}</nuxt-link
                         >
+                          {{ update.post.community?.name }}
+                        </nuxt-link>
                       </span>
                     </div>
                   </div>
@@ -148,11 +148,10 @@
                     @deleted="postDeleted"
                   />
                 </template>
+
                 <template v-else-if="update.kind === 'friend_request'">
                   <div>
-                    <div
-                      class="text-sm text-stone-500 dark:text-stone-400 flex gap-2 items-center"
-                    >
+                    <div class="text-sm text-stone-500 dark:text-stone-400 flex gap-2 items-center">
                       <Avatar
                         :value="
                           update.request.user_id === me.data.user_id
@@ -161,17 +160,15 @@
                         "
                         size="xs"
                       />
-                      <span
-                        >New friend request
-                        <template
-                          v-if="update.request.user_id === me.data.user_id"
-                        >
-                          received from
-                          {{ update.request.from_user.display_name }}</template
-                        ><template v-else>
+                      <span>
+                        New friend request
+                        <template v-if="update.request.user_id === me.data.user_id">
+                          received from {{ update.request.from_user.display_name }}
+                        </template>
+                        <template v-else>
                           sent to {{ update.request.user.display_name }}
-                        </template></span
-                      >
+                        </template>
+                      </span>
                     </div>
                   </div>
                   <UserCard
@@ -225,13 +222,13 @@
         </ClientOnly>
       </div>
       <div
-        class="flex flex-col gap-4 dark:bg-stone-950 p-4 pb-20 md:pb-0"
+        class="flex flex-col gap-4 dark:bg-stone-950 pt-4 pb-20 md:pb-0"
         :class="{
           block: selectedTab === 'events',
-          'hidden md:block': selectedTab === 'updates',
+          'hidden md:flex': selectedTab === 'updates',
         }"
       >
-        <div>
+        <div class="px-4">
           <Button
             v-if="!featureFlags.isEnabled('ical')"
             component="nuxt-link"
@@ -300,20 +297,18 @@
             </Menu>
           </Calendar>
         </div>
-        <div class="flex flex-col gap-4 calendar-events">
-          <nuxt-link
+        <div class="calendar-events custom-scrollbar flex flex-col gap-4 pl-4 pr-3">
+          <template
             v-for="event in eventsOnDay"
-            :to="`/event/${event.id}`"
-            class="w-full"
           >
             <EventCard
-              size="sm"
+              display="small"
               :event="event"
-              class="m-auto"
+              class="m-auto flex-none"
               :canModifyEvent="canModifyEvent(event)"
               @deleted="removeEvent"
             />
-          </nuxt-link>
+          </template>
         </div>
       </div>
       <div
@@ -534,8 +529,18 @@ onMounted(async () => {
 
 .calendar-events {
   @media (min-width: 768px) {
-    height: calc(100vh - 350px);
+    height: calc(100vh - 350px - 2rem);
     overflow-y: scroll;
   }
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: oklch(0.869 0.005 56.366) transparent; /* Stone 300 */
+  scrollbar-gutter: stable;
+}
+
+.custom-scrollbar:where(.dark, .dark *) {
+  scrollbar-color: oklch(0.444 0.011 73.639) transparent; /* Stone 600 */
 }
 </style>
