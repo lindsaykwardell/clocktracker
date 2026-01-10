@@ -12,9 +12,8 @@
           />
         </div>
         <div class="w-full lg:w-1/2 flex flex-col gap-4">
-          <nuxt-link
+          <template
             v-for="event in eventsOnDay"
-            :to="`/event/${event.id}`"
             class="w-full"
           >
             <EventCard
@@ -23,7 +22,7 @@
               :canModifyEvent="canModifyEvent(event)"
               @deleted="removeEvent"
             />
-          </nuxt-link>
+          </template>
         </div>
       </div>
     </template>

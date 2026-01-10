@@ -189,7 +189,7 @@ const shouldShowAnnouncement = computed(() => {
 
 useHead({
   titleTemplate: (titleChunk) => {
-    return titleChunk ? `${titleChunk} - ClockTracker` : "ClockTracker";
+    return titleChunk ? `${titleChunk} | ClockTracker` : "ClockTracker";
   },
 });
 

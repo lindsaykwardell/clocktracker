@@ -21,6 +21,7 @@ import type { Event } from "~/composables/useCommunities";
 const route = useRoute();
 const slug = route.params.slug as string;
 
+const metadata = await $fetch(`/api/community/${slug}/minimal`);
 const events = ref<Event[]>([]);
 
 async function fetchEvents({ year, month }: { year: number; month: number }) {
@@ -28,4 +29,9 @@ async function fetchEvents({ year, month }: { year: number; month: number }) {
     `/api/community/${slug}/events/calendar/${year}/${month}`
   );
 }
+
+useHead({
+  title: () => `Events - ${metadata.name}`,
+});
+
 </script>

@@ -752,7 +752,7 @@ if (gameMetadata.error.value) {
 }
 
 useHead({
-  title: `${gameMetadata.data.value!.user!.display_name} | ${
+  title: `${gameMetadata.data.value!.user!.display_name} - ${
     gameMetadata.data.value!.script
   }`,
   meta: [
@@ -765,7 +765,7 @@ useHead({
     },
     {
       property: "og:title",
-      content: `${gameMetadata.data.value!.user!.display_name} | ${
+      content: `${gameMetadata.data.value!.user!.display_name} - ${
         gameMetadata.data.value!.script
       }`,
     },
@@ -795,7 +795,7 @@ useHead({
     },
     {
       property: "twitter:title",
-      content: `${gameMetadata.data.value!.user!.display_name} | ${
+      content: `${gameMetadata.data.value!.user!.display_name} - ${
         gameMetadata.data.value!.script
       }`,
     },
