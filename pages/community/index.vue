@@ -1,25 +1,22 @@
 <template>
   <StandardTemplate>
     <template v-if="me.status === Status.SUCCESS">
-      <div class="flex justify-end items-center p-4 gap-4">
+      <div class="flex justify-end items-center p-4 gap-2">
         <Button
           component="nuxt-link"
           to="/community/create"
-          class="py-2 px-4"
-          primary
+          color="primary"
         >
           Create Community
         </Button>
         <Button
           component="nuxt-link"
           to="/search?near_me=true"
-          class="py-2 px-4"
-          secondary
         >
           Find Communities Near Me
         </Button>
       </div>
-      <div class="w-full lg:w-[800px] m-auto flex flex-col items-center gap-4">
+      <div class="w-full lg:w-[800px] m-auto flex flex-col items-center gap-4 p-4 md:p-4 pb-4 lg:pb-8">
         <h1 class="font-sorts text-4xl lg:text-3xl">Communities</h1>
         <CommunityCard
           v-for="community in myCommunities"

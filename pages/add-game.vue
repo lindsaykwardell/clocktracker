@@ -4,6 +4,7 @@
       <h2 class="font-sorts text-4xl text-center">Add Game</h2>
       <p class="text-center italic text-stone-400 pt-6 text-sm">
         Adding more than one game?
+        <!-- @todo create link version of Button? -->
         <button
           @click="initImportGames"
           class="underline italic dark:hover:text-white hover:text-black"
@@ -17,8 +18,9 @@
           @click="resetGame"
           type="button"
           id="reset-game"
-          class="w-[300px] m-auto"
-          secondary
+          class="m-auto"
+          color="caution"
+          wide
           :disabled="inFlight"
         >
           Reset Game

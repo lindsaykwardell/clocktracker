@@ -8,13 +8,15 @@
         <div class="form-items flex flex-col md:flex-row gap-4 items-center md:items-start w-full lg:pr-40">
           <div class="flex-none w-32 md:w-40 flex flex-col gap-2 items-center">
             <Avatar :value="community.data.icon" size="lg" />
-            <button
+            <Button
               @click="selectCommunityAvatar"
               type="button"
-              class="form-action is-neutral"
+              variant="filled"
+              size="small"
+              color="neutral"
             >
               Change Logo
-            </button>
+            </Button>
           </div>
           <div class="flex-grow flex flex-col gap-3">
             <div class="flex flex-col md:flex-row md:gap-2">
@@ -56,17 +58,27 @@
                   class="flex gap-1"
                 >
                   <Input v-model="updatedLinks[index]" type="text" />
-                  <button
+                  <Button
                     type="button"
                     @click="updatedLinks.splice(index, 1)"
-                    class="form-action is-destructive"
+                    icon="x-lg"
+                    display="icon-only"
+                    color="negative"
                   >
                     Remove
-                  </button>
+                  </Button>
                 </div>
-                <button @click="updatedLinks.push('')" type="button">
-                  Add link
-                </button>
+                <div class="flex justify-center">
+                  <Button 
+                    @click="updatedLinks.push('')" 
+                    type="button"
+                    variant="filled"
+                    color="neutral"
+                    size="small"
+                  >
+                    Add link
+                  </Button>
+                </div>
               </div>
             </label>
             <label>
@@ -77,8 +89,8 @@
                   component="a"
                   href="https://discord.com/oauth2/authorize?client_id=1125833336695304323&permissions=549755833344&scope=bot"
                   target="_blank"
-                  class="w-[200px] text-white"
-                  discord
+                  variant="filled"
+                  color="discord"
                 >
                   <Discord />
                   Add Bot
@@ -99,8 +111,10 @@
           <Button
             type="submit"
             id="save-game"
-            class="py-2 px-4 w-[300px] m-auto"
-            primary
+            variant="filled"
+            color="primary"
+            size="large"
+            wide
             :disabled="inFlight"
           >
             <template v-if="inFlight">
@@ -142,20 +156,26 @@
                     </div>
                   </div>
                 </td>
-                <td class="w-[250px]">
+                <td>
                   <div class="flex justify-end gap-2">
-                    <button
+                    <Button
                       @click="approveUser(member.user_id)"
-                      class="table-action is-positive"
+                      variant="filled"
+                      size="mobile-small"
+                      color="positive"
+                      class="flex-1"
                     >
                       Approve
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       @click="denyUser(member.user_id)"
-                      class="table-action is-destructive"
+                      variant="filled"
+                      size="mobile-small"
+                      color="negative"
+                      class="flex-1"
                     >
                       Ignore
-                    </button>
+                    </Button>
                   </div>
                 </td>
               </tr>
@@ -216,19 +236,17 @@
                     }}
                   </span>
                 </td>
-                <td class="">
+                <td>
                   <div class="flex gap-2">
-                    <button
+                    <Button
                       v-if="!isMe(member.user_id)"
                       @click="toggleAdmin(member.user_id)"
-                      :class="[
-                        'table-action',
-                        community.data.admins
-                          .map(({ user_id }) => user_id)
-                          .includes(member.user_id)
-                          ? 'is-undo'
-                          : 'is-positive',
-                      ]"
+                      variant="filled"
+                      size="mobile-small"
+                      class="flex-1"
+                      :color="community.data.admins.map(({ user_id }) => user_id).includes(member.user_id)
+                          ? 'caution'
+                          : 'positive'"
                     >
                       <template
                         v-if="
@@ -240,17 +258,20 @@
                         Demote
                       </template>
                       <template v-else> Promote </template>
-                    </button>
+                    </Button>
                     <div
                       v-else
                       class="table-action border border-transparent"
                     />
-                    <button
+                    <Button
                       @click="removeUser(member.user_id)"
-                      class="table-action is-destructive"
+                      variant="filled"
+                      size="mobile-small"
+                      class="flex-1"
+                      color="negative"
                     >
                       Remove
-                    </button>
+                    </Button>
                   </div>
                 </td>
               </tr>
@@ -291,12 +312,15 @@
                 </td>
                 <td>
                   <div class="flex justify-center gap-2">
-                    <button
+                    <Button
                       @click="unbanUser(member.user_id)"
-                      class="table-action is-undo"
+                      variant="filled"
+                      size="mobile-small"
+                      class="flex-1"
+                      color="caution"
                     >
                       Unban
-                    </button>
+                    </Button>
                   </div>
                 </td>
               </tr>
@@ -436,31 +460,6 @@ useHead({
   th,
   td {
     @apply p-2;
-  }
-
-  .form-action {
-    @apply rounded transition duration-150 text-sm md:text-base px-2 md:px-3 py-1 md:py-2;
-  }
-
-  .table-action {
-    @apply flex-1 whitespace-nowrap rounded transition duration-150 text-sm md:text-base px-2 md:px-3 py-1 md:py-2;
-  }
-
-  .table-action.is-positive {
-    @apply text-white bg-green-600 hover:bg-green-700;
-  }
-
-  .table-action.is-undo {
-    @apply text-black bg-yellow-500 hover:bg-yellow-600;
-  }
-
-  .form-action.is-destructive,
-  .table-action.is-destructive {
-    @apply text-white bg-red-700 hover:bg-red-800;
-  }
-
-  .form-action.is-neutral {
-    @apply text-black dark:text-white bg-stone-300 dark:bg-stone-600 hover:bg-stone-400 dark:hover:bg-stone-700;
   }
 
   .custom-scrollbar {

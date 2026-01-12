@@ -71,7 +71,7 @@
             <option :value="true">Tutorials are disabled</option>
           </select>
         </label>
-        <Button type="submit" primary class="px-4 py-2" :disabled="inFlight">
+        <Button type="submit" color="primary" :disabled="inFlight">
           <template v-if="inFlight">
             <Spinner />
             Saving...

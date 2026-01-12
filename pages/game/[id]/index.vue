@@ -402,31 +402,24 @@
             ),
           }"
         >
-          <button
+          <Button
             type="button"
             @click="grimPage -= 1"
             v-if="grimPage !== 0"
-            class="absolute bottom-0 left-1 flex items-center font-sorts z-10"
+            icon="journal-arrow-up"
+            class="absolute bottom-1 left-1 z-10"
           >
-            <span
-              class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded"
-            >
-              {{ "<" }} Previous page
-            </span>
-          </button>
-          <button
-            v-if="grimPage !== game.data.grimoire.length - 1"
+            <span> Previous page </span>
+          </Button>
+          <Button
             type="button"
+            v-if="grimPage !== game.data.grimoire.length - 1"
             @click="grimPage += 1"
-            class="absolute bottom-0 right-1 flex items-center font-sorts z-10"
+            icon="journal-arrow-down"
+            class="absolute bottom-1 right-1 z-10"
           >
-            <span
-              class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded"
-            >
-              Next page
-              {{ ">" }}
-            </span>
-          </button>
+            <span> Next page </span>
+          </Button>
           <div class="w-screen md:w-full overflow-scroll">
             <Grimoire
               :tokens="game.data.grimoire[grimPage].tokens"
@@ -464,21 +457,10 @@
             :onCardClick="confirmMergeGame"
           />
         </Dialog>
-        <div v-if="isMe" class="absolute top-1 right-3" id="menu-controls">
+        <div v-if="isMe" class="absolute top-3 right-3" id="menu-controls">
           <Menu v-slot="{ open }">
             <MenuButton>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="32"
-                height="32"
-                viewBox="0 0 16 16"
-                class="w-6"
-              >
-                <path
-                  fill="#000"
-                  d="M3 9.5a1.5 1.5 0 1 1 0-3a1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3a1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3a1.5 1.5 0 0 1 0 3"
-                />
-              </svg>
+              <IconUI id="dots" :rounded="true" shadow />
             </MenuButton>
             <transition
               enter-active-class="transition duration-100 ease-out"
@@ -491,7 +473,7 @@
               <div v-show="open || showMenuForTour">
                 <MenuItems
                   static
-                  class="absolute right-0 z-10 bg-stone-100 dark:bg-stone-900 rounded shadow-md whitespace-nowrap flex flex-col items-start min-w-[150px] divide-y divide-stone-500 dark:divide-stone-700 overflow-hidden"
+                  class="absolute right-0 z-10 bg-stone-100 dark:bg-stone-900 rounded shadow-md whitespace-nowrap flex flex-col items-start min-w-[150px] overflow-hidden"
                 >
                   <div
                     v-if="
@@ -501,12 +483,13 @@
                     class="w-full"
                   >
                     <MenuItem v-if="game.data.waiting_for_confirmation">
-                      <button
+                      <ButtonSubmenu
                         @click="confirmGame"
-                        class="flex gap-1 w-full items-center dark:text-white text-sm px-2 min-h-[32px]"
+                        icon="plus-lg"
+                        color="positive"
                       >
                         Add game to my Profile
-                      </button>
+                      </ButtonSubmenu>
                     </MenuItem>
                     <MenuItem v-if="similarGames.length > 0">
                       <button
@@ -519,121 +502,72 @@
                     </MenuItem>
                   </div>
                   <div class="w-full">
-                    <MenuItem>
-                      <button
+                    <MenuItem v-if="!game.data.waiting_for_confirmation">
+                      <ButtonSubmenu
                         @click="toggleFavorite"
-                        class="flex gap-1 w-full items-center dark:text-white text-sm px-1 py-1"
+                        icon="star"
+                        iconColor="primary"
                       >
-                        <Star class="w-5 text-primary" />
                         <div id="favorite-game">Mark as Favorite</div>
-                      </button>
+                      </ButtonSubmenu>
                     </MenuItem>
                     <MenuItem v-if="!game.data.waiting_for_confirmation">
-                      <nuxt-link
-                        class="flex gap-1 w-full items-center dark:text-white text-sm px-2"
+                      <ButtonSubmenu
+                        component="nuxt-link"
                         :to="`/game/${route.params.id}/edit`"
+                        icon="edit"
                       >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="32"
-                          height="32"
-                          viewBox="0 0 32 32"
-                          class="w-4"
-                        >
-                          <path
-                            fill="currentColor"
-                            d="M2 26h28v2H2zM25.4 9c.8-.8.8-2 0-2.8l-3.6-3.6c-.8-.8-2-.8-2.8 0l-15 15V24h6.4l15-15zm-5-5L24 7.6l-3 3L17.4 7l3-3zM6 22v-3.6l10-10l3.6 3.6l-10 10H6z"
-                          />
-                        </svg>
                         <div id="edit-game">Edit</div>
-                      </nuxt-link>
+                      </ButtonSubmenu>
                     </MenuItem>
                     <MenuItem>
-                      <button
+                      <ButtonSubmenu
                         @click="deleteGame(false)"
-                        class="flex gap-1 w-full items-center dark:text-white text-sm px-2"
+                        :icon="game.data.waiting_for_confirmation ? 'x-lg' : 'trash'"
+                        :color="game.data.waiting_for_confirmation ? 'caution' : 'neutral'"
                       >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="32"
-                          height="32"
-                          viewBox="0 0 512 512"
-                          class="w-4"
-                        >
-                          <path
-                            d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
-                            fill="currentColor"
-                          />
-                          <path d="M249 160h14v241h-14z" fill="currentColor" />
-                          <path
-                            d="M320 160h-14.6l-10.7 241h14.6z"
-                            fill="currentColor"
-                          />
-                          <path
-                            d="M206.5 160H192l10.7 241h14.6z"
-                            fill="currentColor"
-                          />
-                        </svg>
                         <div id="delete-game">
-                          <template v-if="game.data.waiting_for_confirmation"
-                            >Ignore</template
-                          >
-                          <template v-else>Delete</template>
+                          <template v-if="game.data.waiting_for_confirmation">
+                            Decline
+                          </template>
+                          <template v-else>
+                            Delete
+                          </template>
                         </div>
-                      </button>
+                      </ButtonSubmenu>
                     </MenuItem>
                     <MenuItem v-if="game.data.parent_game_id">
-                      <button
+                      <ButtonSubmenu
                         @click="deleteGame(true)"
-                        class="flex gap-1 w-full items-center dark:text-white text-sm px-2"
+                        :icon="game.data.waiting_for_confirmation ? 'x-lg' : 'trash'"
+                        :color="game.data.waiting_for_confirmation ? 'negative' : 'neutral'"
                       >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="32"
-                          height="32"
-                          viewBox="0 0 512 512"
-                          class="w-4"
-                        >
-                          <path
-                            d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
-                            fill="currentColor"
-                          />
-                          <path d="M249 160h14v241h-14z" fill="currentColor" />
-                          <path
-                            d="M320 160h-14.6l-10.7 241h14.6z"
-                            fill="currentColor"
-                          />
-                          <path
-                            d="M206.5 160H192l10.7 241h14.6z"
-                            fill="currentColor"
-                          />
-                        </svg>
-                        <template v-if="game.data.waiting_for_confirmation"
-                          >Ignore</template
-                        >
-                        <template v-else>Delete</template> and Untag Myself
-                      </button>
+                        <template v-if="game.data.waiting_for_confirmation">
+                          Decline
+                        </template>
+                        <template v-else>
+                          Delete
+                        </template> 
+                        and Untag Myself
+                      </ButtonSubmenu>
                     </MenuItem>
                   </div>
                   <div class="w-full">
                     <MenuItem v-if="canPostToBGG">
-                      <button
-                        class="bg-[#3f3a60] hover:bg-[#2e2950] transition duration-150 text-white flex items-center w-full text-sm min-h-[32px]"
+                      <ButtonSubmenu
                         @click="initPostToBGG"
+                        color="bgg"
+                        icon="bgg"
+                        iconColor="bgg"
+                        :iconSpin="bggInFlight"
                         :disabled="bggInFlight"
                       >
-                        <div class="w-6 ml-1">
-                          <img
-                            src="/img/bgg.png"
-                            class="w-6 h-6 m-auto"
-                            :class="{ 'animate-spin': bggInFlight }"
-                          />
-                        </div>
                         <span v-if="game.data.bgg_id">Delete from BGG</span>
                         <span v-else>Post to BGG</span>
-                      </button>
+                      </ButtonSubmenu>
                     </MenuItem>
                     <MenuItem v-if="canPostToBGStats">
+                      <!-- @todo Apply ButtonSubmenu-->
                       <a
                         :href="bgStatsLink"
                         class="bg-[#333] transition duration-150 dark:text-white flex items-center w-full gap-1 text-sm min-h-[32px]"

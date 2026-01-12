@@ -107,8 +107,7 @@
 
         <StatsCommunityBalance 
           v-if="games?.length"
-          :games="games" 
-          class="w-full" 
+          :games="games"
         />
       </div>
     </div>

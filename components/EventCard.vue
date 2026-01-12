@@ -98,7 +98,7 @@
               >
                 <Menu>
                   <MenuButton>
-                    <IconUI id="dots" :rounded="true" />
+                    <IconUI id="dots" :rounded="true" shadow />
                   </MenuButton>
                   <transition
                     enter-active-class="transition duration-100 ease-out"
@@ -109,35 +109,37 @@
                     leave-to-class="transform scale-95 opacity-0"
                   >
                     <MenuItems
-                      class="absolute right-0 z-10 bg-stone-100 dark:bg-stone-800 rounded shadow-md whitespace-nowrap flex flex-col items-start min-w-[150px]"
+                      class="absolute right-0 z-10 bg-stone-100 dark:bg-stone-800 rounded shadow-md whitespace-nowrap flex flex-col divide-y divide-stone-100 items-start min-w-[150px]"
                     >
                       <MenuItem>
-                        <nuxt-link
+                        <ButtonSubmenu
+                          component="nuxt-link"
                           :to="`/event/${event.id}/edit`"
-                          class="flex gap-1 w-full items-center text-black dark:text-white text-sm px-2 min-h-[32px]"
+                          icon="edit"
                         >
                           Edit Event
-                        </nuxt-link>
+                        </ButtonSubmenu>
                       </MenuItem>
                       <MenuItem>
-                        <nuxt-link
+                        <ButtonSubmenu
+                          component="nuxt-link"
                           :to="`/event/create?duplicate=${event.id}${
                             event.community?.slug
                               ? `&slug=${event.community?.slug}`
                               : ''
                           }`"
-                          class="flex gap-1 w-full items-center text-black dark:text-white text-sm px-2 min-h-[32px]"
+                          icon="copy"
                         >
                           Duplicate Event
-                        </nuxt-link>
+                        </ButtonSubmenu>
                       </MenuItem>
                       <MenuItem>
-                        <button
+                        <ButtonSubmenu
                           @click="deleteEvent"
-                          class="flex gap-1 w-full items-center text-black dark:text-white text-sm px-2 min-h-[32px]"
+                          icon="trash"
                         >
                           Delete Event
-                        </button>
+                        </ButtonSubmenu>
                       </MenuItem>
                     </MenuItems>
                   </transition>

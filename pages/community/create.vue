@@ -21,9 +21,10 @@
         <Button
           type="submit"
           id="save-game"
-          class="py-2 px-4 w-[300px] m-auto"
+          class="m-auto"
+          color="primary"
+          wide
           :disabled="inFlight"
-          primary
         >
           <template v-if="inFlight">
             <Spinner />

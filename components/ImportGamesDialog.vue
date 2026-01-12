@@ -5,30 +5,42 @@
     </template>
     <div v-if="show" class="p-4">
       <template v-if="!inFlight">
-        <p class="pb-4">
+        <p class="mb-4">
           You can upload a CSV of your games and import them into ClockTracker.
           Below are the steps to upload your games:
         </p>
-        <ul class="list-disc list-inside">
+        <ol class="flex flex-col gap-4">
           <li>
-            <a
+            <h4 class="text-lg font-semibold font-sorts">Step 1</h4>
+            <p class="mb-2">
+              Download the CSV import template.
+            </p>
+            <Button
+              component="a"
               href="/import_template.csv"
               download="import_template.csv"
-              class="underline"
+              icon="download"
             >
-              Download Import Template
-            </a>
+              Download template
+            </Button>
           </li>
           <li>
-            Enter your game details into the spreadsheet. Make sure you save it
-            as a CSV!
+            <h4 class="text-lg font-semibold font-sorts">Step 2</h4>
+            <p>Enter your game details into the spreadsheet. Make sure you save it
+            as a CSV file!</p>
           </li>
           <li>
-            <button @click="initiateImport" class="underline">
-              Upload the template with your games
-            </button>
+            <h4 class="text-lg font-semibold font-sorts">Step 3</h4>
+            <p class="mb-2">Upload the template with your games below.</p>
+            <Button 
+              @click="initiateImport" 
+              icon="upload"
+              color="primary"
+            >
+              Upload template
+            </Button>
           </li>
-        </ul>
+        </ol>
       </template>
       <Loading v-else />
     </div>

@@ -35,13 +35,13 @@
         <GameOverviewGrid
           :games="favoriteGames"
         />
-        <div v-if="isMe" class="flex justify-center items-center">
-          <button
+        <div v-if="isMe" class="flex justify-center items-center mt-2">
+          <Button
             @click="showFavoritesDialog = !showFavoritesDialog"
-            class="p-4 text-gray-800 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200 hover:underline"
+            size="small"
           >
             Manage Favorite Games
-          </button>
+          </Button>
         </div>
       </template>
       <p v-else class="text-center text-2xl font-sorts">No games yet!</p>

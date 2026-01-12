@@ -79,8 +79,8 @@
         }"
       >
         <ClientOnly>
-          <ul class="px-4 py-8 flex flex-col gap-3 lg:gap-4 items-center">
-            <li v-for="update in updates.data.value" class="max-w-[800px]">
+          <ul class="px-4 py-8 flex flex-col gap-3 lg:gap-4">
+            <li v-for="update in updates.data.value" class="max-w-[800px] w-full mx-auto">
               <div class="flex flex-col gap-2">
                 <template v-if="update.kind === 'new_event'">
                   <div class="flex gap-2 items-center">
@@ -233,8 +233,7 @@
             v-if="!featureFlags.isEnabled('ical')"
             component="nuxt-link"
             to="/event/create"
-            tertiary
-            fontSize="sm"
+            size="small"
           >
             Create Event
           </Button>
@@ -247,18 +246,7 @@
           >
             <Menu v-if="featureFlags.isEnabled('ical')">
               <MenuButton>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="32"
-                  height="32"
-                  viewBox="0 0 16 16"
-                  class="w-6"
-                >
-                  <path
-                    fill="#a8a29e"
-                    d="M3 9.5a1.5 1.5 0 1 1 0-3a1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3a1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3a1.5 1.5 0 0 1 0 3"
-                  />
-                </svg>
+                <IconUI id="dots" :rounded="true" shadow />
               </MenuButton>
               <transition
                 enter-active-class="transition duration-100 ease-out"
@@ -272,17 +260,18 @@
                   class="absolute right-0 z-10 bg-stone-100 dark:bg-stone-800 rounded shadow-md whitespace-nowrap flex flex-col items-start min-w-[150px]"
                 >
                   <MenuItem>
-                    <nuxt-link
+                    <ButtonSubmenu
+                      component="nuxt-link"
                       to="/event/create"
-                      class="flex gap-1 w-full items-center text-black dark:text-white text-sm px-2 min-h-[32px]"
+                      icon="calender-plus"
                     >
                       Create Event
-                    </nuxt-link>
+                    </ButtonSubmenu>
                   </MenuItem>
                   <MenuItem v-if="copyIsSupported">
-                    <button
+                    <ButtonSubmenu
                       @click.prevent="copyCalendarLink"
-                      class="flex gap-1 w-full items-center text-black dark:text-white text-sm px-2 min-h-[32px]"
+                      icon="copy"
                       v-tooltip="{
                         content: 'Copied!',
                         shown: showCopyTooltip,
@@ -290,7 +279,7 @@
                       }"
                     >
                       Copy Calendar Link
-                    </button>
+                    </ButtonSubmenu>
                   </MenuItem>
                 </MenuItems>
               </transition>
