@@ -4,7 +4,7 @@
       class="w-full flex flex-col items-center justify-center gap-12 py-4"
     >
       <h2 class="font-sorts text-4xl text-center">Integrations</h2>
-      <div class="text-left w-full">
+      <div class="text-left w-full space-y-4">
         <h3 class="text-2xl">BoardGameGeek</h3>
         <p class="text-stone-500">
           Connect your BoardGameGeek account to sync your plays to your profile.
@@ -28,7 +28,7 @@
                 required
               />
             </label>
-            <Button @click.prevent="connectBoardGameGeek" font-size="md">
+            <Button @click.prevent="connectBoardGameGeek" color="bgg">
               Connect
             </Button>
           </div>
@@ -36,7 +36,7 @@
             <p class="pb-2">
               Connected as <strong>{{ bgg_username }}</strong>
             </p>
-            <Button @click.prevent="disconnectBoardGameGeek" font-size="md">
+            <Button @click.prevent="disconnectBoardGameGeek" color="negative" size="small">
               Disconnect
             </Button>
           </div>

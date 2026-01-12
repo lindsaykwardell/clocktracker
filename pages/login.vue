@@ -4,6 +4,7 @@
       <img src="/logo.png" class="w-48 bg-stone-900 rounded-full" alt="ClockTracker" />
     </nuxt-link>
     <h1>Sign in</h1>
+    <!-- @todo Fix input fields-->
     <form @submit.prevent="login" class="flex flex-col items-center gap-2">
       <label>
         <span class="block">Email</span>
@@ -25,10 +26,13 @@
           placeholder="Password"
         />
       </label>
-      <Button type="submit" class="w-[300px] py-2"> Login </Button>
-      <Button type="button" @click="register" class="w-[300px] py-2" tertiary>
+      <Button type="submit" color="primary" wide>
+        Login
+      </Button>
+      <Button type="button" @click="register" wide>
         Register
       </Button>
+      <!-- @todo create link version of Button? -->
       <button
         @click.prevent="sendResetPassword"
         class="hover:underline text-stone-400 text-sm"

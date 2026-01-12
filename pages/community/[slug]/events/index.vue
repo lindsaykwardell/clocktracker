@@ -5,8 +5,8 @@
         <Button
           component="nuxt-link"
           :to="`/event/create?slug=${slug}`"
-          class="py-2 px-4"
-          primary
+          color="primary"
+          icon="calender-plus"
         >
           Create Event
         </Button>

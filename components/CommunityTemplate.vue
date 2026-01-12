@@ -35,20 +35,16 @@
                   </div>
                 </div>
               </div>
-              <button
+              <Button
                 v-if="user && !isBanned"
                 @click="isMember ? leave() : join()"
-                class="whitespace-nowrap flex gap-1 items-center justify-center px-3 py-2 rounded transition duration-150"
-                :class="{
-                  'text-white bg-purple-500 hover:bg-purple-600': !isMember,
-                  'text-white bg-red-700 hover:bg-red-800': isMember,
-                }"
+                :color="isMember ? 'negative' : isPending ? 'caution' : 'positive'"
               >
                 <template v-if="isMember"> Leave Community </template>
                 <template v-else-if="isPending">Requested</template>
                 <template v-else-if="isNotAllowed">Request to Join</template>
                 <template v-else> Join Community </template>
-              </button>
+              </Button>
             </div>
             <div class="flex flex-col gap-1 w-full">
               <h2 class="text-xs text-stone-600 text-center md:text-start uppercase">

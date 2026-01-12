@@ -84,18 +84,20 @@
             </div>
           </div>
         </div>
-        <FriendButton
-          v-if="user && !isUser"
-          :username="player.username"
-          :user_id="player.user_id"
-        />
-        <nuxt-link
-          v-if="isUser"
-          :to="`/settings`"
-          class="whitespace-nowrap flex gap-1 items-center justify-center px-3 py-2 rounded transition duration-150 text-white bg-purple-500 hover:bg-purple-600"
-        >
-          Edit profile
-        </nuxt-link>
+        <div class="flex-none">
+          <FriendButton
+            v-if="user && !isUser"
+            :username="player.username"
+            :user_id="player.user_id"
+          />
+          <nuxt-link
+            v-if="isUser"
+            :to="`/settings`"
+            class="whitespace-nowrap flex gap-1 items-center justify-center px-3 py-2 rounded transition duration-150 text-white bg-purple-500 hover:bg-purple-600"
+          >
+            Edit profile
+          </nuxt-link>
+        </div>
       </div>
       <div class="flex flex-col gap-1">
         <h2 class="text-xs text-stone-600 text-center md:text-start uppercase">Joined Communities</h2>

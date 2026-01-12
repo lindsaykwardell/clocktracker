@@ -24,10 +24,7 @@
               v-if="isAllowedToRegister"
               :disabled="inFlight"
               @click="initRegister()"
-              class="py-2 px-4"
-              font-size="md"
-              :primary="!alreadyRegistered"
-              :outline="alreadyRegistered"
+              :color="alreadyRegistered ? 'caution' : 'primary'"
             >
               <template v-if="inFlight"><Spinner /></template>
               <template v-else-if="alreadyRegistered">Unregister</template>
@@ -35,8 +32,6 @@
             </Button>
             <Button
               v-if="shareIsSupported || copyIsSupported"
-              class="py-2 px-4"
-              font-size="md"
               @click="getShareLink"
               v-tooltip="{
                 content: 'Copied!',
@@ -142,7 +137,7 @@
                   </div>
                 </template>
                 <template v-for="waitlist in event.data.waitlists">
-                  <div class="flex flex-col gap-2">
+                  <div class="flex flex-col gap-2 items-start">
                     <h3 class="card-label">{{ waitlist.name }}</h3>
                     <ul v-if="waitlist.users.length > 0" class="flex flex-col gap-1">
                       <li v-for="player in waitlist.users">
@@ -168,19 +163,19 @@
                         </div>
                       </li>
                     </ul>
-                    <button
+                    <Button
                       xv-if="
                       !inFlight &&
                       (event.who_can_register === 'ANYONE' ? true : isMember)
                     "
-                      v-if="!inFlight"
+                      v-if="!inFlight && !alreadyRegistered"
                       @click="initRegister(waitlist.id)"
-                      class="transition duration-150 hover:underline flex items-center gap-2"
+                      size="small"
+                      class="inline-flex"
+                      icon="sign"
                     >
-                      <template v-if="!alreadyRegistered">
-                        <IconUI id="sign" />Register for {{ waitlist.name }}
-                      </template>
-                    </button>
+                      Register for <span class="sr-only">{{ waitlist.name }}</span>list
+                    </Button>
                   </div>
                 </template>
               </div>
@@ -204,15 +199,15 @@
               required
             />
           </label>
-          <button
+          <Button
             :disabled="inFlight"
             type="submit"
             id="register-attendee"
-            class="w-full bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
+            color="primary"
           >
             <template v-if="inFlight"><Spinner /></template>
             <template v-else>Register</template>
-          </button>
+          </Button>
         </form>
       </Dialog>
     </template>

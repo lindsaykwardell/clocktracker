@@ -50,6 +50,7 @@
         <Avatar value="/img/default.png" size="xs" />
       </div>
     </div>
+    <!-- @todo Use Button? -->
     <button
       id="show-navbar"
       @click="showMenu = !showMenu"

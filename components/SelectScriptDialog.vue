@@ -1,147 +1,137 @@
 <template>
   <Dialog v-model:visible="showScriptDialog">
     <template #title>
-      <div class="flex">
-        <h2 class="text-2xl font-bold font-sorts flex-grow">Select Script</h2>
-        <button
+      <div class="flex gap-4">
+        <h2 class="text-2xl font-bold font-sorts">Select Script</h2>
+        <Button
           v-if="scriptSelected"
           @click.prevent="clearSelectedScript"
-          class="text-stone-400"
+          color="negative"
+          size="small"
+          
         >
-          Clear selection
-        </button>
-        <Listbox v-model="mode" class="w-48">
-          <div class="relative mt-1">
-            <ListboxButton
-              class="relative w-full cursor-default rounded-lg py-2 pl-3 pr-10 shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm"
-            >
-              <span
-                v-if="mode === 'classic'"
-                :class="[
-                  'relative select-none py-2 px-2 flex justify-between items-center',
-                ]"
-              >
-                <div>
-                  <img
-                    src="/img/botc_head.webp"
-                    alt="Demon Head"
-                    class="w-10 h-10 flex-shrink"
-                  />
-                </div>
-                <div :class="['block truncate flex-grow text-right']">
-                  Classic
-                </div>
-              </span>
-              <span
-                v-if="mode === 'living'"
-                :class="[
-                  'relative select-none py-2 px-2 flex justify-between items-center',
-                ]"
-              >
-                <div>
-                  <img
-                    src="/img/living-scripts.webp"
-                    alt="Living Scripts"
-                    class="w-10 h-10 flex-shrink"
-                  />
-                </div>
-                <div :class="['block truncate flex-grow text-right']">
-                  Living Scripts
-                </div>
-              </span>
-              <span
-                class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="m6 9l6 6l6-6"
-                  />
-                </svg>
-              </span>
-            </ListboxButton>
-
-            <transition
-              leave-active-class="transition duration-100 ease-in"
-              leave-from-class="opacity-100"
-              leave-to-class="opacity-0"
-            >
-              <ListboxOptions
-                class="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-stone-950 py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
-                @click.stop.prevent
-              >
-                <ListboxOption
-                  v-slot="{ active, selected }"
-                  value="classic"
-                  as="template"
-                >
-                  <li
-                    :class="[
-                      active ? 'bg-stone-800 text-stone-100' : 'text-stone-300',
-                      'relative cursor-default select-none py-2 px-2 flex justify-between items-center',
-                    ]"
-                  >
-                    <div>
-                      <img
-                        src="/img/botc_head.webp"
-                        alt="Demon Head"
-                        class="w-10 h-10 flex-shrink"
-                      />
-                    </div>
-                    <div
-                      :class="[
-                        selected ? 'font-medium' : 'font-normal',
-                        'block truncate flex-grow text-right',
-                      ]"
-                    >
-                      Classic
-                    </div>
-                  </li>
-                </ListboxOption>
-                <ListboxOption
-                  v-slot="{ active, selected }"
-                  value="living"
-                  as="template"
-                >
-                  <li
-                    :class="[
-                      active ? 'bg-stone-800 text-stone-100' : 'text-stone-300',
-                      'relative cursor-default select-none py-2 px-2 flex justify-between items-center',
-                    ]"
-                  >
-                    <div>
-                      <img
-                        src="/img/living-scripts.webp"
-                        alt="Living Scripts"
-                        class="w-10 h-10 flex-shrink"
-                      />
-                    </div>
-                    <div
-                      :class="[
-                        selected ? 'font-medium' : 'font-normal',
-                        'block truncate flex-grow text-right',
-                      ]"
-                    >
-                      Living Scripts
-                    </div>
-                  </li>
-                </ListboxOption>
-              </ListboxOptions>
-            </transition>
-          </div>
-        </Listbox>
+          Clear current script
+        </Button>
       </div>
     </template>
-    <section class="p-4 flex flex-col gap-2">
+    <section class="flex justify-center mx-4 border-b border-stone-700">
+      <Listbox v-model="mode" class="w-56">
+        <div class="relative">
+          <ListboxButton
+            class="relative w-full border-x border-t border-stone-700 rounded-t-lg cursor-pointer pr-10 focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm"
+          >
+            <span
+              v-if="mode === 'classic'"
+              :class="[
+                'relative select-none py-2 px-2 flex justify-between items-center',
+              ]"
+            >
+              <div>
+                <img
+                  src="/img/botc_head.webp"
+                  alt="Demon Head"
+                  class="w-10 h-10 flex-shrink"
+                />
+              </div>
+              <div :class="['block truncate flex-grow text-right']">
+                Classic Scripts
+              </div>
+            </span>
+            <span
+              v-if="mode === 'living'"
+              :class="[
+                'relative select-none py-2 px-2 flex justify-between items-center',
+              ]"
+            >
+              <div>
+                <img
+                  src="/img/living-scripts.webp"
+                  alt="Living Scripts"
+                  class="w-10 h-10 flex-shrink"
+                />
+              </div>
+              <div :class="['block truncate flex-grow text-right']">
+                Living Scripts
+              </div>
+            </span>
+            <span
+              class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2"
+            >
+              <IconUI id="chevron-down" size="sm" />
+            </span>
+          </ListboxButton>
+
+          <transition
+            leave-active-class="transition duration-100 ease-in"
+            leave-from-class="opacity-100"
+            leave-to-class="opacity-0"
+          >
+            <ListboxOptions
+              class="absolute z-10 border-x border-b border-stone-700 rounded-b-lg max-h-60 w-full overflow-auto bg-stone-950 py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
+              @click.stop.prevent
+            >
+              <ListboxOption
+                v-slot="{ active, selected }"
+                value="classic"
+                as="template"
+              >
+                <li
+                  :class="[
+                    active ? 'bg-stone-800 text-stone-100' : 'text-stone-300',
+                    'relative cursor-pointer select-none py-2 px-2 flex justify-between items-center',
+                  ]"
+                >
+                  <div>
+                    <img
+                      src="/img/botc_head.webp"
+                      alt="Demon Head"
+                      class="w-10 h-10 flex-shrink"
+                    />
+                  </div>
+                  <div
+                    :class="[
+                      selected ? 'font-medium' : 'font-normal',
+                      'block truncate flex-grow text-right',
+                    ]"
+                  >
+                    Classic Scripts
+                  </div>
+                </li>
+              </ListboxOption>
+              <ListboxOption
+                v-slot="{ active, selected }"
+                value="living"
+                as="template"
+              >
+                <li
+                  :class="[
+                    active ? 'bg-stone-800 text-stone-100' : 'text-stone-300',
+                    'relative cursor-pointer select-none py-2 px-2 flex justify-between items-center',
+                  ]"
+                >
+                  <div>
+                    <img
+                      src="/img/living-scripts.webp"
+                      alt="Living Scripts"
+                      class="w-10 h-10 flex-shrink"
+                    />
+                  </div>
+                  <div
+                    :class="[
+                      selected ? 'font-medium' : 'font-normal',
+                      'block truncate flex-grow text-right',
+                    ]"
+                  >
+                    Living Scripts
+                  </div>
+                </li>
+              </ListboxOption>
+            </ListboxOptions>
+          </transition>
+        </div>
+      </Listbox>
+    </section>
+    <section class="p-4 flex flex-col gap-2 min-h-40">
       <template v-if="mode === 'classic'">
         <div class="flex justify-around gap-8 pb-4">
           <button
@@ -164,16 +154,17 @@
           </button>
         </div>
         <div class="flex flex-wrap gap-2">
-          <button
+          <Button
             v-for="script in recentScripts"
             @click="emit('selectScript', script)"
-            class="bg-stone-600 hover:bg-stone-700 transition duration-150 px-2 py-1 rounded flex items-center gap-2"
+            size="small"
+            color="neutral-on-dark"
           >
             {{ script.name }}
-            <template v-if="script.version">
-              &nbsp;v{{ script.version }}
-            </template>
-          </button>
+            <span v-if="script.version" class="text-xs">
+              v{{ script.version }}
+            </span>
+          </Button>
         </div>
       </template>
       <div class="relative">
@@ -182,6 +173,7 @@
           class="block w-full border border-stone-500 rounded-md p-2 text-lg bg-stone-600"
           placeholder="Search for a script"
         />
+        <!-- @todo use Button? -->
         <button
           type="button"
           @click="searchScripts"
@@ -191,7 +183,7 @@
           <img v-else src="/img/living-scripts.webp" />
         </button>
       </div>
-      <ul v-if="mode === 'classic'" class="py-2">
+      <ul v-if="mode === 'classic' && scripts.length > 0" class="py-2">
         <li v-for="script in scripts" class="px-1 py-2 hover:bg-stone-800">
           <button
             type="button"
@@ -218,14 +210,18 @@
           </button>
         </li>
       </ul>
-      <button
+      <div v-if="mode === 'classic'" class="mx-auto">or</div>
+      <Button
         v-if="mode === 'classic'"
         type="button"
-        class="text-stone-400 italic underline"
         @click="handleUploadScript"
+        size="small"
+        icon="upload"
+        color="neutral-on-dark"
+        class="mx-auto"
       >
         Upload a script
-      </button>
+      </Button>
       <template v-if="mode === 'living' && isLoading">
         <div class="flex justify-center items-center">
           <Loading />
@@ -240,6 +236,7 @@
             <h4 class="font-bold">By {{ lsCampaign.author }}</h4>
           </div>
           <div>
+            <!-- @todo fix background color -->
             <Input mode="select" v-model="selectedLSGame">
               <option v-for="game in selectableGames" :value="game">
                 Game {{ game.game_number }}

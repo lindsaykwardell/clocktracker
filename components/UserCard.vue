@@ -42,7 +42,7 @@
           </div>
         </div>
       </div>
-      <div v-if="player.status === Status.SUCCESS">
+      <div class="flex-none" v-if="player.status === Status.SUCCESS">
         <slot />
       </div>
     </div>

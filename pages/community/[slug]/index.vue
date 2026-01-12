@@ -104,9 +104,7 @@
               <div>
                 <Button
                   type="submit"
-                  class="px-4 py-2 mt-2"
-                  primary
-                  font-size="md"
+                  color="primary"
                 >
                   Post message
                 </Button>

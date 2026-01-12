@@ -1,8 +1,8 @@
 <template>
   <div>
-    <div class="flex">
+    <div class="flex items-center gap-2">
       <div
-        class="flex flex-grow justify-center md:justify-around gap-6 py-4"
+        class="flex flex-grow justify-center md:justify-between max-w-[1000px] mx-auto gap-6 py-4"
         :class="{
           'text-xl lg:text-2xl': size === 'lg',
           'text-lg lg:text-xl': size === 'md',
@@ -10,11 +10,31 @@
           'text-sm': size === 'xs',
         }"
       >
-        <button @click="backOneMonth">＜</button>
+        <Button 
+          @click="backOneMonth"
+          title="Previous month"
+          icon="chevron-left"
+          color="contrast"
+          display="icon-only"
+          size="small"
+          circular
+        >
+          Previous
+        </Button>
         <h2 class="font-sorts">
           {{ formattedYearAndMonth }}
         </h2>
-        <button @click="forwardOneMonth">＞</button>
+        <Button 
+          @click="forwardOneMonth"
+          title="Next month"
+          icon="chevron-right"
+          color="contrast"
+          display="icon-only"
+          size="small"
+          circular
+        >
+          Next
+        </Button>
       </div>
       <div class="flex-shrink">
         <slot />

@@ -37,18 +37,21 @@
             <IconUI id="reply" />
             <span class="sr-only">Reply count:</span>{{ post._count.replies }}
           </span>
-          <button @click="toggleReply" class="text-sm font-semibold hover:underline leading-none">
+          <Button @click="toggleReply" size="small" icon="reply">
             Reply
-          </button>
+          </Button>
         </div>
       </div>
-      <button
+      <Button
         v-if="isMe(post.user.user_id) || isModerator"
+        icon="x"
+        color="contrast"
+        display="icon-only"
+        circular
         @click="deletePost(post.id)"
-        :title="`Delete post by ${post.user.display_name}`"
       >
-        <IconUI id="x" :rounded="true" size="sm" />
-      </button>
+        Delete post by {{post.user.display_name}}
+      </Button>
     </div>
 
     <div v-if="post.replies.length > 0" class="flex flex-col gap-6 md:gap-8 ml-10 md:ml-12">
@@ -87,19 +90,23 @@
           
         </div>
         <div>
-          <button
+          <Button
             v-if="isMe(reply.user.user_id) || isModerator"
             @click="deletePost(reply.id)"
-            :title="`Delete post by ${post.user.display_name}`"
+            icon="x"
+            color="contrast"
+            display="icon-only"
+            size="small"
+            circular
           >
-            <IconUI id="x" :rounded="true" size="sm" />
-          </button>
+            Delete post by {{post.user.display_name}}
+          </Button>
         </div>
       </div>
     </div>
 
     <div v-if="showReply" class="flex gap-4 items-start ml-12">
-      <!-- @todo User avater here? -->
+      <!-- @todo User avatar here? -->
       <Avatar size="xs" background />
       <form @submit.prevent="submitReply" class="flex-grow flex flex-col gap-2">
         <div>
@@ -107,8 +114,8 @@
           <ExpandingTextarea v-model="newReply" />
         </div>
         <div>
-          <Button type="submit" primary font-size="md" class="px-3 py-2">
-            Send
+          <Button type="submit" size="small" color="primary">
+            Post reply
           </Button>
         </div>
       </form>

@@ -14,11 +14,10 @@
           <div class="flex flex-wrap md:flex-nowrap">
             <div class="w-1/2 md:w-auto p-1">
               <Button
-                font-size="md"
                 @click="showUsers = !showUsers"
-                class="w-full md:w-auto"
-                :tertiary="!showUsers"
                 :disabled="users.length === 0"
+                :active="showUsers"
+                variant="ghost"
               >
                 <h2>
                   {{ users.length }} User{{ users.length === 1 ? "" : "s" }}
@@ -27,11 +26,10 @@
             </div>
             <div class="w-1/2 md:w-auto p-1">
               <Button
-                font-size="md"
                 @click="showCommunities = !showCommunities"
-                class="w-full md:w-auto"
-                :tertiary="!showCommunities"
                 :disabled="communities.length === 0"
+                :active="showCommunities"
+                variant="ghost"
               >
                 <h2>
                   {{ communities.length }} Communit{{
@@ -42,11 +40,10 @@
             </div>
             <div class="w-1/2 md:w-auto p-1">
               <Button
-                font-size="md"
                 @click="showScripts = !showScripts"
-                class="w-full md:w-auto"
-                :tertiary="!showScripts"
                 :disabled="scripts.length === 0"
+                :active="showScripts"
+                variant="ghost"
               >
                 <h2>
                   {{ scripts.length }} Script{{
@@ -57,11 +54,10 @@
             </div>
             <div class="w-1/2 md:w-auto p-1">
               <Button
-                font-size="md"
                 @click="showRoles = !showRoles"
-                class="w-full md:w-auto"
-                :tertiary="!showRoles"
                 :disabled="roles.length === 0"
+                :active="showRoles"
+                variant="ghost"
               >
                 <h2>
                   {{ roles.length }} Role{{ roles.length === 1 ? "" : "s" }}

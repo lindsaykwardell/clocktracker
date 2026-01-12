@@ -22,7 +22,7 @@ const value = computed({
 const classes = computed(
   () =>
     "block w-full border bg-stone-300 dark:bg-stone-600 disabled:bg-stone-400 dark:disabled:bg-stone-700 border-stone-100 dark:border-stone-500 rounded-md p-2 " +
-    (is.value === "textarea" ? "resize-none" : "h-[2.5rem]") +
+    (is.value === "textarea" ? "resize-none " : "h-[2.5rem] ") +
     fontSize.value
 );
 

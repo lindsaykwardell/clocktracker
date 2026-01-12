@@ -16,7 +16,7 @@
             but provide early access into what's coming next on ClockTracker
           </div>
         </label>
-        <Button type="submit" primary class="px-4 py-2" :disabled="inFlight">
+        <Button type="submit" color="primary" :disabled="inFlight">
           <template v-if="inFlight">
             <Spinner />
             Saving...
@@ -28,17 +28,20 @@
           Profile updated successfully!
         </span>
       </form>
-      <div v-else>
+      <div v-else class="space-y-4">
         <p>
           You must be a Ko-Fi supporter to access these features.
-          <a
-            href="https://ko-fi.com/clocktracker"
-            class="underline"
-            target="_blank"
-          >
-            Become a supporter now!
-          </a>
         </p>
+        <Button
+          component="a"
+          to="https://ko-fi.com/clocktracker"
+          target="_blank"
+          color="primary"
+          wide
+          class="mx-auto"
+        >
+          Become a supporter now!
+        </Button>
       </div>
       <!-- <h2 class="font-sorts text-4xl text-center">
         Current Supporter Perks

@@ -5,19 +5,30 @@
         {{ options.title }}
       </div>
       <div v-if="showControls" class="flex gap-1 chart-actions">
-        <nuxt-link 
+        <Button
+          component="nuxt-link"
           :to="`/charts/editor?chart_id=${options.id}`"
-          class="flex inline-flex items-center"
           title="Edit chart"
+          color="contrast"
+          icon="edit"
+          display="icon-only"
+          size="x-small"
+          circular
         >
-          <IconUI id="edit" :rounded="true" size="sm" />
-        </nuxt-link>
-        <button 
+          Edit chart
+        </Button>
+        <Button
+          component="nuxt-link"
           @click="emit('deleteChart', options.id)"
           title="Delete chart"
+          color="contrast"
+          icon="x-lg"
+          display="icon-only"
+          size="x-small"
+          circular
         >
-          <IconUI id="x-lg" :rounded="true" size="sm" />
-        </button>
+          Edit chart
+        </Button>
       </div>
     </div>
     <Bar

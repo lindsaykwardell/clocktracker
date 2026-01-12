@@ -30,8 +30,7 @@
         </label>
         <Button
           type="submit"
-          primary
-          class="px-4 py-2"
+          color="primary"
           :disabled="passwordInFlight"
         >
           <template v-if="passwordInFlight">

@@ -3,8 +3,9 @@
     v-if="render"
     class="w-full h-screen flex flex-col items-center gap-6 py-4"
   >
-    <img class="w-[300px]" src="/logo.png" alt="ClockTracker" />
-    <h1 class="text-stone-200 text-2xl font-sorts">
+    <img class="w-[300px] bg-stone-900 rounded-full" src="/logo.png" alt="ClockTracker" />
+    <h1 class="text-2xl font-sorts">
+      <!-- @todo This full_name doen't work on the welcome page -->
       Welcome, {{ user?.user_metadata.full_name }}
     </h1>
     <form
@@ -12,7 +13,9 @@
       @submit.prevent="saveSettings"
     >
       <Avatar :value="avatar" />
-      <button @click.prevent.stop="selectAvatar">Upload new avatar</button>
+      <Button @click.prevent.stop="selectAvatar" size="small">
+        Upload avatar
+      </Button>
       <label class="block w-[300px]">
         <span class="block">Username</span>
         <input
@@ -58,20 +61,21 @@
           </option>
         </select>
       </label>
-      <button
+      <Button
         type="submit"
-        class="w-full bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-4"
         :disabled="inFlight"
+        color="primary"
+        wide
       >
         <template v-if="inFlight">
           <Spinner />
           Saving...
         </template>
         <template v-else>Save Settings</template>
-      </button>
-      <span class="text-red-600">{{ errorMessage }}</span>
+      </Button>
+      <span v-if="errorMessage" class="text-red-600">{{ errorMessage }}</span>
     </form>
-    <nuxt-link to="/logout" class="underline">Not you? Log out</nuxt-link>
+    <nuxt-link to="/logout" class="underline pb-4">Not you? Log out</nuxt-link>
   </main>
 </template>
 

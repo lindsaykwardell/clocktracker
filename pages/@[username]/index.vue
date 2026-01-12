@@ -78,21 +78,21 @@
             :games="pendingGames"
           >
             <template #default>
-              <button
+              <Button
                 v-if="
                   pendingGames.status === Status.SUCCESS &&
                   pendingGames.data.length > 0
                 "
                 type="button"
-                class="rounded py-1 justify-center text-lg flex gap-2 bg-green-800 hover:bg-green-900 transition duration-150 px-2"
                 @click="addTaggedGamesToProfile"
                 :disabled="inFlight"
+                color="positive"
               >
                 <template v-if="inFlight">
                   <Spinner class="m-auto" />
                 </template>
                 <template v-else> Add all games to profile </template>
-              </button>
+              </Button>
             </template>
 
             <template #no-content>

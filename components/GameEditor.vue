@@ -1,5 +1,5 @@
 <template>
-  <form class="max-w-[1000px] m-auto py-6" @submit.prevent="emit('submit')">
+  <form class="max-w-[1000px] m-auto py-4" @submit.prevent="emit('submit')">
     <fieldset
       class="flex flex-col gap-5 border rounded border-stone-500 p-4 my-3"
     >
@@ -13,11 +13,12 @@
           <span class="block">Script</span>
           <div class="flex items-center gap-1">
             <div v-if="game.script" class="flex-grow">{{ game.script }}</div>
+            <!-- @todo Update button -->
             <Button
               type="button"
               id="select-script"
               @click="showScriptDialog = !showScriptDialog"
-              font-size="md"
+              class="h-[2.5rem]"
               :class="{
                 'w-full': !game.script,
                 'flex-shrink': game.script,
@@ -85,26 +86,32 @@
             </label>
           </div>
         </div>
-        <div class="flex-1 flex flex-col gap-1 justify-center">
-          <div v-for="(st, index) in game.co_storytellers" class="flex gap-2">
+        <div class="flex-1 flex flex-col">
+          <span class="block">Co-Storytellers</span>
+          <div v-for="(st, index) in game.co_storytellers" class="flex gap-1 mb-1">
             <TaggedUserInput
               v-model:value="game.co_storytellers[index]"
               :users="potentialCoStorytellers"
             />
-            <button
+            <Button
               type="button"
               @click="game.co_storytellers.splice(index, 1)"
+              icon="x-lg"
+              display="icon-only"
+              color="negative"
+              class="h-[2.5rem]"
             >
-              X
-            </button>
+              Remove storyteller
+            </Button>
           </div>
-          <button
+          <Button
             type="button"
             @click="game.co_storytellers.push('')"
-            class="w-full"
+            icon="person-plus"
+            class="w-full h-[2.5rem]"
           >
             Add Storyteller
-          </button>
+          </Button>
         </div>
       </div>
       <div class="w-full flex flex-wrap gap-5">
@@ -241,27 +248,19 @@
         v-for="(character, i) in game.player_characters"
         class="relative rounded p-4 flex justify-center items-center aspect-square"
       >
-        <button
+        <Button
           type="button"
           v-if="i !== 0"
           @click="removeCharacter(i)"
-          class="absolute top-1 right-1"
+          class="absolute top-1 right-1 z-10"
+          color="contrast"
+          icon="x-lg"
+          display="icon-only"
+          circular
+          title="Remove this role"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="32"
-            height="32"
-            viewBox="0 0 512 512"
-          >
-            <path
-              d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
-              fill="currentColor"
-            />
-            <path d="M249 160h14v241h-14z" fill="currentColor" />
-            <path d="M320 160h-14.6l-10.7 241h14.6z" fill="currentColor" />
-            <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
-          </svg>
-        </button>
+          Remove
+        </Button>
         <Token
           :character="character"
           alwaysShowAlignment
@@ -312,7 +311,7 @@
           <p class="p-2">OR</p>
           <div class="flex justify-center">
             <Button
-              primary
+              color="primary"
               type="button"
               @click="showCopyGrimoireDialog = true"
             >
@@ -336,44 +335,35 @@
         <Button
           v-if="game.grimoire.length > 1"
           @click.prevent="deletePage"
+          color="negative"
+          icon="journal-x"
+          size="small"
           class="absolute top-1 right-1 z-10"
+          title="Delete this page"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="32"
-            height="32"
-            viewBox="0 0 512 512"
-          >
-            <path
-              d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
-              fill="currentColor"
-            />
-            <path d="M249 160h14v241h-14z" fill="currentColor" />
-            <path d="M320 160h-14.6l-10.7 241h14.6z" fill="currentColor" />
-            <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
-          </svg>
           <span class="hidden md:inline">Delete page</span>
         </Button>
         <Button
           type="button"
           @click="pageBackward"
           v-if="grimPage !== 0"
-          class="absolute bottom-1 left-1 font-sorts"
-          font-size="sm"
+          icon="journal-arrow-up"
+          class="absolute bottom-1 left-1"
         >
-          <span> {{ "<" }} Previous page </span>
+          <span> Previous page </span>
         </Button>
         <Button
           type="button"
           @click="pageForward"
-          class="absolute bottom-1 right-1 font-sorts"
-          font-size="sm"
+          :color="grimPage === game.grimoire.length - 1 ? 'positive' : 'neutral'"
+          :icon="grimPage === game.grimoire.length - 1 ? 'journal-plus' : 'journal-arrow-down'"
+          :display="grimPage === game.grimoire.length - 1 ? 'icon-before' : 'icon-after'"
+          class="absolute bottom-1 right-1"
         >
           <span v-if="grimPage <= game.grimoire.length - 1">
             {{
               grimPage === game.grimoire.length - 1 ? "Add page" : "Next page"
             }}
-            {{ ">" }}
           </span>
         </Button>
         <div class="w-screen md:w-auto max-w-[966px] overflow-scroll">
@@ -403,26 +393,19 @@
             v-for="(character, i) in game.demon_bluffs"
             class="relative border border-stone-600 rounded p-4 flex justify-center items-center aspect-square"
           >
-            <button
+            <Button
               type="button"
               @click="removeDemonBluff(i)"
-              class="absolute top-1 right-1"
+              class="absolute top-1 right-1 z-10"
+              color="contrast"
+              size="small"
+              icon="x-lg"
+              display="icon-only"
+              circular
+              title="Remove this demon bluff"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="32"
-                height="32"
-                viewBox="0 0 512 512"
-              >
-                <path
-                  d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
-                  fill="currentColor"
-                />
-                <path d="M249 160h14v241h-14z" fill="currentColor" />
-                <path d="M320 160h-14.6l-10.7 241h14.6z" fill="currentColor" />
-                <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
-              </svg>
-            </button>
+              Remove
+            </Button>
             <Token
               :character="character"
               size="md"
@@ -457,26 +440,18 @@
             v-for="(character, i) in game.fabled"
             class="relative border border-stone-600 rounded p-4 flex justify-center items-center aspect-square"
           >
-            <button
+            <Button
               type="button"
               @click="removeFabled(i)"
-              class="absolute top-1 right-1"
+              class="absolute top-1 right-1 z-10"
+              size="small"
+              icon="x-lg"
+              display="icon-only"
+              circular
+              title="Remove this fabled"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="32"
-                height="32"
-                viewBox="0 0 512 512"
-              >
-                <path
-                  d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
-                  fill="currentColor"
-                />
-                <path d="M249 160h14v241h-14z" fill="currentColor" />
-                <path d="M320 160h-14.6l-10.7 241h14.6z" fill="currentColor" />
-                <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
-              </svg>
-            </button>
+              Remove
+            </Button>
             <Token
               :character="character"
               size="md"
@@ -528,8 +503,10 @@
       <div class="flex flex-wrap gap-2">
         <Button
           v-for="(tag, index) in game.tags"
-          font-size="sm"
           @click.prevent="game.tags.splice(index, 1)"
+          size="small"
+          removableTag
+          :title="`Remove ${tag}`"
         >
           {{ tag }}
         </Button>
@@ -572,17 +549,28 @@
     >
       <legend>Images</legend>
       <div class="flex flex-col gap-5">
-        <Button type="button" @click="uploadFile" font-size="md" tertiary>
+        <Button type="button" @click="uploadFile" icon="upload">
           Upload Images
         </Button>
         <div class="flex flex-wrap gap-5">
-          <div v-for="file in game.image_urls" :key="file">
+          <div class='relative' v-for="file in game.image_urls" :key="file">
             <img
               crossorigin="anonymous"
               :src="file"
               class="w-64 h-64 object-cover"
             />
-            <button type="button" @click="removeFile(file)">Remove</button>
+            <Button
+              type="button"
+              @click="removeFile(file)"
+              class="absolute top-1 right-1 z-10"
+              size="small"
+              icon="x-lg"
+              display="icon-only"
+              circular
+              title="Remove this image"
+            >
+              Remove
+            </Button>
           </div>
         </div>
       </div>
@@ -590,8 +578,9 @@
     <Button
       type="submit"
       id="save-game"
-      class="w-[300px] m-auto"
-      primary
+      class="m-auto"
+      color="primary"
+      wide
       :disabled="inFlight"
     >
       <template v-if="inFlight">

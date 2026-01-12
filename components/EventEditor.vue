@@ -83,7 +83,7 @@
       </label>
     </div>
     <div class="flex gap-4">
-      <label class="flex-1">
+      <label class="flex-1 flex flex-col gap-2">
         <span class="block">Storytellers</span>
         <div class="flex flex-col gap-1">
           <div
@@ -92,23 +92,29 @@
             class="flex gap-1"
           >
             <Input v-model="event.storytellers[index]" type="text" />
-            <button
+            <Button
               type="button"
               @click="event.storytellers.splice(index, 1)"
-              class="transition duration-150 text-white font-bold py-2 px-4 rounded"
+              color="negative"
+              icon="x-lg"
+              display="icon-only"
+              :title="`Remove ${event.storytellers[index]} as storyteller`"
             >
               Remove
-            </button>
+            </Button>
           </div>
         </div>
-        <button @click="event.storytellers.push('')" type="button">
-          Add Storyteller
-        </button>
+        <div>
+          <Button @click="event.storytellers.push('')" type="button" size="small" icon="person-plus">
+            Add Storyteller
+          </Button>
+        </div>
       </label>
       <label class="flex-1">
         <span class="block">Script</span>
         <div class="flex items-center gap-1">
           <div v-if="event.script" class="flex-grow">{{ event.script }}</div>
+          <!-- @todo Update button -->
           <Button
             type="button"
             id="select-script"
@@ -136,7 +142,7 @@
       <Input mode="textarea" v-model="event.description" rows="5" />
     </label>
     <div>
-      <label>
+      <label class="flex flex-col gap-2">
         <span class="block">Waitlists</span>
         <div
           v-if="event.waitlists.length <= 0"
@@ -148,33 +154,41 @@
         <div
           v-for="(waitlist, index) in event.waitlists"
           :key="index"
-          class="flex items-center"
+          class="flex items-center gap-1"
         >
-          <label class="flex items-center">
+          <label class="flex items-center gap-1">
             Default
             <input
               type="checkbox"
               v-model="waitlist.default"
               @click="ensureOneDefaultWaitlist(index)"
-              class="m-2"
             />
           </label>
-          <Input v-model="waitlist.name" type="text" />
-          <button
-            type="button"
-            @click.stop.prevent="event.waitlists.splice(index, 1)"
-            class="block transition duration-150 dark:text-white font-bold py-2 px-4 rounded"
-          >
-            Remove
-          </button>
+          <div class="flex-grow flex gap-1">
+            <Input v-model="waitlist.name" type="text" />
+            <Button
+              type="button"
+              @click.stop.prevent="event.waitlists.splice(index, 1)"
+              icon="x-lg"
+              display="icon-only"
+              color="negative"
+              class="flex-grow"
+              :title="`Remove ${waitlist.name}`"
+            >
+              Remove
+            </Button>
+          </div>
         </div>
-        <button
-          type="button"
-          @click="event.waitlists.push({ name: '', default: false })"
-          class="transition duration-150 dark:text-white font-bold py-2 px-4 rounded"
-        >
-          Add Waitlist
-        </button>
+        <div>
+          <Button
+            type="button"
+            @click="event.waitlists.push({ name: '', default: false })"
+            icon="plus-lg"
+            size="small"
+          >
+            Add Waitlist
+          </Button>
+        </div>
       </label>
     </div>
     <div>
@@ -182,14 +196,13 @@
       <img
         v-if="event.image"
         :src="event.image"
-        class="m-auto w-full md:w-[600px] object-cover h-[250px]"
+        class="m-auto w-full md:w-[600px] object-cover h-[250px] mb-4"
       />
       <Button
         type="button"
         @click="uploadFile"
-        tertiary
-        class="w-full mt-2"
-        font-size="md"
+        icon="upload"
+        size="small"
       >
         Upload Image
       </Button>
@@ -197,20 +210,22 @@
         v-if="event.image"
         type="button"
         @click="removeFile"
-        tertiary
-        class="w-full mt-2"
-        font-size="sm"
+        color="negative"
+        icon="x"
+        size="small"
       >
         Remove Image
       </Button>
     </div>
-    <Button type="submit" id="save-game" :disabled="inFlight" primary>
-      <template v-if="inFlight">
-        <Spinner />
-        Saving...
-      </template>
-      <template v-else>Save Event</template>
-    </Button>
+    <div class="flex flex-col items-center">
+      <Button type="submit" id="save-game" :disabled="inFlight" color="primary" wide>
+        <template v-if="inFlight">
+          <Spinner />
+          Saving...
+        </template>
+        <template v-else>Save Event</template>
+      </Button>
+    </div>
     <template v-if="errors">
       <div class="text-red-500 text-center">{{ errors }}</div>
     </template>

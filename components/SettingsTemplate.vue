@@ -4,14 +4,14 @@
       <nav
         class="flex flex-col md:w-[300px] w-[100px] min-w-[100px] md:min-w-[300px] items-center"
       >
-        <Avatar :value="avatar" class="mt-10 md:mt-0" />
-        <button
+        <Avatar :value="avatar" class="mt-10 md:mt-0 mb-2" />
+        <Button
           @click.prevent.stop="selectAvatar"
-          class="text-sm hover:underline text-stone-400"
+          size="small"
         >
           Upload new avatar
-        </button>
-        <h1 class="font-sorts text-lg hidden md:block py-2">
+        </Button>
+        <h1 class="font-sorts text-lg hidden md:block my-4">
           {{ displayName }}
         </h1>
         <ul class="w-full py-4">
