@@ -1,8 +1,6 @@
-import { PrismaClient } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
 import { fetchEventAndUpdateDiscord } from "~/server/utils/fetchEventAndUpdateDiscord";
-
-const prisma = new PrismaClient();
+import { prisma } from "~/server/utils/prisma";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;

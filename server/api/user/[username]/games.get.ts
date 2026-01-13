@@ -1,8 +1,7 @@
-import { PrismaClient, PrivacySetting } from "@prisma/client";
+import { PrivacySetting } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
 import { fetchGames } from "~/server/utils/fetchGames";
-
-const prisma = new PrismaClient();
+import { prisma } from "~/server/utils/prisma";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;

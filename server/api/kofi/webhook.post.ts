@@ -1,7 +1,5 @@
-import { PrismaClient } from "@prisma/client";
 import dayjs from "dayjs";
-
-const prisma = new PrismaClient();
+import { prisma } from "~/server/utils/prisma";
 
 type KoFiPayload = {
   data: {

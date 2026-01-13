@@ -1,8 +1,7 @@
-import { PrismaClient, WinStatus_V2 } from "@prisma/client";
+import { WinStatus_V2 } from "@prisma/client";
 import { mapOfficialIdToClocktrackerId } from "~/server/utils/getRoleMap";
 import { User } from "@supabase/supabase-js";
-
-const prisma = new PrismaClient();
+import { prisma } from "~/server/utils/prisma";
 
 export default defineEventHandler(async (handler) => {
   const user = handler.context.user as User | null;
