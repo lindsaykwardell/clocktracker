@@ -1,6 +1,5 @@
 import {
   Character,
-  PrismaClient,
   PrivacySetting,
   Role,
   RoleType,
@@ -8,8 +7,7 @@ import {
 } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
 import dayjs from "dayjs";
-
-const prisma = new PrismaClient();
+import { prisma } from "~/server/utils/prisma";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;

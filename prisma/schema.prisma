@@ -66,6 +66,11 @@ model Game {
   @@index([user_id])
 }
 
+model ImportedGame {
+  id      String @id @default(uuid())
+  payload String
+}
+
 model FavoriteGame {
   id         Int          @id @default(autoincrement())
   user       UserSettings @relation(fields: [user_id], references: [user_id])

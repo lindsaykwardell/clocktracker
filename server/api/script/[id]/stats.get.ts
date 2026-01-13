@@ -1,9 +1,8 @@
-import { PrismaClient, Alignment, WinStatus_V2 } from "@prisma/client";
+import { Alignment, WinStatus_V2 } from "@prisma/client";
 // @ts-ignore
 import dayjs from "dayjs";
 import { winRateByRole } from "~/server/utils/stats";
-
-const prisma = new PrismaClient();
+import { prisma } from "~/server/utils/prisma";
 
 export default defineEventHandler(async (handler) => {
   const script_id = +handler.context.params!.id;

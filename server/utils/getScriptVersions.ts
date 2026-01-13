@@ -1,9 +1,8 @@
-import { PrivacySetting, PrismaClient, Script } from "@prisma/client";
+import { PrivacySetting, Script } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
 import axios from "axios";
 import * as cheerio from "cheerio";
-
-const prisma = new PrismaClient();
+import { prisma } from "./prisma";
 
 export async function getScriptVersions(script: Script, me: User | null) {
   if (script.is_custom_script) {

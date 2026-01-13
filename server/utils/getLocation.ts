@@ -1,7 +1,6 @@
-import { City, PrismaClient } from "@prisma/client";
+import { City } from "@prisma/client";
+import { prisma } from "./prisma";
 const URL = "https://photon.komoot.io/api/";
-
-const prisma = new PrismaClient();
 
 type FeatureCollection = {
   type: "FeatureCollection";

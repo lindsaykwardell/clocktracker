@@ -1,8 +1,7 @@
-import { PrismaClient, PrivacySetting, UserSettings } from "@prisma/client";
+import { PrivacySetting, UserSettings } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
 import naturalOrder from "natural-order";
-
-const prisma = new PrismaClient();
+import { prisma } from "~/server/utils/prisma";
 
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
