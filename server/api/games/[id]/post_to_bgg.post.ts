@@ -1,7 +1,6 @@
 import type { User } from "@supabase/supabase-js";
 import {
   Alignment,
-  PrismaClient,
   PrivacySetting,
   WinStatus_V2,
 } from "@prisma/client";
@@ -10,8 +9,7 @@ import axios from "axios";
 import dayjs from "dayjs";
 import { fetchGame } from "~/server/utils/fetchGames";
 import { useFeatureFlags } from "~/server/utils/featureFlags";
-
-const prisma = new PrismaClient();
+import { prisma } from "~/server/utils/prisma";
 
 export default defineEventHandler(async (handler) => {
   const user = handler.context.user as User | null;

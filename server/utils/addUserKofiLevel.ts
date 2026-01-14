@@ -1,6 +1,5 @@
-import { PrismaClient, UserSettings } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { UserSettings } from "@prisma/client";
+import { prisma } from "./prisma";
 
 export async function addUserKofiLevel<T>(
   user: T & { user_id: string }

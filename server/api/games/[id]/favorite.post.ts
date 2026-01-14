@@ -1,7 +1,6 @@
-import { FavoriteGame, PrismaClient } from "@prisma/client";
+import { FavoriteGame } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
-
-const prisma = new PrismaClient();
+import { prisma } from "~/server/utils/prisma";
 
 export default defineEventHandler(
   async (
