@@ -1,7 +1,6 @@
 import type { User } from "@supabase/supabase-js";
-import { PrismaClient, WhoCanRegister } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { WhoCanRegister } from "@prisma/client";
+import { prisma } from "~/server/utils/prisma";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;

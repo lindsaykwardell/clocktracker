@@ -1,8 +1,7 @@
-import { PrismaClient, RoleType } from "@prisma/client";
+import { RoleType } from "@prisma/client";
 // @ts-ignore
 import dayjs from "dayjs";
-
-const prisma = new PrismaClient();
+import { prisma } from "~/server/utils/prisma";
 
 export default defineEventHandler(async (handler) => {
   const typeString = handler.context.params?.type as string;

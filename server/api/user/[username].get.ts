@@ -1,8 +1,7 @@
-import { PrismaClient, PrivacySetting } from "@prisma/client";
+import { PrivacySetting } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
 import { addUserKofiLevel } from "~/server/utils/addUserKofiLevel";
-
-const prisma = new PrismaClient();
+import { prisma } from "~/server/utils/prisma";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;

@@ -1,13 +1,11 @@
 import type { User } from "@supabase/supabase-js";
 import {
-  PrismaClient,
   Alignment,
   LocationType,
   WinStatus_V2,
   PrivacySetting,
 } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "~/server/utils/prisma";
 
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
