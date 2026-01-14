@@ -1,4 +1,4 @@
-import { PrismaClient, WhoCanRegister } from "@prisma/client";
+import { WhoCanRegister } from "@prisma/client";
 import {
   ActionRowBuilder,
   ButtonBuilder,
@@ -7,8 +7,7 @@ import {
   EmbedBuilder,
   GatewayIntentBits,
 } from "discord.js";
-
-const prisma = new PrismaClient();
+import { prisma } from "./prisma";
 
 export async function fetchEventAndUpdateDiscord(event_id: string) {
   const event = await prisma.event.findUnique({

@@ -1,7 +1,6 @@
-import { PrismaClient, RoleType } from "@prisma/client";
+import { RoleType } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
-
-const prisma = new PrismaClient();
+import { prisma } from "~/server/utils/prisma";
 
 // This endpoint is specifically for fetching a script by its ID
 // This is the ClockTracker ID, not the BOTC script db ID.
