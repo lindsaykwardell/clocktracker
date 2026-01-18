@@ -1,6 +1,7 @@
 <template>
   <ul class="grid grid-cols-[repeat(auto-fill,_minmax(260px,_1fr))] md:grid-cols-[repeat(auto-fill,_minmax(360px,_1fr))] bg-stone-300/30 dark:bg-stone-700/30">
     <li
+      :key="game.id"
       v-for="game in games"
       class="border border-black transition duration-150 ease-in-out"
       :class="
@@ -37,6 +38,8 @@
             :src="fullImageUrl(game.image_urls[0])"
             class="absolute bottom-0 w-full h-full object-cover blur-sm"
             crossorigin="anonymous"
+            loading="lazy"
+            decoding="async"
           />
           <div
             class="absolute top-0 left-0 text-white md:text-lg bg-gradient-to-br from-black/75 via-black/50 to-black-0 p-1 flex gap-2 items-center"
@@ -66,10 +69,10 @@
               <Token
                 v-if="
                   showCommunityCard === false &&
-                  (gamesStore.getLastCharater(game.id).name ||
-                    gamesStore.getLastCharater(game.id).alignment !== 'NEUTRAL')
+                  (lastCharacter(game.id).name ||
+                    lastCharacter(game.id).alignment !== 'NEUTRAL')
                 "
-                :character="gamesStore.getLastCharater(game.id)"
+                :character="lastCharacter(game.id)"
                 size="lg"
               />
               <div v-else class="bg-black/25 flex justify-center">
@@ -198,13 +201,9 @@
                 v-if="!selectMultipleGames.enabled && isMyGame(game)"
                 class="text-white bg-black hover:bg-purple-600 transition-colors duration-250 ease-in-out z-10"
                 :title="`Edit game - ${
-                  game.script && gamesStore.getLastCharater(game.id)?.name
-                    ? `${game.script} as ${
-                        gamesStore.getLastCharater(game.id).name
-                      }`
-                    : game.script ||
-                      gamesStore.getLastCharater(game.id)?.name ||
-                      ''
+                  game.script && lastCharacter(game.id)?.name
+                    ? `${game.script} as ${lastCharacter(game.id).name}`
+                    : game.script || lastCharacter(game.id)?.name || ''
                 }, played on ${formatDate(game.date)}`"
                 :to="`/game/${game.id}/edit`"
               >
@@ -215,13 +214,9 @@
                 target="_blank"
                 class="text-white bg-black hover:bg-purple-600 transition-colors duration-250 ease-in-out z-10"
                 :title="`View this game on BoardGameGeek - ${
-                  game.script && gamesStore.getLastCharater(game.id)?.name
-                    ? `${game.script} as ${
-                        gamesStore.getLastCharater(game.id).name
-                      }`
-                    : game.script ||
-                      gamesStore.getLastCharater(game.id)?.name ||
-                      ''
+                  game.script && lastCharacter(game.id)?.name
+                    ? `${game.script} as ${lastCharacter(game.id).name}`
+                    : game.script || lastCharacter(game.id)?.name || ''
                 }, played on ${formatDate(game.date)}`"
                 :href="`https://boardgamegeek.com/play/details/${game.bgg_id}`"
               >
@@ -242,13 +237,9 @@
                 v-if="!selectMultipleGames.enabled"
                 class="text-white bg-black hover:bg-purple-600 transition-colors duration-250 ease-in-out game-link"
                 :title="`View game - ${
-                  game.script && gamesStore.getLastCharater(game.id)?.name
-                    ? `${game.script} as ${
-                        gamesStore.getLastCharater(game.id).name
-                      }`
-                    : game.script ||
-                      gamesStore.getLastCharater(game.id)?.name ||
-                      ''
+                  game.script && lastCharacter(game.id)?.name
+                    ? `${game.script} as ${lastCharacter(game.id).name}`
+                    : game.script || lastCharacter(game.id)?.name || ''
                 }, played on ${formatDate(game.date)}`"
                 :to="getGameLink(game)"
               >
@@ -319,10 +310,28 @@ const componentIs = computed(() => {
   return props.onCardClick ? "button" : defineNuxtLink({});
 });
 
+const lastCharacters = computed<
+  Record<string, ReturnType<typeof gamesStore.getLastCharater>>
+>(() => {
+  const entries: Record<
+    string,
+    ReturnType<typeof gamesStore.getLastCharater>
+  > = {};
+  for (const game of props.games) {
+    entries[game.id] = gamesStore.getLastCharater(game.id);
+  }
+  return entries;
+});
+
+const lastCharacter = (gameId: string) => lastCharacters.value[gameId];
+
+const dateFormatter = new Intl.DateTimeFormat(
+  typeof navigator !== "undefined" ? navigator.language : "en-US",
+  { timeZone: "UTC" }
+);
+
 function formatDate(date: Date) {
-  return new Intl.DateTimeFormat(navigator.language, {
-    timeZone: "UTC",
-  }).format(new Date(date));
+  return dateFormatter.format(new Date(date));
 }
 
 function fullImageUrl(file: string) {
@@ -427,15 +436,39 @@ const orbitPos = (game: GameRecord, index: number) => {
   return index - (count - 1) / 2;
 };
 
-const taggedPlayers = computed(
-  () => (game: GameRecord) =>
-    game.grimoire
-      .flatMap((g) => g.tokens.filter((t) => t.player_id))
-      .map((t) => t.player)
-      .filter(
-        (p, i, a) => p && a.findIndex((p2) => p2?.username === p.username) === i
-      )
-);
+type TaggedPlayer = NonNullable<
+  GameRecord["grimoire"][number]["tokens"][number]["player"]
+>;
+
+const computeTaggedPlayers = (game: GameRecord): TaggedPlayer[] => {
+  const seen = new Set<string>();
+  const players: TaggedPlayer[] = [];
+
+  for (const g of game.grimoire) {
+    for (const t of g.tokens) {
+      const player = t.player;
+      if (!t.player_id || !player) continue;
+
+      const key = player.id ?? player.username;
+      if (!key || seen.has(key)) continue;
+
+      seen.add(key);
+      players.push(player);
+    }
+  }
+
+  return players;
+};
+
+const taggedPlayersMap = computed<Record<string, TaggedPlayer[]>>(() => {
+  const entries: Record<string, TaggedPlayer[]> = {};
+  for (const game of props.games) {
+    entries[game.id] = computeTaggedPlayers(game);
+  }
+  return entries;
+});
+
+const taggedPlayers = (game: GameRecord) => taggedPlayersMap.value[game.id] ?? [];
 </script>
 
 <style scoped>

@@ -5,7 +5,7 @@
       :color="friendButtonColor"
       :class="friendButtonClass"
     >
-      <img src="/img/role/empath.png" class="w-8 h-8" />
+      <img src="/img/ui/empath.webp" class="w-6 h-6" />
       <span :aria-label="friendButtonText"></span>
     </Button>
     <Button
@@ -15,7 +15,7 @@
       @click.prevent="rejectFriendship"
       color="negative"
     >
-      <img src="/img/role/empath.png" class="w-8 h-8" />
+      <img src="/img/ui/empath.webp" class="w-6 h-6" />
       Reject Request
     </Button>
   </div>

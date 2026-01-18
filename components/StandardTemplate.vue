@@ -24,7 +24,7 @@
             class="h-[2rem]"
           />
           <div class="absolute right-2 top-0 w-8 h-8" aria-label="Search">
-            <img src="/img/role/investigator.png" />
+            <img src="/img/ui/investigator.webp" />
           </div>
         </form>
       </div>
