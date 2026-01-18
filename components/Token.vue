@@ -11,7 +11,7 @@
       :src="image"
       loading="lazy"
       :alt="character?.name || character?.role?.name || 'Unknown'"
-      v-tooltip="tokenTooltip"
+      v-tooltip="tokenTooltip || undefined"
     />
     <svg
       v-if="!hideName && (character?.name || character?.role?.name)"
@@ -58,7 +58,7 @@
         :class="relatedImageSize"
         :src="alignmentImage"
         loading="lazy"
-        v-tooltip="alignmentTooltip"
+        v-tooltip="alignmentTooltip || undefined"
       />
     </div>
     <slot />
@@ -76,7 +76,7 @@
         :src="relatedImage"
         loading="lazy"
         :alt="character?.related || character.related_role?.name || 'Unknown'"
-        v-tooltip="relatedTokenTooltip"
+        v-tooltip="relatedTokenTooltip || undefined"
       />
     </div>
   </div>

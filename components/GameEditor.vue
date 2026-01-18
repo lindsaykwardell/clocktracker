@@ -1,5 +1,5 @@
 <template>
-  <form class="max-w-[1000px] m-auto py-4" @submit.prevent="emit('submit')">
+  <form class="max-w-[1000px] m-auto py-4 px-4 md:px-8" @submit.prevent="emit('submit')">
     <fieldset
       class="flex flex-col gap-5 border rounded border-stone-500 p-4 my-3"
     >
@@ -25,7 +25,7 @@
               }"
             >
               <div class="w-[30px] overflow-hidden">
-                <img src="/img/role/investigator.png" />
+                <img src="/img/ui/investigator.webp" />
               </div>
               <template v-if="editingMultipleGames">Not updated</template>
               <template v-else-if="game.script === ''">Select Script</template>
@@ -183,7 +183,7 @@
         </label>
         <label
           v-if="!editingMultipleGames"
-          class="w-1/3 md:w-auto flex flex-col gap-2 items-center"
+          class="w-1/3 md:w-auto flex flex-col gap-2 items-start md:items-center"
         >
           <span class="block">Record Grimoire</span>
           <Toggle v-model="advancedModeEnabled" />
@@ -195,7 +195,7 @@
       class="flex flex-col md:flex-row gap-5 border rounded border-stone-500 p-4 my-3"
     >
       <legend>Game Results</legend>
-      <fieldset class="flex gap-4">
+      <fieldset class="flex gap-4 flex-wrap">
         <label class="flex gap-2 items-center">
           <input
             type="radio"
@@ -327,38 +327,55 @@
             ? { '--bg-image-url' : `url(${customBackground})` }
             : {}
         "
-        class="grimoire pt-3 relative bg-center bg-cover w-full script-bg"
-        :class="{
-          ...scriptBgClasses(game.script, !!customBackground),
-        }"
+        class="grimoire grimoire-edit relative w-full flex flex-col gap-2"
       >
+        <div class="relative">
+          <div 
+            class="w-full max-w-[calc(100vw-4rem)] md:w-auto md:max-w-[966px] overflow-scroll bg-center bg-cover script-bg"
+            :class="{
+              ...scriptBgClasses(game.script, !!customBackground),
+            }"
+          >
+            <Grimoire
+              :tokens="game.grimoire[grimPage].tokens"
+              :availableRoles="orderedRoles"
+              :excludePlayers="storytellerNames"
+              @selectedMe="applyMyRoleToGrimoire"
+            />
+            <div
+              class="absolute bottom-0 w-full xl:w-[calc(100%-0.625rem)] text-center bg-gradient-to-b from-transparent via-stone-800 to-stone-800 text-white"
+            >
+              Page {{ grimPage + 1 }} of {{ game.grimoire.length }}
+            </div>
+          </div>
+        </div>
+        
+        <Button
+          type="button"
+          @click="pageBackward"
+          v-if="grimPage !== 0"
+          icon="journal-prev"
+          class="md:absolute bottom-1 left-1"
+        >
+          Previous page
+        </Button>
         <Button
           v-if="game.grimoire.length > 1"
           @click.prevent="deletePage"
           color="negative"
           icon="journal-x"
-          size="small"
-          class="absolute top-1 right-1 z-10"
+          class="md:absolute top-1 right-4 z-10"
           title="Delete this page"
         >
-          <span class="hidden md:inline">Delete page</span>
-        </Button>
-        <Button
-          type="button"
-          @click="pageBackward"
-          v-if="grimPage !== 0"
-          icon="journal-arrow-up"
-          class="absolute bottom-1 left-1"
-        >
-          <span> Previous page </span>
+          Delete page
         </Button>
         <Button
           type="button"
           @click="pageForward"
           :color="grimPage === game.grimoire.length - 1 ? 'positive' : 'neutral'"
-          :icon="grimPage === game.grimoire.length - 1 ? 'journal-plus' : 'journal-arrow-down'"
-          :display="grimPage === game.grimoire.length - 1 ? 'icon-before' : 'icon-after'"
-          class="absolute bottom-1 right-1"
+          :icon="grimPage === game.grimoire.length - 1 ? 'journal-plus' : 'journal-next'"
+          display="icon-after"
+          class="md:absolute bottom-1 right-4"
         >
           <span v-if="grimPage <= game.grimoire.length - 1">
             {{
@@ -366,19 +383,6 @@
             }}
           </span>
         </Button>
-        <div class="w-screen md:w-auto max-w-[966px] overflow-scroll">
-          <Grimoire
-            :tokens="game.grimoire[grimPage].tokens"
-            :availableRoles="orderedRoles"
-            :excludePlayers="storytellerNames"
-            @selectedMe="applyMyRoleToGrimoire"
-          />
-        </div>
-        <div
-          class="text-center bg-gradient-to-b from-transparent via-stone-800 to-stone-800 text-white"
-        >
-          Page {{ grimPage + 1 }} of {{ game.grimoire.length }}
-        </div>
       </div>
     </fieldset>
     <fieldset
@@ -575,20 +579,22 @@
         </div>
       </div>
     </fieldset>
-    <Button
-      type="submit"
-      id="save-game"
-      class="m-auto"
-      color="primary"
-      wide
-      :disabled="inFlight"
-    >
-      <template v-if="inFlight">
-        <Spinner />
-        Saving...
-      </template>
-      <template v-else>Save Game</template>
-    </Button>
+    <div class="text-center">
+      <Button
+        type="submit"
+        id="save-game"
+        color="primary"
+        wide
+        :disabled="inFlight"
+      >
+        <template v-if="inFlight">
+          <Spinner />
+          Saving...
+        </template>
+        <template v-else>Save Game</template>
+      </Button>
+    </div>
+    
   </form>
   <Tour :steps="tour" tourKey="game-editor" />
   <TokenDialog
@@ -1526,6 +1532,7 @@ onMounted(async () => {
 <style scoped>
 .script-bg {
   background-image: var(--bg-image-url);
+  background-attachment: local, local;
 
   &.is-trouble-brewing {
     --bg-image-url: url("/img/scripts/trouble-brewing-bg.webp");
@@ -1545,6 +1552,17 @@ onMounted(async () => {
 
   &.is-unknown-script {
     --bg-image-url: url("/img/scripts/unknown-script-bg.webp");
+  }
+}
+
+.grimoire {
+  .overflow-scroll {
+    /* Compensate scrollbars (and page count) so tokens are centered */
+    padding-block-start: 1.25rem;
+    padding-block-end: 1.5rem;
+
+    scrollbar-width: thin;
+    scrollbar-color: oklch(44.4% 0.011 73.639) transparent;
   }
 }
 </style>

@@ -126,7 +126,7 @@
             font-size="md"
           >
             <div class="w-[30px] overflow-hidden">
-              <img src="/img/role/investigator.png" />
+              <img src="/img/ui/investigator.webp" />
             </div>
             <template v-if="event.script === ''">Select Script</template>
           </Button>

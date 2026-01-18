@@ -110,11 +110,11 @@
       </template>
       <template v-else-if="playerFetchStatus === Status.ERROR">
         <div class="flex gap-3 items-center justify-center h-screen">
-          <img src="/img/role/imp.png" class="inline-block w-16 h-16" />
+          <img src="/img/ui/imp.webp" class="inline-block w-14 h-14" />
           <p class="text-center text-2xl my-4 font-sorts">
             This account is not available
           </p>
-          <img src="/img/role/imp.png" class="inline-block w-16 h-16" />
+          <img src="/img/ui/imp.webp" class="inline-block w-14 h-14" />
         </div>
       </template>
       <template v-else>
