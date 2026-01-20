@@ -1,8 +1,6 @@
-import { PrismaClient } from "@prisma/client";
 import dayjs from "dayjs";
 import * as ics from "ics";
-
-const prisma = new PrismaClient();
+import { prisma } from "~/server/utils/prisma";
 
 export default defineEventHandler(async (handler) => {
   const cal_id = handler.context.params!.cal_id;

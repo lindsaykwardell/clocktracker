@@ -1,8 +1,7 @@
-import { PrismaClient, Alignment, RoleType } from "@prisma/client";
+import { Alignment, RoleType } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
 import { nanoid } from "nanoid";
-
-const prisma = new PrismaClient();
+import { prisma } from "./prisma";
 
 export type UploadedScript = [
   {

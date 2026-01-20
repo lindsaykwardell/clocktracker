@@ -1,8 +1,7 @@
 import type { User } from "@supabase/supabase-js";
-import { PrismaClient, PrivacySetting } from "@prisma/client";
+import { PrivacySetting } from "@prisma/client";
 import { anonymizeGame, GameRecord } from "~/server/utils/anonymizeGame";
-
-const prisma = new PrismaClient();
+import { prisma } from "./prisma";
 
 export async function fetchGames(user_id: string, me: User | null) {
   const games = await prisma.game.findMany({

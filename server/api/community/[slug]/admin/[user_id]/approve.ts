@@ -1,8 +1,6 @@
 import type { User } from "@supabase/supabase-js";
-import { PrismaClient } from "@prisma/client";
 import { addUserKofiLevel } from "~/server/utils/addUserKofiLevel";
-
-const prisma = new PrismaClient();
+import { prisma } from "~/server/utils/prisma";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;

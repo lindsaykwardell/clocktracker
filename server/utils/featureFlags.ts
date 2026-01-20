@@ -1,7 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
-
-const prisma = new PrismaClient();
+import { prisma } from "./prisma";
 
 export async function getFeatureFlags(me: User | null) {
   const is_admin = await prisma.userSettings

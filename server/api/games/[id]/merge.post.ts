@@ -1,8 +1,7 @@
 import type { User } from "@supabase/supabase-js";
-import { PrismaClient, PrivacySetting } from "@prisma/client";
+import { PrivacySetting } from "@prisma/client";
 import { fetchGame } from "~/server/utils/fetchGames";
-
-const prisma = new PrismaClient();
+import { prisma } from "~/server/utils/prisma";
 
 export default defineEventHandler(async (handler) => {
   const gameId = handler.context.params?.id;

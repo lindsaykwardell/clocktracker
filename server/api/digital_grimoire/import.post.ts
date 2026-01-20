@@ -1,60 +1,12 @@
-import type { User } from "@supabase/supabase-js";
-
-type DigitalGrimoireGame = {
-  date: Date;
-  script_id?: number;
-  script:
-    | [
-        {
-          id: "_meta";
-          name: string;
-          author?: string;
-          logo?: string;
-          almanac?: string;
-          background?: string;
-        },
-        ...(
-          | {
-              id: string;
-              image?: string | string[];
-              reminders?: string[];
-              name: string;
-              team?:
-                | "townsfolk"
-                | "outsider"
-                | "minion"
-                | "demon"
-                | "traveler"
-                | "fabled";
-              ability?: string;
-            }
-          | string
-        )[]
-      ]
-    | string;
-  script_version?: string;
-  player_count: number;
-  traveler_count: number;
-  win: "GOOD_WINS" | "EVIL_WINS" | "NOT_RECORDED";
-  demon_bluffs: string[];
-  fabled: string[];
-  grimoire: {
-    role_id: string;
-    alignment: "GOOD" | "EVIL" | "NEUTRAL";
-    is_dead: boolean;
-    used_ghost_vote: boolean;
-    order: number;
-    created_at: Date;
-    player_name: string;
-    reminders: {
-      role_id: string;
-      reminder: string;
-    }[];
-  }[];
-};
+import { prisma } from "~/server/utils/prisma";
 
 export default defineEventHandler(async (handler) => {
-  const allowedOrigins = ["https://botc.games/", "https://staging.botc.games/"];
+  const allowedOrigins = [
+    "https://botc.games/",
+    "https://staging.botc.games/",
+    "https://botc.games",
+    "https://staging.botc.games",
+  ];
 
   const origin = getRequestHeader(handler, "origin");
 
@@ -71,20 +23,32 @@ export default defineEventHandler(async (handler) => {
     return "";
   }
 
-  const user: User | null = handler.context.user;
-  const body = await readBody<DigitalGrimoireGame>(handler);
+  // Parse form data - the game data comes as a stringified JSON in a field called "game"
+  const formData = await readFormData(handler);
+  const gameString = formData.get("game");
 
-  if (!user) {
-    // Rather than throw here, redirect to the login page
-    sendRedirect(handler, "/");
-  }
-
-  if (!body) {
+  if (!gameString || typeof gameString !== "string") {
     throw createError({
       status: 400,
-      statusMessage: "Bad Request",
+      statusMessage: "Bad Request - missing 'game' field in form data",
     });
   }
 
-  return body;
+  // Strip surrounding quotes if present (sometimes form data double-encodes the string)
+  let jsonString = gameString.trim();
+  if (
+    (jsonString.startsWith("'") && jsonString.endsWith("'")) ||
+    (jsonString.startsWith('"') && jsonString.endsWith('"'))
+  ) {
+    jsonString = jsonString.slice(1, -1);
+  }
+
+  const importedGame = await prisma.importedGame.create({
+    data: {
+      payload: jsonString,
+    },
+  });
+
+  // Redirect to the game editor
+  return sendRedirect(handler, `/add-game?imported_game=${importedGame.id}`);
 });

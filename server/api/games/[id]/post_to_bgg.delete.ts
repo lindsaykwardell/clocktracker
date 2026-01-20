@@ -1,10 +1,9 @@
 import type { User } from "@supabase/supabase-js";
-import { Alignment, PrismaClient, PrivacySetting } from "@prisma/client";
+import { Alignment, PrivacySetting } from "@prisma/client";
 import axios from "axios";
 // @ts-ignore
 import dayjs from "dayjs";
-
-const prisma = new PrismaClient();
+import { prisma } from "~/server/utils/prisma";
 
 export default defineEventHandler(async (handler) => {
   const user = handler.context.user as User | null;
