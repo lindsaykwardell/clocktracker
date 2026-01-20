@@ -13,6 +13,7 @@
         }"
       >
         <form @submit.prevent.stop="search" role="search">
+          <label for="search" class="sr-only">Search</label>
           <Input
             id="search"
             v-model="query"
@@ -21,9 +22,9 @@
             :placeholder="
               customSearchPlaceholder || 'Type in a query, then press enter'
             "
-            class="h-[2rem]"
+            class="h-[2rem] text-sm"
           />
-          <div class="absolute right-2 top-0 w-8 h-8" aria-label="Search">
+          <div class="absolute right-2 top-[50%] -translate-y-[50%] w-6 h-6">
             <img src="/img/ui/investigator.webp" />
           </div>
         </form>
@@ -50,24 +51,16 @@
         <Avatar value="/img/default.png" size="xs" />
       </div>
     </div>
-    <!-- @todo Use Button? -->
-    <button
+    <Button
       id="show-navbar"
       @click="showMenu = !showMenu"
-      class="fixed top-1 left-1 z-50 w-[42px] h-[42px] flex items-center justify-center bg-stone-300 dark:bg-stone-900 border border-stone-500 rounded-lg"
+      :icon="showMenu ? 'x' : 'menu'"
+      iconSize="xl"
+      display="icon-only"
+      class="fixed top-1 left-1 z-50"
     >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="32"
-        height="32"
-        viewBox="0 0 32 32"
-      >
-        <path
-          fill="currentColor"
-          d="M4 6h24v2H4zm0 18h24v2H4zm0-12h24v2H4zm0 6h24v2H4z"
-        />
-      </svg>
-    </button>
+      Open Menu
+    </Button> 
     <nav
       class="fixed flex flex-col gap-3 p-2 rounded md:rounded-none rounded-l-none md:pb-0 top-0 bg-stone-200 dark:bg-stone-900 z-40 overflow-hidden transition duration-300 w-screen h-screen max-w-screen md:max-w-[300px]"
       :class="{
@@ -137,46 +130,8 @@
             <Toggle v-model="dark" size="sm" />
             🌙
           </div>
-          <div class="flex justify-around">
-            <a
-              id="discord"
-              href="https://discord.gg/KwMz8ThamT"
-              class="text-stone-400 hover:text-stone-500 dark:text-stone-200 dark:hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
-              aria-label="Join the ClockTracker Discord server"
-            >
-              <div class="w-[50px] flex justify-center">
-                <Discord />
-              </div>
-            </a>
-            <a
-              id="bluesky"
-              href="https://bsky.app/profile/clocktracker.app"
-              class="text-stone-400 hover:text-stone-500 dark:text-stone-200 dark:hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
-              aria-label="Join the ClockTracker Discord server"
-            >
-              <div class="w-[50px] flex justify-center">
-                <Bluesky />
-              </div>
-            </a>
-            <a
-              id="kofi"
-              href="https://ko-fi.com/clocktracker"
-              class="text-stone-400 hover:text-stone-500 dark:text-stone-200 dark:hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
-              aria-label="Donate to ClockTracker"
-            >
-              <div class="w-[50px] flex justify-center">
-                <KoFi />
-              </div>
-            </a>
-            <a
-              href="https://github.com/lindsaykwardell/clocktracker"
-              class="text-stone-400 hover:text-stone-500 dark:text-stone-200 dark:hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
-              aria-label="View the ClockTracker source code"
-            >
-              <div class="w-[50px] flex justify-center">
-                <Github />
-              </div>
-            </a>
+          <div class="flex justify-around gap-1">
+            <Socials />
           </div>
         </div>
       </section>

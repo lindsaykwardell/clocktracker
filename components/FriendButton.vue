@@ -4,8 +4,8 @@
       @click.prevent="alterFriendshipStatus"
       :color="friendButtonColor"
       :class="friendButtonClass"
+      :image="friendButtonImage"
     >
-      <img src="/img/ui/empath.webp" class="w-6 h-6" />
       <span :aria-label="friendButtonText"></span>
     </Button>
     <Button
@@ -14,8 +14,8 @@
       "
       @click.prevent="rejectFriendship"
       color="negative"
+      image="soldier"
     >
-      <img src="/img/ui/empath.webp" class="w-6 h-6" />
       Reject Request
     </Button>
   </div>
@@ -79,6 +79,18 @@ const friendButtonColor = computed(() => {
   }
 });
 
+const friendButtonImage = computed(() => {
+  switch (friends.getFriendStatus(props.user_id)) {
+    case FriendStatus.FRIENDS:
+      return "assassin";
+    case FriendStatus.REQUEST_SENT:
+      return "deusexfiasco";
+    case FriendStatus.REQUEST_RECEIVED:
+    case FriendStatus.NOT_FRIENDS:
+      return "empath";
+  }
+});
+
 function alterFriendshipStatus() {
   const friendRequest = friends.getFriendRequest(props.user_id);
   switch (friends.getFriendStatus(props.user_id)) {
@@ -118,10 +130,6 @@ div button.request-received:first-child span:before {
 }
 
 div button.friends:first-child span:before {
-  content: "Friends";
-}
-
-div button.friends:first-child:hover span:before {
   content: "Unfriend";
 }
 </style>

@@ -13,7 +13,6 @@
           <span class="block">Script</span>
           <div class="flex items-center gap-1">
             <div v-if="game.script" class="flex-grow">{{ game.script }}</div>
-            <!-- @todo Update button -->
             <Button
               type="button"
               id="select-script"
@@ -23,12 +22,11 @@
                 'w-full': !game.script,
                 'flex-shrink': game.script,
               }"
+              image="investigator"
             >
-              <div class="w-[30px] overflow-hidden">
-                <img src="/img/ui/investigator.webp" />
-              </div>
               <template v-if="editingMultipleGames">Not updated</template>
               <template v-else-if="game.script === ''">Select Script</template>
+              <template v-else><span class="sr-only">Change script</span></template>
             </Button>
           </div>
           <SelectScriptDialog
@@ -402,7 +400,7 @@
               @click="removeDemonBluff(i)"
               class="absolute top-1 right-1 z-10"
               color="contrast"
-              size="small"
+              size="sm"
               icon="x-lg"
               display="icon-only"
               circular
@@ -448,7 +446,7 @@
               type="button"
               @click="removeFabled(i)"
               class="absolute top-1 right-1 z-10"
-              size="small"
+              size="sm"
               icon="x-lg"
               display="icon-only"
               circular
@@ -508,7 +506,7 @@
         <Button
           v-for="(tag, index) in game.tags"
           @click.prevent="game.tags.splice(index, 1)"
-          size="small"
+          size="sm"
           removableTag
           :title="`Remove ${tag}`"
         >
@@ -522,18 +520,7 @@
         <label class="flex-1">
           <span class="block">BoardGameGeek Game URL</span>
           <div class="flex items-center">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="32"
-              height="32"
-              viewBox="0 0 24 24"
-              class="text-[#ff5100]"
-            >
-              <path
-                fill="currentColor"
-                d="m19.7 4.44l-2.38.64L19.65 0L4.53 5.56l.83 6.67l-1.4 1.34L8.12 24l8.85-3.26l3.07-7.22l-1.32-1.27l.98-7.81Z"
-              />
-            </svg>
+            <IconUI id="bgg" color="bgg" size="lg" />
             <Input
               type="text"
               v-model="bggIdInput"
@@ -567,7 +554,7 @@
               type="button"
               @click="removeFile(file)"
               class="absolute top-1 right-1 z-10"
-              size="small"
+              size="sm"
               icon="x-lg"
               display="icon-only"
               circular

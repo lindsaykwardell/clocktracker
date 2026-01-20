@@ -1,13 +1,20 @@
 <template>
   <component
     :is="is"
-    class="clocktracker-submenu-button flex items-center font-gothic font-medium text-sm transition duration-150 dark:text-white w-full"
     :class="{
       [computedClasses]: true,
     }"
     :disabled="disabled"
   >
-    <IconUI v-if="iconId" :id="iconId" size="sm" :color="iconColor" :spin="iconSpin" />
+    <template v-if="image">
+      <img 
+        :src="`/img/ui/${image}.webp`" 
+        class="w-[14px]" 
+      />
+    </template>
+    <template v-else>
+      <IconUI v-if="iconId" :id="iconId" size="sm" :color="iconColor" :spin="iconSpin" />
+    </template>
     <slot />
   </component>
 </template>
@@ -17,13 +24,16 @@
   defineProps<{
     component?: string;
     disabled?: boolean;
-    color?: "primary" | "secondary" | "neutral" | "positive" | "caution" | "negative" | "discord" | "bgg";
+    variant?: "filled" | "soft";
+    color?: "primary" | "neutral" | "positive" | "caution" | "negative" | "discord" | "bgg" | "bgstats";
     icon?: string;
     iconSpin?: boolean;
     iconColor?: "primary" | "neutral" | "positive" | "caution" | "negative" | "bgg";
+    image?: string;
   }>(),
   { 
     color: "neutral",
+    variant: "soft",
   }
   );
 
@@ -40,77 +50,117 @@
   }
   });
 
-  const primary = 
-    "text-white/95 bg-purple-500 dark:bg-purple-800";
-  const neutral = 
-    "text-stone-950 bg-white dark:bg-stone-950";    
-  const positive = 
-    "text-green-700 bg-white dark:bg-stone-950";
-  const caution = 
-    "text-amber-700 bg-white dark:bg-stone-950";  
-  const negative = 
-    "text-red-700 bg-white dark:bg-stone-950";
-  const discord = 
-    "text-white/95 bg-discord";  
-  const bgg =
-    "text-white/95 bg-[#3f3a60]"
-  
-  const primaryHover = 
-    "hover:text-purple-100 hover:bg-purple-600 dark:hover:bg-purple-900-dark";
-  const neutralHover = 
-    "hover:text-stone-950 hover:bg-stone-400 dark:hover:bg-stone-700";  
-  const positiveHover = 
-    "hover:text-green-950 hover:bg-green-600 dark:hover:bg-green-800-dark";
-  const cautionHover = 
-    "hover:text-amber-950 hover:bg-amber-600 dark:hover:bg-amber-800-dark";  
-  const negativeHover = 
-    "hover:text-red-950 hover:bg-red-600 dark:hover:bg-red-800-dark";
-  const discordHover = 
-    "hover:text-white hover:bg-discord-dark";  
-  const bggHover =
-    "hover:bg-[#2e2950]";  
-  
-  const colorScheme = computed(() => {
-    if (props.color === "primary") {
-      return `${primary} ${primaryHover}`;
-    }
-    else if (props.color === "neutral") {
-      return `${neutral} ${neutralHover}`;
-    }
-    else if (props.color === "positive") {
-      return `${positive} ${positiveHover}`;
-    }
-    else if (props.color === "caution") {
-      return `${caution} ${cautionHover}`;
-    }
-    else if (props.color === "negative") {
-      return `${negative} ${negativeHover}`;
-    }
-    else if (props.color === "discord") {
-      return `${discord} ${discordHover}`;
-    }
-    else if (props.color === "bgg") {
-      return `${bgg} ${bggHover}`;
-    }
-  });
-
-  const padding = computed(() => {
-    return "py-2 px-3";
-  });
-  
-  const spacing = computed(() => {
-    return "gap-2";
-  });
-
   const iconId = computed(() =>
     props.icon
   );
 
-  const disabledStyle = computed(() => {
-    return props.disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer";
+  const colorClass = computed(() => {
+    return `ct-btn-submenu-${props.color}`;
+  });
+
+  const variantClass = computed(() => {
+    return `ct-btn-submenu-${props.variant}`;
   });
 
   const computedClasses = computed(() => {
-    return `${spacing.value} ${padding.value} ${colorScheme.value} ${disabledStyle.value}`;
+    return `ct-btn-submenu ${variantClass.value} ${colorClass.value}`;
   });
 </script>
+
+<style scoped>
+  .ct-btn-submenu {
+    /* dark:text-white  */
+    @apply flex items-center w-full;
+    @apply font-gothic font-medium text-sm;
+    @apply transition duration-150;
+  }
+
+  .ct-btn-submenu {
+    --btn-bg: var(--btn-color, theme(colors.white));
+    --btn-fg: var(--color-base-content);
+    --btn-p: .5rem .75rem;
+    --btn-gap: 0.375rem;
+
+    cursor: pointer;
+    vertical-align: middle;
+    outline-offset: 2px;
+    color: var(--btn-fg);
+    font-size: var(--fontsize, .875rem);
+    outline-color: var(--btn-color, var(--color-base-content));
+    background-color: var(--btn-bg);
+    touch-action: manipulation;
+    flex-shrink: 0;
+    padding: var(--btn-p);
+    gap: var(--btn-gap);
+  }
+
+  /* Colors */
+  .ct-btn-submenu {
+    /* For testing purposes */
+    /* --btn-color: cyan !important; */
+
+    &-primary {
+      --btn-color: theme(colors.primary);
+      --btn-fg: theme(colors.primary-content);
+
+      &:where(.dark, .dark *) {
+        --btn-color: theme(colors.dark-primary);
+      }
+    }
+
+    &-positive {
+      --btn-color: theme(colors.positive);
+      --btn-fg: theme(colors.positive-content);
+    }
+
+    &-caution {
+      --btn-color: theme(colors.caution);
+      --btn-fg: theme(colors.caution-content);
+    }
+
+    &-negative {
+      --btn-color: theme(colors.negative);
+      --btn-fg: theme(colors.negative-content);
+    }
+
+    &-discord {
+      --btn-color: theme(colors.discord);
+      --btn-fg: theme(colors.discord-content)
+    }
+
+    &-bgg {
+      --btn-color: theme(colors.bgg-purple);
+      --btn-fg: theme(colors.bgg-purple-content);
+    }
+
+    &-bgstats {
+      --btn-color: theme(colors.bgstats-grey);
+      --btn-fg: theme(colors.bgstats-grey-content);
+    }
+  }
+
+  @media(hover: hover) {
+    .ct-btn-submenu:hover {
+      --btn-bg: var(--btn-color, var(--color-base-200));
+    }
+
+    @supports (color: color-mix(in lab, red, red)) {
+      .ct-btn-submenu:hover {
+        --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-base-200)), #000 5%);
+      }
+    }
+  }
+
+  .ct-btn-submenu-soft:not(.ct-btn-submenu-active,:hover,:active:focus,:focus-visible,:disabled,[disabled],.ct-btn-submenu-disabled) {
+    --btn-fg: var(--btn-color, var(--color-base-content));
+    --btn-bg: var(--btn-color, theme(colors.white));
+  }
+
+  @supports (color: color-mix(in lab,red,red)) {
+    .ct-btn-submenu-soft:not(.ct-btn-submenu-active,:hover,:active:focus,:focus-visible,:disabled,[disabled],.ct-btn-submenu-disabled) {
+      --btn-fg: color-mix(in oklab, var(--btn-color, var(--color-base-content)), #000 10%);
+      --btn-bg: color-mix(in oklab, var(--btn-color, theme(colors.white)) 1%, theme(colors.white));
+    }
+  }
+
+</style>

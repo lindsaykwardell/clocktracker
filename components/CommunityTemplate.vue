@@ -21,14 +21,13 @@
                     v-if="community.data.location"
                     class="md:text-lg dark:text-stone-400 flex gap-2 items-center justify-center md:justify-start"
                   >
-                    <IconUI id="globe" />
+                    <IconUI id="location" />
                     <span class="sr-only">Location: </span><span>{{ community.data.location }}</span>
                   </div>
                   <div class="flex gap-2 flex-wrap justify-center md:justify-start">
                     <SocialLink
                       v-for="link in community.data.links"
                       :href="link"
-                      class="hover:text-primary dark:hover:text-primary-light transition duration-150 hover:underline"
                     >
                       {{ link.replace(/https?:\/\//, "").replace(/\/$/, "") }}
                     </SocialLink>

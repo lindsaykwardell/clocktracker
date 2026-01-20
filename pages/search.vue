@@ -17,7 +17,8 @@
                 @click="showUsers = !showUsers"
                 :disabled="users.length === 0"
                 :active="showUsers"
-                variant="ghost"
+                variant="soft"
+                color="primary"
               >
                 <h2>
                   {{ users.length }} User{{ users.length === 1 ? "" : "s" }}
@@ -29,7 +30,8 @@
                 @click="showCommunities = !showCommunities"
                 :disabled="communities.length === 0"
                 :active="showCommunities"
-                variant="ghost"
+                variant="soft"
+                color="primary"
               >
                 <h2>
                   {{ communities.length }} Communit{{
@@ -43,7 +45,8 @@
                 @click="showScripts = !showScripts"
                 :disabled="scripts.length === 0"
                 :active="showScripts"
-                variant="ghost"
+                variant="soft"
+                color="primary"
               >
                 <h2>
                   {{ scripts.length }} Script{{
@@ -57,7 +60,8 @@
                 @click="showRoles = !showRoles"
                 :disabled="roles.length === 0"
                 :active="showRoles"
-                variant="ghost"
+                variant="soft"
+                color="primary"
               >
                 <h2>
                   {{ roles.length }} Role{{ roles.length === 1 ? "" : "s" }}

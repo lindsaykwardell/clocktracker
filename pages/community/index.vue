@@ -16,8 +16,8 @@
           Find Communities Near Me
         </Button>
       </div>
-      <div class="w-full lg:w-[800px] m-auto flex flex-col items-center gap-4 p-4 md:p-4 pb-4 lg:pb-8">
-        <h1 class="font-sorts text-4xl lg:text-3xl">Communities</h1>
+      <div class="w-full lg:w-[800px] m-auto flex flex-col items-stretch gap-4 p-4 md:p-4 pb-4 lg:pb-8">
+        <h1 class="font-sorts text-center text-4xl lg:text-3xl">Communities</h1>
         <CommunityCard
           v-for="community in myCommunities"
           :community="community"

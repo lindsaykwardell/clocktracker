@@ -13,7 +13,7 @@
       @submit.prevent="saveSettings"
     >
       <Avatar :value="avatar" />
-      <Button @click.prevent.stop="selectAvatar" size="small">
+      <Button @click.prevent.stop="selectAvatar" size="sm">
         Upload avatar
       </Button>
       <label class="block w-[300px]">

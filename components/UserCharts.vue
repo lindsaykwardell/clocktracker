@@ -141,7 +141,9 @@
         <div class="flex gap-2 items-center">
           <Button
             @click="setMode('player')"
-            :disabled="mode === 'player'"
+            :active="mode === 'player'"
+            color="primary"
+            variant="soft"
             icon="person"
           >
             Player
@@ -149,7 +151,9 @@
 
           <Button
             @click="setMode('storyteller')"
-            :disabled="mode === 'storyteller'"
+            :active="mode === 'storyteller'"
+            color="primary"
+            variant="soft"
             icon="book"
           >
             Storyteller
@@ -161,7 +165,7 @@
           v-if="startDateRange !== null"
           @click.prevent="startDateRange = null"
           :title="`Remove after ${formatDate(new Date(startDateRange))} date filter`"
-          size="small"
+          size="sm"
           removableTag
         >
           From: {{ formatDate(new Date(startDateRange)) }}
@@ -170,7 +174,7 @@
           v-if="endDateRange !== null"
           @click.prevent="endDateRange = null"
           :title="`Remove before ${formatDate(new Date(endDateRange))} date filter`"
-          size="small"
+          size="sm"
           removableTag
         >
           To: {{ formatDate(new Date(endDateRange)) }}
@@ -179,7 +183,7 @@
           v-if="minPlayers !== null"
           @click.prevent="minPlayers = null"
           :title="`Remove min ${minPlayers} playercount filter`"
-          size="small"
+          size="sm"
           removableTag
         >
           Min Players: {{ minPlayers }}
@@ -188,7 +192,7 @@
           v-if="maxPlayers !== null"
           @click.prevent="maxPlayers = null"
           :title="`Remove max ${maxPlayers} playercount filter `"
-          size="small"
+          size="sm"
           removableTag
         >
           Max Players: {{ maxPlayers }}
@@ -197,7 +201,7 @@
           v-if="selectedCommunity"
           @click.prevent="selectedCommunity = null"
           :title="`Remove ${selectedCommunity} community filter`"
-          size="small"
+          size="sm"
           removableTag
         >
           Community: {{ selectedCommunity }}
@@ -206,7 +210,7 @@
           v-if="selectedLocation"
           @click.prevent="selectedLocation = null"
           :title="`Remove ${selectedLocation} location filter`"
-          size="small"
+          size="sm"
           removableTag
         >
           Location: {{ selectedLocation }}
@@ -215,7 +219,7 @@
           v-for="(tag, index) in selectedTags"
           @click.prevent="selectedTags.splice(index, 1)"
           :title="`Remove ${tag} tag`"
-          size="small"
+          size="sm"
           removableTag
         >
           Tag: {{ tag }}
@@ -354,7 +358,7 @@
             :to="addChartLink"
             color="primary"
             icon="plus-lg"
-            size="small"
+            size="sm"
             class="mb-2 md:mb-0 inline-flex"
           >
             Add Chart

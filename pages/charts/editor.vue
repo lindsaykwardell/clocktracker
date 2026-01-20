@@ -89,7 +89,7 @@
                     @click.prevent="options.include_tags.splice(index, 1)"
                     :title="`Remove ${tag}`"
                     color="positive"
-                    size="small"
+                    size="sm"
                     removableTag
                   >
                     {{ tag }}
@@ -118,7 +118,7 @@
                     @click.prevent="options.exclude_tags.splice(index, 1)"
                     :title="`Remove ${tag}`"
                     color="negative"
-                    size="small"
+                    size="sm"
                     removableTag
                   >
                     {{ tag }}

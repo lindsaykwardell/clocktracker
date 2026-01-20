@@ -28,7 +28,7 @@
           Profile updated successfully!
         </span>
       </form>
-      <div v-else class="space-y-4">
+      <div v-else class="space-y-4 text-center">
         <p>
           You must be a Ko-Fi supporter to access these features.
         </p>
@@ -38,7 +38,6 @@
           target="_blank"
           color="primary"
           wide
-          class="mx-auto"
         >
           Become a supporter now!
         </Button>

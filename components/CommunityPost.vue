@@ -37,7 +37,7 @@
             <IconUI id="reply" />
             <span class="sr-only">Reply count:</span>{{ post._count.replies }}
           </span>
-          <Button @click="toggleReply" size="small" icon="reply">
+          <Button @click="toggleReply" size="sm" icon="reply">
             Reply
           </Button>
         </div>
@@ -48,6 +48,7 @@
         color="contrast"
         display="icon-only"
         circular
+        size="sm"
         @click="deletePost(post.id)"
       >
         Delete post by {{post.user.display_name}}
@@ -96,7 +97,7 @@
             icon="x"
             color="contrast"
             display="icon-only"
-            size="small"
+            size="xs"
             circular
           >
             Delete post by {{post.user.display_name}}
@@ -114,7 +115,7 @@
           <ExpandingTextarea v-model="newReply" />
         </div>
         <div>
-          <Button type="submit" size="small" color="primary">
+          <Button type="submit" size="sm" color="primary">
             Post reply
           </Button>
         </div>

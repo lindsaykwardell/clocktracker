@@ -21,16 +21,6 @@
         >
           <template #register>
             <Button
-              v-if="isAllowedToRegister"
-              :disabled="inFlight"
-              @click="initRegister()"
-              :color="alreadyRegistered ? 'caution' : 'primary'"
-            >
-              <template v-if="inFlight"><Spinner /></template>
-              <template v-else-if="alreadyRegistered">Unregister</template>
-              <template v-else>Register</template>
-            </Button>
-            <Button
               v-if="shareIsSupported || copyIsSupported"
               @click="getShareLink"
               v-tooltip="{
@@ -40,6 +30,16 @@
               }"
             >
               Share
+            </Button>
+            <Button
+              v-if="isAllowedToRegister"
+              :disabled="inFlight"
+              @click="initRegister()"
+              :color="alreadyRegistered ? 'caution' : 'primary'"
+            >
+              <template v-if="inFlight"><Spinner /></template>
+              <template v-else-if="alreadyRegistered">Unregister</template>
+              <template v-else>Register</template>
             </Button>
           </template>
           <template #footer>
@@ -170,7 +170,7 @@
                     "
                       v-if="!inFlight && !alreadyRegistered"
                       @click="initRegister(waitlist.id)"
-                      size="small"
+                      size="sm"
                       class="inline-flex"
                       icon="sign"
                     >

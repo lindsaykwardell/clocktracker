@@ -12,7 +12,7 @@
           color="contrast"
           icon="edit"
           display="icon-only"
-          size="x-small"
+          size="xs"
           circular
         >
           Edit chart
@@ -24,7 +24,7 @@
           color="contrast"
           icon="x-lg"
           display="icon-only"
-          size="x-small"
+          size="xs"
           circular
         >
           Edit chart

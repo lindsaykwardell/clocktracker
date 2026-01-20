@@ -16,7 +16,7 @@
           icon="chevron-left"
           color="contrast"
           display="icon-only"
-          size="small"
+          size="sm"
           circular
         >
           Previous
@@ -30,7 +30,7 @@
           icon="chevron-right"
           color="contrast"
           display="icon-only"
-          size="small"
+          size="sm"
           circular
         >
           Next
@@ -70,7 +70,7 @@
               <li v-for="event in eventsOnDay(day)">
                 <nuxt-link
                   :to="`/event/${event.id}`"
-                  class="flex flex-col md:flex-row gap-3"
+                  class="flex flex-col md:flex-row gap-3 rounded bg-purple-200 p-1"
                 >
                   <div class="flex-grow hover:underline">
                     <span class="text-stone-500">

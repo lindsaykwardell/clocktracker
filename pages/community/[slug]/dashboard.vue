@@ -12,7 +12,7 @@
               @click="selectCommunityAvatar"
               type="button"
               variant="filled"
-              size="small"
+              size="sm"
               color="neutral"
             >
               Change Logo
@@ -74,7 +74,7 @@
                     type="button"
                     variant="filled"
                     color="neutral"
-                    size="small"
+                    size="sm"
                   >
                     Add link
                   </Button>
@@ -91,8 +91,8 @@
                   target="_blank"
                   variant="filled"
                   color="discord"
+                  icon="discord"
                 >
-                  <Discord />
                   Add Bot
                 </Button>
               </div>
@@ -113,7 +113,7 @@
             id="save-game"
             variant="filled"
             color="primary"
-            size="large"
+            size="lg"
             wide
             :disabled="inFlight"
           >
@@ -126,206 +126,215 @@
         </div>
       </form>
 
-      <section v-if="community.data.join_requests?.length">
-        <h2 class="font-sorts text-center text-xl lg:text-2xl mb-2 lg:mb-4 col-span-8">
-          Join Requests
-        </h2>
-        <div class="overflow-x-scroll custom-scrollbar -mx-4 md:mx-0 w-screen md:w-full">
-          <table class="w-full">
-            <thead>
-              <tr>
-                <th class="text-center">User</th>
-                <th class="text-left">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-stone-300 dark:divide-stone-700/40">
-              <tr v-for="member in community.data.join_requests">
-                <td>
-                  <div class="flex gap-2 items-center">
-                    <div class="flex-none">
-                      <Avatar
-                        :value="member.avatar"
-                        size="xs"
-                        class="border-stone-800"
-                        background
-                      />
+      <section class="grid gap-4 grid-cols-2 grid-flow-row-dense">
+        <div class="col-start-2 row-start-1" v-if="community.data.join_requests?.length">
+          <h2 class="font-sorts text-center xl:text-left text-xl lg:text-2xl mb-2 lg:mb-4 col-span-8">
+            Join Requests
+          </h2>
+          <div class="overflow-x-scroll custom-scrollbar -mx-4 md:mx-0 w-screen md:w-full">
+            <table>
+              <thead>
+                <tr>
+                  <th class="text-left">User</th>
+                  <th class="text-left">Status</th>
+                  <th class="text-left"><span class="sr-only">Actions</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="member in community.data.join_requests">
+                  <td>
+                    <div class="flex gap-2 items-center">
+                      <div class="flex-none">
+                        <Avatar
+                          :value="member.avatar"
+                          size="xs"
+                          class="border-stone-800"
+                          background
+                        />
+                      </div>
+                      <div class="flex flex-col">
+                        <span class="font-semibold">{{ member.display_name }}</span>
+                        <span class="text-xs md:text-sm text-muted">(@{{ member.username }})</span>
+                      </div>
                     </div>
-                    <div class="flex flex-col lg:flex-row lg:gap-1">
-                      <span class="font-semibold">{{ member.display_name }}</span>
-                      <span class="text-sm md:text-base">(@{{ member.username }})</span>
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  <div class="flex justify-end gap-2">
-                    <Button
-                      @click="approveUser(member.user_id)"
-                      variant="filled"
-                      size="mobile-small"
-                      color="positive"
-                      class="flex-1"
-                    >
-                      Approve
-                    </Button>
-                    <Button
-                      @click="denyUser(member.user_id)"
-                      variant="filled"
-                      size="mobile-small"
-                      color="negative"
-                      class="flex-1"
-                    >
-                      Ignore
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <section>
-        <h2 class="font-sorts text-center text-xl lg:text-2xl mb-2 lg:mb-4 col-span-8">
-          Community Members
-        </h2>
-        <div class="overflow-x-scroll custom-scrollbar -mx-4 md:mx-0 w-screen md:w-full">
-          <table class="w-full">
-            <thead>
-              <tr>
-                <th class="text-left">User</th>
-                <th class="text-center">Role</th>
-                <th class="text-Center">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-stone-300 dark:divide-stone-700/40">
-              <tr v-for="member in community.data.members">
-                <td>
-                  <div class="flex gap-2 items-center ">
-                    <div class="flex-none">
-                      <Avatar
-                        :value="member.avatar"
-                        size="xs"
-                        class="border-stone-800"
-                        background
-                      />
-                    </div>
-                    <div class="flex flex-col lg:flex-row lg:gap-1">
-                      <span class="font-semibold">{{ member.display_name }}</span>
-                      <span class="text-sm md:text-base">(@{{ member.username }})</span>
-                    </div>
-                  </div>
-                </td>
-                <td class="text-center">
-                  <span
-                    class="inline-flex items-center rounded-sm text-sm md:text-base font-medium px-2 md:px-3 md:py-1"
-                    :class="{
-                      'bg-stone-200 text-gray-800 dark:bg-black/40 dark:text-white': !community.data.admins
-                        .map(({ user_id }) => user_id)
-                        .includes(member.user_id),
-                      'bg-stone-500 text-white dark:bg-purple-400/40 dark:text-white': community.data.admins
-                        .map(({ user_id }) => user_id)
-                        .includes(member.user_id),
-                    }"
-                  >          
-                    {{
-                      community.data.admins
-                        .map(({ user_id }) => user_id)
-                        .includes(member.user_id)
-                        ? "Admin"
-                        : "Member"
-                    }}
-                  </span>
-                </td>
-                <td>
-                  <div class="flex gap-2">
-                    <Button
-                      v-if="!isMe(member.user_id)"
-                      @click="toggleAdmin(member.user_id)"
-                      variant="filled"
-                      size="mobile-small"
-                      class="flex-1"
-                      :color="community.data.admins.map(({ user_id }) => user_id).includes(member.user_id)
-                          ? 'caution'
-                          : 'positive'"
-                    >
-                      <template
-                        v-if="
-                          community.data.admins
-                            .map(({ user_id }) => user_id)
-                            .includes(member.user_id)
-                        "
+                  </td>
+                  <td>
+                    <Badge color="caution" size="sm">
+                      Pending
+                    </Badge>
+                  </td>
+                  <td>
+                    <div class="flex justify-end gap-2">
+                      <Button
+                        @click="approveUser(member.user_id)"
+                        size="sm"
+                        color="positive"
                       >
-                        Demote
-                      </template>
-                      <template v-else> Promote </template>
-                    </Button>
-                    <div
-                      v-else
-                      class="table-action border border-transparent"
-                    />
-                    <Button
-                      @click="removeUser(member.user_id)"
-                      variant="filled"
-                      size="mobile-small"
-                      class="flex-1"
-                      color="negative"
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                        Approve
+                      </Button>
+                      <Button
+                        @click="denyUser(member.user_id)"
+                        size="sm"
+                        color="negative"
+                      >
+                        Ignore
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-      </section>
-      
-      <section v-if="community.data.banned_users?.length">
-        <h2 class="font-sorts text-center text-xl lg:text-2xl mb-2 lg:mb-4 col-span-8">
-          Banned Users
-        </h2>
-        <div class="overflow-x-scroll custom-scrollbar -mx-4 md:mx-0 w-screen md:w-full">
-          <table class="w-full">
-            <thead>
-              <tr>
-                <th class="text-left">User</th>
-                <th class="text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-stone-300 dark:divide-stone-700/40">
-              <tr v-for="member in community.data.banned_users">
-                <td>
-                  <div class="flex gap-2 items-center">
-                    <div class="flex-none">
-                      <Avatar
-                        :value="member.avatar"
-                        size="xs"
-                        class="border-stone-800"
-                        background
-                      />
+
+        <div class="col-start-1 span-hack">
+          <h2 class="font-sorts text-center xl:text-left text-xl lg:text-2xl mb-2 lg:mb-4 col-span-8">
+            Community Members
+          </h2>
+          <div class="overflow-x-scroll custom-scrollbar -mx-4 md:mx-0 w-screen md:w-full">
+            <table>
+              <thead>
+                <tr>
+                  <th class="text-left">User</th>
+                  <th class="text-left">Role</th>
+                  <th class="text-left"><span class="sr-only">Actions</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="member in community.data.members">
+                  <td>
+                    <div class="flex gap-2 items-center">
+                      <div class="flex-none">
+                        <Avatar
+                          :value="member.avatar"
+                          size="xs"
+                          class="border-stone-800"
+                          background
+                        />
+                      </div>
+                      <div class="flex flex-col">
+                        <span class="font-semibold">{{ member.display_name }}</span>
+                        <span class="text-xs md:text-sm text-muted">@{{ member.username }}</span>
+                      </div>
                     </div>
-                    <div class="flex flex-col lg:flex-row lg:gap-1">
-                      <span class="font-semibold">{{ member.display_name }}</span>
-                      <span class="text-sm md:text-base">(@{{ member.username }})</span>
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  <div class="flex justify-center gap-2">
-                    <Button
-                      @click="unbanUser(member.user_id)"
-                      variant="filled"
-                      size="mobile-small"
-                      class="flex-1"
-                      color="caution"
+                  </td>
+                  <td>
+                    <Badge
+                      :color="community.data.admins.map(({ user_id }) => user_id).includes(member.user_id) ? 'primary' : 'neutral'"
+                      size="sm"
                     >
-                      Unban
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                      {{
+                        community.data.admins
+                          .map(({ user_id }) => user_id)
+                          .includes(member.user_id)
+                          ? "Admin"
+                          : "Member"
+                      }}
+                    </Badge>
+                  </td>
+                  <td>
+                    <div class="flex justify-end relative">
+                      <Menu>
+                        <MenuButton>
+                          <IconUI id="dots" :rounded="true" shadow />
+                        </MenuButton>
+                        <transition
+                          enter-active-class="transition duration-100 ease-out"
+                          enter-from-class="transform scale-95 opacity-0"
+                          enter-to-class="transform scale-100 opacity-100"
+                          leave-active-class="transition duration-75 ease-out"
+                          leave-from-class="transform scale-100 opacity-100"
+                          leave-to-class="transform scale-95 opacity-0"
+                        >
+                          <MenuItems
+                            class="ct-contextual-links right-0 top-full"
+                          >
+                            <MenuItem>
+                              <ButtonSubmenu
+                                v-if="!isMe(member.user_id)"
+                                @click="toggleAdmin(member.user_id)"
+                              >
+                                <template
+                                  v-if="
+                                    community.data.admins
+                                      .map(({ user_id }) => user_id)
+                                      .includes(member.user_id)
+                                  "
+                                >
+                                  Demote
+                                </template>
+                                <template v-else> Promote </template>
+                              </ButtonSubmenu>
+                            </MenuItem>
+                            <MenuItem>
+                              <ButtonSubmenu
+                                @click="removeUser(member.user_id)"
+                              >
+                                Remove
+                              </ButtonSubmenu>
+                            </MenuItem>
+                          </MenuItems>
+                        </transition>
+                      </Menu>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="col-start-2 row-start-2" v-if="community.data.banned_users?.length">
+          <h2 class="font-sorts text-center xl:text-left text-xl lg:text-2xl mb-2 lg:mb-4 col-span-8">
+            Banned Users
+          </h2>
+          <div class="overflow-x-scroll custom-scrollbar -mx-4 md:mx-0 w-screen md:w-full">
+            <table>
+              <thead>
+                <tr>
+                  <th class="text-left">User</th>
+                  <th class="text-left">Status</th>
+                  <th class="text-left"><span class="sr-only">Actions</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="member in community.data.banned_users">
+                  <td>
+                    <div class="flex gap-2 items-center">
+                      <div class="flex-none">
+                        <Avatar
+                          :value="member.avatar"
+                          size="xs"
+                          class="border-stone-800"
+                          background
+                        />
+                      </div>
+                      <div class="flex flex-col">
+                        <span class="font-semibold">{{ member.display_name }}</span>
+                        <span class="text-xs md:text-sm text-muted">@{{ member.username }}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <Badge color="negative" size="sm">
+                      Banned
+                    </Badge>
+                  </td>
+                  <td>
+                    <div class="flex justify-end gap-2">
+                      <Button
+                        @click="unbanUser(member.user_id)"
+                        size="sm"
+                        color="caution"
+                      >
+                        Unban
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
     </div>
@@ -333,6 +342,8 @@
 </template>
 
 <script setup lang="ts">
+import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
+
 definePageMeta({
   middleware: "community-admin",
 });
@@ -457,9 +468,29 @@ useHead({
 </script>
 
 <style scoped>
+  table {
+    @apply w-full rounded-lg border border-stone-300 dark:border-stone-700/40;
+  }
+
+  thead {
+    @apply text-sm border-b border-stone-300 dark:border-stone-700/40;
+  }
+
+  tbody {
+    @apply divide-y divide-stone-300 dark:divide-stone-700/40;
+  }
+
+  th {
+    @apply font-normal text-muted;
+  }
+
   th,
   td {
     @apply p-2;
+  }
+
+  .span-hack {
+    grid-row: span 3;
   }
 
   .custom-scrollbar {

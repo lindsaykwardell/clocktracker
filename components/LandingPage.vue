@@ -7,8 +7,8 @@
       <Button
         component="nuxt-link"
         to="/login"
-        icon="envelope"
-        size="large"
+        icon="mail"
+        size="lg"
         color="primary"
         wide
       >
@@ -94,8 +94,8 @@
         component="nuxt-link"
         to="/login"
         color="primary"
-        icon="envelope"
-        size="large"
+        icon="mail"
+        size="lg"
         wide
       >
         Continue with e-mail
