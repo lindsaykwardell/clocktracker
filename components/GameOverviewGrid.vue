@@ -1,5 +1,10 @@
 <template>
-  <ul class="grid grid-cols-[repeat(auto-fill,_minmax(260px,_1fr))] md:grid-cols-[repeat(auto-fill,_minmax(360px,_1fr))] bg-stone-300/30 dark:bg-stone-700/30">
+  <ul 
+    class="grid bg-stone-300/30 dark:bg-stone-700/30"
+    :class="{
+      'grid-cols-[repeat(auto-fill,_minmax(260px,_1fr))] md:grid-cols-[repeat(auto-fill,_minmax(360px,_1fr))]': !showSingleGame
+    }"
+    >
     <li
       :key="game.id"
       v-for="game in games"
@@ -18,7 +23,7 @@
           :is="componentIs"
           @click="handleCardClick(game)"
           :to="getGameLink(game)"
-          class="w-full bg-stone-900 flex flex-col items-center cursor-pointer rounded overflow-hidden text-black h-48 md:h-72 bg-cover bg-center script-bg"
+          class="w-full bg-stone-900 flex flex-col items-center cursor-pointer overflow-hidden text-black h-48 md:h-72 bg-cover bg-center script-bg"
           :style="
             game.associated_script?.background
               ? {
@@ -278,9 +283,11 @@ const props = withDefaults(
     games: GameRecord[];
     onCardClick?: (game: GameRecord) => void;
     showCommunityCard?: boolean;
+    showSingleGame?: boolean;
   }>(),
   {
     showCommunityCard: false,
+    showSingleGame: false,
   }
 );
 

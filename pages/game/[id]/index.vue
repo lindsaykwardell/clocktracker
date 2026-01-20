@@ -175,48 +175,6 @@
                     }}
                   <!-- </span>  -->
                 </div>
-                <!-- <div v-if="game.data.script" class="metadata-item">
-                  <span class="metadata-label">Script</span>
-                  <div class="inline-flex gap-1 items-center">
-                    <nuxt-link
-                      class="hover:underline text-blue-800 hover:text-blue-700"
-                      :to="games.getScriptLink(game.data)"
-                    >
-                      {{ game.data.script }}
-                    </nuxt-link>
-                    <Badge
-                      v-if="
-                        game.data.associated_script?.version &&
-                        !isBaseScript(game.data.script)
-                      "
-                      size="xs"
-                      variant="overlay"
-                    >
-                      <template v-if="game.data.ls_game_id">
-                        Game {{ game.data.associated_script.version }}
-                      </template>
-                      <template v-else>
-                        {{ game.data.associated_script.version }}
-                      </template>
-                    </Badge>
-                  </div>
-                </div> -->
-                <!-- <div
-                  v-if="game.data.ls_game?.campaign"
-                  class="metadata-item"
-                >
-                  <div class="flex items-center gap-1">
-                    <img src="/img/ui/living-scripts.webp" class="w-6 h-6" />
-                    <span class="metadata-label">Campaign</span>
-                  </div>
-                  <a
-                    class="hover:underline text-blue-800 hover:text-blue-700"
-                    :href="`https://chillclocktower.com/living-script/campaign.php?view=${game.data.ls_game.campaign.id}`"
-                    target="_blank"
-                  >
-                    {{ game.data.ls_game.campaign.title }}
-                  </a>
-                </div> -->
                 <div v-if="storytellers.length" class="metadata-item">
                   <span class="metadata-label">Storyteller{{ storytellers.length === 1 ? "" : "s" }}</span>
                   <div>
@@ -283,23 +241,19 @@
                   }}
                   {{ game.data.location ? ` (${game.data.location})` : "" }}
                 </div>
-                <!-- <div class="metadata-item">
-                  <span class="metadata-label">Date</span>
-                  <time :datetime="dayjs(game.data.date).toISOString()">
-                    {{ formatDate(game.data.date) }}
-                  </time>
-                </div> -->
                 <div
                   v-if="game.data.parent_game"
                   class="flex gap-3 items-center"
                 >
                   <span class="metadata-label">Tagged By</span>
-                  <nuxt-link
-                    class="hover:underline text-blue-800 hover:text-blue-700"
+                  <Button
+                    component="nuxt-link"
                     :to="`/@${game.data.parent_game.user.username}`"
+                    variant="link"
+                    color="primary"
                   >
                     {{ game.data.parent_game.user.display_name }}
-                  </nuxt-link>
+                  </Button>
                 </div>
               </div>  
               

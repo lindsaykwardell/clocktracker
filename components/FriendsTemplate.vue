@@ -99,7 +99,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-  li > a:not(.router-link-exact-active) {
+  li > a:not(.router-link-exact-active,:hover) {
     border-color: theme(colors.stone.300);
 
     &:where(.dark, .dark *) {
