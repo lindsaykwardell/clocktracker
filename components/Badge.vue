@@ -150,7 +150,7 @@
     }
 
     &-games {
-      --badge-color: theme(colors.primary-content);
+      --badge-color: theme(colors.primary);
     }
 
     &-admins {

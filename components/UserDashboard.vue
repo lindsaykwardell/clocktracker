@@ -213,6 +213,7 @@
                   <div>
                     <GameOverviewGrid
                       :games="getGame(update.game.id)"
+                      showSingleGame
                     />
                   </div>
                 </template>
