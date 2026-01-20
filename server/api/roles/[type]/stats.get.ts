@@ -1,7 +1,6 @@
-import { Alignment, PrismaClient, WinStatus_V2 } from "@prisma/client";
+import { Alignment, WinStatus_V2 } from "@prisma/client";
 import { winRateByRole } from "~/server/utils/stats";
-
-const prisma = new PrismaClient();
+import { prisma } from "~/server/utils/prisma";
 
 export default defineEventHandler(async (handler) => {
   const name = handler.context.params?.type as string;

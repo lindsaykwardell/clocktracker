@@ -40,7 +40,7 @@
               >
                 {{ pendingGames.data.length }}
               </span>
-              <span>Tagged</span>
+              <span>Tagged / Draft</span>
             </nuxt-link>
             <nuxt-link
               :to="`/@${username}?view=stats`"
@@ -97,7 +97,7 @@
 
             <template #no-content>
               <p class="text-center text-2xl my-4 font-sorts">
-                No tagged games
+                No tagged or draft games
               </p>
             </template>
           </UserGamesView>

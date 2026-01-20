@@ -3,13 +3,11 @@ import {
   Alignment,
   Character,
   LocationType,
-  PrismaClient,
   Role,
   WinStatus_V2,
 } from "@prisma/client";
 import dayjs from "dayjs";
-
-const prisma = new PrismaClient();
+import { prisma } from "~/server/utils/prisma";
 
 type ExportedRow = {
   date: string;
