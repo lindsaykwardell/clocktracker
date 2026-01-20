@@ -3,6 +3,7 @@
     v-if="userGames.status === Status.SUCCESS"
     class="space-y-8 md:space-y-12 xl:space-y-16 pb-4 lg:pb-8"
   >
+    <!-- @todo improve graphically + copy to community-->
     <section
       class="px-4 lg:px-8 grid grid-cols-2 xl:grid-cols-4 gap-4 w-3/4 mx-auto"
     >
@@ -38,7 +39,7 @@
         <div v-if="isMe" class="flex justify-center items-center mt-2">
           <Button
             @click="showFavoritesDialog = !showFavoritesDialog"
-            size="small"
+            size="sm"
           >
             Manage Favorite Games
           </Button>

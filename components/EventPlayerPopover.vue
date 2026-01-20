@@ -13,15 +13,14 @@
         leave-to-class="transform scale-95 opacity-0"
       >
         <MenuItems
-          class="absolute bottom-[100%] z-10 bg-stone-50 dark:bg-stone-950 p-2 rounded shadow-md whitespace-nowrap flex flex-col items-start"
+          class="ct-contextual-links top-full"
         >
           <MenuItem v-for="option in options">
-            <button
+            <ButtonSubmenu
               @click="option.action"
-              class="hover:text-stone-500 dark:hover:text-stone-300 w-full text-left"
             >
               {{ option.label }}
-            </button>
+            </ButtonSubmenu>
           </MenuItem>
         </MenuItems>
       </transition>

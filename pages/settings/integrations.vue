@@ -36,7 +36,7 @@
             <p class="pb-2">
               Connected as <strong>{{ bgg_username }}</strong>
             </p>
-            <Button @click.prevent="disconnectBoardGameGeek" color="negative" size="small">
+            <Button @click.prevent="disconnectBoardGameGeek" color="negative" size="sm">
               Disconnect
             </Button>
           </div>

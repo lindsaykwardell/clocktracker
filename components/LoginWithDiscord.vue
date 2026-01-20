@@ -3,7 +3,7 @@
     @click="login"
     icon="discord"
     color="discord"
-    size="large"
+    size="lg"
     wide
   >
     Login with Discord

@@ -83,7 +83,7 @@
       </label>
     </div>
     <div class="flex gap-4">
-      <label class="flex-1 flex flex-col gap-2">
+      <label class="flex-1 flex flex-col">
         <span class="block">Storytellers</span>
         <div class="flex flex-col gap-1">
           <div
@@ -105,7 +105,13 @@
           </div>
         </div>
         <div>
-          <Button @click="event.storytellers.push('')" type="button" size="small" icon="person-plus">
+          <Button 
+            @click="event.storytellers.push('')" 
+            type="button" 
+            size="sm" 
+            icon="person-plus"
+            class="mt-2"
+          >
             Add Storyteller
           </Button>
         </div>
@@ -123,16 +129,14 @@
               'w-full': !event.script,
               'flex-shrink': event.script,
             }"
-            font-size="md"
+            image="investigator"
           >
-            <div class="w-[30px] overflow-hidden">
-              <img src="/img/ui/investigator.webp" />
-            </div>
             <template v-if="event.script === ''">Select Script</template>
           </Button>
         </div>
         <SelectScriptDialog
           v-model:visible="showScriptDialog"
+          :scriptSelected="!!event.script"
           @selectScript="selectScript"
         />
       </label>
@@ -184,7 +188,7 @@
             type="button"
             @click="event.waitlists.push({ name: '', default: false })"
             icon="plus-lg"
-            size="small"
+            size="sm"
           >
             Add Waitlist
           </Button>
@@ -202,7 +206,7 @@
         type="button"
         @click="uploadFile"
         icon="upload"
-        size="small"
+        size="sm"
       >
         Upload Image
       </Button>
@@ -212,7 +216,7 @@
         @click="removeFile"
         color="negative"
         icon="x"
-        size="small"
+        size="sm"
       >
         Remove Image
       </Button>

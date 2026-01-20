@@ -233,7 +233,7 @@
             v-if="!featureFlags.isEnabled('ical')"
             component="nuxt-link"
             to="/event/create"
-            size="small"
+            size="sm"
           >
             Create Event
           </Button>
@@ -257,7 +257,7 @@
                 leave-to-class="transform scale-95 opacity-0"
               >
                 <MenuItems
-                  class="absolute right-0 z-10 bg-stone-100 dark:bg-stone-800 rounded shadow-md whitespace-nowrap flex flex-col items-start min-w-[150px]"
+                  class="ct-contextual-links right-0"
                 >
                   <MenuItem>
                     <ButtonSubmenu

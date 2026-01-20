@@ -340,15 +340,19 @@
               </slot>
               <Button
                 @click="gameView = 'grid'"
-                :disabled="gameView === 'grid'"
+                :active="gameView === 'grid'"
+                color="primary"
+                variant="soft"
                 icon="grid"
               >
                 Grid
               </Button>
               <Button
                 @click="gameView = 'table'"
-                :disabled="gameView === 'table'"
+                :active="gameView === 'table'"
+                color="primary"
                 icon="table"
+                variant="soft"
               >
                 Table
               </Button>
@@ -362,7 +366,7 @@
                 :title="`Remove after ${formatDate(
                   new Date(startDateRange)
                 )} date filter`"
-                size="small"
+                size="sm"
                 removableTag
               >
                 From: {{ formatDate(new Date(startDateRange)) }}
@@ -373,7 +377,7 @@
                 :title="`Remove before ${formatDate(
                   new Date(endDateRange)
                 )} date filter`"
-                size="small"
+                size="sm"
                 removableTag
               >
                 To: {{ formatDate(new Date(endDateRange)) }}
@@ -382,7 +386,7 @@
                 v-if="minPlayers !== null"
                 @click.prevent="minPlayers = null"
                 :title="`Remove min ${minPlayers} playercount filter`"
-                size="small"
+                size="sm"
                 removableTag
               >
                 Min Players: {{ minPlayers }}
@@ -391,7 +395,7 @@
                 v-if="maxPlayers !== null"
                 @click.prevent="maxPlayers = null"
                 :title="`Remove max ${maxPlayers} playercount filter `"
-                size="small"
+                size="sm"
                 removableTag
               >
                 Max Players: {{ maxPlayers }}
@@ -400,7 +404,7 @@
                 v-if="selectedRole"
                 @click.prevent="selectedRole = null"
                 :title="`Remove ${selectedRole} role filter`"
-                size="small"
+                size="sm"
                 removableTag
               >
                 Character: {{ selectedRole }}
@@ -409,7 +413,7 @@
                 v-if="selectedAlignment"
                 @click.prevent="selectedAlignment = null"
                 :title="`Remove alignment`"
-                size="small"
+                size="sm"
                 removableTag
               >
                 Alignment:
@@ -424,7 +428,7 @@
                 v-if="selectedScript"
                 @click.prevent="selectedScript = null"
                 :title="`Remove ${selectedScript} script filter`"
-                size="small"
+                size="sm"
                 removableTag
               >
                 Script: {{ selectedScript }}
@@ -433,7 +437,7 @@
                 v-if="selectedLocation"
                 @click.prevent="selectedLocation = null"
                 :title="`Remove ${selectedLocation} location filter`"
-                size="small"
+                size="sm"
                 removableTag
               >
                 Location: {{ selectedLocation }}
@@ -442,7 +446,7 @@
                 v-if="selectedCommunity"
                 @click.prevent="selectedCommunity = null"
                 :title="`Remove ${selectedCommunity} community filter`"
-                size="small"
+                size="sm"
                 removableTag
               >
                 Community: {{ selectedCommunity }}
@@ -451,7 +455,7 @@
                 v-if="selectedWinState"
                 @click.prevent="selectedWinState = null"
                 :title="`Remove win/loss filter`"
-                size="small"
+                size="sm"
                 removableTag
               >
                 Win/Loss:
@@ -471,7 +475,7 @@
                 v-for="(player, index) in selectedPlayers"
                 @click.prevent="selectedPlayers.splice(index, 1)"
                 :title="`Remove ${player} player filter`"
-                size="small"
+                size="sm"
                 removableTag
               >
                 Player: {{ player }}
@@ -480,7 +484,7 @@
                 v-for="(tag, index) in selectedTags"
                 @click.prevent="selectedTags.splice(index, 1)"
                 :title="`Remove ${tag} tag filter`"
-                size="small"
+                size="sm"
                 removableTag
               >
                 Tag: {{ tag }}
@@ -518,7 +522,7 @@
               to="/add-game"
               color="primary"
               icon="plus-lg"
-              size="large"
+              size="lg"
               wide
             >
               Add Your First Game
@@ -528,7 +532,7 @@
               type="button"
               @click="initImportGames"
               icon="upload"
-              size="large"
+              size="lg"
               wide
             >
               Import Games

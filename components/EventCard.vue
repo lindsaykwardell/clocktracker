@@ -1,6 +1,6 @@
 <template>
   <section
-    class="event-card relative grid rounded border dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 overflow-hidden "
+    class="ct-card ct-card--event grid"
     :class="{
       'max-w-[600px]': display !== 'large',
       'text-sm': display === 'small',
@@ -35,7 +35,7 @@
           >
             <!-- Date & Title -->
             <div class="flex-grow">
-              <div class="text-purple-700 font-semibold flex gap-1 flex-wrap">
+              <div class="text-primary dark:text-dark-primary font-semibold flex gap-1 flex-wrap">
                 <ClientOnly>
                   <span>
                     <time>{{ formatDate(event.start) }} {{ formatTime(event.start) }} - </time>
@@ -43,8 +43,6 @@
                   <span>
                     <time>{{ formatTime(event.end) }}</time>
                   </span>
-                  
-                  
                 </ClientOnly>
               </div>
               <h2
@@ -68,28 +66,20 @@
             <!-- Tags and actions -->
             <div class="flex gap-2 items-center">
               <template v-if="event.location_type === 'ONLINE'">
-                <span 
-                  class="inline-flex items-center rounded-sm font-medium px-1"
-                  :class="{
-                    'text-sm md:text-base md:px-2 md:py-1': display !== 'small',
-                    'text-sm': display === 'small',
-                  }"
-                  :style="`background-color:${chartColors.online}`"
+                <Badge
+                  :size="display === 'small' ? 'sm' : 'md'"
+                  color="digital"
                 >
                   Online
-                </span>
+                </Badge>
               </template>
               <template v-else>
-                <span 
-                  class="inline-flex items-center rounded-sm font-medium px-1 text-white" 
-                  :class="{
-                    'text-sm md:text-base md:px-2 md:py-1': display !== 'small',
-                    'text-sm': display === 'small',
-                  }"
-                  :style="`background-color:${chartColors.p11}`"
+                <Badge
+                  :size="display === 'small' ? 'sm' : 'md'"
+                  color="primary"
                 >
                   In person
-                </span>
+                </Badge>
               </template>
               <div
                 v-if="display !== 'small' && canModifyEvent"
@@ -109,7 +99,7 @@
                     leave-to-class="transform scale-95 opacity-0"
                   >
                     <MenuItems
-                      class="absolute right-0 z-10 bg-stone-100 dark:bg-stone-800 rounded shadow-md whitespace-nowrap flex flex-col divide-y divide-stone-100 items-start min-w-[150px]"
+                      class="ct-contextual-links"
                     >
                       <MenuItem>
                         <ButtonSubmenu
@@ -151,11 +141,11 @@
           <!-- Author -->
           <div 
             v-if="display !== 'small'"
-            class="flex items-center gap-1 text-sm text-stone-500 dark:text-stone-400"
+            class="ct-card__subline flex items-center gap-1"
             >
             <div
               v-if="event.created_by"
-              class="flex  items-center gap-2"
+              class="flex items-center gap-2"
             >
               <Avatar :value="event.created_by.avatar" size="xxs" background />
               <span>Created by {{ event.created_by.display_name }}</span>
@@ -212,14 +202,13 @@
             <span class="card-label">
               Game Link
             </span>
-            <a
-              v-if="event.game_link"
+            <Button
+              component="a"
               :href="event.game_link"
-              target="_blank"
-              class="text-blue-600 text-sm hover:underline"
+              color="primary"
             >
               Go to game <span class="sr-only">{{ event.title }}</span>
-            </a>
+            </Button>
           </div>
           <div
             class="card-metadata"
@@ -243,9 +232,15 @@
             <span class="card-label">
               Script
             </span>
-            <a class="hover:underline" :href="scriptLink(event)" target="">
+            <Button
+              component="a"
+              :href="scriptLink(event)" 
+              target=""
+              color="primary"
+              variant="link"
+            >
               {{ event.script }}
-            </a>
+            </Button>
           </div>
           <div class="card-metadata">
             <span class="card-label">
@@ -358,27 +353,12 @@ const tour = [
 ];
 </script>
 
-<style>
-  .event-card {
-    a:not(.overlay-link) {
-      position: relative;
-      z-index: 1;
-    }
-  }
-
+<style scoped>
   .card-metadata {
     @apply flex flex-col gap-1 items-start;
   }
 
   .card-label {
     @apply text-xs text-stone-500 dark:text-stone-400 uppercase;
-  }
-
-  .overlay-link::after {
-    content: "";
-    inset: 0;
-    position: absolute;
-
-    @apply transition duration-150 rounded border border-transparent hover:border-purple-700;
   }
 </style>

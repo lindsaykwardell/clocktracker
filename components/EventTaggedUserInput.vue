@@ -2,7 +2,7 @@
   <div class="w-[300px] text-left flex gap-2">
     <template v-if="showAddPlayer">
       <!-- @todo Update button -->
-      <Button @click="showAddPlayer = false" size="small" tertiary> ✕ </Button>
+      <Button @click="showAddPlayer = false" size="sm" tertiary> ✕ </Button>
       <TaggedUserInput
         :users="addableUsers"
         v-model:value="addPlayer"
@@ -11,7 +11,7 @@
       />
     </template>
     <template v-else>
-      <Button @click="showAddPlayer = true" size="small" icon="person-plus">
+      <Button @click="showAddPlayer = true" size="sm" icon="person-plus">
         Add Player
       </Button>
     </template>

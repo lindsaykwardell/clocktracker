@@ -28,14 +28,14 @@
               v-if="player.location"
               class="md:text-lg dark:text-stone-400 flex gap-2 items-center"
             >
-              <IconUI id="globe" />
+              <IconUI id="location" />
               <span class="sr-only">Location: </span><span>{{ player.location }}</span>
             </div>
             <div
               v-if="player.kofi_level"
               class="md:text-lg dark:text-stone-400 flex gap-2 items-center"
             >
-              <KoFi />
+              <IconUI id="kofi" />
               <span v-if="player.kofi_level === 'ONE_TIME'">Supporter</span>
               <span v-else-if="player.kofi_level === 'SUBSCRIBER'">
                 Subscriber
@@ -90,17 +90,19 @@
             :username="player.username"
             :user_id="player.user_id"
           />
-          <nuxt-link
+          <Button
+            component="nuxt-link"
             v-if="isUser"
             :to="`/settings`"
-            class="whitespace-nowrap flex gap-1 items-center justify-center px-3 py-2 rounded transition duration-150 text-white bg-purple-500 hover:bg-purple-600"
+            icon="edit"
+            color="primary"
           >
             Edit profile
-          </nuxt-link>
+          </Button>
         </div>
       </div>
       <div class="flex flex-col gap-1">
-        <h2 class="text-xs text-stone-600 text-center md:text-start uppercase">Joined Communities</h2>
+        <h2 class="text-xs text-stone-600 text-center md:text-start uppercase">Communities</h2>
         <div
           v-if="player.communities?.length"
           class="flex flex-wrap justify-start gap-[0.125rem]"

@@ -142,7 +142,7 @@
             class="absolute top-0 left-0 w-full h-full bg-stone-600 flex items-center justify-center opacity-0 hover:opacity-100 transition duration-300 gap-2"
             @click="emit('claimSeat', token)"
           >
-            <Chair class="w-6 h-6" />
+            <IconUI id="chair" />
             Claim Seat
           </button>
           {{ token.player_name }}

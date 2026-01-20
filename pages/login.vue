@@ -32,13 +32,9 @@
       <Button type="button" @click="register" wide>
         Register
       </Button>
-      <!-- @todo create link version of Button? -->
-      <button
-        @click.prevent="sendResetPassword"
-        class="hover:underline text-stone-400 text-sm"
-      >
+      <Button @click.prevent="sendResetPassword" variant="link" size="sm">
         Forgot Password?
-      </button>
+      </Button>
       <span v-if="resetPasswordSent" class="text-green-500"
         >An email has been sent to reset your password</span
       >

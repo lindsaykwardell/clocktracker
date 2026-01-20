@@ -7,7 +7,7 @@
           v-if="scriptSelected"
           @click.prevent="clearSelectedScript"
           color="negative"
-          size="small"
+          size="sm"
           
         >
           Clear current script
@@ -28,7 +28,7 @@
             >
               <div>
                 <img
-                  src="/img/botc_head.webp"
+                  src="/img/ui/botc_head.webp"
                   alt="Demon Head"
                   class="w-10 h-10 flex-shrink"
                 />
@@ -45,7 +45,7 @@
             >
               <div>
                 <img
-                  src="/img/living-scripts.webp"
+                  src="/img/ui/living-scripts.webp"
                   alt="Living Scripts"
                   class="w-10 h-10 flex-shrink"
                 />
@@ -83,7 +83,7 @@
                 >
                   <div>
                     <img
-                      src="/img/botc_head.webp"
+                      src="/img/ui/botc_head.webp"
                       alt="Demon Head"
                       class="w-10 h-10 flex-shrink"
                     />
@@ -111,7 +111,7 @@
                 >
                   <div>
                     <img
-                      src="/img/living-scripts.webp"
+                      src="/img/ui/living-scripts.webp"
                       alt="Living Scripts"
                       class="w-10 h-10 flex-shrink"
                     />
@@ -153,11 +153,11 @@
             <img src="/img/sects_and_violets.png" alt="Sects and Violets" />
           </button>
         </div>
-        <div class="flex flex-wrap gap-2">
+        <div class="flex flex-wrap justify-center gap-2">
           <Button
             v-for="script in recentScripts"
             @click="emit('selectScript', script)"
-            size="small"
+            size="sm"
             color="neutral-on-dark"
           >
             {{ script.name }}
@@ -173,14 +173,14 @@
           class="block w-full border border-stone-500 rounded-md p-2 text-lg bg-stone-600"
           placeholder="Search for a script"
         />
-        <!-- @todo use Button? -->
+        <!-- @todo Should this be a button, since this autosubmits? -->
         <button
           type="button"
           @click="searchScripts"
-          class="absolute right-2 -top-3 w-16 h-16"
+          class="absolute right-2 top-[50%] -translate-y-[50%] w-10 h-10"
         >
           <img v-if="mode === 'classic'" src="/img/ui/investigator.webp" />
-          <img v-else src="/img/living-scripts.webp" />
+          <img v-else src="/img/ui/living-scripts.webp" />
         </button>
       </div>
       <ul v-if="mode === 'classic' && scripts.length > 0" class="py-2">
@@ -215,7 +215,7 @@
         v-if="mode === 'classic'"
         type="button"
         @click="handleUploadScript"
-        size="small"
+        size="sm"
         icon="upload"
         color="neutral-on-dark"
         class="mx-auto"

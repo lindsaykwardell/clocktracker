@@ -1,23 +1,26 @@
 <template>
   <nuxt-link
     :to="to"
-    class="text-stone-900 hover:text-stone-800 dark:text-stone-200 dark:hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full px-3 py-3"
+    class="flex gap-2 items-center justify-between whitespace-nowrap w-full px-3 py-3 rounded text-stone-900 hover:bg-stone-300 dark:text-stone-200 dark:hover:bg-stone-700"
   >
-    <div class="relative">
-      <div class="w-[38px] overflow-hidden">
-        <span
-          v-if="notificationCount && notificationCount > 0"
-          class="absolute top-1 left-1 text-stone-200 bg-red-800 rounded-full px-2 py-1 text-xs font-bold aspect-square"
-          aria-label="Unread notifications"
-        >
-          {{ notificationCount }}
-        </span>
-        <img :src="`/img/ui/${icon}.webp`" alt="" />
+    <div class="flex gap-2 items-center">
+      <div class="relative">
+        <div class="w-[38px] overflow-hidden">
+          <img :src="`/img/ui/${icon}.webp`" alt="" />
+        </div>
       </div>
+      <span class="w-full">
+        <slot />
+      </span>
     </div>
-    <span class="w-full">
-      <slot />
-    </span>
+    
+    <Badge
+      v-if="notificationCount && notificationCount > 0"
+      color="negative"
+      size="sm"
+    >
+      <span class="sr-only">Unread notifications: </span>{{ notificationCount }}
+    </Badge>
   </nuxt-link>
 </template>
 
