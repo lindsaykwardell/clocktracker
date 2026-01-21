@@ -601,7 +601,6 @@
       <template v-else>Save Game</template>
     </Button>
   </form>
-  <Tour :steps="tour" tourKey="game-editor" />
   <TokenDialog
     v-model:visible="showRoleSelectionDialog"
     :availableRoles="visibleRoles"
@@ -712,36 +711,6 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits(["submit"]);
-
-const tour: Step[] = [
-  {
-    target: "#select-script",
-    content: "Select a script to use for this game.",
-  },
-  {
-    target: "#player-count",
-    content: "Enter the number of players in the game.",
-  },
-  {
-    target: "#game-results",
-    content: "Select whether you won or lost the game.",
-    placement: Placement.TOP_START,
-  },
-  {
-    target: "#player-role",
-    content: "Select your character role in the game.",
-  },
-  {
-    target: "#related-player-role",
-    content:
-      "If your role is related to another (such as Drunk), you can enter a related role here.",
-  },
-  {
-    target: "#save-game",
-    content:
-      "When you've finished entering the game details, you're ready to save!",
-  },
-];
 
 type Character = {
   name: string;

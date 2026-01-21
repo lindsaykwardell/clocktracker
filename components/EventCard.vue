@@ -192,7 +192,6 @@
 
       <slot name="footer" :event="event" />
     </div>
-    <Tour :steps="tour" v-if="canModifyEvent" tourKey="event-card-controls" />
   </section>
 </template>
 
@@ -268,10 +267,4 @@ function deleteEvent() {
   }
 }
 
-const tour = [
-  {
-    target: "#menu-controls",
-    content: "From here, you can edit, duplicate, or delete the event.",
-  },
-];
 </script>

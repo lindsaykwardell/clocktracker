@@ -488,7 +488,7 @@
               leave-from-class="transform scale-100 opacity-100"
               leave-to-class="transform scale-95 opacity-0"
             >
-              <div v-show="open || showMenuForTour">
+              <div v-show="open">
                 <MenuItems
                   static
                   class="absolute right-0 z-10 bg-stone-100 dark:bg-stone-900 rounded shadow-md whitespace-nowrap flex flex-col items-start min-w-[150px] divide-y divide-stone-500 dark:divide-stone-700 overflow-hidden"
@@ -651,12 +651,6 @@
             </transition>
           </Menu>
         </div>
-        <Tour
-          v-if="user?.id && game.data.user_id === user.id"
-          :steps="tour"
-          tourKey="game-viewer-v2"
-          @onTourEnd="showMenuForTour = false"
-        />
       </section>
     </template>
     <template v-else>
@@ -1037,33 +1031,6 @@ onMounted(() => {
   }
 });
 
-const showMenuForTour = ref(false);
-
-const tour = [
-  {
-    target: "#menu-controls",
-    content:
-      "Here you can edit or delete this game, or post it to BoardGameGeek (if you have connected your account).",
-    onNext: () => {
-      showMenuForTour.value = true;
-    },
-  },
-  {
-    target: "#favorite-game",
-    content:
-      "You can mark this game as a favorite to display it on your profile, as well as find it more easily in your games list.",
-  },
-  {
-    target: "#edit-game",
-    content:
-      "If you need to make any changes to this game, you can do so here.",
-  },
-  {
-    target: "#delete-game",
-    content:
-      "You can also delete your game, but be careful! This action is permanent.",
-  },
-];
 </script>
 
 <style scoped>
