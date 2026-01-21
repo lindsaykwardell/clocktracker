@@ -45,6 +45,8 @@ useHead({
 });
 
 const router = useRouter();
+const route = useRoute();
+const rolesStore = useRoles();
 const inFlight = ref(false);
 const userSettings = await useFetch("/api/settings");
 
@@ -198,10 +200,140 @@ watch(game, () => {
   localStorage.setItem("draftGame", JSON.stringify(game));
 });
 
-onMounted(() => {
-  const draftGame = localStorage.getItem("draftGame");
-  if (draftGame) {
-    Object.assign(game, JSON.parse(draftGame));
+onMounted(async () => {
+  const importedGameId = route.query.imported_game as string;
+
+  if (importedGameId) {
+    // Clear any draft game to prevent conflicts with imported data
+    localStorage.removeItem("draftGame");
+
+    try {
+      // Fetch roles first so we can populate role objects
+      await rolesStore.fetchRoles();
+
+      const { data, error } = await useFetch(
+        `/api/digital_grimoire/hydrate/${importedGameId}`
+      );
+
+      if (error.value || !data.value) {
+        console.error("Failed to hydrate imported game:", error.value);
+        return;
+      }
+
+      const hydrated = data.value as {
+        date: string;
+        script: string;
+        script_id: number | null;
+        is_storyteller: boolean;
+        location_type: "ONLINE" | "IN_PERSON";
+        location: string;
+        player_count: number;
+        traveler_count: number;
+        win_v2: WinStatus_V2;
+        notes: string;
+        demon_bluffs: { name: string; role_id: string | null }[];
+        fabled: { name: string; role_id: string | null }[];
+        grimoire: {
+          tokens: {
+            create: {
+              role_id: string | null;
+              alignment: "GOOD" | "EVIL" | "NEUTRAL";
+              is_dead: boolean;
+              used_ghost_vote: boolean;
+              order: number;
+              player_name: string;
+              reminders: {
+                create: { reminder: string; token_url: string }[];
+              };
+            }[];
+          };
+        }[];
+      };
+
+      // Transform grimoire tokens with role data
+      const transformedGrimoire = hydrated.grimoire.map((g) => ({
+        tokens: g.tokens.create.map((token) => {
+          const role = token.role_id
+            ? rolesStore.getRole(token.role_id)
+            : undefined;
+          return {
+            alignment: token.alignment,
+            order: token.order,
+            is_dead: token.is_dead,
+            used_ghost_vote: token.used_ghost_vote,
+            role_id: token.role_id,
+            role: role
+              ? {
+                  token_url: role.token_url,
+                  type: role.type,
+                  initial_alignment: role.initial_alignment,
+                }
+              : undefined,
+            related_role_id: null,
+            related_role: { token_url: "/1x1.png" },
+            player_name: token.player_name,
+            reminders: token.reminders.create,
+          };
+        }),
+      }));
+
+      // Transform demon bluffs with role data
+      const transformedDemonBluffs = hydrated.demon_bluffs.map((bluff) => {
+        const role = bluff.role_id
+          ? rolesStore.getRole(bluff.role_id)
+          : undefined;
+        return {
+          name: bluff.name,
+          role_id: bluff.role_id,
+          role: role
+            ? {
+                token_url: role.token_url,
+                type: role.type,
+              }
+            : undefined,
+        };
+      });
+
+      // Transform fabled with role data
+      const transformedFabled = hydrated.fabled.map((fab) => {
+        const role = fab.role_id ? rolesStore.getRole(fab.role_id) : undefined;
+        return {
+          name: fab.name,
+          role_id: fab.role_id,
+          role: role
+            ? {
+                token_url: role.token_url,
+                type: role.type,
+              }
+            : undefined,
+        };
+      });
+
+      // Populate the game object with hydrated data
+      Object.assign(game, {
+        date: dayjs(hydrated.date).format("YYYY-MM-DD"),
+        script: hydrated.script,
+        script_id: hydrated.script_id,
+        is_storyteller: hydrated.is_storyteller,
+        location_type: hydrated.location_type,
+        location: hydrated.location,
+        player_count: hydrated.player_count,
+        traveler_count: hydrated.traveler_count,
+        win_v2: hydrated.win_v2,
+        notes: hydrated.notes,
+        demon_bluffs: transformedDemonBluffs,
+        fabled: transformedFabled,
+        grimoire: transformedGrimoire,
+      });
+    } catch (e) {
+      console.error("Error importing game:", e);
+    }
+  } else {
+    // Only restore draft if not importing
+    const draftGame = localStorage.getItem("draftGame");
+    if (draftGame) {
+      Object.assign(game, JSON.parse(draftGame));
+    }
   }
 });
 

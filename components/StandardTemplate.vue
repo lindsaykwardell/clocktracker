@@ -203,12 +203,6 @@
       <slot />
     </main>
   </div>
-  <Tour
-    v-if="me.status === Status.SUCCESS"
-    :steps="tour"
-    @onTourEnd="showMenu = false"
-    tourKey="new-community-nav-item"
-  />
 </template>
 
 <script setup lang="ts">
@@ -275,82 +269,4 @@ onMounted(() => {
   dark.value = themeIsDark();
 });
 
-const tour: Step[] = [
-  {
-    target: "#anchor-center",
-    content:
-      "Welcome to ClockTracker! You can see your friends, communities, and games here. Let's walk through some of the features available to you.",
-  },
-  {
-    target: "#my-profile",
-    content:
-      "This is your profile. You can see your recorded games and personalized stats here.",
-  },
-  {
-    target: "#search",
-    content:
-      "From any page, you can search for users, communities, or roles and scripts that you want to see details about.",
-  },
-  {
-    target: "#show-navbar",
-    content:
-      "This is the navigation bar. You can access all the main features of ClockTracker from here.",
-    onNext: () => {
-      showMenu.value = true;
-    },
-  },
-  {
-    target: "#dashboard",
-    content:
-      "This is your dashboard. You can see recent activity from your friends and communities and see upcoming events.",
-  },
-  {
-    target: "#my-games",
-    content:
-      "You can see all the games you have recorded here. You can also edit or delete them.",
-  },
-  {
-    target: "#add-game",
-    content:
-      "You can add a game and record as much or as little data about your playthrough as you would like. You can use the base scripts, one of the community scripts, or just add whatever characters you want from a custom script.",
-  },
-  {
-    target: "#friends",
-    content:
-      "You can see your friends here. You can also see friend requests and send friend requests.",
-  },
-  {
-    target: "#communities",
-    content:
-      "Communities are another way to connect. You can create a community and invite your friends to join. Once you have a community, you can create and manage events, and see what scripts you've all been playing.",
-  },
-  // {
-  //   target: "#events",
-  //   content:
-  //     "Events that you are registered for can be viewed here. If you're looking for an event, check our your community's events page.",
-  // },
-  {
-    target: "#settings",
-    content:
-      "You can change your settings here. You can change your display name, username, password, as well as connect ClockTracker to sites like BoardGameGeek.",
-  },
-  {
-    target: "#discord",
-    content:
-      "You can join the ClockTracker Discord server here. You can ask questions, report bugs, or just chat with other ClockTracker users.",
-  },
-  {
-    target: "#kofi",
-    content:
-      "If you find ClockTracker valuable, you can donate to support us on Ko-Fi. Donations help keep the site running and are greatly appreciated.",
-    onNext: () => {
-      showMenu.value = false;
-    },
-  },
-  {
-    target: "#anchor-center",
-    content:
-      "That's it! You're ready to start using ClockTracker. If you have any questions, feel free to reach out on Discord.",
-  },
-];
 </script>
