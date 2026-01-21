@@ -1,6 +1,7 @@
 import { FavoriteGame } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
 import { prisma } from "~/server/utils/prisma";
+import { getUserId } from "~/server/utils/getUserId";
 
 export default defineEventHandler(
   async (
@@ -22,6 +23,14 @@ export default defineEventHandler(
       });
     }
 
+    const userId = getUserId(user);
+    if (!userId) {
+      throw createError({
+        status: 401,
+        statusMessage: "Invalid user",
+      });
+    }
+
     const game = await prisma.game.findUnique({
       where: {
         id: gameId,
@@ -39,7 +48,7 @@ export default defineEventHandler(
       });
     }
 
-    if (game.user_id !== user.id) {
+    if (game.user_id !== userId) {
       throw createError({
         status: 403,
         statusMessage: "Forbidden",
@@ -49,7 +58,7 @@ export default defineEventHandler(
     // Check if it's already a favorite
     const existingFavorite = await prisma.favoriteGame.findFirst({
       where: {
-        user_id: user.id,
+        user_id: userId,
         game_id: game.id,
       },
       select: {
@@ -74,7 +83,7 @@ export default defineEventHandler(
       // add it
       const favorite = await prisma.favoriteGame.create({
         data: {
-          user_id: user.id,
+          user_id: userId,
           game_id: game.id,
         },
         select: {

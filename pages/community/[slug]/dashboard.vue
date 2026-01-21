@@ -310,7 +310,7 @@ const _location = computed({
 const inFlight = ref(false);
 
 function isMe(id: string) {
-  return user.value?.id === id;
+  return user.value?.sub === id;
 }
 
 function selectCommunityAvatar() {

@@ -277,12 +277,12 @@ const isAllowedToEdit = computed(() => {
     if (event.value.data.community) {
       return communities.isModerator(
         event.value.data.community.slug,
-        user.value?.id
+        user.value?.sub
       );
     }
 
     if (event.value.data.created_by) {
-      return event.value.data.created_by.user_id === user.value?.id;
+      return event.value.data.created_by.user_id === user.value?.sub;
     }
   }
 
@@ -298,13 +298,13 @@ const isAllowedToRegister = computed(() => {
     if (event.value.data.community?.slug) {
       return communities.isMember(
         event.value.data.community.slug,
-        user.value?.id
+        user.value?.sub
       );
     }
 
     if (event.value.data.created_by) {
       // If it's me, I can register
-      if (event.value.data.created_by.user_id === user.value?.id) {
+      if (event.value.data.created_by.user_id === user.value?.sub) {
         return true;
       }
 
@@ -421,7 +421,7 @@ onUnmounted(() => {
 });
 
 const alreadyRegistered = computed(() => {
-  const me = users.getUserById(user.value?.id);
+  const me = users.getUserById(user.value?.sub);
 
   if (event.value.status !== Status.SUCCESS || me.status !== Status.SUCCESS) {
     return false;
@@ -441,7 +441,7 @@ const alreadyRegistered = computed(() => {
 const registerForWaitlist = ref<number | undefined>(undefined);
 
 function initRegister(waitlistId?: number) {
-  const me = users.getUserById(user.value?.id);
+  const me = users.getUserById(user.value?.sub);
   if (me.status !== Status.SUCCESS) {
     registerForWaitlist.value = waitlistId;
     showRegisterDialog.value = true;

@@ -26,7 +26,7 @@ if (savedGame.error.value) {
   router.push("/404");
 }
 
-if (savedGame.data.value?.user_id !== user.value?.id) {
+if (savedGame.data.value?.user_id !== user.value?.sub) {
   router.push("/403");
 }
 

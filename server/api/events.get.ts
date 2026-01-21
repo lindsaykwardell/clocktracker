@@ -1,5 +1,6 @@
 import { User } from "@supabase/supabase-js";
 import { prisma } from "~/server/utils/prisma";
+import { getUserId } from "~/server/utils/getUserId";
 
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
@@ -8,16 +9,21 @@ export default defineEventHandler(async (handler) => {
     return [];
   }
 
+  const userId = getUserId(user);
+  if (!userId) {
+    return [];
+  }
+
   return prisma.event.findMany({
     where: {
       OR: [
         {
-          created_by_id: user.id,
+          created_by_id: userId,
         },
         {
           registered_players: {
             some: {
-              user_id: user.id,
+              user_id: userId,
             },
           },
         },
@@ -26,7 +32,7 @@ export default defineEventHandler(async (handler) => {
             some: {
               users: {
                 some: {
-                  user_id: user.id,
+                  user_id: userId,
                 },
               },
             },

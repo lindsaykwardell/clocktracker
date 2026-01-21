@@ -8,6 +8,7 @@ import {
 } from "@prisma/client";
 import papaparse from "papaparse";
 import { prisma } from "~/server/utils/prisma";
+import { getUserId } from "~/server/utils/getUserId";
 
 type UploadedRow = {
   date: string;
@@ -38,6 +39,14 @@ export default defineEventHandler(async (handler) => {
     throw createError({
       status: 401,
       statusMessage: "Unauthorized",
+    });
+  }
+
+  const userId = getUserId(user);
+  if (!userId) {
+    throw createError({
+      status: 401,
+      statusMessage: "Invalid user",
     });
   }
 
@@ -161,7 +170,7 @@ export default defineEventHandler(async (handler) => {
         OR: [
           {
             user_id: {
-              equals: user.id,
+              equals: userId,
             },
           },
           {
@@ -242,7 +251,7 @@ export default defineEventHandler(async (handler) => {
 
     await prisma.game.create({
       data: {
-        user_id: user.id,
+        user_id: userId,
         date,
         script: row.script,
         script_id,
@@ -268,7 +277,7 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  return fetchGames(user.id, user);
+  return fetchGames(userId, user);
 });
 
 async function normalizePlayerCharacter(

@@ -104,7 +104,13 @@ export const useUsers = defineStore("users", {
       this.users.set(user_id, { status: Status.LOADING });
 
       try {
-        const me = await $fetch<User>("/api/settings");
+        // Ensure cookies are sent with the request
+        const me = await $fetch<User>("/api/settings", {
+          credentials: "include",
+          headers: process.client ? {
+            // Ensure cookies are sent
+          } : {},
+        });
 
         this.storeUser(me);
 

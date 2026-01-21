@@ -4,6 +4,7 @@ import axios from "axios";
 // @ts-ignore
 import dayjs from "dayjs";
 import { prisma } from "~/server/utils/prisma";
+import { getUserId } from "~/server/utils/getUserId";
 
 export default defineEventHandler(async (handler) => {
   const user = handler.context.user as User | null;
@@ -16,9 +17,17 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
+  const userId = getUserId(user);
+  if (!userId) {
+    throw createError({
+      status: 401,
+      statusMessage: "Invalid user",
+    });
+  }
+
   const userSettings = await prisma.userSettings.findUnique({
     where: {
-      user_id: user.id,
+      user_id: userId,
     },
     select: {
       bgg_cookies: true,
@@ -37,7 +46,7 @@ export default defineEventHandler(async (handler) => {
   const game = await prisma.game.findUnique({
     where: {
       id: gameId,
-      user_id: user.id,
+      user_id: userId,
       deleted: false,
     },
     select: {
@@ -89,7 +98,7 @@ export default defineEventHandler(async (handler) => {
   if (cookies[0] && cookies[1]) {
     await prisma.userSettings.update({
       where: {
-        user_id: user.id,
+        user_id: userId,
       },
       data: {
         bgg_cookies: cookies,

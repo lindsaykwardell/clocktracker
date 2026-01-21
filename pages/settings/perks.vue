@@ -71,7 +71,7 @@ const users = useUsers();
 const user = useSupabaseUser();
 
 const kofiLevel = computed(() => {
-  const u = users.getUserById(user.value?.id);
+  const u = users.getUserById(user.value?.sub);
 
   if (u.status !== Status.SUCCESS) return null;
 
@@ -98,7 +98,7 @@ async function saveSettings() {
     inFlight.value = false;
     savedSuccessfully.value = true;
 
-    users.fetchMe(user.value?.id);
+    users.fetchMe(user.value?.sub);
   } catch (error: any) {
     console.error(error);
     errorMessage.value = error.message || "An error occurred";

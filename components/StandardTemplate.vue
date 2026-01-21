@@ -272,7 +272,16 @@ watch(dark, () => {
 });
 
 onMounted(() => {
-  dark.value = themeIsDark();
+  // Check if user has a theme preference in their settings
+  const me = useMe();
+  if (me.value.status === "SUCCESS" && me.value.data) {
+    // If user has settings, use their preference (if stored in settings)
+    // For now, fall back to localStorage
+    dark.value = themeIsDark();
+  } else {
+    // No user settings loaded yet, use localStorage
+    dark.value = themeIsDark();
+  }
 });
 
 const tour: Step[] = [

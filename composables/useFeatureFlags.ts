@@ -57,39 +57,24 @@ export const useFeatureFlags = defineStore("featureFlags", {
   },
   actions: {
     async init() {
-      const { data, error } = await useFetch<{ [key: string]: boolean } | null>(
+      const flags = await $fetch<{ [key: string]: boolean }>(
         "/api/feature_flags"
       );
 
-      if (error.value) {
-        console.error("Error fetching feature flags:", error.value);
-        return;
-      }
-
       this.flags.clear(); // Clear existing flags before setting new ones
-      if (data.value) {
+      if (flags) {
         // Check if data.value is not null or undefined
-        for (const [key, value] of Object.entries(data.value)) {
+        for (const [key, value] of Object.entries(flags)) {
           this.flags.set(key, value);
         }
       }
     },
     async fetchScheduledMaintenance() {
-      const { data: maintenance, error: maintenanceError } = await useFetch<
-        string | null
-      >("/api/scheduled_maintenance");
+      const maintenance = await $fetch<string | null>(
+        "/api/scheduled_maintenance"
+      );
 
-      if (maintenanceError.value) {
-        console.error(
-          "Error fetching scheduled maintenance:",
-          maintenanceError.value
-        );
-        return;
-      }
-
-      this.scheduledMaintenance = maintenance.value
-        ? new Date(maintenance.value)
-        : null;
+      this.scheduledMaintenance = maintenance ? new Date(maintenance) : null;
     },
   },
 });

@@ -1,7 +1,11 @@
 <template>
   <div class="flex flex-col items-center gap-2 m-auto py-4">
     <nuxt-link to="/">
-      <img src="/logo.png" class="w-48 bg-stone-900 rounded-full" alt="ClockTracker" />
+      <img
+        src="/logo.png"
+        class="w-48 bg-stone-900 rounded-full"
+        alt="ClockTracker"
+      />
     </nuxt-link>
     <h1>Sign in</h1>
     <form @submit.prevent="login" class="flex flex-col items-center gap-2">
@@ -69,10 +73,35 @@ async function login() {
     console.error(error);
     errorMessage.value = error.message;
   } else {
-    friends.fetchFriends();
-    friends.fetchRequests();
+    // Wait for the session to be established and user state to be available
+    const user = useSupabaseUser();
+    const users = useUsers();
 
-    router.push("/");
+    // Wait for Supabase to update the user state
+    let attempts = 0;
+    while (!user.value && attempts < 30) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      attempts++;
+    }
+
+    // On client side, useSupabaseUser() returns User object with 'id' property
+    if (user.value?.sub) {
+      // Manually trigger user data fetch
+      try {
+        await users.fetchMe(user.value.id);
+      } catch (e) {
+        console.error("Error fetching user data after login:", e);
+      }
+
+      friends.fetchFriends();
+      friends.fetchRequests();
+
+      // Use navigateTo to allow Vue to handle the navigation properly
+      await navigateTo("/");
+    } else {
+      errorMessage.value =
+        "Login successful but user state not available. Please refresh the page.";
+    }
   }
 }
 

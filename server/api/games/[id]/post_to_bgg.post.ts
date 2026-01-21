@@ -10,6 +10,7 @@ import dayjs from "dayjs";
 import { fetchGame } from "~/server/utils/fetchGames";
 import { useFeatureFlags } from "~/server/utils/featureFlags";
 import { prisma } from "~/server/utils/prisma";
+import { getUserId } from "~/server/utils/getUserId";
 
 export default defineEventHandler(async (handler) => {
   const user = handler.context.user as User | null;
@@ -23,6 +24,14 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
+  const userId = getUserId(user);
+  if (!userId) {
+    throw createError({
+      status: 401,
+      statusMessage: "Invalid user",
+    });
+  }
+
   if (!body) {
     throw createError({
       status: 400,
@@ -32,7 +41,7 @@ export default defineEventHandler(async (handler) => {
 
   const userSettings = await prisma.userSettings.findUnique({
     where: {
-      user_id: user.id,
+      user_id: userId,
     },
     select: {
       display_name: true,
@@ -180,7 +189,7 @@ ${game.notes}
   if (cookies[0] && cookies[1]) {
     await prisma.userSettings.update({
       where: {
-        user_id: user.id,
+        user_id: userId,
       },
       data: {
         bgg_cookies: cookies,

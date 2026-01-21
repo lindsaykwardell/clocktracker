@@ -297,7 +297,7 @@
         v-if="!game.player_count"
         :style="
           customBackground
-            ? { '--bg-image-url' : `url(${customBackground})` }
+            ? { '--bg-image-url': `url(${customBackground})` }
             : {}
         "
         class="grimoire pt-3 relative bg-center bg-cover w-full h-[200px] flex justify-center items-center script-bg"
@@ -325,7 +325,7 @@
         v-else
         :style="
           customBackground
-            ? { '--bg-image-url' : `url(${customBackground})` }
+            ? { '--bg-image-url': `url(${customBackground})` }
             : {}
         "
         class="grimoire pt-3 relative bg-center bg-cover w-full script-bg"
@@ -613,9 +613,8 @@
     <template #title>
       <h2 class="text-2xl font-bold">Copy Existing Grimoire</h2>
       <p class="text-lg text-stone-400 py-4">
-        Click on a game to copy the grimoire data to this game.
-        (Grimoire data includes player count, player data, 
-        location, community, ...)
+        Click on a game to copy the grimoire data to this game. (Grimoire data
+        includes player count, player data, location, community, ...)
       </p>
     </template>
 
@@ -1350,7 +1349,7 @@ watch(
 
     value.forEach((page, i) => {
       page.tokens.forEach((token, j) => {
-        if (!!token.player_id && token.player_id === user.value?.id) {
+        if (!!token.player_id && token.player_id === user.value?.sub) {
           const lastCharacter = myCharacters.at(-1);
           const sameAsLast =
             lastCharacter &&
@@ -1453,7 +1452,7 @@ watch(
 function applyMyRoleToGrimoire() {
   props.game.grimoire.forEach((page) => {
     page.tokens.forEach((token) => {
-      if (!(!!token.player_id && token.player_id === user.value?.id)) return;
+      if (!(!!token.player_id && token.player_id === user.value?.sub)) return;
 
       const playerRole = props.game.player_characters[0].role;
       const relatedRole = props.game.player_characters[0].related_role;
@@ -1510,7 +1509,11 @@ onMounted(async () => {
   }
 
   // If the game has grimoire data with tokens, enable Record Grimoire without changing user preference
-  if (props.game.grimoire.some((g) => g.tokens.length > 0 && g.tokens.some((t) => t.role_id))) {
+  if (
+    props.game.grimoire.some(
+      (g) => g.tokens.length > 0 && g.tokens.some((t) => t.role_id)
+    )
+  ) {
     grimoireOverride.value = true;
   }
 

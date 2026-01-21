@@ -152,12 +152,12 @@ const props = defineProps<{
 const slug = (route.params.slug || props.slug) as string;
 
 const community = computed(() => communities.getCommunity(slug));
-const isMember = computed(() => communities.isMember(slug, user.value?.id));
+const isMember = computed(() => communities.isMember(slug, user.value?.sub));
 const isModerator = computed(() =>
-  communities.isModerator(slug, user.value?.id)
+  communities.isModerator(slug, user.value?.sub)
 );
-const isBanned = computed(() => communities.isBanned(slug, user.value?.id));
-const isPending = computed(() => communities.isPending(slug, user.value?.id));
+const isBanned = computed(() => communities.isBanned(slug, user.value?.sub));
+const isPending = computed(() => communities.isPending(slug, user.value?.sub));
 const isNotAllowed = computed(() => {
   if (community.value.status !== Status.SUCCESS) return true;
 

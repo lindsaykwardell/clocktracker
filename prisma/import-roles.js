@@ -1,7 +1,15 @@
 const { PrismaClient } = require("@prisma/client");
+const { Pool } = require("pg");
+const { PrismaPg } = require("@prisma/adapter-pg");
 const { roles, reminders } = require("./roles");
 
-const prisma = new PrismaClient();
+const connectionString = process.env.DATABASE_URL;
+const pool = connectionString ? new Pool({ connectionString }) : undefined;
+const adapter = pool ? new PrismaPg(pool) : undefined;
+
+const prisma = new PrismaClient({
+  adapter,
+});
 
 async function main() {
   // Upsert all the roles

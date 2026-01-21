@@ -67,7 +67,7 @@ const user = useSupabaseUser();
 const users = useUsers();
 
 const avatar = computed(() => {
-  const u = users.getUserById(user.value?.id);
+  const u = users.getUserById(user.value?.sub);
 
   if (u.status !== Status.SUCCESS) return null;
 
@@ -75,7 +75,7 @@ const avatar = computed(() => {
 });
 
 const displayName = computed(() => {
-  const u = users.getUserById(user.value?.id);
+  const u = users.getUserById(user.value?.sub);
 
   if (u.status !== Status.SUCCESS) return null;
 
@@ -114,6 +114,6 @@ async function uploadAvatar(event: Event) {
     }),
   });
 
-  users.fetchMe(user.value?.id);
+  users.fetchMe(user.value?.sub);
 }
 </script>

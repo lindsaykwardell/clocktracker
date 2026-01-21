@@ -2,6 +2,7 @@ import { Alignment, RoleType } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
 import { nanoid } from "nanoid";
 import { prisma } from "./prisma";
+import { getUserId } from "~/server/utils/getUserId";
 
 export type UploadedScript = [
   {
@@ -47,10 +48,18 @@ export async function saveCustomScript(
     });
   }
 
+  const userId = getUserId(user);
+  if (!userId) {
+    throw createError({
+      status: 401,
+      statusMessage: "Invalid user",
+    });
+  }
+
   const existingScripts = await prisma.script.findMany({
     where: {
       name: script.name,
-      user_id: user.id,
+      user_id: userId,
     },
     include: {
       roles: {
@@ -206,7 +215,7 @@ export async function saveCustomScript(
       type: "",
       json_url: "",
       pdf_url: "",
-      user_id: user.id,
+      user_id: userId,
       is_custom_script: true,
       script_id:
         existingScripts.length > 0
@@ -229,7 +238,7 @@ export async function saveCustomScript(
       type: "",
       json_url: "",
       pdf_url: "",
-      user_id: user.id,
+      user_id: userId,
       is_custom_script: true,
       json: JSON.stringify(body),
       logo: script.logo ?? null,

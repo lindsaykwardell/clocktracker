@@ -1,6 +1,7 @@
 import { CommunityPost, Event } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
 import { prisma } from "~/server/utils/prisma";
+import { getUserId } from "~/server/utils/getUserId";
 
 type Update =
   | {
@@ -143,6 +144,11 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
+  const userId = getUserId(user);
+  if (!userId) {
+    return [];
+  }
+
   /**
    * We need to find all the recent stuff that has happened.
    * This is a computed property that will return the events
@@ -161,19 +167,19 @@ export default defineEventHandler(async (handler) => {
           community: {
             members: {
               some: {
-                user_id: user.id,
+                user_id: userId,
               },
             },
           },
         },
         {
-          created_by_id: user.id,
+          created_by_id: userId,
         },
         {
           created_by: {
             friends: {
               some: {
-                user_id: user.id,
+                user_id: userId,
               },
             }
           }
@@ -275,7 +281,7 @@ export default defineEventHandler(async (handler) => {
       community: {
         members: {
           some: {
-            user_id: user.id,
+            user_id: userId,
           },
         },
       },
@@ -341,10 +347,10 @@ export default defineEventHandler(async (handler) => {
     where: {
       OR: [
         {
-          from_user_id: user.id,
+          from_user_id: userId,
         },
         {
-          user_id: user.id,
+          user_id: userId,
         },
       ],
     },
@@ -373,7 +379,7 @@ export default defineEventHandler(async (handler) => {
 
   const taggedGames = await prisma.game.findMany({
     where: {
-      user_id: user.id,
+      user_id: userId,
       parent_game_id: {
         not: null,
       },

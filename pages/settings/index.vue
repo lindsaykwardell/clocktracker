@@ -148,7 +148,7 @@ async function saveSettings() {
     inFlight.value = false;
     savedSuccessfully.value = true;
 
-    users.fetchMe(user.value?.id);
+    users.fetchMe(user.value?.sub);
   } catch (error: any) {
     console.error(error);
     errorMessage.value = error.message || "An error occurred";

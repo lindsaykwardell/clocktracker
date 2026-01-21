@@ -11,7 +11,9 @@
           class="border-2 shadow-xl flex-shrink row-span-3"
           size="lg"
         />
-        <h3 class="font-sorts text-xl md:text-2xl xl:text-3xl col-span-2 break-all">
+        <h3
+          class="font-sorts text-xl md:text-2xl xl:text-3xl col-span-2 break-all"
+        >
           {{ player.display_name }}
         </h3>
         <div class="row-start-2 col-start-2">
@@ -26,7 +28,8 @@
             class="md:text-lg dark:text-stone-400 flex gap-2 items-center"
           >
             <IconUI id="globe" />
-            <span class="sr-only">Location: </span><span>{{ player.location }}</span>
+            <span class="sr-only">Location: </span
+            ><span>{{ player.location }}</span>
           </div>
           <div
             v-if="player.kofi_level"
@@ -135,7 +138,7 @@ const props = defineProps<{
   };
 }>();
 
-const isUser = computed(() => user.value?.id === props.player.user_id);
+const isUser = computed(() => user.value?.sub === props.player.user_id);
 
 const allGames = computed(() => {
   return games.getByPlayer(props.player.username);

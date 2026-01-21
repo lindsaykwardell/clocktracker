@@ -253,7 +253,7 @@ const users = useUsers();
 const games = useGames();
 const showScriptDialog = ref(false);
 
-const me = computed(() => users.getUserById(user.value?.id));
+const me = computed(() => users.getUserById(user.value?.sub));
 
 const myLocations = computed(() => {
   if (me.value.status === Status.SUCCESS) {

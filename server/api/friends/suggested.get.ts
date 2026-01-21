@@ -2,6 +2,7 @@ import { PrivacySetting, UserSettings } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
 import naturalOrder from "natural-order";
 import { prisma } from "~/server/utils/prisma";
+import { getUserId } from "~/server/utils/getUserId";
 
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
@@ -10,14 +11,19 @@ export default defineEventHandler(async (handler) => {
     return [];
   }
 
+  const userId = getUserId(user);
+  if (!userId) {
+    return [];
+  }
+
   const requests = await prisma.friendRequest.findMany({
     where: {
       OR: [
         {
-          from_user_id: user.id,
+          from_user_id: userId,
         },
         {
-          user_id: user.id,
+          user_id: userId,
         },
       ],
       accepted: false,
@@ -48,7 +54,7 @@ export default defineEventHandler(async (handler) => {
 
   const friendsWithFriends = await prisma.friend.findMany({
     where: {
-      user_id: user.id,
+      user_id: userId,
     },
     select: {
       friend: {
@@ -85,7 +91,7 @@ export default defineEventHandler(async (handler) => {
     .flatMap((friend) => friend.friend.friend_of.map((friend) => friend.friend))
     .filter(
       (f) =>
-        f.user_id !== user.id &&
+        f.user_id !== userId &&
         !friendsWithFriends.find(
           (friend) => friend.friend.user_id === f.user_id
         ) &&
@@ -111,7 +117,7 @@ export default defineEventHandler(async (handler) => {
       NOT: {
         user_id: {
           in: [
-            user.id,
+            userId,
             ...friendsWithFriends.map((f) => f.friend.user_id),
             ...friendsOfFriends.map((f) => f.user_id),
             ...requestIds,

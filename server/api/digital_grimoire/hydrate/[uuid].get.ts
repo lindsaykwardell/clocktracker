@@ -3,6 +3,7 @@ import { Alignment, WinStatus_V2 } from "@prisma/client";
 import { mapOfficialIdToClocktrackerId } from "~/server/utils/getRoleMap";
 import { saveCustomScript, UploadedScript } from "~/server/utils/customScript";
 import { prisma } from "~/server/utils/prisma";
+import { getUserId } from "~/server/utils/getUserId";
 
 type DigitalGrimoireGame = {
   date: Date;
@@ -65,6 +66,14 @@ export default defineEventHandler(async (handler) => {
   if (!user) {
     // Rather than throw here, redirect to the login page
     return sendRedirect(handler, "/login");
+  }
+
+  const userId = getUserId(user);
+  if (!userId) {
+    throw createError({
+      status: 401,
+      statusMessage: "Invalid user",
+    });
   }
 
   let body: DigitalGrimoireGame;
@@ -203,7 +212,7 @@ export default defineEventHandler(async (handler) => {
   const win_v2 = body.win as WinStatus_V2;
 
   const hydratedGame = {
-    user_id: user.id,
+    user_id: userId,
     date: new Date(body.date),
     script: scriptName,
     script_id: scriptId,

@@ -1,5 +1,6 @@
 import type { User } from "@supabase/supabase-js";
 import { prisma } from "~/server/utils/prisma";
+import { getUserId } from "~/server/utils/getUserId";
 
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
@@ -15,6 +16,14 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
+  const userId = getUserId(user);
+  if (!userId) {
+    throw createError({
+      status: 401,
+      statusMessage: "Invalid user",
+    });
+  }
+
   if (!gameId) {
     throw createError({
       status: 400,
@@ -25,7 +34,7 @@ export default defineEventHandler(async (handler) => {
   const game = await prisma.game.findUnique({
     where: {
       id: gameId,
-      user_id: user.id,
+      user_id: userId,
     },
     select: {
       user_id: true,
@@ -37,7 +46,7 @@ export default defineEventHandler(async (handler) => {
     },
   });
 
-  if (!game || game.user_id !== user.id) {
+  if (!game || game.user_id !== userId) {
     throw createError({
       status: 404,
       statusMessage: "Not Found",
@@ -62,7 +71,7 @@ export default defineEventHandler(async (handler) => {
 
     for (const grimoire of game.grimoire) {
       for (const token of grimoire.tokens) {
-        if (token.player_id === user.id) {
+        if (token.player_id === userId) {
           await prisma.token.update({
             where: {
               id: token.id,

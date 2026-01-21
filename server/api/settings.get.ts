@@ -1,6 +1,7 @@
 import type { User } from "@supabase/supabase-js";
 import { addUserKofiLevel } from "../utils/addUserKofiLevel";
 import { prisma } from "~/server/utils/prisma";
+import { getUserId } from "~/server/utils/getUserId";
 
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
@@ -12,9 +13,17 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
+  const userId = getUserId(user);
+  if (!userId) {
+    throw createError({
+      status: 401,
+      statusMessage: "Invalid user",
+    });
+  }
+
   const settings = await prisma.userSettings.findFirst({
     where: {
-      user_id: user.id,
+      user_id: userId,
     },
     select: {
       user_id: true,
@@ -82,7 +91,7 @@ export default defineEventHandler(async (handler) => {
     if (!settings.discord_id && user.app_metadata.provider === "discord") {
       await prisma.userSettings.update({
         where: {
-          user_id: user.id,
+          user_id: userId,
         },
         data: {
           discord_id: user.user_metadata.provider_id,
@@ -150,7 +159,7 @@ export default defineEventHandler(async (handler) => {
 
   const newSettings = await prisma.userSettings.create({
     data: {
-      user_id: user.id,
+      user_id: userId,
       username,
       display_name: user.user_metadata.full_name || randomName.display_name,
       avatar: user.user_metadata.avatar_url || "/img/default.png",
@@ -240,7 +249,7 @@ export default defineEventHandler(async (handler) => {
       },
     },
     data: {
-      user_id: user.id,
+      user_id: userId,
     },
   });
 

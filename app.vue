@@ -1,9 +1,6 @@
 <template>
   <NuxtPage />
-  <AnnouncementDialog
-    id="year-in-review-2025"
-    v-if="shouldShowAnnouncement"
-  >
+  <AnnouncementDialog id="year-in-review-2025" v-if="shouldShowAnnouncement">
     <template #title>
       <h1 class="text-2xl font-bold font-sorts">Year In Review Begins!</h1>
       <div class="text-lg text-stone-400">{{ formattedAnnouncementDate }}</div>
@@ -56,6 +53,7 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import type { User } from "~/composables/useUsers";
+import { Status } from "~/composables/useFetchStatus";
 import { nanoid } from "nanoid";
 
 dayjs.extend(utc);
@@ -65,6 +63,7 @@ const users = useUsers();
 const user = useSupabaseUser();
 const featureFlags = useFeatureFlags();
 
+// Only initialize feature flags on client side to avoid SSR issues
 await featureFlags.init();
 await featureFlags.fetchScheduledMaintenance();
 
@@ -72,7 +71,9 @@ await featureFlags.fetchScheduledMaintenance();
 const { data: userSettings, error: userSettingsError } = await useAsyncData(
   "userSettings",
   async () => {
-    if (!user.value?.id) {
+    // On client side, useSupabaseUser() returns User object with 'sub' property
+    const userId = user.value?.sub;
+    if (!userId) {
       // console.log('useAsyncData handler: No user ID');
       return null;
     }
@@ -86,7 +87,10 @@ const { data: userSettings, error: userSettingsError } = await useAsyncData(
         }
       }
       // console.log('useAsyncData handler: Fetching /api/settings with headers:', headers);
-      const settings = await $fetch<User>("/api/settings", { headers });
+      const settings = await $fetch<User>("/api/settings", { 
+        headers,
+        credentials: "include", // Ensure cookies are sent
+      });
       // console.log('useAsyncData handler: Fetched settings:', settings);
       return settings || null; // Ensure we return null if settings is falsy for any reason
     } catch (e: any) {
@@ -100,8 +104,23 @@ const { data: userSettings, error: userSettingsError } = await useAsyncData(
   },
   {
     server: true,
-    watch: [() => user.value?.id],
+    watch: [() => user.value?.sub],
     default: () => null, // Provide a default value for userSettings, ensuring it's not undefined
+    // Don't reset the data on navigation - keep existing data if available
+    getCachedData: (key) => {
+      // Try to get cached data from Pinia store if available
+      if (process.client) {
+        const users = useUsers();
+        const userId = user.value?.sub;
+        if (userId) {
+          const cachedUser = users.getUserById(userId);
+          if (cachedUser.status === Status.SUCCESS && cachedUser.data) {
+            return cachedUser.data;
+          }
+        }
+      }
+      return null;
+    },
   }
 );
 
@@ -127,9 +146,8 @@ watch(
 // Watch for user ID changes (e.g., login/logout), primarily for client-side scenarios
 // or if useAsyncData initially fails to load data for an authenticated user.
 watch(
-  () => user.value?.id,
+  () => user.value?.sub,
   async (currentId, previousId) => {
-    // console.log(`User ID watcher: currentId=${currentId}, previousId=${previousId}, userSettings.value exists=${!!userSettings.value}`);
     if (featureFlags.isEnabled("maintenance")) {
       return;
     }
@@ -138,17 +156,18 @@ watch(
       // If userSettings is null (or doesn't match currentId) and we have a currentId,
       // it means useAsyncData hasn't loaded it for this user yet, or failed.
       if (!userSettings.value || userSettings.value.user_id !== currentId) {
-        // console.log(`User ID watcher: Settings not loaded for ${currentId} or mismatch, attempting fetchMe.`);
         try {
           await users.fetchMe(currentId);
         } catch (e: any) {
           console.error("Error in user ID watch calling fetchMe:", e.message);
+          // Don't clear existing settings if fetch fails - might be a temporary network issue
         }
       }
-    } else if (!currentId && userSettings.value) {
+    } else if (!currentId && userSettings.value && previousId) {
+      // Only clear settings if we had a previous user ID and now we don't
+      // This prevents clearing on initial load when user state hasn't been restored yet
       // User logged out and we still have old userSettings. `useAsyncData` should re-run due to its watch
       // and return null, which will then trigger the userSettings watcher to clear things if needed.
-      // console.log('User ID watcher: User logged out, useAsyncData should clear userSettings.');
     }
   },
   {
