@@ -43,7 +43,7 @@ const users = useUsers();
 const user = useSupabaseUser();
 
 const me = computed(() => {
-  return users.getUserById(user.value?.id);
+  return users.getUserById(user.value?.sub);
 });
 
 const events = ref(await $fetch<Event[]>("/api/events"));

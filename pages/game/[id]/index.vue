@@ -134,7 +134,9 @@
                       !isBaseScript(game.data.script)
                     "
                   >
-                    <span class="inline-flex items-center rounded-sm bg-black/10 text-gray-800 text-xs font-medium badge">
+                    <span
+                      class="inline-flex items-center rounded-sm bg-black/10 text-gray-800 text-xs font-medium badge"
+                    >
                       <template v-if="game.data.ls_game_id">
                         Game {{ game.data.associated_script.version }}
                       </template>
@@ -251,7 +253,7 @@
                   {{ game.data.parent_game.user.display_name }}
                 </nuxt-link>
               </label>
-            </div>            
+            </div>
             <div
               v-if="game.data.demon_bluffs.length || game.data.fabled.length"
               class="flex flex-col md:flex-row gap-4 mt-4 justify-start"
@@ -345,7 +347,7 @@
                 v-if="game.data.ignore_for_stats"
                 class="inline-flex gap-1 items-center px-2 py-1 rounded bg-red-700/60 text-white badge"
               >
-                <IconUI id="disabled"/>Ignored for Stats
+                <IconUI id="disabled" />Ignored for Stats
               </span>
             </div>
           </div>
@@ -391,7 +393,9 @@
           "
           :style="
             game.data.associated_script?.background
-              ? { '--bg-image-url' : `url(${game.data.associated_script.background})` }
+              ? {
+                  '--bg-image-url': `url(${game.data.associated_script.background})`,
+                }
               : {}
           "
           class="grimoire bg-center bg-cover relative text-white script-bg"
@@ -828,7 +832,7 @@ function isStorytellerAFriend(storyteller: string) {
   // If it's me, I'm a friend of myself.
   if (
     storytellerUser.status === Status.SUCCESS &&
-    storytellerUser.data.user_id === user.value?.id
+    storytellerUser.data.user_id === user.value?.sub
   ) {
     return true;
   }

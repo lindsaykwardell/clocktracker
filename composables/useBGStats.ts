@@ -9,7 +9,7 @@ export const useBGStats = (g: ComputedRef<FetchStatus<GameRecord>>) => {
   const users = useUsers();
 
   const canPostToBGStats = computed(() => {
-    const me = users.getUserById(user.value?.id || "");
+    const me = users.getUserById(user.value?.sub || "");
 
     if (me.status !== Status.SUCCESS) return false;
 

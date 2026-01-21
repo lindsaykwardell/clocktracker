@@ -14,7 +14,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
   if (community?.status === Status.SUCCESS) {
     if (
-      !community.data.admins.some((admin) => admin.user_id === user.value?.id)
+      !community.data.admins.some((admin) => admin.user_id === user.value?.sub)
     ) {
       return navigateTo(`/community/${slug}`);
     }

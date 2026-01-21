@@ -8,6 +8,7 @@ import {
 } from "@prisma/client";
 import dayjs from "dayjs";
 import { prisma } from "~/server/utils/prisma";
+import { getUserId } from "~/server/utils/getUserId";
 
 type ExportedRow = {
   date: string;
@@ -38,7 +39,15 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  const games = await fetchGames(user.id, user);
+  const userId = getUserId(user);
+  if (!userId) {
+    throw createError({
+      status: 401,
+      statusMessage: "Invalid user",
+    });
+  }
+  
+  const games = await fetchGames(userId, user);
 
   setResponseHeader(
     handler,

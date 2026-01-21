@@ -1,6 +1,7 @@
 import type { User } from "@supabase/supabase-js";
 import { Chart } from "@prisma/client";
 import { prisma } from "~/server/utils/prisma";
+import { getUserId } from "~/server/utils/getUserId";
 
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
@@ -14,6 +15,14 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
+  const userId = getUserId(user);
+  if (!userId) {
+    throw createError({
+      status: 401,
+      statusMessage: "Invalid user",
+    });
+  }
+
   if (!body) {
     throw createError({
       status: 400,
@@ -24,7 +33,7 @@ export default defineEventHandler(async (handler) => {
   return prisma.chart.update({
     where: {
       id,
-      user_id: user.id,
+      user_id: userId,
     },
     data: {
       ...body,

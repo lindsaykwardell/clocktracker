@@ -1,6 +1,8 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
 const { PrismaClient, WinStatus, WinStatus_V2 } = require("@prisma/client");
+const { Pool } = require("pg");
+const { PrismaPg } = require("@prisma/adapter-pg");
 const { faker } = require("@faker-js/faker");
 const { v4: uuidv4 } = require("uuid");
 const dayjs = require("dayjs");
@@ -9,7 +11,13 @@ const citySeed = require("./city-seed.json");
 const { createClient } = require("@supabase/supabase-js");
 const scripts = require("./scripts.json");
 
-const prisma = new PrismaClient();
+const connectionString = process.env.DATABASE_URL;
+const pool = connectionString ? new Pool({ connectionString }) : undefined;
+const adapter = pool ? new PrismaPg(pool) : undefined;
+
+const prisma = new PrismaClient({
+  adapter,
+});
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_KEY

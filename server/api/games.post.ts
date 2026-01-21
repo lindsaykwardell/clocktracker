@@ -9,6 +9,7 @@ import {
   Fabled,
 } from "@prisma/client";
 import { prisma } from "~/server/utils/prisma";
+import { getUserId } from "~/server/utils/getUserId";
 
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
@@ -37,6 +38,14 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
+  const userId = getUserId(user);
+  if (!userId) {
+    throw createError({
+      status: 401,
+      statusMessage: "Invalid user",
+    });
+  }
+
   if (!body) {
     throw createError({
       status: 400,
@@ -48,7 +57,7 @@ export default defineEventHandler(async (handler) => {
     data: {
       ...body,
       date: new Date(body.date),
-      user_id: user.id,
+      user_id: userId,
       player_characters: {
         create: [...body.player_characters],
       },
@@ -125,7 +134,7 @@ export default defineEventHandler(async (handler) => {
   );
 
   for (const id of taggedPlayers) {
-    if (!id || id === user.id) continue;
+    if (!id || id === userId) continue;
 
     // Reduce grimoire to find all tokens that have this player_id
     const player_characters = newGame.grimoire.reduce(
@@ -206,7 +215,7 @@ export default defineEventHandler(async (handler) => {
           username: storyteller.replace("@", ""),
           friends: {
             some: {
-              user_id: user.id,
+              user_id: userId,
             },
           },
         },

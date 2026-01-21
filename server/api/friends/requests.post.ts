@@ -1,5 +1,6 @@
 import { User } from "@supabase/supabase-js";
 import { prisma } from "~/server/utils/prisma";
+import { getUserId } from "~/server/utils/getUserId";
 
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
@@ -9,6 +10,14 @@ export default defineEventHandler(async (handler) => {
     throw createError({
       status: 401,
       statusMessage: "Unauthorized",
+    });
+  }
+
+  const userId = getUserId(user);
+  if (!userId) {
+    throw createError({
+      status: 401,
+      statusMessage: "Invalid user",
     });
   }
 
@@ -23,12 +32,12 @@ export default defineEventHandler(async (handler) => {
     where: {
       OR: [
         {
-          from_user_id: user.id,
+          from_user_id: userId,
           user_id: body.user_id,
         },
         {
           from_user_id: body.user_id,
-          user_id: user.id,
+          user_id: userId,
         }
       ],
       accepted: false,
@@ -40,7 +49,7 @@ export default defineEventHandler(async (handler) => {
   } else {
     const request = await prisma.friendRequest.create({
       data: {
-        from_user_id: user.id,
+        from_user_id: userId,
         user_id: body.user_id,
       },
       include: {

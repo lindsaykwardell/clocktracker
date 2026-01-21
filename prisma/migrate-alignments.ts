@@ -1,8 +1,16 @@
 import { PrismaClient, Alignment } from "@prisma/client";
+import { Pool } from "pg";
+import { PrismaPg } from "@prisma/adapter-pg";
 import * as fs from "fs";
 import * as path from "path";
 
-const prisma = new PrismaClient();
+const connectionString = process.env.DATABASE_URL;
+const pool = connectionString ? new Pool({ connectionString }) : undefined;
+const adapter = pool ? new PrismaPg(pool) : undefined;
+
+const prisma = new PrismaClient({
+  adapter,
+});
 
 // Configuration
 const DRY_RUN = process.env.DRY_RUN === "1";

@@ -11,7 +11,7 @@ const {
 const { Upload } = require("@aws-sdk/lib-storage");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const axios = require("axios");
-const Jimp = require("jimp");
+const sharp = require("sharp");
 const ProgressBar = require("progress");
 
 dotenv.config({
@@ -31,26 +31,20 @@ const S3 = new S3Client({
 const folders = new Map();
 
 folders.set("events", {
-  resize: (image) => image.resize(600, Jimp.AUTO),
+  resize: (image) => image.resize(600, null, { fit: "inside" }),
 });
 
 folders.set("avatars", {
   resize: (image) => {
-    const height = image.bitmap.height;
-    const width = image.bitmap.width;
-
-    if (height > width && width > 300) {
-      image.resize(300, Jimp.AUTO);
-    } else if (height <= width && height > 300) {
-      image.resize(Jimp.AUTO, 300);
-    }
-
-    image.cover(300, 300);
+    return image.resize(300, 300, {
+      fit: "cover",
+      position: "center",
+    });
   },
 });
 
 folders.set("game-attachments", {
-  resize: (image) => image.resize(800, Jimp.AUTO),
+  resize: (image) => image.resize(800, null, { fit: "inside" }),
 });
 
 async function main() {
@@ -97,15 +91,16 @@ async function download(file, folder) {
 
   const params = await (async () => {
     try {
-      const image = await Jimp.read(await blob.arrayBuffer());
+      const image = sharp(await blob.arrayBuffer());
       const { resize } = folders.get(folder);
-      resize(image);
+      const resized = resize(image);
+      const buffer = await resized.jpeg({ quality: 90 }).toBuffer();
 
       return {
         Bucket: "clocktracker-storage",
         Key: `${folder}/${filename}`,
-        Body: await image.getBufferAsync(Jimp.MIME_JPEG),
-        ContentType: Jimp.MIME_JPEG,
+        Body: buffer,
+        ContentType: "image/jpeg",
       };
     } catch (err) {
       return {

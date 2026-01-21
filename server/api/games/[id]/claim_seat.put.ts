@@ -2,6 +2,7 @@ import type { User } from "@supabase/supabase-js";
 import { Alignment } from "@prisma/client";
 import { fetchGame } from "~/server/utils/fetchGames";
 import { prisma } from "~/server/utils/prisma";
+import { getUserId } from "~/server/utils/getUserId";
 
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
@@ -17,6 +18,14 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
+  const userId = getUserId(user);
+  if (!userId) {
+    throw createError({
+      status: 401,
+      statusMessage: "Invalid user",
+    });
+  }
+
   if (!body || isNaN(body.order)) {
     throw createError({
       status: 400,
@@ -26,7 +35,7 @@ export default defineEventHandler(async (handler) => {
 
   const userDetails = await prisma.userSettings.findUnique({
     where: {
-      user_id: user.id,
+      user_id: userId,
     },
   });
 
@@ -53,7 +62,7 @@ export default defineEventHandler(async (handler) => {
           user: {
             friends: {
               some: {
-                user_id: user.id,
+                user_id: userId,
               },
             },
           },
@@ -62,7 +71,7 @@ export default defineEventHandler(async (handler) => {
           community: {
             members: {
               some: {
-                user_id: user.id,
+                user_id: userId,
               },
             },
           },
@@ -96,7 +105,7 @@ export default defineEventHandler(async (handler) => {
         some: {
           tokens: {
             none: {
-              player_id: user.id,
+              player_id: userId,
             },
           },
         },
@@ -225,10 +234,10 @@ export default defineEventHandler(async (handler) => {
     }
 
     const isFriend = gameExists.user?.friends.some(
-      (f) => f.user_id === user.id
+      (f) => f.user_id === userId
     );
     const is_community_member = gameExists.community?.members.some(
-      (m) => m.user_id === user.id
+      (m) => m.user_id === userId
     );
 
     if (!isFriend && !is_community_member) {
@@ -251,7 +260,7 @@ export default defineEventHandler(async (handler) => {
 
     if (
       gameExists.grimoire.some((g) =>
-        g.tokens.some((t) => t.player_id === user.id)
+        g.tokens.some((t) => t.player_id === userId)
       )
     ) {
       throw createError({
@@ -280,7 +289,7 @@ export default defineEventHandler(async (handler) => {
       },
     },
     data: {
-      player_id: user.id,
+      player_id: userId,
       player_name: userDetails.display_name,
     },
   });
@@ -289,7 +298,7 @@ export default defineEventHandler(async (handler) => {
   game.grimoire.forEach((g) => {
     g.tokens.forEach((t) => {
       if (t.order === body.order) {
-        t.player_id = user.id;
+        t.player_id = userId;
         t.player_name = userDetails.display_name;
       }
     });
@@ -298,7 +307,7 @@ export default defineEventHandler(async (handler) => {
   // Reduce grimoire to find all tokens that have this player_id
   const player_characters = game.grimoire.reduce(
     (acc, g) => {
-      const tokens = g.tokens?.filter((t) => t.player_id === user.id);
+      const tokens = g.tokens?.filter((t) => t.player_id === userId);
       if (tokens) {
         for (const token of tokens) {
           // Avoid duplicating identical consecutive tokens (same role/related/alignment)
@@ -333,7 +342,7 @@ export default defineEventHandler(async (handler) => {
     }[]
   );
 
-  if (game.user_id !== user.id) {
+  if (game.user_id !== userId) {
     try {
       await prisma.game.create({
         data: {
@@ -346,7 +355,7 @@ export default defineEventHandler(async (handler) => {
           parent_game: undefined,
           parent_game_id: game.parent_game_id || game.id,
           child_games: undefined,
-          user_id: user.id,
+          user_id: userId,
           player_characters: {
             create: [...player_characters],
           },
@@ -390,7 +399,7 @@ export default defineEventHandler(async (handler) => {
       const taggedPlayer =
         game.grimoire
           .flatMap((g) => g.tokens)
-          .find((t) => t.player_id === user.id)?.player_name || "Unknown";
+          .find((t) => t.player_id === userId)?.player_name || "Unknown";
 
       console.error(`Error saving for ${taggedPlayer}: ${message}`);
 

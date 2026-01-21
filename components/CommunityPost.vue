@@ -177,7 +177,7 @@ function isUserModerator(user_id: string) {
 }
 
 function isMe(id: string) {
-  return user.value?.id === id;
+  return user.value?.sub === id;
 }
 
 function toggleReply() {

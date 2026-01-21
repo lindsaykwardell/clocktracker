@@ -1,12 +1,15 @@
 import { PrismaClient } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
 import { prisma } from "./prisma";
+import { getUserId } from "~/server/utils/getUserId";
 
 export async function getFeatureFlags(me: User | null) {
+  const userId = getUserId(me);
+  
   const is_admin = await prisma.userSettings
     .findUnique({
       where: {
-        user_id: me?.id || "",
+        user_id: userId || "",
       },
       select: {
         is_admin: true,
@@ -16,7 +19,7 @@ export async function getFeatureFlags(me: User | null) {
 
   const latest_kofi_payment = await prisma.koFiPayment.findFirst({
     where: {
-      user_id: me?.id || "",
+      user_id: userId || "",
       expires_at: {
         gte: new Date(),
       },
@@ -47,7 +50,7 @@ export async function getFeatureFlags(me: User | null) {
         {
           active_for: {
             some: {
-              user_id: me?.id || "",
+              user_id: userId || "",
             },
           },
         },

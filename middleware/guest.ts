@@ -1,13 +1,9 @@
 export default defineNuxtRouteMiddleware(async (to, from) => {
   const user = useSupabaseUser();
 
+  // If user is logged in, redirect them away from guest-only pages (like login)
   if (user.value) {
-    try {
-      const settings = await $fetch("/api/settings");
-    } catch (error) {
-      console.error(error);
-      return navigateTo(`/`);
-    }
-    return;
+    return navigateTo("/");
   }
+  // If no user, allow access to guest pages
 });

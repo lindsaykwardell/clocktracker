@@ -5,11 +5,7 @@
     </template>
     <div v-else class="flex flex-col md:flex-row h-[calc(100vh-50px)]">
       <div class="flex-grow flex justify-center items-center">
-        <Chart 
-          class="py-12 m-auto" 
-          :games="myGames.data" 
-          :options="options" 
-        />
+        <Chart class="py-12 m-auto" :games="myGames.data" :options="options" />
       </div>
       <div
         class="w-100 md:w-1/2 lg:w-1/3 p-8 border-l dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40"
@@ -108,7 +104,7 @@
                     {{ tag }}
                   </option>
                 </Input>
-                <div 
+                <div
                   v-if="options.exclude_tags.length"
                   class="flex flex-wrap gap-1"
                 >
@@ -134,11 +130,8 @@
           >
             Cancel
           </nuxt-link>
-          <Button @click="saveChart" primary class="px-3">
-            Save
-          </Button>
+          <Button @click="saveChart" primary class="px-3"> Save </Button>
         </div>
-        
       </div>
     </div>
   </StandardTemplate>
@@ -163,7 +156,7 @@ const isStorytellerFromQuery = computed(() => {
 });
 
 const me = computed(() => {
-  return users.getUserById(user.value?.id);
+  return users.getUserById(user.value?.sub);
 });
 
 const myGames = computed(() => {
@@ -199,7 +192,7 @@ const options = reactive<{
   exclude_tags: [],
   width: 250,
   height: 250,
-  storyteller_only: isStorytellerFromQuery.value
+  storyteller_only: isStorytellerFromQuery.value,
 });
 
 const selectedIncludeTag = ref<string | null>(null);
@@ -234,9 +227,7 @@ async function saveChart() {
 
   if (me.value.status === Status.SUCCESS) {
     const username = me.value.data.username;
-    const view = options.storyteller_only
-      ? "stats&storyteller=1"
-      : "stats";
+    const view = options.storyteller_only ? "stats&storyteller=1" : "stats";
 
     router.push(`/@${username}?view=${view}`);
   } else {
@@ -250,9 +241,7 @@ const cancelLink = computed(() => {
   }
 
   const username = me.value.data.username;
-  const view = options.storyteller_only
-      ? "stats&storyteller=1"
-      : "stats";
+  const view = options.storyteller_only ? "stats&storyteller=1" : "stats";
 
   return `/@${username}?view=${view}`;
 });

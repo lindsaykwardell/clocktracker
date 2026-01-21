@@ -163,7 +163,7 @@ export const useCommunities = defineStore("communities", {
   actions: {
     async fetchCommunity(slug: string | undefined) {
       if (!slug) return;
-      
+
       // Mark as loading if we don't have the community yet
       if (!this.communities.has(slug))
         this.communities.set(slug, { status: Status.LOADING });
@@ -262,7 +262,7 @@ export const useCommunities = defineStore("communities", {
       try {
         const user = useSupabaseUser();
         const users = useUsers();
-        const me = users.getUserById(user.value?.id);
+        const me = users.getUserById(user.value?.sub);
         const community = this.communities.get(slug);
         if (
           community?.status === Status.SUCCESS &&
@@ -381,7 +381,7 @@ export const useCommunities = defineStore("communities", {
     },
     async updateIcon(slug: string, icon: string) {
       const user = useSupabaseUser();
-      if (this.isModerator(slug, user.value?.id)) {
+      if (this.isModerator(slug, user.value?.sub)) {
         const response = await $fetch<Community>(`/api/community/${slug}`, {
           method: "PUT",
           body: JSON.stringify({ icon }),
@@ -408,7 +408,7 @@ export const useCommunities = defineStore("communities", {
       }
     ) {
       const user = useSupabaseUser();
-      if (this.isModerator(slug, user.value?.id)) {
+      if (this.isModerator(slug, user.value?.sub)) {
         const response = await $fetch<Community>(`/api/community/${slug}`, {
           method: "PUT",
           body: JSON.stringify(body),

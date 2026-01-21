@@ -2,6 +2,7 @@ import type { User } from "@supabase/supabase-js";
 import { UserSettings } from "@prisma/client";
 import axios from "axios";
 import { prisma } from "~/server/utils/prisma";
+import { getUserId } from "~/server/utils/getUserId";
 
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
@@ -13,6 +14,14 @@ export default defineEventHandler(async (handler) => {
     throw createError({
       status: 401,
       statusMessage: "Unauthorized",
+    });
+  }
+
+  const userId = getUserId(user);
+  if (!userId) {
+    throw createError({
+      status: 401,
+      statusMessage: "Invalid user",
     });
   }
 
@@ -60,7 +69,7 @@ export default defineEventHandler(async (handler) => {
 
   await prisma.userSettings.update({
     where: {
-      user_id: user.id,
+      user_id: userId,
     },
     data: {
       bgg_username: body.username,

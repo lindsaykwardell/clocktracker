@@ -85,7 +85,7 @@ async function connectBoardGameGeek() {
     username.value = "";
     password.value = "";
 
-    users.fetchMe(user.value?.id);
+    users.fetchMe(user.value?.sub);
   } catch {
     inFlight.value = false;
   }
@@ -101,7 +101,7 @@ async function disconnectBoardGameGeek() {
     inFlight.value = false;
     bgg_username.value = null;
 
-    users.fetchMe(user.value?.id);
+    users.fetchMe(user.value?.sub);
   } catch {
     inFlight.value = false;
   }
