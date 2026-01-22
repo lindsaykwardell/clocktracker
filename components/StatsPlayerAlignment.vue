@@ -4,7 +4,7 @@
       Alignment Insights
     </h2>
 
-    <div class="grid gap-2 md:gap-4 grid-cols-2 lg:grid-cols-3">
+    <div class="grid gap-2 md:gap-4 md:grid-cols-2 lg:grid-cols-3">
       <div class="lg:col-span-3 xl:col-span-1 p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40">
         <!-- <h3 class="font-sorts text-center text-lg lg:text-xl mb-2 md:mb-3">
           Starting Alignment

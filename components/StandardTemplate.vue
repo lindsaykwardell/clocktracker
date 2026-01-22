@@ -87,7 +87,7 @@
           />
         </nuxt-link>
         <template v-if="me.status === Status.SUCCESS">
-          <YearInReviewLink />
+          <YearInReviewLink class="mb-4"/>
           <NavLink id="dashboard" to="/" icon="innkeeper"> Home </NavLink>
           <NavLink
             id="my-games"

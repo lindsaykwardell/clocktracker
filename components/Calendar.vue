@@ -52,7 +52,7 @@
               'h-[40px] md:h-[75px]': size === 'sm',
               'h-[40px]': size === 'xs',
               'cursor-pointer': clickableDays,
-              'border border-yellow-500': day.isSame(today, 'day'),
+              'border border-primary dark:border-dark-primary': day.isSame(today, 'day'),
               'bg-stone-200 dark:bg-stone-700':
                 selectedDay && day.isSame(selectedDay, 'day'),
             }"

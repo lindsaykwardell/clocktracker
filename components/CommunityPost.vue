@@ -255,7 +255,7 @@ async function deletePost(post_id: string) {
     }
   }
   a {
-    @apply text-blue-600 hover:underline;
+    @apply text-primary dark:text-dark-primary hover:underline;
   }
   hr {
     @apply my-4 border-stone-300;

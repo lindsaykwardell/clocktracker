@@ -99,7 +99,7 @@ const props = defineProps<{
         related_role?: { token_url: string; name?: string };
       }
     | undefined;
-  size?: "sm" | "reminder" | "md" | "lg";
+  size?: "sm" | "reminder" | "md" | "front" | "lg";
   alwaysShowAlignment?: boolean;
   hideRelated?: boolean;
   hideName?: boolean;
@@ -124,6 +124,9 @@ const tokenClass = computed(() => {
       break;
     case "md":
       classes += "w-20 h-20 md:w-28 md:h-28";
+      break;
+    case "front":
+      classes += "w-32 h-32 md:w-40 md:h-40";
       break;
     case "lg":
       classes += "w-36 h-36 md:w-48 md:h-48";

@@ -1,9 +1,9 @@
 <template>
   <StandardTemplate>
     <template v-if="shouldRenderFriendsPage">
-      <div class="flex gap-4 xl:max-w-[1200px] m-auto mt-4">
+      <div class="flex flex-col md:flex-row gap-4 xl:max-w-[1200px] m-auto mt-4 px-4 md:px-8">
         <nav
-          class="flex flex-col md:w-[300px] w-[100px] min-w-[100px] md:min-w-[300px] items-center"
+          class="flex flex-col w-full md:w-[300px] w-[100px] min-w-[100px] md:min-w-[300px] items-center"
         >
           <ul class="w-full sticky top-16 md:top-4 divide-y divide-stone-300 dark:divide-stone-800 bg-stone-200 dark:bg-stone-700 rounded overflow-hidden">
             <li class="w-full">

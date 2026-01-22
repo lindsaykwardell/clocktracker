@@ -1,19 +1,22 @@
 <template>
   <StandardTemplate>
-    <div class="flex gap-4 xl:max-w-[1200px] m-auto mt-4">
+    <div class="flex flex-col md:flex-row gap-4 xl:max-w-[1200px] m-auto mt-4 px-4 md:px-8">
       <nav
-        class="flex flex-col md:w-[300px] w-[100px] min-w-[100px] md:min-w-[300px] items-center"
+        class="flex flex-col w-full md:w-[300px] w-[100px] min-w-[100px] md:min-w-[300px]"
       >
-        <Avatar :value="avatar" class="mt-10 md:mt-0 mb-2" />
-        <Button
-          @click.prevent.stop="selectAvatar"
-          size="sm"
-        >
-          Upload new avatar
-        </Button>
-        <h1 class="font-sorts text-lg hidden md:block my-4">
-          {{ displayName }}
-        </h1>
+        <div class="flex flex-col items-center mb-4 md:mb-0">
+          <Avatar :value="avatar" class="mt-10 md:mt-0 mb-2" />
+          <Button
+            @click.prevent.stop="selectAvatar"
+            size="sm"
+          >
+            Upload new avatar
+          </Button>
+          <h1 class="font-sorts text-lg my-4">
+            {{ displayName }}
+          </h1>
+        </div>
+        
         <ul class="w-full divide-y divide-stone-300 dark:divide-stone-800 bg-stone-200 dark:bg-stone-700 rounded overflow-hidden">
           <li class="w-full">
             <nuxt-link

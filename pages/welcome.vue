@@ -73,7 +73,7 @@
         </template>
         <template v-else>Save Settings</template>
       </Button>
-      <span v-if="errorMessage" class="text-red-600">{{ errorMessage }}</span>
+      <Alert v-if="errorMessage" color="negative">{{ errorMessage }}</Alert>
     </form>
     <nuxt-link to="/logout" class="underline pb-4">Not you? Log out</nuxt-link>
   </main>

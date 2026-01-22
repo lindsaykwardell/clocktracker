@@ -19,6 +19,7 @@
                 :active="showUsers"
                 variant="soft"
                 color="primary"
+                class="w-full md:w-auto"
               >
                 <h2>
                   {{ users.length }} User{{ users.length === 1 ? "" : "s" }}
@@ -32,6 +33,7 @@
                 :active="showCommunities"
                 variant="soft"
                 color="primary"
+                class="w-full md:w-auto"
               >
                 <h2>
                   {{ communities.length }} Communit{{
@@ -47,6 +49,7 @@
                 :active="showScripts"
                 variant="soft"
                 color="primary"
+                class="w-full md:w-auto"
               >
                 <h2>
                   {{ scripts.length }} Script{{
@@ -62,6 +65,7 @@
                 :active="showRoles"
                 variant="soft"
                 color="primary"
+                class="w-full md:w-auto"
               >
                 <h2>
                   {{ roles.length }} Role{{ roles.length === 1 ? "" : "s" }}

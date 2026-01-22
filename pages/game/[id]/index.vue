@@ -163,17 +163,11 @@
                   class="metadata-item"
                 >
                   <span class="metadata-label">Result</span>
-                  <!-- <span
-                    :class="game.data?.win_v2 === WinStatus_V2.GOOD_WINS
-                        ? 'text-blue-600'
-                        : 'text-red-600'"
-                  > -->
-                    {{
-                      game.data?.win_v2 === WinStatus_V2.GOOD_WINS
-                        ? "Good Won"
-                        : "Evil Won"
-                    }}
-                  <!-- </span>  -->
+                  {{
+                    game.data?.win_v2 === WinStatus_V2.GOOD_WINS
+                      ? "Good Won"
+                      : "Evil Won"
+                  }}
                 </div>
                 <div v-if="storytellers.length" class="metadata-item">
                   <span class="metadata-label">Storyteller{{ storytellers.length === 1 ? "" : "s" }}</span>
@@ -353,7 +347,7 @@
           </div>
 
           <!-- Script image -->
-          <div class="text-center">
+          <div class="flex flex-col items-center">
             <img
               :src="game.data.associated_script?.logo ?? scriptLogo(game.data.script)"
               class="hidden md:block w-48 xl:w-64 h-48 xl:h-64"

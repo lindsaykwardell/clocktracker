@@ -4,7 +4,7 @@
       Alignment Insights
     </h2>
 
-    <div class="grid gap-2 md:gap-4 grid-cols-1 lg:grid-cols-3">
+    <div class="grid gap-2 md:gap-4 md:grid-cols-2 lg:grid-cols-3">
       <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-2">
         <h3 class="font-sorts text-center text-lg lg:text-xl">Draw Bias</h3>
         <div class="flex flex-col divide-y divide-stone-300 dark:divide-stone-700/40">
