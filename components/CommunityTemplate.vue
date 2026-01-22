@@ -4,7 +4,7 @@
       <template v-if="community.status === Status.SUCCESS">
         <div class="bg-stone-200 dark:bg-stone-950 shadow-lg">
           <div
-            class="flex flex-col items-center w-full lg:w-2/3 m-auto pt-4 px-8 lg:px-0 gap-4"
+            class="flex flex-col items-center w-full lg:w-2/3 m-auto py-4 px-8 lg:px-0 gap-4"
           >
             <div class="flex flex-col md:flex-row gap-4 md:gap-2 lg:gap-3 xl:gap-4 items-center w-full">
               <Avatar
@@ -45,7 +45,7 @@
                 <template v-else> Join Community </template>
               </Button>
             </div>
-            <div class="flex flex-col gap-1 w-full">
+            <div v-if="!isNotAllowed" class="flex flex-col gap-1 w-full">
               <h2 class="text-xs text-stone-600 text-center md:text-start uppercase">
                 Moderators
               </h2>
@@ -74,7 +74,7 @@
             </p>
             <nav
               v-if="!isNotAllowed"
-              class="flex flex-wrap justify-center md:justify-start w-100 md:-mx-3 md:w-[calc(100%+1.5rem)] gap-2 md:gap-1 py-2 md:py-0"
+              class="flex flex-wrap justify-center md:justify-start w-100 -mb-4 md:-mx-3 md:w-[calc(100%+1.5rem)] gap-2 md:gap-1 py-2 md:py-0"
             >
               <nuxt-link
                 :to="`/community/${community.data.slug}`"
