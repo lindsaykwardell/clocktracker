@@ -87,6 +87,8 @@
   const Menu = resolveComponent("IconList");
   const Players = resolveComponent("IconPlayers");
   const Chair = resolveComponent("IconChair");
+  const GraphUpArrow = resolveComponent("IconGraphUpArrow");
+  const GraphDownArrow = resolveComponent("IconGraphDownArrow");
 
   // Socials
   const Website = resolveComponent("IconGlobe");
@@ -202,7 +204,11 @@
         return Trash;
       case "add":
       case "plus-lg":
-        return PlusLg;    
+        return PlusLg;
+      case "graph-down":
+        return GraphDownArrow;
+      case "graph-up":
+        return GraphUpArrow; 
       default:
         return EyeSlash;
     }

@@ -4,8 +4,8 @@
       class="w-full flex flex-col items-center justify-center gap-12 py-4"
     >
       <h2 class="font-sorts text-4xl text-center">Account & Data</h2>
-      <div class="space-y-4">
-        <h3 class="font-sorts text-2xl">Export Game Data</h3>
+      <div class="space-y-4 w-full xl:w-3/4">
+        <h3 class="text-2xl">Export Game Data</h3>
         <div class="w-full text-left max-w-[80ch]">
           <p>
             Exporting game data will download a CSV file with all of your game

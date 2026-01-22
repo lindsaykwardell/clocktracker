@@ -1,6 +1,6 @@
 <template>
   <StandardTemplate>
-    <section class="py-6">
+    <section class="py-6 px-4 md:px-8">
       <h2 class="font-sorts text-4xl text-center">Create Community</h2>
       <form
         class="max-w-[1000px] m-auto py-6 flex flex-col gap-4"
@@ -32,9 +32,7 @@
           </template>
           <template v-else>Create New Community</template>
         </Button>
-        <template v-if="errors">
-          <div class="text-red-500 text-center">{{ errors }}</div>
-        </template>
+        <Alert v-if="errors" color="negative">{{ errors }}</Alert>
       </form>
     </section>
   </StandardTemplate>

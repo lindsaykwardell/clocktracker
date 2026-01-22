@@ -153,15 +153,17 @@
           </div>
         </div>
         
-        <VueMarkdown
-          class="post max-w-[80ch]"
-          :class="{
-            'text-sm md:text-base': display !== 'small',
-            'text-sm': display === 'small',
-          }"
-          :source="event.description"
-        />
-
+        <template v-if="event.description">
+          <VueMarkdown
+            class="post max-w-[80ch] text-stone-700 dark:text-stone-400"
+            :class="{
+              'text-sm md:text-base': display !== 'small',
+              'text-sm': display === 'small',
+            }"
+            :source="event.description"
+          />
+        </template>
+        
         <div v-if="$slots.register" class="flex-grow flex items-end">
           <div class="flex gap-2">
             <slot name="register" :event="event" />
@@ -206,6 +208,7 @@
               component="a"
               :href="event.game_link"
               color="primary"
+              variant="link"
             >
               Go to game <span class="sr-only">{{ event.title }}</span>
             </Button>
@@ -243,7 +246,7 @@
             </Button>
           </div>
           <div class="card-metadata">
-            <span class="card-label">
+            <span v-if="display === 'detail'" class="card-label">
               Status
             </span>
             <div>

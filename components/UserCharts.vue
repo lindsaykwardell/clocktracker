@@ -138,7 +138,7 @@
             </Menu>
           </div>
         </div>
-        <div class="flex gap-2 items-center">
+        <div class="flex gap-2 items-center justify-center md:justify-end">
           <Button
             @click="setMode('player')"
             :active="mode === 'player'"

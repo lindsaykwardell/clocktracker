@@ -5,11 +5,21 @@
     </nuxt-link>
     <h1>Sign in</h1>
     <!-- @todo Fix input fields-->
-    <form @submit.prevent="login" class="flex flex-col items-center gap-2">
+     <template v-if="errorMessage">
+        <Alert color="negative">
+          {{ errorMessage }}
+        </Alert>
+      </template>
+      <template v-if="resetPasswordSent">
+        <Alert color="positive">
+          An email has been sent to reset your password
+        </Alert>
+      </template>
+    <form @submit.prevent="login" class="flex flex-col min-w-[16rem] items-stretch gap-2">
       <label>
         <span class="block">Email</span>
         <input
-          class="text-black p-1 rounded w-48"
+          class="block w-full border bg-stone-200 dark:bg-stone-600 disabled:bg-stone-400 dark:disabled:bg-stone-700 border-stone-100 dark:border-stone-500 rounded-md p-2"
           required
           type="email"
           v-model="email"
@@ -19,7 +29,7 @@
       <label>
         <span class="block">Password</span>
         <input
-          class="text-black p-1 rounded w-48"
+          class="block w-full border bg-stone-200 dark:bg-stone-600 disabled:bg-stone-400 dark:disabled:bg-stone-700 border-stone-100 dark:border-stone-500 rounded-md p-2"
           required
           type="password"
           v-model="password"
@@ -35,12 +45,8 @@
       <Button @click.prevent="sendResetPassword" variant="link" size="sm">
         Forgot Password?
       </Button>
-      <span v-if="resetPasswordSent" class="text-green-500"
-        >An email has been sent to reset your password</span
-      >
-      <span class="text-red-500">{{ errorMessage }}</span>
     </form>
-    <hr class="border border-stone-100 w-full max-w-[500px]" />
+    <p class="p-2">OR</p>
     <LoginWithDiscord />
   </div>
 </template>

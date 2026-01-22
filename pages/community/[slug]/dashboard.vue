@@ -18,7 +18,7 @@
               Change Logo
             </Button>
           </div>
-          <div class="flex-grow flex flex-col gap-3">
+          <div class="flex-grow flex flex-col gap-3 w-full max-w-[40rem] md:w-auto md:max-w-unset">
             <div class="flex flex-col md:flex-row md:gap-2">
               <label class="block flex-grow">
                 <span class="block">Name</span>
@@ -126,12 +126,12 @@
         </div>
       </form>
 
-      <section class="grid gap-4 grid-cols-2 grid-flow-row-dense">
-        <div class="col-start-2 row-start-1" v-if="community.data.join_requests?.length">
+      <section class="grid gap-4 md:grid-cols-2 grid-flow-row-dense">
+        <div class="md:col-start-2 md:row-start-1" v-if="community.data.join_requests?.length">
           <h2 class="font-sorts text-center xl:text-left text-xl lg:text-2xl mb-2 lg:mb-4 col-span-8">
             Join Requests
           </h2>
-          <div class="overflow-x-scroll custom-scrollbar -mx-4 md:mx-0 w-screen md:w-full">
+          <div class="overflow-x-scroll custom-scrollbar w-full">
             <table>
               <thead>
                 <tr>
@@ -187,11 +187,11 @@
           </div>
         </div>
 
-        <div class="col-start-1 span-hack">
+        <div class="md:col-start-1 span-hack">
           <h2 class="font-sorts text-center xl:text-left text-xl lg:text-2xl mb-2 lg:mb-4 col-span-8">
             Community Members
           </h2>
-          <div class="overflow-x-scroll custom-scrollbar -mx-4 md:mx-0 w-screen md:w-full">
+          <div class="overflow-x-scroll custom-scrollbar w-full">
             <table>
               <thead>
                 <tr>
@@ -284,11 +284,11 @@
           </div>
         </div>
 
-        <div class="col-start-2 row-start-2" v-if="community.data.banned_users?.length">
+        <div class="md:col-start-2 md:row-start-2" v-if="community.data.banned_users?.length">
           <h2 class="font-sorts text-center xl:text-left text-xl lg:text-2xl mb-2 lg:mb-4 col-span-8">
             Banned Users
           </h2>
-          <div class="overflow-x-scroll custom-scrollbar -mx-4 md:mx-0 w-screen md:w-full">
+          <div class="overflow-x-scroll custom-scrollbar w-full">
             <table>
               <thead>
                 <tr>

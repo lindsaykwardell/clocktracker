@@ -201,7 +201,7 @@
             <h2 class="font-sorts text-center text-xl lg:text-2xl mb-2 lg:mb-4 col-span-8">
               Community Standouts
             </h2>
-            <div class="w-full xl:w-3/4 xl:mx-auto grid gap-x-2 md:gap-x-4 gap-y-8 md:gap-y-12 xl:gap-y-16 community-grid-8">
+            <div class="w-full xl:w-3/4 xl:mx-auto grid gap-2 md:gap-4 community-grid-8">
               <StatsCommunityTopPlayers
                 :players="visiblePlayers"
                 mode="players"
@@ -217,7 +217,7 @@
               <StatsCommunityTopLocations
                 :games="filteredGames"
                 :is-member="isMember"
-                class="col-span-2"
+                class="col-span-3 lg:col-span-2"
               />
             </div>
           </section>
@@ -303,14 +303,7 @@
           <section v-if="filteredGames.length">
             <StatsCommunityRoles :games="{ status: Status.SUCCESS, data: filteredGames }" :players="visiblePlayers" />
           </section>
-
         </template>
-
-        <div v-if="stats && stats.players.length" class="mt-2 text-sm">
-          <p class="text-stone-500">
-            Totals: {{ stats.totals.games }} games • {{ stats.totals.players }} players seen in grimoire tokens
-          </p>
-        </div>
       </div>
     </template>
   </CommunityTemplate>
@@ -457,9 +450,6 @@ function formatDate(date: Date) {
   }).format(new Date(date));
 }
 
-const mostEvil = computed(() => pickTop("evil_plays"));
-const mostWins = computed(() => pickTop("wins"));
-
 function pickTop(key: keyof PlayerSummary) {
   if (!stats.value) return null;
   const players = stats.value.players
@@ -469,41 +459,7 @@ function pickTop(key: keyof PlayerSummary) {
   return players[0] || null;
 }
 
-function playerLink(player: PlayerSummary | null) {
-  if (!player || !player.user_id) return null;
-  return `/@${player.username}`;
-}
-
 const NuxtLink = resolveComponent("nuxt-link");
-
-const DebugLinks = defineComponent({
-  name: "DebugLinks",
-  props: {
-    games: { type: Array as () => string[], default: () => [] },
-  },
-  setup(props) {
-    return () =>
-      props.games.length
-        ? h(
-            "div",
-            {
-              class:
-                "text-xs text-stone-500 flex flex-wrap gap-2 justify-center mt-1",
-            },
-            props.games.map((gameId) =>
-              h(
-                NuxtLink,
-                {
-                  to: `/game/${gameId}`,
-                  class: "underline text-primary",
-                },
-                { default: () => `Game ${gameId}` }
-              )
-            )
-          )
-        : null;
-  },
-});
 
 useHead({
   title: () => `Stats - ${metadata.name}`,
@@ -513,6 +469,14 @@ useHead({
 
 <style scoped>
   .community-grid-8 {
-    grid-template-columns: repeat(8, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    @media (min-width: 768px) {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+
+    @media (min-width: 1024px) {
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+    }
   }
 </style>

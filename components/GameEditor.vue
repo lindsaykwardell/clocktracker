@@ -527,10 +527,10 @@
               pattern="https:\/\/boardgamegeek\.com\/play\/details\/\d+"
             />
           </div>
-          <div v-if="!bggIdIsValid" class="text-red-500">
+          <Alert v-if="!bggIdIsValid" color="negative" class="mt-1">
             Invalid BoardGameGeek URL. Format should be:
-            https://boardgamegeek.com/play/details/[game id]
-          </div>
+            https://boardgamegeek.com/play/details/[game_id]
+          </Alert>
         </label>
       </div>
     </fieldset>

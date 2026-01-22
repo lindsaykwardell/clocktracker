@@ -1,6 +1,6 @@
 <template>
   <form
-    class="max-w-[1000px] m-auto py-6 flex flex-col gap-4"
+    class="w-full max-w-[1000px] m-auto py-6 flex flex-col gap-4"
     @submit.prevent="emit('save', event)"
   >
     <div class="flex gap-4">
@@ -8,6 +8,8 @@
         <span class="block">Title</span>
         <Input v-model="event.title" required />
       </label>
+    </div>
+    <div class="flex flex-wrap gap-4">
       <label>
         <span class="flex gap-2 items-top"
           >Who Can Register
@@ -41,33 +43,33 @@
           <option value="ANYONE">Anyone</option>
         </Input>
       </label>
-    </div>
-    <div class="flex gap-4">
-      <label class="flex-1">
-        <span class="block">Start Date</span>
-        <Input v-model="event.start" type="datetime-local" required />
+      <label class="flex-[0_1_auto]">
+        <span class="block">Player Count</span>
+        <Input v-model="event.player_count" type="number" max="20" min="5" />
       </label>
-      <label class="flex-1">
-        <span class="block">End Date</span>
-        <Input v-model="event.end" type="datetime-local" required />
-      </label>
-      <label class="flex-1">
+      <label class="flex-[0_1_auto]">
         <span class="block">Location Type</span>
         <Input mode="select" v-model="event.location_type">
           <option value="ONLINE">Online</option>
           <option value="IN_PERSON">In Person</option>
         </Input>
       </label>
-      <label v-if="event.location_type === 'IN_PERSON'" class="flex-1">
+      <label v-if="event.location_type === 'IN_PERSON'" class="flex-[0_1_auto]">
         <span class="block">Location</span>
         <Input type="text" v-model="event.location" list="locations" />
         <datalist id="locations">
           <option v-for="location in myLocations" :value="location"></option>
         </datalist>
       </label>
-      <label class="flex-1">
-        <span class="block">Player Count</span>
-        <Input v-model="event.player_count" type="number" max="20" min="5" />
+    </div>
+    <div class="flex flex-wrap gap-4">
+      <label class="flex-[0_1_auto]">
+        <span class="block">Start Date</span>
+        <Input v-model="event.start" type="datetime-local" required />
+      </label>
+      <label class="flex-[0_1_auto]">
+        <span class="block">End Date</span>
+        <Input v-model="event.end" type="datetime-local" required />
       </label>
     </div>
     <div class="flex gap-4">
@@ -230,9 +232,7 @@
         <template v-else>Save Event</template>
       </Button>
     </div>
-    <template v-if="errors">
-      <div class="text-red-500 text-center">{{ errors }}</div>
-    </template>
+    <Alert v-if="errors" color="negative">{{ errors }}</Alert>
   </form>
 </template>
 

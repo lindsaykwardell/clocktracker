@@ -1,7 +1,7 @@
 <template>
   <template v-if="me.status === Status.SUCCESS">
     <div class="dashboard">
-      <div class="content custom-scrollbar hidden lg:flex flex-col gap-4 p-4 dark:bg-stone-950">
+      <div class="content custom-scrollbar hidden lg:flex flex-col gap-4 p-4 bg-stone-200/30 dark:bg-stone-950">
         <YearInReviewLink />
         <h1 class="text-xl font-sorts text-center">My Profile</h1>
         <ul class="px-4">
@@ -34,7 +34,7 @@
           :to="`/roles/${roleOfTheDay.data.value?.id}`"
         >
           <Token
-            size="lg"
+            size="front"
             :character="{ 
               name: roleOfTheDay.data.value?.name,
               alignment: roleOfTheDay.data.value?.initial_alignment,
@@ -72,172 +72,198 @@
         </template>
       </div>
       <div
-        class="content custom-scrollbar md:overflow-y-scroll pb-20 md:pb-0"
+        class="content custom-scrollbar md:overflow-y-scroll pb-20 md:pb-0 px-4"
         :class="{
           block: selectedTab === 'updates',
           'hidden md:block': selectedTab === 'events',
         }"
       >
-        <ClientOnly>
-          <ul class="px-4 py-8 flex flex-col gap-3 lg:gap-4">
-            <li v-for="update in updates.data.value" class="max-w-[800px] w-full mx-auto">
-              <div class="flex flex-col gap-2">
-                <template v-if="update.kind === 'new_event'">
-                  <div class="flex gap-2 items-center">
-                    <Avatar :value="update.event.community?.icon" size="xs" />
-                    <div class="flex flex-col">
-                      <span class="text-sm text-stone-500 dark:text-stone-400">
-                        <template v-if="update.event.community">
-                          New Event in
-                          <nuxt-link
-                            :to="`/community/${update.event.community?.slug}`"
-                            class="font-semibold hover:underline"
-                            >{{ update.event.community?.name }}</nuxt-link
-                          >
-                        </template>
-                        <template v-else-if="update.event.created_by">
-                          New Event by
-                          <template
-                            v-if="
-                              update.event.created_by.user_id ===
-                              me.data.user_id
-                            "
-                          >
-                            you
-                          </template>
-                          <template v-else>
-                            <nuxt-link
-                              :to="`/@${update.event.created_by.username}`"
-                              class="hover:underline"
-                              >{{
-                                update.event.created_by.display_name
-                              }}</nuxt-link
-                            >
-                          </template>
-                        </template>
-                      </span>
-                    </div>
-                  </div>
-                  <EventCard
-                    v-if="update.kind === 'new_event'"
-                    :event="update.event"
-                    display="large"
-                  />
-                </template>
+        <div class="max-w-[800px] w-full mx-auto mt-4 mb-8 space-y-8">
+          
+          <div class="space-y-2">
+            <div>
+              <h2 class="text-xl font-sorts">Stats at a glance</h2>
+              <p class="text-xs text-stone-500">Changes shown for the last 30 days.</p>
+            </div>
+            <div>
+              <UserStatsSummary
+                v-if="userGames.status === Status.SUCCESS"
+                :games="userGames.data"
+                variant="dashboard"
+                class="flex-none"
+              />
+            </div>
+          </div>
 
-                <template v-else-if="update.kind === 'new_post'">
-                  <div class="flex gap-2 items-center">
-                    <Avatar :value="update.post.community?.icon" size="xs" />
-                    <div class="flex flex-col">
-                      <span class="text-sm text-stone-500 dark:text-stone-400">
-                        New Post in
-                        <nuxt-link
-                          :to="`/community/${update.post.community?.slug}`"
-                          class="hover:underline"
-                        >
-                          {{ update.post.community?.name }}
-                        </nuxt-link>
-                      </span>
-                    </div>
-                  </div>
-                  <CommunityPost
-                    v-if="update.kind === 'new_post'"
-                    :post="update.post"
-                    :community="update.post.community"
-                    :isMember="true"
-                    @deleted="postDeleted"
-                  />
-                </template>
+          <hr class="border-stone-300 dark:border-stone-700/50" />
 
-                <template v-else-if="update.kind === 'friend_request'">
-                  <div>
-                    <div class="text-sm text-stone-500 dark:text-stone-400 flex gap-2 items-center">
-                      <Avatar
-                        :value="
-                          update.request.user_id === me.data.user_id
-                            ? update.request.from_user.avatar
-                            : update.request.user.avatar
-                        "
-                        size="xs"
+          <div class="space-y-2">
+            <h2 class="text-3xl font-sorts ">Activity Feed</h2>
+            <ClientOnly>
+              <ul class="mt-4 flex flex-col gap-3 lg:gap-6">
+                <li v-for="update in updates.data.value" class="max-w-[800px] w-full mx-auto">
+                  <div class="flex flex-col gap-2">
+                    <template v-if="update.kind === 'new_event'">
+                      <div class="flex gap-2 items-center">
+                        <Avatar :value="update.event.community?.icon" size="xs" />
+                        <div class="flex flex-col">
+                          <span class="text-sm text-stone-500 dark:text-stone-400">
+                            <template v-if="update.event.community">
+                              New Event in
+                              <nuxt-link
+                                :to="`/community/${update.event.community?.slug}`"
+                                class="font-semibold hover:underline"
+                                >{{ update.event.community?.name }}</nuxt-link
+                              >
+                            </template>
+                            <template v-else-if="update.event.created_by">
+                              New Event by
+                              <template
+                                v-if="
+                                  update.event.created_by.user_id ===
+                                  me.data.user_id
+                                "
+                              >
+                                you
+                              </template>
+                              <template v-else>
+                                <nuxt-link
+                                  :to="`/@${update.event.created_by.username}`"
+                                  class="hover:underline"
+                                  >{{
+                                    update.event.created_by.display_name
+                                  }}</nuxt-link
+                                >
+                              </template>
+                            </template>
+                          </span>
+                        </div>
+                      </div>
+                      <EventCard
+                        v-if="update.kind === 'new_event'"
+                        :event="update.event"
+                        display="large"
                       />
-                      <span>
-                        New friend request
-                        <template v-if="update.request.user_id === me.data.user_id">
-                          received from {{ update.request.from_user.display_name }}
-                        </template>
-                        <template v-else>
-                          sent to {{ update.request.user.display_name }}
-                        </template>
-                      </span>
-                    </div>
-                  </div>
-                  <UserCard
-                    :username="
-                      update.request.user_id === me.data.user_id
-                        ? update.request.from_user.username
-                        : update.request.user.username
-                    "
-                    class="w-full"
-                  >
-                    <div class="p-2">
-                      <FriendButton
+                    </template>
+
+                    <template v-else-if="update.kind === 'new_post'">
+                      <div class="flex gap-2 items-center">
+                        <Avatar :value="update.post.community?.icon" size="xs" />
+                        <div class="flex flex-col">
+                          <span class="text-sm text-stone-500 dark:text-stone-400">
+                            New Post in
+                            <nuxt-link
+                              :to="`/community/${update.post.community?.slug}`"
+                              class="hover:underline"
+                            >
+                              {{ update.post.community?.name }}
+                            </nuxt-link>
+                          </span>
+                        </div>
+                      </div>
+                      <CommunityPost
+                        v-if="update.kind === 'new_post'"
+                        :post="update.post"
+                        :community="update.post.community"
+                        :isMember="true"
+                        @deleted="postDeleted"
+                      />
+                    </template>
+
+                    <template v-else-if="update.kind === 'friend_request'">
+                      <div>
+                        <div class="text-sm text-stone-500 dark:text-stone-400 flex gap-2 items-center">
+                          <Avatar
+                            :value="
+                              update.request.user_id === me.data.user_id
+                                ? update.request.from_user.avatar
+                                : update.request.user.avatar
+                            "
+                            size="xs"
+                          />
+                          <span>
+                            New friend request
+                            <template v-if="update.request.user_id === me.data.user_id">
+                              received from {{ update.request.from_user.display_name }}
+                            </template>
+                            <template v-else>
+                              sent to {{ update.request.user.display_name }}
+                            </template>
+                          </span>
+                        </div>
+                      </div>
+                      <UserCard
                         :username="
                           update.request.user_id === me.data.user_id
                             ? update.request.from_user.username
                             : update.request.user.username
                         "
-                        :user_id="
-                          update.request.user_id === me.data.user_id
-                            ? update.request.from_user.user_id
-                            : update.request.user.user_id
-                        "
-                      />
-                    </div>
-                  </UserCard>
-                </template>
-                <template v-else-if="update.kind === 'tagged_game'">
-                  <div>
-                    <div
-                      class="text-sm text-stone-500 dark:text-stone-400 flex gap-2 items-center"
-                    >
-                      <Avatar
-                        :value="update.game.parent_game?.user?.avatar"
-                        size="xs"
-                      />
-                      <span
-                        >You were tagged in a game by
-                        {{ update.game.parent_game?.user?.display_name }}</span
+                        class="w-full"
                       >
-                    </div>
+                        <div class="p-2">
+                          <FriendButton
+                            :username="
+                              update.request.user_id === me.data.user_id
+                                ? update.request.from_user.username
+                                : update.request.user.username
+                            "
+                            :user_id="
+                              update.request.user_id === me.data.user_id
+                                ? update.request.from_user.user_id
+                                : update.request.user.user_id
+                            "
+                          />
+                        </div>
+                      </UserCard>
+                    </template>
+                    <template v-else-if="update.kind === 'tagged_game'">
+                      <div>
+                        <div
+                          class="text-sm text-stone-500 dark:text-stone-400 flex gap-2 items-center"
+                        >
+                          <Avatar
+                            :value="update.game.parent_game?.user?.avatar"
+                            size="xs"
+                          />
+                          <span
+                            >You were tagged in a game by
+                            {{ update.game.parent_game?.user?.display_name }}</span
+                          >
+                        </div>
+                      </div>
+                      <div>
+                        <GameOverviewGrid
+                          :games="getGame(update.game.id)"
+                          showSingleGame
+                        />
+                      </div>
+                    </template>
                   </div>
-                  <div>
-                    <GameOverviewGrid
-                      :games="getGame(update.game.id)"
-                      showSingleGame
-                    />
-                  </div>
-                </template>
-              </div>
-            </li>
-          </ul>
-        </ClientOnly>
+                </li>
+              </ul>
+            </ClientOnly>
+
+          </div>
+        </div>
       </div>
       <div
-        class="flex flex-col gap-4 dark:bg-stone-950 pt-4 pb-20 md:pb-0"
+        class="flex flex-col gap-4 md:gap-8 bg-stone-200/30 dark:bg-stone-950 p-4 pb-20 md:pb-0"
         :class="{
           block: selectedTab === 'events',
           'hidden md:flex': selectedTab === 'updates',
         }"
       >
-        <div class="px-4">
-          <Button
-            v-if="!featureFlags.isEnabled('ical')"
-            component="nuxt-link"
-            to="/event/create"
-            size="sm"
-          >
-            Create Event
-          </Button>
+        <div class="flex-1">
+          <div class="text-center">
+            <Button
+              v-if="!featureFlags.isEnabled('ical')"
+              component="nuxt-link"
+              to="/event/create"
+              size="sm"
+            >
+              Create Event
+            </Button>
+          </div>
           <Calendar
             size="xs"
             :events="events ?? []"
@@ -294,7 +320,7 @@
             <EventCard
               display="small"
               :event="event"
-              class="m-auto flex-none"
+              class="mx-auto flex-none"
               :canModifyEvent="canModifyEvent(event)"
               @deleted="removeEvent"
             />
@@ -374,6 +400,11 @@ const getGame = computed(() => {
 
     return [];
   };
+});
+
+const userGames = computed(() => {
+  if (me.value.status !== Status.SUCCESS) return { status: Status.IDLE };
+  return games.getByPlayer(me.value.data.username);
 });
 
 // Calendar-related functions
