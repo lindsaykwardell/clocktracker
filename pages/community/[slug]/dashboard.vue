@@ -18,7 +18,7 @@
               Change Logo
             </Button>
           </div>
-          <div class="flex-grow flex flex-col gap-3 w-full max-w-[40rem] md:w-auto md:max-w-unset">
+          <div class="flex-grow flex flex-col gap-3 w-full max-w-[40rem] md:w-auto md:max-w-none">
             <div class="flex flex-col md:flex-row md:gap-2">
               <label class="block flex-grow">
                 <span class="block">Name</span>
