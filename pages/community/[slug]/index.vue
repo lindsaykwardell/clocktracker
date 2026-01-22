@@ -4,6 +4,15 @@
     </template>
     <template #default="{ community, isMember, isModerator }">
       <div class="px-4 lg:px-8 pb-4 lg:pb-8 space-y-8 md:space-y-12 xl:space-y-16">
+        <section class="w-full xl:w-3/4 xl:mx-auto">
+          <CommunityStatsSummary
+            v-if="statsGames.length"
+            :games="statsGames"
+            :member-count="community.data.members.length"
+            :active-players-count="activePlayersCount"
+          />
+        </section>
+        
         <template v-if="recentGames.status === Status.SUCCESS">
           <GameOverviewGrid
             v-if="recentGames.data.length > 0"
@@ -130,6 +139,7 @@
 import naturalOrder from "natural-order";
 import type { Event } from "~/composables/useCommunities";
 import { Status } from "~/composables/useFetchStatus";
+import type { GameRecord } from "~/composables/useGames";
 
 const route = useRoute();
 const slug = route.params.slug as string;
@@ -137,8 +147,14 @@ const communities = useCommunities();
 const games = useGames();
 
 const metadata = await $fetch(`/api/community/${slug}/minimal`);
+const { data: stats } = await useFetch<{
+  totals: { games: number; players: number };
+  games: GameRecord[];
+}>(() => `/api/community/${slug}/stats`);
 
 const message = ref("");
+const statsGames = computed(() => stats.value?.games ?? []);
+const activePlayersCount = computed(() => stats.value?.totals?.players ?? 0);
 
 const recentGames = computed(() => {
   const communityGames = games.getByCommunity(slug);

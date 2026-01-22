@@ -1,5 +1,5 @@
 <template>
-  <section class="grid grid-cols-2 xl:grid-cols-4 gap-4">
+  <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
     <div class="stat">
       <div class="number text-blue-700">
         {{ overallStats.totalGames }}
