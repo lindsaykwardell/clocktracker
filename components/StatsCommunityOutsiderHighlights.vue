@@ -29,7 +29,12 @@
               />
             </div>
             <div class="text-center text-sm text-balance max-w-44">
-              <span class="font-semibold">{{ item.player.username }}</span> has been {{ roleArticle(item.role) }}<span class="font-semibold">{{ item.role }}</span>
+              <RedactedName
+                class="font-semibold"
+                :name="item.player.username"
+                :redact="props.anonymizeNonUsers && !item.player.user_id"
+              />
+              has been {{ roleArticle(item.role) }}<span class="font-semibold">{{ item.role }}</span>
               {{ item.count }} time<span v-if="item.count !== 1">s</span>.
             </div>
           </template>
@@ -51,6 +56,7 @@ import type { PlayerSummary } from "~/composables/useCommunityStats";
 
 const props = defineProps<{
   players: PlayerSummary[];
+  anonymizeNonUsers?: boolean;
 }>();
 
 /**
@@ -90,6 +96,7 @@ const roleItems = computed(() => {
     makeItem("Damsel", "The Damsel", "damsel_plays"),
   ];
 });
+
 
 /**
  * Pick the top player for a given role field, breaking ties by priority.

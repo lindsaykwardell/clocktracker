@@ -40,13 +40,13 @@
     } else {
       switch (props.color) {
         case "info":
-        return "check";
+        return "info-circle";
         case "positive":
-        return "check";
+        return "check-circle";
         case "caution":
-        return "check";
+        return "exclamation-circle";
         case "negative":
-        return "check";
+        return "x-circle";
         default:
         return "";
       }

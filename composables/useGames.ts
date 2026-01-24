@@ -226,8 +226,12 @@ export const useGames = defineStore("games", {
         return { status: Status.SUCCESS, data: games };
       };
     },
-    getByCommunity(): (slug: string) => FetchStatus<GameRecord[]> {
-      return (slug: string) => {
+    getByCommunity(): (
+      slug: string,
+      options?: { includePrivate?: boolean }
+    ) => FetchStatus<GameRecord[]> {
+      return (slug: string, options?: { includePrivate?: boolean }) => {
+        const includePrivate = options?.includePrivate ?? false;
         const communities = useCommunities();
         const community = communities.getCommunity(slug);
         if (community.status !== Status.SUCCESS) return community;
@@ -240,7 +244,7 @@ export const useGames = defineStore("games", {
               if (
                 game.user_id === user.user_id &&
                 game.community_id === community.data.id &&
-                game.privacy === "PUBLIC" &&
+                (includePrivate || game.privacy === "PUBLIC") &&
                 game.parent_game_id === null
               ) {
                 games.push(game);

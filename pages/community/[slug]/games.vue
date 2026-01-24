@@ -1,7 +1,7 @@
 <template>
-  <CommunityTemplate>
+  <CommunityTemplate v-slot="{ isMember }">
     <UserGamesView
-      :games="communityGames"
+      :games="communityGames(isMember)"
       :player="null"
       :showCommunityCard="true"
     />
@@ -14,7 +14,8 @@ const route = useRoute();
 const slug = route.params.slug as string;
 
 const metadata = await $fetch(`/api/community/${slug}/minimal`);
-const communityGames = computed(() => games.getByCommunity(slug));
+const communityGames = (isMember: boolean) =>
+  games.getByCommunity(slug, { includePrivate: isMember });
 
 onMounted(() => {
   games.fetchCommunityGames(slug);

@@ -49,10 +49,11 @@ export default defineEventHandler(async (handler) => {
 
   // If the community is private, only members can see the games
   // But it's not an error.
-  if (
-    community.is_private &&
-    !community.members.some((member) => member.user_id === me?.id)
-  ) {
+  const isMember = community.members.some(
+    (member) => member.user_id === me?.id
+  );
+
+  if (community.is_private && !isMember) {
     return [];
   }
 
@@ -60,7 +61,7 @@ export default defineEventHandler(async (handler) => {
     where: {
       deleted: false,
       community_id: community.id,
-      privacy: PrivacySetting.PUBLIC,
+      ...(isMember ? {} : { privacy: PrivacySetting.PUBLIC }),
       parent_game_id: null,
     },
     include: {

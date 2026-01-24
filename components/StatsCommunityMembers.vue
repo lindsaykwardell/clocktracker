@@ -61,10 +61,12 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import type { PlayerSummary } from "~/composables/useCommunityStats";
+import { escapeHtml, getRedactedNameHtml } from "~/composables/useRedactedName";
 
 const props = defineProps<{
   players: PlayerSummary[];
   memberIds?: string[];
+  anonymizeNonUsers?: boolean;
 }>();
 
 type Person = {
@@ -179,12 +181,20 @@ function buildTooltip(player: PlayerSummary) {
   const rate = games > 0 ? Math.round((wins / games) * 100) : 0;
   const topRole = mostPlayedRole(player);
   const roleText = topRole ? `${topRole.name} (${topRole.count})` : "None";
-  return `<strong>${player.username}</strong><br>Games played: ${games}<br>Games storytold: ${stories}<br>W/L: ${wins}-${losses} (${rate}%)<br>Most played: ${roleText}`;
+  const nameHtml = nameHtmlFor(player);
+  return `<strong>${nameHtml}</strong><br>Games played: ${games}<br>Games storytold: ${stories}<br>W/L: ${wins}-${losses} (${rate}%)<br>Most played: ${roleText}`;
 }
+
+const nameHtmlFor = (player: PlayerSummary) => {
+  if (props.anonymizeNonUsers && !player.user_id) {
+    return getRedactedNameHtml(player.username);
+  }
+  return escapeHtml(player.username);
+};
 
 /**
  * Initials for anonymous (non-user) players.
- * 
+ *
  * Ab for single name, AB for others.
  */
 function initials(name: string) {
