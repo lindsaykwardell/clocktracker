@@ -24,7 +24,12 @@
             />
           </div>
           <div class="text-center text-sm text-balance max-w-44">
-            <span class="font-semibold">{{ mostGood.player.username }}</span> has finished 
+            <RedactedName
+              class="font-semibold"
+              :name="mostGood.player.username"
+              :redact="props.anonymizeNonUsers && !mostGood.player.user_id"
+            />
+            has finished 
             {{ mostGood.count }} game<span v-if="mostGood.count !== 1">s</span> as 
             <span class="font-semibold" :style="`color: ${chartColors.good}`">Good</span>.
           </div>
@@ -56,7 +61,12 @@
             />
           </div>
           <div class="text-center text-sm text-balance max-w-44">
-            <span class="font-semibold">{{ mostEvil.player.username }}</span> has finished 
+            <RedactedName
+              class="font-semibold"
+              :name="mostEvil.player.username"
+              :redact="props.anonymizeNonUsers && !mostEvil.player.user_id"
+            />
+            has finished 
             {{ mostEvil.count }} game<span v-if="mostEvil.count !== 1">s</span> as 
             <span class="font-semibold" :style="`color: ${chartColors.evil}`">Evil</span>.
           </div>
@@ -88,7 +98,12 @@
             />
           </div>
           <div class="text-center text-sm text-balance max-w-44">
-            <span class="font-semibold">{{ bestWinRate.player.username }}</span> has a 
+            <RedactedName
+              class="font-semibold"
+              :name="bestWinRate.player.username"
+              :redact="props.anonymizeNonUsers && !bestWinRate.player.user_id"
+            />
+            has a 
             <span class="font-semibold">{{ bestWinRate.rate }}%</span> win rate, winning {{ bestWinRate.wins }} out of {{ bestWinRate.total }} games.
           </div>
         </template>
@@ -123,6 +138,7 @@ import type { PlayerSummary } from "~/composables/useCommunityStats";
 const props = defineProps<{
   players: PlayerSummary[];
   games?: GameRecord[];
+  anonymizeNonUsers?: boolean;
 }>();
 
 const mostGood = computed(() => makeAlignmentCard("good"));

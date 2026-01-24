@@ -15,12 +15,18 @@
         class="flex items-center justify-between gap-2 py-1"
       >
         <div class="flex items-center gap-4">
-          <Avatar
-            :value="item.avatar || '/img/default.png'"
-            size="xs"
-            class="border-stone-800"
-            background
-          />
+          <div class="relative">
+            <Avatar
+              :value="item.avatar || '/img/default.png'"
+              size="xs"
+              class="border-stone-800"
+              background
+            />
+            <div
+              v-if="!item.user_id"
+              class="absolute top-0 left-0 w-full h-full bg-neutral-200/50 dark:bg-stone-800/50 rounded-full z-10"
+            />
+          </div>
 
           <component
             v-if="item.user_id"
@@ -31,7 +37,10 @@
             {{ item.username }}
           </component>
           <span v-else class="font-semibold">
-            {{ item.username }}
+            <RedactedName
+              :name="item.username"
+              :redact="props.anonymizeNonUsers"
+            />
           </span>
         </div>
         
@@ -52,6 +61,7 @@ const props = defineProps<{
   players: PlayerSummary[];
   mode: "players" | "storytellers";
   title: string;
+  anonymizeNonUsers?: boolean;
 }>();
 
 const NuxtLink = resolveComponent("nuxt-link");

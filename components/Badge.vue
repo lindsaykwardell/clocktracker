@@ -21,6 +21,7 @@
     icon?: string;
     display?: "icon-before" | "icon-only" | "icon-after";
     bold?: boolean;
+    circular?: boolean;
   }>(),
   { 
     variant: "filled",
@@ -79,8 +80,17 @@
     }
   });
 
+  const shapeClass = computed(() => {
+    if (props.circular) {
+      return "ct-badge-circle";
+    }
+    else {
+      return "";
+    }
+  });
+
   const computedClasses = computed(() => {
-    return `ct-badge ${variantClass.value} ${colorClass.value} ${sizeClass.value}`;
+    return `ct-badge ${variantClass.value} ${colorClass.value} ${sizeClass.value} ${shapeClass.value}`;
   });
 </script>
 
@@ -202,5 +212,15 @@
     --fontsize: 1.125rem;
     --badge-p: .625rem;
     --size: calc(var(--tailwind-spacing) * 10);
+  }
+
+  /* Shape */
+  .ct-badge-circle {
+    --depth: 0;
+
+    width: var(--size);
+    height: var(--size);
+    padding-inline: 0;
+    border-radius: 50%;
   }
 </style>

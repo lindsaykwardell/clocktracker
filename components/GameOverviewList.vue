@@ -29,6 +29,7 @@
           v-for="game in games"
           :key="game.id"
           class="table-row game-row bg-cover bg-center script-bg"
+          :title="rowTitle(game)"
           :class="{
             ...scriptBgClasses(
               game.script,
@@ -207,7 +208,11 @@
               </Button>
               <Button
                 component="nuxt-link"
-                v-if="!selectMultipleGames.enabled && !props.readonly"
+                v-if="
+                  !selectMultipleGames.enabled &&
+                  !props.readonly &&
+                  canViewGame(game)
+                "
                 :to="getGameLink(game)"
                 class="bg-white dark:text-white dark:bg-black hover:bg-purple-600 transition-colors duration-250 ease-in-out game-link"
                 :title="`View game - ${
@@ -237,12 +242,15 @@
 
 <script setup lang="ts">
 import { displayWinIconSvg } from "~/composables/useGames";
+import { FriendStatus } from "~/composables/useFriends";
 
 const gamesStore = useGames();
 const selectMultipleGames = useSelectMultipleGames();
 const { isBaseScript, scriptBgClasses } = useScripts();
 const users = useUsers();
 const me = useMe();
+const friends = useFriends();
+const user = useSupabaseUser();
 
 const props = withDefaults(
   defineProps<{
@@ -263,17 +271,17 @@ function formatDate(date: Date) {
   }).format(new Date(date));
 }
 
+const getChildGameId = (game: GameRecord) => {
+  if (me.value?.status !== Status.SUCCESS) return null;
+
+  const userId = me.value.data.user_id;
+  const childGame = game.child_games?.find((g) => g.user_id === userId);
+  return childGame?.id ?? null;
+};
+
 const getGameLink = (game: GameRecord) => {
-  if (me.value && me.value.status === Status.SUCCESS) {
-    const userId = me.value.data.user_id;
-    if (game.child_games) {
-      const childGame = game.child_games.find((g) => g.user_id === userId);
-      if (childGame) {
-        return `/game/${childGame.id}`;
-      }
-    }
-  }
-  return `/game/${game.id}`;
+  const childGameId = getChildGameId(game);
+  return childGameId ? `/game/${childGameId}` : `/game/${game.id}`;
 };
 
 const nuxtLink = resolveComponent("nuxt-link");
@@ -296,6 +304,33 @@ function isMyGame(game: GameRecord) {
 
   return me.value?.data.user_id === game.user_id;
 }
+
+function canViewGame(game: GameRecord) {
+  if (game.privacy === "PUBLIC") return true;
+  if (me.value?.status !== Status.SUCCESS) return false;
+
+  if (me.value.data.user_id === game.user_id) return true;
+  if (getChildGameId(game)) return true;
+
+  if (game.privacy === "FRIENDS_ONLY") {
+    return friends.getFriendStatus(game.user_id) === FriendStatus.FRIENDS;
+  }
+
+  return false;
+}
+
+function rowTitle(game: GameRecord) {
+  if (canViewGame(game)) return undefined;
+  return game.privacy === "FRIENDS_ONLY"
+    ? "Friends only game"
+    : "Private game";
+}
+
+onMounted(() => {
+  if (user.value?.id && friends.friends.status !== Status.SUCCESS) {
+    friends.fetchFriends();
+  }
+});
 </script>
 
 <style scoped>

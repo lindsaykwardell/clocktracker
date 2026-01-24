@@ -15,17 +15,25 @@
           >
             <template v-if="item.entry">
               <div class="flex items-center gap-3">
-                <Avatar
-                  :value="item.entry.avatar || '/img/default.png'"
-                  size="xs"
-                  class="border-stone-800"
-                  background
-                />
+                <div class="relative">
+                  <Avatar
+                    :value="item.entry.avatar || '/img/default.png'"
+                    size="xs"
+                    class="border-stone-800"
+                    background
+                  />
+                  <div
+                    v-if="!item.entry.userId"
+                    class="absolute top-0 left-0 w-full h-full bg-neutral-200/50 dark:bg-stone-800/50 rounded-full z-10"
+                  />
+                </div>
                 <div class="flex flex-col leading-tight">
                   <span class="text-stone-500 text-xs">{{ item.title }}</span>
-                  <span class="font-semibold">
-                    {{ item.entry.name }}
-                  </span>
+                  <RedactedName
+                    class="font-semibold"
+                    :name="item.entry.name"
+                    :redact="item.entry.redact"
+                  />
                 </div>
               </div>
               <div class="flex flex-col items-end text-right">
@@ -59,18 +67,26 @@
                 v-if="!item.entry"
                 class="rounded-full shadow-lg w-8 md:w-10 h-8 md:h-10 aspect-square bg-stone-200 dark:bg-stone-800 border border-stone-400"
               />
-              <Avatar
-                v-else
-                :value="item.entry.avatar || '/img/default.png'"
-                size="xs"
-                class="border-stone-800"
-                background
-              />
+              <div v-else class="relative">
+                <Avatar
+                  :value="item.entry.avatar || '/img/default.png'"
+                  size="xs"
+                  class="border-stone-800"
+                  background
+                />
+                <div
+                  v-if="!item.entry.userId"
+                  class="absolute top-0 left-0 w-full h-full bg-neutral-200/50 dark:bg-stone-800/50 rounded-full z-10"
+                />
+              </div>
               <div class="flex flex-col leading-tight">
                 <span class="text-stone-500 text-xs">{{ item.title }}</span>
-                <span v-if="item.entry" class="font-semibold">
-                  {{ item.entry.name }}
-                </span>
+                <RedactedName
+                  v-if="item.entry"
+                  class="font-semibold"
+                  :name="item.entry.name"
+                  :redact="item.entry.redact"
+                />
                 <span v-else class="font-semibold text-stone-500">
                   No data
                 </span>
@@ -94,17 +110,25 @@
             class="flex items-center justify-between gap-3 text-sm md:text-base py-2"
           >
             <div class="flex items-center gap-3">
-              <Avatar
-                :value="currentStreakEntry.avatar || '/img/default.png'"
-                size="xs"
-                class="border-stone-800"
-                background
-              />
+              <div class="relative">
+                <Avatar
+                  :value="currentStreakEntry.avatar || '/img/default.png'"
+                  size="xs"
+                  class="border-stone-800"
+                  background
+                />
+                <div
+                  v-if="!currentStreakEntry.userId"
+                  class="absolute top-0 left-0 w-full h-full bg-neutral-200/50 dark:bg-stone-800/50 rounded-full z-10"
+                />
+              </div>
               <div class="flex flex-col leading-tight">
                 <span class="text-stone-500 text-xs">Current streak</span>
-                <span class="font-semibold">
-                  {{ currentStreakEntry.name }}
-                </span>
+                <RedactedName
+                  class="font-semibold"
+                  :name="currentStreakEntry.name"
+                  :redact="currentStreakEntry.redact"
+                />
               </div>
             </div>
             <span
@@ -121,17 +145,25 @@
           >
             <template v-if="item.entry">
               <div class="flex items-center gap-3">
-                <Avatar
-                  :value="item.entry.avatar || '/img/default.png'"
-                  size="xs"
-                  class="border-stone-800"
-                  background
-                />
+                <div class="relative">
+                  <Avatar
+                    :value="item.entry.avatar || '/img/default.png'"
+                    size="xs"
+                    class="border-stone-800"
+                    background
+                  />
+                  <div
+                    v-if="!item.entry.userId"
+                    class="absolute top-0 left-0 w-full h-full bg-neutral-200/50 dark:bg-stone-800/50 rounded-full z-10"
+                  />
+                </div>
                 <div class="flex flex-col leading-tight">
                   <span class="text-stone-500 text-xs">{{ item.title }}</span>
-                  <span class="font-semibold">
-                    {{ item.entry.name }}
-                  </span>
+                  <RedactedName
+                    class="font-semibold"
+                    :name="item.entry.name"
+                    :redact="item.entry.redact"
+                  />
                 </div>
               </div>
               <span
@@ -162,6 +194,8 @@ import type { PlayerSummary } from "~/composables/useCommunityStats";
 
 type Entry = {
   name: string;
+  redact: boolean;
+  userId: string | null;
   avatar: string | null;
   value: number;
   detail?: string;
@@ -171,6 +205,7 @@ type Entry = {
 const props = defineProps<{
   games: FetchStatus<GameRecord[]>;
   players: PlayerSummary[];
+  anonymizeNonUsers?: boolean;
 }>();
 
 const playerIndex = computed(() => {
@@ -180,6 +215,12 @@ const playerIndex = computed(() => {
   });
   return map;
 });
+
+const shouldRedact = (name: string) => {
+  if (!props.anonymizeNonUsers) return false;
+  const player = playerIndex.value.get(name.toLowerCase());
+  return !player?.user_id;
+};
 
 type Alignment = "GOOD" | "EVIL" | null;
 type PlayerGame = {
@@ -224,6 +265,7 @@ const perPlayerGames = computed<Map<string, PlayerGame[]>>(() => {
             token.player_name ||
             null;
           if (!name) continue;
+          if (props.players?.length && !playerIndex.value.has(name.toLowerCase())) continue;
           const alignment = (token.alignment as Alignment | null) ?? (token.role?.initial_alignment as Alignment | null) ?? null;
           if (!alignment) continue;
           const bucket = timelines.get(name) ?? { aligns: [], initials: [] };
@@ -235,6 +277,7 @@ const perPlayerGames = computed<Map<string, PlayerGame[]>>(() => {
     } else if (game.player_characters?.length) {
       for (const pc of game.player_characters) {
         if (!pc.name) continue;
+        if (props.players?.length && !playerIndex.value.has(pc.name.toLowerCase())) continue;
         const alignment = (pc.alignment as Alignment | null) ?? (pc.role?.initial_alignment as Alignment | null) ?? null;
         if (!alignment) continue;
         const bucket = timelines.get(pc.name) ?? { aligns: [], initials: [] };
@@ -468,8 +511,11 @@ const currentStreakEntry = computed<Entry | null>(() => {
 
   if (!best) return null;
   const player = playerIndex.value.get(best.name.toLowerCase());
+  const baseName = player?.username || best.name;
   return {
-    name: player?.username || best.name,
+    name: baseName,
+    redact: shouldRedact(baseName),
+    userId: player?.user_id ?? null,
     avatar: player?.avatar || null,
     value: best.length,
     highlight: best.alignment === "GOOD" ? "good" : "evil",
@@ -488,8 +534,11 @@ function topBy<T extends { name: string }>(
 
 function toEntry(name: string, value: number): Entry {
   const player = playerIndex.value.get(name.toLowerCase());
+  const baseName = player?.username || name;
   return {
-    name: player?.username || name,
+    name: baseName,
+    redact: shouldRedact(baseName),
+    userId: player?.user_id ?? null,
     avatar: player?.avatar || null,
     value,
   };

@@ -5,7 +5,7 @@
     >
       <Alert
         v-if="isMe && me.status === Status.SUCCESS && (isNew || isUpdate)"
-        color="info"
+        color="positive"
       >
         {{ isNew ? "Game added!" : "Game updated!" }}
         <template v-if="isNew">

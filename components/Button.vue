@@ -33,6 +33,15 @@
         <slot />
       </template>
       <IconUI v-if="iconId && displayMode === 'icon-after'" :id="iconId" :size="iconSize" :color="iconColor" :spin="iconSpin" />
+      <Badge
+        v-if="props.count"
+        color="negative"
+        :aria-label="countLabel"
+        circular
+        size="sm"
+      >
+        {{ props.count }}
+      </Badge>
     </template>
     
   </component>
@@ -56,6 +65,8 @@ const props = withDefaults(
     iconColor?: "primary" | "neutral" | "positive" | "caution" | "negative" | "bgg";
     display?: "icon-before" | "icon-only" | "icon-after";
     image?: string;
+    count?: string | number;
+    countLabel?: string;
 }>(),
   { 
     variant:"filled",

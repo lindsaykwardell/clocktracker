@@ -19,24 +19,30 @@
           class="absolute top-0 left-0 w-full h-full z-50 cursor-pointer"
           @click="selectMultipleGames.toggleGame(game.id)"
         ></button>
-        <component
-          :is="componentIs"
-          @click="handleCardClick(game)"
-          :to="getGameLink(game)"
-          class="w-full bg-stone-900 flex flex-col items-center cursor-pointer overflow-hidden text-black h-48 md:h-72 bg-cover bg-center script-bg"
-          :style="
-            game.associated_script?.background
-              ? {
-                  '--bg-image-url': `url(${game.associated_script.background})`,
-                }
-              : {}
-          "
-          :class="{
-            ...scripts.scriptBgClasses(
-              game.script,
-              !!game.associated_script?.background
-            ),
-          }"
+          <component
+            :is="cardComponent(game)"
+            @click="handleCardClick(game)"
+            :to="canViewGame(game) ? getGameLink(game) : undefined"
+            :title="cardTitle(game)"
+            class="w-full bg-stone-900 flex flex-col items-center overflow-hidden text-black h-48 md:h-72 bg-cover bg-center script-bg"
+            :style="
+              game.associated_script?.background
+                ? {
+                    '--bg-image-url': `url(${game.associated_script.background})`,
+                  }
+                : {}
+            "
+            :class="{
+              'cursor-pointer':
+                canViewGame(game) ||
+                !!props.onCardClick ||
+                selectMultipleGames.enabled,
+              'cursor-not-allowed': !canViewGame(game),
+              ...scripts.scriptBgClasses(
+                game.script,
+                !!game.associated_script?.background
+              ),
+            }"
         >
           <img
             v-if="game.image_urls[0]"
@@ -238,7 +244,7 @@
               </Button>
               <Button
                 component="nuxt-link"
-                v-show="!selectMultipleGames.enabled"
+                v-show="!selectMultipleGames.enabled && canViewGame(game)"
                 :to="getGameLink(game)"
                 class="game-link"
                 :title="`View game - ${
@@ -270,9 +276,12 @@
 
 <script setup lang="ts">
 import { displayWinIconSvg } from "~/composables/useGames";
+import { FriendStatus } from "~/composables/useFriends";
 const gamesStore = useGames();
 const users = useUsers();
 const me = useMe();
+const friends = useFriends();
+const user = useSupabaseUser();
 
 const config = useRuntimeConfig();
 const scripts = useScripts();
@@ -291,23 +300,45 @@ const props = withDefaults(
   }
 );
 
-const getGameLink = (game: GameRecord) => {
-  if (me.value?.status === Status.SUCCESS) {
-    const user_id = me.value.data.user_id;
-    const childGame = game.child_games?.find(
-      (g: { user_id: string }) => g.user_id === user_id
-    );
-    if (childGame) {
-      return `/game/${childGame.id}`;
-    }
-  }
-  return `/game/${game.id}`;
+const getChildGameId = (game: GameRecord) => {
+  if (me.value?.status !== Status.SUCCESS) return null;
+
+  const userId = me.value.data.user_id;
+  const childGame = game.child_games?.find((g) => g.user_id === userId);
+  return childGame?.id ?? null;
 };
 
-const componentIs = computed(() => {
+const getGameLink = (game: GameRecord) => {
+  const childGameId = getChildGameId(game);
+  return childGameId ? `/game/${childGameId}` : `/game/${game.id}`;
+};
+
+const canViewGame = (game: GameRecord) => {
+  if (game.privacy === "PUBLIC") return true;
+  if (me.value?.status !== Status.SUCCESS) return false;
+
+  if (me.value.data.user_id === game.user_id) return true;
+  if (getChildGameId(game)) return true;
+
+  if (game.privacy === "FRIENDS_ONLY") {
+    return friends.getFriendStatus(game.user_id) === FriendStatus.FRIENDS;
+  }
+
+  return false;
+};
+
+const cardComponent = (game: GameRecord) => {
   if (!props.games.length) return "div";
-  return props.onCardClick ? "button" : defineNuxtLink({});
-});
+  if (props.onCardClick) return "button";
+  return canViewGame(game) ? defineNuxtLink({}) : "div";
+};
+
+const cardTitle = (game: GameRecord) => {
+  if (canViewGame(game)) return undefined;
+  return game.privacy === "FRIENDS_ONLY"
+    ? "Friends only game"
+    : "Private game";
+};
 
 const lastCharacters = computed<
   Record<string, ReturnType<typeof gamesStore.getLastCharater>>
@@ -468,6 +499,12 @@ const taggedPlayersMap = computed<Record<string, TaggedPlayer[]>>(() => {
 });
 
 const taggedPlayers = (game: GameRecord) => taggedPlayersMap.value[game.id] ?? [];
+
+onMounted(() => {
+  if (user.value?.id && friends.friends.status !== Status.SUCCESS) {
+    friends.fetchFriends();
+  }
+});
 </script>
 
 <style scoped>

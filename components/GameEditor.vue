@@ -187,6 +187,11 @@
           <Toggle v-model="advancedModeEnabled" />
         </label>
       </div>
+      <div v-if="showCommunityPrivacyAlert" class="w-full">
+        <Alert color="info">
+          {{ communityPrivacyAlertText }}
+        </Alert>
+      </div>
     </fieldset>
     <fieldset
       id="game-results"
@@ -865,6 +870,22 @@ const myLocations = computed(() => {
     return games.getLocationsByPlayer(me.value.data.username);
   }
   return [];
+});
+
+const showCommunityPrivacyAlert = computed(() => {
+  const hasCommunity = !!props.game.community_id || !!props.game.community_name;
+  if (!hasCommunity) return false;
+
+  return (
+    props.game.privacy === "PRIVATE" ||
+    props.game.privacy === "FRIENDS_ONLY"
+  );
+});
+
+const communityPrivacyAlertText = computed(() => {
+  return props.game.privacy === "FRIENDS_ONLY"
+    ? "Community-tagged games appear in its lists/stats, even if 'Friends Only'. Non-friends won't see a link to the full game."
+    : "Community-tagged games appear in its lists/stats, even if 'Private'. Others won't see a link to the full game.";
 });
 
 const myGames = computed(() => {

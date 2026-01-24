@@ -9,15 +9,10 @@
           <div class="relative w-full md:w-auto">
             <Menu>
               <MenuButton class="relative w-full md:w-auto">
-                <span
-                  v-if="activeFilters.length"
-                  class="absolute -top-2 -right-2 text-stone-200 bg-red-800 rounded-full px-2 py-1 text-xs font-bold aspect-square"
-                  aria-label="Active filters"
-                >
-                  {{ activeFilters.length }}
-                </span>
                 <Button 
                   icon="filter"
+                  :count="activeFilters.length ? activeFilters.length : ''"
+                  countLabel="Active filters"
                 >
                   Filter Stats
                 </Button>

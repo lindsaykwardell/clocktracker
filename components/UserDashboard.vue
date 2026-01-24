@@ -550,7 +550,7 @@ onMounted(async () => {
 
 .calendar-events {
   @media (min-width: 768px) {
-    height: calc(100vh - 350px - 2rem);
+    height: calc(100vh - 350px - 3rem);
     overflow-y: scroll;
   }
 }

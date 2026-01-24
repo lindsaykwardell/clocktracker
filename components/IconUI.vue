@@ -48,6 +48,7 @@
   const Json = resolveComponent("IconBraces");
   const CalenderPlus = resolveComponent("IconCalenderPlus");
   const Check = resolveComponent("IconCheck");
+  const CheckCircle = resolveComponent("IconCheckCircle");
   const ChevronDown = resolveComponent("IconChevronDown");
   const ChevronLeft = resolveComponent("IconChevronLeft");
   const ChevronRight = resolveComponent("IconChevronRight");
@@ -57,11 +58,13 @@
   const Dots = resolveComponent("IconDots");
   const Download = resolveComponent("IconDownload");
   const Edit = resolveComponent("IconPencilFill");
+  const ExclamationCircle = resolveComponent("IconExclamationCircle");
   const Mail = resolveComponent("IconEnvelope");
   const EyeSlash = resolveComponent("IconEyeSlash");
   const Filter = resolveComponent("IconFilter");
   const Grid = resolveComponent("IconGrid");
   const Info = resolveComponent("IconInfo");
+  const InfoCircle = resolveComponent("IconInfoCircle");
   const JournalNext = resolveComponent("IconJournalNext");
   const JournalPlus = resolveComponent("IconJournalPlus");
   const JournalPrev = resolveComponent("IconJournalPrev");
@@ -82,6 +85,7 @@
   const View = resolveComponent("IconView");
   const WindowStack = resolveComponent("IconWindowStack");
   const X = resolveComponent("IconX");
+  const XCircle = resolveComponent("IconXCircle");
   const XLg = resolveComponent("IconXLg");
   const PDF = resolveComponent("IconFileEarmarkPDF");
   const Menu = resolveComponent("IconList");
@@ -208,7 +212,15 @@
       case "graph-down":
         return GraphDownArrow;
       case "graph-up":
-        return GraphUpArrow; 
+        return GraphUpArrow;   
+      case "check-circle":
+        return CheckCircle;
+      case "exclamation-circle":
+        return ExclamationCircle;
+      case "info-circle":
+        return InfoCircle; 
+      case "x-circle":
+        return XCircle;       
       default:
         return EyeSlash;
     }

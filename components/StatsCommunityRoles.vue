@@ -68,6 +68,7 @@ import naturalOrder from "natural-order";
 import { WinStatus_V2, type GameRecord } from "~/composables/useGames";
 import { Status, type FetchStatus } from "~/composables/useFetchStatus";
 import type { RoleType } from "~/composables/useRoles";
+import { escapeHtml, getRedactedNameHtml } from "~/composables/useRedactedName";
 
 const roles = useRoles();
 
@@ -75,8 +76,10 @@ const props = defineProps<{
   games: FetchStatus<GameRecord[]>;
   players?: {
     username: string;
+    user_id?: string | null;
     roles: Record<string, number>;
   }[];
+  anonymizeNonUsers?: boolean;
 }>();
 
 /**
@@ -136,6 +139,7 @@ type RoleStats = {
   wins: number;
   losses: number;
   topPlayer?: string;
+  topPlayerHtml?: string;
 };
 
 type SortMode = "alphabetical" | "plays" | "winRate";
@@ -264,15 +268,18 @@ const roleStats = computed<Map<string, RoleStats>>(() => {
   }
 
   if (props.players?.length) {
-    const topCounts = new Map<string, { name: string; count: number }>();
+    const topCounts = new Map<string, { name: string; count: number; html: string }>();
 
     for (const player of props.players) {
+      const htmlName = props.anonymizeNonUsers && !player.user_id
+        ? getRedactedNameHtml(player.username)
+        : escapeHtml(player.username);
       for (const [roleName, count] of Object.entries(player.roles || {})) {
         const roleId = roleNameToId.value.get(roleName.toLowerCase());
         if (!roleId) continue;
         const current = topCounts.get(roleId);
         if (!current || count > current.count) {
-          topCounts.set(roleId, { name: player.username, count });
+          topCounts.set(roleId, { name: player.username, html: htmlName, count });
         }
       }
     }
@@ -281,6 +288,7 @@ const roleStats = computed<Map<string, RoleStats>>(() => {
       const stat = stats.get(roleId);
       if (stat) {
         stat.topPlayer = info.name;
+        stat.topPlayerHtml = info.html;
       }
     }
   }
@@ -314,7 +322,7 @@ const roleTooltip = (role: { id: string; name: string }) => {
     return `<strong>${role.name}</strong><br>Not played yet`;
   }
 
-  const topLine = stats.topPlayer ? `<br>Most played by: ${stats.topPlayer}` : "";
+  const topLine = stats.topPlayerHtml ? `<br>Most played by: ${stats.topPlayerHtml}` : "";
   return `<strong>${role.name}</strong><br>Games: ${stats.plays}<br>W/L: ${stats.wins}-${stats.losses} (${formatPercent(stats.wins, stats.losses)})${topLine}`;
 };
 

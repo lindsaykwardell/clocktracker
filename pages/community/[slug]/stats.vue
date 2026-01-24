@@ -17,15 +17,10 @@
               <div class="relative w-full md:w-auto">
                 <Menu>
                   <MenuButton class="relative w-full md:w-auto">
-                    <span
-                      v-if="activeFilters.length"
-                      class="absolute -top-2 -right-2 text-stone-200 bg-red-800 rounded-full px-2 py-1 text-xs font-bold aspect-square"
-                      aria-label="Active filters"
-                    >
-                      {{ activeFilters.length }}
-                    </span>
                     <Button
                       icon="filter"
+                      :count="activeFilters.length ? activeFilters.length : ''"
+                      countLabel="Active filters"
                     >
                       Filter Stats
                     </Button>
@@ -207,12 +202,14 @@
                 mode="players"
                 title="Most Frequent Players"
                 class="col-span-3"
+                :anonymize-non-users="!isMember"
               />
               <StatsCommunityTopPlayers
                 :players="visiblePlayers"
                 mode="storytellers"
                 title="Most Frequent Storytellers"
                 class="col-span-3"
+                :anonymize-non-users="!isMember"
               />
               <StatsCommunityTopLocations
                 :games="filteredGames"
@@ -227,6 +224,7 @@
               :players="visiblePlayers"
               :games="filteredGames"
               class="w-full xl:w-3/4 xl:mx-auto"
+              :anonymize-non-users="!isMember"
             />
           </section>
           
@@ -234,6 +232,7 @@
             <StatsCommunityOutsiderHighlights 
               :players="visiblePlayers"
               class="w-full xl:w-3/4 xl:mx-auto"
+              :anonymize-non-users="!isMember"
             />
           </section>
 
@@ -242,6 +241,7 @@
               :games="{ status: Status.SUCCESS, data: filteredGames }"
               :players="visiblePlayers"
               class="w-full xl:w-3/4 xl:mx-auto"
+              :anonymize-non-users="!isMember"
             />
           </section>
 
@@ -297,11 +297,16 @@
               :players="visiblePlayers"
               :member-ids="communityMembers"
               class="w-full xl:w-3/4 xl:mx-auto"
+              :anonymize-non-users="!isMember"
             />
           </section>
 
           <section v-if="filteredGames.length">
-            <StatsCommunityRoles :games="{ status: Status.SUCCESS, data: filteredGames }" :players="visiblePlayers" />
+            <StatsCommunityRoles
+              :games="{ status: Status.SUCCESS, data: filteredGames }"
+              :players="visiblePlayers"
+              :anonymize-non-users="!isMember"
+            />
           </section>
         </template>
       </div>
@@ -402,7 +407,7 @@ const activeFilters = computed(() => {
     ...(minPlayers.value ? [{ type: "min_players", value: minPlayers.value }] : []),
     ...(maxPlayers.value ? [{ type: "max_players", value: maxPlayers.value }] : []),
     ...(selectedLocation.value ? [{ type: "location", value: selectedLocation.value }] : []),
-    ...(includeNonMembers.value ? [] : [{ type: "members_only", value: "true" }]),
+    // Membership toggle should not count as a filter badge.
   ];
 });
 
@@ -466,6 +471,24 @@ useHead({
 });
 
 </script>
+
+<style>
+  .redacted-name {
+    display: inline-block;
+    @apply text-stone-800 bg-stone-800;
+    @apply h-[.75rem] overflow-hidden select-none;
+    position: relative;
+    inset-block-end: -1px;
+    inset-inline-start: 1px;
+    overflow: hidden;
+
+    
+  }  
+
+  .v-popper__popper .redacted-name {
+      @apply text-stone-100 bg-stone-100;
+    }
+</style>
 
 <style scoped>
   .community-grid-8 {

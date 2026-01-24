@@ -145,6 +145,7 @@ const route = useRoute();
 const slug = route.params.slug as string;
 const communities = useCommunities();
 const games = useGames();
+const user = useSupabaseUser();
 
 const metadata = await $fetch(`/api/community/${slug}/minimal`);
 const { data: stats } = await useFetch<{
@@ -155,9 +156,12 @@ const { data: stats } = await useFetch<{
 const message = ref("");
 const statsGames = computed(() => stats.value?.games ?? []);
 const activePlayersCount = computed(() => stats.value?.totals?.players ?? 0);
+const isMember = computed(() => communities.isMember(slug, user.value?.id));
 
 const recentGames = computed(() => {
-  const communityGames = games.getByCommunity(slug);
+  const communityGames = games.getByCommunity(slug, {
+    includePrivate: isMember.value,
+  });
   if (communityGames.status !== Status.SUCCESS) return communityGames;
   return {
     ...communityGames,
