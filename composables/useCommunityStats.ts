@@ -26,3 +26,9 @@ export type PlayerSummary = {
   role_games?: Record<string, string[]>;
   roles: Record<string, number>;
 };
+
+export const COMMUNITY_STATS_MIN_GAMES = 3;
+export const COMMUNITY_STATS_BAYESIAN_ALPHA = 2;
+export const COMMUNITY_STATS_BAYESIAN_BETA = 2;
+export const COMMUNITY_STATS_BAYESIAN_TOOLTIP =
+  "<div class='w-[250px]'>Ranking uses a small sample-size adjustment (Bayesian) so tiny samples don't outrank larger ones.</div>";

@@ -13,15 +13,14 @@
       <label>
         <span class="flex gap-2 items-top"
           >Who Can Register
-          <span
+          <IconUI 
             v-tooltip="{
               content:
                 '<div class=\'w-[250px]\'>If \'Anyone with the event link\' is chosen, the event will not appear anywhere on the site.</div>',
               html: true,
             }"
-          >
-            <IconUI id="info-circle" size="sm" />
-          </span>
+            id="info-circle" 
+            size="sm" />
         </span>
         <Input mode="select" v-model="event.who_can_register">
           <option value="COMMUNITY_MEMBERS">
