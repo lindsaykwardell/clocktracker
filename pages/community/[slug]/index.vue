@@ -37,12 +37,14 @@
             <nuxt-link
               v-for="member in community.data.members"
               :to="`/@${member.username}`"
+              :aria-label="`View ${member.username}'s profile`"
             >
               <Avatar
                 :value="member.avatar"
                 :size="community.data.members.length > 50 ? 'xs' : 'sm'"
                 class="border-stone-800"
                 background
+                v-tooltip="member.username"
               />
             </nuxt-link>
           </div>
