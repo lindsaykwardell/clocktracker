@@ -20,7 +20,8 @@
               html: true,
             }"
             id="info-circle" 
-            size="sm" />
+            size="sm" 
+          />
         </span>
         <Input mode="select" v-model="event.who_can_register">
           <option value="COMMUNITY_MEMBERS">

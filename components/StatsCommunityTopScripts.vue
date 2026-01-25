@@ -12,7 +12,7 @@
 
     <div v-else class="flex items-center overflow-hidden">
       <ol
-        class="relative -top-px list-none w-full  text-sm md:text-base divide-y divide-stone-300 dark:divide-stone-700/40"
+        class="relative -top-px list-none w-full text-sm divide-y divide-stone-300 dark:divide-stone-700/40"
         :class="{
           'lg:columns-2': topScripts.length >= 5,
           'mx-auto max-w-[15rem]': topScripts.length < 5,
@@ -40,9 +40,9 @@
             </nuxt-link>
           </div>
           
-          <span class="text-xs md:text-sm text-stone-800 px-1 bg-stone-300 rounded-md leading-none">
+          <Badge variant="soft" size="xs">
             {{ script.count }}
-          </span>
+          </Badge>
         </li>
       </ol>
     </div>

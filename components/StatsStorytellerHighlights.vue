@@ -35,8 +35,11 @@
           </div>
         </div>
 
-        <div v-else class="flex items-center justify-center flex-grow">
-          <p class="text-center text-sm text-stone-400">
+        <div v-else class="flex flex-col items-center flex-grow gap-2">
+          <div
+            class="rounded-full shadow-lg w-36 h-36 md:w-48 md:h-48 aspect-square bg-stone-200 dark:bg-stone-800 border border-stone-400"
+          />
+          <p class="text-center text-sm text-stone-400 text-balance">
             No characters recorded yet.
           </p>
         </div>
@@ -72,8 +75,11 @@
           </div>
         </div>
 
-        <div v-else class="flex items-center justify-center flex-grow">
-          <p class="text-center text-sm text-stone-400">
+        <div v-else class="flex flex-col items-center flex-grow gap-2">
+          <div
+            class="rounded-full shadow-lg w-36 h-36 md:w-48 md:h-48 aspect-square bg-stone-200 dark:bg-stone-800 border border-stone-400"
+          />
+          <p class="text-center text-sm text-stone-400 text-balance">
             No bluffs recorded yet.
           </p>
         </div>
@@ -109,9 +115,12 @@
           </div>
         </div>
 
-        <div v-else class="flex items-center justify-center flex-grow">
-          <p class="text-center text-sm text-stone-400">
-            No NPCs used yet.
+        <div v-else class="flex flex-col items-center flex-grow gap-2">
+          <div
+            class="rounded-full shadow-lg w-36 h-36 md:w-48 md:h-48 aspect-square bg-stone-200 dark:bg-stone-800 border border-stone-400"
+          />
+          <p class="text-center text-sm text-stone-400 text-balance">
+            No Fabled or Loric recorded yet.
           </p>
         </div>
       </div>
