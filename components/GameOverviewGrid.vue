@@ -223,25 +223,33 @@
               >
                 Edit
               </Button>
-              <Button
-                component="a"
-                v-if="!selectMultipleGames.enabled && game.bgg_id"
-                :href="`https://boardgamegeek.com/play/details/${game.bgg_id}`"
-                target="_blank"
-                class="z-10"
-                :title="`View this game on BoardGameGeek - ${
-                  game.script && lastCharacter(game.id)?.name
-                    ? `${game.script} as ${lastCharacter(game.id).name}`
-                    : game.script || lastCharacter(game.id)?.name || ''
-                }, played on ${formatDate(game.date)}`"
-                color="black"
-                size="sm"
-                icon="bgg"
-                display="icon-only"
-                circular
+
+              <template v-if="!selectMultipleGames.enabled && game.bgg_id">
+                <Button
+                  component="a"
+                  :href="`https://boardgamegeek.com/play/details/${game.bgg_id}`"
+                  target="_blank"
+                  class="z-10"
+                  :title="`View this game on BoardGameGeek - ${
+                    game.script && lastCharacter(game.id)?.name
+                      ? `${game.script} as ${lastCharacter(game.id).name}`
+                      : game.script || lastCharacter(game.id)?.name || ''
+                  }, played on ${formatDate(game.date)}`"
+                  color="black"
+                  size="sm"
+                  icon="bgg"
+                  display="icon-only"
+                  circular
+                >
+                  BGG
+                </Button>
+              </template>
+              <template
+                v-else-if="game.bgg_id"
               >
-                BGG
-              </Button>
+                <IconUI id="bgg" color="bgg" rounded dark />
+              </template>
+
               <Button
                 component="nuxt-link"
                 v-show="!selectMultipleGames.enabled && canViewGame(game)"
@@ -259,13 +267,13 @@
                 circular
               >
                 View
-            </Button>
-            </div>
-            <div
-              class="flex items-center justify-center select-status"
-              v-show="selectMultipleGames.enabled"
-            >
-              <IconUI id="check" rounded dark />
+              </Button>
+              <div
+                class="flex items-center justify-center select-status"
+                v-show="selectMultipleGames.enabled"
+              >
+                <IconUI id="check" rounded dark />
+              </div>
             </div>
           </div>
         </div>
@@ -563,7 +571,7 @@ li.selected {
 <style scoped>
 .select-status {
   > span {
-    @apply bg-white dark:text-white dark:bg-black;
+    @apply bg-white text-black dark:text-white dark:bg-black;
 
     position: relative;
     z-index: 13;

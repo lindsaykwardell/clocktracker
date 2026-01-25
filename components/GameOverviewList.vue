@@ -17,10 +17,15 @@
           <th class="hidden md:table-cell">Players (+Travelers)</th>
           <th>Result</th>
           <th
-            v-if="!selectMultipleGames.enabled && !props.readonly"
+            v-if="!props.readonly && !selectMultipleGames.enabled"
             class="hidden md:table-cell"
           >
             Actions
+          </th>
+          <th
+            v-else-if="selectMultipleGames.enabled"
+          >
+            BGG
           </th>
         </tr>
       </thead>
@@ -159,11 +164,11 @@
               v-html="displayWinIconSvg(game, props.showCommunityCard)"
             ></div>
           </td>
-          <td v-if="!selectMultipleGames.enabled && !props.readonly">
+          <td v-if="!props.readonly">
             <div class="game-actions flex gap-2 items-center justify-center">
               <Button
                 component="nuxt-link"
-                v-if="isMyGame(game)"
+                v-if="isMyGame(game)  && !selectMultipleGames.enabled"
                 :to="`/game/${game.id}/edit`"
                 class="bg-white dark:text-white dark:bg-black hover:bg-purple-600 transition-colors duration-250 ease-in-out z-10 hidden md:flex"
                 :title="`Edit game - ${
@@ -183,29 +188,35 @@
               >
                 Edit
               </Button>
-              <Button
-                component="a"
-                v-if="game.bgg_id"
-                :href="`https://boardgamegeek.com/play/details/${game.bgg_id}`"
-                target="_blank"
-                class="z-10 hidden md:inline-flex"
-                :title="`View this game on BoardGameGeek - ${
-                  game.script && gamesStore.getLastCharater(game.id)?.name
-                    ? `${game.script} as ${
-                        gamesStore.getLastCharater(game.id).name
-                      }`
-                    : game.script ||
-                      gamesStore.getLastCharater(game.id)?.name ||
-                      ''
-                }, played on ${formatDate(game.date)}`"
-                size="xs-sm"
-                color="contrast"
-                icon="bgg"
-                display="icon-only"
-                circular
-              >
-                BGG
-              </Button>
+
+              <template v-if="game.bgg_id && !selectMultipleGames.enabled">
+                <Button
+                  component="a"
+                  v-if="game.bgg_id"
+                  :href="`https://boardgamegeek.com/play/details/${game.bgg_id}`"
+                  target="_blank"
+                  class="z-10 hidden md:inline-flex"
+                  :title="`View this game on BoardGameGeek - ${
+                    game.script && gamesStore.getLastCharater(game.id)?.name
+                      ? `${game.script} as ${
+                          gamesStore.getLastCharater(game.id).name
+                        }`
+                      : game.script ||
+                        gamesStore.getLastCharater(game.id)?.name ||
+                        ''
+                  }, played on ${formatDate(game.date)}`"
+                  size="xs-sm"
+                  color="contrast"
+                  icon="bgg"
+                  display="icon-only"
+                  circular
+                >
+                  BGG
+                </Button>
+              </template>
+              <template v-else-if="game.bgg_id">
+                <IconUI id="bgg" color="bgg" rounded noHover />
+              </template>
               <Button
                 component="nuxt-link"
                 v-if="
