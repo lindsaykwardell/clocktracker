@@ -8,10 +8,11 @@
       v-if="image"
       class="token-image"
       :class="dynamicTokenClass"
-      :src="image"
+      :src="sizedImage"
       loading="lazy"
       :alt="character?.name || character?.role?.name || 'Unknown'"
       v-tooltip="tokenTooltip || undefined"
+      @error="onTokenImageError"
     />
     <svg
       v-if="!hideName && (character?.name || character?.role?.name)"
@@ -56,9 +57,10 @@
     >
       <img
         :class="relatedImageSize"
-        :src="alignmentImage"
+        :src="sizedAlignmentImage"
         loading="lazy"
         v-tooltip="alignmentTooltip || undefined"
+        @error="onAlignmentImageError"
       />
     </div>
     <slot />
@@ -73,10 +75,11 @@
         v-if="relatedImage"
         class="related-token-image"
         :class="relatedImageSize"
-        :src="relatedImage"
+        :src="sizedRelatedImage"
         loading="lazy"
         :alt="character?.related || character.related_role?.name || 'Unknown'"
         v-tooltip="relatedTokenTooltip || undefined"
+        @error="onRelatedImageError"
       />
     </div>
   </div>
@@ -253,10 +256,10 @@ const image = computed(() => {
     return props.character.role.token_url;
   }
   if (props.character?.alignment === "GOOD") {
-    return "/img/role/good.png";
+    return "/img/role/good.webp";
   }
   if (props.character?.alignment === "EVIL") {
-    return "/img/role/evil.png";
+    return "/img/role/evil.webp";
   }
 });
 
@@ -265,19 +268,19 @@ const relatedImage = computed(() => {
     return props.character.related_role.token_url;
   }
   if (props.character?.alignment === "GOOD") {
-    return "/img/role/good.png";
+    return "/img/role/good.webp";
   }
   if (props.character?.alignment === "EVIL") {
-    return "/img/role/evil.png";
+    return "/img/role/evil.webp";
   }
 });
 
 const alignmentImage = computed(() => {
   if (props.character?.alignment === "GOOD") {
-    return "/img/role/good.png";
+    return "/img/role/good.webp";
   }
   if (props.character?.alignment === "EVIL") {
-    return "/img/role/evil.png";
+    return "/img/role/evil.webp";
   } else {
     return "/1x1.png";
   }
@@ -295,6 +298,74 @@ const reminderTextSize = computed(() => {
   }
   return "text-[0.5rem] md:text-xs";
 });
+
+const sizeAdjustedUrl = (url?: string) => {
+  if (!url) {
+    return url;
+  }
+  if (!url.startsWith("/img/role/")) {
+    return url;
+  }
+
+  const sizeFolder =
+    props.size === "sm"
+      ? "48x48"
+      : props.size === "md"
+      ? "80x80"
+      : props.size === "lg"
+      ? "160x160"
+      : undefined;
+
+  let adjusted = url;
+  if (sizeFolder) {
+    adjusted = adjusted.replace("/img/role/", `/img/role/${sizeFolder}/`);
+  }
+
+  // Prefer webp variants; fall back handled in onError.
+  adjusted = adjusted.replace(/\.png$/i, ".webp");
+
+  return adjusted;
+};
+
+const sizedImage = computed(() => sizeAdjustedUrl(image.value));
+const sizedRelatedImage = computed(() => sizeAdjustedUrl(relatedImage.value));
+const sizedAlignmentImage = computed(() => sizeAdjustedUrl(alignmentImage.value));
+
+const onTokenImageError = (event: Event) => {
+  if (!image.value) {
+    return;
+  }
+  const img = event.target as HTMLImageElement | null;
+  if (!img || img.dataset.fallbackApplied === "true") {
+    return;
+  }
+  img.dataset.fallbackApplied = "true";
+  img.src = image.value;
+};
+
+const onRelatedImageError = (event: Event) => {
+  if (!relatedImage.value) {
+    return;
+  }
+  const img = event.target as HTMLImageElement | null;
+  if (!img || img.dataset.fallbackApplied === "true") {
+    return;
+  }
+  img.dataset.fallbackApplied = "true";
+  img.src = relatedImage.value;
+};
+
+const onAlignmentImageError = (event: Event) => {
+  if (!alignmentImage.value) {
+    return;
+  }
+  const img = event.target as HTMLImageElement | null;
+  if (!img || img.dataset.fallbackApplied === "true") {
+    return;
+  }
+  img.dataset.fallbackApplied = "true";
+  img.src = alignmentImage.value;
+};
 </script>
 
 <style scoped>
