@@ -44,10 +44,9 @@
           </span>
         </div>
         
-
-        <span class="text-xs md:text-base text-stone-800 px-2 bg-stone-300 rounded-md leading-none">
+        <Badge variant="soft" size="sm">
           {{ item.count }}
-        </span>
+        </Badge>
       </li>
     </ol>
   </div>

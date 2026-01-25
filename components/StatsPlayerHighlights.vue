@@ -33,9 +33,12 @@
           </div>
         </div>
 
-        <div v-else class="flex items-center justify-center flex-grow">
-          <p class="text-center text-sm text-stone-400">
-            Not enough data (No recorded games).
+        <div v-else class="flex flex-col items-center flex-grow gap-2">
+          <div
+            class="rounded-full shadow-lg w-36 h-36 md:w-48 md:h-48 aspect-square bg-stone-200 dark:bg-stone-800 border border-stone-400"
+          />
+          <p class="text-center text-sm text-stone-400 text-balance">
+            No recorded games.
           </p>
         </div>
       </div>
@@ -44,6 +47,14 @@
       <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-2 md:gap-3">
         <h3 class="font-sorts text-center text-lg lg:text-xl">
           Best Performing
+          <IconUI 
+            v-tooltip="{
+              content: bestPerformingTooltip,
+              html: true,
+            }"
+            id="info-circle" 
+            size="sm" 
+          />
         </h3>
 
         <div v-if="bestPerforming" class="flex flex-col items-center gap-2">
@@ -70,18 +81,28 @@
           </div>
         </div>
 
-        <div v-else class="flex items-center justify-center flex-grow">
+        <div v-else class="flex flex-col items-center flex-grow gap-2">
+          <div
+            class="rounded-full shadow-lg w-36 h-36 md:w-48 md:h-48 aspect-square bg-stone-200 dark:bg-stone-800 border border-stone-400"
+          />
           <p class="text-center text-sm text-stone-400 text-balance">
-            Not enough data (No character with at least {{ MIN_PLAYS_FOR_PERFORMANCE }} plays and a win rate of 50% or higher).
+            No eligable character.
           </p>
         </div>
-        
       </div>
 
       <!-- Worst performing -->
       <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-2 md:gap-3">
         <h3 class="font-sorts text-center text-lg lg:text-xl">
           Worst Performing
+          <IconUI 
+            v-tooltip="{
+              content: worstPerformingTooltip,
+              html: true,
+            }"
+            id="info-circle" 
+            size="sm" 
+          />
         </h3>
 
         <div v-if="worstPerforming" class="flex flex-col items-center gap-2">
@@ -108,9 +129,12 @@
           </div>
         </div>
 
-        <div v-else class="flex items-center justify-center flex-grow">
+        <div v-else class="flex flex-col items-center flex-grow gap-2">
+          <div
+            class="rounded-full shadow-lg w-36 h-36 md:w-48 md:h-48 aspect-square bg-stone-200 dark:bg-stone-800 border border-stone-400"
+          />
           <p class="text-center text-sm text-stone-400 text-balance">
-            Not enough data (No character with at least {{ MIN_PLAYS_FOR_PERFORMANCE }} plays and a win rate lower than 50%).
+            No eligable character.
           </p>
         </div>
       </div>
@@ -141,7 +165,11 @@
             <span class="font-semibold" :style="`color: ${chartColors.evil}`">Evil</span>.
           </template>
         </div>
-
+        <div v-else>
+          <p class="text-center text-sm text-stone-400 text-balance">
+            No data.
+          </p>
+        </div>
       </div>
     </div>
   </div>
@@ -382,6 +410,11 @@ const bestPerforming = computed<RoleSummary | null>(() => {
   return best;
 });
 
+const bestPerformingTooltip = computed(
+  () =>
+    `<div class='w-[250px]'>Only characters with at least ${MIN_PLAYS_FOR_PERFORMANCE} plays and a win rate of 50% or higher are considered.</div>`
+);
+
 /**
  * Determine "Worst Performing" character.
  * 
@@ -420,6 +453,12 @@ const worstPerforming = computed<RoleSummary | null>(() => {
 
   return worst;
 });
+
+const worstPerformingTooltip = computed(
+  () =>
+    `<div class='w-[250px]'>Only characters with at least ${MIN_PLAYS_FOR_PERFORMANCE} plays and a win rate lower than 50% are considered.</div>`
+);
+
 
 /**
  * Determine the character used for stats in a game.
