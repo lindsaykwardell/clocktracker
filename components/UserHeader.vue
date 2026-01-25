@@ -101,10 +101,9 @@
           </Button>
         </div>
       </div>
-      <div class="flex flex-col gap-1">
+      <div v-if="player.communities?.length" class="flex flex-col gap-1">
         <h2 class="text-xs text-stone-600 text-center md:text-start uppercase">Communities</h2>
         <div
-          v-if="player.communities?.length"
           class="flex flex-wrap justify-start gap-[0.125rem]"
         >
           <nuxt-link
