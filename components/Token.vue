@@ -11,7 +11,7 @@
       :src="image"
       loading="lazy"
       :alt="character?.name || character?.role?.name || 'Unknown'"
-      v-tooltip="tokenTooltip"
+      v-tooltip="tokenTooltip || undefined"
     />
     <svg
       v-if="!hideName && (character?.name || character?.role?.name)"
@@ -58,7 +58,7 @@
         :class="relatedImageSize"
         :src="alignmentImage"
         loading="lazy"
-        v-tooltip="alignmentTooltip"
+        v-tooltip="alignmentTooltip || undefined"
       />
     </div>
     <slot />
@@ -76,7 +76,7 @@
         :src="relatedImage"
         loading="lazy"
         :alt="character?.related || character.related_role?.name || 'Unknown'"
-        v-tooltip="relatedTokenTooltip"
+        v-tooltip="relatedTokenTooltip || undefined"
       />
     </div>
   </div>
@@ -99,7 +99,7 @@ const props = defineProps<{
         related_role?: { token_url: string; name?: string };
       }
     | undefined;
-  size?: "sm" | "reminder" | "md" | "lg";
+  size?: "sm" | "reminder" | "md" | "front" | "lg";
   alwaysShowAlignment?: boolean;
   hideRelated?: boolean;
   hideName?: boolean;
@@ -124,6 +124,9 @@ const tokenClass = computed(() => {
       break;
     case "md":
       classes += "w-20 h-20 md:w-28 md:h-28";
+      break;
+    case "front":
+      classes += "w-32 h-32 md:w-40 md:h-40";
       break;
     case "lg":
       classes += "w-36 h-36 md:w-48 md:h-48";

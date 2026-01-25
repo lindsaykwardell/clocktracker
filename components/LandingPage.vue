@@ -7,10 +7,12 @@
       <Button
         component="nuxt-link"
         to="/login"
-        class="w-[300px] py-2 bg-stone-600 hover:bg-stone-700"
+        icon="mail"
+        size="lg"
+        color="primary"
+        wide
       >
-        <Email />
-        <span>Login</span>
+        <span>Continue with e-mail</span>
       </Button>
       <LoginWithDiscord />
     </div>
@@ -91,10 +93,12 @@
       <Button
         component="nuxt-link"
         to="/login"
-        class="w-[300px] py-2 bg-stone-600 hover:bg-stone-700"
+        color="primary"
+        icon="mail"
+        size="lg"
+        wide
       >
-        <Email />
-        <span>Login</span>
+        Continue with e-mail
       </Button>
       <LoginWithDiscord />
     </div>

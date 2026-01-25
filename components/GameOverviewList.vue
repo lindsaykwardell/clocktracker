@@ -29,6 +29,7 @@
           v-for="game in games"
           :key="game.id"
           class="table-row game-row bg-cover bg-center script-bg"
+          :title="rowTitle(game)"
           :class="{
             ...scriptBgClasses(
               game.script,
@@ -54,24 +55,12 @@
         >
           <td v-if="selectMultipleGames.enabled">
             <div class="flex items-center justify-center select-status">
-              <span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  fill="currentColor"
-                  viewBox="0 0 16 16"
-                >
-                  <path
-                    d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425z"
-                  />
-                </svg>
-              </span>
+              <IconUI id="check" rounded />
             </div>
           </td>
           <td class="w-4 md:w-6">
-            <div v-if="isFavorite(game)" class="text-primary">
-              <Star class="w-4 md:w-6" />
+            <div v-if="isFavorite(game)" class="flex items-center justify-center" >
+              <IconUI id="star" class="text-primary" />
             </div>
           </td>
           <td
@@ -91,15 +80,15 @@
             {{ formatDate(game.date) }}
           </td>
           <td>
-            <div class="flex items-center gap-1">
-              <span class="line-clamp-1 md:line-clamp-none max-w-40 md:max-w-none">
+            <div class="flex items-center gap-1 md:gap-2">
+              <span v-if="game.script" class="line-clamp-1 md:line-clamp-none max-w-40 md:max-w-none">
                 {{ game.script }}
               </span>
-              <template
-                v-if="game.associated_script && !isBaseScript(game.script)"
-              >
-                <span
-                  class="inline-flex items-center rounded-sm bg-black/10 text-gray-800 dark:bg-black/40 dark:text-white text-xs font-medium badge"
+              <div class="flex items-center gap-1">
+                <Badge
+                  v-if="game.associated_script && !isBaseScript(game.script)"
+                  size="xs"
+                  variant="overlay"
                 >
                   <template v-if="game.ls_game_id">
                     Game {{ game.associated_script.version }}
@@ -107,17 +96,38 @@
                   <template v-else>
                     {{ game.associated_script.version }}
                   </template>
-                </span>
-              </template>
-              <span
-                v-if="game.ignore_for_stats"
-                class="inline-flex gap-1 items-center rounded bg-red-700/60 text-xs font-medium text-white p-[0.125rem]"
-              >
-                <IconUI id="disabled" size="xs" />
-                <span class="sr-only">
-                  Ignored for Stats
-                </span>
-              </span>
+                </Badge>
+                <Badge
+                  v-if="game.ignore_for_stats"
+                  color="negative"
+                  size="xs"
+                  icon="disabled"
+                  display="icon-only"
+                  variant="overlay"
+                >
+                  <span class="sr-only">
+                    Ignored for Stats
+                  </span>
+                </Badge>
+                <Badge 
+                v-if="game.privacy === 'PRIVATE' || game.privacy === 'FRIENDS_ONLY'"
+                  color="negative"
+                  size="xs"
+                  icon="eye-slash" 
+                  display="icon-only"
+                  variant="overlay"
+                >
+                  <span class="sr-only">
+                    Visibility: 
+                    <template v-if="game.privacy === 'PRIVATE'">
+                      Private
+                    </template>
+                    <template v-else>
+                      Friends Only
+                    </template>
+                  </span>
+                </Badge>
+              </div>
             </div>
           </td>
           <td class="hidden md:table-cell text-start">
@@ -151,8 +161,10 @@
           </td>
           <td v-if="!selectMultipleGames.enabled && !props.readonly">
             <div class="game-actions flex gap-2 items-center justify-center">
-              <nuxt-link
+              <Button
+                component="nuxt-link"
                 v-if="isMyGame(game)"
+                :to="`/game/${game.id}/edit`"
                 class="bg-white dark:text-white dark:bg-black hover:bg-purple-600 transition-colors duration-250 ease-in-out z-10 hidden md:flex"
                 :title="`Edit game - ${
                   game.script && gamesStore.getLastCharater(game.id)?.name
@@ -163,14 +175,20 @@
                       gamesStore.getLastCharater(game.id)?.name ||
                       ''
                 }, played on ${formatDate(game.date)}`"
-                :to="`/game/${game.id}/edit`"
+                size="xs-sm"
+                color="contrast"
+                icon="edit"
+                display="icon-only"
+                circular
               >
-                <IconUI id="edit" :rounded="true" />
-              </nuxt-link>
-              <a
+                Edit
+              </Button>
+              <Button
+                component="a"
                 v-if="game.bgg_id"
+                :href="`https://boardgamegeek.com/play/details/${game.bgg_id}`"
                 target="_blank"
-                class="bg-white dark:text-white dark:bg-black hover:bg-purple-600 transition-colors duration-250 ease-in-out z-10 hidden md:flex"
+                class="z-10 hidden md:inline-flex"
                 :title="`View this game on BoardGameGeek - ${
                   game.script && gamesStore.getLastCharater(game.id)?.name
                     ? `${game.script} as ${
@@ -180,24 +198,22 @@
                       gamesStore.getLastCharater(game.id)?.name ||
                       ''
                 }, played on ${formatDate(game.date)}`"
-                :href="`https://boardgamegeek.com/play/details/${game.bgg_id}`"
+                size="xs-sm"
+                color="contrast"
+                icon="bgg"
+                display="icon-only"
+                circular
               >
-                <!-- @todo use IconUI-->
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 25.4 37.9"
-                  aria-hidden="true"
-                >
-                  <path
-                    fill="currentColor"
-                    d="m24.9 7-3.8 1 3.7-8L.9 8.8l1.3 10.5L0 21.5l6.6 16.4 14-5.1 4.8-11.4-2.1-2L24.9 7z"
-                  />
-                </svg>
-              </a>
-              <nuxt-link
-                v-if="!selectMultipleGames.enabled && !props.readonly"
+                BGG
+              </Button>
+              <Button
+                component="nuxt-link"
+                v-if="
+                  !selectMultipleGames.enabled &&
+                  !props.readonly &&
+                  canViewGame(game)
+                "
+                :to="getGameLink(game)"
                 class="bg-white dark:text-white dark:bg-black hover:bg-purple-600 transition-colors duration-250 ease-in-out game-link"
                 :title="`View game - ${
                   game.script && gamesStore.getLastCharater(game.id)?.name
@@ -208,10 +224,14 @@
                       gamesStore.getLastCharater(game.id)?.name ||
                       ''
                 }, played on ${formatDate(game.date)}`"
-                :to="getGameLink(game)"
+                size="xs-sm"
+                color="contrast"
+                icon="view"
+                display="icon-only"
+                circular
               >
-                <IconUI id="view" :rounded="true" />
-              </nuxt-link>
+                View
+            </Button>
             </div>
           </td>
         </tr>
@@ -222,12 +242,15 @@
 
 <script setup lang="ts">
 import { displayWinIconSvg } from "~/composables/useGames";
+import { FriendStatus } from "~/composables/useFriends";
 
 const gamesStore = useGames();
 const selectMultipleGames = useSelectMultipleGames();
 const { isBaseScript, scriptBgClasses } = useScripts();
 const users = useUsers();
 const me = useMe();
+const friends = useFriends();
+const user = useSupabaseUser();
 
 const props = withDefaults(
   defineProps<{
@@ -248,17 +271,17 @@ function formatDate(date: Date) {
   }).format(new Date(date));
 }
 
+const getChildGameId = (game: GameRecord) => {
+  if (me.value?.status !== Status.SUCCESS) return null;
+
+  const userId = me.value.data.user_id;
+  const childGame = game.child_games?.find((g) => g.user_id === userId);
+  return childGame?.id ?? null;
+};
+
 const getGameLink = (game: GameRecord) => {
-  if (me.value && me.value.status === Status.SUCCESS) {
-    const userId = me.value.data.user_id;
-    if (game.child_games) {
-      const childGame = game.child_games.find((g) => g.user_id === userId);
-      if (childGame) {
-        return `/game/${childGame.id}`;
-      }
-    }
-  }
-  return `/game/${game.id}`;
+  const childGameId = getChildGameId(game);
+  return childGameId ? `/game/${childGameId}` : `/game/${game.id}`;
 };
 
 const nuxtLink = resolveComponent("nuxt-link");
@@ -281,6 +304,33 @@ function isMyGame(game: GameRecord) {
 
   return me.value?.data.user_id === game.user_id;
 }
+
+function canViewGame(game: GameRecord) {
+  if (game.privacy === "PUBLIC") return true;
+  if (me.value?.status !== Status.SUCCESS) return false;
+
+  if (me.value.data.user_id === game.user_id) return true;
+  if (getChildGameId(game)) return true;
+
+  if (game.privacy === "FRIENDS_ONLY") {
+    return friends.getFriendStatus(game.user_id) === FriendStatus.FRIENDS;
+  }
+
+  return false;
+}
+
+function rowTitle(game: GameRecord) {
+  if (canViewGame(game)) return undefined;
+  return game.privacy === "FRIENDS_ONLY"
+    ? "Friends only game"
+    : "Private game";
+}
+
+onMounted(() => {
+  if (user.value?.id && friends.friends.status !== Status.SUCCESS) {
+    friends.fetchFriends();
+  }
+});
 </script>
 
 <style scoped>
@@ -380,19 +430,6 @@ tr {
     .select-multiple:hover & {
       @apply bg-purple-800 text-white dark:text-white dark:bg-purple-600;
     }
-  }
-}
-
-.game-actions,
-.select-status {
-  > a,
-  > span {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 50%;
-
-    @apply w-6 h-6 md:w-8 md:h-8;
   }
 }
 

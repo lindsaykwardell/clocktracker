@@ -84,15 +84,16 @@
                   v-if="options.include_tags.length"
                   class="flex flex-wrap gap-1"
                 >
-                  <button
+                  <Button
                     v-for="(tag, index) in options.include_tags"
-                    class="bg-green-500 hover:bg-green-400 dark:bg-green-600 dark:hover:bg-green-700 transition duration-150 pl-2 py-1 rounded flex items-center"
                     @click.prevent="options.include_tags.splice(index, 1)"
                     :title="`Remove ${tag}`"
+                    color="positive"
+                    size="sm"
+                    removableTag
                   >
                     {{ tag }}
-                    <IconUI id="x" size="sm" />
-                  </button>
+                  </Button>
                 </div>
               </div>
               <div class="flex flex-col gap-1">
@@ -112,15 +113,16 @@
                   v-if="options.exclude_tags.length"
                   class="flex flex-wrap gap-1"
                 >
-                  <button
+                  <Button
                     v-for="(tag, index) in options.exclude_tags"
-                    class="bg-red-500 hover:bg-red-400 dark:bg-red-600 dark:hover:bg-red-700 transition duration-150 pl-2 py-1 rounded flex items-center"
                     @click.prevent="options.exclude_tags.splice(index, 1)"
                     :title="`Remove ${tag}`"
+                    color="negative"
+                    size="sm"
+                    removableTag
                   >
                     {{ tag }}
-                    <IconUI id="x" size="sm" />
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -128,13 +130,17 @@
         </div>
         <!-- Form actions -->
         <div class="col-span-2 flex gap-2 justify-end">
-          <nuxt-link
+          <Button
+            component="nuxt-link"
             :to="cancelLink"
-            class="px-3 py-2 border rounded dark:border-stone-600 bg-stone-300/50 hover:bg-stone-300 dark:bg-stone-900/50 hover:dark:bg-stone-900"
+            color="caution"
           >
             Cancel
-          </nuxt-link>
-          <Button @click="saveChart" primary class="px-3">
+        </Button>
+          <Button 
+            @click="saveChart" 
+            color="positive"
+          >
             Save
           </Button>
         </div>

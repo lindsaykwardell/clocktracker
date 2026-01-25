@@ -189,7 +189,7 @@ const shouldShowAnnouncement = computed(() => {
 
 useHead({
   titleTemplate: (titleChunk) => {
-    return titleChunk ? `${titleChunk} - ClockTracker` : "ClockTracker";
+    return titleChunk ? `${titleChunk} | ClockTracker` : "ClockTracker";
   },
 });
 
@@ -221,6 +221,49 @@ body {
   @apply bg-stone-50 dark:bg-stone-800 font-gothic dark:text-stone-100;
 }
 
+.ct-card {
+  @apply p-4 relative rounded border dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 overflow-hidden;
+
+  &--event {
+    @apply p-0;
+  }
+
+  &__title {
+    @apply font-sorts text-xl lg:text-2xl;
+  }
+
+  &__subline {
+    @apply text-sm text-stone-500 dark:text-stone-400;
+  }
+
+  &__tags {
+    @apply flex gap-6 mt-2 text-stone-600;
+  }
+
+  a:not(.overlay-link),
+  button:not(.overlay-link) {
+    position: relative;
+    z-index: 1;
+  }
+
+  .overlay-link::after {
+    content: "";
+    inset: 0;
+    position: absolute;
+
+    @apply transition duration-150 rounded border border-transparent hover:border-purple-700;
+  }
+}
+
+.ct-contextual-links {
+  @apply absolute right-0 z-10;
+  @apply flex flex-col items-start min-w-[150px];
+  @apply divide-y divide-stone-100 dark:divide-stone-900;
+  @apply overflow-hidden whitespace-nowrap ;
+  @apply bg-stone-100 dark:bg-stone-900 rounded shadow-md;
+  @apply rounded shadow-md;
+}
+
 :root {
   --vs-controls-color: #664cc3;
   --vs-border-color: #664cc3;
@@ -236,6 +279,23 @@ body {
 
   --vs-dropdown-option--active-bg: #664cc3;
   --vs-dropdown-option--active-color: #eeeeee;
+
+  --color-base-100: theme(colors.stone.100);
+  --color-base-200: theme(colors.stone.200);
+  --color-base-300: theme(colors.stone.300);
+  --color-base-content: theme(colors.zinc.900);
+
+  --tailwind-spacing: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
+}
+
+.dark {
+  --color-base-100: theme(colors.stone.800);
+  --color-base-200: theme(colors.stone.900);
+  --color-base-300: theme(colors.stone.950);
+  --color-base-content: theme(colors.stone.100);
 }
 
 .v-select {

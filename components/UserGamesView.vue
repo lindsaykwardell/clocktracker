@@ -31,23 +31,12 @@
                 <div class="relative w-full md:w-auto">
                   <Menu>
                     <MenuButton class="relative w-full md:w-auto">
-                      <span
-                        v-if="activeFilters.length"
-                        class="absolute -top-2 -right-2 text-stone-200 bg-red-800 rounded-full px-2 py-1 text-xs font-bold aspect-square"
-                        aria-label="Unread notifications"
-                      >
-                        {{ activeFilters.length }}
-                      </span>
                       <Button
-                        class="font-normal w-full whitespace-nowrap"
-                        hasIcon
+                        icon="filter"
+                        :count="activeFilters.length ? activeFilters.length : ''"
+                        countLabel="Active filters"
                       >
-                        <div
-                          class="w-full flex gap-2 items-center md:justify-center"
-                        >
-                          <IconUI id="filter" />
-                          Filter Games
-                        </div>
+                        Filter Games
                       </Button>
                     </MenuButton>
                     <transition
@@ -272,39 +261,33 @@
                 </div>
                 <div class="relative w-full md:w-auto">
                   <Button
-                    class="font-normal w-full"
                     :disabled="selectMultipleGames.selectedGames.length <= 0"
                     @click="deleteMultipleGames"
+                    color="negative"
                   >
-                    <span class="w-full text-left">
-                      Delete game{{
-                        selectMultipleGames.selectedGames.length !== 1
-                          ? "s"
-                          : ""
-                      }}
-                    </span>
+                    Delete game{{
+                      selectMultipleGames.selectedGames.length !== 1
+                        ? "s"
+                        : ""
+                    }}
                   </Button>
                 </div>
                 <div class="relative w-full md:w-auto">
                   <Button
                     component="nuxt-link"
                     to="/edit-games"
-                    class="font-normal w-full"
                     :disabled="selectMultipleGames.selectedGames.length <= 0"
+                    color="primary"
                   >
-                    <span class="w-full text-left">
-                      Edit game{{
-                        selectMultipleGames.selectedGames.length !== 1
-                          ? "s"
-                          : ""
-                      }}
-                    </span>
+                    Edit game{{
+                      selectMultipleGames.selectedGames.length !== 1
+                        ? "s"
+                        : ""
+                    }}
                   </Button>
                 </div>
                 <div v-if="canPostToBGG" class="relative w-full md:w-auto">
                   <Button
-                    class="font-normal w-full flex items-center h-[2.5rem]"
-                    custom="bg-[#3f3a60] hover:bg-[#2e2950]"
                     :disabled="selectMultipleGames.selectedGames.length <= 0"
                     @click="
                       selectMultipleGames.selectedGamesHaveBGG
@@ -313,20 +296,16 @@
                           )
                         : postMultipleToBGG(selectMultipleGames.selectedGames)
                     "
+                    icon="bgg"
+                    color="bgg"
+                    :iconSpin=bggInFlight
                   >
-                    <div class="w-6">
-                      <img
-                        src="/img/bgg.png"
-                        class="w-6 h-6 m-auto"
-                        :class="{ 'animate-spin': bggInFlight }"
-                      />
-                    </div>
-                    <span
-                      class="text-left w-full"
-                      v-if="selectMultipleGames.selectedGamesHaveBGG"
-                      >Delete from BGG</span
-                    >
-                    <span class="text-left w-full" v-else>Post to BGG</span>
+                    <template v-if="selectMultipleGames.selectedGamesHaveBGG">
+                      Delete from BGG
+                    </template>
+                    <template v-else>
+                      Post to BGG
+                    </template>
                   </Button>
                 </div>
               </template>
@@ -334,11 +313,11 @@
                 <Button
                   @click="selectMultipleGames.toggleMode"
                   class="font-normal w-full"
-                  :tertiary="selectMultipleGames.enabled"
+                  :color="selectMultipleGames.enabled ? 'caution' : 'neutral'"
                 >
                   <div class="w-full text-left whitespace-nowrap">
                     <template v-if="selectMultipleGames.enabled">
-                      <span>Cancel</span>
+                      Cancel
                     </template>
                     <template v-else>Select Games</template>
                   </div>
@@ -355,21 +334,21 @@
                 </div>
               </slot>
               <Button
-                class="w-[100px]"
                 @click="gameView = 'grid'"
-                :disabled="gameView === 'grid'"
-                hasIcon
+                :active="gameView === 'grid'"
+                color="primary"
+                variant="soft"
+                icon="grid"
               >
-                <IconUI id="grid" />
                 Grid
               </Button>
               <Button
-                class="w-[100px]"
                 @click="gameView = 'table'"
-                :disabled="gameView === 'table'"
-                hasIcon
+                :active="gameView === 'table'"
+                color="primary"
+                icon="table"
+                variant="soft"
               >
-                <IconUI id="table" />
                 Table
               </Button>
             </div>
@@ -378,112 +357,101 @@
             <div class="flex flex-wrap gap-2">
               <Button
                 v-if="startDateRange !== null"
-                font-size="md"
                 @click.prevent="startDateRange = null"
                 :title="`Remove after ${formatDate(
                   new Date(startDateRange)
                 )} date filter`"
-                hasIcon
-                tag
+                size="sm"
+                removableTag
               >
-                After Date: {{ formatDate(new Date(startDateRange))
-                }}<IconUI id="x" />
+                From: {{ formatDate(new Date(startDateRange)) }}
               </Button>
               <Button
                 v-if="endDateRange !== null"
-                font-size="md"
                 @click.prevent="endDateRange = null"
                 :title="`Remove before ${formatDate(
                   new Date(endDateRange)
                 )} date filter`"
-                hasIcon
-                tag
+                size="sm"
+                removableTag
               >
-                Before Date: {{ formatDate(new Date(endDateRange))
-                }}<IconUI id="x" />
+                To: {{ formatDate(new Date(endDateRange)) }}
               </Button>
               <Button
                 v-if="minPlayers !== null"
-                font-size="md"
                 @click.prevent="minPlayers = null"
                 :title="`Remove min ${minPlayers} playercount filter`"
-                hasIcon
-                tag
+                size="sm"
+                removableTag
               >
-                Min Players: {{ minPlayers }}<IconUI id="x" />
+                Min Players: {{ minPlayers }}
               </Button>
               <Button
                 v-if="maxPlayers !== null"
-                font-size="md"
                 @click.prevent="maxPlayers = null"
                 :title="`Remove max ${maxPlayers} playercount filter `"
-                hasIcon
-                tag
+                size="sm"
+                removableTag
               >
-                Max Players: {{ maxPlayers }}<IconUI id="x" />
+                Max Players: {{ maxPlayers }}
               </Button>
               <Button
                 v-if="selectedRole"
-                font-size="md"
                 @click.prevent="selectedRole = null"
                 :title="`Remove ${selectedRole} role filter`"
-                hasIcon
-                tag
+                size="sm"
+                removableTag
               >
-                Character: {{ selectedRole }}<IconUI id="x" />
+                Character: {{ selectedRole }}
               </Button>
               <Button
                 v-if="selectedAlignment"
-                font-size="md"
                 @click.prevent="selectedAlignment = null"
                 :title="`Remove alignment`"
-                hasIcon
-                tag
+                size="sm"
+                removableTag
               >
                 Alignment:
-                <template v-if="selectedAlignment === 'GOOD'">Good</template>
-                <template v-else-if="selectedAlignment === 'EVIL'"
-                  >Evil</template
-                >
-                <IconUI id="x" />
+                <template v-if="selectedAlignment === 'GOOD'">
+                  Good
+                </template>
+                <template v-else-if="selectedAlignment === 'EVIL'">
+                  Evil
+                </template>
               </Button>
               <Button
                 v-if="selectedScript"
-                font-size="md"
                 @click.prevent="selectedScript = null"
                 :title="`Remove ${selectedScript} script filter`"
-                hasIcon
-                tag
+                size="sm"
+                removableTag
               >
-                Script: {{ selectedScript }}<IconUI id="x" />
+                Script: {{ selectedScript }}
               </Button>
               <Button
                 v-if="selectedLocation"
-                font-size="md"
                 @click.prevent="selectedLocation = null"
                 :title="`Remove ${selectedLocation} location filter`"
-                hasIcon
-                tag
+                size="sm"
+                removableTag
               >
-                Location: {{ selectedLocation }}<IconUI id="x" />
+                Location: {{ selectedLocation }}
               </Button>
               <Button
                 v-if="selectedCommunity"
-                font-size="md"
                 @click.prevent="selectedCommunity = null"
                 :title="`Remove ${selectedCommunity} community filter`"
-                hasIcon
-                tag
+                size="sm"
+                removableTag
               >
-                Community: {{ selectedCommunity }}<IconUI id="x" />
+                Community: {{ selectedCommunity }}
               </Button>
               <Button
                 v-if="selectedWinState"
-                font-size="md"
                 @click.prevent="selectedWinState = null"
                 :title="`Remove win/loss filter`"
-                hasIcon
-                tag
+                size="sm"
+                removableTag
               >
                 Win/Loss:
                 <template v-if="selectedWinState === WinStatus_V2.GOOD_WINS"
@@ -497,27 +465,24 @@
                   v-else-if="selectedWinState === WinStatus_V2.NOT_RECORDED"
                   >Not recorded</template
                 >
-                <IconUI id="x" />
               </Button>
               <Button
                 v-for="(player, index) in selectedPlayers"
-                font-size="md"
                 @click.prevent="selectedPlayers.splice(index, 1)"
                 :title="`Remove ${player} player filter`"
-                hasIcon
-                tag
+                size="sm"
+                removableTag
               >
-                Player: {{ player }}<IconUI id="x" />
+                Player: {{ player }}
               </Button>
               <Button
                 v-for="(tag, index) in selectedTags"
-                font-size="md"
                 @click.prevent="selectedTags.splice(index, 1)"
                 :title="`Remove ${tag} tag filter`"
-                hasIcon
-                tag
+                size="sm"
+                removableTag
               >
-                Tag: {{ tag }}<IconUI id="x" />
+                Tag: {{ tag }}
               </Button>
             </div>
           </div>
@@ -550,20 +515,23 @@
             <Button
               component="nuxt-link"
               to="/add-game"
-              class="w-[300px] py-2"
-              font-size="xl"
-              primary
+              color="primary"
+              icon="plus-lg"
+              size="lg"
+              wide
             >
               Add Your First Game
             </Button>
             <p>or</p>
-            <button
+            <Button
               type="button"
               @click="initImportGames"
-              class="bg-stone-600 hover:bg-stone-700 transition duration-150 text-white font-bold py-2 px-4 rounded text-center text-xl m-auto block w-[300px]"
+              icon="upload"
+              size="lg"
+              wide
             >
               Import Games
-            </button>
+            </Button>
           </template>
         </div>
       </slot>

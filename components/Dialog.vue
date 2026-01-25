@@ -17,14 +17,18 @@
           <slot name="title" />
         </div>
         <div class="flex-grow" />
-        <div>
-          <button
+        <div class="p-2">
+          <Button
             type="button"
-            class="p-4 hover:bg-stone-800"
             @click="emit('update:visible', false)"
+            title="Close dialog"
+            color="neutral-on-dark"
+            icon="x-lg"
+            display="icon-only"
+            circular
           >
-            Ⅹ
-          </button>
+            Close
+          </Button>
         </div>
       </div>
       <slot />

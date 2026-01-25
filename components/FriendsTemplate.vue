@@ -1,30 +1,34 @@
 <template>
   <StandardTemplate>
     <template v-if="shouldRenderFriendsPage">
-      <div class="flex gap-4 xl:max-w-[1200px] m-auto mt-4">
+      <div class="flex flex-col md:flex-row gap-4 xl:max-w-[1200px] m-auto mt-4 px-4 md:px-8">
         <nav
-          class="flex flex-col md:w-[300px] w-[100px] min-w-[100px] md:min-w-[300px] items-center"
+          class="flex flex-col w-full md:w-[300px] w-[100px] min-w-[100px] md:min-w-[300px] items-center"
         >
-          <ul class="w-full sticky top-16 md:top-4">
-            <li class="w-full bg-stone-300 dark:bg-stone-700">
+          <ul class="w-full sticky top-16 md:top-4 divide-y divide-stone-300 dark:divide-stone-800 bg-stone-200 dark:bg-stone-700 rounded overflow-hidden">
+            <li class="w-full">
               <nuxt-link
                 to="/friends"
-                class="block w-full p-2 hover:bg-stone-200 dark:hover:bg-stone-900 duration-150"
-                active-class="bg-stone-200 dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-950"
+                class="block w-full p-2 border-l-[6px] hover:border-primary hover:text-primary-content hover:bg-primary dark:hover:bg-dark-primary duration-150"
+                active-class="border-primary dark:border-dark-primary"
               >
                 My Friends
               </nuxt-link>
+            </li>
+            <li>
               <nuxt-link
                 to="/friends/requests"
-                class="block w-full p-2 hover:bg-stone-200 dark:hover:bg-stone-900 duration-150"
-                active-class="bg-stone-200 dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-950"
+                class="block w-full p-2 border-l-[6px] hover:border-primary hover:text-primary-content hover:bg-primary dark:hover:bg-dark-primary duration-150"
+                active-class="border-primary dark:border-dark-primary"
               >
                 Friend Requests
               </nuxt-link>
+            </li>
+            <li>
               <nuxt-link
                 to="/friends/suggested"
-                class="block w-full p-2 hover:bg-stone-200 dark:hover:bg-stone-900 duration-150"
-                active-class="bg-stone-200 dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-950"
+                class="block w-full p-2 border-l-[6px] hover:border-primary hover:text-primary-content hover:bg-primary dark:hover:bg-dark-primary duration-150"
+                active-class="border-primary dark:border-dark-primary"
               >
                 Suggested Friends
               </nuxt-link>
@@ -93,3 +97,13 @@ onMounted(() => {
   if (props.fetchSuggested) friends.fetchRecommended();
 });
 </script>
+
+<style scoped>
+  li > a:not(.router-link-exact-active,:hover) {
+    border-color: theme(colors.stone.300);
+
+    &:where(.dark, .dark *) {
+      border-color: theme(colors.stone.900);
+    }
+  }
+</style>

@@ -1,23 +1,23 @@
 <template>
   <div class="flex flex-col gap-2">
-    <button
+    <Button
       @click.prevent="alterFriendshipStatus"
-      class="whitespace-nowrap flex gap-1 items-center justify-center py-1 w-[150px] rounded transition duration-150"
+      :color="friendButtonColor"
       :class="friendButtonClass"
+      :image="friendButtonImage"
     >
-      <img src="/img/role/empath.png" class="w-8 h-8" />
       <span :aria-label="friendButtonText"></span>
-    </button>
-    <button
+    </Button>
+    <Button
       v-if="
         friends.getFriendStatus(props.user_id) === FriendStatus.REQUEST_RECEIVED
       "
       @click.prevent="rejectFriendship"
-      class="whitespace-nowrap flex gap-1 items-center justify-center py-1 w-[150px] rounded transition duration-150 border border-red-900 hover:border-red-950 hover:bg-red-950"
+      color="negative"
+      image="soldier"
     >
-      <img src="/img/role/empath.png" class="w-8 h-8" />
-      <span>Delete</span>
-    </button>
+      Reject Request
+    </Button>
   </div>
 </template>
 
@@ -56,13 +56,38 @@ const friendButtonText = computed(() => {
 const friendButtonClass = computed(() => {
   switch (friends.getFriendStatus(props.user_id)) {
     case FriendStatus.FRIENDS:
-      return "friends bg-green-950 hover:bg-transparent border border-transparent hover:border-red-950 text-white hover:text-black dark:hover:text-white";
+      return "friends";
     case FriendStatus.REQUEST_SENT:
-      return "request-sent border border-purple-500 dark:border-purple-800 hover:bg-purple-600 dark:hover:bg-purple-900";
+      return "request-sent";
     case FriendStatus.REQUEST_RECEIVED:
-      return "request-received border border-purple-500 dark:border-purple-800 hover:bg-purple-600 dark:hover:bg-purple-900";
+      return "request-received";
     case FriendStatus.NOT_FRIENDS:
-      return "not-friends bg-purple-500 dark:bg-purple-800 hover:bg-purple-600 dark:hover:bg-purple-900-dark";
+      return "not-friends";
+  }
+});
+
+const friendButtonColor = computed(() => {
+  switch (friends.getFriendStatus(props.user_id)) {
+    case FriendStatus.FRIENDS:
+      return "negative";
+    case FriendStatus.REQUEST_SENT:
+      return "caution";
+    case FriendStatus.REQUEST_RECEIVED:
+      return "positive";
+    case FriendStatus.NOT_FRIENDS:
+      return "primary";
+  }
+});
+
+const friendButtonImage = computed(() => {
+  switch (friends.getFriendStatus(props.user_id)) {
+    case FriendStatus.FRIENDS:
+      return "assassin";
+    case FriendStatus.REQUEST_SENT:
+      return "deusexfiasco";
+    case FriendStatus.REQUEST_RECEIVED:
+    case FriendStatus.NOT_FRIENDS:
+      return "empath";
   }
 });
 
@@ -97,18 +122,14 @@ div button.not-friends:first-child span:before {
 }
 
 div button.request-sent:first-child span:before {
-  content: "Cancel";
+  content: "Cancel Request";
 }
 
 div button.request-received:first-child span:before {
-  content: "Accept";
+  content: "Accept Request";
 }
 
 div button.friends:first-child span:before {
-  content: "Friends";
-}
-
-div button.friends:first-child:hover span:before {
   content: "Unfriend";
 }
 </style>
