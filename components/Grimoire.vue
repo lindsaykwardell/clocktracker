@@ -21,23 +21,10 @@
             <button
               v-if="!props.readonly"
               type="button"
-              class="z-50 absolute w-full h-full flex justify-center items-center rounded-full bg-black/25 opacity-0 hover:opacity-100 transition duration-200 cursor-pointer"
+              class="text-white z-50 absolute w-full h-full flex justify-center items-center rounded-full bg-black/50 opacity-0 hover:opacity-100 transition duration-200 cursor-pointer"
               @click="removeReminder(token, reminderToken)"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="32"
-                height="32"
-                viewBox="0 0 512 512"
-              >
-                <path
-                  d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
-                  fill="currentColor"
-                />
-                <path d="M249 160h14v241h-14z" fill="currentColor" />
-                <path d="M320 160h-14.6l-10.7 241h14.6z" fill="currentColor" />
-                <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
-              </svg>
+              <IconUI id="x-lg" size="lg"/>
             </button>
             <ReminderToken :reminder="reminderToken"> </ReminderToken>
           </div>
@@ -149,12 +136,13 @@
           v-else-if="token.player_name"
           class="relative bg-stone-600 rounded p-1 border-2 border-stone-500 text-center text-ellipsis text-xs md:text-sm max-w-[150px] overflow-hidden whitespace-nowrap"
         >
+          <!-- @todo Apply Button? -->
           <button
             v-if="me.status === Status.SUCCESS && canClaimSeat"
             class="absolute top-0 left-0 w-full h-full bg-stone-600 flex items-center justify-center opacity-0 hover:opacity-100 transition duration-300 gap-2"
             @click="emit('claimSeat', token)"
           >
-            <Chair class="w-6 h-6" />
+            <IconUI id="chair" />
             Claim Seat
           </button>
           {{ token.player_name }}

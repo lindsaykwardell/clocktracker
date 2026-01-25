@@ -1,196 +1,277 @@
 <template>
   <section
-    class="bg-stone-200 dark:bg-stone-900 rounded shadow"
+    class="ct-card ct-card--event grid"
     :class="{
-      'text-sm': size === 'sm',
-      'max-w-full': width === 'full',
-      'max-w-[600px]': width !== 'full',
+      'max-w-[600px]': display !== 'large',
+      'text-sm': display === 'small',
+      'lg:w-full xl:w-3/4 lg:max-w-none lg:grid-cols-[minmax(400px,_1fr)_minmax(360px,_1fr)]': display === 'detail',
     }"
   >
-    <img
-      v-if="event.image"
-      :src="event.image"
-      class="w-full md:w-[600px] object-cover h-[150px] md:h-[250px] m-auto"
-    />
-    <div class="p-3 flex flex-col gap-2">
-      <div
-        class="flex text-stone-500 dark:text-stone-400 items-center"
-        :class="{
-          'flex-row': size !== 'sm',
-          'flex-col': size === 'sm',
-        }"
-      >
-        <div class="flex-grow">
-          <ClientOnly>
-            <time
-              >{{ formatDate(event.start) }} {{ formatTime(event.start) }}</time
-            >
-            - <time>{{ formatTime(event.end) }}</time>
-          </ClientOnly>
-        </div>
-        <div class="hidden md:block">
-          <template v-if="event.location_type === 'ONLINE'"> Online </template>
-          <template v-else>
-            {{ event.location }}
-          </template>
-        </div>
-        <div
-          v-if="size !== 'sm' && canModifyEvent"
-          class="pl-4 relative"
-          id="menu-controls"
-        >
-          <Menu>
-            <MenuButton>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="32"
-                height="32"
-                viewBox="0 0 16 16"
-                class="w-6"
-              >
-                <path
-                  fill="#a8a29e"
-                  d="M3 9.5a1.5 1.5 0 1 1 0-3a1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3a1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3a1.5 1.5 0 0 1 0 3"
-                />
-              </svg>
-            </MenuButton>
-            <transition
-              enter-active-class="transition duration-100 ease-out"
-              enter-from-class="transform scale-95 opacity-0"
-              enter-to-class="transform scale-100 opacity-100"
-              leave-active-class="transition duration-75 ease-out"
-              leave-from-class="transform scale-100 opacity-100"
-              leave-to-class="transform scale-95 opacity-0"
-            >
-              <MenuItems
-                class="absolute right-0 z-10 bg-stone-100 dark:bg-stone-800 rounded shadow-md whitespace-nowrap flex flex-col items-start min-w-[150px]"
-              >
-                <MenuItem>
-                  <nuxt-link
-                    :to="`/event/${event.id}/edit`"
-                    class="flex gap-1 w-full items-center text-black dark:text-white text-sm px-2 min-h-[32px]"
-                  >
-                    Edit Event
-                  </nuxt-link>
-                </MenuItem>
-                <MenuItem>
-                  <nuxt-link
-                    :to="`/event/create?duplicate=${event.id}${
-                      event.community?.slug
-                        ? `&slug=${event.community?.slug}`
-                        : ''
-                    }`"
-                    class="flex gap-1 w-full items-center text-black dark:text-white text-sm px-2 min-h-[32px]"
-                  >
-                    Duplicate Event
-                  </nuxt-link>
-                </MenuItem>
-                <MenuItem>
-                  <button
-                    @click="deleteEvent"
-                    class="flex gap-1 w-full items-center text-black dark:text-white text-sm px-2 min-h-[32px]"
-                  >
-                    Delete Event
-                  </button>
-                </MenuItem>
-              </MenuItems>
-            </transition>
-          </Menu>
-        </div>
-      </div>
-      <div class="block md:hidden text-stone-500 dark:text-stone-400">
-        <template v-if="event.location_type === 'ONLINE'"> Online </template>
-        <template v-else>
-          {{ event.location }}
-        </template>
-      </div>
-      <div
-        v-if="event.created_by"
-        class="flex text-stone-500 dark:text-stone-400 items-center gap-2"
-      >
-        <Avatar :value="event.created_by.avatar" size="xs" />
-        <span class="text-sm"
-          >Created by {{ event.created_by.display_name }}</span
-        >
-      </div>
-      <h2
-        class="font-sorts"
-        :class="{
-          'text-lg lg:text-xl': size !== 'sm',
-          'text-base': size === 'sm',
-        }"
-      >
-        {{ event.title }}
-      </h2>
-      <VueMarkdown
-        class="post"
-        :class="{
-          'text-sm md:text-base': size !== 'sm',
-          'text-sm': size === 'sm',
-        }"
-        :source="event.description"
+    <div 
+      :class="{
+        'lg:border-r lg:border-stone-300 dark:lg:border-stone-700/50 flex flex-col max-w-[600px]': display === 'detail',
+      }"
+    >
+      <img
+        v-if="event.image && display !== 'small'"
+        :src="event.image"
+        class="w-full object-cover h-[150px] md:h-[250px] m-auto"
       />
-      <div v-if="event.game_link" class="flex gap-3">
-        <span class="text-sm text-stone-500 dark:text-stone-400"
-          >Game Link</span
+
+      <div class="flex-grow flex flex-col gap-4 p-4">
+        <div 
+          class="flex flex-col "
+          :class="{
+            'gap-1': display !== 'small',
+            'gap-2': display === 'small',
+          }"
         >
-        <a
-          v-if="event.game_link"
-          :href="event.game_link"
-          target="_blank"
-          class="text-blue-600 text-sm hover:underline"
-          >{{ event.game_link }}</a
-        >
-      </div>
-      <div class="flex flex-col md:flex-row gap-2 items-top justify-between">
-        <div
-          class="flex-1 flex gap-3 items-center"
-          v-if="
-            event.storytellers.length > 0 && event.storytellers[0].length > 0
-          "
-        >
-          <span class="text-sm text-stone-500 dark:text-stone-400"
-            >Storyteller{{ event.storytellers.length === 1 ? "" : "s" }}</span
+          <div
+            class="flex items-start"
+            :class="{
+              'flex-row gap-4': display !== 'small',
+              'flex-col gap-1': display === 'small',
+            }"
           >
-          <div>
-            <template v-for="(storyteller, index) in event.storytellers">
-              <span>{{ storyteller }}</span>
-              <template v-if="index !== event.storytellers.length - 1"
-                >,
+            <!-- Date & Title -->
+            <div class="flex-grow">
+              <div class="text-primary dark:text-dark-primary font-semibold flex gap-1 flex-wrap">
+                <ClientOnly>
+                  <span>
+                    <time>{{ formatDate(event.start) }} {{ formatTime(event.start) }} - </time>
+                  </span>
+                  <span>
+                    <time>{{ formatTime(event.end) }}</time>
+                  </span>
+                </ClientOnly>
+              </div>
+              <h2
+                class="font-sorts text-balance"
+                :class="{
+                  'text-xl lg:text-2xl': display !== 'small',
+                  'text-lg/6': display === 'small',
+                }"
+              >
+                <template v-if="display !== 'detail'">
+                  <nuxt-link :to="`/event/${event.id}`" class="overlay-link">
+                    {{ event.title }}
+                  </nuxt-link>
+                </template>
+                <template v-else>
+                  {{ event.title }}
+                </template>
+              </h2>
+            </div>
+
+            <!-- Tags and actions -->
+            <div class="flex gap-2 items-center">
+              <template v-if="event.location_type === 'ONLINE'">
+                <Badge
+                  :size="display === 'small' ? 'sm' : 'md'"
+                  color="digital"
+                >
+                  Online
+                </Badge>
               </template>
-            </template>
+              <template v-else>
+                <Badge
+                  :size="display === 'small' ? 'sm' : 'md'"
+                  color="primary"
+                >
+                  In person
+                </Badge>
+              </template>
+              <div
+                v-if="display !== 'small' && canModifyEvent"
+                class="relative"
+                id="menu-controls"
+              >
+                <Menu>
+                  <MenuButton>
+                    <IconUI id="dots" :rounded="true" shadow />
+                  </MenuButton>
+                  <transition
+                    enter-active-class="transition duration-100 ease-out"
+                    enter-from-class="transform scale-95 opacity-0"
+                    enter-to-class="transform scale-100 opacity-100"
+                    leave-active-class="transition duration-75 ease-out"
+                    leave-from-class="transform scale-100 opacity-100"
+                    leave-to-class="transform scale-95 opacity-0"
+                  >
+                    <MenuItems
+                      class="ct-contextual-links"
+                    >
+                      <MenuItem>
+                        <ButtonSubmenu
+                          component="nuxt-link"
+                          :to="`/event/${event.id}/edit`"
+                          icon="edit"
+                        >
+                          Edit Event
+                        </ButtonSubmenu>
+                      </MenuItem>
+                      <MenuItem>
+                        <ButtonSubmenu
+                          component="nuxt-link"
+                          :to="`/event/create?duplicate=${event.id}${
+                            event.community?.slug
+                              ? `&slug=${event.community?.slug}`
+                              : ''
+                          }`"
+                          icon="copy"
+                        >
+                          Duplicate Event
+                        </ButtonSubmenu>
+                      </MenuItem>
+                      <MenuItem>
+                        <ButtonSubmenu
+                          @click="deleteEvent"
+                          icon="trash"
+                        >
+                          Delete Event
+                        </ButtonSubmenu>
+                      </MenuItem>
+                    </MenuItems>
+                  </transition>
+                </Menu>
+              </div>
+            </div>
+          </div>
+
+          <!-- Author -->
+          <div 
+            v-if="display !== 'small'"
+            class="ct-card__subline flex items-center gap-1"
+            >
+            <div
+              v-if="event.created_by"
+              class="flex items-center gap-2"
+            >
+              <Avatar :value="event.created_by.avatar" size="xxs" background />
+              <span>Created by {{ event.created_by.display_name }}</span>
+            </div>
           </div>
         </div>
-        <div class="flex-1 flex gap-3 items-center" v-if="event.script">
-          <span class="text-sm text-stone-500 dark:text-stone-400">Script</span>
-          <a class="hover:underline" :href="scriptLink(event)" target="">
-            {{ event.script }}
-          </a>
+        
+        <template v-if="event.description">
+          <VueMarkdown
+            class="post max-w-[80ch] text-stone-700 dark:text-stone-400"
+            :class="{
+              'text-sm md:text-base': display !== 'small',
+              'text-sm': display === 'small',
+            }"
+            :source="event.description"
+          />
+        </template>
+        
+        <div v-if="$slots.register" class="flex-grow flex items-end">
+          <div class="flex gap-2">
+            <slot name="register" :event="event" />
+          </div>
         </div>
       </div>
-      <div class="flex flex-col md:flex-row justify-between gap-2 items-center">
-        <div>
-          <span class="text-stone-500 dark:text-stone-400">
-            <template v-if="event.player_count">
-              {{ registeredPlayerCount }}/{{ event.player_count }}
-            </template>
-            <template v-else>
-              {{ registeredPlayerCount }}
-            </template>
-            players registered
-          </span>
-          <template v-if="waitlistCount > 0">
-            <span class="text-stone-500 dark:text-stone-400"
-              >({{ waitlistCount }} waiting)</span
-            >
-          </template>
-        </div>
-        <div class="flex gap-2 justify-end">
-          <slot name="register" :event="event" />
-        </div>
-      </div>
+    </div>
 
-      <slot name="footer" :event="event" />
+    <div>
+      <div 
+        class="flex flex-col gap-4 px-4 pb-4"
+        :class="{
+          'xl:pl-6 pt-4': display === 'detail',
+        }"
+      >
+        <hr 
+          class="border-stone-300 dark:border-stone-700/50 w-full "
+          :class="{
+            'lg:hidden': display === 'detail',
+          }"
+        />
+
+        <!-- Metadata -->
+        <div 
+          class="grid"
+          :class="{
+            'grid-cols-2 gap-2': display !== 'small',
+            'gap-1': display === 'small',
+          }"
+        >
+          <div v-if="event.location_type !== 'ONLINE'" class="card-metadata">
+            <span class="card-label">
+              Location
+            </span>
+            {{ event.location }}
+          </div>
+          <div v-if="event.game_link" class="card-metadata">
+            <span class="card-label">
+              Game Link
+            </span>
+            <Button
+              component="a"
+              :href="event.game_link"
+              color="primary"
+              variant="link"
+            >
+              Go to game <span class="sr-only">{{ event.title }}</span>
+            </Button>
+          </div>
+          <div
+            class="card-metadata"
+            v-if="
+              event.storytellers.length > 0 && event.storytellers[0].length > 0
+            "
+          >
+            <span class="card-label"
+              >Storyteller{{ event.storytellers.length === 1 ? "" : "s" }}</span
+            >
+            <div>
+              <template v-for="(storyteller, index) in event.storytellers">
+                <span>{{ storyteller }}</span>
+                <template v-if="index !== event.storytellers.length - 1"
+                  >,
+                </template>
+              </template>
+            </div>
+          </div>
+          <div class="card-metadata" v-if="event.script">
+            <span class="card-label">
+              Script
+            </span>
+            <Button
+              component="a"
+              :href="scriptLink(event)" 
+              target=""
+              color="primary"
+              variant="link"
+            >
+              {{ event.script }}
+            </Button>
+          </div>
+          <div class="card-metadata">
+            <span v-if="display === 'detail'" class="card-label">
+              Status
+            </span>
+            <div>
+              <template v-if="event.player_count">
+                {{ registeredPlayerCount }}/{{ event.player_count }}
+              </template>
+              <template v-else>
+                {{ registeredPlayerCount }}
+              </template>
+              players registered
+              <template v-if="waitlistCount > 0">
+                <span class="text-stone-500 dark:text-stone-400">
+                  ({{ waitlistCount }} waiting)
+                </span>
+              </template>
+            </div>
+            
+          </div>
+        </div>
+
+        <slot name="footer" :event="event" />
+        
+      </div>
+      <Tour :steps="tour" v-if="canModifyEvent" tourKey="event-card-controls" />
+      
     </div>
   </section>
 </template>
@@ -199,12 +280,12 @@
 import type { Event } from "~/composables/useCommunities";
 import VueMarkdown from "vue-markdown-render";
 import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
+import { chartColors } from "~/composables/useChartColors";
 
 const props = defineProps<{
   event: Event;
   canModifyEvent?: boolean;
-  size?: "sm" | "md";
-  width?: "full" | "auto";
+  display?: "small" | "large" | "detail" ;
 }>();
 
 const emit = defineEmits(["deleted"]);
@@ -268,3 +349,13 @@ function deleteEvent() {
 }
 
 </script>
+
+<style scoped>
+  .card-metadata {
+    @apply flex flex-col gap-1 items-start;
+  }
+
+  .card-label {
+    @apply text-xs text-stone-500 dark:text-stone-400 uppercase;
+  }
+</style>

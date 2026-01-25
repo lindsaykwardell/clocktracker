@@ -1,6 +1,12 @@
 <template>
-  <ul class="grid grid-cols-[repeat(auto-fill,_minmax(260px,_1fr))] md:grid-cols-[repeat(auto-fill,_minmax(360px,_1fr))] bg-stone-300/30 dark:bg-stone-700/30">
+  <ul 
+    class="grid bg-stone-300/30 dark:bg-stone-700/30"
+    :class="{
+      'grid-cols-[repeat(auto-fill,_minmax(260px,_1fr))] md:grid-cols-[repeat(auto-fill,_minmax(360px,_1fr))]': !showSingleGame
+    }"
+    >
     <li
+      :key="game.id"
       v-for="game in games"
       class="border border-black transition duration-150 ease-in-out"
       :class="
@@ -13,43 +19,62 @@
           class="absolute top-0 left-0 w-full h-full z-50 cursor-pointer"
           @click="selectMultipleGames.toggleGame(game.id)"
         ></button>
-        <component
-          :is="componentIs"
-          @click="handleCardClick(game)"
-          :to="getGameLink(game)"
-          class="w-full bg-stone-900 flex flex-col items-center cursor-pointer rounded overflow-hidden text-black h-48 md:h-72 bg-cover bg-center script-bg"
-          :style="
-            game.associated_script?.background
-              ? {
-                  '--bg-image-url': `url(${game.associated_script.background})`,
-                }
-              : {}
-          "
-          :class="{
-            ...scripts.scriptBgClasses(
-              game.script,
-              !!game.associated_script?.background
-            ),
-          }"
+          <component
+            :is="cardComponent(game)"
+            @click="handleCardClick(game)"
+            :to="canViewGame(game) ? getGameLink(game) : undefined"
+            :title="cardTitle(game)"
+            class="w-full bg-stone-900 flex flex-col items-center overflow-hidden text-black h-48 md:h-72 bg-cover bg-center script-bg"
+            :style="
+              game.associated_script?.background
+                ? {
+                    '--bg-image-url': `url(${game.associated_script.background})`,
+                  }
+                : {}
+            "
+            :class="{
+              'cursor-pointer':
+                canViewGame(game) ||
+                !!props.onCardClick ||
+                selectMultipleGames.enabled,
+              'cursor-not-allowed': !canViewGame(game),
+              ...scripts.scriptBgClasses(
+                game.script,
+                !!game.associated_script?.background
+              ),
+            }"
         >
           <img
             v-if="game.image_urls[0]"
             :src="fullImageUrl(game.image_urls[0])"
             class="absolute bottom-0 w-full h-full object-cover blur-sm"
             crossorigin="anonymous"
+            loading="lazy"
+            decoding="async"
           />
           <div
-            class="absolute top-0 left-0 text-white md:text-lg bg-gradient-to-br from-black/75 via-black/50 to-black-0 p-1 flex gap-2 items-center"
+            class="absolute z-10 top-0 left-0 text-white md:text-lg bg-gradient-to-br from-black/75 via-black/50 to-black-0 p-1 flex gap-2 items-center"
           >
             <div>{{ formatDate(game.date) }}</div>
-            <span
-              v-if="game.ignore_for_stats"
-              class="inline-flex gap-1 items-center rounded-sm bg-red-700/60 text-xs font-medium text-white badge"
+            <Badge v-if="game.ignore_for_stats" size="xs" icon="disabled" variant="overlay" color="negative" bold>
+              <span class="sr-only">Ignored for </span>Stats
+            </Badge>
+            <Badge 
+              v-if="game.privacy === 'PRIVATE' || game.privacy === 'FRIENDS_ONLY'"
+              size="xs"
+              icon="eye-slash" 
+              color="negative"
+              variant="overlay"
+              bold
             >
-              <IconUI id="disabled" size="xs" /><span class="sr-only"
-                >Ignored for </span
-              >Stats
-            </span>
+              <span class="sr-only">Visibility: </span>
+              <template v-if="game.privacy === 'PRIVATE'">
+                Private
+              </template>
+              <template v-else>
+                Friends Only
+              </template>
+            </Badge>
           </div>
           <div class="absolute top-8 left-1 z-10">
             <Avatar
@@ -66,10 +91,10 @@
               <Token
                 v-if="
                   showCommunityCard === false &&
-                  (gamesStore.getLastCharater(game.id).name ||
-                    gamesStore.getLastCharater(game.id).alignment !== 'NEUTRAL')
+                  (lastCharacter(game.id).name ||
+                    lastCharacter(game.id).alignment !== 'NEUTRAL')
                 "
-                :character="gamesStore.getLastCharater(game.id)"
+                :character="lastCharacter(game.id)"
                 size="lg"
               />
               <div v-else class="bg-black/25 flex justify-center">
@@ -129,42 +154,30 @@
           <div
             class="absolute -top-6 md:-top-12 left-0 p-1 flex gap-2 items-center bg-gradient-to-r from-black/75 via-black/50 to-black-0 h-6 md:h-12"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="32"
-              height="32"
-              viewBox="0 0 256 256"
-              class="text-yellow-400 w-4 h-h md:w-auto md:h-auto"
-            >
-              <path
-                fill="currentColor"
-                d="M64.12 147.8a4 4 0 0 1-4 4.2H16a8 8 0 0 1-7.8-6.17a8.35 8.35 0 0 1 1.62-6.93A67.8 67.8 0 0 1 37 117.51a40 40 0 1 1 66.46-35.8a3.94 3.94 0 0 1-2.27 4.18A64.08 64.08 0 0 0 64 144c0 1.28 0 2.54.12 3.8m182-8.91A67.76 67.76 0 0 0 219 117.51a40 40 0 1 0-66.46-35.8a3.94 3.94 0 0 0 2.27 4.18A64.08 64.08 0 0 1 192 144c0 1.28 0 2.54-.12 3.8a4 4 0 0 0 4 4.2H240a8 8 0 0 0 7.8-6.17a8.33 8.33 0 0 0-1.63-6.94Zm-89 43.18a48 48 0 1 0-58.37 0A72.13 72.13 0 0 0 65.07 212A8 8 0 0 0 72 224h112a8 8 0 0 0 6.93-12a72.15 72.15 0 0 0-33.74-29.93Z"
-              />
-            </svg>
+            <IconUI id="players" size="xxl" color="yellow" />
             <div class="text-white font-bold flex items-center gap-2">
               <span>{{ game.player_count }}</span>
-                <template v-if="game.traveler_count">
-                  (+{{ game.traveler_count }})
-                </template>
-                <div
-                  v-for="(player, index) in taggedPlayers(game)"
-                  class="tagged-players"
-                  :style="`--i: ${index}`"
-                >
-                  <Avatar
-                    size="xs"
-                    :value="player?.avatar"
-                    class="bg-stone-300 dark:bg-stone-950"
-                  /></div>
+              <template v-if="game.traveler_count">
+                (+{{ game.traveler_count }})
+              </template>
+              <div
+                v-for="(player, index) in taggedPlayers(game)"
+                class="tagged-players"
+                :style="`--i: ${index}`"
+              >
+                <Avatar
+                  size="xs"
+                  :value="player?.avatar"
+                  class="bg-stone-300 dark:bg-stone-950"
+                />
+              </div>
             </div>
           </div>
           <div class="flex flex-grow justify-between gap-1 p-1">
             <div class="flex gap-1 items-center">
-              <div v-if="isFavorite(game)" class="text-primary">
-                <Star class="w-6" />
-              </div>
+              <IconUI v-if="isFavorite(game)" id="star-bordered" class="text-primary" size="lg" />
               <div v-if="game.ls_game?.campaign?.id">
-                <img src="/img/living-scripts.webp" class="w-8 h-8" />
+                <img src="/img/ui/living-scripts.webp" class="w-7 h-7" />
               </div>
               <div
                 class="font-gothic text-white md:text-lg flex gap-1 items-center"
@@ -177,16 +190,14 @@
                       !scripts.isBaseScript(game.script)
                     "
                   >
-                    <span
-                      class="hidden md:inline-flex items-center rounded-sm bg-black/50 text-xs font-medium text-white badge"
-                    >
+                    <Badge size="xs" variant="overlay">
                       <template v-if="game.ls_game_id">
                         Game {{ game.associated_script.version }}
                       </template>
                       <template v-else>
                         {{ game.associated_script.version }}
                       </template>
-                    </span>
+                    </Badge>
                   </template>
                 </div>
               </div>
@@ -194,84 +205,67 @@
             <div
               class="game-actions gap-1 md:gap-2 items-center justify-center flex"
             >
-              <nuxt-link
+              <Button
+                component="nuxt-link"
                 v-if="!selectMultipleGames.enabled && isMyGame(game)"
-                class="text-white bg-black hover:bg-purple-600 transition-colors duration-250 ease-in-out z-10"
-                :title="`Edit game - ${
-                  game.script && gamesStore.getLastCharater(game.id)?.name
-                    ? `${game.script} as ${
-                        gamesStore.getLastCharater(game.id).name
-                      }`
-                    : game.script ||
-                      gamesStore.getLastCharater(game.id)?.name ||
-                      ''
-                }, played on ${formatDate(game.date)}`"
                 :to="`/game/${game.id}/edit`"
+                class="z-10"
+                :title="`Edit game - ${
+                  game.script && lastCharacter(game.id)?.name
+                    ? `${game.script} as ${lastCharacter(game.id).name}`
+                    : game.script || lastCharacter(game.id)?.name || ''
+                }, played on ${formatDate(game.date)}`"
+                size="sm"
+                color="black"
+                icon="edit"
+                display="icon-only"
+                circular
               >
-                <IconUI id="edit" :rounded="true" :dark="true" />
-              </nuxt-link>
-              <a
+                Edit
+              </Button>
+              <Button
+                component="a"
                 v-if="!selectMultipleGames.enabled && game.bgg_id"
-                target="_blank"
-                class="text-white bg-black hover:bg-purple-600 transition-colors duration-250 ease-in-out z-10"
-                :title="`View this game on BoardGameGeek - ${
-                  game.script && gamesStore.getLastCharater(game.id)?.name
-                    ? `${game.script} as ${
-                        gamesStore.getLastCharater(game.id).name
-                      }`
-                    : game.script ||
-                      gamesStore.getLastCharater(game.id)?.name ||
-                      ''
-                }, played on ${formatDate(game.date)}`"
                 :href="`https://boardgamegeek.com/play/details/${game.bgg_id}`"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 25.4 37.9"
-                  aria-hidden="true"
-                >
-                  <path
-                    fill="currentColor"
-                    d="m24.9 7-3.8 1 3.7-8L.9 8.8l1.3 10.5L0 21.5l6.6 16.4 14-5.1 4.8-11.4-2.1-2L24.9 7z"
-                  />
-                </svg>
-              </a>
-              <nuxt-link
-                v-if="!selectMultipleGames.enabled"
-                class="text-white bg-black hover:bg-purple-600 transition-colors duration-250 ease-in-out game-link"
-                :title="`View game - ${
-                  game.script && gamesStore.getLastCharater(game.id)?.name
-                    ? `${game.script} as ${
-                        gamesStore.getLastCharater(game.id).name
-                      }`
-                    : game.script ||
-                      gamesStore.getLastCharater(game.id)?.name ||
-                      ''
+                target="_blank"
+                class="z-10"
+                :title="`View this game on BoardGameGeek - ${
+                  game.script && lastCharacter(game.id)?.name
+                    ? `${game.script} as ${lastCharacter(game.id).name}`
+                    : game.script || lastCharacter(game.id)?.name || ''
                 }, played on ${formatDate(game.date)}`"
-                :to="getGameLink(game)"
+                color="black"
+                size="sm"
+                icon="bgg"
+                display="icon-only"
+                circular
               >
-                <IconUI id="view" :rounded="true" :dark="true" />
-              </nuxt-link>
+                BGG
+              </Button>
+              <Button
+                component="nuxt-link"
+                v-show="!selectMultipleGames.enabled && canViewGame(game)"
+                :to="getGameLink(game)"
+                class="game-link"
+                :title="`View game - ${
+                  game.script && lastCharacter(game.id)?.name
+                    ? `${game.script} as ${lastCharacter(game.id).name}`
+                    : game.script || lastCharacter(game.id)?.name || ''
+                }, played on ${formatDate(game.date)}`"
+                size="sm"
+                color="black"
+                icon="view"
+                display="icon-only"
+                circular
+              >
+                View
+            </Button>
             </div>
             <div
               class="flex items-center justify-center select-status"
-              v-if="selectMultipleGames.enabled"
+              v-show="selectMultipleGames.enabled"
             >
-              <span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  fill="currentColor"
-                  viewBox="0 0 16 16"
-                >
-                  <path
-                    d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425z"
-                  />
-                </svg>
-              </span>
+              <IconUI id="check" rounded dark />
             </div>
           </div>
         </div>
@@ -282,9 +276,12 @@
 
 <script setup lang="ts">
 import { displayWinIconSvg } from "~/composables/useGames";
+import { FriendStatus } from "~/composables/useFriends";
 const gamesStore = useGames();
 const users = useUsers();
 const me = useMe();
+const friends = useFriends();
+const user = useSupabaseUser();
 
 const config = useRuntimeConfig();
 const scripts = useScripts();
@@ -295,34 +292,76 @@ const props = withDefaults(
     games: GameRecord[];
     onCardClick?: (game: GameRecord) => void;
     showCommunityCard?: boolean;
+    showSingleGame?: boolean;
   }>(),
   {
     showCommunityCard: false,
+    showSingleGame: false,
   }
 );
 
-const getGameLink = (game: GameRecord) => {
-  if (me.value?.status === Status.SUCCESS) {
-    const user_id = me.value.data.user_id;
-    const childGame = game.child_games?.find(
-      (g: { user_id: string }) => g.user_id === user_id
-    );
-    if (childGame) {
-      return `/game/${childGame.id}`;
-    }
-  }
-  return `/game/${game.id}`;
+const getChildGameId = (game: GameRecord) => {
+  if (me.value?.status !== Status.SUCCESS) return null;
+
+  const userId = me.value.data.user_id;
+  const childGame = game.child_games?.find((g) => g.user_id === userId);
+  return childGame?.id ?? null;
 };
 
-const componentIs = computed(() => {
+const getGameLink = (game: GameRecord) => {
+  const childGameId = getChildGameId(game);
+  return childGameId ? `/game/${childGameId}` : `/game/${game.id}`;
+};
+
+const canViewGame = (game: GameRecord) => {
+  if (game.privacy === "PUBLIC") return true;
+  if (me.value?.status !== Status.SUCCESS) return false;
+
+  if (me.value.data.user_id === game.user_id) return true;
+  if (getChildGameId(game)) return true;
+
+  if (game.privacy === "FRIENDS_ONLY") {
+    return friends.getFriendStatus(game.user_id) === FriendStatus.FRIENDS;
+  }
+
+  return false;
+};
+
+const cardComponent = (game: GameRecord) => {
   if (!props.games.length) return "div";
-  return props.onCardClick ? "button" : defineNuxtLink({});
+  if (props.onCardClick) return "button";
+  return canViewGame(game) ? defineNuxtLink({}) : "div";
+};
+
+const cardTitle = (game: GameRecord) => {
+  if (canViewGame(game)) return undefined;
+  return game.privacy === "FRIENDS_ONLY"
+    ? "Friends only game"
+    : "Private game";
+};
+
+const lastCharacters = computed<
+  Record<string, ReturnType<typeof gamesStore.getLastCharater>>
+>(() => {
+  const entries: Record<
+    string,
+    ReturnType<typeof gamesStore.getLastCharater>
+  > = {};
+  for (const game of props.games) {
+    entries[game.id] = gamesStore.getLastCharater(game.id);
+  }
+  return entries;
 });
 
+const lastCharacter = (gameId: string) => lastCharacters.value[gameId];
+
+const dateFormatter = new Intl.DateTimeFormat(
+  typeof navigator !== "undefined" ? navigator.language : "en-US",
+  { timeZone: "UTC" }
+);
+
 function formatDate(date: Date) {
-  return new Intl.DateTimeFormat(navigator.language, {
-    timeZone: "UTC",
-  }).format(new Date(date));
+  return dateFormatter.format(new Date(date));
 }
 
 function fullImageUrl(file: string) {
@@ -427,15 +466,45 @@ const orbitPos = (game: GameRecord, index: number) => {
   return index - (count - 1) / 2;
 };
 
-const taggedPlayers = computed(
-  () => (game: GameRecord) =>
-    game.grimoire
-      .flatMap((g) => g.tokens.filter((t) => t.player_id))
-      .map((t) => t.player)
-      .filter(
-        (p, i, a) => p && a.findIndex((p2) => p2?.username === p.username) === i
-      )
-);
+type TaggedPlayer = NonNullable<
+  GameRecord["grimoire"][number]["tokens"][number]["player"]
+>;
+
+const computeTaggedPlayers = (game: GameRecord): TaggedPlayer[] => {
+  const seen = new Set<string>();
+  const players: TaggedPlayer[] = [];
+
+  for (const g of game.grimoire) {
+    for (const t of g.tokens) {
+      const player = t.player;
+      if (!t.player_id || !player) continue;
+
+      const key = player.id ?? player.username;
+      if (!key || seen.has(key)) continue;
+
+      seen.add(key);
+      players.push(player);
+    }
+  }
+
+  return players;
+};
+
+const taggedPlayersMap = computed<Record<string, TaggedPlayer[]>>(() => {
+  const entries: Record<string, TaggedPlayer[]> = {};
+  for (const game of props.games) {
+    entries[game.id] = computeTaggedPlayers(game);
+  }
+  return entries;
+});
+
+const taggedPlayers = (game: GameRecord) => taggedPlayersMap.value[game.id] ?? [];
+
+onMounted(() => {
+  if (user.value?.id && friends.friends.status !== Status.SUCCESS) {
+    friends.fetchFriends();
+  }
+});
 </script>
 
 <style scoped>
@@ -509,7 +578,7 @@ li.selected {
   }
 }
 
-.game-actions,
+/* .game-actions,
 .select-status {
   > a,
   > span {
@@ -520,7 +589,7 @@ li.selected {
 
     @apply w-6 h-6 md:w-8 md:h-8;
   }
-}
+} */
 
 .game-row {
   position: relative;
@@ -542,10 +611,6 @@ li.selected {
 
     inline-size: auto;
   }
-}
-
-.badge {
-  padding: 0.125rem 0.25rem;
 }
 
 .token-solarsystem {

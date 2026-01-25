@@ -1,55 +1,66 @@
 <template>
   <StandardTemplate>
-    <div class="flex gap-4 xl:max-w-[1200px] m-auto mt-4">
+    <div class="flex flex-col md:flex-row gap-4 xl:max-w-[1200px] m-auto mt-4 px-4 md:px-8">
       <nav
-        class="flex flex-col md:w-[300px] w-[100px] min-w-[100px] md:min-w-[300px] items-center"
+        class="flex flex-col w-full md:w-[300px] w-[100px] min-w-[100px] md:min-w-[300px]"
       >
-        <Avatar :value="avatar" class="mt-10 md:mt-0" />
-        <button
-          @click.prevent.stop="selectAvatar"
-          class="text-sm hover:underline text-stone-400"
-        >
-          Upload new avatar
-        </button>
-        <h1 class="font-sorts text-lg hidden md:block py-2">
-          {{ displayName }}
-        </h1>
-        <ul class="w-full py-4">
-          <li class="w-full bg-stone-300 dark:bg-stone-700">
+        <div class="flex flex-col items-center mb-4 md:mb-0">
+          <Avatar :value="avatar" class="mt-10 md:mt-0 mb-2" />
+          <Button
+            @click.prevent.stop="selectAvatar"
+            size="sm"
+          >
+            Upload new avatar
+          </Button>
+          <h1 class="font-sorts text-lg my-4">
+            {{ displayName }}
+          </h1>
+        </div>
+        
+        <ul class="w-full divide-y divide-stone-300 dark:divide-stone-800 bg-stone-200 dark:bg-stone-700 rounded overflow-hidden">
+          <li class="w-full">
             <nuxt-link
               to="/settings"
-              class="block w-full p-2 hover:bg-stone-200 dark:hover:bg-stone-900 duration-150"
-              active-class="bg-stone-200 dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-950"
+              class="block w-full p-2 border-l-[6px] hover:border-primary hover:text-primary-content hover:bg-primary dark:hover:bg-dark-primary duration-150"
+              active-class="border-primary dark:border-dark-primary"
             >
               Profile
             </nuxt-link>
+          </li>
+          <li>  
             <nuxt-link
               to="/settings/password"
-              class="block w-full p-2 hover:bg-stone-200 dark:hover:bg-stone-900 duration-150"
-              active-class="bg-stone-200 dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-950"
+              class="block w-full p-2 border-l-[6px] hover:border-primary hover:text-primary-content hover:bg-primary dark:hover:bg-dark-primary duration-150"
+              active-class="border-primary dark:border-dark-primary"
             >
               Password
             </nuxt-link>
+          </li>
+          <li>  
             <nuxt-link
               to="/settings/integrations"
-              class="block w-full p-2 hover:bg-stone-200 dark:hover:bg-stone-900 duration-150"
-              active-class="bg-stone-200 dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-950"
+              class="block w-full p-2 border-l-[6px] hover:border-primary hover:text-primary-content hover:bg-primary dark:hover:bg-dark-primary duration-150"
+              active-class="border-primary dark:border-dark-primary"
             >
               Integrations
             </nuxt-link>
+          </li>
+          <li>  
             <nuxt-link
               to="/settings/account"
-              class="block w-full p-2 hover:bg-stone-200 dark:hover:bg-stone-900 duration-150"
-              active-class="bg-stone-200 dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-950"
+              class="block w-full p-2 border-l-[6px] hover:border-primary hover:text-primary-content hover:bg-primary dark:hover:bg-dark-primary duration-150"
+              active-class="border-primary dark:border-dark-primary"
             >
               Account & Data
             </nuxt-link>
+          </li>
+          <li>
             <nuxt-link
               to="/settings/perks"
-              class="flex gap-2 w-full p-2 hover:bg-stone-200 dark:hover:bg-stone-900 duration-150"
-              active-class="bg-stone-200 dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-950"
+              class="flex gap-2 items-center w-full p-2 border-l-[6px] hover:border-primary hover:text-primary-content hover:bg-primary dark:hover:bg-dark-primary duration-150"
+              active-class="border-primary dark:border-dark-primary"
             >
-              <KoFi class="w-6 h-6" />
+              <IconUI id="kofi" size="lg" />
               <span>Perks</span>
             </nuxt-link>
           </li>
@@ -117,3 +128,13 @@ async function uploadAvatar(event: Event) {
   users.fetchMe(user.value?.id);
 }
 </script>
+
+<style scoped>
+  li > a:not(.router-link-exact-active,:hover) {
+    border-color: theme(colors.stone.300);
+
+    &:where(.dark, .dark *) {
+      border-color: theme(colors.stone.900);
+    }
+  }
+</style>
