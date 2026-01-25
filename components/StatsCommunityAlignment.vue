@@ -6,7 +6,17 @@
 
     <div class="grid gap-2 md:gap-4 md:grid-cols-2 lg:grid-cols-3">
       <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-2">
-        <h3 class="font-sorts text-center text-lg lg:text-xl">Draw Bias</h3>
+        <h3 class="font-sorts text-center text-lg lg:text-xl">
+          Draw Bias
+          <IconUI 
+            v-tooltip="{
+            content: bayesianTooltip,
+              html: true,
+            }"
+            id="info-circle" 
+            size="sm" 
+          />
+        </h3>
         <div class="flex flex-col divide-y divide-stone-300 dark:divide-stone-700/40">
           <div
             v-for="item in biasItems"
@@ -42,7 +52,7 @@
                   v-tooltip="{ content: item.detail || '', html: true }"
                   :style="item.entry.value > 0 ? `color: ${chartColors.evil}` : item.entry.value < 0 ? `color: ${chartColors.good}` : undefined"
                 >
-                  {{ formatBiasValue(item.entry.value) }}
+                  {{ formatBiasValue(item.entry.displayValue ?? item.entry.value) }}
                 </span>
               </div>
             </template>
@@ -190,7 +200,13 @@ import { WinStatus_V2 } from "~/composables/useGames";
 import type { GameRecord } from "~/composables/useGames";
 import { chartColors } from "~/composables/useChartColors";
 import { Status } from "~/composables/useFetchStatus";
-import type { PlayerSummary } from "~/composables/useCommunityStats";
+import {
+  COMMUNITY_STATS_BAYESIAN_ALPHA,
+  COMMUNITY_STATS_BAYESIAN_BETA,
+  COMMUNITY_STATS_BAYESIAN_TOOLTIP,
+  COMMUNITY_STATS_MIN_GAMES,
+  type PlayerSummary,
+} from "~/composables/useCommunityStats";
 
 type Entry = {
   name: string;
@@ -198,6 +214,7 @@ type Entry = {
   userId: string | null;
   avatar: string | null;
   value: number;
+  displayValue?: number;
   detail?: string;
   highlight?: "good" | "evil";
 };
@@ -207,6 +224,8 @@ const props = defineProps<{
   players: PlayerSummary[];
   anonymizeNonUsers?: boolean;
 }>();
+
+const bayesianTooltip = COMMUNITY_STATS_BAYESIAN_TOOLTIP;
 
 const playerIndex = computed(() => {
   const map = new Map<string, PlayerSummary>();
@@ -331,14 +350,16 @@ const biasEntries = computed(() => {
   for (const [name, games] of perPlayerGames.value.entries()) {
     const valid = games.filter((g) => g.alignment === "GOOD" || g.alignment === "EVIL");
     const total = valid.length;
-    if (!total) continue;
+    if (total < COMMUNITY_STATS_MIN_GAMES) continue;
     const actualEvil = valid.filter((g) => g.alignment === "EVIL").length;
     const expectedEvil = valid.reduce((sum, g) => sum + (g.expectedEvilProb || 0), 0);
-    const actualRate = actualEvil / total;
+    const actualRate = bayesianRate(actualEvil, total);
+    const rawRate = actualEvil / total;
     const expectedRate = total ? expectedEvil / total : 0;
     const bias = actualRate - expectedRate;
     results.push({
       ...toEntry(name, bias),
+      displayValue: rawRate - expectedRate,
       detail: biasDetail(name),
     });
   }
@@ -384,10 +405,11 @@ function biasDetail(name: string) {
   const games = perPlayerGames.value.get(name) || [];
   const valid = games.filter((g) => g.alignment === "GOOD" || g.alignment === "EVIL");
   const total = valid.length;
-  if (!total) return "";
+  if (total < COMMUNITY_STATS_MIN_GAMES) return "";
   const expectedEvil = valid.reduce((sum, g) => sum + (g.expectedEvilProb || 0), 0);
   const actualEvil = valid.filter((g) => g.alignment === "EVIL").length;
-  const diffRate = total ? (actualEvil / total) - (expectedEvil / total) : 0;
+  const expectedRate = total ? expectedEvil / total : 0;
+  const diffRate = total ? (actualEvil / total) - expectedRate : 0;
   const pct = Math.round(diffRate * 100);
   return `<div class="text-balance max-w-44 space-y-2">
     <p>Based on ${total} game${total === 1 ? "" : "s"} played, this player was expected to draw an Evil token ${expectedEvil.toFixed(1)} time${expectedEvil === 1 ? "" : "s"}.</p>
@@ -562,5 +584,11 @@ function formatBiasValue(value: number) {
   const pct = Math.round(value * 100);
   const sign = pct > 0 ? "+" : "";
   return `${sign}${pct}%`;
+}
+
+function bayesianRate(successes: number, total: number) {
+  const alpha = COMMUNITY_STATS_BAYESIAN_ALPHA;
+  const beta = COMMUNITY_STATS_BAYESIAN_BETA;
+  return total > 0 ? (successes + alpha) / (total + alpha + beta) : 0;
 }
 </script>
