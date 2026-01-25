@@ -4,7 +4,8 @@
       'inline-flex items-center justify-center',
       props.size,
       {
-        'icon-rounded rounded-full dark:bg-black dark:text-white hover:bg-purple-600 transition-colors duration-200 ease-in-out z-10': props.rounded,
+        'icon-rounded rounded-full dark:bg-black dark:text-white': props.rounded,
+        'hover:bg-purple-600 transition-colors duration-200 ease-in-out z-10': props.rounded && !noHover,
         'bg-black text-white': props.rounded && props.dark,
         'bg-white text-black': props.rounded && !props.dark,
         'shadow': props.rounded && props.shadow,
@@ -16,7 +17,7 @@
       width="16" 
       height="16" 
       fill="currentColor"
-      :viewBox="props.id === 'bgg' ? '0 0 32 40' : '0 0 16 16'"
+      viewBox="0 0 16 16"
       aria-hidden="true"
       class="ui-icon"
       :class="[
@@ -41,6 +42,7 @@
     size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
     spin?: boolean;
     color?: "primary" | "neutral" | "positive" | "caution" | "negative" | "bgg" | "yellow";
+    noHover?: boolean;
   }>();
 
   const ArrowRightShort = resolveComponent("IconArrowRightShort");
