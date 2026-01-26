@@ -6,8 +6,8 @@
     id="year-in-review"
     class="ct-btn-yir"
   >
-    <img 
-      :src="`/img/ui/fanggu_large_purple.webp`" 
+    <ImageUI 
+      image="fanggu_large_purple" 
       class="absolute right-2 top-0 w-[6.75rem] h-[6.75rem] opacity-80" 
     />
     <span>Year in Review</span>

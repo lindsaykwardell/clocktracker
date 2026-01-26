@@ -25,7 +25,7 @@
             class="h-[2rem] text-sm"
           />
           <div class="absolute right-2 top-[50%] -translate-y-[50%] w-6 h-6">
-            <img src="/img/ui/investigator.webp" />
+            <ImageUI image="investigator" />
           </div>
         </form>
       </div>

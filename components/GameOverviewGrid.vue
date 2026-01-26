@@ -113,6 +113,7 @@
                   :character="{
                     alignment: role.alignment,
                     role: {
+                      id: role.id,
                       token_url: role.token_url,
                       alternate_token_urls: role.alternate_token_urls,
                       initial_alignment: role.initial_alignment,
@@ -177,7 +178,7 @@
             <div class="flex gap-1 items-center">
               <IconUI v-if="isFavorite(game)" id="star-bordered" class="text-primary" size="lg" />
               <div v-if="game.ls_game?.campaign?.id">
-                <img src="/img/ui/living-scripts.webp" class="w-7 h-7" />
+                <ImageUI image="living-scripts" class="w-7 h-7" />
               </div>
               <div
                 class="font-gothic text-white md:text-lg flex gap-1 items-center"
@@ -410,6 +411,7 @@ function uniquePlayableRoles(game: GameRecord) {
 
   const roles: {
     key: string;
+    id: string;
     name: string;
     token_url: string | null;
     alternate_token_urls?: string[] | null;
@@ -440,6 +442,7 @@ function uniquePlayableRoles(game: GameRecord) {
 
     roles.push({
       key: `${character.role_id}:${alignmentKey}:${index}`,
+      id: character.role_id,
       name: character.name,
       token_url:
         character.role?.token_url ?? character.related_role?.token_url ?? null,

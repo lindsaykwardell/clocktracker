@@ -6,7 +6,7 @@
     <div class="flex gap-2 items-center">
       <div class="relative">
         <div class="w-[38px] overflow-hidden">
-          <img :src="`/img/ui/${icon}.webp`" alt="" />
+          <ImageUI :image="icon" alt="" />
         </div>
       </div>
       <span class="w-full">

@@ -27,9 +27,9 @@
               ]"
             >
               <div>
-                <img
-                  src="/img/ui/botc_head.webp"
-                  alt="Demon Head"
+                <ImageUI 
+                  image="botc_head"
+                  aria-hidden="true"
                   class="w-10 h-10 flex-shrink"
                 />
               </div>
@@ -44,9 +44,9 @@
               ]"
             >
               <div>
-                <img
-                  src="/img/ui/living-scripts.webp"
-                  alt="Living Scripts"
+                <ImageUI 
+                  image="living-scripts"
+                  aria-hidden="true"
                   class="w-10 h-10 flex-shrink"
                 />
               </div>
@@ -82,9 +82,9 @@
                   ]"
                 >
                   <div>
-                    <img
-                      src="/img/ui/botc_head.webp"
-                      alt="Demon Head"
+                    <ImageUI 
+                      image="botc_head"
+                      aria-hidden="true"
                       class="w-10 h-10 flex-shrink"
                     />
                   </div>
@@ -110,9 +110,9 @@
                   ]"
                 >
                   <div>
-                    <img
-                      src="/img/ui/living-scripts.webp"
-                      alt="Living Scripts"
+                    <ImageUI 
+                      image="living-scripts"
+                      aria-hidden="true"
                       class="w-10 h-10 flex-shrink"
                     />
                   </div>
@@ -179,8 +179,8 @@
           @click="searchScripts"
           class="absolute right-2 top-[50%] -translate-y-[50%] w-10 h-10"
         >
-          <img v-if="mode === 'classic'" src="/img/ui/investigator.webp" />
-          <img v-else src="/img/ui/living-scripts.webp" />
+          <ImageUI v-if="mode === 'classic'" image="investigator" />
+          <ImageUI v-else image="living-scripts" />
         </button>
       </div>
       <ul v-if="mode === 'classic' && scripts.length > 0" class="py-2">

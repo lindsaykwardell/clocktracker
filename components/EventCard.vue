@@ -270,8 +270,6 @@
         <slot name="footer" :event="event" />
         
       </div>
-      <Tour :steps="tour" v-if="canModifyEvent" tourKey="event-card-controls" />
-      
     </div>
   </section>
 </template>

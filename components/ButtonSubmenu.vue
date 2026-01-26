@@ -7,8 +7,8 @@
     :disabled="disabled"
   >
     <template v-if="image">
-      <img 
-        :src="`/img/ui/${image}.webp`" 
+      <ImageUI 
+        :image="image" 
         class="w-[14px]" 
       />
     </template>

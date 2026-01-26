@@ -165,6 +165,7 @@
 </template>
 
 <script setup lang="ts">
+import { useRoleImage } from "~/composables/useRoleImage";
 import { RoleType } from "~/composables/useRoles";
 import { Status } from "~/composables/useFetchStatus";
 
@@ -196,6 +197,7 @@ type Token = {
 const friends = useFriends();
 const games = useGames();
 const roles = useRoles();
+const { roleBaseUrlFromId, roleBaseUrlFromRole } = useRoleImage();
 
 const me = useMe();
 
@@ -283,6 +285,15 @@ const orderedTokens = computed(() =>
     .filter((t) => !props.readonly || t.role || t.player_name)
 );
 
+const tokenUrlForRoleId = (roleId: string) => {
+  const role = roles.getRole(roleId);
+  return (
+    roleBaseUrlFromRole(role) ??
+    roleBaseUrlFromId(roleId) ??
+    ""
+  );
+};
+
 const reminders = computed(() => {
   const fabled = [
     ...roles.getRoleByType(RoleType.FABLED),
@@ -354,7 +365,13 @@ const reminders = computed(() => {
       a.role_id.localeCompare(b.role_id)
     ),
     ...fabledReminders.toSorted((a, b) => a.role_id.localeCompare(b.role_id)),
-  ].filter(
+  ]
+    .map((reminder) => ({
+      ...reminder,
+      token_url:
+        reminder.token_url || tokenUrlForRoleId(reminder.role_id),
+    }))
+    .filter(
     (r, i, a) =>
       a.findIndex(
         (r2) => r2.role_id === r.role_id && r2.reminder === r.reminder

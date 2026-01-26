@@ -71,9 +71,7 @@
                 "
               >
                 <img
-                  :src="
-                    mostCommonCharacter?.token_url || `/img/role/48x48/amnesiac.webp`
-                  "
+                  :src="mostCommonCharacterImage"
                   alt="Player Count"
                   class="w-8"
                 />
@@ -130,9 +128,12 @@
 </template>
 
 <script setup lang="ts">
+import { useRoleImage } from "~/composables/useRoleImage";
 const user = useSupabaseUser();
 const games = useGames();
 const roles = useRoles();
+const { roleBaseUrlFromId, roleBaseUrlFromRole, sizeAdjustedUrl } =
+  useRoleImage();
 
 const props = defineProps<{
   player: {
@@ -211,5 +212,22 @@ const mostCommonCharacter = computed(() => {
   const role = roles.getRole(sortedCharacters?.[0]?.[0]);
 
   return role;
+});
+
+const mostCommonCharacterImage = computed(() => {
+  const fallbackBase = roleBaseUrlFromId("amnesiac") ?? "/img/role/amnesiac";
+  const fallback = sizeAdjustedUrl(fallbackBase, "sm", "webp");
+  const role = mostCommonCharacter.value;
+
+  if (!role) {
+    return fallback;
+  }
+
+  const base = roleBaseUrlFromRole(role);
+  if (!base) {
+    return fallback;
+  }
+
+  return sizeAdjustedUrl(base, "sm", "webp");
 });
 </script>
