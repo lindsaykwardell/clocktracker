@@ -12,8 +12,8 @@
     :disabled="disabled || undefined"
   >
     <template v-if="image">
-      <img 
-        :src="`/img/ui/${image}.webp`" 
+      <ImageUI 
+        :image="image" 
         class="w-7 h-7 p-[0.125rem]" 
         :class="{
           'bg-white rounded-full': color !== 'neutral',

@@ -111,7 +111,9 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
-    public: {},
+    public: {
+      assetVersion: process.env.NUXT_PUBLIC_ASSET_VERSION ?? "v1",
+    },
   },
 
   bugsnag: {
@@ -214,6 +216,16 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
+    "/img/role/**": {
+      headers: {
+        "cache-control": "public, max-age=31536000, immutable",
+      },
+    },
+    "/img/ui/**": {
+      headers: {
+        "cache-control": "public, max-age=31536000, immutable",
+      },
+    },
     "/scripts/**": {
       ssr: false,
     },
