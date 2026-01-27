@@ -173,22 +173,25 @@
                   <span class="metadata-label">Storyteller{{ storytellers.length === 1 ? "" : "s" }}</span>
                   <div>
                     <template v-for="(storyteller, index) in storytellers">
-                      <Button
-                        component="nuxt-link"
-                        v-if="
-                          isStorytellerAFriend(storyteller) &&
-                          storyteller.includes('@')
-                        "
-                        variant="link"
-                        color="primary"
-                        :to="`/${storyteller}`"
-                      >
-                        {{ storyteller }}
-                      </Button>
-                      <template v-else>{{ storyteller }}</template>
-                      <template v-if="index !== storytellers.length - 1"
-                        >,
-                      </template>
+                      <span class="align-middle">
+                        <!-- @todo should only friends be linked? -->
+                        <Button
+                          component="nuxt-link"
+                          v-if="
+                            isStorytellerAFriend(storyteller) &&
+                            storyteller.includes('@')
+                          "
+                          variant="link"
+                          color="primary"
+                          :to="`/${storyteller}`"
+                        >
+                          {{ storyteller }}
+                        </Button>
+                        <template v-else>{{ storyteller }}</template>
+                        <template v-if="index !== storytellers.length - 1"
+                          >,
+                        </template>
+                      </span>
                     </template>
                   </div>
                 </div>
