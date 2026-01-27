@@ -67,11 +67,18 @@
 <script setup lang="ts">
 const friends = useFriends();
 
-const props = defineProps<{
-  fetchFriends: boolean;
-  fetchRequests: boolean;
-  fetchSuggested: boolean;
-}>();
+const props = withDefaults(
+  defineProps<{
+    fetchFriends?: boolean;
+    fetchRequests?: boolean;
+    fetchSuggested?: boolean;
+  }>(),
+  {
+    fetchFriends: false,
+    fetchRequests: false,
+    fetchSuggested: false,
+  }
+);
 
 const shouldRenderFriendsPage = computed(() => {
   let shouldRender = true;
