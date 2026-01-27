@@ -28,19 +28,19 @@
             <nuxt-link
               v-if="me?.username === username"
               :to="`/@${username}?view=pending`"
-              class="relative font-bold leading-none md:text-lg whitespace-nowrap rounded md:rounded-none bg-stone-100 md:bg-transparent border-2 md:border-x-0 md:border-t-0 md:border-b-4 py-2 md:py-1 px-3 hover:bg-stone-300 dark:hover:bg-stone-700"
+              class="flex gap-1 items-center relative font-bold leading-none md:text-lg whitespace-nowrap rounded md:rounded-none bg-stone-100 md:bg-transparent border-2 md:border-x-0 md:border-t-0 md:border-b-4 py-2 md:py-1 px-3 hover:bg-stone-300 dark:hover:bg-stone-700"
               :class="currentTabClass('pending')"
             >
-              <span
-                v-if="
-                  pendingGames.status === Status.SUCCESS &&
-                  pendingGames.data.length
-                "
-                class="text-stone-200 bg-red-800 rounded-full px-2 py-1 text-xs font-bold aspect-square"
+              <span>Tagged / Draft</span>
+              <Badge
+                v-if="pendingGames.status === Status.SUCCESS && pendingGames.data.length"
+                color="negative"
+                aria-label="Pending games count"
+                circular
+                size="sm"
               >
                 {{ pendingGames.data.length }}
-              </span>
-              <span>Tagged / Draft</span>
+              </Badge>
             </nuxt-link>
             <nuxt-link
               :to="`/@${username}?view=stats`"
