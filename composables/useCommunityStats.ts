@@ -1,6 +1,7 @@
 export type PlayerSummary = {
   user_id: string | null;
   username: string;
+  display_name?: string;
   avatar: string | null;
   priority?: number;
   plays: number;

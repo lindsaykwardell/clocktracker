@@ -68,17 +68,14 @@ import naturalOrder from "natural-order";
 import { WinStatus_V2, type GameRecord } from "~/composables/useGames";
 import { Status, type FetchStatus } from "~/composables/useFetchStatus";
 import type { RoleType } from "~/composables/useRoles";
+import type { PlayerSummary } from "~/composables/useCommunityStats";
 import { escapeHtml, getRedactedNameHtml } from "~/composables/useRedactedName";
 
 const roles = useRoles();
 
 const props = defineProps<{
   games: FetchStatus<GameRecord[]>;
-  players?: {
-    username: string;
-    user_id?: string | null;
-    roles: Record<string, number>;
-  }[];
+  players?: PlayerSummary[];
   anonymizeNonUsers?: boolean;
 }>();
 
@@ -271,15 +268,16 @@ const roleStats = computed<Map<string, RoleStats>>(() => {
     const topCounts = new Map<string, { name: string; count: number; html: string }>();
 
     for (const player of props.players) {
+      const displayName = player.display_name || player.username;
       const htmlName = props.anonymizeNonUsers && !player.user_id
-        ? getRedactedNameHtml(player.username)
-        : escapeHtml(player.username);
+        ? getRedactedNameHtml(displayName)
+        : escapeHtml(displayName);
       for (const [roleName, count] of Object.entries(player.roles || {})) {
         const roleId = roleNameToId.value.get(roleName.toLowerCase());
         if (!roleId) continue;
         const current = topCounts.get(roleId);
         if (!current || count > current.count) {
-          topCounts.set(roleId, { name: player.username, html: htmlName, count });
+          topCounts.set(roleId, { name: displayName, html: htmlName, count });
         }
       }
     }

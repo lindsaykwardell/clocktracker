@@ -391,6 +391,16 @@ export default defineEventHandler(async (handler) => {
       location_type: g.location_type,
       tags: g.tags,
       script: g.script,
+      user: g.user
+        ? {
+            user_id: g.user.user_id,
+            username: g.user.username,
+            avatar: g.user.avatar,
+          }
+        : null,
+      storyteller: g.storyteller,
+      co_storytellers: g.co_storytellers,
+      is_storyteller: g.is_storyteller,
       win_v2: g.win_v2,
       ignore_for_stats: g.ignore_for_stats,
       grimoire:

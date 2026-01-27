@@ -319,9 +319,11 @@ import { computed, defineComponent, h, ref, resolveComponent, watchEffect } from
 import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
 import { Status } from "~/composables/useFetchStatus";
 import type { GameRecord } from "~/composables/useGames";
+import { WinStatus_V2 } from "~/composables/useGames";
 type PlayerSummary = {
   user_id: string | null;
   username: string;
+  display_name?: string;
   avatar: string | null;
   priority?: number;
   plays: number;
@@ -344,15 +346,45 @@ type PlayerSummary = {
   roles: Record<string, number>;
 };
 
+type CommunityToken = {
+  alignment: string | null;
+  role: {
+    name: string;
+    type: string | null;
+    initial_alignment: string | null;
+    token_url: string | null;
+  } | null;
+  player: {
+    user_id: string | null;
+    username: string | null;
+    display_name: string | null;
+    avatar: string | null;
+  } | null;
+  player_name: string | null;
+};
+
+type CommunityGame = Omit<GameRecord, "grimoire" | "user"> & {
+  user: {
+    user_id: string;
+    username: string;
+    avatar: string | null;
+  } | null;
+  storyteller: string | null;
+  co_storytellers: (string | null)[] | null;
+  is_storyteller: boolean | null;
+  grimoire: { tokens: CommunityToken[] }[];
+};
+
 type CommunityStats = {
   totals: { games: number; players: number };
   players: PlayerSummary[];
-  games: GameRecord[];
+  games: CommunityGame[];
 };
 
 const route = useRoute();
 const slug = route.params.slug as string;
 const communities = useCommunities();
+const users = useUsers();
 const user = useSupabaseUser();
 const metadata = await $fetch(`/api/community/${slug}/minimal`);
 
@@ -360,13 +392,91 @@ const { data: stats, pending, error } = useFetch<CommunityStats>(
   () => `/api/community/${slug}/stats`
 );
 
-const statsGames = computed(() => stats.value?.games ?? []);
+const statsGames = computed<CommunityGame[]>(() => stats.value?.games ?? []);
 const isMember = computed(() => communities.isMember(slug, user.value?.id));
 const communityMembers = computed(() => {
   const community = communities.getCommunity(slug);
   if (community.status !== Status.SUCCESS) return [];
   return community.data.members.map((m) => m.user_id);
 });
+const communityMemberSet = computed(() => new Set(communityMembers.value));
+const communityMemberByUsername = computed(() => {
+  const community = communities.getCommunity(slug);
+  if (community.status !== Status.SUCCESS) {
+    return new Map<
+      string,
+      {
+        user_id: string;
+        username: string;
+        display_name: string;
+        avatar: string | null;
+      }
+    >();
+  }
+
+  const map = new Map<
+    string,
+    {
+      user_id: string;
+      username: string;
+      display_name: string;
+      avatar: string | null;
+    }
+  >();
+
+  for (const member of community.data.members) {
+    if (!member?.username) continue;
+    map.set(member.username.toLowerCase(), {
+      user_id: member.user_id,
+      username: member.username,
+      display_name: member.display_name,
+      avatar: member.avatar ?? null,
+    });
+  }
+
+  return map;
+});
+const communityMemberById = computed(() => {
+  const community = communities.getCommunity(slug);
+  if (community.status !== Status.SUCCESS) {
+    return new Map<string, { display_name: string; username: string; avatar: string | null }>();
+  }
+
+  const map = new Map<string, { display_name: string; username: string; avatar: string | null }>();
+  for (const member of community.data.members) {
+    map.set(member.user_id, {
+      display_name: member.display_name,
+      username: member.username,
+      avatar: member.avatar ?? null,
+    });
+  }
+
+  return map;
+});
+const fetchedUsernames = new Set<string>();
+const getUserByUsername = (username: string) => {
+  const trimmed = username.trim();
+  if (!trimmed.startsWith("@")) {
+    return null;
+  }
+
+  const normalized = trimmed.replace(/^@/, "");
+  if (!normalized) return null;
+
+  const status = users.getUser(normalized);
+  if (status.status === Status.SUCCESS) {
+    return status.data;
+  }
+
+  if (!process.server && status.status !== Status.LOADING) {
+    if (!fetchedUsernames.has(normalized)) {
+      fetchedUsernames.add(normalized);
+      users.fetchUser(normalized);
+    }
+  }
+
+  return null;
+};
 
 const startDateRange = ref<string | null>(null);
 const endDateRange = ref<string | null>(null);
@@ -385,7 +495,9 @@ const allTags = computed(() => {
       set.add(tag);
     }
   });
-  return Array.from(set).sort();
+  return Array.from(set).sort((a, b) =>
+    a.localeCompare(b, undefined, { sensitivity: "base" })
+  );
 });
 
 const availableLocations = computed(() => {
@@ -396,7 +508,7 @@ const availableLocations = computed(() => {
         .filter((game) => game.location)
         .map((game) => game.location!.trim())
     ),
-  ].sort();
+  ].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
 });
 
 const activeFilters = computed(() => {
@@ -425,7 +537,7 @@ watchEffect(() => {
   if (endDateRange.value === "") endDateRange.value = null;
 });
 
-const filteredGames = computed<GameRecord[]>(() => {
+const filteredGames = computed<CommunityGame[]>(() => {
   if (!statsGames.value.length) return [];
   return statsGames.value.filter((game) => {
     const playerCount = game.player_count ?? 0;
@@ -442,11 +554,19 @@ const filteredGames = computed<GameRecord[]>(() => {
   });
 });
 
+const filteredPlayers = computed(() =>
+  buildPlayerStats(
+    filteredGames.value,
+    communityMemberSet.value,
+    communityMemberByUsername.value,
+    communityMemberById.value
+  )
+);
+
 const visiblePlayers = computed(() => {
-  if (!stats.value) return [];
-  if (includeNonMembers.value) return stats.value.players;
-  const memberSet = new Set(communityMembers.value);
-  return stats.value.players.filter((p) => p.user_id && memberSet.has(p.user_id));
+  if (includeNonMembers.value) return filteredPlayers.value;
+  const memberSet = communityMemberSet.value;
+  return filteredPlayers.value.filter((p) => p.user_id && memberSet.has(p.user_id));
 });
 
 function formatDate(date: Date) {
@@ -469,6 +589,396 @@ const NuxtLink = resolveComponent("nuxt-link");
 useHead({
   title: () => `Stats - ${metadata.name}`,
 });
+
+type PlayerIdentity = {
+  key: string;
+  user_id: string | null;
+  username: string;
+  display_name?: string;
+  avatar: string | null;
+};
+
+type RoleDetails = {
+  token_url: string | null;
+  type: string | null;
+  initial_alignment: string | null;
+};
+
+type Alignment = "GOOD" | "EVIL" | null;
+
+type PlayerAccumulator = {
+  identity: PlayerIdentity;
+  alignment: Alignment;
+  roles: Set<string>;
+  roleTokens: Map<string, string | null>;
+  travelerCount: number;
+  isStoryteller: boolean;
+  roleDetails: Map<string, RoleDetails>;
+};
+
+// Prefer display names for @username storytellers when we can match a member.
+function resolveStorytellerIdentity(
+  name: string,
+  memberByUsername: Map<
+    string,
+    {
+      user_id: string;
+      username: string;
+      display_name: string;
+      avatar: string | null;
+    }
+  >,
+  memberById: Map<string, { display_name: string; username: string; avatar: string | null }>
+): PlayerIdentity {
+  const trimmed = name.trim();
+  const normalized = trimmed.startsWith("@") ? trimmed.slice(1) : trimmed;
+  const member = memberByUsername.get(normalized.toLowerCase());
+
+  if (member) {
+    const memberByIdMatch = memberById.get(member.user_id);
+    return {
+      key: `user:${member.user_id}`,
+      user_id: member.user_id,
+      username: member.username,
+      display_name:
+        memberByIdMatch?.display_name ||
+        member.display_name ||
+        member.username,
+      avatar: memberByIdMatch?.avatar ?? member.avatar ?? null,
+    };
+  }
+
+  const fetchedUser = getUserByUsername(trimmed);
+  if (fetchedUser) {
+    return {
+      key: `user:${fetchedUser.user_id}`,
+      user_id: fetchedUser.user_id,
+      username: fetchedUser.username,
+      display_name: fetchedUser.display_name || fetchedUser.username,
+      avatar: fetchedUser.avatar ?? null,
+    };
+  }
+
+  return {
+    key: `name:${normalized.toLowerCase()}`,
+    user_id: null,
+    username: normalized,
+    display_name: normalized,
+    avatar: null,
+  };
+}
+
+function buildPlayerStats(
+  games: CommunityGame[],
+  memberIds: Set<string>,
+  memberByUsername: Map<
+    string,
+    {
+      user_id: string;
+      username: string;
+      display_name: string;
+      avatar: string | null;
+    }
+  >,
+  memberById: Map<string, { display_name: string; username: string; avatar: string | null }>
+) {
+  const stats = new Map<string, PlayerSummary & { key: string }>();
+
+  const calcPriority = (userId: string | null) => {
+    if (userId && memberIds.has(userId)) return 2;
+    if (userId) return 1;
+    return 0;
+  };
+
+  for (const game of games) {
+    if (game.ignore_for_stats) continue;
+
+    const result = game.win_v2;
+    const storytellerUserId =
+      game.is_storyteller && game.user?.user_id ? game.user.user_id : null;
+    const storytellerNames = new Set<string>();
+    const ownerUsername = game.user?.username?.toLowerCase();
+
+    if (game.storyteller?.trim()) {
+      const name = game.storyteller.trim();
+      if (!ownerUsername || name.toLowerCase() !== ownerUsername) {
+        storytellerNames.add(name);
+      }
+    }
+
+    if (Array.isArray(game.co_storytellers)) {
+      for (const co of game.co_storytellers) {
+        const name = co?.trim();
+        if (!name) continue;
+        if (!ownerUsername || name.toLowerCase() !== ownerUsername) {
+          storytellerNames.add(name);
+        }
+      }
+    }
+
+    const perPlayerForGame = new Map<string, PlayerAccumulator>();
+
+    for (const page of game.grimoire ?? []) {
+      for (const token of page.tokens ?? []) {
+        if (token.role?.type === "FABLED" || token.role?.type === "LORIC") {
+          continue;
+        }
+
+        const playerIdentity = resolvePlayerIdentity(
+          token.player,
+          token.player_name,
+          memberByUsername,
+          memberById
+        );
+        if (!playerIdentity) continue;
+
+        if (
+          storytellerUserId &&
+          game.is_storyteller &&
+          playerIdentity.user_id === storytellerUserId
+        ) {
+          continue;
+        }
+
+        const alignment = (token.alignment ||
+          token.role?.initial_alignment ||
+          null) as Alignment;
+        if (alignment !== "GOOD" && alignment !== "EVIL") continue;
+
+        let playerEntry = perPlayerForGame.get(playerIdentity.key);
+        if (!playerEntry) {
+          playerEntry = {
+            identity: playerIdentity,
+            alignment,
+            roles: new Set<string>(),
+            roleTokens: new Map<string, string | null>(),
+            travelerCount: 0,
+            isStoryteller: false,
+            roleDetails: new Map<string, RoleDetails>(),
+          };
+          perPlayerForGame.set(playerIdentity.key, playerEntry);
+        }
+
+        playerEntry.alignment = alignment;
+
+        if (token.role?.name) {
+          playerEntry.roles.add(token.role.name);
+          if (!playerEntry.roleTokens.has(token.role.name)) {
+            playerEntry.roleTokens.set(token.role.name, token.role.token_url ?? null);
+          }
+          if (!playerEntry.roleDetails.has(token.role.name)) {
+            playerEntry.roleDetails.set(token.role.name, {
+              token_url: token.role.token_url ?? null,
+              type: token.role.type ?? null,
+              initial_alignment: token.role.initial_alignment ?? null,
+            });
+          }
+          if (token.role.type === "TRAVELER") {
+            playerEntry.travelerCount++;
+          }
+        }
+      }
+    }
+
+    if (game.is_storyteller && game.user) {
+      const member = memberById.get(game.user.user_id);
+      const storytellerId = `user:${game.user.user_id}`;
+      const existingStory = perPlayerForGame.get(storytellerId);
+      if (existingStory) {
+        existingStory.isStoryteller = true;
+      } else {
+        perPlayerForGame.set(storytellerId, {
+          identity: {
+            key: storytellerId,
+            user_id: game.user.user_id,
+            username: game.user.username,
+            display_name: member?.display_name || game.user.username,
+            avatar: member?.avatar ?? game.user.avatar ?? null,
+          },
+          alignment: null,
+          roles: new Set<string>(),
+          roleTokens: new Map<string, string | null>(),
+          travelerCount: 0,
+          isStoryteller: true,
+          roleDetails: new Map<string, RoleDetails>(),
+        });
+      }
+    }
+
+    if (storytellerNames.size) {
+      for (const name of storytellerNames) {
+        const identity = resolveStorytellerIdentity(
+          name,
+          memberByUsername,
+          memberById
+        );
+        const existingStory = perPlayerForGame.get(identity.key);
+        if (existingStory) {
+          existingStory.isStoryteller = true;
+        } else {
+          perPlayerForGame.set(identity.key, {
+            identity,
+            alignment: null,
+            roles: new Set<string>(),
+            roleTokens: new Map<string, string | null>(),
+            travelerCount: 0,
+            isStoryteller: true,
+            roleDetails: new Map<string, RoleDetails>(),
+          });
+        }
+      }
+    }
+
+    for (const [, entry] of perPlayerForGame) {
+      const { identity, alignment, roles, roleTokens, travelerCount, isStoryteller, roleDetails } = entry;
+
+      const existing = stats.get(identity.key) ?? {
+        key: identity.key,
+        user_id: identity.user_id,
+        username: identity.username,
+        display_name: identity.display_name ?? identity.username,
+        avatar: identity.avatar,
+        priority: calcPriority(identity.user_id),
+        plays: 0,
+        wins: 0,
+        losses: 0,
+        good_plays: 0,
+        evil_plays: 0,
+        drunk_plays: 0,
+        lunatic_plays: 0,
+        mutant_plays: 0,
+        damsel_plays: 0,
+        traveler_plays: 0,
+        storyteller_plays: 0,
+        role_tokens: {},
+        role_games: {},
+        role_details: {},
+        roles: {},
+      } satisfies PlayerSummary & { key: string };
+
+      existing.priority = Math.max(existing.priority ?? 0, calcPriority(identity.user_id));
+
+      if (!(isStoryteller && roles.size === 0)) {
+        existing.plays++;
+      }
+      if (alignment === "GOOD") existing.good_plays++;
+      if (alignment === "EVIL") existing.evil_plays++;
+
+      if (result === WinStatus_V2.GOOD_WINS || result === WinStatus_V2.EVIL_WINS) {
+        const goodWon = result === WinStatus_V2.GOOD_WINS;
+        const evilWon = result === WinStatus_V2.EVIL_WINS;
+
+        if ((alignment === "GOOD" && goodWon) || (alignment === "EVIL" && evilWon)) {
+          existing.wins++;
+        } else if ((alignment === "GOOD" && evilWon) || (alignment === "EVIL" && goodWon)) {
+          existing.losses++;
+        }
+      }
+
+      for (const roleName of roles) {
+        existing.roles[roleName] = (existing.roles[roleName] ?? 0) + 1;
+        if (roleName === "Drunk") existing.drunk_plays++;
+        if (roleName === "Lunatic") existing.lunatic_plays++;
+        if (roleName === "Mutant") existing.mutant_plays++;
+        if (roleName === "Damsel") existing.damsel_plays++;
+
+        if (!existing.role_tokens[roleName]) {
+          existing.role_tokens[roleName] = roleTokens.get(roleName) ?? null;
+        }
+        if (!existing.role_details[roleName]) {
+          const details = roleDetails.get(roleName);
+          existing.role_details[roleName] = details ?? {
+            token_url: null,
+            type: null,
+            initial_alignment: null,
+          };
+        }
+        const arr = existing.role_games[roleName] ?? [];
+        if (!arr.includes(game.id)) {
+          arr.push(game.id);
+          existing.role_games[roleName] = arr;
+        }
+      }
+
+      if (travelerCount > 0) {
+        existing.traveler_plays++;
+      }
+      if (isStoryteller) {
+        existing.storyteller_plays++;
+      }
+
+      stats.set(identity.key, existing);
+    }
+  }
+
+  return Array.from(stats.values()).sort((a, b) => b.plays - a.plays);
+}
+
+// Prefer display names for @username players when we can match a member.
+function resolvePlayerIdentity(
+  player: CommunityToken["player"] | null,
+  playerName: CommunityToken["player_name"] | null,
+  memberByUsername: Map<
+    string,
+    {
+      user_id: string;
+      username: string;
+      display_name: string;
+      avatar: string | null;
+    }
+  >,
+  memberById: Map<string, { display_name: string; username: string; avatar: string | null }>
+): PlayerIdentity | null {
+  if (player?.user_id) {
+    const member = memberById.get(player.user_id);
+    const username = member?.username || player.username || player.display_name;
+    const displayName = member?.display_name || player.display_name || username;
+    return {
+      key: `user:${player.user_id}`,
+      user_id: player.user_id,
+      username: username ?? "Unknown",
+      display_name: displayName ?? "Unknown",
+      avatar: member?.avatar ?? player.avatar ?? null,
+    };
+  }
+
+  const rawName = playerName || player?.display_name || player?.username;
+  if (!rawName) return null;
+
+  const trimmed = rawName.trim();
+  const normalized = trimmed.startsWith("@") ? trimmed.slice(1) : trimmed;
+  const member = memberByUsername.get(normalized.toLowerCase());
+  if (member) {
+    return {
+      key: `user:${member.user_id}`,
+      user_id: member.user_id,
+      username: member.display_name || member.username,
+      avatar: member.avatar ?? null,
+    };
+  }
+
+  const fetchedUser = getUserByUsername(rawName);
+  if (fetchedUser) {
+    return {
+      key: `user:${fetchedUser.user_id}`,
+      user_id: fetchedUser.user_id,
+      username: fetchedUser.username,
+      display_name: fetchedUser.display_name || fetchedUser.username,
+      avatar: fetchedUser.avatar ?? null,
+    };
+  }
+
+  const name = normalized;
+  if (!name) return null;
+
+  return {
+    key: `name:${name.toLowerCase()}`,
+    user_id: null,
+    username: name,
+    display_name: name,
+    avatar: player?.avatar ?? null,
+  };
+}
 
 </script>
 

@@ -9,7 +9,8 @@
       <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-2 md:gap-3 items-center text-center">
         <h3 class="font-sorts text-center text-lg lg:text-xl">
           Most Good
-          <IconUI 
+          <IconUI
+            v-if="bayesianTooltip"
             v-tooltip="{
             content: bayesianTooltip,
               html: true,
@@ -34,7 +35,7 @@
           <div class="text-center text-sm text-balance max-w-48">
             <RedactedName
               class="font-semibold"
-              :name="mostGood.player.username"
+              :name="displayName(mostGood.player)"
               :redact="props.anonymizeNonUsers && !mostGood.player.user_id"
             />
             is <span class="font-semibold">{{ mostGood.rate }}% </span>
@@ -57,7 +58,8 @@
       <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-2 md:gap-3 items-center text-center">
         <h3 class="font-sorts text-center text-lg lg:text-xl">
           Most Evil
-          <IconUI 
+          <IconUI
+            v-if="bayesianTooltip"
             v-tooltip="{
             content: bayesianTooltip,
               html: true,
@@ -82,7 +84,7 @@
           <div class="text-center text-sm text-balance max-w-48">
             <RedactedName
               class="font-semibold"
-              :name="mostEvil.player.username"
+              :name="displayName(mostEvil.player)"
               :redact="props.anonymizeNonUsers && !mostEvil.player.user_id"
             />
             is <span class="font-semibold">{{ mostEvil.rate }}% </span>
@@ -105,7 +107,8 @@
       <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-2 md:gap-3 items-center text-center">
         <h3 class="font-sorts text-center text-lg lg:text-xl">
           Highest Win Rate
-          <IconUI 
+          <IconUI
+            v-if="bayesianTooltip"
             v-tooltip="{
             content: bayesianTooltip,
               html: true,
@@ -130,7 +133,7 @@
           <div class="text-center text-sm text-balance max-w-44">
             <RedactedName
               class="font-semibold"
-              :name="bestWinRate.player.username"
+              :name="displayName(bestWinRate.player)"
               :redact="props.anonymizeNonUsers && !bestWinRate.player.user_id"
             />
             has a 
@@ -180,7 +183,18 @@ const props = defineProps<{
 const mostGood = computed(() => makeAlignmentRateCard("good"));
 const mostEvil = computed(() => makeAlignmentRateCard("evil"));
 const bestWinRate = computed(() => makeWinRateCard());
-const bayesianTooltip = COMMUNITY_STATS_BAYESIAN_TOOLTIP;
+const displayName = (player: PlayerSummary) =>
+  player.display_name || player.username;
+
+const useRelaxedStats = computed(
+  () => (props.games?.length ?? 0) < COMMUNITY_STATS_MIN_GAMES
+);
+const minGames = computed(() =>
+  useRelaxedStats.value ? 1 : COMMUNITY_STATS_MIN_GAMES
+);
+const bayesianTooltip = computed(() =>
+  useRelaxedStats.value ? null : COMMUNITY_STATS_BAYESIAN_TOOLTIP
+);
 
 /**
  * Build the alignment rate highlight card.
@@ -221,10 +235,10 @@ function pickBestWinRate() {
   if (!props.players?.length) return null;
   return (
     props.players
-      .filter((p) => p.plays >= COMMUNITY_STATS_MIN_GAMES)
+      .filter((p) => p.plays >= minGames.value)
       .sort((a, b) => {
-        const rateA = bayesianRate(a.wins, a.plays);
-        const rateB = bayesianRate(b.wins, b.plays);
+        const rateA = rateScore(a.wins, a.plays);
+        const rateB = rateScore(b.wins, b.plays);
         if (rateB !== rateA) return rateB - rateA;
         // tie-breaker: more plays, then priority
         if (b.plays !== a.plays) return b.plays - a.plays;
@@ -241,11 +255,11 @@ function pickBestAlignmentRate(field: "good" | "evil") {
   const playsField = field === "good" ? "good_plays" : "evil_plays";
   return (
     props.players
-      .filter((p) => p.plays >= COMMUNITY_STATS_MIN_GAMES)
+      .filter((p) => p.plays >= minGames.value)
       .filter((p) => (p[playsField] ?? 0) > 0)
       .sort((a, b) => {
-        const rateA = bayesianRate(a[playsField] ?? 0, a.plays);
-        const rateB = bayesianRate(b[playsField] ?? 0, b.plays);
+        const rateA = rateScore(a[playsField] ?? 0, a.plays);
+        const rateB = rateScore(b[playsField] ?? 0, b.plays);
         if (rateB !== rateA) return rateB - rateA;
         if (b.plays !== a.plays) return b.plays - a.plays;
         return (b.priority ?? 0) - (a.priority ?? 0);
@@ -257,6 +271,12 @@ function bayesianRate(successes: number, total: number) {
   const alpha = COMMUNITY_STATS_BAYESIAN_ALPHA;
   const beta = COMMUNITY_STATS_BAYESIAN_BETA;
   return total > 0 ? (successes + alpha) / (total + alpha + beta) : 0;
+}
+
+function rateScore(successes: number, total: number) {
+  if (!total) return 0;
+  if (useRelaxedStats.value) return successes / total;
+  return bayesianRate(successes, total);
 }
 
 </script>

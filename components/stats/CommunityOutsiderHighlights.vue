@@ -31,7 +31,7 @@
             <div class="text-center text-sm text-balance max-w-44">
               <RedactedName
                 class="font-semibold"
-                :name="item.player.username"
+                :name="displayName(item.player)"
                 :redact="props.anonymizeNonUsers && !item.player.user_id"
               />
               has been {{ roleArticle(item.role) }}<span class="font-semibold">{{ item.role }}</span>
@@ -58,6 +58,9 @@ const props = defineProps<{
   players: PlayerSummary[];
   anonymizeNonUsers?: boolean;
 }>();
+
+const displayName = (player: PlayerSummary) =>
+  player.display_name || player.username;
 
 /**
  * Build highlight items for each tracked outsider role.
