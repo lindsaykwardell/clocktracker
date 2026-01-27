@@ -11,7 +11,7 @@
     <ol v-else class="flex flex-col text-sm md:text-base divide-y divide-stone-300 dark:divide-stone-700/40">
       <li
         v-for="item in items"
-        :key="item.username"
+        :key="item.user_id || item.username"
         class="flex items-center justify-between gap-2 py-1"
       >
         <div class="flex items-center gap-4">
@@ -34,11 +34,11 @@
             :to="`/@${item.username}`"
             class="font-semibold hover:underline"
           >
-            {{ item.username }}
+            {{ displayName(item) }}
           </component>
           <span v-else class="font-semibold">
             <RedactedName
-              :name="item.username"
+              :name="displayName(item)"
               :redact="props.anonymizeNonUsers"
             />
           </span>
@@ -81,4 +81,7 @@ const items = computed(() => {
     .slice(0, 5)
     .map((p) => ({ ...p, count: (p as any)[field] as number }));
 });
+
+const displayName = (player: PlayerSummary) =>
+  player.display_name || player.username;
 </script>

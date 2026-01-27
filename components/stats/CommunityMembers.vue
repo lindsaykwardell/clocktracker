@@ -31,7 +31,7 @@
         <ul class="flex flex-wrap justify-center gap-1">
           <template v-if="group.people.length">
             <li
-              v-for="person in group.people"
+              v-for="person in visiblePeople(group)"
               class="relative"
               :key="person.username + (person.user_id || '')"
             >
@@ -40,26 +40,45 @@
                 class="rounded-full object-cover shadow-lg border w-8 md:w-10 h-8 md:h-10 aspect-square flex items-center justify-center text-stone-100 bg-stone-800"
                 v-tooltip="{ content: person.tooltip, html: true }"
               >
-                {{ initials(person.username) }}
+                {{ initials(person.display_name || person.username) }}
               </div>
-              <Avatar
+              <component
                 v-else
-                :value="person.avatar || '/img/default.png'"
-                size="sm-token"
-                class="border-stone-800"
-                background
-                v-tooltip="{ content: person.tooltip, html: true }"
-              />
+                :is="NuxtLink"
+                :to="`/@${person.username}`"
+                class="inline-flex"
+              >
+                <Avatar
+                  :value="person.avatar || '/img/default.png'"
+                  size="sm-token"
+                  class="border-stone-800"
+                  background
+                  v-tooltip="{ content: person.tooltip, html: true }"
+                />
+              </component>
             </li>
           </template>
         </ul>
+        <div
+          v-if="shouldShowNonUserToggle(group)"
+          class="flex justify-center mt-4"
+        >
+          <Button
+            type="button"
+            @click="showAllNonUsers = !showAllNonUsers"
+            variant="soft"
+            size="xs"
+          >
+            {{ showAllNonUsers ? "Show less" : `Show more (${remainingNonUsers(group)})` }}
+          </Button>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, resolveComponent } from "vue";
 import type { PlayerSummary } from "~/composables/useCommunityStats";
 import { escapeHtml, getRedactedNameHtml } from "~/composables/useRedactedName";
 
@@ -69,11 +88,21 @@ const props = defineProps<{
   anonymizeNonUsers?: boolean;
 }>();
 
+const NuxtLink = resolveComponent("nuxt-link");
+
 type Person = {
   user_id: string | null;
   username: string;
+  display_name: string;
   avatar: string | null;
   tooltip: string;
+};
+
+type Group = {
+  key: string;
+  title: string;
+  filter: (p: PlayerSummary) => boolean;
+  people: Person[];
 };
 
 type SortMode = "alphabetical" | "plays" | "winRate" | "storytold";
@@ -86,6 +115,8 @@ const sortOptions: { label: string; value: SortMode }[] = [
 ];
 
 const sortMode = ref<SortMode>("alphabetical");
+const nonUsersLimit = 54; // 54 fits 2 lines on desktop.
+const showAllNonUsers = ref(false);
 
 /**
  * Group players by membership and apply sorting within each group.
@@ -93,7 +124,7 @@ const sortMode = ref<SortMode>("alphabetical");
 const grouped = computed(() => {
   const members = new Set(props.memberIds || []);
 
-  const groups: { key: string; title: string; filter: (p: PlayerSummary) => boolean; people: Person[] }[] = [
+  const groups: Group[] = [
     {
       key: "members",
       title: "Community Members",
@@ -118,6 +149,7 @@ const grouped = computed(() => {
     const person: Person = {
       user_id: player.user_id,
       username: player.username,
+      display_name: player.display_name || player.username,
       avatar: player.avatar,
       tooltip: buildTooltip(player),
     };
@@ -132,12 +164,29 @@ const grouped = computed(() => {
   return groups.filter((g) => g.people.length);
 });
 
+const visiblePeople = (group: Group) => {
+  if (group.key !== "anonymous" || showAllNonUsers.value) {
+    return group.people;
+  }
+  return group.people.slice(0, nonUsersLimit);
+};
+
+const shouldShowNonUserToggle = (group: Group) =>
+  group.key === "anonymous" && group.people.length > nonUsersLimit;
+
+const remainingNonUsers = (group: Group) =>
+  Math.max(group.people.length - nonUsersLimit, 0);
+
 /**
  * Compare two people according to the selected sort mode.
  */
 function comparePeople(a: Person, b: Person) {
-  const pa = props.players.find((p) => p.username === a.username && p.user_id === a.user_id);
-  const pb = props.players.find((p) => p.username === b.username && p.user_id === b.user_id);
+  const pa = props.players.find((p) =>
+    a.user_id ? p.user_id === a.user_id : p.username === a.username
+  );
+  const pb = props.players.find((p) =>
+    b.user_id ? p.user_id === b.user_id : p.username === b.username
+  );
 
   const playsA = pa?.plays ?? 0;
   const playsB = pb?.plays ?? 0;
@@ -147,7 +196,11 @@ function comparePeople(a: Person, b: Person) {
   const rateB = playsB > 0 ? (pb?.wins ?? 0) / playsB : 0;
 
   if (sortMode.value === "alphabetical") {
-    const nameDiff = (a.username || "").localeCompare(b.username || "", undefined, { sensitivity: "base" });
+    const nameDiff = (a.display_name || "").localeCompare(
+      b.display_name || "",
+      undefined,
+      { sensitivity: "base" }
+    );
     if (nameDiff !== 0) return nameDiff;
   } 
   else if (sortMode.value === "plays") {
@@ -186,10 +239,11 @@ function buildTooltip(player: PlayerSummary) {
 }
 
 const nameHtmlFor = (player: PlayerSummary) => {
+  const name = player.display_name || player.username || "Unknown";
   if (props.anonymizeNonUsers && !player.user_id) {
-    return getRedactedNameHtml(player.username);
+    return getRedactedNameHtml(name);
   }
-  return escapeHtml(player.username);
+  return escapeHtml(name);
 };
 
 /**

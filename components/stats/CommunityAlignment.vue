@@ -8,7 +8,8 @@
       <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-2">
         <h3 class="font-sorts text-center text-lg lg:text-xl">
           Draw Bias
-          <IconUI 
+          <IconUI
+            v-if="bayesianTooltip"
             v-tooltip="{
             content: bayesianTooltip,
               html: true,
@@ -225,19 +226,41 @@ const props = defineProps<{
   anonymizeNonUsers?: boolean;
 }>();
 
-const bayesianTooltip = COMMUNITY_STATS_BAYESIAN_TOOLTIP;
+const useRelaxedStats = computed(() => {
+  if (props.games.status !== Status.SUCCESS) return false;
+  return (props.games.data?.length ?? 0) < COMMUNITY_STATS_MIN_GAMES;
+});
+
+const minGames = computed(() =>
+  useRelaxedStats.value ? 1 : COMMUNITY_STATS_MIN_GAMES
+);
+
+const bayesianTooltip = computed(() =>
+  useRelaxedStats.value ? null : COMMUNITY_STATS_BAYESIAN_TOOLTIP
+);
 
 const playerIndex = computed(() => {
   const map = new Map<string, PlayerSummary>();
   props.players.forEach((p) => {
     if (p.username) map.set(p.username.toLowerCase(), p);
+    if (p.display_name) map.set(p.display_name.toLowerCase(), p);
+  });
+  return map;
+});
+const playerIndexById = computed(() => {
+  const map = new Map<string, PlayerSummary>();
+  props.players.forEach((p) => {
+    if (p.user_id) map.set(p.user_id, p);
   });
   return map;
 });
 
+const getPlayerByName = (name: string) =>
+  playerIndex.value.get(name.toLowerCase());
+
 const shouldRedact = (name: string) => {
   if (!props.anonymizeNonUsers) return false;
-  const player = playerIndex.value.get(name.toLowerCase());
+  const player = getPlayerByName(name);
   return !player?.user_id;
 };
 
@@ -278,13 +301,27 @@ const perPlayerGames = computed<Map<string, PlayerGame[]>>(() => {
       for (const page of game.grimoire) {
         for (const token of page.tokens ?? []) {
           if (token.role?.type === "FABLED" || token.role?.type === "LORIC") continue;
-          const name =
+          const rawName =
             token.player?.username ||
             token.player?.display_name ||
             token.player_name ||
             null;
+          if (!rawName) continue;
+          const playerById = token.player?.user_id
+            ? playerIndexById.value.get(token.player.user_id)
+            : null;
+          const normalized = rawName.trim().startsWith("@")
+            ? rawName.trim().slice(1)
+            : rawName.trim();
+          const playerByName = playerById ?? getPlayerByName(normalized);
+          const name = playerByName?.display_name || playerByName?.username || normalized;
           if (!name) continue;
-          if (props.players?.length && !playerIndex.value.has(name.toLowerCase())) continue;
+          if (
+            props.players?.length &&
+            !playerByName
+          ) {
+            continue;
+          }
           const alignment = (token.alignment as Alignment | null) ?? (token.role?.initial_alignment as Alignment | null) ?? null;
           if (!alignment) continue;
           const bucket = timelines.get(name) ?? { aligns: [], initials: [] };
@@ -296,13 +333,21 @@ const perPlayerGames = computed<Map<string, PlayerGame[]>>(() => {
     } else if (game.player_characters?.length) {
       for (const pc of game.player_characters) {
         if (!pc.name) continue;
-        if (props.players?.length && !playerIndex.value.has(pc.name.toLowerCase())) continue;
+        const name = pc.name.trim().startsWith("@")
+          ? pc.name.trim().slice(1)
+          : pc.name.trim();
+        if (
+          props.players?.length &&
+          !getPlayerByName(name)
+        ) {
+          continue;
+        }
         const alignment = (pc.alignment as Alignment | null) ?? (pc.role?.initial_alignment as Alignment | null) ?? null;
         if (!alignment) continue;
-        const bucket = timelines.get(pc.name) ?? { aligns: [], initials: [] };
+        const bucket = timelines.get(name) ?? { aligns: [], initials: [] };
         bucket.aligns.push(alignment);
         bucket.initials.push((pc.role?.initial_alignment as Alignment | null) ?? alignment);
-        timelines.set(pc.name, bucket);
+        timelines.set(name, bucket);
       }
     }
 
@@ -350,10 +395,10 @@ const biasEntries = computed(() => {
   for (const [name, games] of perPlayerGames.value.entries()) {
     const valid = games.filter((g) => g.alignment === "GOOD" || g.alignment === "EVIL");
     const total = valid.length;
-    if (total < COMMUNITY_STATS_MIN_GAMES) continue;
+    if (total < minGames.value) continue;
     const actualEvil = valid.filter((g) => g.alignment === "EVIL").length;
     const expectedEvil = valid.reduce((sum, g) => sum + (g.expectedEvilProb || 0), 0);
-    const actualRate = bayesianRate(actualEvil, total);
+    const actualRate = rateScore(actualEvil, total);
     const rawRate = actualEvil / total;
     const expectedRate = total ? expectedEvil / total : 0;
     const bias = actualRate - expectedRate;
@@ -405,7 +450,7 @@ function biasDetail(name: string) {
   const games = perPlayerGames.value.get(name) || [];
   const valid = games.filter((g) => g.alignment === "GOOD" || g.alignment === "EVIL");
   const total = valid.length;
-  if (total < COMMUNITY_STATS_MIN_GAMES) return "";
+  if (total < minGames.value) return "";
   const expectedEvil = valid.reduce((sum, g) => sum + (g.expectedEvilProb || 0), 0);
   const actualEvil = valid.filter((g) => g.alignment === "EVIL").length;
   const expectedRate = total ? expectedEvil / total : 0;
@@ -532,8 +577,8 @@ const currentStreakEntry = computed<Entry | null>(() => {
   }
 
   if (!best) return null;
-  const player = playerIndex.value.get(best.name.toLowerCase());
-  const baseName = player?.username || best.name;
+  const player = getPlayerByName(best.name);
+  const baseName = player?.display_name || player?.username || best.name;
   return {
     name: baseName,
     redact: shouldRedact(baseName),
@@ -555,8 +600,8 @@ function topBy<T extends { name: string }>(
 }
 
 function toEntry(name: string, value: number): Entry {
-  const player = playerIndex.value.get(name.toLowerCase());
-  const baseName = player?.username || name;
+  const player = getPlayerByName(name);
+  const baseName = player?.display_name || player?.username || name;
   return {
     name: baseName,
     redact: shouldRedact(baseName),
@@ -590,5 +635,11 @@ function bayesianRate(successes: number, total: number) {
   const alpha = COMMUNITY_STATS_BAYESIAN_ALPHA;
   const beta = COMMUNITY_STATS_BAYESIAN_BETA;
   return total > 0 ? (successes + alpha) / (total + alpha + beta) : 0;
+}
+
+function rateScore(successes: number, total: number) {
+  if (!total) return 0;
+  if (useRelaxedStats.value) return successes / total;
+  return bayesianRate(successes, total);
 }
 </script>
