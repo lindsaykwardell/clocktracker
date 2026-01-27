@@ -8,10 +8,10 @@
       v-if="image"
       class="token-image"
       :class="dynamicTokenClass"
-      :src="image"
+      :src="sizedImage"
       loading="lazy"
       :alt="character?.name || character?.role?.name || 'Unknown'"
-      v-tooltip="tokenTooltip"
+      v-tooltip="tokenTooltip || undefined"
     />
     <svg
       v-if="!hideName && (character?.name || character?.role?.name)"
@@ -56,9 +56,9 @@
     >
       <img
         :class="relatedImageSize"
-        :src="alignmentImage"
+        :src="sizedAlignmentImage"
         loading="lazy"
-        v-tooltip="alignmentTooltip"
+        v-tooltip="alignmentTooltip || undefined"
       />
     </div>
     <slot />
@@ -73,33 +73,38 @@
         v-if="relatedImage"
         class="related-token-image"
         :class="relatedImageSize"
-        :src="relatedImage"
+        :src="sizedRelatedImage"
         loading="lazy"
         :alt="character?.related || character.related_role?.name || 'Unknown'"
-        v-tooltip="relatedTokenTooltip"
+        v-tooltip="relatedTokenTooltip || undefined"
       />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useRoleImage } from "~/composables/useRoleImage";
+
 const props = defineProps<{
   character?:
     | {
         alignment?: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
         name?: string;
         related?: string | null;
+        role_id?: string | null;
+        related_role_id?: string | null;
         role?: {
-          token_url: string;
-          alternate_token_urls?: string[];
+          id: string;
+          token_url?: string;
           type: string;
           initial_alignment?: "GOOD" | "EVIL" | "NEUTRAL";
           name?: string;
+          custom_role?: boolean;
         };
-        related_role?: { token_url: string; name?: string };
+        related_role?: { token_url?: string; id?: string; name?: string };
       }
     | undefined;
-  size?: "sm" | "reminder" | "md" | "lg";
+  size?: "sm" | "reminder" | "md" | "front" | "lg";
   alwaysShowAlignment?: boolean;
   hideRelated?: boolean;
   hideName?: boolean;
@@ -112,6 +117,13 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits(["clickRelated", "clickRole", "clickAlignment"]);
+const {
+  alignmentSuffix,
+  isRoleAssetUrl,
+  roleBaseUrlFromId,
+  roleBaseUrlFromRole,
+  sizeAdjustedUrl,
+} = useRoleImage();
 
 const tokenClass = computed(() => {
   let classes = "";
@@ -124,6 +136,9 @@ const tokenClass = computed(() => {
       break;
     case "md":
       classes += "w-20 h-20 md:w-28 md:h-28";
+      break;
+    case "front":
+      classes += "w-32 h-32 md:w-40 md:h-40";
       break;
     case "lg":
       classes += "w-36 h-36 md:w-48 md:h-48";
@@ -144,8 +159,8 @@ const tokenClass = computed(() => {
 const dynamicTokenClass = computed(() => {
   let classes = imageSize.value;
 
-  // If the character has alternate token URLs, we don't want to apply any filters
-  if ((props.character?.role?.alternate_token_urls?.length ?? 0) > 0) {
+  // If the character uses alignment-specific art, don't apply filters.
+  if (usesAlignmentVariant.value) {
     return classes;
   }
 
@@ -180,6 +195,8 @@ const imageSize = computed(() => {
       return "relative w-8 h-8 md:w-12 md:h-12";
     case "md":
       return "md:w-20 md:h-20";
+    case "front":
+      return "w-24 h-24 md:w-36 md:h-36";
     case "lg":
       return "w-32 h-32 md:w-40 md:h-40";
   }
@@ -218,42 +235,38 @@ const relatedImageSize = computed(() => {
   }
 });
 
+// If we're using alignment-specific art, skip shader/filter overlays.
+const usesAlignmentVariant = computed(() => {
+  const base = roleBaseUrlFromRole(props.character?.role);
+  if (!isRoleAssetUrl(base)) {
+    return false;
+  }
+  return alignmentSuffix(props.character?.role, props.character?.alignment) !== "";
+});
+
 const image = computed(() => {
-  if (!props.character?.role) {
+  if (!props.character?.role && !props.character?.role_id) {
     return undefined;
   }
-  if ((props.character?.role?.alternate_token_urls?.length ?? 0) > 0) {
-    if (
-      (props.character?.alignment === "GOOD" &&
-        props.character?.role?.initial_alignment === "EVIL") ||
-      (props.character?.alignment === "EVIL" &&
-        props.character?.role?.initial_alignment === "GOOD")
-    ) {
-      return props.character.role.alternate_token_urls?.[0];
+  const base = roleBaseUrlFromRole(props.character?.role);
+  if (base) {
+    if (isRoleAssetUrl(base)) {
+      return `${base}${alignmentSuffix(
+        props.character?.role,
+        props.character.alignment
+      )}`;
     }
-    if (props.character?.role?.initial_alignment === "NEUTRAL") {
-      if (
-        props.character?.alignment === "GOOD" &&
-        (props.character.role.alternate_token_urls?.length ?? 0) >= 1
-      ) {
-        return props.character.role.alternate_token_urls?.[0];
-      }
-      if (
-        props.character?.alignment === "EVIL" &&
-        (props.character.role.alternate_token_urls?.length ?? 0) >= 2
-      ) {
-        return props.character.role.alternate_token_urls?.[1];
-      }
-    }
+    return base;
   }
-  if (props.character?.role?.token_url) {
-    return props.character.role.token_url;
+  const derivedBase = roleBaseUrlFromId(props.character?.role_id);
+  if (derivedBase) {
+    return derivedBase;
   }
   if (props.character?.alignment === "GOOD") {
-    return "/img/role/good.png";
+    return "/img/role/good.webp";
   }
   if (props.character?.alignment === "EVIL") {
-    return "/img/role/evil.png";
+    return "/img/role/evil.webp";
   }
 });
 
@@ -261,21 +274,31 @@ const relatedImage = computed(() => {
   if (props.character?.related_role?.token_url) {
     return props.character.related_role.token_url;
   }
+  if (props.character?.related_role?.id) {
+    return roleBaseUrlFromId(props.character.related_role.id);
+  }
+  const derivedRelated = roleBaseUrlFromId(
+    props.character?.related_role_id
+  );
+  if (derivedRelated) {
+    return derivedRelated;
+  }
   if (props.character?.alignment === "GOOD") {
-    return "/img/role/good.png";
+    return "/img/role/good.webp";
   }
   if (props.character?.alignment === "EVIL") {
-    return "/img/role/evil.png";
+    return "/img/role/evil.webp";
   }
 });
 
 const alignmentImage = computed(() => {
   if (props.character?.alignment === "GOOD") {
-    return "/img/role/good.png";
+    return "/img/role/good.webp";
   }
   if (props.character?.alignment === "EVIL") {
-    return "/img/role/evil.png";
-  } else {
+    return "/img/role/evil.webp";
+  } 
+  else {
     return "/1x1.png";
   }
 });
@@ -292,11 +315,22 @@ const reminderTextSize = computed(() => {
   }
   return "text-[0.5rem] md:text-xs";
 });
+
+const sizedImage = computed(() =>
+  sizeAdjustedUrl(image.value, props.size, "webp")
+);
+const sizedRelatedImage = computed(() =>
+  sizeAdjustedUrl(relatedImage.value, props.size, "webp")
+);
+const sizedAlignmentImage = computed(() =>
+  sizeAdjustedUrl(alignmentImage.value, props.size, "webp")
+);
+
 </script>
 
 <style scoped>
 .token {
-  background-image: url("/img/token-bg.png");
+  background-image: url("/img/token-bg.webp");
 
   &.reminder {
     background-image: url("/img/reminder-token.webp");

@@ -1,83 +1,27 @@
 <template>
   <component :is="template" moderatorOnly :slug="existingEvent.community?.slug">
-    <h2 class="font-sorts text-2xl lg:text-3xl my-4 text-center">Edit Event</h2>
-    <EventEditor
-      :event="event"
-      :inFlight="inFlight"
-      :errors="errors"
-      @save="saveEvent"
-    />
-    <h3 class="font-sorts text-xl lg:text-2xl my-4 text-center">
-      Registered Players
-    </h3>
-    <ClientOnly>
-      <div class="flex flex-col md:flex-row gap-4 max-w-[1000px] m-auto">
-        <div class="flex-1">
-          <h3 class="font-bold">Players</h3>
-          <ul>
-            <li
-              v-for="player in event.player_count
-                ? registered_players.slice(0, event.player_count)
-                : registered_players"
-              class="flex gap-2"
-            >
-              <EventPlayerPopover :options="registeredOptions(player)" />
-              <nuxt-link
-                v-if="player.user"
-                :to="`/@${player.user.username}`"
-                class="flex gap-2 items-center hover:underline"
-                v-tooltip="'Registered on ' + formatDate(player.created_at)"
-              >
-                <Avatar
-                  :value="player.user.avatar"
-                  size="xs"
-                  class="border-stone-800"
-                />
-                <div>{{ player.name }}</div>
-              </nuxt-link>
-              <div
-                v-else
-                class="flex gap-2 items-center"
-                v-tooltip="'Registered on ' + formatDate(player.created_at)"
-              >
-                <Avatar
-                  value="/img/default.png"
-                  size="xs"
-                  class="border-stone-800"
-                />
-                <div>{{ player.name }}</div>
-              </div>
-            </li>
-            <li>
-              <EventTaggedUserInput
-                :slug="existingEvent.community?.slug"
-                :alreadyRegisteredUserIds="alreadyRegisteredUserIds"
-                @add-player="registerPlayer"
-              />
-            </li>
-          </ul>
-        </div>
-        <div
-          v-if="
-            (event.player_count &&
-              registered_players.length > event.player_count) ||
-            event.waitlists.length > 0
-          "
-          class="flex-1 flex flex-col gap-2"
-        >
-          <template
-            v-if="
-              event.player_count &&
-              registered_players.length > event.player_count
-            "
-          >
-            <h3 class="font-bold">Waitlist</h3>
-            <ul>
+    <div class="px-4 md:px-8">
+      <h2 class="font-sorts text-2xl lg:text-3xl my-4 text-center">Edit Event</h2>
+      <EventEditor
+        :event="event"
+        :inFlight="inFlight"
+        :errors="errors"
+        @save="saveEvent"
+      />
+      <h3 class="font-sorts text-xl lg:text-2xl my-4 text-center">
+        Registered Players
+      </h3>
+      <ClientOnly>
+        <div class="flex flex-col md:flex-row gap-8 max-w-[1000px] m-auto pb-4 lg:pb-8">
+          <div class="flex-1 space-y-2">
+            <h3 class="font-bold">Players</h3>
+            <ul class="flex flex-col divide-y divide-stone-300 dark:divide-stone-700/40">
               <li
-                v-for="player in registered_players.slice(event.player_count)"
-                class="flex gap-2"
+                v-for="player in event.player_count
+                  ? registered_players.slice(0, event.player_count)
+                  : registered_players"
+                class="flex justify-between gap-2 py-1"
               >
-                <EventPlayerPopover :options="registeredOptions(player)" />
                 <nuxt-link
                   v-if="player.user"
                   :to="`/@${player.user.username}`"
@@ -103,56 +47,116 @@
                   />
                   <div>{{ player.name }}</div>
                 </div>
+                <EventPlayerPopover :options="registeredOptions(player)" />
               </li>
             </ul>
-          </template>
-          <template v-for="waitlist in waitlists">
-            <h3 class="font-bold">{{ waitlist.name }}</h3>
-            <ul>
-              <li v-for="player in waitlist.users" class="flex gap-2">
-                <EventPlayerPopover
-                  :options="waitlistOptions(player, waitlist)"
-                />
-
-                <nuxt-link
-                  v-if="player.user"
-                  v-tooltip="'Registered on ' + formatDate(player.created_at)"
-                  :to="`/@${player.user.username}`"
-                  class="flex gap-2 items-center hover:underline"
-                >
-                  <Avatar
-                    :value="player.user.avatar"
-                    size="xs"
-                    class="border-stone-800"
-                  />
-                  <div>{{ player.name }}</div>
-                </nuxt-link>
-                <div
-                  v-else
-                  class="flex gap-2 items-center"
-                  v-tooltip="'Registered on ' + formatDate(player.created_at)"
-                >
-                  <Avatar
-                    value="/img/default.png"
-                    size="xs"
-                    class="border-stone-800"
-                  />
-                  <div>{{ player.name }}</div>
-                </div>
-              </li>
-              <li>
+            <EventTaggedUserInput
+              :slug="existingEvent.community?.slug"
+              :alreadyRegisteredUserIds="alreadyRegisteredUserIds"
+              @add-player="registerPlayer"
+            />
+          </div>
+          <div
+            v-if="
+              (event.player_count &&
+                registered_players.length > event.player_count) ||
+              event.waitlists.length > 0
+            "
+            class="flex-1 flex flex-col gap-4"
+          >
+            <template
+              v-if="
+                event.player_count &&
+                registered_players.length > event.player_count
+              "
+            >
+              <div class="space-y-2">
+                <h3 class="font-bold">Waitlist</h3>
+                <ul class="flex flex-col divide-y divide-stone-300 dark:divide-stone-700/40">
+                  <li
+                    v-for="player in registered_players.slice(event.player_count)"
+                    class="flex justify-between gap-2 py-1"
+                  >
+                    <nuxt-link
+                      v-if="player.user"
+                      :to="`/@${player.user.username}`"
+                      class="flex gap-2 items-center hover:underline"
+                      v-tooltip="'Registered on ' + formatDate(player.created_at)"
+                    >
+                      <Avatar
+                        :value="player.user.avatar"
+                        size="xs"
+                        class="border-stone-800"
+                      />
+                      <div>{{ player.name }}</div>
+                    </nuxt-link>
+                    <div
+                      v-else
+                      class="flex gap-2 items-center"
+                      v-tooltip="'Registered on ' + formatDate(player.created_at)"
+                    >
+                      <Avatar
+                        value="/img/default.png"
+                        size="xs"
+                        class="border-stone-800"
+                      />
+                      <div>{{ player.name }}</div>
+                    </div>
+                    <EventPlayerPopover :options="registeredOptions(player)" />
+                  </li>
+                </ul>
+              </div>
+            </template>
+            <template v-for="waitlist in waitlists">
+              <div class="space-y-2">
+                <h3 class="font-bold">{{ waitlist.name }}</h3>
+                <ul class="flex flex-col divide-y divide-stone-300 dark:divide-stone-700/40">
+                  <li 
+                    v-for="player in waitlist.users" 
+                    class="flex justify-between gap-2 py-1"
+                  >
+                    <nuxt-link
+                      v-if="player.user"
+                      v-tooltip="'Registered on ' + formatDate(player.created_at)"
+                      :to="`/@${player.user.username}`"
+                      class="flex gap-2 items-center hover:underline"
+                    >
+                      <Avatar
+                        :value="player.user.avatar"
+                        size="xs"
+                        class="border-stone-800"
+                      />
+                      <div>{{ player.name }}</div>
+                    </nuxt-link>
+                    <div
+                      v-else
+                      class="flex gap-2 items-center"
+                      v-tooltip="'Registered on ' + formatDate(player.created_at)"
+                    >
+                      <Avatar
+                        value="/img/default.png"
+                        size="xs"
+                        class="border-stone-800"
+                      />
+                      <div>{{ player.name }}</div>
+                    </div>
+                    <EventPlayerPopover
+                      :options="waitlistOptions(player, waitlist)"
+                    />
+                  </li>
+                </ul>
                 <EventTaggedUserInput
                   :slug="existingEvent.community?.slug"
                   :alreadyRegisteredUserIds="alreadyRegisteredUserIds"
                   :waitlistId="waitlist.id"
                   @add-player="registerPlayer"
                 />
-              </li>
-            </ul>
-          </template>
+              </div>
+            </template>
+          </div>
         </div>
-      </div>
-    </ClientOnly>
+      </ClientOnly>
+    </div>
   </component>
 </template>
 
@@ -202,7 +206,7 @@ const event = reactive<{
   image: existingEvent.image,
   who_can_register: existingEvent.who_can_register,
   storytellers: existingEvent.storytellers,
-  script: existingEvent.script,
+  script: existingEvent.script ?? "",
   script_id: existingEvent.script_id,
   game_link: existingEvent.game_link,
   waitlists: existingEvent.waitlists.map((w) => ({

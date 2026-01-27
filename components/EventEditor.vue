@@ -1,6 +1,6 @@
 <template>
   <form
-    class="max-w-[1000px] m-auto py-6 flex flex-col gap-4"
+    class="w-full max-w-[1000px] m-auto py-6 flex flex-col gap-4"
     @submit.prevent="emit('save', event)"
   >
     <div class="flex gap-4">
@@ -8,29 +8,20 @@
         <span class="block">Title</span>
         <Input v-model="event.title" required />
       </label>
+    </div>
+    <div class="flex flex-wrap gap-4">
       <label>
         <span class="flex gap-2 items-top"
           >Who Can Register
-          <span
+          <IconUI 
             v-tooltip="{
               content:
                 '<div class=\'w-[250px]\'>If \'Anyone with the event link\' is chosen, the event will not appear anywhere on the site.</div>',
               html: true,
             }"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="32"
-              height="32"
-              viewBox="0 0 24 24"
-              class="w-4 h-4"
-            >
-              <path
-                fill="currentColor"
-                d="M11 17h2v-6h-2zm1-8q.425 0 .713-.288T13 8t-.288-.712T12 7t-.712.288T11 8t.288.713T12 9m0 13q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22m0-2q3.35 0 5.675-2.325T20 12t-2.325-5.675T12 4T6.325 6.325T4 12t2.325 5.675T12 20m0-8"
-              />
-            </svg>
-          </span>
+            id="info-circle" 
+            size="sm" 
+          />
         </span>
         <Input mode="select" v-model="event.who_can_register">
           <option value="COMMUNITY_MEMBERS">
@@ -41,33 +32,33 @@
           <option value="ANYONE">Anyone</option>
         </Input>
       </label>
-    </div>
-    <div class="flex gap-4">
-      <label class="flex-1">
-        <span class="block">Start Date</span>
-        <Input v-model="event.start" type="datetime-local" required />
+      <label class="flex-[0_1_auto]">
+        <span class="block">Player Count</span>
+        <Input v-model="event.player_count" type="number" max="20" min="5" />
       </label>
-      <label class="flex-1">
-        <span class="block">End Date</span>
-        <Input v-model="event.end" type="datetime-local" required />
-      </label>
-      <label class="flex-1">
+      <label class="flex-[0_1_auto]">
         <span class="block">Location Type</span>
         <Input mode="select" v-model="event.location_type">
           <option value="ONLINE">Online</option>
           <option value="IN_PERSON">In Person</option>
         </Input>
       </label>
-      <label v-if="event.location_type === 'IN_PERSON'" class="flex-1">
+      <label v-if="event.location_type === 'IN_PERSON'" class="flex-[0_1_auto]">
         <span class="block">Location</span>
         <Input type="text" v-model="event.location" list="locations" />
         <datalist id="locations">
           <option v-for="location in myLocations" :value="location"></option>
         </datalist>
       </label>
-      <label class="flex-1">
-        <span class="block">Player Count</span>
-        <Input v-model="event.player_count" type="number" max="20" min="5" />
+    </div>
+    <div class="flex flex-wrap gap-4">
+      <label class="flex-[0_1_auto]">
+        <span class="block">Start Date</span>
+        <Input v-model="event.start" type="datetime-local" required />
+      </label>
+      <label class="flex-[0_1_auto]">
+        <span class="block">End Date</span>
+        <Input v-model="event.end" type="datetime-local" required />
       </label>
     </div>
     <div class="flex gap-4">
@@ -83,7 +74,7 @@
       </label>
     </div>
     <div class="flex gap-4">
-      <label class="flex-1">
+      <label class="flex-1 flex flex-col">
         <span class="block">Storytellers</span>
         <div class="flex flex-col gap-1">
           <div
@@ -92,23 +83,35 @@
             class="flex gap-1"
           >
             <Input v-model="event.storytellers[index]" type="text" />
-            <button
+            <Button
               type="button"
               @click="event.storytellers.splice(index, 1)"
-              class="transition duration-150 text-white font-bold py-2 px-4 rounded"
+              color="negative"
+              icon="x-lg"
+              display="icon-only"
+              :title="`Remove ${event.storytellers[index]} as storyteller`"
             >
               Remove
-            </button>
+            </Button>
           </div>
         </div>
-        <button @click="event.storytellers.push('')" type="button">
-          Add Storyteller
-        </button>
+        <div>
+          <Button 
+            @click="event.storytellers.push('')" 
+            type="button" 
+            size="sm" 
+            icon="person-plus"
+            class="mt-2"
+          >
+            Add Storyteller
+          </Button>
+        </div>
       </label>
       <label class="flex-1">
         <span class="block">Script</span>
         <div class="flex items-center gap-1">
           <div v-if="event.script" class="flex-grow">{{ event.script }}</div>
+          <!-- @todo Update button -->
           <Button
             type="button"
             id="select-script"
@@ -117,16 +120,14 @@
               'w-full': !event.script,
               'flex-shrink': event.script,
             }"
-            font-size="md"
+            image="investigator"
           >
-            <div class="w-[30px] overflow-hidden">
-              <img src="/img/role/investigator.png" />
-            </div>
             <template v-if="event.script === ''">Select Script</template>
           </Button>
         </div>
         <SelectScriptDialog
           v-model:visible="showScriptDialog"
+          :scriptSelected="!!event.script"
           @selectScript="selectScript"
         />
       </label>
@@ -136,7 +137,7 @@
       <Input mode="textarea" v-model="event.description" rows="5" />
     </label>
     <div>
-      <label>
+      <label class="flex flex-col gap-2">
         <span class="block">Waitlists</span>
         <div
           v-if="event.waitlists.length <= 0"
@@ -148,33 +149,41 @@
         <div
           v-for="(waitlist, index) in event.waitlists"
           :key="index"
-          class="flex items-center"
+          class="flex items-center gap-1"
         >
-          <label class="flex items-center">
+          <label class="flex items-center gap-1">
             Default
             <input
               type="checkbox"
               v-model="waitlist.default"
               @click="ensureOneDefaultWaitlist(index)"
-              class="m-2"
             />
           </label>
-          <Input v-model="waitlist.name" type="text" />
-          <button
-            type="button"
-            @click.stop.prevent="event.waitlists.splice(index, 1)"
-            class="block transition duration-150 dark:text-white font-bold py-2 px-4 rounded"
-          >
-            Remove
-          </button>
+          <div class="flex-grow flex gap-1">
+            <Input v-model="waitlist.name" type="text" />
+            <Button
+              type="button"
+              @click.stop.prevent="event.waitlists.splice(index, 1)"
+              icon="x-lg"
+              display="icon-only"
+              color="negative"
+              class="flex-grow"
+              :title="`Remove ${waitlist.name}`"
+            >
+              Remove
+            </Button>
+          </div>
         </div>
-        <button
-          type="button"
-          @click="event.waitlists.push({ name: '', default: false })"
-          class="transition duration-150 dark:text-white font-bold py-2 px-4 rounded"
-        >
-          Add Waitlist
-        </button>
+        <div>
+          <Button
+            type="button"
+            @click="event.waitlists.push({ name: '', default: false })"
+            icon="plus-lg"
+            size="sm"
+          >
+            Add Waitlist
+          </Button>
+        </div>
       </label>
     </div>
     <div>
@@ -182,14 +191,13 @@
       <img
         v-if="event.image"
         :src="event.image"
-        class="m-auto w-full md:w-[600px] object-cover h-[250px]"
+        class="m-auto w-full md:w-[600px] object-cover h-[250px] mb-4"
       />
       <Button
         type="button"
         @click="uploadFile"
-        tertiary
-        class="w-full mt-2"
-        font-size="md"
+        icon="upload"
+        size="sm"
       >
         Upload Image
       </Button>
@@ -197,23 +205,23 @@
         v-if="event.image"
         type="button"
         @click="removeFile"
-        tertiary
-        class="w-full mt-2"
-        font-size="sm"
+        color="negative"
+        icon="x"
+        size="sm"
       >
         Remove Image
       </Button>
     </div>
-    <Button type="submit" id="save-game" :disabled="inFlight" primary>
-      <template v-if="inFlight">
-        <Spinner />
-        Saving...
-      </template>
-      <template v-else>Save Event</template>
-    </Button>
-    <template v-if="errors">
-      <div class="text-red-500 text-center">{{ errors }}</div>
-    </template>
+    <div class="flex flex-col items-center">
+      <Button type="submit" id="save-game" :disabled="inFlight" color="primary" wide>
+        <template v-if="inFlight">
+          <Spinner />
+          Saving...
+        </template>
+        <template v-else>Save Event</template>
+      </Button>
+    </div>
+    <Alert v-if="errors" color="negative">{{ errors }}</Alert>
   </form>
 </template>
 

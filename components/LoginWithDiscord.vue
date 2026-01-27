@@ -1,7 +1,12 @@
 <template>
-  <Button class="w-[300px] py-2 text-white" discord @click="login">
-    <Discord />
-    <span>Login with Discord</span>
+  <Button 
+    @click="login"
+    icon="discord"
+    color="discord"
+    size="lg"
+    wide
+  >
+    Login with Discord
   </Button>
 </template>
 

@@ -71,17 +71,15 @@
             <option :value="true">Tutorials are disabled</option>
           </select>
         </label>
-        <Button type="submit" primary class="px-4 py-2" :disabled="inFlight">
+        <Button type="submit" color="primary" :disabled="inFlight">
           <template v-if="inFlight">
             <Spinner />
             Saving...
           </template>
           <template v-else>Save Settings</template>
         </Button>
-        <span v-if="errorMessage" class="text-red-600">{{ errorMessage }}</span>
-        <span v-if="savedSuccessfully" class="text-green-600">
-          Profile updated successfully!
-        </span>
+        <Alert v-if="errorMessage" color="negative">{{ errorMessage }}</Alert>
+        <Alert v-if="savedSuccessfully" color="positive">Profile updated successfully!</Alert>
       </form>
     </section>
   </SettingsTemplate>
