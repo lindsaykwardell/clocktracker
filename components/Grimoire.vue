@@ -117,6 +117,8 @@
             <GrimoireTaggedUserInput
               :users="filteredTaggablePlayers"
               @inputFocused="focusedToken = token"
+              @inputBlurred="focusedToken = null"
+              :highlightTagged="!!token.player_id"
               v-model:value="token.player_name"
             />
           </ClientOnly>
@@ -497,13 +499,27 @@ function checkIfPlayerNameIsFriend(token: Token) {
       }
     }
   } else {
+    const trimmedName = token.player_name.trim();
+
+    if (!trimmedName && token.player_id) {
+      token.player_id = undefined;
+      return;
+    }
+
     if (token.player_id) {
       const player = potentiallyTaggedPlayers.value.find(
         (player) => player?.user_id === token.player_id
       );
 
-      if (!player || player.display_name !== token.player_name) {
-        token.player_id = undefined;
+      if (focusedToken.value === token) {
+        if (player?.display_name && player.display_name !== token.player_name) {
+          token.player_id = undefined;
+        }
+        return;
+      }
+
+      if (player?.display_name && player.display_name !== token.player_name) {
+        token.player_name = player.display_name;
       }
     }
   }
