@@ -24,6 +24,7 @@
             "
             class="h-[2rem] text-sm"
           />
+          <!-- @todo This form should have a submit for WCAG -->
           <div class="absolute right-2 top-[50%] -translate-y-[50%] w-6 h-6">
             <ImageUI image="investigator" />
           </div>
@@ -38,7 +39,7 @@
         <span class="hidden md:inline dark:text-stone-200">{{
           me.data.display_name
         }}</span>
-        <Avatar :value="me.data.avatar" size="xs" />
+        <Avatar :value="me.data.avatar" size="xs" aria-hidden="true" />
       </nuxt-link>
       <nuxt-link v-else-if="me.status !== Status.LOADING" to="/login">
         Login
@@ -87,7 +88,7 @@
           />
         </nuxt-link>
         <template v-if="me.status === Status.SUCCESS">
-          <YearInReviewLink class="mb-4"/>
+          <YearInReviewLink class="mb-4" id="year-in-review" />
           <NavLink id="dashboard" to="/" icon="innkeeper"> Home </NavLink>
           <NavLink
             id="my-games"
