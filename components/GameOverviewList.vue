@@ -148,6 +148,7 @@
                 :value="game.community.icon"
                 size="xs"
                 class="flex-shrink bg-stone-300 dark:bg-stone-950"
+                aria-hidden="true"
               />
               {{ game.community_name }}
             </div>
