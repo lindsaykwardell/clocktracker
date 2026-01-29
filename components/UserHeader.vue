@@ -10,6 +10,7 @@
           :value="player.avatar || ''"
           class="border-2 shadow-xl flex-shrink row-span-3"
           size="lg"
+          aria-hidden="true"
         />
         <div class="flex-grow flex flex-col justify-start gap-3 w-full">
           <div class="flex flex-col items-center md:items-start gap-2">
