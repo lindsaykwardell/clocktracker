@@ -82,7 +82,14 @@
               :value="game.community.icon"
               size="sm"
               class="flex-shrink bg-stone-300 dark:bg-stone-950"
+              aria-hidden="true"
             />
+            <span
+              v-if="game.community_name"
+              class="sr-only"
+            >
+              Community: {{ game.community_name }}
+            </span>
           </div>
           <div
             class="flex-grow items-center justify-center flex font-sorts text-3xl"
@@ -161,17 +168,21 @@
               <template v-if="game.traveler_count">
                 (+{{ game.traveler_count }})
               </template>
-              <div
+              <ul
                 v-for="(player, index) in taggedPlayers(game)"
                 class="tagged-players"
                 :style="`--i: ${index}`"
               >
-                <Avatar
-                  size="xs"
-                  :value="player?.avatar"
-                  class="bg-stone-300 dark:bg-stone-950"
-                />
-              </div>
+                <li>
+                  <Avatar
+                    size="xs"
+                    :value="player?.avatar"
+                    class="bg-stone-300 dark:bg-stone-950"
+                    aria-hidden="true"
+                  />
+                  <span class="sr-only">{{ player?.display_name }}</span>
+                </li>
+              </ul>
             </div>
           </div>
           <div class="flex flex-grow justify-between gap-1 p-1">
