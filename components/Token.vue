@@ -22,7 +22,7 @@
       <path
         data-v-deec739a=""
         d="M 13 75 C 13 160, 138 160, 138 75"
-        id="curve"
+        :id="curveId"
         fill="transparent"
       ></path>
       <text
@@ -33,7 +33,7 @@
         font-size="90%"
         class="label mozilla"
       >
-        <textPath data-v-deec739a="" xlink:href="#curve">
+        <textPath data-v-deec739a="" :xlink:href="`#${curveId}`">
           {{ character?.name || character?.role?.name }}
         </textPath>
       </text>
@@ -110,6 +110,7 @@ const props = defineProps<{
   hideName?: boolean;
   outline?: boolean;
   relatedId?: string;
+  curveId?: string;
   reminderText?: string;
   tokenTooltip?: any;
   relatedTokenTooltip?: any;
@@ -117,6 +118,41 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits(["clickRelated", "clickRole", "clickAlignment"]);
+
+let curveIdSeed = 0;
+const curveId = ref("");
+const curveIdBase = computed(() => {
+  if (props.curveId) return props.curveId;
+  const base =
+    props.character?.role?.id ||
+    props.character?.role_id ||
+    props.character?.name ||
+    props.character?.role?.name ||
+    props.relatedId ||
+    "token";
+  return `curve-${hashString(base)}`;
+});
+const curveIdSuffix = ref("");
+
+watchEffect(() => {
+  curveId.value = curveIdSuffix.value
+    ? `${curveIdBase.value}-${curveIdSuffix.value}`
+    : curveIdBase.value;
+});
+
+onMounted(() => {
+  if (!props.curveId) {
+    curveIdSuffix.value = Math.random().toString(36).slice(2, 8);
+  }
+});
+
+function hashString(value: string) {
+  let hash = 5381;
+  for (let i = 0; i < value.length; i += 1) {
+    hash = (hash * 33) ^ value.charCodeAt(i);
+  }
+  return (hash >>> 0).toString(36);
+}
 const {
   alignmentSuffix,
   isRoleAssetUrl,
