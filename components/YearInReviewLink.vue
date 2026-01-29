@@ -3,7 +3,6 @@
     v-if="isDecemberOrJanuary"
     component="nuxt-link"
     to="/year-in-review"
-    id="year-in-review"
     class="ct-btn-yir"
   >
     <ImageUI 
