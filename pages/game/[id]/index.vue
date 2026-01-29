@@ -30,7 +30,7 @@
         </template>
       </Alert>
 
-      <section class="flex flex-col text-black w-full lg:w-4/5 m-auto my-4 rounded shadow-lg relative">
+      <section class="flex flex-col text-black dark:text-white w-full lg:w-4/5 m-auto my-4 rounded shadow-lg relative">
         <!-- Header -->
         <div class="metadata bg-stone-200 dark:bg-stone-950 grid md:grid-cols-[1fr_max-content] justify-center md:justify-start gap-x-4 gap-y-8 py-4 px-7">
           <div class="flex-grow flex flex-col w-full gap-4">
@@ -44,6 +44,7 @@
                   last_character.name || last_character.alignment !== 'NEUTRAL'
                 "
                 class="relative"
+                aria-hidden="true"
               >
                 <template v-if="!game.data.is_storyteller">
                   <nuxt-link
@@ -80,6 +81,7 @@
                   <Avatar
                     :value="player.data.avatar || ''"
                     size="xxs"
+                    aria-hidden="true"
                   />
                   <template v-if="!last_character.name && last_character.alignment === 'NEUTRAL'">
                     Recorded by 
@@ -110,8 +112,8 @@
                       v-if="!last_character.name && last_character.alignment !== 'NEUTRAL'"
                       class="flex items-center gap-1 font-sorts text-xl lg:text-2xl font-bold"
                       :class="{
-                        'text-blue-800': last_character.alignment === 'GOOD',
-                        'text-red-800': last_character.alignment === 'EVIL',
+                        'text-blue-800 dark:text-blue-600': last_character.alignment === 'GOOD',
+                        'text-red-800 dark:text-red-600': last_character.alignment === 'EVIL',
                       }"
                     >
                       {{ last_character.alignment }}
@@ -125,8 +127,8 @@
                         v-for="(character, i) in game.data.player_characters"
                         class="flex gap-1 items-center"
                         :class="{
-                          'text-blue-800': character.alignment === 'GOOD',
-                          'text-red-800': character.alignment === 'EVIL',
+                          'text-blue-800 dark:text-blue-600': character.alignment === 'GOOD',
+                          'text-red-800 dark:text-red-600': character.alignment === 'EVIL',
                         }"
                       >
                         <template
@@ -215,8 +217,8 @@
                       :value="game.data.community.icon"
                       size="xs"
                       class="border-stone-800 flex-shrink"
+                      aria-hidden="true"
                     />
-
                     <Button
                       component="nuxt-link"
                       v-if="game.data.community?.slug"
@@ -354,6 +356,7 @@
             <img
               :src="game.data.associated_script?.logo ?? scriptLogo(game.data.script)"
               class="hidden md:block w-48 xl:w-64 h-48 xl:h-64"
+              aria-hidden="true"
             />
             <div 
               v-if="
