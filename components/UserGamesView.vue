@@ -6,8 +6,10 @@
           <div class="flex flex-col lg:flex-row gap-3 px-4">
             <div class="flex flex-col md:flex-row gap-3 items-center">
               <template v-if="!selectMultipleGames.enabled">
+                <label class="sr-only" for="select-sortby">Sort by</label>
                 <Input
                   mode="select"
+                  id="select-sortby"
                   v-model="sortBy"
                   class="w-full md:w-auto rounded text-lg bg-stone-200 dark:bg-stone-600 border-0"
                 >
@@ -20,8 +22,10 @@
                   <option value="players">Sort by Players</option>
                   <option value="favorite">Sort by Favorite</option>
                 </Input>
+                <label class="sr-only" for="select-orderby">Order by</label>
                 <Input
                   mode="select"
+                  id="select-orderby"
                   v-model="orderBy"
                   class="w-full md:w-auto rounded p-1 text-lg bg-stone-200 dark:bg-stone-600 border-0"
                 >
