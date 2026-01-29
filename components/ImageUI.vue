@@ -2,6 +2,7 @@
   <img
     class="ct-ui-image"
     :src="imageUrl"
+    aria-hidden="true"
   />
 </template>
 
