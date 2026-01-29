@@ -2,7 +2,7 @@
   <template v-if="me.status === Status.SUCCESS">
     <div class="dashboard">
       <div class="content custom-scrollbar hidden lg:flex flex-col gap-4 p-4 bg-stone-200/30 dark:bg-stone-950">
-        <YearInReviewLink />
+        <YearInReviewLink id="year-in-review-menu" />
         <h1 class="text-xl font-sorts text-center">My Profile</h1>
         <ul class="px-4">
           <li>
@@ -61,7 +61,7 @@
               v-for="community in myCommunities"
               class="flex gap-2 items-center"
             >
-              <Avatar :value="community.icon" size="xs" />
+              <Avatar :value="community.icon" size="xs" aria-hidden="true" />
               <nuxt-link
                 :to="`/community/${community.slug}`"
                 class="hover:underline"
@@ -83,7 +83,7 @@
           <div class="space-y-2">
             <div>
               <h2 class="text-xl font-sorts">Stats at a glance</h2>
-              <p class="text-xs text-stone-500">Changes shown for the last 30 days.</p>
+              <p class="text-xs text-stone-500 dark:text-stone-400">Changes shown for the last 30 days.</p>
             </div>
             <div>
               <UserStatsSummary
@@ -105,7 +105,7 @@
                   <div class="flex flex-col gap-2">
                     <template v-if="update.kind === 'new_event'">
                       <div class="flex gap-2 items-center">
-                        <Avatar :value="update.event.community?.icon" size="xs" />
+                        <Avatar :value="update.event.community?.icon" size="xs" aria-hidden="true" />
                         <div class="flex flex-col">
                           <span class="text-sm text-stone-500 dark:text-stone-400">
                             <template v-if="update.event.community">
@@ -148,7 +148,7 @@
 
                     <template v-else-if="update.kind === 'new_post'">
                       <div class="flex gap-2 items-center">
-                        <Avatar :value="update.post.community?.icon" size="xs" />
+                        <Avatar :value="update.post.community?.icon" size="xs" aria-hidden="true" />
                         <div class="flex flex-col">
                           <span class="text-sm text-stone-500 dark:text-stone-400">
                             New Post in
@@ -180,6 +180,7 @@
                                 : update.request.user.avatar
                             "
                             size="xs"
+                            aria-hidden="true"
                           />
                           <span>
                             New friend request
@@ -224,6 +225,7 @@
                           <Avatar
                             :value="update.game.parent_game?.user?.avatar"
                             size="xs"
+                            aria-hidden="true"
                           />
                           <span
                             >You were tagged in a game by
