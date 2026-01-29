@@ -16,7 +16,7 @@
           attacks!
         </p>
         <div class="w-[300px] m-auto" @click="close">
-          <YearInReviewLink />
+          <YearInReviewLink id="year-in-review-dialog"/>
         </div>
         <p class="p-2 pt-6">
           Check out your "Year In Review" to see how you've fared over the past
