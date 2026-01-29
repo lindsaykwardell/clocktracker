@@ -6,7 +6,7 @@
       <h2 class="font-sorts text-4xl text-center">Integrations</h2>
       <div class="space-y-4 w-full xl:w-3/4">
         <h3 class="text-2xl">BoardGameGeek</h3>
-        <p class="text-stone-500">
+        <p class="text-stone-500 dark:text-stone-400">
           Connect your BoardGameGeek account to sync your plays to your profile.
         </p>
         <div class="flex gap-4">
@@ -44,7 +44,7 @@
       </div>
       <div class="space-y-4 w-full xl:w-3/4">
         <h3 class="text-2xl">BGStats</h3>
-        <p class="text-stone-500">Enable logging games to BGStats.</p>
+        <p class="text-stone-500 dark:text-stone-400">Enable logging games to BGStats.</p>
         <label class="flex gap-4">
           <Toggle v-model="enable_bgstats" />
           <span>Enable BGStats</span>
