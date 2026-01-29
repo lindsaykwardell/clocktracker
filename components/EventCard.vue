@@ -147,7 +147,7 @@
               v-if="event.created_by"
               class="flex items-center gap-2"
             >
-              <Avatar :value="event.created_by.avatar" size="xxs" background />
+              <Avatar :value="event.created_by.avatar" size="xxs" background aria-hidden="true" />
               <span>Created by {{ event.created_by.display_name }}</span>
             </div>
           </div>
