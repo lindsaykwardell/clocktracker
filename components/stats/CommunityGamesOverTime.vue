@@ -15,7 +15,7 @@
       :data="chartData"
       :options="chartOptions"
       :plugins="[lineOnTop]"
-      class="mb-16"
+      class="mb-16 max-w-[100%]"
     />
   </div>
 </template>
