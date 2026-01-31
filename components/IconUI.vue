@@ -95,6 +95,10 @@
   const Chair = resolveComponent("IconChair");
   const GraphUpArrow = resolveComponent("IconGraphUpArrow");
   const GraphDownArrow = resolveComponent("IconGraphDownArrow");
+  const MenuOpen = resolveComponent("IconMenuOpen");
+  const MenuClose = resolveComponent("IconMenuClose");
+  const Sun = resolveComponent("IconSun");
+  const Moon = resolveComponent("IconMoon");
 
   // Socials
   const Website = resolveComponent("IconGlobe");
@@ -222,7 +226,15 @@
       case "info-circle":
         return InfoCircle; 
       case "x-circle":
-        return XCircle;       
+        return XCircle;
+      case "menu-open":
+        return MenuOpen;
+      case "menu-close":
+        return MenuClose;
+      case "sun":
+        return Sun;
+      case "moon":
+        return Moon;            
       default:
         return EyeSlash;
     }

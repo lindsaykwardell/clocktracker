@@ -101,25 +101,26 @@
         </div>
       </div>
       <div v-if="player.communities?.length" class="flex flex-col gap-1">
-        <h2 class="text-xs text-stone-600 text-center md:text-start uppercase">Communities</h2>
-        <div
+        <h2 class="text-xs text-stone-600 dark:text-stone-400 text-center md:text-start uppercase">Communities</h2>
+        <ul
           class="flex flex-wrap justify-start gap-[0.125rem]"
         >
           <nuxt-link
             v-for="community in player.communities"
             :to="`/community/${community.slug}`"
-            :aria-label="`View the ${community.name} community`"
           >
             <Avatar
               :value="community.icon"
               size="xs"
               class="flex-shrink bg-stone-300 dark:bg-stone-950"
               v-tooltip="community.name"
+              aria-hidden="true"
             />
+            <span class=sr-only>{{ community.name }}</span>
           </nuxt-link>
-        </div>
+        </ul>
       </div>
-      <hr v-if="player.bio" class="border-stone-100 w-full" />
+      <hr v-if="player.bio" class="border-stone-100 dark:border-stone-600 w-full" />
       <p class="whitespace-pre-wrap w-full text-center md:text-start text-sm md:text-base text-balance max-w-[80ch]">
         {{ player.bio }}
       </p>

@@ -21,7 +21,16 @@
                 class="block w-full p-2 border-l-[6px] hover:border-primary hover:text-primary-content hover:bg-primary dark:hover:bg-dark-primary duration-150"
                 active-class="border-primary dark:border-dark-primary"
               >
-                Friend Requests
+                <span class="flex items-center justify-between">
+                  Friend Requests
+                  <Badge
+                    v-if="requestCount > 0"
+                    color="negative"
+                    size="sm"
+                  >
+                    <span class="sr-only">Unread notifications: </span>{{ requestCount }}
+                  </Badge>
+                </span>
               </nuxt-link>
             </li>
             <li>
@@ -66,6 +75,7 @@
 
 <script setup lang="ts">
 const friends = useFriends();
+const me = useMe();
 
 const props = withDefaults(
   defineProps<{
@@ -96,6 +106,12 @@ const shouldRenderFriendsPage = computed(() => {
     shouldRender = false;
 
   return shouldRender;
+});
+
+const requestCount = computed(() => {
+  if (me.value.status !== Status.SUCCESS) return 0;
+
+  return friends.getRequestCount(me.value.data.user_id);
 });
 
 onMounted(() => {

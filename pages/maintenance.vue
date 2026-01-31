@@ -3,7 +3,7 @@
     <h1 class="text-4xl font-bold font-sorts text-center">
       Maintenance in Progress
     </h1>
-    <ImageUI image="engineer_large" class="w-[300px] h-[300px]" />
+    <ImageUI image="tinker_large" class="w-[300px] h-[300px]" />
     <p class="text-lg">The site is currently down for maintenance.</p>
     <p class="text-lg">Please check back later.</p>
   </div>
