@@ -266,6 +266,13 @@
   #overlay {
     display: block;
   }
+
+  /* Prevent scroll when open */
+  html:has(#sidebar.open),
+  body:has(#sidebar.open) {
+    height: 100dvh !important;
+    overflow: hidden !important;
+  }
 }
 
 #sidebar ul {
@@ -338,11 +345,14 @@
   fill: var(--color-base-content);
 }
 
-.sidebar-bottom {
+#sidebar > ul.sidebar-bottom {
   @apply border-t border-stone-300 dark:border-stone-700/50;
 
   margin-block-start: auto;
   padding-block-start: .5rem;
-}
 
+  > li:last-child {
+    margin-block-end: 0;
+  }
+}
 </style>
