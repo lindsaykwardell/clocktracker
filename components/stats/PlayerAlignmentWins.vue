@@ -159,8 +159,9 @@ const chartOptions = computed(() => ({
           const percent = ctx.parsed ?? 0;
           const decided = stats?.decided ?? 0;
           const wins = stats?.wins ?? 0;
+          const losses = Math.max(0, decided - wins);
 
-          return `${ctx.dataset.label}: ${percent.toFixed(0)}% (W/L: ${wins}/${decided})`;
+          return `${ctx.dataset.label}: ${percent.toFixed(0)}% (W/L: ${wins}/${losses})`;
         },
       },
     },
