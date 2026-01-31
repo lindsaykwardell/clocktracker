@@ -6,7 +6,7 @@
     title="Join the ClockTracker Discord server"
     variant="soft"
     icon="discord"
-    size="lg"
+    :size="size"
     display="icon-only"
   >
     Discord
@@ -18,7 +18,7 @@
     title="Join the ClockTracker conversation on Bluesky"
     variant="soft"
     icon="bluesky"
-    size="lg"
+    :size="size"
     display="icon-only"
   >
     Bluesky
@@ -30,7 +30,7 @@
     title="Donate to ClockTracker"
     variant="soft"
     icon="kofi"
-    size="lg"
+    :size="size"
     display="icon-only"
   >
     Ko-Fi
@@ -42,9 +42,20 @@
     title="View the ClockTracker source code"
     variant="soft"
     icon="github"
-    size="lg"
+    :size="size"
     display="icon-only"
   >
     Github
   </Button>
 </template>
+
+<script setup lang="ts">
+const props = withDefaults(
+  defineProps<{
+    size?: "xs" | "lg";
+}>(),
+  { 
+    size: "lg",
+  }
+);
+</script>

@@ -13,14 +13,14 @@
           >
             <nuxt-link
               :to="`/@${username}`"
-              class="font-bold leading-none md:text-lg whitespace-nowrap rounded md:rounded-none bg-stone-100 md:bg-transparent border-2 md:border-x-0 md:border-t-0 md:border-b-4 py-2 md:py-1 px-3 hover:bg-stone-300 dark:hover:bg-stone-700"
+              class="profile-tab"
               :class="currentTabClass('profile')"
             >
               Profile
             </nuxt-link>
             <nuxt-link
               :to="`/@${username}?view=games`"
-              class="font-bold leading-none md:text-lg whitespace-nowrap rounded md:rounded-none bg-stone-100 md:bg-transparent border-2 md:border-x-0 md:border-t-0 md:border-b-4 py-2 md:py-1 px-3 hover:bg-stone-300 dark:hover:bg-stone-700"
+              class="profile-tab"
               :class="currentTabClass('games')"
             >
               Games
@@ -28,7 +28,7 @@
             <nuxt-link
               v-if="me?.username === username"
               :to="`/@${username}?view=pending`"
-              class="flex gap-1 items-center relative font-bold leading-none md:text-lg whitespace-nowrap rounded md:rounded-none bg-stone-100 md:bg-transparent border-2 md:border-x-0 md:border-t-0 md:border-b-4 py-2 md:py-1 px-3 hover:bg-stone-300 dark:hover:bg-stone-700"
+              class="flex gap-1 items-center relative profile-tab"
               :class="currentTabClass('pending')"
             >
               <span>Tagged / Draft</span>
@@ -44,7 +44,7 @@
             </nuxt-link>
             <nuxt-link
               :to="`/@${username}?view=stats`"
-              class="font-bold leading-none md:text-lg whitespace-nowrap rounded md:rounded-none bg-stone-100 md:bg-transparent border-2 md:border-x-0 md:border-t-0 md:border-b-4 py-2 md:py-1 px-3 hover:bg-stone-300 dark:hover:bg-stone-700"
+              class="profile-tab"
               :class="currentTabClass('stats')"
             >
               Stats
@@ -275,3 +275,12 @@ useHead({
   ],
 });
 </script>
+
+<style>
+  .profile-tab {
+    @apply font-bold leading-none md:text-lg whitespace-nowrap rounded md:rounded-none; 
+    @apply bg-stone-100 dark:bg-stone-800 md:bg-transparent dark:md:bg-transparent hover:bg-stone-300 dark:hover:bg-stone-700; 
+    @apply border-2 md:border-x-0 md:border-t-0 md:border-b-4;
+    @apply py-2 md:py-1 px-3;
+  }
+</style>
