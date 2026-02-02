@@ -7,13 +7,14 @@
       <slot :close="() => (show = false)" />
     </div>
     <div class="flex justify-center p-4">
-      <a
+      <Button
+        component="a"
         href="https://ko-fi.com/clocktracker"
-        class="text-center text-lg bg-blue-950 hover:bg-blue-800 transition duration-150 text-white font-bold py-2 px-4 rounded flex justify-center gap-4 items-center"
+        color="primary"
+        icon="kofi"
       >
-        <KoFi />
-        <span>Support ClockTracker on Ko-fi</span>
-      </a>
+        Support ClockTracker on Ko-fi
+      </Button>
     </div>
   </Dialog>
 </template>

@@ -1,36 +1,43 @@
 <template>
-  <nuxt-link
-    :to="`/roles/${role.id}`"
-    class="bg-stone-300 dark:bg-stone-950 hover:bg-stone-200 dark:hover:bg-stone-900 w-full p-2 shadow-lg flex items-center"
-  >
-    <div class="flex flex-col md:flex-row gap-3 items-top">
-      <Token :character="character" size="lg" />
-      <div class="flex-grow flex flex-col gap-2">
-        <h2 class="font-sorts text-xl lg:text-2xl">
-          {{ role.name }}
+  <div class="ct-card ct-card--role flex flex-col md:flex-row gap-4 items-center md:items-top">
+    <Token :character="character" size="lg" />
+
+    <div class="flex-grow flex flex-col items-center md:items-start gap-2">
+      <div class="ct-card__header">
+        <h2 class="ct-card__title text-center md:text-start">
+          <nuxt-link
+            :to="`/roles/${role.id}`"
+            class="overlay-link"
+          >
+            {{ role.name }}
+          </nuxt-link>
         </h2>
 
-        <section class="flex gap-6 text-stone-600">
-          <div>
-            <span
-              class="text-stone-200 bg-purple-800 rounded-full px-2 py-1 text-xs font-bold aspect-square"
-            >
-              {{ role._count.scripts }}
-            </span>
-            <span> Script{{ role._count.scripts === 1 ? "" : "s" }} </span>
-          </div>
-          <div>
-            <span
-              class="text-stone-200 bg-blue-800 rounded-full px-2 py-1 text-xs font-bold aspect-square"
-            >
-              {{ role._count.games }}
-            </span>
-            <span> Game{{ role._count.games === 1 ? "" : "s" }} Played</span>
-          </div>
-        </section>
+        <p class="ct-card__subline text-center md:text-start">
+          {{ roleType }}
+        </p>
       </div>
+
+      <p class="whitespace-pre-wrap text-center md:text-start w-full max-w-[80ch]">
+        {{ role.ability }}
+      </p>
+
+      <section class="ct-card__tags">
+        <div>
+          <Badge color="scripts" size="sm">
+            {{ role._count.scripts }} 
+          </Badge>
+          Script{{ role._count.scripts === 1 ? "" : "s" }}
+        </div>
+        <div>
+          <Badge color="games" size="sm">
+            {{ role._count.games }} 
+          </Badge>
+          Game{{ role._count.games === 1 ? "" : "s" }}
+        </div>
+      </section>
     </div>
-  </nuxt-link>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -44,4 +51,20 @@ const character = computed(() => ({
   name: props.role.name,
   role: props.role,
 }));
+
+const roleType = computed(() => {
+  const type = props.role.type ?? "";
+  if (!type) return "";
+  return type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
+});
 </script>
+
+<style scoped>
+  .overlay-link::after {
+    content: "";
+    inset: 0;
+    position: absolute;
+
+    @apply transition duration-150 rounded border border-transparent hover:border-purple-700;
+  }
+</style>

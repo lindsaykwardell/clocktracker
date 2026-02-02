@@ -411,46 +411,8 @@
         class="w-40 md:w-52 pb-8 md:pb-20"
       />
 
-      <div class="flex justify-around">
-        <a
-          id="discord"
-          href="https://discord.gg/KwMz8ThamT"
-          class="text-stone-400 hover:text-stone-500 dark:text-stone-200 dark:hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
-          aria-label="Join the ClockTracker Discord server"
-        >
-          <div class="w-[50px] flex justify-center">
-            <Discord />
-          </div>
-        </a>
-        <a
-          id="bluesky"
-          href="https://bsky.app/profile/clocktracker.app"
-          class="text-stone-400 hover:text-stone-500 dark:text-stone-200 dark:hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
-          aria-label="Join the ClockTracker Discord server"
-        >
-          <div class="w-[50px] flex justify-center">
-            <Bluesky />
-          </div>
-        </a>
-        <a
-          id="kofi"
-          href="https://ko-fi.com/clocktracker"
-          class="text-stone-400 hover:text-stone-500 dark:text-stone-200 dark:hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
-          aria-label="Donate to ClockTracker"
-        >
-          <div class="w-[50px] flex justify-center">
-            <KoFi />
-          </div>
-        </a>
-        <a
-          href="https://github.com/lindsaykwardell/clocktracker"
-          class="text-stone-400 hover:text-stone-500 dark:text-stone-200 dark:hover:text-stone-100 hover:underline flex gap-2 items-center whitespace-nowrap w-full py-1"
-          aria-label="View the ClockTracker source code"
-        >
-          <div class="w-[50px] flex justify-center">
-            <Github />
-          </div>
-        </a>
+      <div class="flex justify-around gap-2">
+        <Socials buttonColor="black" />
       </div>
     </section>
     <section class="gap-5">
@@ -578,7 +540,7 @@ const wonMostInMonth = computed(() => {
 });
 
 useHead({
-  title: `Year in Review ${data.value?.year} | ${data.value?.display_name}`,
+  title: `Year in Review ${data.value?.year} - ${data.value?.display_name}`,
   meta: [
     {
       name: "description",
@@ -586,7 +548,7 @@ useHead({
     },
     {
       property: "og:title",
-      content: `Year in Review ${data.value?.year} | ${data.value?.display_name}`,
+      content: `Year in Review ${data.value?.year} - ${data.value?.display_name}`,
     },
     {
       property: "og:description",
@@ -610,7 +572,7 @@ useHead({
     },
     {
       property: "twitter:title",
-      content: `Year in Review ${data.value?.year} | ${data.value?.display_name}`,
+      content: `Year in Review ${data.value?.year} - ${data.value?.display_name}`,
     },
     {
       property: "twitter:description",

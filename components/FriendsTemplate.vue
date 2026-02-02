@@ -1,30 +1,43 @@
 <template>
   <StandardTemplate>
     <template v-if="shouldRenderFriendsPage">
-      <div class="flex gap-4 xl:max-w-[1200px] m-auto mt-4">
+      <div class="flex flex-col md:flex-row gap-4 xl:max-w-[1200px] m-auto mt-4 px-4 md:px-8">
         <nav
-          class="flex flex-col md:w-[300px] w-[100px] min-w-[100px] md:min-w-[300px] items-center"
+          class="flex flex-col w-full md:w-[300px] w-[100px] min-w-[100px] md:min-w-[300px] items-center"
         >
-          <ul class="w-full sticky top-16 md:top-4">
-            <li class="w-full bg-stone-300 dark:bg-stone-700">
+          <ul class="w-full sticky top-16 md:top-4 divide-y divide-stone-300 dark:divide-stone-800 bg-stone-200 dark:bg-stone-700 rounded overflow-hidden">
+            <li class="w-full">
               <nuxt-link
                 to="/friends"
-                class="block w-full p-2 hover:bg-stone-200 dark:hover:bg-stone-900 duration-150"
-                active-class="bg-stone-200 dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-950"
+                class="block w-full p-2 border-l-[6px] hover:border-primary hover:text-primary-content hover:bg-primary dark:hover:bg-dark-primary duration-150"
+                active-class="border-primary dark:border-dark-primary"
               >
                 My Friends
               </nuxt-link>
+            </li>
+            <li>
               <nuxt-link
                 to="/friends/requests"
-                class="block w-full p-2 hover:bg-stone-200 dark:hover:bg-stone-900 duration-150"
-                active-class="bg-stone-200 dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-950"
+                class="block w-full p-2 border-l-[6px] hover:border-primary hover:text-primary-content hover:bg-primary dark:hover:bg-dark-primary duration-150"
+                active-class="border-primary dark:border-dark-primary"
               >
-                Friend Requests
+                <span class="flex items-center justify-between">
+                  Friend Requests
+                  <Badge
+                    v-if="requestCount > 0"
+                    color="negative"
+                    size="sm"
+                  >
+                    <span class="sr-only">Unread notifications: </span>{{ requestCount }}
+                  </Badge>
+                </span>
               </nuxt-link>
+            </li>
+            <li>
               <nuxt-link
                 to="/friends/suggested"
-                class="block w-full p-2 hover:bg-stone-200 dark:hover:bg-stone-900 duration-150"
-                active-class="bg-stone-200 dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-950"
+                class="block w-full p-2 border-l-[6px] hover:border-primary hover:text-primary-content hover:bg-primary dark:hover:bg-dark-primary duration-150"
+                active-class="border-primary dark:border-dark-primary"
               >
                 Suggested Friends
               </nuxt-link>
@@ -62,12 +75,20 @@
 
 <script setup lang="ts">
 const friends = useFriends();
+const me = useMe();
 
-const props = defineProps<{
-  fetchFriends: boolean;
-  fetchRequests: boolean;
-  fetchSuggested: boolean;
-}>();
+const props = withDefaults(
+  defineProps<{
+    fetchFriends?: boolean;
+    fetchRequests?: boolean;
+    fetchSuggested?: boolean;
+  }>(),
+  {
+    fetchFriends: false,
+    fetchRequests: false,
+    fetchSuggested: false,
+  }
+);
 
 const shouldRenderFriendsPage = computed(() => {
   let shouldRender = true;
@@ -87,9 +108,25 @@ const shouldRenderFriendsPage = computed(() => {
   return shouldRender;
 });
 
+const requestCount = computed(() => {
+  if (me.value.status !== Status.SUCCESS) return 0;
+
+  return friends.getRequestCount(me.value.data.user_id);
+});
+
 onMounted(() => {
   if (props.fetchFriends) friends.fetchFriends();
   if (props.fetchRequests) friends.fetchRequests();
   if (props.fetchSuggested) friends.fetchRecommended();
 });
 </script>
+
+<style scoped>
+  li > a:not(.router-link-exact-active,:hover) {
+    border-color: theme(colors.stone.300);
+
+    &:where(.dark, .dark *) {
+      border-color: theme(colors.stone.900);
+    }
+  }
+</style>

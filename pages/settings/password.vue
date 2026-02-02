@@ -30,8 +30,7 @@
         </label>
         <Button
           type="submit"
-          primary
-          class="px-4 py-2"
+          color="primary"
           :disabled="passwordInFlight"
         >
           <template v-if="passwordInFlight">
@@ -40,10 +39,8 @@
           </template>
           <template v-else>Update Password</template>
         </Button>
-        <span class="text-red-600"> {{ passwordErrorMessage }}</span>
-        <span v-if="passwordSavedSuccessfully" class="text-green-600">
-          Password updated successfully!
-        </span>
+        <Alert v-if="passwordErrorMessage" color="negative">{{ passwordErrorMessage }}</Alert>
+        <Alert v-if="passwordSavedSuccessfully" color="positive">Password updated successfully!</Alert>
       </form>
     </section>
   </SettingsTemplate>

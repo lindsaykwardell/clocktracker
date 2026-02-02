@@ -4,13 +4,13 @@
       class="w-full flex flex-col items-center justify-center gap-12 py-4"
     >
       <h2 class="font-sorts text-4xl text-center">Integrations</h2>
-      <div class="text-left w-full">
+      <div class="space-y-4 w-full xl:w-3/4">
         <h3 class="text-2xl">BoardGameGeek</h3>
-        <p class="text-stone-500">
+        <p class="text-stone-500 dark:text-stone-400">
           Connect your BoardGameGeek account to sync your plays to your profile.
         </p>
         <div class="flex gap-4">
-          <div v-if="!bgg_username" class="flex flex-col gap-2">
+          <div v-if="!bgg_username" class="flex flex-col gap-2 w-full md:w-[16rem]">
             <label class="block w-full">
               <span class="block">Username</span>
               <input
@@ -28,7 +28,7 @@
                 required
               />
             </label>
-            <Button @click.prevent="connectBoardGameGeek" font-size="md">
+            <Button @click.prevent="connectBoardGameGeek" color="bgg">
               Connect
             </Button>
           </div>
@@ -36,16 +36,16 @@
             <p class="pb-2">
               Connected as <strong>{{ bgg_username }}</strong>
             </p>
-            <Button @click.prevent="disconnectBoardGameGeek" font-size="md">
+            <Button @click.prevent="disconnectBoardGameGeek" color="negative" size="sm">
               Disconnect
             </Button>
           </div>
         </div>
       </div>
-      <div class="text-left w-full">
+      <div class="space-y-4 w-full xl:w-3/4">
         <h3 class="text-2xl">BGStats</h3>
-        <p class="text-stone-500">Enable logging games to BGStats.</p>
-        <label class="flex gap-4 pt-4">
+        <p class="text-stone-500 dark:text-stone-400">Enable logging games to BGStats.</p>
+        <label class="flex gap-4">
           <Toggle v-model="enable_bgstats" />
           <span>Enable BGStats</span>
         </label>

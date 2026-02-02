@@ -9,18 +9,12 @@
           <div class="relative w-full md:w-auto">
             <Menu>
               <MenuButton class="relative w-full md:w-auto">
-                <span
-                  v-if="activeFilters.length"
-                  class="absolute -top-2 -right-2 text-stone-200 bg-red-800 rounded-full px-2 py-1 text-xs font-bold aspect-square"
-                  aria-label="Active filters"
+                <Button 
+                  icon="filter"
+                  :count="activeFilters.length ? activeFilters.length : ''"
+                  countLabel="Active filters"
                 >
-                  {{ activeFilters.length }}
-                </span>
-                <Button class="font-normal w-full whitespace-nowrap" hasIcon>
-                  <div class="w-full flex gap-2 items-center md:justify-center">
-                    <IconUI id="filter" />
-                    Filter Stats
-                  </div>
+                  Filter Stats
                 </Button>
               </MenuButton>
               <transition
@@ -139,21 +133,24 @@
             </Menu>
           </div>
         </div>
-        <div class="flex gap-2 items-center">
+        <div class="flex gap-2 items-center justify-center md:justify-end">
           <Button
             @click="setMode('player')"
-            :disabled="mode === 'player'"
-            hasIcon
+            :active="mode === 'player'"
+            color="primary"
+            variant="soft"
+            icon="person"
           >
-            <IconUI id="person" /> Player
+            Player
           </Button>
 
           <Button
             @click="setMode('storyteller')"
-            :disabled="mode === 'storyteller'"
-            hasIcon
+            :active="mode === 'storyteller'"
+            color="primary"
+            variant="soft"
+            icon="book"
           >
-            <IconUI id="book" />
             Storyteller
           </Button>
         </div>
@@ -161,80 +158,66 @@
       <div class="flex flex-wrap gap-2 px-4">
         <Button
           v-if="startDateRange !== null"
-          class="px-2 gap-0"
-          font-size="md"
           @click.prevent="startDateRange = null"
           :title="`Remove after ${formatDate(new Date(startDateRange))} date filter`"
-          hasIcon
-          tag
+          size="sm"
+          removableTag
         >
-          After Date: {{ formatDate(new Date(startDateRange)) }}<IconUI id="x" />
+          From: {{ formatDate(new Date(startDateRange)) }}
         </Button>
         <Button
           v-if="endDateRange !== null"
-          class="px-2 gap-0"
-          font-size="md"
           @click.prevent="endDateRange = null"
           :title="`Remove before ${formatDate(new Date(endDateRange))} date filter`"
-          hasIcon
-          tag
+          size="sm"
+          removableTag
         >
-          Before Date: {{ formatDate(new Date(endDateRange)) }}<IconUI id="x" />
+          To: {{ formatDate(new Date(endDateRange)) }}
         </Button>
         <Button
           v-if="minPlayers !== null"
-          class="px-2 gap-0"
-          font-size="md"
           @click.prevent="minPlayers = null"
           :title="`Remove min ${minPlayers} playercount filter`"
-          hasIcon
-          tag
+          size="sm"
+          removableTag
         >
-          Min Players: {{ minPlayers }}<IconUI id="x" />
+          Min Players: {{ minPlayers }}
         </Button>
         <Button
           v-if="maxPlayers !== null"
-          class="px-2 gap-0"
-          font-size="md"
           @click.prevent="maxPlayers = null"
           :title="`Remove max ${maxPlayers} playercount filter `"
-          hasIcon
-          tag
+          size="sm"
+          removableTag
         >
-          Max Players: {{ maxPlayers }}<IconUI id="x" />
+          Max Players: {{ maxPlayers }}
         </Button>
         <Button
           v-if="selectedCommunity"
-          class="px-2 gap-0"
-          font-size="md"
           @click.prevent="selectedCommunity = null"
           :title="`Remove ${selectedCommunity} community filter`"
-          hasIcon
-          tag
+          size="sm"
+          removableTag
         >
-          Community: {{ selectedCommunity }}<IconUI id="x" />
+          Community: {{ selectedCommunity }}
         </Button>
         <Button
           v-if="selectedLocation"
-          class="px-2 gap-0"
-          font-size="md"
           @click.prevent="selectedLocation = null"
           :title="`Remove ${selectedLocation} location filter`"
-          hasIcon
-          tag
+          size="sm"
+          removableTag
         >
-          Location: {{ selectedLocation }}<IconUI id="x" />
+          Location: {{ selectedLocation }}
         </Button>
         <Button
           v-for="(tag, index) in selectedTags"
-          class="px-2 gap-0"
-          font-size="md"
           @click.prevent="selectedTags.splice(index, 1)"
           :title="`Remove ${tag} tag`"
-          hasIcon
-          tag
+          size="sm"
+          removableTag
         >
-          Tag: {{ tag }}<IconUI id="x" />
+          Tag: {{ tag }}
         </Button>
       </div>
     </div>
@@ -368,12 +351,11 @@
             component="nuxt-link"
             v-if="isMe"
             :to="addChartLink"
-            primary
-            hasIcon
-            font-size="md"
-            class="px-3 py-2 mb-2 md:mb-0 inline-flex"
+            color="primary"
+            icon="plus-lg"
+            size="sm"
+            class="mb-2 md:mb-0 inline-flex"
           >
-            <IconUI id="plus-lg" />
             Add Chart
           </Button>
         </div>
