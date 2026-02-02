@@ -25,7 +25,7 @@ test.describe("Maintenance Page", () => {
     // Verify the image is present by checking its alt text or src if more specific
     // For example, if the image always has this src:
     await expect(
-      page.locator('img[src="/img/role/engineer.png"]')
+      page.locator('img[src="/img/role/engineer.webp"]')
     ).toBeVisible();
   });
 

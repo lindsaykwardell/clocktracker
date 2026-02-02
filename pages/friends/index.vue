@@ -6,6 +6,7 @@
         :username="friend.username"
         class="w-full"
       >
+        <FriendButton :username="friend.username" :user_id="friend.user_id" />
       </UserCard>
     </div>
   </FriendsTemplate>

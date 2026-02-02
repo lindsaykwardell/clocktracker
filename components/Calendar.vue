@@ -1,8 +1,8 @@
 <template>
   <div>
-    <div class="flex">
+    <div class="flex items-center gap-2">
       <div
-        class="flex flex-grow justify-center md:justify-around gap-6 py-4"
+        class="flex flex-grow justify-center md:justify-between max-w-[1000px] mx-auto gap-6 py-4"
         :class="{
           'text-xl lg:text-2xl': size === 'lg',
           'text-lg lg:text-xl': size === 'md',
@@ -10,11 +10,31 @@
           'text-sm': size === 'xs',
         }"
       >
-        <button @click="backOneMonth">＜</button>
+        <Button 
+          @click="backOneMonth"
+          title="Previous month"
+          icon="chevron-left"
+          color="contrast"
+          display="icon-only"
+          size="sm"
+          circular
+        >
+          Previous
+        </Button>
         <h2 class="font-sorts">
           {{ formattedYearAndMonth }}
         </h2>
-        <button @click="forwardOneMonth">＞</button>
+        <Button 
+          @click="forwardOneMonth"
+          title="Next month"
+          icon="chevron-right"
+          color="contrast"
+          display="icon-only"
+          size="sm"
+          circular
+        >
+          Next
+        </Button>
       </div>
       <div class="flex-shrink">
         <slot />
@@ -26,19 +46,19 @@
           <div
             v-if="day"
             @click="emit('selectDay', day)"
-            class="p-1 hover:bg-stone-300 dark:hover:bg-stone-700 overflow-hidden"
+            class="p-1 dark:hover:text-stone-100 hover:bg-stone-300 dark:hover:bg-stone-800 overflow-hidden"
             :class="{
               'min-h-[100px] md:min-h-[150px]': size !== 'sm' && size !== 'xs',
               'h-[40px] md:h-[75px]': size === 'sm',
               'h-[40px]': size === 'xs',
               'cursor-pointer': clickableDays,
-              'border border-yellow-500': day.isSame(today, 'day'),
-              'bg-stone-200 dark:bg-stone-700':
+              'border border-primary dark:border-dark-primary': day.isSame(today, 'day'),
+              'bg-stone-200 dark:bg-stone-800':
                 selectedDay && day.isSame(selectedDay, 'day'),
             }"
           >
             <div
-              class="text-stone-500"
+              class="text-stone-500 dark:text-stone-400"
               :class="{
                 'text-center': size === 'sm' || size === 'xs',
                 'text-xs': size === 'xs',
@@ -50,7 +70,7 @@
               <li v-for="event in eventsOnDay(day)">
                 <nuxt-link
                   :to="`/event/${event.id}`"
-                  class="flex flex-col md:flex-row gap-3"
+                  class="flex flex-col md:flex-row gap-3 rounded bg-purple-200 p-1"
                 >
                   <div class="flex-grow hover:underline">
                     <span class="text-stone-500">

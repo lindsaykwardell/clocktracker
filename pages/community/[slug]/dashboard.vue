@@ -1,103 +1,120 @@
 <template>
   <CommunityTemplate moderatorOnly v-slot="{ community }">
-    <div class="flex flex-col gap-3 p-2">
+    <div class="px-4 lg:px-8 pb-4 lg:pb-8 space-y-8 md:space-y-12 xl:space-y-16">
       <form
         @submit.prevent="updateCommunity"
-        class="flex flex-col md:flex-row gap-4 items-start p-2 w-full lg:w-5/6 xl:w-3/4 m-auto"
+        class="flex flex-col gap-4 items-center w-full xl:w-3/4 m-auto"
       >
-        <div class="flex flex-col items-center">
-          <Avatar :value="community.data.icon" size="lg" />
-          <Button
-            @click="selectCommunityAvatar"
-            type="button"
-            class="whitespace-nowrap w-[150px] mt-2"
-            outline
-          >
-            Change Icon
-          </Button>
-        </div>
-        <div class="flex-grow w-full flex flex-col gap-3">
-          <div class="flex flex-col md:flex-row md:gap-2">
-            <label class="block flex-grow">
-              <span class="block">Name</span>
-              <Input v-model="updatedName" required />
-            </label>
-            <label class="block">
-              <span class="block">Slug</span>
-              <Input v-model="updatedSlug" required />
-            </label>
+        <div class="form-items flex flex-col md:flex-row gap-4 items-center md:items-start w-full lg:pr-40">
+          <div class="flex-none w-32 md:w-40 flex flex-col gap-2 items-center">
+            <Avatar :value="community.data.icon" size="lg" />
+            <Button
+              @click="selectCommunityAvatar"
+              type="button"
+              variant="filled"
+              size="sm"
+              color="neutral"
+            >
+              Change Logo
+            </Button>
           </div>
-          <div class="flex flex-col md:flex-row md:gap-2">
-            <label class="block">
-              <span class="block">Privacy</span>
-              <Input mode="select" v-model="updatedPrivacy">
-                <option :value="false">Public</option>
-                <option :value="true">Private</option>
-              </Input>
-            </label>
-            <label class="block flex-grow">
-              <span class="block">Location</span>
-              <LocationSearchInput
-                v-model:value="_location"
-                inputClass="block w-full border border-stone-500 rounded-md p-2"
-              />
-            </label>
-            <label class="block flex-grow">
-              <span class="block">Time Zone</span>
-              <TimeZoneSelector v-model:value="updatedTimeZone" />
-            </label>
-          </div>
-          <label>
-            <span class="block">Links</span>
-            <div class="flex flex-col gap-1">
-              <div
-                v-for="(_, index) in updatedLinks"
-                :key="index"
-                class="flex gap-1"
-              >
-                <Input v-model="updatedLinks[index]" type="text" />
-                <button
-                  type="button"
-                  @click="updatedLinks.splice(index, 1)"
-                  class="transition duration-150 dark:text-white font-bold py-2 px-4 rounded"
+          <div class="flex-grow flex flex-col gap-3 w-full max-w-[40rem] md:w-auto md:max-w-none">
+            <div class="flex flex-col md:flex-row md:gap-2">
+              <label class="block flex-grow">
+                <span class="block">Name</span>
+                <Input v-model="updatedName" required />
+              </label>
+              <label class="block">
+                <span class="block">Slug</span>
+                <Input v-model="updatedSlug" required />
+              </label>
+            </div>
+            <div class="flex flex-col md:flex-row md:gap-2">
+              <label class="block">
+                <span class="block">Privacy</span>
+                <Input mode="select" v-model="updatedPrivacy">
+                  <option :value="false">Public</option>
+                  <option :value="true">Private</option>
+                </Input>
+              </label>
+              <label class="block flex-grow">
+                <span class="block">Location</span>
+                <LocationSearchInput
+                  v-model:value="_location"
+                  inputClass="block w-full border border-stone-500 rounded-md p-2"
+                />
+              </label>
+              <label class="block flex-grow">
+                <span class="block">Time Zone</span>
+                <TimeZoneSelector v-model:value="updatedTimeZone" />
+              </label>
+            </div>
+            <label>
+              <span class="block">Links</span>
+              <div class="flex flex-col gap-1">
+                <div
+                  v-for="(_, index) in updatedLinks"
+                  :key="index"
+                  class="flex gap-1"
                 >
-                  Remove
-                </button>
+                  <Input v-model="updatedLinks[index]" type="text" />
+                  <Button
+                    type="button"
+                    @click="updatedLinks.splice(index, 1)"
+                    icon="x-lg"
+                    display="icon-only"
+                    color="negative"
+                  >
+                    Remove
+                  </Button>
+                </div>
+                <div class="flex justify-center">
+                  <Button 
+                    @click="updatedLinks.push('')" 
+                    type="button"
+                    variant="filled"
+                    color="neutral"
+                    size="sm"
+                  >
+                    Add link
+                  </Button>
+                </div>
               </div>
-              <button @click="updatedLinks.push('')" type="button">
-                Add link
-              </button>
-            </div>
-          </label>
-          <label>
-            <span class="block">Discord Server ID</span>
-            <div class="flex gap-2">
-              <Input v-model="updatedDiscordServerId" />
-              <Button
-                component="a"
-                href="https://discord.com/oauth2/authorize?client_id=1125833336695304323&permissions=549755833344&scope=bot"
-                target="_blank"
-                class="w-[200px] text-white"
-                discord
-              >
-                <Discord />
-                Add Bot
-              </Button>
-            </div>
-          </label>
-          <label>
-            <span class="block">Description</span>
-            <Input
-              mode="textarea"
-              v-model="updatedDescription"
-              rows="5"
-            ></Input>
-          </label>
+            </label>
+            <label>
+              <span class="block">Discord Server ID</span>
+              <div class="flex gap-2">
+                <Input v-model="updatedDiscordServerId" />
+                <Button
+                  component="a"
+                  href="https://discord.com/oauth2/authorize?client_id=1125833336695304323&permissions=549755833344&scope=bot"
+                  target="_blank"
+                  variant="filled"
+                  color="discord"
+                  icon="discord"
+                >
+                  Add Bot
+                </Button>
+              </div>
+            </label>
+            <label>
+              <span class="block">Description</span>
+              <Input
+                mode="textarea"
+                v-model="updatedDescription"
+                rows="5"
+              ></Input>
+            </label>   
+          </div>
+        </div>
+        <div class="form-actions">
           <Button
             type="submit"
             id="save-game"
-            class="py-2 px-4 w-[300px] m-auto"
-            primary
+            variant="filled"
+            color="primary"
+            size="lg"
+            wide
             :disabled="inFlight"
           >
             <template v-if="inFlight">
@@ -108,171 +125,225 @@
           </Button>
         </div>
       </form>
-      <template v-if="community.data.join_requests?.length">
-        <h2 class="text-2xl">Join Requests</h2>
-        <div class="overflow-scroll w-screen md:w-full">
-          <table class="w-full">
-            <thead>
-              <tr>
-                <th />
-                <th class="text-left">Name</th>
-                <th class="text-left">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="member in community.data.join_requests">
-                <td class="w-[50px] min-w-[50px]">
-                  <Avatar
-                    :value="member.avatar"
-                    size="xs"
-                    class="border-stone-800"
-                  />
-                </td>
-                <td class="">
-                  <div
-                    class="whitespace-nowrap overflow-hidden overflow-ellipsis"
-                  >
-                    {{ member.display_name }} (@{{ member.username }})
-                  </div>
-                </td>
-                <td class="w-[250px]">
-                  <div class="flex justify-end gap-2">
-                    <button
-                      @click="approveUser(member.user_id)"
-                      class="whitespace-nowrap rounded transition duration-150 border border-green-800 hover:bg-green-900 dark:text-white px-4 py-2 mt-2 w-[125px]"
-                    >
-                      Approve
-                    </button>
-                    <button
-                      @click="denyUser(member.user_id)"
-                      class="whitespace-nowrap rounded transition duration-150 border border-red-800 hover:bg-red-900 dark:text-white px-4 py-2 mt-2 w-[125px]"
-                    >
-                      Ignore
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+
+      <section class="grid gap-4 md:grid-cols-2 grid-flow-row-dense">
+        <div class="md:col-start-2 md:row-start-1" v-if="community.data.join_requests?.length">
+          <h2 class="font-sorts text-center xl:text-left text-xl lg:text-2xl mb-2 lg:mb-4 col-span-8">
+            Join Requests
+          </h2>
+          <div class="overflow-x-scroll custom-scrollbar w-full">
+            <table>
+              <thead>
+                <tr>
+                  <th class="text-left">User</th>
+                  <th class="text-left">Status</th>
+                  <th class="text-left"><span class="sr-only">Actions</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="member in community.data.join_requests">
+                  <td>
+                    <div class="flex gap-2 items-center">
+                      <div class="flex-none">
+                        <Avatar
+                          :value="member.avatar"
+                          size="xs"
+                          class="border-stone-800"
+                          background
+                        />
+                      </div>
+                      <div class="flex flex-col">
+                        <span class="font-semibold">{{ member.display_name }}</span>
+                        <span class="text-xs md:text-sm text-muted">(@{{ member.username }})</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <Badge color="caution" size="sm">
+                      Pending
+                    </Badge>
+                  </td>
+                  <td>
+                    <div class="flex justify-end gap-2">
+                      <Button
+                        @click="approveUser(member.user_id)"
+                        size="sm"
+                        color="positive"
+                      >
+                        Approve
+                      </Button>
+                      <Button
+                        @click="denyUser(member.user_id)"
+                        size="sm"
+                        color="negative"
+                      >
+                        Ignore
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-      </template>
-      <h2 class="text-2xl">Members</h2>
-      <div class="overflow-scroll w-screen md:w-full">
-        <table class="w-full">
-          <thead>
-            <tr>
-              <th />
-              <th class="text-left">Name</th>
-              <th class="text-left">Role</th>
-              <th class="text-left">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="member in community.data.members">
-              <td class="w-[50px] min-w-[50px]">
-                <Avatar
-                  :value="member.avatar"
-                  size="xs"
-                  class="border-stone-800"
-                />
-              </td>
-              <td class="">
-                <div
-                  class="whitespace-nowrap overflow-hidden overflow-ellipsis"
-                >
-                  {{ member.display_name }} (@{{ member.username }})
-                </div>
-              </td>
-              <td>
-                {{
-                  community.data.admins
-                    .map(({ user_id }) => user_id)
-                    .includes(member.user_id)
-                    ? "Admin"
-                    : "Member"
-                }}
-              </td>
-              <td class="w-[250px]">
-                <div class="flex gap-2">
-                  <button
-                    v-if="!isMe(member.user_id)"
-                    @click="toggleAdmin(member.user_id)"
-                    class="flex-1 whitespace-nowrap rounded transition duration-150 border border-green-800 hover:bg-green-900 hover:text-white dark:text-white px-4 py-2 mt-2"
-                  >
-                    <template
-                      v-if="
+
+        <div class="md:col-start-1 span-hack">
+          <h2 class="font-sorts text-center xl:text-left text-xl lg:text-2xl mb-2 lg:mb-4 col-span-8">
+            Community Members
+          </h2>
+          <div class="overflow-x-scroll custom-scrollbar w-full">
+            <table>
+              <thead>
+                <tr>
+                  <th class="text-left">User</th>
+                  <th class="text-left">Role</th>
+                  <th class="text-left"><span class="sr-only">Actions</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="member in community.data.members">
+                  <td>
+                    <div class="flex gap-2 items-center">
+                      <div class="flex-none">
+                        <Avatar
+                          :value="member.avatar"
+                          size="xs"
+                          class="border-stone-800"
+                          background
+                        />
+                      </div>
+                      <div class="flex flex-col">
+                        <span class="font-semibold">{{ member.display_name }}</span>
+                        <span class="text-xs md:text-sm text-muted">@{{ member.username }}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <Badge
+                      :color="community.data.admins.map(({ user_id }) => user_id).includes(member.user_id) ? 'primary' : 'neutral'"
+                      size="sm"
+                    >
+                      {{
                         community.data.admins
                           .map(({ user_id }) => user_id)
                           .includes(member.user_id)
-                      "
-                    >
-                      Demote
-                    </template>
-                    <template v-else> Promote </template>
-                  </button>
-                  <div
-                    v-else
-                    class="flex-1 whitespace-nowrap rounded transition duration-150 border border-transparent px-4 py-2 mt-2"
-                  />
-                  <button
-                    @click="removeUser(member.user_id)"
-                    class="flex-1 whitespace-nowrap rounded transition duration-150 border border-red-800 hover:bg-red-900 hover:text-white dark:text-white px-4 py-2 mt-2"
-                  >
-                    Remove
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <template v-if="community.data.banned_users?.length">
-        <h2 class="text-2xl">Banned Users</h2>
-        <div class="overflow-scroll w-screen md:w-full">
-          <table class="w-full">
-            <thead>
-              <tr>
-                <th />
-                <th class="text-left">Name</th>
-                <th class="text-left">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="member in community.data.banned_users">
-                <td class="w-[50px] min-w-[50px]">
-                  <Avatar
-                    :value="member.avatar"
-                    size="xs"
-                    class="border-stone-800"
-                  />
-                </td>
-                <td class="">
-                  <div
-                    class="whitespace-nowrap overflow-hidden overflow-ellipsis"
-                  >
-                    {{ member.display_name }} (@{{ member.username }})
-                  </div>
-                </td>
-                <td class="w-[250px]">
-                  <div class="flex justify-end gap-2">
-                    <button
-                      @click="unbanUser(member.user_id)"
-                      class="whitespace-nowrap rounded transition duration-150 border border-red-800 hover:bg-red-900 dark:text-white px-4 py-2 mt-2 w-[125px]"
-                    >
-                      Unban
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                          ? "Admin"
+                          : "Member"
+                      }}
+                    </Badge>
+                  </td>
+                  <td>
+                    <div class="flex justify-end relative">
+                      <Menu>
+                        <MenuButton>
+                          <IconUI id="dots" :rounded="true" shadow />
+                        </MenuButton>
+                        <transition
+                          enter-active-class="transition duration-100 ease-out"
+                          enter-from-class="transform scale-95 opacity-0"
+                          enter-to-class="transform scale-100 opacity-100"
+                          leave-active-class="transition duration-75 ease-out"
+                          leave-from-class="transform scale-100 opacity-100"
+                          leave-to-class="transform scale-95 opacity-0"
+                        >
+                          <MenuItems
+                            class="ct-contextual-links right-0 top-full"
+                          >
+                            <MenuItem>
+                              <ButtonSubmenu
+                                v-if="!isMe(member.user_id)"
+                                @click="toggleAdmin(member.user_id)"
+                              >
+                                <template
+                                  v-if="
+                                    community.data.admins
+                                      .map(({ user_id }) => user_id)
+                                      .includes(member.user_id)
+                                  "
+                                >
+                                  Demote
+                                </template>
+                                <template v-else> Promote </template>
+                              </ButtonSubmenu>
+                            </MenuItem>
+                            <MenuItem>
+                              <ButtonSubmenu
+                                @click="removeUser(member.user_id)"
+                              >
+                                Remove
+                              </ButtonSubmenu>
+                            </MenuItem>
+                          </MenuItems>
+                        </transition>
+                      </Menu>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-      </template>
+
+        <div class="md:col-start-2 md:row-start-2" v-if="community.data.banned_users?.length">
+          <h2 class="font-sorts text-center xl:text-left text-xl lg:text-2xl mb-2 lg:mb-4 col-span-8">
+            Banned Users
+          </h2>
+          <div class="overflow-x-scroll custom-scrollbar w-full">
+            <table>
+              <thead>
+                <tr>
+                  <th class="text-left">User</th>
+                  <th class="text-left">Status</th>
+                  <th class="text-left"><span class="sr-only">Actions</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="member in community.data.banned_users">
+                  <td>
+                    <div class="flex gap-2 items-center">
+                      <div class="flex-none">
+                        <Avatar
+                          :value="member.avatar"
+                          size="xs"
+                          class="border-stone-800"
+                          background
+                        />
+                      </div>
+                      <div class="flex flex-col">
+                        <span class="font-semibold">{{ member.display_name }}</span>
+                        <span class="text-xs md:text-sm text-muted">@{{ member.username }}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <Badge color="negative" size="sm">
+                      Banned
+                    </Badge>
+                  </td>
+                  <td>
+                    <div class="flex justify-end gap-2">
+                      <Button
+                        @click="unbanUser(member.user_id)"
+                        size="sm"
+                        color="caution"
+                      >
+                        Unban
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
     </div>
   </CommunityTemplate>
 </template>
 
 <script setup lang="ts">
+import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
+
 definePageMeta({
   middleware: "community-admin",
 });
@@ -283,6 +354,7 @@ const user = useSupabaseUser();
 
 const slug = route.params.slug as string;
 
+const metadata = await $fetch(`/api/community/${slug}/minimal`);
 const community = await $fetch(`/api/community/${slug}`);
 
 const updatedName = ref(community.name);
@@ -389,4 +461,45 @@ watchEffect(() => {
     updatedLinks.value.push("");
   }
 });
+
+useHead({
+  title: () => `Dashboard - ${metadata.name}`,
+});
 </script>
+
+<style scoped>
+  table {
+    @apply w-full rounded-lg border border-stone-300 dark:border-stone-700/40;
+  }
+
+  thead {
+    @apply text-sm border-b border-stone-300 dark:border-stone-700/40;
+  }
+
+  tbody {
+    @apply divide-y divide-stone-300 dark:divide-stone-700/40;
+  }
+
+  th {
+    @apply font-normal text-muted;
+  }
+
+  th,
+  td {
+    @apply p-2;
+  }
+
+  .span-hack {
+    grid-row: span 3;
+  }
+
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: oklch(0.869 0.005 56.366) transparent; /* Stone 300 */
+    scrollbar-gutter: stable;
+  }
+
+  .custom-scrollbar:where(.dark, .dark *) {
+    scrollbar-color: oklch(0.444 0.011 73.639) transparent; /* Stone 600 */
+  }
+</style>

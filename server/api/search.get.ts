@@ -185,7 +185,7 @@ export default defineEventHandler(async (handler) => {
   });
 
   const scripts =
-    query.length > 3
+    query.length >= 3
       ? await prisma.script.findMany({
           where: {
             AND: {
@@ -237,7 +237,7 @@ export default defineEventHandler(async (handler) => {
       : [];
 
   const users =
-    query.length > 3
+    query.length >= 3
       ? await prisma.userSettings.findMany({
           where: {
             OR: [
@@ -299,7 +299,7 @@ export default defineEventHandler(async (handler) => {
   const usersWithKofiLevel = await Promise.all(users.map(addUserKofiLevel));
 
   const roles =
-    query.length > 3
+    query.length >= 3
       ? await prisma.role.findMany({
           where: {
             name: {
@@ -388,6 +388,7 @@ export default defineEventHandler(async (handler) => {
       id: role.id,
       name: role.name,
       initial_alignment: role.initial_alignment,
+      ability: role.ability,
       type: role.type,
       token_url: role.token_url,
       _count: {

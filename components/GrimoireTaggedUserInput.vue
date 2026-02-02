@@ -3,9 +3,10 @@
     <TaggedUserInput
       :users="users"
       :renderListOnTop="renderListOnTop"
-      inputClass="w-20 md:w-28 text-xs md:text-sm"
+      :inputClass="inputClass"
       v-model:value="value"
       @inputFocused="emit('inputFocused')"
+      @inputBlurred="emit('inputBlurred')"
     />
   </div>
 </template>
@@ -21,9 +22,10 @@ const props = defineProps<{
     avatar?: string | null;
   }[];
   value: string;
+  highlightTagged?: boolean;
 }>();
 
-const emit = defineEmits(["inputFocused", "update:value"]);
+const emit = defineEmits(["inputFocused", "inputBlurred", "update:value"]);
 
 const element = ref();
 
@@ -41,4 +43,21 @@ const renderListOnTop = computed(() => {
   const distanceToBottom = element.value?.getBoundingClientRect().bottom;
   return grimoireDistanceToBottom - distanceToBottom < 150;
 });
+
+const inputClass = computed(() =>
+  [
+    "w-20",
+    "md:w-28",
+    "text-xs",
+    "md:text-sm",
+    props.highlightTagged ? "tag-match" : "",
+  ].join(" ")
+);
 </script>
+
+<style>
+  .tag-match {
+    border: 2px solid theme(colors.purple.700) !important;
+    font-weight: 600;
+  }
+</style>
