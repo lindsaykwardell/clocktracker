@@ -5,6 +5,27 @@
     >
       <h2 class="font-sorts text-4xl text-center">Integrations</h2>
       <div class="space-y-4 w-full xl:w-3/4">
+        <h3 class="text-2xl">Discord</h3>
+        <p class="text-stone-500 dark:text-stone-400">
+          Connect your Discord account to log in with Discord.
+        </p>
+        <div class="flex gap-4">
+          <div v-if="!discordIdentity">
+            <Button @click.prevent="connectDiscord" color="discord" icon="discord">
+              Connect Discord
+            </Button>
+          </div>
+          <div v-else class="pt-4">
+            <p class="pb-2">
+              Connected as <strong>{{ discordIdentity.identity_data?.full_name || discordIdentity.identity_data?.name || 'Discord User' }}</strong>
+            </p>
+            <Button @click.prevent="disconnectDiscord" color="negative" size="sm">
+              Disconnect
+            </Button>
+          </div>
+        </div>
+      </div>
+      <div class="space-y-4 w-full xl:w-3/4">
         <h3 class="text-2xl">BoardGameGeek</h3>
         <p class="text-stone-500 dark:text-stone-400">
           Connect your BoardGameGeek account to sync your plays to your profile.
@@ -59,6 +80,7 @@ definePageMeta({
   middleware: "auth",
 });
 
+const supabase = useSupabaseClient();
 const settings = await useFetch("/api/settings");
 const users = useUsers();
 const user = useSupabaseUser();
@@ -68,6 +90,34 @@ const enable_bgstats = ref(settings.data?.value?.enable_bgstats || false);
 const username = ref("");
 const password = ref("");
 const inFlight = ref(false);
+
+// Discord integration
+const discordIdentity = computed(() => {
+  return user.value?.identities?.find((identity) => identity.provider === "discord");
+});
+
+async function connectDiscord() {
+  await supabase.auth.linkIdentity({
+    provider: "discord",
+    options: {
+      redirectTo: `${window.location.origin}/settings/integrations`,
+    },
+  });
+}
+
+async function disconnectDiscord() {
+  if (!discordIdentity.value) return;
+
+  const { error } = await supabase.auth.unlinkIdentity(discordIdentity.value);
+
+  if (error) {
+    console.error("Failed to disconnect Discord:", error);
+    alert("Failed to disconnect Discord. You must have at least one login method.");
+  } else {
+    // Refresh user data to update the UI
+    await supabase.auth.refreshSession();
+  }
+}
 
 async function connectBoardGameGeek() {
   inFlight.value = true;
