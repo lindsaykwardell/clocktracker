@@ -7,7 +7,7 @@
     <div class="grid gap-2 md:gap-4 grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       <!-- Most Good -->
       <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-2 md:gap-3 items-center text-center">
-        <h3 class="font-sorts text-center text-lg lg:text-xl">
+        <h3 class="font-sorts text-center text-lg lg:text-xl text-balance">
           Most Good
           <IconUI
             v-if="bayesianTooltip"
@@ -56,7 +56,7 @@
 
       <!-- Most Evil -->
       <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-2 md:gap-3 items-center text-center">
-        <h3 class="font-sorts text-center text-lg lg:text-xl">
+        <h3 class="font-sorts text-center text-lg lg:text-xl text-balance">
           Most Evil
           <IconUI
             v-if="bayesianTooltip"
@@ -105,7 +105,7 @@
 
       <!-- Best win rate -->
       <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-2 md:gap-3 items-center text-center">
-        <h3 class="font-sorts text-center text-lg lg:text-xl">
+        <h3 class="font-sorts text-center text-lg lg:text-xl text-balance">
           Highest Win Rate
           <IconUI
             v-if="bayesianTooltip"
@@ -149,7 +149,7 @@
       </div>
 
       <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-2">
-        <h3 class="font-sorts text-center text-lg lg:text-xl">
+        <h3 class="font-sorts text-center text-lg lg:text-xl text-balance">
           Game Balance
         </h3>
 
