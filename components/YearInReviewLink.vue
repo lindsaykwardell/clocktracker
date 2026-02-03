@@ -1,15 +1,17 @@
 <template>
   <template v-if="isDecemberOrJanuary">
     <template v-if="sidebar">
-      <NavLink 
-        to="/year-in-review" 
-        icon="fanggu_large_purple"
-        title="Year in Review"
-        class="yir-bg"
-        v-bind="$attrs"
-      >
-        Year in Review
-      </NavLink>
+      <li>
+        <NavLink 
+          to="/year-in-review" 
+          icon="fanggu_large_purple"
+          title="Year in Review"
+          class="yir-bg"
+          v-bind="$attrs"
+        >
+          Year in Review
+        </NavLink>
+      </li>
     </template>
     <template v-else>
       <nuxt-link
