@@ -249,7 +249,7 @@
         </div>
       </div>
       <div
-        class="flex flex-col gap-4 md:gap-8 bg-stone-200/30 dark:bg-stone-950 p-4 pb-20 md:pb-0"
+        class="flex flex-col gap-4 md:gap-8 bg-stone-200/30 dark:bg-stone-950 p-4 pb-20 md:pb-4"
         :class="{
           block: selectedTab === 'events',
           'hidden md:flex': selectedTab === 'updates',
@@ -315,7 +315,7 @@
             </Menu>
           </Calendar>
         </div>
-        <div class="calendar-events custom-scrollbar flex flex-col gap-4 pl-4 pr-3">
+        <div class="calendar-events custom-scrollbar flex flex-col gap-4 pl-2 pr-1">
           <template
             v-for="event in eventsOnDay"
           >
@@ -330,7 +330,7 @@
         </div>
       </div>
       <div
-        class="md:hidden fixed bottom-0 left-0 flex p-2 bg-stone-50 border-t border-stone-400 dark:border-stone-700 dark:bg-stone-950 w-full"
+        class="app-nav md:hidden fixed bottom-0 left-0 flex p-2 bg-stone-50 border-t border-stone-400 dark:border-stone-700 dark:bg-stone-950 w-full"
       >
         <button
           class="flex-1 flex flex-col items-center text-xs"
@@ -536,6 +536,8 @@ onMounted(async () => {
   @media (min-width: 768px) {
     display: grid;
     grid-template-columns: 1fr 300px;
+    height: calc(100vh - 50px);
+    overflow-y: hidden;
   }
 
   @media (min-width: 1024px) {
@@ -565,5 +567,9 @@ onMounted(async () => {
 
 .custom-scrollbar:where(.dark, .dark *) {
   scrollbar-color: oklch(0.444 0.011 73.639) transparent; /* Stone 600 */
+}
+
+.app-nav {
+  z-index: 99;
 }
 </style>

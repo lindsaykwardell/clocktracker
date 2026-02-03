@@ -206,16 +206,25 @@
 
   box-sizing: border-box;
   block-size: 100vh;
+  block-size: 100dvh;
   inline-size: 250px;
   padding: 1rem 1em;
   position: sticky;
   inset-block-start: 0;
   align-self: start;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   text-wrap: nowrap;
   transition-property: inline-size, min-inline-size, padding;
   transition-duration: 300ms;
   transition-timing-function: ease-in-out;
+  scrollbar-width: thin;
+  scrollbar-color: theme(colors.stone.200) transparent;
+  scrollbar-gutter: stable;
+
+  &:where(.dark, .dark *) {
+    scrollbar-color: theme(colors.stone.800) transparent;
+  }
 
   &.closed {
     padding: 0.5rem 5px;
@@ -248,13 +257,11 @@
 @media(max-width: 800px){
   #sidebar {
     position: fixed;
-    block-size: 100dvh;
     inline-size: calc(100dvw - 4rem);
     min-inline-size: unset;
     max-inline-size: 20rem;
     inset-block: 0;
     z-index: 9999;
-    overflow-y: scroll;
     
     &.closed {
       inline-size: 0;
