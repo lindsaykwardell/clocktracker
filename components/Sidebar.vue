@@ -30,9 +30,9 @@
         </div>
       </li>
 
-      <li v-if="me.status === Status.SUCCESS">
+      <template v-if="me.status === Status.SUCCESS">
         <YearInReviewLink id="year-in-review" sidebar />
-      </li>
+      </template>
 
       <li>
         <NavLink 
