@@ -17,8 +17,7 @@ async function login() {
   await supabase.auth.signInWithOAuth({
     provider: "discord",
     options: {
-      queryParams: { prompt: "none" },
-      redirectTo: `${window.location.host}`,
+      redirectTo: `${window.location.origin}`,
     },
   });
 }
