@@ -717,7 +717,7 @@
                     />
                 </Dialog>
                 <div
-                    v-if="!isMe"
+                    v-if="isMe"
                     class="absolute top-3 right-3"
                     id="menu-controls"
                 >
@@ -888,7 +888,7 @@
                                                 <span v-else>Post to BGG</span>
                                             </ButtonSubmenu>
                                         </MenuItem>
-                                        <MenuItem v-if="true">
+                                        <MenuItem v-if="canPostToBGStats">
                                             <ButtonSubmenu
                                                 component="a"
                                                 :href="bgStatsLink"
