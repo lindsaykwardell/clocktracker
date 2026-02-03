@@ -6,7 +6,7 @@
 
     <div class="grid gap-2 md:gap-4 md:grid-cols-2 lg:grid-cols-3">
       <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-2">
-        <h3 class="font-sorts text-center text-lg lg:text-xl">
+        <h3 class="font-sorts text-center text-lg lg:text-xl text-balance">
           Draw Bias
           <IconUI
             v-if="bayesianTooltip"
@@ -51,7 +51,7 @@
                 <span
                   class="font-semibold text-stone-700 dark:text-stone-300"
                   v-tooltip="{ content: item.detail || '', html: true }"
-                  :style="item.entry.value > 0 ? `color: ${chartColors.evil}` : item.entry.value < 0 ? `color: ${chartColors.good}` : undefined"
+                  :style="biasValueStyle(item.entry.displayValue ?? item.entry.value)"
                 >
                   {{ formatBiasValue(item.entry.displayValue ?? item.entry.value) }}
                 </span>
@@ -66,7 +66,7 @@
       </div>
 
       <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-3">
-        <h3 class="font-sorts text-center text-lg lg:text-xl">Switches</h3>
+        <h3 class="font-sorts text-center text-lg lg:text-xl text-balance">Switches</h3>
         <div class="flex flex-col divide-y divide-stone-300 dark:divide-stone-700/40">
           <div
             v-for="item in switchItems"
@@ -114,7 +114,7 @@
       </div>
 
       <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-3">
-        <h3 class="font-sorts text-center text-lg lg:text-xl">Streaks</h3>
+        <h3 class="font-sorts text-center text-lg lg:text-xl text-balance">Streaks</h3>
         <div class="flex flex-col divide-y divide-stone-300 dark:divide-stone-700/40">
           <div
             v-if="currentStreakEntry"
@@ -216,7 +216,6 @@ type Entry = {
   avatar: string | null;
   value: number;
   displayValue?: number;
-  detail?: string;
   highlight?: "good" | "evil";
 };
 
@@ -405,7 +404,6 @@ const biasEntries = computed(() => {
     results.push({
       ...toEntry(name, bias),
       displayValue: rawRate - expectedRate,
-      detail: biasDetail(name),
     });
   }
   return results;
@@ -439,12 +437,19 @@ const mostGoodBiasDetail = computed(() => {
   return biasDetail(mostGoodBias.value.name);
 });
 
-const mostBalancedBias = computed(() =>
-  biasEntries.value
-    .map((e) => ({ ...e, value: Math.abs(e.value) }))
-    .sort((a, b) => a.value - b.value)
-    .find((e) => e.value >= 0) || null
-);
+const mostBalancedBias = computed(() => {
+  const threshold = 0.1;
+  const eligible = biasEntries.value.filter((e) => {
+    const raw = e.displayValue ?? e.value;
+    return Math.abs(raw) <= threshold;
+  });
+  if (!eligible.length) return null;
+  return (
+    eligible
+      .map((e) => ({ entry: e, score: Math.abs(e.value) }))
+      .sort((a, b) => a.score - b.score)[0]?.entry ?? null
+  );
+});
 
 function biasDetail(name: string) {
   const games = perPlayerGames.value.get(name) || [];
@@ -458,7 +463,7 @@ function biasDetail(name: string) {
   const pct = Math.round(diffRate * 100);
   return `<div class="text-balance max-w-44 space-y-2">
     <p>Based on ${total} game${total === 1 ? "" : "s"} played, this player was expected to draw an Evil token ${expectedEvil.toFixed(1)} time${expectedEvil === 1 ? "" : "s"}.</p>
-    <p>They drew one ${actualEvil} time${actualEvil === 1 ? "" : "s"}, which is a difference of <span style="color:${diffRate >= 0 ? chartColors.evil : chartColors.good}; font-weight:600;">${pct >= 0 ? "+" : ""}${pct}%</span>.</p>
+    <p>They drew one ${actualEvil} time${actualEvil === 1 ? "" : "s"}, which is a difference of <span style="color:${biasColor(diffRate)}; font-weight:600;">${pct >= 0 ? "+" : ""}${pct}%</span>.</p>
   </div>`;
 }
 
@@ -500,13 +505,6 @@ const switchEntries = computed(() => {
 const mostSwitches = computed(() =>
   topBy(switchEntries.value, (s) => s.switches)
 );
-const mostSwitchesToGood = computed(() =>
-  topBy(switchEntries.value, (s) => s.toGood)
-);
-const mostSwitchesToEvil = computed(() =>
-  topBy(switchEntries.value, (s) => s.toEvil)
-);
-
 const switchItems = computed(() => [
   { title: "Most alignment switches", entry: mostSwitches.value },
   { title: "Most successful switches to Good", entry: topBy(switchEntries.value, (s) => s.winGood), highlight: "good" },
@@ -629,6 +627,16 @@ function formatBiasValue(value: number) {
   const pct = Math.round(value * 100);
   const sign = pct > 0 ? "+" : "";
   return `${sign}${pct}%`;
+}
+
+function biasColor(value: number) {
+  if (value > 0) return chartColors.evil;
+  if (value < 0) return chartColors.good;
+  return "oklch(70.8% 0 0)";
+}
+
+function biasValueStyle(value: number) {
+  return `color: ${biasColor(value)}`;
 }
 
 function bayesianRate(successes: number, total: number) {
