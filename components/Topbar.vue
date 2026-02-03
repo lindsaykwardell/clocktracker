@@ -5,6 +5,19 @@
       @click="toggleSidebar"
       icon="menu-open"
       :class="showMenu ? '' : 'rotate'"
+      class="hidden md:inline-flex"
+      iconSize="lg"
+      display="icon-only"
+      title="Expand sidebar"
+      color="contrast"
+    >
+      Expand Menu
+    </Button>
+    <Button
+      id="sidebar-toggle-mobile"
+      @click="toggleSidebar"
+      icon="menu"
+      class="md:hidden"
       iconSize="lg"
       display="icon-only"
       title="Expand sidebar"

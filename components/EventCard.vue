@@ -246,7 +246,7 @@
             </Button>
           </div>
           <div class="card-metadata">
-            <span v-if="display === 'detail'" class="card-label">
+            <span class="card-label">
               Status
             </span>
             <div>

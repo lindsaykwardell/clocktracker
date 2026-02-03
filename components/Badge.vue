@@ -104,7 +104,7 @@
     --badge-p: .5rem;
     --badge-gap: 0.375rem;
     --badge-bg: var(--badge-color, var(--color-base-content));
-    --badge-fg: color-mix(in oklab, var(--badge-color, var(--color-base-content)) 5%, var(--color-base-100));
+    --badge-fg: color-mix(in oklab, var(--color-base-content) 95%, var(--badge-color));
 
     color: var(--badge-fg);
     background: var(--badge-bg);
@@ -117,75 +117,103 @@
     /* For testing purposes */
     /* --badge-color: hotpink !important; */
 
-    &-primary {
+    &-primary ,
+    &-games {
       --badge-color: theme(colors.primary);
-
+      --badge-fg: theme(colors.primary-content);
       
       &:where(.dark, .dark *) {
         --badge-color: theme(colors.purple.400);
+        --badge-fg: theme(colors.purple.900);
       }
     }
 
     &-neutral {
       /* @apply text-gray-800 bg-stone-200 dark:bg-black/40 dark:text-white; */
       --badge-color: theme(colors.stone.800);
+      --badge-fg: theme(colors.stone.200);
 
       &:where(.dark, .dark *) {
         --badge-color: theme(colors.stone.400);
+        --badge-fg: theme(colors.stone.950);
       }
     }
 
-    &-positive {
+    &-positive,
+    &-admins {
       --badge-color: theme(colors.green.800);
+      --badge-fg: theme(colors.green.100);
+
+      &:where(.dark, .dark *) {
+        --badge-color: theme(colors.green.400);
+        --badge-fg: theme(colors.green.950);
+      }
     }
 
     &-caution {
       --badge-color: theme(colors.amber.800);
+      --badge-fg: theme(colors.amber.100);
 
       &:where(.dark, .dark *) {
         --badge-color: theme(colors.amber.400);
+        --badge-fg: theme(colors.amber.950);
       }
     }
 
     &-negative {
       --badge-color: theme(colors.red.800);
+      --badge-fg: theme(colors.red.100);
 
       &:where(.dark, .dark *) {
         --badge-color: theme(colors.red.400);
+        --badge-fg: theme(colors.red.950);
       }
     }
 
     &-scripts {
       --badge-color: theme(colors.blue.800);
-    }
+      --badge-fg: theme(colors.blue.100);
 
-    &-games {
-      --badge-color: theme(colors.primary);
-    }
-
-    &-admins {
-      --badge-color: theme(colors.green.800);
+      &:where(.dark, .dark *) {
+        --badge-color: theme(colors.blue.400);
+        --badge-fg: theme(colors.blue.950);
+      }
     }
 
     &-digital {
       --badge-color: theme(colors.digital);
+      --badge-fg: color-mix(in oklab, theme(colors.digital), #ffffff 90%);
+
+      &:where(.dark, .dark *) {
+        --badge-fg: color-mix(in oklab, theme(colors.digital), #000000 90%);
+      }
     }
   }
 
-  .ct-badge-soft {
+  .ct-badge-soft,
+  .ct-badge-overlay {
     --badge-fg: var(--badge-color, var(--color-base-content));
     --badge-bg: var(--badge-color, var(--color-base-content));
-  }
-
-  .ct-badge-overlay {
-    --badge-bg: color-mix(in oklab, var(--badge-color, var(--color-base-content)) 60%, transparent);
   }
 
   @supports (color: color-mix(in lab,red,red)) {
     .ct-badge-soft {
       --badge-bg: color-mix(in oklab, var(--badge-color, var(--color-base-content)) 15%, var(--color-base-100));
+
+      &:where(.dark, .dark *) {
+        --badge-fg: color-mix(in oklab, var(--badge-color), #ffffff 5%);
+      }
     }
   }
+
+  @supports (color: color-mix(in lab,red,red)) {
+    .ct-badge-overlay {
+      --badge-bg: color-mix(in oklab, var(--badge-color, var(--color-base-content)) 20%, transparent);
+      --badge-fg: color-mix(in oklab, var(--badge-color), #ffffff 85%);
+    }
+  }
+
+  
 
   /* Size */
 

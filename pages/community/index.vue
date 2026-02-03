@@ -1,7 +1,7 @@
 <template>
   <StandardTemplate>
     <template v-if="me.status === Status.SUCCESS">
-      <div class="flex justify-center md:justify-end items-center p-4 gap-2">
+      <div class="flex flex-wrap justify-center md:justify-end items-center p-4 gap-2">
         <Button
           component="nuxt-link"
           to="/community/create"
