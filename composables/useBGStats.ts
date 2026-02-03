@@ -36,6 +36,7 @@ export const useBGStats = (g: ComputedRef<FetchStatus<GameRecord>>) => {
       comments: game.notes,
       game: {
         bggId: 240980,
+        cooperative: false,
         highestWins: false,
         name: "Blood on the Clocktower",
         noPoints: true,
