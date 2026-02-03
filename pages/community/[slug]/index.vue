@@ -1,105 +1,137 @@
 <template>
   <CommunityTemplate>
     <template #header="{ community }">
-      <div class="flex flex-wrap w-11/12 m-auto pb-2">
-        <nuxt-link
-          v-for="member in community.data.members"
-          :to="`/@${member.username}`"
-        >
-          <Avatar
-            :value="member.avatar"
-            :size="community.data.members.length > 50 ? 'xs' : 'sm'"
-            class="border-stone-800"
-          />
-        </nuxt-link>
-      </div>
     </template>
     <template #default="{ community, isMember, isModerator }">
-      <template v-if="recentGames.status === Status.SUCCESS">
-        <GameOverviewGrid
-          v-if="recentGames.data.length > 0"
-          :games="recentGames.data"
-          showCommunityCard
-        />
-        <template v-else>
-          <p class="text-center py-3 text-stone-400">
-            No games have been played yet.
-          </p>
+      <div class="px-4 lg:px-8 pb-4 lg:pb-8 space-y-8 md:space-y-12 xl:space-y-16">
+        <section class="w-full xl:w-3/4 xl:mx-auto">
+          <CommunityStatsSummary
+            v-if="statsGames.length"
+            :games="statsGames"
+            :member-count="community.data.members.length"
+            :active-players-count="activePlayersCount"
+          />
+        </section>
+        
+        <template v-if="recentGames.status === Status.SUCCESS">
+          <GameOverviewGrid
+            v-if="recentGames.data.length > 0"
+            :games="recentGames.data"
+            showCommunityCard
+          />
+          <template v-else>
+            <p class="text-center py-3 text-stone-400">
+              No games have been played yet.
+            </p>
+          </template>
         </template>
-      </template>
-      <template v-else>
-        <Loading />
-      </template>
-      <div v-if="community.data.events.length > 0" class="flex justify-center">
-        <nuxt-link
-          :to="`/event/${community.data.events[0].id}`"
-          class="w-full md:w-[600px]"
-        >
-          <EventCard
-            :event="community.data.events[0]"
-            class="mt-6 m-auto"
-            :canModifyEvent="isModerator"
-            @deleted="reloadCommunity"
-          >
-            <template #footer="{ event }">
-              <div class="flex flex-wrap w-11/12 m-auto pb-2">
-                <template v-for="player in allEventAttendees(event)">
-                  <nuxt-link
-                    v-if="player.user"
-                    :to="`/@${player.user.username}`"
-                  >
-                    <Avatar
-                      :value="player.user.avatar"
-                      size="xs"
-                      class="border-stone-800"
-                    />
-                  </nuxt-link>
-                  <template v-else-if="player.discord_user_id">
-                    <Avatar
-                      value="/img/discord.png"
-                      size="xs"
-                      class="border-stone-800"
-                    />
+        <template v-else>
+          <Loading />
+        </template>
+
+        <section class="w-full xl:w-3/4 xl:mx-auto">
+          <h2 class="font-sorts text-center text-xl lg:text-2xl mb-2 lg:mb-4 col-span-8">
+            Members
+          </h2>
+          <div class="flex flex-wrap justify-center gap-1">
+            <nuxt-link
+              v-for="member in community.data.members"
+              :to="`/@${member.username}`"
+              :aria-label="`View ${member.username}'s profile`"
+            >
+              <Avatar
+                :value="member.avatar"
+                :size="community.data.members.length > 50 ? 'xs' : 'sm'"
+                class="border-stone-800"
+                background
+                v-tooltip="member.username"
+              />
+            </nuxt-link>
+          </div>
+        </section>
+        
+
+        <section v-if="community.data.events.length > 0" class="w-full md:w-11/12 lg:max-w-[800px] m-auto">
+          <h2 class="font-sorts text-center text-xl lg:text-2xl mb-2 lg:mb-4 col-span-8">
+            Next Event
+          </h2>
+          <div class="flex justify-center">
+            <EventCard
+              :event="community.data.events[0]"
+              class="m-auto"
+              :canModifyEvent="isModerator"
+              @deleted="reloadCommunity"
+            >
+              <template #footer="{ event }">
+                <div class="text-xs text-stone-500 dark:text-stone-400 uppercase">
+                  Players
+                </div>
+                <div class="flex flex-wrap gap-[0.125rem]">
+                  <template v-for="player in allEventAttendees(event)">
+                    <nuxt-link
+                      v-if="player.user"
+                      :to="`/@${player.user.username}`"
+                    >
+                      <Avatar
+                        :value="player.user.avatar"
+                        size="xs"
+                        class="border-stone-800"
+                        background
+                      />
+                    </nuxt-link>
+                    <template v-else-if="player.discord_user_id">
+                      <Avatar
+                        value="/img/discord.png"
+                        size="xs"
+                        class="border-stone-800"
+                        background
+                      />
+                    </template>
+                    <template v-else>
+                      <Avatar
+                        value="/img/default.png"
+                        size="xs"
+                        class="border-stone-800"
+                        background
+                      />
+                    </template>
                   </template>
-                  <template v-else>
-                    <Avatar
-                      value="/img/default.png"
-                      size="xs"
-                      class="border-stone-800"
-                    />
-                  </template>
-                </template>
+                </div>
+              </template>
+            </EventCard>
+          </div>
+        </section>
+
+        <section class="w-full md:w-11/12 lg:max-w-[800px] m-auto">
+          <h2 class="font-sorts text-center text-xl lg:text-2xl mb-2 lg:mb-4 col-span-8">
+            Message Board
+          </h2>
+          <div v-if="isMember" class="p-4 mb-8 flex flex-col gap-8 rounded border dark:border-stone-700/50 bg-stone-300/40 dark:bg-stone-900/50">
+            <form @submit.prevent="submitPost" class="flex flex-col gap-2">
+              <div class="flex flex-col gap-1">
+                <label>Add to the conversation</label>
+                <ExpandingTextarea v-model="message" />
               </div>
-            </template>
-          </EventCard>
-        </nuxt-link>
-      </div>
-      <div
-        class="w-full md:w-11/12 lg:max-w-[800px] m-auto flex flex-col gap-3 mt-8"
-      >
-        <div v-if="isMember" class="bg-stone-200 dark:bg-stone-900 p-4">
-          <label>
-            Add to the conversation
-            <form @submit.prevent="submitPost">
-              <ExpandingTextarea v-model="message" />
-              <Button
-                type="submit"
-                class="px-4 py-2 mt-2"
-                primary
-                font-size="md"
-              >
-                Send
-              </Button>
+              <div>
+                <Button
+                  type="submit"
+                  color="primary"
+                >
+                  Post message
+                </Button>
+              </div>
             </form>
-          </label>
-        </div>
-        <CommunityPost
-          v-for="post in community.data.posts"
-          :post="post"
-          :community="community.data"
-          :isMember="isMember"
-          :isModerator="isModerator"
-        />
+          </div>
+          <div class="flex flex-col gap-4">
+            <CommunityPost
+              v-for="post in community.data.posts"
+              :post="post"
+              :community="community.data"
+              :isMember="isMember"
+              :isModerator="isModerator"
+            />
+          </div>
+        </section>
       </div>
     </template>
   </CommunityTemplate>
@@ -109,18 +141,29 @@
 import naturalOrder from "natural-order";
 import type { Event } from "~/composables/useCommunities";
 import { Status } from "~/composables/useFetchStatus";
+import type { GameRecord } from "~/composables/useGames";
 
 const route = useRoute();
 const slug = route.params.slug as string;
 const communities = useCommunities();
 const games = useGames();
+const user = useSupabaseUser();
 
 const metadata = await $fetch(`/api/community/${slug}/minimal`);
+const { data: stats } = await useFetch<{
+  totals: { games: number; players: number };
+  games: GameRecord[];
+}>(() => `/api/community/${slug}/stats`);
 
 const message = ref("");
+const statsGames = computed(() => stats.value?.games ?? []);
+const activePlayersCount = computed(() => stats.value?.totals?.players ?? 0);
+const isMember = computed(() => communities.isMember(slug, user.value?.id));
 
 const recentGames = computed(() => {
-  const communityGames = games.getByCommunity(slug);
+  const communityGames = games.getByCommunity(slug, {
+    includePrivate: isMember.value,
+  });
   if (communityGames.status !== Status.SUCCESS) return communityGames;
   return {
     ...communityGames,

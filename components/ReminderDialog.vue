@@ -31,7 +31,7 @@
         <label for="custom-reminder" class="text-lg font-bold">
           Custom Reminder
         </label>
-        <div class="flex gap-4">
+        <div class="flex items-center gap-4">
           <Popover class="relative" v-slot="{ close }">
             <PopoverButton>
               <Token
@@ -62,6 +62,7 @@
               </div>
             </PopoverPanel>
           </Popover>
+          <!-- @todo fix text color -->
           <Input type="text" v-model="customReminder" />
           <Button
             type="submit"
@@ -72,7 +73,6 @@
                 token_url: tokenUrl,
               })
             "
-            fontSize="sm"
           >
             Add Custom Reminder
           </Button>

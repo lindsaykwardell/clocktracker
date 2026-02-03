@@ -9,18 +9,18 @@
               player.user_id === user?.id ||
               friends.getFriendStatus(player.user_id) === FriendStatus.FRIENDS
             "
-            class="flex flex-wrap justify-start w-screen md:w-full gap-1 h-12"
+            class="flex flex-wrap justify-center md:justify-start w-100 md:-mx-3 md:w-[calc(100%+1.5rem)] gap-2 md:gap-1 py-2 md:py-0"
           >
             <nuxt-link
               :to="`/@${username}`"
-              class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-200 dark:hover:bg-stone-700"
+              class="profile-tab"
               :class="currentTabClass('profile')"
             >
               Profile
             </nuxt-link>
             <nuxt-link
               :to="`/@${username}?view=games`"
-              class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-200 dark:hover:bg-stone-700"
+              class="profile-tab"
               :class="currentTabClass('games')"
             >
               Games
@@ -28,23 +28,23 @@
             <nuxt-link
               v-if="me?.username === username"
               :to="`/@${username}?view=pending`"
-              class="relative font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-200 dark:hover:bg-stone-700"
+              class="flex gap-1 items-center relative profile-tab"
               :class="currentTabClass('pending')"
             >
-              <span
-                v-if="
-                  pendingGames.status === Status.SUCCESS &&
-                  pendingGames.data.length
-                "
-                class="text-stone-200 bg-red-800 rounded-full px-2 py-1 text-xs font-bold aspect-square"
+              <span>Tagged / Draft</span>
+              <Badge
+                v-if="pendingGames.status === Status.SUCCESS && pendingGames.data.length"
+                color="negative"
+                aria-label="Pending games count"
+                circular
+                size="sm"
               >
                 {{ pendingGames.data.length }}
-              </span>
-              <span>Tagged / Draft</span>
+              </Badge>
             </nuxt-link>
             <nuxt-link
               :to="`/@${username}?view=stats`"
-              class="font-bold md:text-lg whitespace-nowrap border-b-4 py-2 md:py-1 px-2 md:px-3 hover:bg-stone-200 dark:hover:bg-stone-700"
+              class="profile-tab"
               :class="currentTabClass('stats')"
             >
               Stats
@@ -78,21 +78,21 @@
             :games="pendingGames"
           >
             <template #default>
-              <button
+              <Button
                 v-if="
                   pendingGames.status === Status.SUCCESS &&
                   pendingGames.data.length > 0
                 "
                 type="button"
-                class="rounded py-1 justify-center text-lg flex gap-2 bg-green-800 hover:bg-green-900 transition duration-150 px-2"
                 @click="addTaggedGamesToProfile"
                 :disabled="inFlight"
+                color="positive"
               >
                 <template v-if="inFlight">
                   <Spinner class="m-auto" />
                 </template>
                 <template v-else> Add all games to profile </template>
-              </button>
+              </Button>
             </template>
 
             <template #no-content>
@@ -110,11 +110,11 @@
       </template>
       <template v-else-if="playerFetchStatus === Status.ERROR">
         <div class="flex gap-3 items-center justify-center h-screen">
-          <img src="/img/role/imp.png" class="inline-block w-16 h-16" />
+          <ImageUI image="imp" class="inline-block w-14 h-14" />
           <p class="text-center text-2xl my-4 font-sorts">
             This account is not available
           </p>
-          <img src="/img/role/imp.png" class="inline-block w-16 h-16" />
+          <ImageUI image="imp" class="inline-block w-14 h-14" />
         </div>
       </template>
       <template v-else>
@@ -275,3 +275,12 @@ useHead({
   ],
 });
 </script>
+
+<style>
+  .profile-tab {
+    @apply font-bold leading-none md:text-lg whitespace-nowrap rounded md:rounded-none; 
+    @apply bg-stone-100 dark:bg-stone-800 md:bg-transparent dark:md:bg-transparent hover:bg-stone-300 dark:hover:bg-stone-700; 
+    @apply border-2 md:border-x-0 md:border-t-0 md:border-b-4;
+    @apply py-2 md:py-1 px-3;
+  }
+</style>

@@ -25,6 +25,9 @@ export default defineNuxtConfig({
     head: {
       charset: "utf-8",
       viewport: "width=device-width, initial-scale=1",
+      htmlAttrs: {
+        lang: "en",
+      },
       link: [
         { rel: "stylesheet", href: "/index.css" },
         { rel: "icon", type: "image/png", href: "/logo-ct-sm.png" },
@@ -111,7 +114,9 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
-    public: {},
+    public: {
+      assetVersion: process.env.NUXT_PUBLIC_ASSET_VERSION ?? "v1",
+    },
   },
 
   bugsnag: {
@@ -214,6 +219,16 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
+    "/img/role/**": {
+      headers: {
+        "cache-control": "public, max-age=31536000, immutable",
+      },
+    },
+    "/img/ui/**": {
+      headers: {
+        "cache-control": "public, max-age=31536000, immutable",
+      },
+    },
     "/scripts/**": {
       ssr: false,
     },

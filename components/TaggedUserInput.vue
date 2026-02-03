@@ -3,6 +3,7 @@
     <Combobox v-model="value">
       <ComboboxInput
         @focus="emit('inputFocused')"
+        @blur="emit('inputBlurred')"
         @change="value = $event.target.value"
         class="block w-full border bg-stone-200 dark:bg-stone-600 disabled:bg-stone-300 dark:disabled:bg-stone-700 border-stone-100 dark:border-stone-500 rounded-md p-2 h-[2.5rem] text-lg"
         :class="inputClass"
@@ -60,7 +61,12 @@ const props = defineProps<{
   placeholder?: string;
 }>();
 
-const emit = defineEmits(["inputFocused", "optionSelected", "update:value"]);
+const emit = defineEmits([
+  "inputFocused",
+  "inputBlurred",
+  "optionSelected",
+  "update:value",
+]);
 
 const value = computed({
   get: () => props.value,

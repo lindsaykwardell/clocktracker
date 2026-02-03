@@ -1,5 +1,5 @@
 <template>
-  <form class="max-w-[1000px] m-auto py-6" @submit.prevent="emit('submit')">
+  <form class="max-w-[1000px] m-auto py-4 px-4 md:px-8" @submit.prevent="emit('submit')">
     <fieldset
       class="flex flex-col gap-5 border rounded border-stone-500 p-4 my-3"
     >
@@ -17,17 +17,16 @@
               type="button"
               id="select-script"
               @click="showScriptDialog = !showScriptDialog"
-              font-size="md"
+              class="h-[2.5rem]"
               :class="{
                 'w-full': !game.script,
                 'flex-shrink': game.script,
               }"
+              image="investigator"
             >
-              <div class="w-[30px] overflow-hidden">
-                <img src="/img/role/investigator.png" />
-              </div>
               <template v-if="editingMultipleGames">Not updated</template>
               <template v-else-if="game.script === ''">Select Script</template>
+              <template v-else><span class="sr-only">Change script</span></template>
             </Button>
           </div>
           <SelectScriptDialog
@@ -85,26 +84,32 @@
             </label>
           </div>
         </div>
-        <div class="flex-1 flex flex-col gap-1 justify-center">
-          <div v-for="(st, index) in game.co_storytellers" class="flex gap-2">
+        <div class="flex-1 flex flex-col">
+          <span class="block">Co-Storytellers</span>
+          <div v-for="(st, index) in game.co_storytellers" class="flex gap-1 mb-1">
             <TaggedUserInput
               v-model:value="game.co_storytellers[index]"
               :users="potentialCoStorytellers"
             />
-            <button
+            <Button
               type="button"
               @click="game.co_storytellers.splice(index, 1)"
+              icon="x-lg"
+              display="icon-only"
+              color="negative"
+              class="h-[2.5rem]"
             >
-              X
-            </button>
+              Remove storyteller
+            </Button>
           </div>
-          <button
+          <Button
             type="button"
             @click="game.co_storytellers.push('')"
-            class="w-full"
+            icon="person-plus"
+            class="w-full h-[2.5rem]"
           >
             Add Storyteller
-          </button>
+          </Button>
         </div>
       </div>
       <div class="w-full flex flex-wrap gap-5">
@@ -176,11 +181,16 @@
         </label>
         <label
           v-if="!editingMultipleGames"
-          class="w-1/3 md:w-auto flex flex-col gap-2 items-center"
+          class="w-1/3 md:w-auto flex flex-col gap-2 items-start md:items-center"
         >
           <span class="block">Record Grimoire</span>
           <Toggle v-model="advancedModeEnabled" />
         </label>
+      </div>
+      <div v-if="showCommunityPrivacyAlert" class="w-full">
+        <Alert color="info">
+          {{ communityPrivacyAlertText }}
+        </Alert>
       </div>
     </fieldset>
     <fieldset
@@ -188,7 +198,7 @@
       class="flex flex-col md:flex-row gap-5 border rounded border-stone-500 p-4 my-3"
     >
       <legend>Game Results</legend>
-      <fieldset class="flex gap-4">
+      <fieldset class="flex gap-4 flex-wrap">
         <label class="flex gap-2 items-center">
           <input
             type="radio"
@@ -241,27 +251,19 @@
         v-for="(character, i) in game.player_characters"
         class="relative rounded p-4 flex justify-center items-center aspect-square"
       >
-        <button
+        <Button
           type="button"
           v-if="i !== 0"
           @click="removeCharacter(i)"
-          class="absolute top-1 right-1"
+          class="absolute top-1 right-1 z-10"
+          color="contrast"
+          icon="x-lg"
+          display="icon-only"
+          circular
+          title="Remove this role"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="32"
-            height="32"
-            viewBox="0 0 512 512"
-          >
-            <path
-              d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
-              fill="currentColor"
-            />
-            <path d="M249 160h14v241h-14z" fill="currentColor" />
-            <path d="M320 160h-14.6l-10.7 241h14.6z" fill="currentColor" />
-            <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
-          </svg>
-        </button>
+          Remove
+        </Button>
         <Token
           :character="character"
           alwaysShowAlignment
@@ -312,7 +314,7 @@
           <p class="p-2">OR</p>
           <div class="flex justify-center">
             <Button
-              primary
+              color="primary"
               type="button"
               @click="showCopyGrimoireDialog = true"
             >
@@ -328,67 +330,62 @@
             ? { '--bg-image-url' : `url(${customBackground})` }
             : {}
         "
-        class="grimoire pt-3 relative bg-center bg-cover w-full script-bg"
-        :class="{
-          ...scriptBgClasses(game.script, !!customBackground),
-        }"
+        class="grimoire grimoire-edit relative w-full flex flex-col gap-2"
       >
-        <Button
-          v-if="game.grimoire.length > 1"
-          @click.prevent="deletePage"
-          class="absolute top-1 right-1 z-10"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="32"
-            height="32"
-            viewBox="0 0 512 512"
+        <div class="relative">
+          <div 
+            class="w-full max-w-[calc(100vw-4rem)] md:w-auto md:max-w-[966px] overflow-scroll bg-center bg-cover script-bg"
+            :class="{
+              ...scriptBgClasses(game.script, !!customBackground),
+            }"
           >
-            <path
-              d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
-              fill="currentColor"
+            <Grimoire
+              :tokens="game.grimoire[grimPage].tokens"
+              :availableRoles="orderedRoles"
+              :excludePlayers="storytellerNames"
+              @selectedMe="applyMyRoleToGrimoire"
             />
-            <path d="M249 160h14v241h-14z" fill="currentColor" />
-            <path d="M320 160h-14.6l-10.7 241h14.6z" fill="currentColor" />
-            <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
-          </svg>
-          <span class="hidden md:inline">Delete page</span>
-        </Button>
+            <div
+              class="absolute bottom-0 w-full xl:w-[calc(100%-0.625rem)] text-center bg-gradient-to-b from-transparent via-stone-800 to-stone-800 text-white"
+            >
+              Page {{ grimPage + 1 }} of {{ game.grimoire.length }}
+            </div>
+          </div>
+        </div>
+        
         <Button
           type="button"
           @click="pageBackward"
           v-if="grimPage !== 0"
-          class="absolute bottom-1 left-1 font-sorts"
-          font-size="sm"
+          icon="journal-prev"
+          class="md:absolute bottom-1 left-1"
         >
-          <span> {{ "<" }} Previous page </span>
+          Previous page
+        </Button>
+        <Button
+          v-if="game.grimoire.length > 1"
+          @click.prevent="deletePage"
+          color="negative"
+          icon="journal-x"
+          class="md:absolute top-1 right-4 z-10"
+          title="Delete this page"
+        >
+          Delete page
         </Button>
         <Button
           type="button"
           @click="pageForward"
-          class="absolute bottom-1 right-1 font-sorts"
-          font-size="sm"
+          :color="grimPage === game.grimoire.length - 1 ? 'positive' : 'neutral'"
+          :icon="grimPage === game.grimoire.length - 1 ? 'journal-plus' : 'journal-next'"
+          display="icon-after"
+          class="md:absolute bottom-1 right-4"
         >
           <span v-if="grimPage <= game.grimoire.length - 1">
             {{
               grimPage === game.grimoire.length - 1 ? "Add page" : "Next page"
             }}
-            {{ ">" }}
           </span>
         </Button>
-        <div class="w-screen md:w-auto max-w-[966px] overflow-scroll">
-          <Grimoire
-            :tokens="game.grimoire[grimPage].tokens"
-            :availableRoles="orderedRoles"
-            :excludePlayers="storytellerNames"
-            @selectedMe="applyMyRoleToGrimoire"
-          />
-        </div>
-        <div
-          class="text-center bg-gradient-to-b from-transparent via-stone-800 to-stone-800 text-white"
-        >
-          Page {{ grimPage + 1 }} of {{ game.grimoire.length }}
-        </div>
       </div>
     </fieldset>
     <fieldset
@@ -403,26 +400,19 @@
             v-for="(character, i) in game.demon_bluffs"
             class="relative border border-stone-600 rounded p-4 flex justify-center items-center aspect-square"
           >
-            <button
+            <Button
               type="button"
               @click="removeDemonBluff(i)"
-              class="absolute top-1 right-1"
+              class="absolute top-1 right-1 z-10"
+              color="contrast"
+              size="sm"
+              icon="x-lg"
+              display="icon-only"
+              circular
+              title="Remove this demon bluff"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="32"
-                height="32"
-                viewBox="0 0 512 512"
-              >
-                <path
-                  d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
-                  fill="currentColor"
-                />
-                <path d="M249 160h14v241h-14z" fill="currentColor" />
-                <path d="M320 160h-14.6l-10.7 241h14.6z" fill="currentColor" />
-                <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
-              </svg>
-            </button>
+              Remove
+            </Button>
             <Token
               :character="character"
               size="md"
@@ -457,26 +447,18 @@
             v-for="(character, i) in game.fabled"
             class="relative border border-stone-600 rounded p-4 flex justify-center items-center aspect-square"
           >
-            <button
+            <Button
               type="button"
               @click="removeFabled(i)"
-              class="absolute top-1 right-1"
+              class="absolute top-1 right-1 z-10"
+              size="sm"
+              icon="x-lg"
+              display="icon-only"
+              circular
+              title="Remove this fabled"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="32"
-                height="32"
-                viewBox="0 0 512 512"
-              >
-                <path
-                  d="M400 113.3h-80v-20c0-16.2-13.1-29.3-29.3-29.3h-69.5C205.1 64 192 77.1 192 93.3v20h-80V128h21.1l23.6 290.7c0 16.2 13.1 29.3 29.3 29.3h141c16.2 0 29.3-13.1 29.3-29.3L379.6 128H400v-14.7zm-193.4-20c0-8.1 6.6-14.7 14.6-14.7h69.5c8.1 0 14.6 6.6 14.6 14.7v20h-98.7v-20zm135 324.6v.8c0 8.1-6.6 14.7-14.6 14.7H186c-8.1 0-14.6-6.6-14.6-14.7v-.8L147.7 128h217.2l-23.3 289.9z"
-                  fill="currentColor"
-                />
-                <path d="M249 160h14v241h-14z" fill="currentColor" />
-                <path d="M320 160h-14.6l-10.7 241h14.6z" fill="currentColor" />
-                <path d="M206.5 160H192l10.7 241h14.6z" fill="currentColor" />
-              </svg>
-            </button>
+              Remove
+            </Button>
             <Token
               :character="character"
               size="md"
@@ -528,8 +510,10 @@
       <div class="flex flex-wrap gap-2">
         <Button
           v-for="(tag, index) in game.tags"
-          font-size="sm"
           @click.prevent="game.tags.splice(index, 1)"
+          size="sm"
+          removableTag
+          :title="`Remove ${tag}`"
         >
           {{ tag }}
         </Button>
@@ -541,28 +525,17 @@
         <label class="flex-1">
           <span class="block">BoardGameGeek Game URL</span>
           <div class="flex items-center">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="32"
-              height="32"
-              viewBox="0 0 24 24"
-              class="text-[#ff5100]"
-            >
-              <path
-                fill="currentColor"
-                d="m19.7 4.44l-2.38.64L19.65 0L4.53 5.56l.83 6.67l-1.4 1.34L8.12 24l8.85-3.26l3.07-7.22l-1.32-1.27l.98-7.81Z"
-              />
-            </svg>
+            <IconUI id="bgg" color="bgg" size="lg" />
             <Input
               type="text"
               v-model="bggIdInput"
               pattern="https:\/\/boardgamegeek\.com\/play\/details\/\d+"
             />
           </div>
-          <div v-if="!bggIdIsValid" class="text-red-500">
+          <Alert v-if="!bggIdIsValid" color="negative" class="mt-1">
             Invalid BoardGameGeek URL. Format should be:
-            https://boardgamegeek.com/play/details/[game id]
-          </div>
+            https://boardgamegeek.com/play/details/[game_id]
+          </Alert>
         </label>
       </div>
     </fieldset>
@@ -572,34 +545,48 @@
     >
       <legend>Images</legend>
       <div class="flex flex-col gap-5">
-        <Button type="button" @click="uploadFile" font-size="md" tertiary>
+        <Button type="button" @click="uploadFile" icon="upload">
           Upload Images
         </Button>
         <div class="flex flex-wrap gap-5">
-          <div v-for="file in game.image_urls" :key="file">
+          <div class='relative' v-for="file in game.image_urls" :key="file">
             <img
               crossorigin="anonymous"
               :src="file"
               class="w-64 h-64 object-cover"
             />
-            <button type="button" @click="removeFile(file)">Remove</button>
+            <Button
+              type="button"
+              @click="removeFile(file)"
+              class="absolute top-1 right-1 z-10"
+              size="sm"
+              icon="x-lg"
+              display="icon-only"
+              circular
+              title="Remove this image"
+            >
+              Remove
+            </Button>
           </div>
         </div>
       </div>
     </fieldset>
-    <Button
-      type="submit"
-      id="save-game"
-      class="w-[300px] m-auto"
-      primary
-      :disabled="inFlight"
-    >
-      <template v-if="inFlight">
-        <Spinner />
-        Saving...
-      </template>
-      <template v-else>Save Game</template>
-    </Button>
+    <div class="text-center">
+      <Button
+        type="submit"
+        id="save-game"
+        color="primary"
+        wide
+        :disabled="inFlight"
+      >
+        <template v-if="inFlight">
+          <Spinner />
+          Saving...
+        </template>
+        <template v-else>Save Game</template>
+      </Button>
+    </div>
+    
   </form>
   <TokenDialog
     v-model:visible="showRoleSelectionDialog"
@@ -852,6 +839,22 @@ const myLocations = computed(() => {
     return games.getLocationsByPlayer(me.value.data.username);
   }
   return [];
+});
+
+const showCommunityPrivacyAlert = computed(() => {
+  const hasCommunity = !!props.game.community_id || !!props.game.community_name;
+  if (!hasCommunity) return false;
+
+  return (
+    props.game.privacy === "PRIVATE" ||
+    props.game.privacy === "FRIENDS_ONLY"
+  );
+});
+
+const communityPrivacyAlertText = computed(() => {
+  return props.game.privacy === "FRIENDS_ONLY"
+    ? "Community-tagged games appear in its lists/stats, even if 'Friends Only'. Non-friends won't see a link to the full game."
+    : "Community-tagged games appear in its lists/stats, even if 'Private'. Others won't see a link to the full game.";
 });
 
 const myGames = computed(() => {
@@ -1514,6 +1517,7 @@ onMounted(async () => {
 <style scoped>
 .script-bg {
   background-image: var(--bg-image-url);
+  background-attachment: local, local;
 
   &.is-trouble-brewing {
     --bg-image-url: url("/img/scripts/trouble-brewing-bg.webp");
@@ -1533,6 +1537,17 @@ onMounted(async () => {
 
   &.is-unknown-script {
     --bg-image-url: url("/img/scripts/unknown-script-bg.webp");
+  }
+}
+
+.grimoire {
+  .overflow-scroll {
+    /* Compensate scrollbars (and page count) so tokens are centered */
+    padding-block-start: 1.25rem;
+    padding-block-end: 1.5rem;
+
+    scrollbar-width: thin;
+    scrollbar-color: oklch(44.4% 0.011 73.639) transparent;
   }
 }
 </style>

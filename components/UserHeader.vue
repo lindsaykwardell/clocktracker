@@ -1,94 +1,109 @@
 <template>
   <div class="bg-stone-200 dark:bg-stone-950 shadow-lg">
     <div
-      class="flex flex-col items-center w-full md:w-3/4 lg:w-2/3 xl:w-1/2 m-auto pt-4"
+      class="flex flex-col items-center md:items-start w-full lg:w-2/3 m-auto pt-4 px-8 lg:px-0 gap-4"
     >
       <div
-        class="grid grid-cols-[8rem_1fr_1fr] md:grid-cols-[10rem_1fr_10rem] px-4 md:px-0 gap-2 lg:gap-4 w-full"
+        class="flex flex-col md:flex-row gap-4 md:gap-2 lg:gap-3 xl:gap-4 items-center w-full"
       >
         <Avatar
           :value="player.avatar || ''"
           class="border-2 shadow-xl flex-shrink row-span-3"
           size="lg"
+          aria-hidden="true"
         />
-        <h3 class="font-sorts text-xl md:text-2xl xl:text-3xl col-span-2 break-all">
-          {{ player.display_name }}
-        </h3>
-        <div class="row-start-2 col-start-2">
-          <div class="md:text-lg dark:text-stone-400 break-all">
-            <h4>{{ player.username }}</h4>
-            <template v-if="player.pronouns">
-              <span>{{ player.pronouns }}</span>
-            </template>
-          </div>
-          <div
-            v-if="player.location"
-            class="md:text-lg dark:text-stone-400 flex gap-2 items-center"
-          >
-            <IconUI id="globe" />
-            <span class="sr-only">Location: </span><span>{{ player.location }}</span>
-          </div>
-          <div
-            v-if="player.kofi_level"
-            class="md:text-lg dark:text-stone-400 flex gap-2 items-center"
-          >
-            <KoFi />
-            <span v-if="player.kofi_level === 'ONE_TIME'">Supporter</span>
-            <span v-else-if="player.kofi_level === 'SUBSCRIBER'">
-              Subscriber
-            </span>
-          </div>
-          <div class="flex gap-2 items-center">
-            <div
-              v-if="gamesAsStoryteller.length"
-              class="flex gap-1 items-center"
-              v-tooltip="`Storyteller in ${gamesAsStoryteller.length} games`"
-            >
-              <img
-                :src="`/img/role/storyteller_inv.png`"
-                alt="Storyteller Count"
-                class="hidden dark:block w-8"
-              />
-              <img
-                :src="`/img/role/storyteller.png`"
-                alt="Storyteller Count"
-                class="block dark:hidden w-8"
-              />
-              <div class="flex gap-2">
-                {{ gamesAsStoryteller.length }}
-              </div>
+        <div class="flex-grow flex flex-col justify-start gap-3 w-full">
+          <div class="flex flex-col items-center md:items-start gap-2">
+            <div>
+              <h1 class="font-sorts text-2xl xl:text-3xl text-center md:text-start break-all">
+                {{ player.display_name }}
+              </h1>
+              <p class="text-sm text-center md:text-start">
+                @{{ player.username }}
+                <template v-if="player.pronouns">
+                  <span> - {{ player.pronouns }}</span>
+                </template>
+              </p>
             </div>
             <div
-              v-if="gamesAsPlayer.length"
-              class="flex gap-1 items-center"
-              v-tooltip="
-                `Player in ${gamesAsPlayer.length} games (Most played: ${
-                  mostCommonCharacter?.name || ''
-                })`
-              "
+              v-if="player.location"
+              class="md:text-lg dark:text-stone-400 flex gap-2 items-center"
             >
-              <img
-                :src="
-                  mostCommonCharacter?.token_url || `/img/role/amnesiac.png`
+              <IconUI id="location" />
+              <span class="sr-only">Location: </span><span>{{ player.location }}</span>
+            </div>
+            <div
+              v-if="player.kofi_level"
+              class="md:text-lg dark:text-stone-400 flex gap-2 items-center"
+            >
+              <IconUI id="kofi" />
+              <span v-if="player.kofi_level === 'ONE_TIME'">Supporter</span>
+              <span v-else-if="player.kofi_level === 'SUBSCRIBER'">
+                Subscriber
+              </span>
+            </div>
+            <div class="flex gap-2 items-center">
+              <div
+                v-if="gamesAsStoryteller.length"
+                class="flex gap-1 items-center h-6 overflow-y-hidden"
+                v-tooltip="`Storyteller in ${gamesAsStoryteller.length} games`"
+              >
+                <img
+                  :src="`/img/role/48x48/storyteller_inv.webp`"
+                  alt="Storyteller Count"
+                  class="hidden dark:block w-8"
+                />
+                <img
+                  :src="`/img/role/48x48/storyteller.webp`"
+                  alt="Storyteller Count"
+                  class="block dark:hidden w-8"
+                />
+                <div class="flex gap-2">
+                  {{ gamesAsStoryteller.length }}
+                </div>
+              </div>
+              <div
+                v-if="gamesAsPlayer.length"
+                class="flex gap-1 items-center h-6 overflow-y-hidden"
+                v-tooltip="
+                  `Player in ${gamesAsPlayer.length} games (Most played: ${
+                    mostCommonCharacter?.name || ''
+                  })`
                 "
-                alt="Player Count"
-                class="w-8"
-              />
-              <div class="flex gap-2">
-                {{ gamesAsPlayer.length }}
+              >
+                <img
+                  :src="mostCommonCharacterImage"
+                  alt="Player Count"
+                  class="w-8"
+                />
+                <div class="flex gap-2">
+                  {{ gamesAsPlayer.length }}
+                </div>
               </div>
             </div>
           </div>
         </div>
-        <FriendButton
-          v-if="user && !isUser"
-          :username="player.username"
-          :user_id="player.user_id"
-          class="row-start-2 col-start-3"
-        />
-        <div
-          v-if="player.communities?.length"
-          class="flex flex-wrap justify-start row-start-4 col-span-3"
+        <div class="flex-none">
+          <FriendButton
+            v-if="user && !isUser"
+            :username="player.username"
+            :user_id="player.user_id"
+          />
+          <Button
+            component="nuxt-link"
+            v-if="isUser"
+            :to="`/settings`"
+            icon="edit"
+            color="primary"
+          >
+            Edit profile
+          </Button>
+        </div>
+      </div>
+      <div v-if="player.communities?.length" class="flex flex-col gap-1">
+        <h2 class="text-xs text-stone-600 dark:text-stone-400 text-center md:text-start uppercase">Communities</h2>
+        <ul
+          class="flex flex-wrap justify-start gap-[0.125rem]"
         >
           <nuxt-link
             v-for="community in player.communities"
@@ -99,12 +114,14 @@
               size="xs"
               class="flex-shrink bg-stone-300 dark:bg-stone-950"
               v-tooltip="community.name"
+              aria-hidden="true"
             />
+            <span class=sr-only>{{ community.name }}</span>
           </nuxt-link>
-        </div>
+        </ul>
       </div>
-      <hr v-if="player.bio" class="border-stone-100 w-full my-4" />
-      <p class="whitespace-pre-wrap text-left w-full p-4">
+      <hr v-if="player.bio" class="border-stone-100 dark:border-stone-600 w-full" />
+      <p class="whitespace-pre-wrap w-full text-center md:text-start text-sm md:text-base text-balance max-w-[80ch]">
         {{ player.bio }}
       </p>
       <slot />
@@ -113,9 +130,12 @@
 </template>
 
 <script setup lang="ts">
+import { useRoleImage } from "~/composables/useRoleImage";
 const user = useSupabaseUser();
 const games = useGames();
 const roles = useRoles();
+const { roleBaseUrlFromId, roleBaseUrlFromRole, sizeAdjustedUrl } =
+  useRoleImage();
 
 const props = defineProps<{
   player: {
@@ -194,5 +214,22 @@ const mostCommonCharacter = computed(() => {
   const role = roles.getRole(sortedCharacters?.[0]?.[0]);
 
   return role;
+});
+
+const mostCommonCharacterImage = computed(() => {
+  const fallbackBase = roleBaseUrlFromId("amnesiac") ?? "/img/role/amnesiac";
+  const fallback = sizeAdjustedUrl(fallbackBase, "sm", "webp");
+  const role = mostCommonCharacter.value;
+
+  if (!role) {
+    return fallback;
+  }
+
+  const base = roleBaseUrlFromRole(role);
+  if (!base) {
+    return fallback;
+  }
+
+  return sizeAdjustedUrl(base, "sm", "webp");
 });
 </script>

@@ -2,17 +2,7 @@
   <div class="relative">
     <Menu>
       <MenuButton>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="32"
-          height="32"
-          viewBox="0 0 32 32"
-        >
-          <path
-            fill="currentColor"
-            d="M4 6h24v2H4zm0 18h24v2H4zm0-12h24v2H4zm0 6h24v2H4z"
-          />
-        </svg>
+        <IconUI id="dots" :rounded="true" shadow />
       </MenuButton>
       <transition
         enter-active-class="transition duration-100 ease-out"
@@ -23,15 +13,14 @@
         leave-to-class="transform scale-95 opacity-0"
       >
         <MenuItems
-          class="absolute bottom-[100%] z-10 bg-stone-50 dark:bg-stone-950 p-2 rounded shadow-md whitespace-nowrap flex flex-col items-start"
+          class="ct-contextual-links top-full"
         >
           <MenuItem v-for="option in options">
-            <button
+            <ButtonSubmenu
               @click="option.action"
-              class="hover:text-stone-500 dark:hover:text-stone-300 w-full text-left"
             >
               {{ option.label }}
-            </button>
+            </ButtonSubmenu>
           </MenuItem>
         </MenuItems>
       </transition>
