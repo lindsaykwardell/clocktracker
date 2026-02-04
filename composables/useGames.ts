@@ -17,6 +17,15 @@ export enum WinStatus_V2 {
   NOT_RECORDED = "NOT_RECORDED",
 }
 
+export enum GameEndTrigger {
+  NOT_RECORDED = "NOT_RECORDED",
+  TWO_PLAYERS_LEFT_ALIVE = "TWO_PLAYERS_LEFT_ALIVE",
+  NO_LIVING_DEMON = "NO_LIVING_DEMON",
+  CHARACTER_ABILITY = "CHARACTER_ABILITY",
+  GAME_ENDED_EARLY = "GAME_ENDED_EARLY",
+  OTHER = "OTHER",
+}
+
 export type FullCharacter = Character & {
   role?: {
     token_url: string;
@@ -48,6 +57,17 @@ export type GameRecord = Omit<Game, "win_v2"> & {
     };
   };
   win_v2: WinStatus_V2;
+  end_trigger: GameEndTrigger;
+  end_trigger_role_id: string | null;
+  end_trigger_note: string;
+  end_trigger_seat_page: number | null;
+  end_trigger_seat_order: number | null;
+  end_trigger_role?: {
+    token_url: string;
+    type: string;
+    initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+    name: string;
+  } | null;
   player_characters: FullCharacter[];
   demon_bluffs: FullDemonBluff[];
   fabled: FullFabled[];

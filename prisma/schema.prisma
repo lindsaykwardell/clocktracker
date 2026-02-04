@@ -39,6 +39,12 @@ model Game {
   traveler_count           Int?
   player_characters        Character[]
   win_v2                   WinStatus_V2   @default(NOT_RECORDED)
+  end_trigger              GameEndTrigger @default(NOT_RECORDED)
+  end_trigger_role         Role?          @relation("GameEndTriggerRole", fields: [end_trigger_role_id], references: [id])
+  end_trigger_role_id      String?
+  end_trigger_note         String         @default("")
+  end_trigger_seat_page    Int?
+  end_trigger_seat_order   Int?
   notes                    String
   image_urls               String[]
   old_image_urls           String[]
@@ -86,6 +92,15 @@ enum WinStatus_V2 {
   GOOD_WINS
   EVIL_WINS
   NOT_RECORDED
+}
+
+enum GameEndTrigger {
+  NOT_RECORDED
+  TWO_PLAYERS_LEFT_ALIVE
+  NO_LIVING_DEMON
+  CHARACTER_ABILITY
+  GAME_ENDED_EARLY
+  OTHER
 }
 
 model Grimoire {
@@ -197,6 +212,7 @@ model Role {
   related_tokens       Token[]        @relation("RelatedToken")
   demon_bluffs         DemonBluff[]
   fabled               Fabled[]
+  end_trigger_games    Game[]         @relation("GameEndTriggerRole")
   reminders            RoleReminder[]
   ls_campaigns         LSCampaign[]
   ls_games             LSGame[]       @relation("Games")

@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import { WinStatus_V2 } from "~/composables/useGames";
+import { WinStatus_V2, type GameEndTrigger } from "~/composables/useGames";
 
 definePageMeta({
   middleware: "auth",
@@ -86,6 +86,17 @@ const game = reactive<{
     };
   }[];
   win_v2: WinStatus_V2 | undefined;
+  end_trigger: GameEndTrigger | undefined;
+  end_trigger_role_id: string | null;
+  end_trigger_note: string;
+  end_trigger_seat_page: number | null;
+  end_trigger_seat_order: number | null;
+  end_trigger_role?: {
+    token_url: string;
+    type: string;
+    initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+    name: string;
+  } | null;
   notes: string;
   image_urls: string[];
   grimoire: {
@@ -128,6 +139,12 @@ const game = reactive<{
   demon_bluffs: [],
   fabled: [],
   win_v2: undefined,
+  end_trigger: undefined,
+  end_trigger_role_id: null,
+  end_trigger_note: "",
+  end_trigger_seat_page: null,
+  end_trigger_seat_order: null,
+  end_trigger_role: null,
   notes: "",
   image_urls: [],
   grimoire: [
@@ -154,6 +171,15 @@ const formattedGame = computed(() => ({
   player_count: game.player_count,
   traveler_count: game.traveler_count,
   win_v2: game.win_v2,
+  end_trigger: game.end_trigger,
+  end_trigger_role_id:
+    game.end_trigger === undefined ? undefined : game.end_trigger_role_id,
+  end_trigger_note:
+    game.end_trigger === undefined ? undefined : game.end_trigger_note,
+  end_trigger_seat_page:
+    game.end_trigger === undefined ? undefined : game.end_trigger_seat_page,
+  end_trigger_seat_order:
+    game.end_trigger === undefined ? undefined : game.end_trigger_seat_order,
   tags: game.tags,
   privacy: game.privacy,
 }));

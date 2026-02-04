@@ -4,6 +4,7 @@ import {
   LocationType,
   WinStatus_V2,
   PrivacySetting,
+  type GameEndTrigger,
 } from "@prisma/client";
 import { prisma } from "~/server/utils/prisma";
 
@@ -23,6 +24,11 @@ export default defineEventHandler(async (handler) => {
     player_count: number | null;
     traveler_count: number | null;
     win_v2: WinStatus_V2 | undefined;
+    end_trigger: GameEndTrigger | undefined;
+    end_trigger_role_id: string | null | undefined;
+    end_trigger_note: string | undefined;
+    end_trigger_seat_page: number | null | undefined;
+    end_trigger_seat_order: number | null | undefined;
     tags: string[];
     privacy: PrivacySetting | "";
   } | null>(handler);
@@ -71,6 +77,23 @@ export default defineEventHandler(async (handler) => {
         player_count: body.player_count || payload.player_count,
         traveler_count: body.traveler_count || payload.traveler_count,
         win_v2: body.win_v2 || payload.win_v2,
+        end_trigger: body.end_trigger || payload.end_trigger,
+        end_trigger_role_id:
+          body.end_trigger_role_id === undefined
+            ? payload.end_trigger_role_id
+            : body.end_trigger_role_id,
+        end_trigger_note:
+          body.end_trigger_note === undefined
+            ? payload.end_trigger_note
+            : body.end_trigger_note,
+        end_trigger_seat_page:
+          body.end_trigger_seat_page === undefined
+            ? payload.end_trigger_seat_page
+            : body.end_trigger_seat_page,
+        end_trigger_seat_order:
+          body.end_trigger_seat_order === undefined
+            ? payload.end_trigger_seat_order
+            : body.end_trigger_seat_order,
         tags: [...payload.tags, ...body.tags],
         privacy: body.privacy || payload.privacy,
       },
@@ -78,6 +101,14 @@ export default defineEventHandler(async (handler) => {
         player_characters: true,
         demon_bluffs: true,
         fabled: true,
+        end_trigger_role: {
+          select: {
+            token_url: true,
+            type: true,
+            initial_alignment: true,
+            name: true,
+          },
+        },
         grimoire: {
           include: {
             tokens: {
@@ -144,6 +175,11 @@ export default defineEventHandler(async (handler) => {
       player_count: game.player_count,
       traveler_count: game.traveler_count,
       win_v2: game.win_v2,
+      end_trigger: game.end_trigger,
+      end_trigger_role_id: game.end_trigger_role_id,
+      end_trigger_note: game.end_trigger_note,
+      end_trigger_seat_page: game.end_trigger_seat_page,
+      end_trigger_seat_order: game.end_trigger_seat_order,
       tags: game.tags,
       privacy: game.privacy,
     });
@@ -249,6 +285,11 @@ export default defineEventHandler(async (handler) => {
               storyteller: game.storyteller,
               co_storytellers: game.co_storytellers,
               win_v2: game.win_v2,
+              end_trigger: game.end_trigger,
+              end_trigger_role_id: game.end_trigger_role_id,
+              end_trigger_note: game.end_trigger_note,
+              end_trigger_seat_page: game.end_trigger_seat_page,
+              end_trigger_seat_order: game.end_trigger_seat_order,
               demon_bluffs: {
                 deleteMany: relatedGame.demon_bluffs.map((g) => ({ id: g.id })),
                 create: game.demon_bluffs.map((g) => ({
@@ -363,6 +404,11 @@ export default defineEventHandler(async (handler) => {
                 storyteller: game.storyteller,
                 co_storytellers: game.co_storytellers,
                 win_v2: game.win_v2,
+                end_trigger: game.end_trigger,
+                end_trigger_role_id: game.end_trigger_role_id,
+                end_trigger_note: game.end_trigger_note,
+                end_trigger_seat_page: game.end_trigger_seat_page,
+                end_trigger_seat_order: game.end_trigger_seat_order,
                 demon_bluffs: {
                   deleteMany: childGame.demon_bluffs.map((g) => ({ id: g.id })),
                   create: game.demon_bluffs.map((g) => ({

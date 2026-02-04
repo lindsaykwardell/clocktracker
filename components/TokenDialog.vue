@@ -3,6 +3,13 @@
     <template #title>
       <div class="flex flex-col md:flex-row w-full gap-2">
         <h2 class="flex-grow text-2xl font-bold font-sorts">Select a Role</h2>
+        <label
+          v-if="showExcludeIrrelevantToggle"
+          class="flex items-center"
+        >
+          <input v-model="excludeIrrelevant" type="checkbox" class="mr-2" />
+          <span>Exclude irrelevant roles</span>
+        </label>
         <label v-if="!hideAllRolesToggle" class="flex items-center">
           <input v-model="showAllRoles" type="checkbox" class="mr-2" />
           <span>All Roles</span>
@@ -67,9 +74,13 @@ const props = defineProps<{
   alwaysShowAllRoles?: boolean;
   alwaysShowFabled?: boolean;
   hideTravelers?: boolean;
+  hideBlankRole?: boolean;
+  restrictRoleIds?: string[] | null;
+  showExcludeIrrelevantToggle?: boolean;
+  excludeIrrelevant?: boolean;
 }>();
 
-const emit = defineEmits(["update:visible", "selectRole"]);
+const emit = defineEmits(["update:visible", "selectRole", "update:excludeIrrelevant"]);
 
 const blankRole = computed(() => ({
   type: RoleType.TOWNSFOLK,
@@ -86,6 +97,10 @@ const hideAllRolesToggle = computed(
     props.availableRoles.length === roles.getAllRoles().length
 );
 const showFabled = ref(false);
+const excludeIrrelevant = computed({
+  get: () => props.excludeIrrelevant ?? false,
+  set: (value) => emit("update:excludeIrrelevant", value),
+});
 
 const allRoles = computed(() => roles.getAllRoles());
 const travelerRoles = computed(() =>
@@ -110,6 +125,11 @@ const providedRolesIncludesTravelers = computed(() => {
 });
 
 const filteredRoles = computed(() => {
+  const restrictIds =
+    excludeIrrelevant.value && props.restrictRoleIds?.length
+      ? new Set(props.restrictRoleIds)
+      : null;
+
   return naturalOrder(
     [
       ...(showAllRoles.value ? allRoles.value : props.availableRoles).filter(
@@ -123,7 +143,8 @@ const filteredRoles = computed(() => {
         role.name.toLowerCase().includes(roleFilter.value.toLowerCase()) &&
         (props.hideTravelers && !showAllRoles.value
           ? role.type !== "TRAVELER"
-          : true)
+          : true) &&
+        (!restrictIds || role.id === "" || restrictIds.has(role.id))
     )
   )
     .orderBy("asc")
@@ -161,7 +182,7 @@ const loric = computed(() => {
 })
 
 const roleGroups = computed(() => {
-  return [
+  const groups = [
     {
       name: "Townsfolk",
       roles: townsfolk.value,
@@ -179,10 +200,6 @@ const roleGroups = computed(() => {
       roles: demons.value,
     },
     {
-      name: "Blank",
-      roles: blank.value,
-    },
-    {
       name: "Travelers",
       roles: travelers.value,
     },
@@ -195,6 +212,15 @@ const roleGroups = computed(() => {
       roles: loric.value,
     }
   ];
+
+  if (!props.hideBlankRole) {
+    groups.splice(4, 0, {
+      name: "Blank",
+      roles: blank.value,
+    });
+  }
+
+  return groups;
 });
 
 function formatRoleAsCharacter(
