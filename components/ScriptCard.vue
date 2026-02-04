@@ -10,7 +10,7 @@
       <div class="ct-card__header">
         <h2 class="ct-card__title text-center md:text-start">
           <nuxt-link
-            :to="`/scripts/${encodeURIComponent(script.name.replaceAll(' ', '_'))}`"
+            :to="`/scripts/${encodeURIComponent(script.name.replaceAll(' ', '_'))}?id=${script.script_id}`"
             class="overlay-link"
           >
             {{ script.name }}
@@ -38,6 +38,7 @@ const { scriptLogo } = useScripts();
 defineProps<{
   script: {
     id: number;
+    script_id: string;
     name: string;
     version: string;
     author: string;
