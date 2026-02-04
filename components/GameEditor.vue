@@ -913,7 +913,16 @@ const endTriggerSeatTokens = computed(() => {
 });
 
 const endTriggerSeatOptions = computed(() => {
-  return endTriggerSeatTokens.value.map((token) => {
+  let tokens = endTriggerSeatTokens.value;
+  if (props.game.end_trigger) {
+    const includes = END_TRIGGER_ROLE_INCLUDES[props.game.end_trigger] || [];
+    if (includes.length > 0) {
+      const allowed = new Set(includes);
+      tokens = tokens.filter((token) => token.role_id && allowed.has(token.role_id));
+    }
+  }
+
+  return tokens.map((token) => {
     const roleName = token.role?.name || "Unknown role";
     const playerName = token.player_name || "Unknown player";
 
