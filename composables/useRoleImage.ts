@@ -2,6 +2,8 @@ type RoleLike = {
   id?: string;
   token_url?: string;
   custom_role?: boolean;
+  type?: string;
+  initial_alignment?: AlignmentLike;
 };
 
 type AlignmentLike = "GOOD" | "EVIL" | "NEUTRAL";
@@ -38,28 +40,46 @@ export const useRoleImage = () => {
   };
 
   // Resolve a role to its base URL. Custom roles keep their explicit URL.
+  // Non-custom roles are always resolved by id to avoid stale token_url values.
   const roleBaseUrlFromRole = (role?: RoleLike) => {
     if (!role) {
       return undefined;
     }
-    if (role.custom_role && role.token_url) {
-      return role.token_url;
+    const trimmedTokenUrl = role.token_url?.trim();
+    const inferredCustom =
+      role.custom_role ??
+      (trimmedTokenUrl ? !isRoleAssetUrl(trimmedTokenUrl) : false);
+    if (inferredCustom) {
+      return trimmedTokenUrl;
     }
-    return roleBaseUrlFromId(role.id) ?? role.token_url;
+    return roleBaseUrlFromId(role.id) ?? trimmedTokenUrl;
   };
 
   // Alignment variants are encoded by suffix for local assets (_g/_e).
   const alignmentSuffix = (
-    role?: { initial_alignment?: AlignmentLike },
+    role?: { initial_alignment?: AlignmentLike; type?: string },
     alignment?: AlignmentLike
   ) => {
     if (!role || !alignment || alignment === "NEUTRAL") {
       return "";
     }
-    if (role.initial_alignment === "NEUTRAL") {
+    if (role.type === "FABLED" || role.type === "LORIC") {
+      return "";
+    }
+    const inferredInitial =
+      role.initial_alignment ??
+      (role.type === "TRAVELER"
+        ? "NEUTRAL"
+        : role.type === "TOWNSFOLK" || role.type === "OUTSIDER"
+        ? "GOOD"
+        : role.type === "MINION" || role.type === "DEMON"
+        ? "EVIL"
+        : "NEUTRAL");
+
+    if (inferredInitial === "NEUTRAL") {
       return alignment === "GOOD" ? "_g" : "_e";
     }
-    if (role.initial_alignment && role.initial_alignment !== alignment) {
+    if (inferredInitial && inferredInitial !== alignment) {
       return alignment === "GOOD" ? "_g" : "_e";
     }
     return "";
