@@ -11,7 +11,7 @@ const props = defineProps<{
   mode?: "input" | "select" | "textarea";
   fontSize?: "sm" | "md" | "lg" | "xl";
   modelValue: any;
-  color: "default" | "light"
+  color?: "default" | "light"
 }>();
 const emit = defineEmits(["update:modelValue"]);
 
