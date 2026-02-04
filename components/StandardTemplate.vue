@@ -53,27 +53,23 @@ const formattedMaintenanceDate = computed(() => {
 
 <style>
 .main-layout {
-  min-height: 100vh;
-  min-height: 100dvh;
   display: grid;
   grid-template-columns: auto 1fr;
-
-  /* &:has(#sidebar.open) {
-    &:before {
-      @apply bg-black;
-
-      content: "";
-      position: fixed;
-      inset: 0;
-      opacity: 0.25;
-      z-index: 500;
-    }
-  } */
+  /* overflow: hidden;
+  min-height: 100vh;
+  min-height: 100dvh; */
 }
 
 @media(max-width: 800px){
   .main-layout {
     grid-template-columns: 1fr;
   }
+}
+
+.profile-tab {
+  @apply font-bold leading-none md:text-lg whitespace-nowrap rounded md:rounded-none; 
+  @apply bg-stone-100 dark:bg-stone-800 md:bg-transparent dark:md:bg-transparent hover:bg-stone-300 dark:hover:bg-stone-700; 
+  @apply border-2 md:border-x-0 md:border-t-0 md:border-b-4;
+  @apply py-2 md:py-1 px-3;
 }
 </style>

@@ -78,28 +78,28 @@
             >
               <nuxt-link
                 :to="`/community/${community.data.slug}`"
-                class="font-bold leading-none md:text-lg whitespace-nowrap rounded md:rounded-none bg-stone-100 md:bg-transparent border-2 md:border-x-0 md:border-t-0 md:border-b-4 py-2 md:py-1 px-3 hover:bg-stone-300 dark:hover:bg-stone-700"
+                class="profile-tab"
                 :class="currentTabClass('')"
               >
                 Home
               </nuxt-link>
               <nuxt-link
                 :to="`/community/${community.data.slug}/events`"
-                class="font-bold leading-none md:text-lg whitespace-nowrap rounded md:rounded-none bg-stone-100 md:bg-transparent border-2 md:border-x-0 md:border-t-0 md:border-b-4 py-2 md:py-1 px-3 hover:bg-stone-300 dark:hover:bg-stone-700"
+                class="profile-tab"
                 :class="currentTabClass('events')"
               >
                 Events
               </nuxt-link>
               <nuxt-link
                 :to="`/community/${community.data.slug}/games`"
-                class="font-bold leading-none md:text-lg whitespace-nowrap rounded md:rounded-none bg-stone-100 md:bg-transparent border-2 md:border-x-0 md:border-t-0 md:border-b-4 py-2 md:py-1 px-3 hover:bg-stone-300 dark:hover:bg-stone-700"
+                class="profile-tab"
                 :class="currentTabClass('games')"
               >
                 Games
               </nuxt-link>
               <nuxt-link
                 :to="`/community/${community.data.slug}/stats`"
-                class="font-bold leading-none md:text-lg whitespace-nowrap rounded md:rounded-none bg-stone-100 md:bg-transparent border-2 md:border-x-0 md:border-t-0 md:border-b-4 py-2 md:py-1 px-3 hover:bg-stone-300 dark:hover:bg-stone-700"
+                class="profile-tab"
                 :class="currentTabClass('stats')"
               >
                 Stats
@@ -107,7 +107,7 @@
               <nuxt-link
                 v-if="isModerator"
                 :to="`/community/${community.data.slug}/dashboard`"
-                class="font-bold leading-none md:text-lg whitespace-nowrap rounded md:rounded-none bg-stone-100 md:bg-transparent border-2 md:border-x-0 md:border-t-0 md:border-b-4 py-2 md:py-1 px-3 hover:bg-stone-300 dark:hover:bg-stone-700"
+                class="profile-tab"
                 :class="currentTabClass('dashboard')"
               >
                 Moderator Dashboard

@@ -329,17 +329,17 @@ const computedClasses = computed(() => {
 
 
   /* Disabled */
-  .ct-btn:disabled:not(.ct-btn-link),
-  .ct-btn[disabled]:not(.ct-btn-link),
-  .ct-btn-disabled:not(.ct-btn-link) {
+  .ct-btn:disabled:not(.ct-btn-link, .ct-btn-link-underline),
+  .ct-btn[disabled]:not(.ct-btn-link, .ct-btn-link-underline),
+  .ct-btn-disabled:not(.ct-btn-link, .ct-btn-link-underline) {
     background-color: var(--color-base-content);
     box-shadow: none;
   }
 
   @supports (color: color-mix(in lab,red,red)) {
-    .ct-btn:disabled:not(.ct-btn-link),
-    .ct-btn[disabled]:not(.ct-btn-link),
-    .ct-btn-disabled:not(.ct-btn-link) {
+    .ct-btn:disabled:not(.ct-btn-link, .ct-btn-link-underline),
+    .ct-btn[disabled]:not(.ct-btn-link, .ct-btn-link-underline),
+    .ct-btn-disabled:not(.ct-btn-link, .ct-btn-link-underline) {
       background-color:color-mix(in oklab,var(--color-base-content)10%,transparent)
     }
   }
@@ -463,11 +463,13 @@ const computedClasses = computed(() => {
     text-decoration-line: none;
   }
 
-  .ct-btn-link:not(.ct-btn-disabled,.ct-btn:disabled,.ct-btn[disabled]) {
+  .ct-btn-link:not(.ct-btn-disabled,.ct-btn:disabled,.ct-btn[disabled]),
+  .ct-btn-link-underline:not(.ct-btn-disabled,.ct-btn:disabled,.ct-btn[disabled]) {
     --btn-fg: var(--btn-color,var(--color-base-content));
   }
 
-  .ct-btn-link:is(.ct-btn-active,:hover,:active:focus,:focus-visible) {
+  .ct-btn-link:is(.ct-btn-active,:hover,:active:focus,:focus-visible),
+  .ct-btn-link-underline:is(.ct-btn-active,:hover,:active:focus,:focus-visible) {
     --btn-border: #0000;
     --btn-bg: #0000;
   }
@@ -501,6 +503,20 @@ const computedClasses = computed(() => {
         --btn-bg:color-mix(in oklab,var(--btn-color,var(--color-base-content))8%,var(--color-base-100));
         --btn-border:color-mix(in oklab,var(--btn-color,var(--color-base-content))10%,var(--color-base-100));
       }
+    }
+  }
+
+  .ct-btn.hidden {
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    .ct-btn.md\:hidden {
+      display: none;
+    }
+
+    .ct-btn.md\:inline-flex {
+      display: inline-flex;
     }
   }
 </style>
