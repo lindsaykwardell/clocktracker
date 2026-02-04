@@ -23,6 +23,12 @@ export type GameRecord = Game & {
     username: string;
     privacy: PrivacySetting;
   };
+  end_trigger_role?: {
+    token_url: string;
+    type: string;
+    initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+    name: string;
+  } | null;
   grimoire: (Grimoire & {
     tokens: (Token & {
       role?: {

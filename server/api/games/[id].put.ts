@@ -228,6 +228,14 @@ export default defineEventHandler(async (handler) => {
       player_characters: true,
       demon_bluffs: true,
       fabled: true,
+      end_trigger_role: {
+        select: {
+          token_url: true,
+          type: true,
+          initial_alignment: true,
+          name: true,
+        },
+      },
       grimoire: {
         include: {
           tokens: {
@@ -384,6 +392,11 @@ export default defineEventHandler(async (handler) => {
             storyteller: body.storyteller,
             co_storytellers: body.co_storytellers,
             win_v2: body.win_v2,
+            end_trigger: body.end_trigger,
+            end_trigger_role_id: body.end_trigger_role_id,
+            end_trigger_note: body.end_trigger_note,
+            end_trigger_seat_page: body.end_trigger_seat_page,
+            end_trigger_seat_order: body.end_trigger_seat_order,
             demon_bluffs: {
               deleteMany: relatedGame.demon_bluffs.map((g) => ({ id: g.id })),
               create: game.demon_bluffs.map((g) => ({
@@ -494,6 +507,11 @@ export default defineEventHandler(async (handler) => {
               storyteller: body.storyteller,
               co_storytellers: body.co_storytellers,
               win_v2: body.win_v2,
+              end_trigger: body.end_trigger,
+              end_trigger_role_id: body.end_trigger_role_id,
+              end_trigger_note: body.end_trigger_note,
+              end_trigger_seat_page: body.end_trigger_seat_page,
+              end_trigger_seat_order: body.end_trigger_seat_order,
               demon_bluffs: {
                 deleteMany: childGame.demon_bluffs.map((g) => ({ id: g.id })),
                 create: game.demon_bluffs.map((g) => ({

@@ -224,6 +224,14 @@ export async function fetchGames(user_id: string, me: User | null) {
           },
         },
       },
+      end_trigger_role: {
+        select: {
+          token_url: true,
+          type: true,
+          initial_alignment: true,
+          name: true,
+        },
+      },
       grimoire: {
         include: {
           tokens: {
@@ -480,6 +488,14 @@ export async function fetchGame(
               type: true,
             },
           },
+        },
+      },
+      end_trigger_role: {
+        select: {
+          token_url: true,
+          type: true,
+          initial_alignment: true,
+          name: true,
         },
       },
       grimoire: {

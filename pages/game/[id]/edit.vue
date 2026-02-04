@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import { WinStatus_V2 } from "~/composables/useGames";
+import { GameEndTrigger, WinStatus_V2 } from "~/composables/useGames";
 
 definePageMeta({
   middleware: ["auth"],
@@ -80,6 +80,17 @@ const game = reactive<{
     };
   }[];
   win_v2: WinStatus_V2;
+  end_trigger: GameEndTrigger;
+  end_trigger_role_id: string | null;
+  end_trigger_note: string;
+  end_trigger_seat_page: number | null;
+  end_trigger_seat_order: number | null;
+  end_trigger_role?: {
+    token_url: string;
+    type: string;
+    initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+    name: string;
+  } | null;
   notes: string;
   image_urls: string[];
   grimoire: {
@@ -163,6 +174,13 @@ const game = reactive<{
       },
     })) || [],
   win_v2: savedGame.data.value?.win_v2 || WinStatus_V2.NOT_RECORDED,
+  end_trigger:
+    savedGame.data.value?.end_trigger || GameEndTrigger.NOT_RECORDED,
+  end_trigger_role_id: savedGame.data.value?.end_trigger_role_id || null,
+  end_trigger_note: savedGame.data.value?.end_trigger_note || "",
+  end_trigger_seat_page: savedGame.data.value?.end_trigger_seat_page || null,
+  end_trigger_seat_order: savedGame.data.value?.end_trigger_seat_order || null,
+  end_trigger_role: savedGame.data.value?.end_trigger_role || null,
   notes: savedGame.data.value?.notes || "",
   image_urls: savedGame.data.value?.image_urls || [],
   grimoire: savedGame.data.value?.grimoire.length
@@ -199,8 +217,10 @@ const game = reactive<{
   privacy: savedGame.data.value?.privacy || "PUBLIC",
 });
 
-const formattedGame = computed(() => ({
-  ...game,
+const formattedGame = computed(() => {
+  const { end_trigger_role, ...rest } = game;
+  return {
+    ...rest,
   player_count: game.player_count || null,
   player_characters: game.player_characters.map((character) => ({
     name: character.name,
@@ -221,7 +241,8 @@ const formattedGame = computed(() => ({
   waiting_for_confirmation: savedGame.data.value?.waiting_for_confirmation
     ? false
     : undefined,
-}));
+  };
+});
 
 async function submitGame() {
   inFlight.value = true;

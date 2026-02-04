@@ -92,6 +92,14 @@ export default defineEventHandler(async (handler) => {
         },
       },
       player_characters: true,
+      end_trigger_role: {
+        select: {
+          token_url: true,
+          type: true,
+          initial_alignment: true,
+          name: true,
+        },
+      },
       grimoire: {
         include: {
           tokens: {
