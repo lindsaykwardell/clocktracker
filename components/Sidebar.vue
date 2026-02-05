@@ -213,7 +213,6 @@ const friends = useFriends();
     transition-timing-function: ease-in-out;
     scrollbar-width: thin;
     scrollbar-color: theme(colors.stone.200) transparent;
-    scrollbar-gutter: stable;
 
     &:where(.dark, .dark *) {
         scrollbar-color: theme(colors.stone.800) transparent;

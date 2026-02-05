@@ -1158,7 +1158,7 @@ function isStorytellerAFriend(storyteller: string) {
 const storytellers = computed(() => {
     if (game.value.status !== Status.SUCCESS) return [];
 
-    const storytellerList = [];
+    const storytellerList: string[] = [];
 
     if (game.value.data.is_storyteller) {
         storytellerList.push(`@${game.value.data.user.username}`);
@@ -1168,7 +1168,16 @@ const storytellers = computed(() => {
         storytellerList.push(game.value.data.storyteller);
     }
 
-    return [...storytellerList, ...game.value.data.co_storytellers];
+    storytellerList.push(...game.value.data.co_storytellers);
+
+    // Deduplicate by normalized username (without @ prefix)
+    const seen = new Set<string>();
+    return storytellerList.filter((storyteller) => {
+        const normalized = storyteller.replace(/^@/, "").toLowerCase();
+        if (seen.has(normalized)) return false;
+        seen.add(normalized);
+        return true;
+    });
 });
 
 const canClaimSeat = computed(() => {
