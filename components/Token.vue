@@ -271,9 +271,24 @@ const relatedImageSize = computed(() => {
   }
 });
 
+const baseRoleImage = computed(() => {
+  const tokenUrl = props.character?.role?.token_url?.trim();
+  const inferredCustom =
+    props.character?.role?.custom_role ??
+    (tokenUrl ? !isRoleAssetUrl(tokenUrl) : false);
+  if (inferredCustom) {
+    return roleBaseUrlFromRole(props.character?.role);
+  }
+  return (
+    roleBaseUrlFromId(props.character?.role?.id) ??
+    roleBaseUrlFromId(props.character?.role_id) ??
+    tokenUrl
+  );
+});
+
 // If we're using alignment-specific art, skip shader/filter overlays.
 const usesAlignmentVariant = computed(() => {
-  const base = roleBaseUrlFromRole(props.character?.role);
+  const base = baseRoleImage.value;
   if (!isRoleAssetUrl(base)) {
     return false;
   }
@@ -284,19 +299,16 @@ const image = computed(() => {
   if (!props.character?.role && !props.character?.role_id) {
     return undefined;
   }
-  const base = roleBaseUrlFromRole(props.character?.role);
+  const base = baseRoleImage.value;
   if (base) {
     if (isRoleAssetUrl(base)) {
-      return `${base}${alignmentSuffix(
+      const normalizedBase = base.replace(/\.(png|webp)$/i, "");
+      return `${normalizedBase}${alignmentSuffix(
         props.character?.role,
         props.character.alignment
       )}`;
     }
     return base;
-  }
-  const derivedBase = roleBaseUrlFromId(props.character?.role_id);
-  if (derivedBase) {
-    return derivedBase;
   }
   if (props.character?.alignment === "GOOD") {
     return "/img/role/good.webp";
