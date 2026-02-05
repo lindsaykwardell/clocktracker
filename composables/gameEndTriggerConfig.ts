@@ -31,9 +31,13 @@ export const DEMONS_THAT_KILL: string[] = [
   'zombuul',
 ];
 
-export const END_TRIGGER_ROLE_INCLUDES: Record<GameEndTrigger, string[]> = {
-  [GameEndTrigger.NOT_RECORDED]: [],
-  [GameEndTrigger.CHARACTER_ABILITY]: [
+export const END_TRIGGER_ROLE_INCLUDES: Record<
+  GameEndTrigger,
+  { base: string[]; conditional: { role: string; requires: string[] }[] }
+> = {
+  [GameEndTrigger.NOT_RECORDED]: { base: [], conditional: [] },
+  [GameEndTrigger.CHARACTER_ABILITY]: {
+    base: [
     ...WILDCARDS,
     // Townsfolk
     'alsaahir',
@@ -58,8 +62,11 @@ export const END_TRIGGER_ROLE_INCLUDES: Record<GameEndTrigger, string[]> = {
 
     // Fabled
     'fiddler',
-  ],
-  [GameEndTrigger.NO_LIVING_DEMON]: [
+    ],
+    conditional: [],
+  },
+  [GameEndTrigger.NO_LIVING_DEMON]: {
+    base: [
     ...WILDCARDS,
     ...DEMONS_THAT_KILL,
 
@@ -94,20 +101,22 @@ export const END_TRIGGER_ROLE_INCLUDES: Record<GameEndTrigger, string[]> = {
     'plaguedoctor', // Storyteller Assassin killing the demon I guess?
     'harlot',
 
-    // Boffin shenanigans
-    'acrobat', // Boffin giving demon this characters ability?
-    'gambler', // Boffin giving demon this characters ability?
-    'grandmother', // Boffin giving demon this characters ability?
-    'huntsman', // Not sure, but if the Boffin gives the demon the Damsel's ability and the Huntsman guesses them?
-    'tinker', // Boffin giving demon this characters ability?
-
-    // Summoner shenanigans
-    'preacher', // This role could preach the Summoner I guess?
-    'sailor', // This role could droison the Summoner I guess?
-    'widow', // This role could droison the Summoner I guess?
-    'poisoner', // This role could droison the Summoner I guess?
-  ],
-  [GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE]: [
+    ],
+    conditional: [
+      // Boffin giving demon this character's ability?
+      { role: 'acrobat', requires: ['boffin'] },
+      { role: 'gambler', requires: ['boffin'] },
+      { role: 'grandmother', requires: ['boffin'] },
+      { role: 'huntsman', requires: ['boffin'] }, // Not sure, but if the Boffin gives the demon the Damsel's ability and the Huntsman guesses them?
+      { role: 'tinker', requires: ['boffin'] },
+      { role: 'preacher', requires: ['summoner'] },
+      { role: 'sailor', requires: ['summoner'] },
+      { role: 'widow', requires: ['summoner'] },
+      { role: 'poisoner', requires: ['summoner'] },
+    ],
+  },
+  [GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE]: {
+    base: [
     ...WILDCARDS,
     ...DEMONS_THAT_KILL,
     'mutant', // A Mutant could get themselves executed due to their ability during final 3.
@@ -138,7 +147,9 @@ export const END_TRIGGER_ROLE_INCLUDES: Record<GameEndTrigger, string[]> = {
     'godfather',
     'harlot',
     'barista',
-  ],
-  [GameEndTrigger.GAME_ENDED_EARLY]: [],
-  [GameEndTrigger.OTHER]: [],
+    ],
+    conditional: [],
+  },
+  [GameEndTrigger.GAME_ENDED_EARLY]: { base: [], conditional: [] },
+  [GameEndTrigger.OTHER]: { base: [], conditional: [] },
 };

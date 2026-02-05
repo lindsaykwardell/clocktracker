@@ -272,16 +272,15 @@
             "
             class="flex flex-col gap-2"
           >
-            <label
-              v-if="advancedModeEnabled && endTriggerSeatOptions.length > 0"
-              class="block"
-            >
-              <span class="block">Select triggering character from grimoire seat</span>
-              <span></span>
+            <label v-if="advancedModeEnabled" class="block">
+              <span class="block"
+                >Select triggering character</span
+              >
               <Input
                 mode="select"
-                v-model="game.end_trigger_seat_order"
+                v-model="endTriggerSeatSelection"
                 @change="selectEndTriggerSeat"
+                :disabled="endTriggerSeatOptions.length === 0"
               >
                 <option :value="null">No seat selected</option>
                 <option
@@ -291,7 +290,18 @@
                 >
                   {{ seat.label }}
                 </option>
+                <option value="custom">Custom</option>
               </Input>
+              <Alert
+                v-if="endTriggerSeatOptions.length === 0"
+                color="info"
+                class="mt-1"
+              >
+                No eligible characters for this trigger found in grimoire, but you can set a custom character below.
+              </Alert>
+              <p v-else class="text-xs text-stone-400 mt-1">
+                Select a character from the grimoire, or set a custom character.
+              </p>
             </label>
             <span v-else class="block">Select triggering character</span>
             <div class="flex gap-3 flex-wrap items-center">
@@ -315,6 +325,9 @@
                   :character="endTriggerCharacter"
                   size="md"
                   class="cursor-pointer"
+                  :class="{
+                    'pointer-events-none opacity-50': !allowManualEndTriggerRole,
+                  }"
                   @clickRole="openEndTriggerRoleDialog"
                   hideRelated
                 />
@@ -323,13 +336,19 @@
                     type="button"
                     @click="openEndTriggerRoleDialog"
                     class="w-full h-full p-1 text-sm"
+                    :disabled="!allowManualEndTriggerRole"
                   >
-                    Select Role
+                    <template v-if="allowManualEndTriggerRole">
+                      Add Character
+                    </template>
+                    <template v-else>
+                      Select Seat Above
+                    </template>
                   </button>
                 </Token>
               </div>
             </div>
-            
+
           </div>
           <label
             v-if="
@@ -912,10 +931,31 @@ const endTriggerSeatTokens = computed(() => {
   return props.game.grimoire[endTriggerSeatPageIndex.value]?.tokens ?? [];
 });
 
+const scriptRoleIds = computed(() => new Set(roles.value.map((role) => role.id)));
+
+const endTriggerIncludeRoleIds = computed(() => {
+  if (!props.game.end_trigger) return [];
+  const config = END_TRIGGER_ROLE_INCLUDES[props.game.end_trigger];
+  if (!config) return [];
+
+  const base = config.base ?? [];
+  const conditional = config.conditional ?? [];
+  const includes = [
+    ...base,
+    ...conditional
+      .filter((entry) =>
+        entry.requires.every((required) => scriptRoleIds.value.has(required))
+      )
+      .map((entry) => entry.role),
+  ];
+
+  return Array.from(new Set(includes));
+});
+
 const endTriggerSeatOptions = computed(() => {
   let tokens = endTriggerSeatTokens.value;
   if (props.game.end_trigger) {
-    const includes = END_TRIGGER_ROLE_INCLUDES[props.game.end_trigger] || [];
+    const includes = endTriggerIncludeRoleIds.value;
     if (includes.length > 0) {
       const allowed = new Set(includes);
       tokens = tokens.filter((token) => token.role_id && allowed.has(token.role_id));
@@ -934,15 +974,61 @@ const endTriggerSeatOptions = computed(() => {
   });
 });
 
+const endTriggerSeatSelection = ref<number | "custom" | null>(
+  props.game.end_trigger_seat_order ?? null
+);
+
+watch(
+  () => props.game.end_trigger_seat_order,
+  (value) => {
+    if (value === null || value === undefined) {
+      endTriggerSeatSelection.value = null;
+    } else {
+      endTriggerSeatSelection.value = value as number;
+    }
+  }
+);
+
+watch(
+  () => endTriggerSeatOptions.value.length,
+  (length) => {
+    if (length === 0) {
+      endTriggerSeatSelection.value = "custom";
+    } else if (endTriggerSeatSelection.value === "custom") {
+      // Keep custom if the user chose it; otherwise allow default "No seat selected".
+      if (props.game.end_trigger_seat_order === null) {
+        endTriggerSeatSelection.value = null;
+      }
+    }
+  },
+  { immediate: true }
+);
+
+const allowManualEndTriggerRole = computed(() => {
+  if (!advancedModeEnabled.value) return true;
+  if (endTriggerSeatOptions.value.length === 0) return true;
+  return endTriggerSeatSelection.value === "custom";
+});
+
 function selectEndTriggerSeat() {
-  if (props.game.end_trigger_seat_order === null) {
+  const selection = endTriggerSeatSelection.value;
+
+  if (selection === "custom") {
+    props.game.end_trigger_seat_order = null;
     props.game.end_trigger_seat_page = null;
     return;
   }
 
+  if (selection === null) {
+    props.game.end_trigger_seat_order = null;
+    props.game.end_trigger_seat_page = null;
+    return;
+  }
+
+  props.game.end_trigger_seat_order = selection;
   props.game.end_trigger_seat_page = endTriggerSeatPageIndex.value;
   const seat = endTriggerSeatOptions.value.find(
-    (option) => option.order === props.game.end_trigger_seat_order
+    (option) => option.order === selection
   );
   if (!seat?.token) return;
 
@@ -999,6 +1085,11 @@ watch(
       props.game.end_trigger_seat_order = null;
       props.game.end_trigger_seat_page = null;
     }
+    // Clear any previously selected character whenever the trigger changes.
+    props.game.end_trigger_role_id = null;
+    props.game.end_trigger_role = null;
+    props.game.end_trigger_seat_order = null;
+    props.game.end_trigger_seat_page = null;
 
     if (
       value !== GameEndTrigger.GAME_ENDED_EARLY &&
@@ -1051,7 +1142,7 @@ const visibleRoles = computed(() => {
 const endTriggerRestrictRoleIds = computed(() => {
   if (tokenSet.value !== "end_trigger") return null;
   if (!props.game.end_trigger) return null;
-  const includes = END_TRIGGER_ROLE_INCLUDES[props.game.end_trigger] || [];
+  const includes = endTriggerIncludeRoleIds.value;
   return includes.length > 0 ? includes : null;
 });
 

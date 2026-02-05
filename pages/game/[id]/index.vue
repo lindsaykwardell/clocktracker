@@ -261,6 +261,15 @@
                                     }}
                                 </div>
                                 <div
+                                    v-if="endTriggerSummary"
+                                    class="metadata-item"
+                                >
+                                    <span class="metadata-label"
+                                        >End Trigger</span
+                                    >
+                                    {{ endTriggerSummary }}
+                                </div>
+                                <div
                                     v-if="storytellers.length"
                                     class="metadata-item"
                                 >
@@ -914,7 +923,7 @@
 </template>
 
 <script setup lang="ts">
-import { WinStatus_V2 } from "~/composables/useGames";
+import { GameEndTrigger, WinStatus_V2 } from "~/composables/useGames";
 import type { GameRecord } from "~/composables/useGames";
 import { displayWinIconSvg } from "~/composables/useGames";
 import dayjs from "dayjs";
@@ -1068,6 +1077,65 @@ useHead({
 const last_character = computed(() => {
     return games.getLastCharater(gameId);
 });
+
+const endTriggerSummary = computed(() => {
+    if (game.value.status !== Status.SUCCESS) return "";
+    const data = game.value.data;
+    if (!data.end_trigger || data.end_trigger === GameEndTrigger.NOT_RECORDED)
+        return "";
+
+    const triggerLabel = (() => {
+        switch (data.end_trigger) {
+            case GameEndTrigger.NO_LIVING_DEMON:
+                return "No living demon";
+            case GameEndTrigger.CHARACTER_ABILITY:
+                return "Character ability";
+            case GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE:
+                return "Only two players left alive";
+            case GameEndTrigger.GAME_ENDED_EARLY:
+                return "Game ended early";
+            case GameEndTrigger.OTHER:
+                return "Other";
+            default:
+                return "Not recorded";
+        }
+    })();
+
+    let character = data.end_trigger_role?.name ?? "";
+    let player = "";
+
+    if (
+        data.end_trigger_seat_page !== null &&
+        data.end_trigger_seat_order !== null &&
+        data.grimoire?.[data.end_trigger_seat_page]
+    ) {
+        const token = data.grimoire[data.end_trigger_seat_page].tokens.find(
+            (t) => t.order === data.end_trigger_seat_order,
+        );
+        if (token) {
+            if (!character) character = token.role?.name ?? "";
+            player = token.player_name ?? "";
+        }
+    }
+
+    if (character && player) {
+        return `${triggerLabel} due to ${roleArticle(character)}${character} (${player})`;
+    }
+    if (character) {
+        return `${triggerLabel} due to ${roleArticle(character)}${character}`;
+    }
+    if (player) {
+        return `${triggerLabel} due to ${player}`;
+    }
+    return triggerLabel;
+});
+
+function roleArticle(name: string): "" | "the " {
+    const pluralRoles = ["Legion", "Lil' Monsta", "Riot"];
+    if (pluralRoles.includes(name)) return "";
+    if (name.startsWith("The ")) return "";
+    return "the ";
+}
 
 function isStorytellerAFriend(storyteller: string) {
     if (friends.isFriend(storyteller.replace("@", "") || "")) {
