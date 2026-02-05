@@ -37,7 +37,12 @@
 
 <script setup lang="ts">
 import dayjs from "dayjs";
-import { GameEndTrigger, WinStatus_V2 } from "~/composables/useGames";
+import {
+  GameEndTrigger,
+  WinStatus_V2,
+  DeathCause,
+  DeathType,
+} from "~/composables/useGames";
 
 definePageMeta({
   middleware: "auth",
@@ -121,6 +126,18 @@ const game = reactive<{
     initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
     name: string;
   } | null;
+  deaths: {
+    grimoire_page: number;
+    seat_order: number;
+    is_revival: boolean;
+    death_type: DeathType | null;
+    cause: DeathCause | null;
+    by_seat_page: number | null;
+    by_seat_order: number | null;
+    player_name: string;
+    role_id: string | null;
+    by_role_id: string | null;
+  }[];
   notes: string;
   image_urls: string[];
   grimoire: {
@@ -204,6 +221,7 @@ const game = reactive<{
   end_trigger_seat_page: null,
   end_trigger_seat_order: null,
   end_trigger_role: null,
+  deaths: [],
   notes: "",
   image_urls: [],
   grimoire: [
@@ -377,6 +395,18 @@ const formattedGame = computed(() => {
     name: fabled.name,
     role_id: fabled.role_id,
   })),
+  deaths: game.deaths.map((death) => ({
+    grimoire_page: death.grimoire_page,
+    seat_order: death.seat_order,
+    is_revival: death.is_revival,
+    death_type: death.death_type,
+    cause: death.cause,
+    by_seat_page: death.by_seat_page,
+    by_seat_order: death.by_seat_order,
+    player_name: death.player_name,
+    role_id: death.role_id,
+    by_role_id: death.by_role_id,
+  })),
   };
 });
 
@@ -477,6 +507,7 @@ function resetGame() {
       end_trigger_role_id: null,
       end_trigger_note: "",
       end_trigger_role: null,
+      deaths: [],
       notes: "",
       image_urls: [],
       grimoire: [

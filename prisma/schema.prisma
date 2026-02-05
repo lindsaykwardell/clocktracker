@@ -66,6 +66,7 @@ model Game {
   privacy                  PrivacySetting @default(PUBLIC)
   demon_bluffs             DemonBluff[]
   fabled                   Fabled[]
+  deaths                   DeathEvent[]
   favorite                 FavoriteGame?
   favorite_id              Int?           @unique
 
@@ -101,6 +102,35 @@ enum GameEndTrigger {
   CHARACTER_ABILITY
   GAME_ENDED_EARLY
   OTHER
+}
+
+enum DeathCause {
+  ABILITY
+  NOMINATION
+}
+
+enum DeathType {
+  DEATH
+  EXECUTION
+}
+
+model DeathEvent {
+  id             Int        @id @default(autoincrement())
+  game           Game       @relation(fields: [game_id], references: [id])
+  game_id        String
+  grimoire_page  Int
+  seat_order     Int
+  is_revival     Boolean    @default(false)
+  death_type     DeathType?
+  cause          DeathCause?
+  by_seat_page   Int?
+  by_seat_order  Int?
+  player_name    String     @default("")
+  role_id        String?
+  role           Role?      @relation(fields: [role_id], references: [id])
+  by_role_id     String?
+  by_role        Role?      @relation("DeathEventByRole", fields: [by_role_id], references: [id])
+  created_at     DateTime   @default(now()) @db.Timestamptz(6)
 }
 
 model Grimoire {
@@ -213,6 +243,8 @@ model Role {
   demon_bluffs         DemonBluff[]
   fabled               Fabled[]
   end_trigger_games    Game[]         @relation("GameEndTriggerRole")
+  death_events         DeathEvent[]
+  death_by_events      DeathEvent[]   @relation("DeathEventByRole")
   reminders            RoleReminder[]
   ls_campaigns         LSCampaign[]
   ls_games             LSGame[]       @relation("Games")

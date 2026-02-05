@@ -19,7 +19,12 @@
 </template>
 
 <script setup lang="ts">
-import { WinStatus_V2, type GameEndTrigger } from "~/composables/useGames";
+import {
+  WinStatus_V2,
+  type GameEndTrigger,
+  DeathCause,
+  DeathType,
+} from "~/composables/useGames";
 
 definePageMeta({
   middleware: "auth",
@@ -97,6 +102,18 @@ const game = reactive<{
     initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
     name: string;
   } | null;
+  deaths: {
+    grimoire_page: number;
+    seat_order: number;
+    is_revival: boolean;
+    death_type: DeathType | null;
+    cause: DeathCause | null;
+    by_seat_page: number | null;
+    by_seat_order: number | null;
+    player_name: string;
+    role_id: string | null;
+    by_role_id: string | null;
+  }[];
   notes: string;
   image_urls: string[];
   grimoire: {
@@ -145,6 +162,7 @@ const game = reactive<{
   end_trigger_seat_page: null,
   end_trigger_seat_order: null,
   end_trigger_role: null,
+  deaths: [],
   notes: "",
   image_urls: [],
   grimoire: [

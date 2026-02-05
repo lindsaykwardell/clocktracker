@@ -7,6 +7,8 @@ import {
   Alignment,
   DemonBluff,
   Fabled,
+  DeathEvent,
+  DeathType,
 } from "@prisma/client";
 import { prisma } from "~/server/utils/prisma";
 
@@ -17,6 +19,7 @@ export default defineEventHandler(async (handler) => {
         player_characters: (Character & { role?: { token_url: string } })[];
         demon_bluffs: (DemonBluff & { role?: { token_url: string } })[];
         fabled: (Fabled & { role?: { token_url: string } })[];
+        deaths?: DeathEvent[];
         grimoire: Partial<
           Grimoire & {
             tokens: Partial<
@@ -58,6 +61,21 @@ export default defineEventHandler(async (handler) => {
       fabled: {
         create: [...body.fabled],
       },
+      deaths: {
+        create:
+          body.deaths?.map((death) => ({
+            grimoire_page: death.grimoire_page,
+            seat_order: death.seat_order,
+            is_revival: death.is_revival ?? false,
+            death_type: death.is_revival ? null : (death.death_type ?? DeathType.DEATH),
+            cause: death.cause ?? null,
+            by_seat_page: death.by_seat_page ?? null,
+            by_seat_order: death.by_seat_order ?? null,
+            player_name: death.player_name ?? "",
+            role_id: death.role_id ?? null,
+            by_role_id: death.by_role_id ?? null,
+          })) || [],
+      },
       grimoire: {
         create: [
           ...body.grimoire.map((g) => ({
@@ -92,6 +110,7 @@ export default defineEventHandler(async (handler) => {
         },
       },
       player_characters: true,
+      deaths: true,
       end_trigger_role: {
         select: {
           token_url: true,
@@ -192,6 +211,21 @@ export default defineEventHandler(async (handler) => {
         fabled: {
           create: [...body.fabled],
         },
+        deaths: {
+          create:
+            body.deaths?.map((death) => ({
+              grimoire_page: death.grimoire_page,
+              seat_order: death.seat_order,
+            is_revival: death.is_revival ?? false,
+            death_type: death.is_revival ? null : (death.death_type ?? DeathType.DEATH),
+            cause: death.cause ?? null,
+            by_seat_page: death.by_seat_page ?? null,
+            by_seat_order: death.by_seat_order ?? null,
+            player_name: death.player_name ?? "",
+            role_id: death.role_id ?? null,
+            by_role_id: death.by_role_id ?? null,
+          })) || [],
+        },
         notes: "",
         // map the already created grimoires to the new game
         grimoire: {
@@ -231,11 +265,26 @@ export default defineEventHandler(async (handler) => {
             demon_bluffs: {
               create: [...body.demon_bluffs],
             },
-            fabled: {
-              create: [...body.fabled],
-            },
-            notes: "",
-            grimoire: {
+        fabled: {
+          create: [...body.fabled],
+        },
+        deaths: {
+          create:
+            body.deaths?.map((death) => ({
+              grimoire_page: death.grimoire_page,
+              seat_order: death.seat_order,
+            is_revival: death.is_revival ?? false,
+            death_type: death.is_revival ? null : (death.death_type ?? DeathType.DEATH),
+            cause: death.cause ?? null,
+            by_seat_page: death.by_seat_page ?? null,
+            by_seat_order: death.by_seat_order ?? null,
+            player_name: death.player_name ?? "",
+            role_id: death.role_id ?? null,
+            by_role_id: death.by_role_id ?? null,
+          })) || [],
+        },
+        notes: "",
+        grimoire: {
               connect: newGame.grimoire.map((g) => ({ id: g.id })),
             },
             parent_game_id: newGame.id,

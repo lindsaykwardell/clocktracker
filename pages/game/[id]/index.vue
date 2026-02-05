@@ -742,11 +742,10 @@
                             leave-from-class="transform scale-100 opacity-100"
                             leave-to-class="transform scale-95 opacity-0"
                         >
-                            <div v-show="open">
-                                <MenuItems
-                                    static
-                                    class="ct-contextual-links right-0"
-                                >
+                            <MenuItems
+                                v-if="open"
+                                class="ct-contextual-links right-0"
+                            >
                                     <div
                                         v-if="
                                             game.data
@@ -909,8 +908,7 @@
                                             </ButtonSubmenu>
                                         </MenuItem>
                                     </div>
-                                </MenuItems>
-                            </div>
+                            </MenuItems>
                         </transition>
                     </Menu>
                 </div>

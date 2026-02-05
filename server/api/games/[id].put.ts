@@ -8,6 +8,8 @@ import {
   DemonBluff,
   Fabled,
   ReminderToken,
+  DeathEvent,
+  DeathType,
 } from "@prisma/client";
 import { prisma } from "~/server/utils/prisma";
 
@@ -19,6 +21,7 @@ export default defineEventHandler(async (handler) => {
         player_characters: (Character & { role?: { token_url: string } })[];
         demon_bluffs: (DemonBluff & { role?: { token_url: string } })[];
         fabled: (Fabled & { role?: { token_url: string } })[];
+        deaths?: DeathEvent[];
         grimoire: Partial<
           Grimoire & {
             tokens: Partial<
@@ -102,6 +105,22 @@ export default defineEventHandler(async (handler) => {
           },
         },
         create: [...body.fabled],
+      },
+      deaths: {
+        deleteMany: {},
+        create:
+          body.deaths?.map((death) => ({
+            grimoire_page: death.grimoire_page,
+            seat_order: death.seat_order,
+            is_revival: death.is_revival ?? false,
+            death_type: death.is_revival ? null : (death.death_type ?? DeathType.DEATH),
+            cause: death.cause ?? null,
+            by_seat_page: death.by_seat_page ?? null,
+            by_seat_order: death.by_seat_order ?? null,
+            player_name: death.player_name ?? "",
+            role_id: death.role_id ?? null,
+            by_role_id: death.by_role_id ?? null,
+          })) || [],
       },
       grimoire: {
         deleteMany: {
@@ -228,6 +247,7 @@ export default defineEventHandler(async (handler) => {
       player_characters: true,
       demon_bluffs: true,
       fabled: true,
+      deaths: true,
       end_trigger_role: {
         select: {
           token_url: true,
@@ -397,6 +417,22 @@ export default defineEventHandler(async (handler) => {
             end_trigger_note: body.end_trigger_note,
             end_trigger_seat_page: body.end_trigger_seat_page,
             end_trigger_seat_order: body.end_trigger_seat_order,
+            deaths: {
+              deleteMany: {},
+              create:
+                body.deaths?.map((death) => ({
+                  grimoire_page: death.grimoire_page,
+                  seat_order: death.seat_order,
+                  is_revival: death.is_revival ?? false,
+                  death_type: death.is_revival ? null : (death.death_type ?? DeathType.DEATH),
+                  cause: death.cause ?? null,
+                  by_seat_page: death.by_seat_page ?? null,
+                  by_seat_order: death.by_seat_order ?? null,
+                  player_name: death.player_name ?? "",
+                  role_id: death.role_id ?? null,
+                  by_role_id: death.by_role_id ?? null,
+                })) || [],
+            },
             demon_bluffs: {
               deleteMany: relatedGame.demon_bluffs.map((g) => ({ id: g.id })),
               create: game.demon_bluffs.map((g) => ({
@@ -509,11 +545,27 @@ export default defineEventHandler(async (handler) => {
               win_v2: body.win_v2,
               end_trigger: body.end_trigger,
               end_trigger_role_id: body.end_trigger_role_id,
-              end_trigger_note: body.end_trigger_note,
-              end_trigger_seat_page: body.end_trigger_seat_page,
-              end_trigger_seat_order: body.end_trigger_seat_order,
-              demon_bluffs: {
-                deleteMany: childGame.demon_bluffs.map((g) => ({ id: g.id })),
+            end_trigger_note: body.end_trigger_note,
+            end_trigger_seat_page: body.end_trigger_seat_page,
+            end_trigger_seat_order: body.end_trigger_seat_order,
+            deaths: {
+              deleteMany: {},
+              create:
+                body.deaths?.map((death) => ({
+                  grimoire_page: death.grimoire_page,
+                  seat_order: death.seat_order,
+                  is_revival: death.is_revival ?? false,
+                  death_type: death.is_revival ? null : (death.death_type ?? DeathType.DEATH),
+                  cause: death.cause ?? null,
+                  by_seat_page: death.by_seat_page ?? null,
+                  by_seat_order: death.by_seat_order ?? null,
+                  player_name: death.player_name ?? "",
+                  role_id: death.role_id ?? null,
+                  by_role_id: death.by_role_id ?? null,
+                })) || [],
+            },
+            demon_bluffs: {
+              deleteMany: childGame.demon_bluffs.map((g) => ({ id: g.id })),
                 create: game.demon_bluffs.map((g) => ({
                   ...g,
                   id: undefined,
