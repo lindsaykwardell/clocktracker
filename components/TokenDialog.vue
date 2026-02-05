@@ -3,40 +3,45 @@
     <template #title>
       <div class="flex flex-col md:flex-row w-full gap-2">
         <h2 class="flex-grow text-2xl font-bold font-sorts">Select a Role</h2>
-        <label
-          v-if="showExcludeIrrelevantToggle"
-          class="flex items-center"
-        >
-          <input v-model="excludeIrrelevant" type="checkbox" class="mr-2" />
-          <span>Exclude irrelevant roles</span>
-        </label>
-        <label v-if="!hideAllRolesToggle" class="flex items-center">
-          <input v-model="showAllRoles" type="checkbox" class="mr-2" />
-          <span>All Roles</span>
-        </label>
-        <label v-if="!alwaysShowFabled" class="flex items-center">
-          <input v-model="showFabled" type="checkbox" class="mr-2" />
-          <span>Show Fabled and Loric</span>
-        </label>
+      </div>
+      <div class="flex justify-between gap-8">
+        <div class="flex gap-4">
+          <label
+            v-if="showExcludeIrrelevantToggle"
+            class="flex items-center"
+          >
+            <input v-model="excludeIrrelevant" type="checkbox" class="mr-2" />
+            <span>Exclude irrelevant roles</span>
+          </label>
+          <label v-if="!hideAllRolesToggle" class="flex items-center">
+            <input v-model="showAllRoles" type="checkbox" class="mr-2" />
+            <span>All Roles</span>
+          </label>
+          <label v-if="!alwaysShowFabled" class="flex items-center">
+            <input v-model="showFabled" type="checkbox" class="mr-2" />
+            <span>Show Fabled and Loric</span>
+          </label>
+        </div>
         <form @submit.prevent="selectMatchingRole">
           <input
             v-model="roleFilter"
             ref="roleFilterRef"
             type="text"
             placeholder="Filter roles"
-            class="p-2 mt-2 border border-gray-300 rounded-md text-black"
+            class="p-2 border border-gray-300 rounded-md text-black"
             aria-label="Filter roles"
           />
         </form>
       </div>
     </template>
-    <div v-if="show">
+    <div v-if="show" class="px-4">
       <div v-for="roleGroup in roleGroups">
         <template v-if="roleGroup.roles.length">
-          <h3 class="mt-4 mb-2 mx-4 text-xl font-bold font-sorts">
+          <h3 class="mt-4 mb-2 mx-4 text-xl font-bold font-sorts text-center">
             {{ roleGroup.name }}
           </h3>
-          <div class="flex flex-wrap justify-around gap-3 p-4">
+          <hr class="border-stone-700" />
+          <div class="flex flex-wrap justify-center gap-3 p-4">
             <button
               type="button"
               v-for="role in roleGroup.roles"
