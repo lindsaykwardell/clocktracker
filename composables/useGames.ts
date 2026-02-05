@@ -26,6 +26,16 @@ export enum GameEndTrigger {
   OTHER = "OTHER",
 }
 
+export enum DeathCause {
+  ABILITY = "ABILITY",
+  NOMINATION = "NOMINATION",
+}
+
+export enum DeathType {
+  DEATH = "DEATH",
+  EXECUTION = "EXECUTION",
+}
+
 export type FullCharacter = Character & {
   role?: {
     token_url: string;
@@ -68,6 +78,20 @@ export type GameRecord = Omit<Game, "win_v2"> & {
     initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
     name: string;
   } | null;
+  deaths: {
+    id: number;
+    grimoire_page: number;
+    seat_order: number;
+    is_revival: boolean;
+    death_type: DeathType | null;
+    cause: DeathCause | null;
+    by_seat_page: number | null;
+    by_seat_order: number | null;
+    player_name: string;
+    role_id: string | null;
+    by_role_id: string | null;
+    created_at: Date;
+  }[];
   player_characters: FullCharacter[];
   demon_bluffs: FullDemonBluff[];
   fabled: FullFabled[];

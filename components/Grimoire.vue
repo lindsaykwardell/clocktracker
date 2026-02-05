@@ -277,12 +277,14 @@ const props = defineProps<{
   readonly?: boolean;
   excludePlayers?: string[];
   canClaimSeat?: boolean;
+  pageIndex?: number;
 }>();
 
-const emit = defineEmits(["selectedMe", "claimSeat"]);
+const emit = defineEmits(["selectedMe", "claimSeat", "deathToggled"]);
 
 const orderedTokens = computed(() =>
   props.tokens
+    .slice()
     .sort((a, b) => a.order - b.order)
     .filter((t) => !props.readonly || t.role || t.player_name)
 );
@@ -551,8 +553,21 @@ function removeReminder(
 }
 
 function toggleIsDead(token: Token) {
-  token.is_dead = !token.is_dead;
+  const nextIsDead = !token.is_dead;
+  token.is_dead = nextIsDead;
   token.used_ghost_vote = false;
+
+  if (!props.readonly) {
+    emit("deathToggled", {
+      token: {
+        order: token.order,
+        player_name: token.player_name,
+        role_id: token.role_id,
+      },
+      isDead: nextIsDead,
+      pageIndex: props.pageIndex ?? 0,
+    });
+  }
 }
 
 function toggleUsedGhostVote(token: Token) {
