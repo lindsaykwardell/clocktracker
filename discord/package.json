@@ -12,21 +12,21 @@
   "author": "Lindsay Wardell",
   "dependencies": {
     "@prisma/client": "^5.12.1",
-    "@supabase/supabase-js": "^2.42.4",
+    "@supabase/supabase-js": "^2.97.0",
     "cron": "^3.1.7",
     "dayjs": "^1.11.10",
-    "discord.js": "^14.14.1",
+    "discord.js": "^14.25.1",
     "dotenv": "^16.4.5",
     "i": "^0.3.7",
     "natural-order": "^2.0.2",
-    "npm": "^10.8.2"
+    "npm": "^11.10.0"
   },
   "devDependencies": {
     "@flydotio/dockerfile": "^0.5.5",
     "@types/node": "^20.12.7",
     "nodemon": "^3.1.0",
     "prisma": "^5.12.1",
-    "tsx": "^4.7.2",
+    "tsx": "^4.21.0",
     "typescript": "^5.4.5"
   }
 }
