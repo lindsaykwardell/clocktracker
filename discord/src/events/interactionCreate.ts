@@ -1,7 +1,18 @@
 import { Events } from "discord.js";
 
 export const name = Events.InteractionCreate;
+const KILL_DATE = new Date("2026-03-01T08:00:00.000Z");
+const RETIREMENT_MESSAGE =
+  "The ClockTracker Discord bot has been retired as of March 1st, 2026. Thank you for using ClockTracker!";
+
 export async function execute(interaction) {
+  // Killswitch: stop all interactions after March 1st, 2026 midnight Pacific
+  if (new Date() >= KILL_DATE) {
+    if (interaction.isAutocomplete()) return;
+    await interaction.reply({ content: RETIREMENT_MESSAGE, ephemeral: true });
+    return;
+  }
+
   // If the bot is in development mode, only allow commands in the development guild
   if (
     process.env.NODE_ENV !== "production" &&

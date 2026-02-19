@@ -4,8 +4,12 @@ import dayjs from "dayjs";
 
 const prisma = new PrismaClient();
 
+const KILL_DATE = new Date("2026-03-01T08:00:00.000Z");
+
 export const schedule = "0 * * * * *";
 export async function execute(client: Client) {
+  // Killswitch: stop cron after March 1st, 2026 midnight Pacific
+  if (new Date() >= KILL_DATE) return;
   // Find all events starting in 15 minutes
   const events = await prisma.event.findMany({
     where: {
