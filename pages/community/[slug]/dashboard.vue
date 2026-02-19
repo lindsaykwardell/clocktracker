@@ -81,7 +81,7 @@
                 </div>
               </div>
             </label>
-            <label>
+            <label v-if="!isDiscordBotRetired">
               <span class="block">Discord Server ID</span>
               <div class="flex gap-2">
                 <Input v-model="updatedDiscordServerId" />
@@ -378,6 +378,9 @@ const _location = computed({
     }
   },
 });
+
+const DISCORD_BOT_KILL_DATE = new Date("2026-03-01T08:00:00.000Z");
+const isDiscordBotRetired = new Date() >= DISCORD_BOT_KILL_DATE;
 
 const inFlight = ref(false);
 
