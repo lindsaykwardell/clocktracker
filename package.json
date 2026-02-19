@@ -30,14 +30,14 @@
     "progress": "^2.0.3",
     "sass": "^1.79.3",
     "start-server-and-test": "^2.0.8",
-    "supabase": "^2.22.12",
+    "supabase": "^2.76.11",
     "typescript": "^5.6.2"
   },
   "dependencies": {
     "@atproto/api": "^0.13.16",
-    "@aws-sdk/client-s3": "^3.654.0",
+    "@aws-sdk/client-s3": "^3.993.0",
     "@aws-sdk/lib-storage": "^3.654.0",
-    "@aws-sdk/s3-request-presigner": "^3.654.0",
+    "@aws-sdk/s3-request-presigner": "^3.993.0",
     "@fontsource/sorts-mill-goudy": "^5.1.1",
     "@globalhive/vuejs-tour": "^1.6.1",
     "@headlessui/vue": "^1.7.23",
