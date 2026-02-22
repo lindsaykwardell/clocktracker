@@ -2,25 +2,28 @@ import { GameEndTrigger } from "~/composables/useGames";
 
 // These could become anything..
 export const WILDCARDS: string[] = [
+  'amnesiac',
+  'cannibal',
   'philosopher',
   'pixie',
   'hermit',
   'wizard',
+  'plague_doctor', // Storyteller Assassin or Cerenovus killing the demon I guess?
   'apprentice',
   'bootlegger',
 ];
 
 // Demons that kill or cause kills, including themselves.
 export const DEMONS_THAT_KILL: string[] = [
-  'alhadikhia',
-  'fanggu',
+  'al-hadikhia',
+  'fang_gu',
   'imp',
   'kazali',
   'legion',
-  'lilmonsta',
+  'lil_monsta',
   'lleech',
-  'lordoftyphon',
-  'nodashii',
+  'lord_of_typhon',
+  'no_dashii',
   'ojo',
   'po',
   'pukka',
@@ -42,7 +45,7 @@ export const END_TRIGGER_ROLE_INCLUDES: Record<
     // Townsfolk
     'alsaahir',
     'atheist',
-    'cultleader',
+    'cult_leader',
     'mayor',
 
     // Outsider
@@ -51,7 +54,7 @@ export const END_TRIGGER_ROLE_INCLUDES: Record<
     'saint',
 
     // Minion
-    'eviltwin',
+    'evil_twin',
     'fearmonger',
     'goblin',
     'mastermind',
@@ -84,9 +87,9 @@ export const END_TRIGGER_ROLE_INCLUDES: Record<
     'gangster',
     'gnome',
     'angel', // Something bad could be death.
-    'hellslibrarian', // Something bad could be death.
+    'hells_librarian', // Something bad could be death.
     'doomsayer',
-    'bigwig',
+    'big_wig',
 
     // (Unintended) swaps
     'barber', // Swap demon to dead player?
@@ -98,7 +101,6 @@ export const END_TRIGGER_ROLE_INCLUDES: Record<
     'harpy', // // Mad demon could be executed.
     'farmer', // A good demon could be the last demon alive and become the farmer I guess?
     'gossip', // Could kill the demon I guess?
-    'plaguedoctor', // Storyteller Assassin killing the demon I guess?
     'harlot',
 
     ],
@@ -131,8 +133,8 @@ export const END_TRIGGER_ROLE_INCLUDES: Record<
     'gangster', // Could kill during final 3.
     'gnome', // Could kill during final 3.
     'angel', // Something bad could be death.
-    'hellslibrarian', // Something bad could be death.
-    'bigwig',
+    'hells_librarian', // Something bad could be death.
+    'big_wig',
 
     // Demons
     'riot',
@@ -144,6 +146,7 @@ export const END_TRIGGER_ROLE_INCLUDES: Record<
     'gambler',
     'gossip',
     'grandmother',
+    'moonchild',
     'godfather',
     'harlot',
     'barista',

@@ -688,6 +688,7 @@
                             :tokens="game.data.grimoire[grimPage].tokens"
                             readonly
                             :canClaimSeat="canClaimSeat"
+                            :deathTooltips="deathTooltipsForPage"
                             @claimSeat="claimSeat"
                         />
                         <div
@@ -921,7 +922,12 @@
 </template>
 
 <script setup lang="ts">
-import { GameEndTrigger, WinStatus_V2 } from "~/composables/useGames";
+import {
+    GameEndTrigger,
+    WinStatus_V2,
+    DeathType,
+    DeathCause,
+} from "~/composables/useGames";
 import type { GameRecord } from "~/composables/useGames";
 import { displayWinIconSvg } from "~/composables/useGames";
 import dayjs from "dayjs";
@@ -1126,6 +1132,85 @@ const endTriggerSummary = computed(() => {
         return `${triggerLabel} due to ${player}`;
     }
     return triggerLabel;
+});
+
+const deathTooltipsForPage = computed(() => {
+    if (game.value.status !== Status.SUCCESS) return {};
+    const data = game.value.data;
+    const pageIndex = grimPage.value;
+    const page = data.grimoire?.[pageIndex];
+    if (!page) return {};
+
+    const ordered = page.tokens.slice().sort((a, b) => a.order - b.order);
+    const getTokenBySeat = (pIndex: number, seat: number) => {
+        const p = data.grimoire?.[pIndex];
+        if (!p) return null;
+        const orderedTokens = p.tokens
+            .slice()
+            .sort((a, b) => a.order - b.order);
+        return orderedTokens[seat] || null;
+    };
+
+    const tooltips: Record<number, string> = {};
+
+    const deathsBySeat = new Map<number, { page: number; revival: boolean; death: typeof data.deaths[number] }>();
+
+    data.deaths
+        .filter((death) => death.grimoire_page <= pageIndex)
+        .forEach((death) => {
+            const existing = deathsBySeat.get(death.seat_order);
+            if (!existing || death.grimoire_page >= existing.page) {
+                deathsBySeat.set(death.seat_order, {
+                    page: death.grimoire_page,
+                    revival: death.is_revival,
+                    death,
+                });
+            }
+        });
+
+    deathsBySeat.forEach((entry, seat) => {
+        if (entry.revival) return;
+        const death = entry.death;
+            const typeLabel =
+                death.death_type === DeathType.EXECUTION
+                    ? "Executed"
+                    : "Died";
+            const causeLabel =
+                death.cause === DeathCause.NOMINATION
+                    ? "nomination"
+                    : death.cause === DeathCause.ABILITY
+                        ? "ability"
+                        : null;
+
+            let byText = "";
+            if (
+                death.by_seat_page !== null &&
+                death.by_seat_order !== null
+            ) {
+                const byToken = getTokenBySeat(
+                    death.by_seat_page,
+                    death.by_seat_order,
+                );
+                if (byToken) {
+                    const byRole = byToken.role?.name || "Unknown role";
+                    const byPlayer = byToken.player_name || "Unknown player";
+                    const byRoleLabel = `${roleArticle(byRole)}${byRole}`;
+                    if (causeLabel) {
+                        byText = ` of ${byRoleLabel} (${byPlayer})`;
+                    } else {
+                        byText = ` by ${byRoleLabel} (${byPlayer})`;
+                    }
+                }
+            }
+
+            if (causeLabel) {
+                tooltips[seat] = `${typeLabel} by ${causeLabel}${byText}`;
+            } else {
+                tooltips[seat] = `${typeLabel}${byText}`;
+            }
+        });
+
+    return tooltips;
 });
 
 function roleArticle(name: string): "" | "the " {
