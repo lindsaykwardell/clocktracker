@@ -38,35 +38,48 @@
           >
           </Token>
         </div>
-        <button
-          type="button"
-          v-if="token.is_dead || token.used_ghost_vote"
-          :disabled="props.readonly"
-          class="absolute top-0 left-0 z-20 flex justify-center w-full duration-200"
-          :class="{
-            'cursor-default': readonly,
-            'opacity-0': !token.used_ghost_vote,
-            'hover:opacity-50 transition hover:-translate-y-2':
-              !props.readonly && token.is_dead && !token.used_ghost_vote,
-          }"
-          @click.prevent="toggleUsedGhostVote(token)"
-        >
-          <img src="/img/token-bg-dead.webp" class="w-4 md:w-8" />
-        </button>
-        <button
-          type="button"
-          @click.prevent="toggleIsDead(token)"
-          :disabled="props.readonly"
-          class="absolute top-0 left-0 z-10 flex justify-center w-full duration-200"
-          :class="{
-            'cursor-default': props.readonly,
-            'opacity-0': !token.is_dead,
-            'hover:opacity-50 transition hover:-translate-y-2':
-              !props.readonly && !token.is_dead,
-          }"
-        >
-          <img src="/img/shroud.png" class="w-8 md:w-10" />
-        </button>
+        <template v-if="!props.readonly">
+          <button
+            type="button"
+            v-if="token.is_dead || token.used_ghost_vote"
+            class="absolute top-0 left-0 z-20 flex justify-center w-full duration-200"
+            :class="{
+              'cursor-default': readonly,
+              'opacity-0': !token.used_ghost_vote,
+              'hover:opacity-50 transition hover:-translate-y-2':
+                !props.readonly && token.is_dead && !token.used_ghost_vote,
+            }"
+            @click.prevent="toggleUsedGhostVote(token)"
+          >
+            <img src="/img/token-bg-dead.webp" class="w-4 md:w-8" />
+          </button>
+          <button
+            type="button"
+            @click.prevent="toggleIsDead(token)"
+            class="absolute top-0 left-0 z-10 flex justify-center w-full duration-200"
+            :class="{
+              'cursor-default': props.readonly,
+              'opacity-0': !token.is_dead,
+              'hover:opacity-50 transition hover:-translate-y-2':
+                !props.readonly && !token.is_dead,
+            }"
+          >
+            <img src="/img/shroud.png" class="w-8 md:w-10" />
+          </button>
+        </template>
+        <template v-else>
+          <img 
+            v-if="token.used_ghost_vote"
+            src="/img/token-bg-dead.webp" 
+            class="absolute top-0 left-[50%] translate-x-[-50%] z-20 w-4 md:w-8" 
+          />
+          <img 
+            v-if="token.is_dead" 
+            src="/img/shroud.png" 
+            class="absolute top-0 left-[50%] translate-x-[-50%] z-10 w-8 md:w-10 cursor-help" 
+            v-tooltip="props.deathTooltips?.[index]"
+          />
+        </template>
         <a
           v-if="props.readonly && token.role_id"
           :href="`/roles/${token.role_id}`"
@@ -278,6 +291,7 @@ const props = defineProps<{
   excludePlayers?: string[];
   canClaimSeat?: boolean;
   pageIndex?: number;
+  deathTooltips?: Record<number, string>;
 }>();
 
 const emit = defineEmits(["selectedMe", "claimSeat", "deathToggled"]);
@@ -286,7 +300,6 @@ const orderedTokens = computed(() =>
   props.tokens
     .slice()
     .sort((a, b) => a.order - b.order)
-    .filter((t) => !props.readonly || t.role || t.player_name)
 );
 
 const tokenUrlForRoleId = (roleId: string) => {

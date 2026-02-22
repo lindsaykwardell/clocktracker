@@ -516,10 +516,165 @@
       v-if="!editingMultipleGames"
       class="block border rounded border-stone-500 p-4 my-3 bg-center bg-cover"
     >
+      <legend>Deaths & Executions</legend>
+        <p v-if="game.deaths.length === 0" class="text-sm text-stone-400">
+          No deaths recorded yet. Toggle a shroud in the grimoire to add an entry.
+        </p>
+        <Alert v-if="deathSyncSummary" :color="deathSyncAlertColor">
+          {{ deathSyncSummary }}
+        </Alert>
+        <details
+          v-for="pageGroup in deathEventsByPage"
+          :key="pageGroup.page"
+          :open="pageGroup.events.some((death) => death.is_revival || death.death_type !== null)"
+        >
+          <summary class="cursor-pointer">
+            Grimoire Page {{ pageGroup.page + 1 }}
+          </summary>
+          <ul class="grid grid-cols-[auto_1fr_auto] gap-x-8 gap-y-2 py-2">
+            <li
+              v-for="death in pageGroup.events"
+              :key="`${pageGroup.page}-${death.seat_order}-${death.is_revival}-${death.player_name}`"
+              class="col-span-full grid grid-cols-subgrid items-center border border-stone-600 rounded p-3"
+            >
+              <div class="flex items-center flex-col gap-1">
+                <div class="relative flex justify-center items-center aspect-square">
+                  <Token
+                    :character="deathSeatCharacter(death)"
+                    size="md"
+                    class="pointer-events-none"
+                    hideRelated
+                  />
+                  <img
+                    v-if="!death.is_revival"
+                    src="/img/shroud.png"
+                    class="absolute top-0 w-8 md:w-10"
+                    alt=""
+                  />
+                </div>
+                <div class="flex flex-col">
+                  <span class="text-sm font-medium">
+                    {{ deathDisplayName(death) }}
+                  </span>
+                  <span class="text-xs text-stone-400 sr-only">
+                    {{ death.is_revival ? "Revived" : "Died" }}
+                  </span>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <label>
+                  <span class="block text-xs">Death type</span>
+                <Input
+                  mode="select"
+                  v-model="death.death_type"
+                  :disabled="death.is_revival"
+                  @update:modelValue="
+                    () => {
+                      death.cause = null;
+                      death.by_seat_order = null;
+                      death.by_seat_page = null;
+                      death.by_role_id = null;
+                    }
+                  "
+                >
+                  <option v-if="death.is_revival" :value="null">Revival</option>
+                  <option v-else :value="null">Not recorded</option>
+                  <option v-if="!death.is_revival" :value="DeathType.DEATH">
+                    Death
+                  </option>
+                  <option v-if="!death.is_revival" :value="DeathType.EXECUTION">
+                    Execution
+                  </option>
+                </Input>
+                </label>
+                <template v-if="death.death_type !== null || death.is_revival">
+                  <label>
+                    <span class="block text-xs">Cause</span>
+                    <Input
+                      mode="select"
+                      v-model="death.cause"
+                      :disabled="death.is_revival"
+                    >
+                      <option v-if="death.is_revival" :value="DeathCause.ABILITY">
+                        Ability
+                      </option>
+                      <template v-else>
+                        <option :value="null">Select cause</option>
+                        <option :value="DeathCause.ABILITY">Ability</option>
+                        <option
+                          v-if="death.death_type !== DeathType.DEATH"
+                          :value="DeathCause.NOMINATION"
+                        >
+                          Nomination
+                        </option>
+                      </template>
+                    </Input>
+                  </label>
+                  <label class="col-span-2">
+                    <span class="block text-xs">Select triggering character</span>
+                    <Input
+                      mode="select"
+                      :modelValue="getDeathSeatSelection(death)"
+                      @update:modelValue="
+                        (value) => updateDeathSeatSelection(death, value as any)
+                      "
+                    >
+                      <option :value="null">No seat selected</option>
+                      <option
+                        v-for="seat in deathSeatOptionsForPage(pageGroup.page, death.cause, death.death_type)"
+                        :key="seat.order"
+                        :value="seat.order"
+                      >
+                        {{ seat.label }}
+                      </option>
+                      <option value="custom">Custom</option>
+                    </Input>
+                  </label>
+                </template>
+              </div>
+              <div
+                v-if="death.death_type !== null || death.is_revival"
+                class="relative flex justify-center items-center aspect-square"
+              >
+                <Token
+                  v-if="death.by_role_id"
+                  :character="deathByRoleCharacter(death)"
+                  size="md"
+                  class="cursor-pointer"
+                  :class="{
+                    'pointer-events-none opacity-50': !allowManualDeathByRole(death),
+                  }"
+                  @clickRole="openDeathByRoleDialog(death)"
+                  hideRelated
+                />
+                <Token v-else outline size="md" class="font-sorts">
+                  <button
+                    type="button"
+                    @click="openDeathByRoleDialog(death)"
+                    class="w-full h-full p-1 text-xs"
+                    :disabled="!allowManualDeathByRole(death)"
+                  >
+                    <template v-if="allowManualDeathByRole(death)">
+                      Add Role
+                    </template>
+                    <template v-else>
+                      Select Seat
+                    </template>
+                  </button>
+                </Token>
+              </div>
+            </li>
+          </ul>
+        </details>
+    </fieldset>
+    <fieldset
+      v-if="!editingMultipleGames"
+      class="block border rounded border-stone-500 p-4 my-3 bg-center bg-cover"
+    >
       <legend>Additional Details</legend>
       <details :open="game.demon_bluffs.length > 0">
         <summary class="cursor-pointer">Demon Bluffs</summary>
-        <div class="flex justify-center md:justify-normal flex-wrap gap-5">
+        <div class="flex justify-center md:justify-normal flex-wrap gap-5 py-2">
           <div
             v-for="(character, i) in game.demon_bluffs"
             class="relative border border-stone-600 rounded p-4 flex justify-center items-center aspect-square"
@@ -565,8 +720,8 @@
         </div>
       </details>
       <details :open="game.fabled.length > 0">
-        <summary class="cursor-pointer">Fabled</summary>
-        <div class="flex justify-center md:justify-normal flex-wrap gap-5">
+        <summary class="cursor-pointer">Fabled & Loric</summary>
+        <div class="flex justify-center md:justify-normal flex-wrap gap-5 py-2">
           <div
             v-for="(character, i) in game.fabled"
             class="relative border border-stone-600 rounded p-4 flex justify-center items-center aspect-square"
@@ -601,145 +756,9 @@
                 @click="addFabled"
                 class="w-full h-full p-1 text-sm"
               >
-                Add Fabled
+                Add NPC
               </button>
             </Token>
-          </div>
-        </div>
-      </details>
-      <details :open="game.deaths.length > 0">
-        <summary class="cursor-pointer">Deaths</summary>
-        <div class="flex flex-col gap-4">
-          <p v-if="game.deaths.length === 0" class="text-sm text-stone-400">
-            No deaths recorded yet. Toggle a shroud in the grimoire to add an entry.
-          </p>
-          <Alert v-if="deathSyncSummary" :color="deathSyncAlertColor">
-            {{ deathSyncSummary }}
-          </Alert>
-          <div
-            v-for="pageGroup in deathEventsByPage"
-            :key="pageGroup.page"
-            class="flex flex-col gap-3"
-          >
-            <h4 class="font-sorts text-lg">
-              Page {{ pageGroup.page + 1 }}
-            </h4>
-            <div class="grid grid-cols-[auto_1fr_auto] gap-x-8 gap-y-2">
-              <div
-                v-for="death in pageGroup.events"
-                :key="`${pageGroup.page}-${death.seat_order}-${death.is_revival}-${death.player_name}`"
-                class="col-span-full grid grid-cols-subgrid items-center border border-stone-600 rounded p-3"
-              >
-                <div class="flex items-center flex-col gap-1">
-                  <div class="relative flex justify-center items-center aspect-square">
-                    <Token
-                      :character="deathSeatCharacter(death)"
-                      size="md"
-                      class="pointer-events-none"
-                      hideRelated
-                    />
-                    <img
-                      v-if="!death.is_revival"
-                      src="/img/shroud.png"
-                      class="absolute top-0 w-8 md:w-10"
-                      alt=""
-                    />
-                  </div>
-                  <div class="flex flex-col">
-                    <span class="text-sm font-medium">
-                      {{ deathDisplayName(death) }}
-                    </span>
-                    <span class="text-xs text-stone-400 sr-only">
-                      {{ death.is_revival ? "Revived" : "Died" }}
-                    </span>
-                  </div>
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                  <label>
-                    <span class="block text-xs">Death type</span>
-                    <Input
-                      mode="select"
-                    v-model="death.death_type"
-                    :disabled="death.is_revival"
-                  >
-                    <option v-if="death.is_revival" :value="null">Revival</option>
-                    <option v-else :value="null">Not tracked</option>
-                    <option v-if="!death.is_revival" :value="DeathType.DEATH">
-                      Death
-                    </option>
-                    <option v-if="!death.is_revival" :value="DeathType.EXECUTION">
-                      Execution
-                    </option>
-                  </Input>
-                  </label>
-                  <label>
-                    <span class="block text-xs">Cause</span>
-                    <Input
-                      mode="select"
-                      v-model="death.cause"
-                      :disabled="death.is_revival"
-                    >
-                      <option v-if="death.is_revival" :value="DeathCause.ABILITY">
-                        Ability
-                      </option>
-                      <template v-else>
-                        <option :value="null">Select cause</option>
-                        <option :value="DeathCause.ABILITY">Ability</option>
-                        <option :value="DeathCause.NOMINATION">Nomination</option>
-                      </template>
-                    </Input>
-                  </label>
-                  <label class="col-span-2">
-                    <span class="block text-xs">Select triggering character</span>
-                    <Input
-                      mode="select"
-                      :modelValue="getDeathSeatSelection(death)"
-                      @update:modelValue="
-                        (value) => updateDeathSeatSelection(death, value as any)
-                      "
-                    >
-                      <option :value="null">No seat selected</option>
-                      <option
-                        v-for="seat in deathSeatOptionsForPage(pageGroup.page)"
-                        :key="seat.order"
-                        :value="seat.order"
-                      >
-                        {{ seat.label }}
-                      </option>
-                      <option value="custom">Custom</option>
-                    </Input>
-                  </label>
-                </div>
-                <div class="relative flex justify-center items-center aspect-square">
-                  <Token
-                    v-if="death.by_role_id"
-                    :character="deathByRoleCharacter(death)"
-                    size="md"
-                    class="cursor-pointer"
-                    :class="{
-                      'pointer-events-none opacity-50': !allowManualDeathByRole(death),
-                    }"
-                    @clickRole="openDeathByRoleDialog(death)"
-                    hideRelated
-                  />
-                  <Token v-else outline size="md" class="font-sorts">
-                    <button
-                      type="button"
-                      @click="openDeathByRoleDialog(death)"
-                      class="w-full h-full p-1 text-xs"
-                      :disabled="!allowManualDeathByRole(death)"
-                    >
-                      <template v-if="allowManualDeathByRole(death)">
-                        Add Role
-                      </template>
-                      <template v-else>
-                        Select Seat
-                      </template>
-                    </button>
-                  </Token>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </details>
@@ -1250,15 +1269,42 @@ function getTokenForSeat(pageIndex: number, order: number) {
   return page.tokens.find((token) => token.order === order) || null;
 }
 
-function deathSeatOptionsForPage(pageIndex: number) {
+function deathSeatOptionsForPage(
+  pageIndex: number,
+  cause: DeathCause | null,
+  deathType: DeathType | null
+) {
   const page = props.game.grimoire[pageIndex];
   if (!page) return [];
-  return page.tokens.map((token) => ({
-    order: token.order,
-    label: `[Seat ${token.order + 1}] ${token.role?.name || "Unknown role"} - ${
-      token.player_name || "Unknown player"
-    }`,
-  }));
+  const previousPage =
+    pageIndex > 0 ? props.game.grimoire[pageIndex - 1] : null;
+  const ordered = page.tokens.slice().sort((a, b) => a.order - b.order);
+  const abilityIncludes =
+    cause === DeathCause.ABILITY && deathType !== null
+      ? DEATH_ROLE_INCLUDES[deathType] || []
+      : [];
+  const abilityAllowed =
+    abilityIncludes.length > 0 ? new Set(abilityIncludes) : null;
+
+  return ordered
+    .filter((token) => {
+      if (
+        abilityAllowed &&
+        (!token.role_id || !abilityAllowed.has(token.role_id))
+      ) {
+        return false;
+      }
+      if (cause !== DeathCause.NOMINATION) return true;
+      const prev = previousPage?.tokens.find((t) => t.order === token.order);
+      const wasDead = prev?.is_dead ?? false;
+      return !(token.is_dead && wasDead);
+    })
+    .map((token) => ({
+      order: token.order,
+      label: `[Seat ${token.order + 1}] ${token.role?.name || "Unknown role"} - ${
+        token.player_name || "Unknown player"
+      }`,
+    }));
 }
 
 function deathDisplayName(death: {
@@ -1330,6 +1376,7 @@ function recordDeathEvent(payload: {
 
   // Only record when state changes between pages.
   if (!shouldRecordDeath && !shouldRecordRevival) {
+    syncDeathEventsFromGrimoire({ force: true, silent: true });
     return;
   }
 
@@ -1347,10 +1394,17 @@ function recordDeathEvent(payload: {
   };
 
   props.game.deaths.push(entry);
+
+  syncDeathEventsFromGrimoire({ force: true, silent: true });
 }
 
-function syncDeathEventsFromGrimoire() {
-  if (deathSyncDone.value || props.editingMultipleGames) return;
+function syncDeathEventsFromGrimoire(options?: {
+  force?: boolean;
+  silent?: boolean;
+}) {
+  const force = options?.force ?? false;
+  const silent = options?.silent ?? false;
+  if ((deathSyncDone.value && !force) || props.editingMultipleGames) return;
   if (!props.game.grimoire.length) return;
 
   let added = 0;
@@ -1358,10 +1412,20 @@ function syncDeathEventsFromGrimoire() {
   let updated = 0;
 
   const events = props.game.deaths;
-  const toRemoveIndices = new Set<number>();
+  const expected = new Map<
+    string,
+    {
+      grimoire_page: number;
+      seat_order: number;
+      is_revival: boolean;
+      player_name: string;
+      role_id: string | null;
+    }
+  >();
 
   props.game.grimoire.forEach((page, pageIndex) => {
-    page.tokens.forEach((token) => {
+    const orderedTokens = page.tokens.slice().sort((a, b) => a.order - b.order);
+    orderedTokens.forEach((token) => {
       const previousToken =
         pageIndex > 0
           ? props.game.grimoire[pageIndex - 1]?.tokens.find(
@@ -1372,76 +1436,76 @@ function syncDeathEventsFromGrimoire() {
       const shouldHaveDeath = token.is_dead && !wasDeadPreviously;
       const shouldHaveRevival = !token.is_dead && wasDeadPreviously;
 
-      const matchingIndices = events
-        .map((death, index) =>
-          death.grimoire_page === pageIndex &&
-          death.seat_order === token.order
-            ? index
-            : -1
-        )
-        .filter((index) => index >= 0);
+      if (!shouldHaveDeath && !shouldHaveRevival) return;
 
-      if (!shouldHaveDeath && !shouldHaveRevival) {
-        matchingIndices.forEach((index) => toRemoveIndices.add(index));
-        return;
-      }
-
-      if (matchingIndices.length === 0) {
-        events.push({
-          grimoire_page: pageIndex,
-          seat_order: token.order,
-          is_revival: shouldHaveRevival,
-          death_type: null,
-          cause: shouldHaveRevival ? DeathCause.ABILITY : null,
-          by_seat_page: shouldHaveRevival ? null : pageIndex,
-          by_seat_order: null,
-          player_name: token.player_name || "",
-          role_id: token.role_id ?? null,
-          by_role_id: null,
-        });
-        added += 1;
-        return;
-      }
-
-      // Keep the first, remove any extra duplicates.
-      matchingIndices.slice(1).forEach((index) => toRemoveIndices.add(index));
-
-      const existing = events[matchingIndices[0]];
-      if (existing.is_revival !== shouldHaveRevival) {
-        existing.is_revival = shouldHaveRevival;
-        if (shouldHaveRevival) {
-          existing.cause = DeathCause.ABILITY;
-          existing.by_seat_page = null;
-          existing.by_seat_order = null;
-          existing.by_role_id = null;
-          existing.death_type = null;
-        } else if (existing.by_seat_page === null) {
-          existing.by_seat_page = pageIndex;
-        }
-        updated += 1;
-      }
-
-      // Leave death_type unset by default.
-      if (existing.is_revival && existing.cause === null) {
-        existing.cause = DeathCause.ABILITY;
-      }
-
-      if (!existing.player_name) {
-        existing.player_name = token.player_name || "";
-      }
-      if (!existing.role_id) {
-        existing.role_id = token.role_id ?? null;
-      }
+      const key = `${pageIndex}:${token.order}`;
+      expected.set(key, {
+        grimoire_page: pageIndex,
+        seat_order: token.order,
+        is_revival: shouldHaveRevival,
+        player_name: token.player_name || "",
+        role_id: token.role_id ?? null,
+      });
     });
   });
 
-  const sortedIndices = Array.from(toRemoveIndices).sort((a, b) => b - a);
-  sortedIndices.forEach((index) => {
-    events.splice(index, 1);
-    removed += 1;
+
+  for (let i = events.length - 1; i >= 0; i -= 1) {
+    const event = events[i];
+    const key = `${event.grimoire_page}:${event.seat_order}`;
+    const expectation = expected.get(key);
+    if (!expectation) {
+      events.splice(i, 1);
+      removed += 1;
+      continue;
+    }
+
+    if (event.is_revival !== expectation.is_revival) {
+      event.is_revival = expectation.is_revival;
+      if (event.is_revival) {
+        event.cause = DeathCause.ABILITY;
+        event.by_seat_page = null;
+        event.by_seat_order = null;
+        event.by_role_id = null;
+        event.death_type = null;
+      } else if (event.by_seat_page === null) {
+        event.by_seat_page = event.grimoire_page;
+      }
+      updated += 1;
+    }
+
+    if (event.is_revival && event.cause === null) {
+      event.cause = DeathCause.ABILITY;
+    }
+
+    if (!event.player_name) {
+      event.player_name = expectation.player_name;
+    }
+    if (!event.role_id) {
+      event.role_id = expectation.role_id;
+    }
+
+    expected.delete(key);
+  }
+
+  expected.forEach((expectation) => {
+    events.push({
+      grimoire_page: expectation.grimoire_page,
+      seat_order: expectation.seat_order,
+      is_revival: expectation.is_revival,
+      death_type: null,
+      cause: expectation.is_revival ? DeathCause.ABILITY : null,
+      by_seat_page: expectation.is_revival ? null : expectation.grimoire_page,
+      by_seat_order: null,
+      player_name: expectation.player_name,
+      role_id: expectation.role_id,
+      by_role_id: null,
+    });
+    added += 1;
   });
 
-  if (added || removed || updated) {
+
+  if (!silent && (added || removed || updated)) {
     deathSyncStats.value = { added, updated, removed };
     deathSyncSummary.value = `Synced deaths: ${added} added, ${updated} updated, ${removed} removed.`;
   }
@@ -1497,10 +1561,17 @@ function updateDeathSeatSelection(
 
 function allowManualDeathByRole(death: {
   grimoire_page: number;
+  seat_order: number;
+  cause: DeathCause | null;
+  death_type: DeathType | null;
   by_seat_order: number | null;
   by_role_id: string | null;
 }) {
-  const options = deathSeatOptionsForPage(death.grimoire_page);
+  const options = deathSeatOptionsForPage(
+    death.grimoire_page,
+    death.cause,
+    death.death_type
+  );
   if (options.length === 0) return true;
   const key = `${death.grimoire_page}:${death.seat_order}`;
   return deathCustomSeatSelections.value.has(key);
@@ -2247,6 +2318,7 @@ function pageBackward() {
 function deletePage() {
   props.game.grimoire.splice(grimPage.value, 1);
   grimPage.value = Math.max(0, grimPage.value - 1);
+  syncDeathEventsFromGrimoire({ force: true, silent: true });
 }
 
 watch(
