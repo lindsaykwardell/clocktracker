@@ -236,6 +236,9 @@ export async function fetchGames(user_id: string, me: User | null) {
       grimoire: {
         include: {
           tokens: {
+            orderBy: {
+              order: "asc",
+            },
             include: {
               role: true,
               related_role: true,
@@ -503,6 +506,9 @@ export async function fetchGame(
       grimoire: {
         include: {
           tokens: {
+            orderBy: {
+              order: "asc",
+            },
             include: {
               role: true,
               related_role: true,

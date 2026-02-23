@@ -42,7 +42,7 @@
           <button
             type="button"
             v-if="token.is_dead || token.used_ghost_vote"
-            class="absolute top-0 left-0 z-20 flex justify-center w-full duration-200"
+            class="absolute top-0 left-[50%] translate-x-[-50%] z-20 duration-200"
             :class="{
               'cursor-default': readonly,
               'opacity-0': !token.used_ghost_vote,
@@ -56,7 +56,7 @@
           <button
             type="button"
             @click.prevent="toggleIsDead(token)"
-            class="absolute top-0 left-0 z-10 flex justify-center w-full duration-200"
+            class="absolute top-0 left-0 left-[50%] translate-x-[-50%] z-10 duration-200"
             :class="{
               'cursor-default': props.readonly,
               'opacity-0': !token.is_dead,
@@ -161,6 +161,12 @@
             Claim Seat
           </button>
           {{ token.player_name }}
+        </div>
+        <div 
+          v-if="!props.readonly"
+          class="text-xs text-stone-300 text-center"
+        >
+          Seat {{ token.order + 1 }}
         </div>
       </div>
     </div>

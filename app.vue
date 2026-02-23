@@ -255,13 +255,18 @@ body {
   }
 }
 
-.ct-contextual-links {
-  @apply absolute right-0 z-10;
-  @apply flex flex-col items-start min-w-[150px];
-  @apply divide-y divide-stone-100 dark:divide-stone-900;
+.ct-contextual-links,
+.ct-contextual-links-compact {
+  @apply absolute right-0;
+  @apply flex flex-col items-start;
   @apply overflow-hidden whitespace-nowrap ;
   @apply bg-stone-100 dark:bg-stone-900 rounded shadow-md;
   @apply rounded shadow-md;
+  @apply divide-y divide-stone-100 dark:divide-stone-900;
+}
+
+.ct-contextual-links {
+  @apply min-w-[150px] z-10;
 }
 
 :root {
