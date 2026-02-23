@@ -30,11 +30,10 @@
                         :to="`/@${me.data.username}?view=games`"
                         class="underline"
                     >
-                        View all games
+                    View all games
                     </nuxt-link>
                 </template>
             </Alert>
-
             <section
                 class="flex flex-col text-black dark:text-white w-full lg:w-4/5 m-auto my-4 rounded shadow-lg relative"
             >

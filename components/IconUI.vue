@@ -46,6 +46,9 @@
   }>();
 
   const ArrowRightShort = resolveComponent("IconArrowRightShort");
+  const ArrowClockwise = resolveComponent("IconArrowClockwise");
+  const ArrowCounterClockwise = resolveComponent("IconArrowCounterClockwise");
+  const ArrowsMove = resolveComponent("IconArrowsMove");
   const Bgg = resolveComponent("IconBgg");
   const Json = resolveComponent("IconBraces");
   const CalenderPlus = resolveComponent("IconCalenderPlus");
@@ -156,6 +159,12 @@
         return Location; 
       case "arrow-right-short":
         return ArrowRightShort;
+      case "arrow-clockwise":
+        return ArrowClockwise;
+      case "arrow-counterclockwise":
+        return ArrowCounterClockwise;
+      case "arrows-move":
+        return ArrowsMove;
       case "mail":
         return Mail;
       case "discord":
@@ -286,11 +295,16 @@
     justify-content: center;
     align-items: center;
     border-radius: 50%;
+    flex-shrink: 0;
     
     @apply w-6 h-6 md:w-8 md:h-8;
 
     &.sm {
       @apply w-4 h-4 md:w-6 md:h-6;
+    }
+
+    &.xs {
+      @apply w-4 h-4 md:w-5 md:h-5;
     }
   }
 
