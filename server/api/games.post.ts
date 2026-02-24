@@ -65,12 +65,11 @@ export default defineEventHandler(async (handler) => {
         create:
           body.deaths?.map((death) => ({
             grimoire_page: death.grimoire_page,
-            seat_order: death.seat_order,
+            participant_id: death.participant_id,
             is_revival: death.is_revival ?? false,
             death_type: death.is_revival ? null : (death.death_type ?? DeathType.DEATH),
             cause: death.cause ?? null,
-            by_seat_page: death.by_seat_page ?? null,
-            by_seat_order: death.by_seat_order ?? null,
+            by_participant_id: death.by_participant_id ?? null,
             player_name: death.player_name ?? "",
             role_id: death.role_id ?? null,
             by_role_id: death.by_role_id ?? null,
@@ -88,6 +87,7 @@ export default defineEventHandler(async (handler) => {
                 is_dead: token.is_dead || false,
                 used_ghost_vote: token.used_ghost_vote || false,
                 order: token.order ?? index,
+                grimoire_participant_id: token.grimoire_participant_id ?? null,
                 player_name: token.player_name || "",
                 player_id: token.player_id,
                 reminders: {
@@ -215,12 +215,11 @@ export default defineEventHandler(async (handler) => {
           create:
             body.deaths?.map((death) => ({
               grimoire_page: death.grimoire_page,
-              seat_order: death.seat_order,
+              participant_id: death.participant_id,
             is_revival: death.is_revival ?? false,
             death_type: death.is_revival ? null : (death.death_type ?? DeathType.DEATH),
             cause: death.cause ?? null,
-            by_seat_page: death.by_seat_page ?? null,
-            by_seat_order: death.by_seat_order ?? null,
+            by_participant_id: death.by_participant_id ?? null,
             player_name: death.player_name ?? "",
             role_id: death.role_id ?? null,
             by_role_id: death.by_role_id ?? null,
@@ -272,12 +271,11 @@ export default defineEventHandler(async (handler) => {
           create:
             body.deaths?.map((death) => ({
               grimoire_page: death.grimoire_page,
-              seat_order: death.seat_order,
+              participant_id: death.participant_id,
             is_revival: death.is_revival ?? false,
             death_type: death.is_revival ? null : (death.death_type ?? DeathType.DEATH),
             cause: death.cause ?? null,
-            by_seat_page: death.by_seat_page ?? null,
-            by_seat_order: death.by_seat_order ?? null,
+            by_participant_id: death.by_participant_id ?? null,
             player_name: death.player_name ?? "",
             role_id: death.role_id ?? null,
             by_role_id: death.by_role_id ?? null,

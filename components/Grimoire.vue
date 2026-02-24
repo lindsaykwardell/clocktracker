@@ -168,6 +168,18 @@
         >
           Seat {{ token.order + 1 }}
         </div>
+        <div
+          v-if="!props.readonly"
+          class="text-[10px] text-stone-400 text-center break-all max-w-[150px]"
+        >
+          {{ token.grimoire_participant_id || "no-participant-id" }}
+        </div>
+        <div
+          v-if="!props.readonly"
+          class="text-[10px] text-stone-500 text-center"
+        >
+          score: {{ debugMatchScore(token) ?? "-" }}
+        </div>
       </div>
     </div>
   </div>
@@ -195,6 +207,7 @@ type Token = {
   order: number;
   is_dead: boolean;
   used_ghost_vote: boolean;
+  grimoire_participant_id?: string | null;
   role_id: string | null;
   role?: {
     token_url: string;
@@ -285,6 +298,7 @@ const allTaggablePlayers = computed(() => {
 
 const props = defineProps<{
   tokens: Token[];
+  previousTokens?: Token[];
   availableRoles?: {
     type: RoleType;
     id: string;
@@ -307,6 +321,41 @@ const orderedTokens = computed(() =>
     .slice()
     .sort((a, b) => a.order - b.order)
 );
+
+function normalizeName(name?: string | null) {
+  return (name || "").trim().toLowerCase();
+}
+
+function debugMatchScore(token: Token) {
+  if (!props.previousTokens?.length) return null;
+  const scored = props.previousTokens.map((candidate) => {
+    let score = 0;
+    if (
+      token.grimoire_participant_id &&
+      candidate.grimoire_participant_id &&
+      token.grimoire_participant_id === candidate.grimoire_participant_id
+    ) {
+      score += 100;
+    }
+    if (token.player_id && candidate.player_id && token.player_id === candidate.player_id) {
+      score += 100;
+    }
+    const tokenName = normalizeName(token.player_name);
+    const candidateName = normalizeName(candidate.player_name);
+    if (tokenName && candidateName && tokenName === candidateName) {
+      score += 60;
+    }
+    if (token.role_id && candidate.role_id && token.role_id === candidate.role_id) {
+      score += 40;
+    }
+    if (token.order === candidate.order) {
+      score += 20;
+    }
+    return score;
+  });
+
+  return scored.length ? Math.max(...scored) : null;
+}
 
 const tokenUrlForRoleId = (roleId: string) => {
   const role = roles.getRole(roleId);
@@ -582,6 +631,8 @@ function toggleIsDead(token: Token) {
         order: token.order,
         player_name: token.player_name,
         role_id: token.role_id,
+        player_id: token.player_id,
+        grimoire_participant_id: token.grimoire_participant_id,
       },
       isDead: nextIsDead,
       pageIndex: props.pageIndex ?? 0,

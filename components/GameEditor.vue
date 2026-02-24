@@ -1,5 +1,5 @@
 <template>
-  <form class="max-w-[1000px] m-auto py-4 px-4 md:px-8" @submit.prevent="emit('submit')">
+  <form class="max-w-[1000px] m-auto py-4 px-4 md:px-8" @submit.prevent="onSubmit">
     <fieldset
       class="flex flex-col gap-5 border rounded border-stone-500 p-4 my-3"
     >
@@ -282,15 +282,15 @@
                 @change="selectEndTriggerSeat"
                 :disabled="endTriggerSeatOptions.length === 0"
               >
-                <option :value="null">No seat selected</option>
+                <option :value="null">No character selected</option>
                 <option
                   v-for="seat in endTriggerSeatOptions"
-                  :key="seat.order"
-                  :value="seat.order"
+                  :key="seat.participant_id"
+                  :value="seat.participant_id"
                 >
                   {{ seat.label }}
                 </option>
-                <option value="custom">Custom</option>
+                <option value="custom">Custom character</option>
               </Input>
               <Alert
                 v-if="endTriggerSeatOptions.length === 0"
@@ -342,7 +342,7 @@
                       Add Character
                     </template>
                     <template v-else>
-                      Select Seat Above
+                      Select Character Above
                     </template>
                   </button>
                 </Token>
@@ -463,6 +463,7 @@
           >
             <Grimoire
               :tokens="game.grimoire[grimPage].tokens"
+              :previousTokens="grimPage > 0 ? game.grimoire[grimPage - 1].tokens : []"
               :availableRoles="orderedRoles"
               :excludePlayers="storytellerNames"
               :pageIndex="grimPage"
@@ -588,7 +589,7 @@
           <ul class="grid grid-cols-[auto_1fr_auto] gap-x-8 gap-y-2 py-2">
             <li
               v-for="death in pageGroup.events"
-              :key="`${pageGroup.page}-${death.seat_order}-${death.is_revival}-${death.player_name}`"
+              :key="`${pageGroup.page}-${death.participant_id}-${death.is_revival}-${death.player_name}`"
               class="col-span-full grid grid-cols-subgrid items-center border border-stone-600 rounded p-3"
             >
               <div class="flex items-center flex-col gap-1">
@@ -622,11 +623,10 @@
                   mode="select"
                   v-model="death.death_type"
                   :disabled="death.is_revival"
-                  @update:modelValue="
+                    @update:modelValue="
                     () => {
                       death.cause = null;
-                      death.by_seat_order = null;
-                      death.by_seat_page = null;
+                      death.by_participant_id = null;
                       death.by_role_id = null;
                     }
                   "
@@ -648,6 +648,7 @@
                       mode="select"
                       v-model="death.cause"
                       :disabled="death.is_revival"
+                      @update:modelValue="onDeathCauseChange(death)"
                     >
                       <option v-if="death.is_revival" :value="DeathCause.ABILITY">
                         Ability
@@ -672,16 +673,17 @@
                       @update:modelValue="
                         (value) => updateDeathSeatSelection(death, value as any)
                       "
+                      :disabled="!death.is_revival && death.cause === null"
                     >
-                      <option :value="null">No seat selected</option>
+                      <option :value="null">No character selected</option>
                       <option
                         v-for="seat in deathSeatOptionsForPage(pageGroup.page, death.cause, death.death_type)"
-                        :key="seat.order"
-                        :value="seat.order"
+                        :key="seat.participant_id"
+                        :value="seat.participant_id"
                       >
                         {{ seat.label }}
                       </option>
-                      <option value="custom">Custom</option>
+                      <option value="custom">Custom character</option>
                     </Input>
                   </label>
                 </template>
@@ -712,7 +714,7 @@
                       Add Role
                     </template>
                     <template v-else>
-                      Select Seat
+                      Select Character
                     </template>
                   </button>
                 </Token>
@@ -1022,8 +1024,7 @@ const props = defineProps<{
     end_trigger: GameEndTrigger | undefined;
     end_trigger_role_id: string | null;
     end_trigger_note: string;
-    end_trigger_seat_page: number | null;
-    end_trigger_seat_order: number | null;
+    end_trigger_participant_id: string | null;
     end_trigger_role?: {
       token_url: string;
       type: string;
@@ -1033,12 +1034,11 @@ const props = defineProps<{
     deaths: {
       id?: number;
       grimoire_page: number;
-      seat_order: number;
+      participant_id: string;
       is_revival: boolean;
       death_type: DeathType | null;
       cause: DeathCause | null;
-      by_seat_page: number | null;
-      by_seat_order: number | null;
+      by_participant_id: string | null;
       player_name: string;
       role_id: string | null;
       by_role_id: string | null;
@@ -1052,6 +1052,7 @@ const props = defineProps<{
         order: number;
         is_dead: boolean;
         used_ghost_vote: boolean;
+        grimoire_participant_id?: string | null;
         role_id: string | null;
         role?: {
           token_url: string;
@@ -1124,12 +1125,11 @@ const excludeIrrelevantEndTriggerRoles = ref(true);
 const excludeIrrelevantDeathRoles = ref(true);
 const focusedDeathEvent = ref<{
   grimoire_page: number;
-  seat_order: number;
+  participant_id: string;
   is_revival: boolean;
   death_type: DeathType | null;
   cause: DeathCause | null;
-  by_seat_page: number | null;
-  by_seat_order: number | null;
+  by_participant_id: string | null;
   player_name: string;
   role_id: string | null;
   by_role_id: string | null;
@@ -1234,23 +1234,24 @@ const endTriggerSeatOptions = computed(() => {
 
     return {
       order: token.order,
+      participant_id: token.grimoire_participant_id || `seat-${token.order}`,
       label: `[Seat ${token.order + 1}] ${roleName} - ${playerName}`,
       token,
     };
   });
 });
 
-const endTriggerSeatSelection = ref<number | "custom" | null>(
-  props.game.end_trigger_seat_order ?? null
+const endTriggerSeatSelection = ref<string | "custom" | null>(
+  props.game.end_trigger_participant_id ?? null
 );
 
 watch(
-  () => props.game.end_trigger_seat_order,
+  () => props.game.end_trigger_participant_id,
   (value) => {
     if (value === null || value === undefined) {
       endTriggerSeatSelection.value = null;
     } else {
-      endTriggerSeatSelection.value = value as number;
+      endTriggerSeatSelection.value = value as string;
     }
   }
 );
@@ -1262,7 +1263,7 @@ watch(
       endTriggerSeatSelection.value = "custom";
     } else if (endTriggerSeatSelection.value === "custom") {
       // Keep custom if the user chose it; otherwise allow default "No seat selected".
-      if (props.game.end_trigger_seat_order === null) {
+      if (props.game.end_trigger_participant_id === null) {
         endTriggerSeatSelection.value = null;
       }
     }
@@ -1280,21 +1281,18 @@ function selectEndTriggerSeat() {
   const selection = endTriggerSeatSelection.value;
 
   if (selection === "custom") {
-    props.game.end_trigger_seat_order = null;
-    props.game.end_trigger_seat_page = null;
+    props.game.end_trigger_participant_id = null;
     return;
   }
 
   if (selection === null) {
-    props.game.end_trigger_seat_order = null;
-    props.game.end_trigger_seat_page = null;
+    props.game.end_trigger_participant_id = null;
     return;
   }
 
-  props.game.end_trigger_seat_order = selection;
-  props.game.end_trigger_seat_page = endTriggerSeatPageIndex.value;
+  props.game.end_trigger_participant_id = selection;
   const seat = endTriggerSeatOptions.value.find(
-    (option) => option.order === selection
+    (option) => option.token.grimoire_participant_id === selection
   );
   if (!seat?.token) return;
 
@@ -1339,6 +1337,206 @@ function getTokenForSeat(pageIndex: number, order: number) {
   return page.tokens.find((token) => token.order === order) || null;
 }
 
+function getTokenForParticipant(pageIndex: number, participantId: string) {
+  const page = props.game.grimoire[pageIndex];
+  if (!page) return null;
+  return (
+    page.tokens.find(
+      (token) => token.grimoire_participant_id === participantId
+    ) || null
+  );
+}
+
+function normalizePlayerName(name?: string | null) {
+  return (name || "").trim().toLowerCase();
+}
+
+function createParticipantId() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return `gp_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+}
+
+let recomputingParticipantIds = false;
+
+function recomputeGrimoireParticipantIds() {
+  if (recomputingParticipantIds) return;
+  if (!props.game.grimoire.length) return;
+  recomputingParticipantIds = true;
+
+  try {
+    const byOrder = (a: { order: number }, b: { order: number }) => a.order - b.order;
+
+    const firstPage = props.game.grimoire[0];
+    firstPage.tokens.forEach((token) => {
+      if (!token.grimoire_participant_id) {
+        token.grimoire_participant_id = createParticipantId();
+      }
+    });
+
+    for (let pageIndex = 1; pageIndex < props.game.grimoire.length; pageIndex += 1) {
+      const page = props.game.grimoire[pageIndex];
+      const previousPage = props.game.grimoire[pageIndex - 1];
+      if (!previousPage) continue;
+
+      const previousTokens = previousPage.tokens.slice().sort(byOrder);
+      const currentTokens = page.tokens.slice().sort(byOrder);
+      const usedPreviousOrders = new Set<number>();
+
+      for (const token of currentTokens) {
+        const tokenName = normalizePlayerName(token.player_name);
+        const scored = previousTokens
+          .filter((candidate) => !usedPreviousOrders.has(candidate.order))
+          .map((candidate) => {
+            let score = 0;
+            if (token.player_id && candidate.player_id && token.player_id === candidate.player_id) {
+              score += 100;
+            }
+            const candidateName = normalizePlayerName(candidate.player_name);
+            if (tokenName && candidateName && tokenName === candidateName) {
+              score += 60;
+            }
+            if (token.role_id && candidate.role_id && token.role_id === candidate.role_id) {
+              score += 40;
+            }
+            if (token.order === candidate.order) {
+              score += 20;
+            }
+            return { candidate, score };
+          })
+          .sort((a, b) => b.score - a.score);
+
+        const best = scored[0];
+        const second = scored[1];
+        const hasStrongMatch = !!best && best.score >= 60;
+        const isAmbiguous = !!best && !!second && best.score === second.score;
+
+        if (hasStrongMatch && !isAmbiguous && best.candidate.grimoire_participant_id) {
+          token.grimoire_participant_id = best.candidate.grimoire_participant_id;
+          usedPreviousOrders.add(best.candidate.order);
+          continue;
+        }
+
+        if (!token.grimoire_participant_id) {
+          token.grimoire_participant_id = createParticipantId();
+        }
+      }
+    }
+  } finally {
+    recomputingParticipantIds = false;
+  }
+}
+
+function onSubmit() {
+  recomputeGrimoireParticipantIds();
+  emit("submit");
+}
+
+function normalizePageTokenOrders(
+  tokens: {
+    order: number;
+  }[]
+) {
+  const sorted = tokens.slice().sort((a, b) => a.order - b.order);
+  let hasMismatch = false;
+  for (let i = 0; i < sorted.length; i += 1) {
+    if (sorted[i].order !== i) {
+      hasMismatch = true;
+      break;
+    }
+  }
+  if (!hasMismatch) return false;
+
+  sorted.forEach((token, index) => {
+    token.order = index;
+  });
+  return true;
+}
+
+function findMatchingTokenOnPreviousPage(
+  pageIndex: number,
+  token: {
+    order: number;
+    grimoire_participant_id?: string | null;
+    player_id?: string | null;
+    player_name?: string | null;
+    role_id?: string | null;
+  },
+  usedPreviousOrders?: Set<number>,
+  preferPreviousDead?: boolean | null
+) {
+  if (pageIndex <= 0) return null;
+  const previousPage = props.game.grimoire[pageIndex - 1];
+  if (!previousPage) return null;
+
+  const available = previousPage.tokens.filter(
+    (candidate) => !usedPreviousOrders?.has(candidate.order)
+  );
+
+  if (token.grimoire_participant_id) {
+    const byParticipantId =
+      available.find(
+        (candidate) =>
+          candidate.grimoire_participant_id === token.grimoire_participant_id
+      ) || null;
+    if (byParticipantId) {
+      usedPreviousOrders?.add(byParticipantId.order);
+      return byParticipantId;
+    }
+  }
+
+  if (token.player_id) {
+    const byPlayerId =
+      available.find((candidate) => candidate.player_id === token.player_id) || null;
+    if (byPlayerId) {
+      usedPreviousOrders?.add(byPlayerId.order);
+      return byPlayerId;
+    }
+  }
+
+  const tokenName = normalizePlayerName(token.player_name);
+  if (tokenName) {
+    const byName = available.filter(
+      (candidate) => normalizePlayerName(candidate.player_name) === tokenName
+    );
+    if (byName.length > 0) {
+      const preferredByState =
+        preferPreviousDead === null || preferPreviousDead === undefined
+          ? null
+          : byName.find((candidate) => candidate.is_dead === preferPreviousDead);
+      const preferred =
+        preferredByState ||
+        byName.find((candidate) => candidate.order === token.order) ||
+        byName[0];
+      usedPreviousOrders?.add(preferred.order);
+      return preferred;
+    }
+  }
+
+  if (token.role_id) {
+    const byRole = available.filter((candidate) => candidate.role_id === token.role_id);
+    if (byRole.length > 0) {
+      const preferredByState =
+        preferPreviousDead === null || preferPreviousDead === undefined
+          ? null
+          : byRole.find((candidate) => candidate.is_dead === preferPreviousDead);
+      const preferred =
+        preferredByState ||
+        byRole.find((candidate) => candidate.order === token.order) ||
+        byRole[0];
+      usedPreviousOrders?.add(preferred.order);
+      return preferred;
+    }
+  }
+
+  const byOrder = available.find((candidate) => candidate.order === token.order) || null;
+  if (byOrder) {
+    usedPreviousOrders?.add(byOrder.order);
+  }
+  return byOrder;
+}
+
 function deathSeatOptionsForPage(
   pageIndex: number,
   cause: DeathCause | null,
@@ -1365,13 +1563,17 @@ function deathSeatOptionsForPage(
         return false;
       }
       if (cause !== DeathCause.NOMINATION) return true;
-      const prev = previousPage?.tokens.find((t) => t.order === token.order);
+      const prev =
+        previousPage && pageIndex > 0
+          ? findMatchingTokenOnPreviousPage(pageIndex, token)
+          : null;
       const wasDead = prev?.is_dead ?? false;
       return !(token.is_dead && wasDead);
     })
     .map((token) => ({
-      order: token.order,
-      label: `[Seat ${token.order + 1}] ${token.role?.name || "Unknown role"} - ${
+      participant_id: token.grimoire_participant_id || `seat-${token.order}`,
+      label: `[Page ${pageIndex + 1}: Seat ${token.order + 1}] 
+        ${token.role?.name || "Unknown role"} - ${
         token.player_name || "Unknown player"
       }`,
     }));
@@ -1379,19 +1581,19 @@ function deathSeatOptionsForPage(
 
 function deathDisplayName(death: {
   grimoire_page: number;
-  seat_order: number;
+  participant_id: string;
   player_name: string;
 }) {
   if (death.player_name) return death.player_name;
-  const token = getTokenForSeat(death.grimoire_page, death.seat_order);
-  return token?.player_name || token?.role?.name || `Seat ${death.seat_order + 1}`;
+  const token = getTokenForParticipant(death.grimoire_page, death.participant_id);
+  return token?.player_name || token?.role?.name || "Unknown player";
 }
 
 function deathSeatCharacter(death: {
   grimoire_page: number;
-  seat_order: number;
+  participant_id: string;
 }) {
-  const token = getTokenForSeat(death.grimoire_page, death.seat_order);
+  const token = getTokenForParticipant(death.grimoire_page, death.participant_id);
   if (!token || !token.role) {
     return {
       name: "",
@@ -1420,15 +1622,29 @@ function recordDeathEvent(payload: {
     order: number;
     player_name: string;
     role_id: string | null;
+    player_id?: string | null;
+    grimoire_participant_id?: string | null;
   };
   isDead: boolean;
   pageIndex: number;
 }) {
+  const pageToken = getTokenForSeat(payload.pageIndex, payload.token.order);
+  if (pageToken && !pageToken.grimoire_participant_id) {
+    pageToken.grimoire_participant_id = createParticipantId();
+  }
+  const participantId =
+    payload.token.grimoire_participant_id ||
+    pageToken?.grimoire_participant_id ||
+    createParticipantId();
+
   const previousPageIndex = payload.pageIndex - 1;
   const previousToken =
     previousPageIndex >= 0
-      ? props.game.grimoire[previousPageIndex]?.tokens.find(
-          (token) => token.order === payload.token.order
+      ? findMatchingTokenOnPreviousPage(
+          payload.pageIndex,
+          payload.token,
+          undefined,
+          !payload.isDead
         )
       : null;
   const wasDeadPreviously = previousToken?.is_dead ?? false;
@@ -1438,7 +1654,7 @@ function recordDeathEvent(payload: {
   const existingIndex = props.game.deaths.findIndex(
     (death) =>
       death.grimoire_page === payload.pageIndex &&
-      death.seat_order === payload.token.order
+      death.participant_id === participantId
   );
   if (existingIndex >= 0) {
     props.game.deaths.splice(existingIndex, 1);
@@ -1452,12 +1668,11 @@ function recordDeathEvent(payload: {
 
   const entry = {
     grimoire_page: payload.pageIndex,
-    seat_order: payload.token.order,
+    participant_id: participantId,
     is_revival: shouldRecordRevival,
     death_type: null,
     cause: shouldRecordRevival ? DeathCause.ABILITY : null,
-    by_seat_page: shouldRecordRevival ? null : payload.pageIndex,
-    by_seat_order: null,
+    by_participant_id: null,
     player_name: payload.token.player_name || "",
     role_id: payload.token.role_id ?? null,
     by_role_id: null,
@@ -1484,22 +1699,26 @@ function syncDeathEventsFromGrimoire(options?: {
   const events = props.game.deaths;
   const expected = new Map<
     string,
-    {
-      grimoire_page: number;
-      seat_order: number;
-      is_revival: boolean;
-      player_name: string;
-      role_id: string | null;
+      {
+        grimoire_page: number;
+        participant_id: string;
+        is_revival: boolean;
+        player_name: string;
+        role_id: string | null;
     }
   >();
 
   props.game.grimoire.forEach((page, pageIndex) => {
     const orderedTokens = page.tokens.slice().sort((a, b) => a.order - b.order);
+    const usedPreviousOrders = new Set<number>();
     orderedTokens.forEach((token) => {
       const previousToken =
         pageIndex > 0
-          ? props.game.grimoire[pageIndex - 1]?.tokens.find(
-              (t) => t.order === token.order
+          ? findMatchingTokenOnPreviousPage(
+              pageIndex,
+              token,
+              usedPreviousOrders,
+              !token.is_dead
             )
           : null;
       const wasDeadPreviously = previousToken?.is_dead ?? false;
@@ -1508,10 +1727,14 @@ function syncDeathEventsFromGrimoire(options?: {
 
       if (!shouldHaveDeath && !shouldHaveRevival) return;
 
-      const key = `${pageIndex}:${token.order}`;
+      if (!token.grimoire_participant_id) {
+        token.grimoire_participant_id = createParticipantId();
+      }
+      const participantId = token.grimoire_participant_id;
+      const key = `${pageIndex}:${participantId}`;
       expected.set(key, {
         grimoire_page: pageIndex,
-        seat_order: token.order,
+        participant_id: participantId,
         is_revival: shouldHaveRevival,
         player_name: token.player_name || "",
         role_id: token.role_id ?? null,
@@ -1519,11 +1742,49 @@ function syncDeathEventsFromGrimoire(options?: {
     });
   });
 
+  function takeExpectedByIdentity(event: (typeof events)[number]) {
+    let bestKey: string | null = null;
+    let bestScore = -1;
+
+    expected.forEach((candidate, candidateKey) => {
+      if (candidate.grimoire_page !== event.grimoire_page) return;
+      if (candidate.is_revival !== event.is_revival) return;
+
+      let score = 0;
+      if (event.participant_id && candidate.participant_id && event.participant_id === candidate.participant_id) score += 10;
+      const eventName = normalizePlayerName(event.player_name);
+      const candidateName = normalizePlayerName(candidate.player_name);
+      if (eventName && candidateName && eventName === candidateName) score += 3;
+      if (event.role_id && candidate.role_id && event.role_id === candidate.role_id) score += 4;
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestKey = candidateKey;
+      }
+    });
+
+    if (!bestKey || bestScore <= 0) return null;
+    const match = expected.get(bestKey) || null;
+    if (match) {
+      expected.delete(bestKey);
+    }
+    return match;
+  }
+
 
   for (let i = events.length - 1; i >= 0; i -= 1) {
     const event = events[i];
-    const key = `${event.grimoire_page}:${event.seat_order}`;
-    const expectation = expected.get(key);
+    const key = `${event.grimoire_page}:${event.participant_id}`;
+    let expectation = expected.get(key);
+    if (expectation) {
+      expected.delete(key);
+    } else {
+      expectation = takeExpectedByIdentity(event);
+      if (expectation && event.participant_id !== expectation.participant_id) {
+        event.participant_id = expectation.participant_id;
+        updated += 1;
+      }
+    }
     if (!expectation) {
       events.splice(i, 1);
       removed += 1;
@@ -1534,12 +1795,9 @@ function syncDeathEventsFromGrimoire(options?: {
       event.is_revival = expectation.is_revival;
       if (event.is_revival) {
         event.cause = DeathCause.ABILITY;
-        event.by_seat_page = null;
-        event.by_seat_order = null;
+        event.by_participant_id = null;
         event.by_role_id = null;
         event.death_type = null;
-      } else if (event.by_seat_page === null) {
-        event.by_seat_page = event.grimoire_page;
       }
       updated += 1;
     }
@@ -1555,18 +1813,16 @@ function syncDeathEventsFromGrimoire(options?: {
       event.role_id = expectation.role_id;
     }
 
-    expected.delete(key);
   }
 
   expected.forEach((expectation) => {
     events.push({
       grimoire_page: expectation.grimoire_page,
-      seat_order: expectation.seat_order,
+      participant_id: expectation.participant_id,
       is_revival: expectation.is_revival,
       death_type: null,
       cause: expectation.is_revival ? DeathCause.ABILITY : null,
-      by_seat_page: expectation.is_revival ? null : expectation.grimoire_page,
-      by_seat_order: null,
+      by_participant_id: null,
       player_name: expectation.player_name,
       role_id: expectation.role_id,
       by_role_id: null,
@@ -1584,13 +1840,13 @@ function syncDeathEventsFromGrimoire(options?: {
 }
 
 function getDeathSeatSelection(death: {
-  by_seat_order: number | null;
+  by_participant_id: string | null;
   by_role_id: string | null;
   grimoire_page: number;
-  seat_order: number;
+  participant_id: string;
 }) {
-  if (death.by_seat_order !== null) return death.by_seat_order;
-  const key = `${death.grimoire_page}:${death.seat_order}`;
+  if (death.by_participant_id !== null) return death.by_participant_id;
+  const key = `${death.grimoire_page}:${death.participant_id}`;
   if (deathCustomSeatSelections.value.has(key)) return "custom";
   return null;
 }
@@ -1598,43 +1854,52 @@ function getDeathSeatSelection(death: {
 function updateDeathSeatSelection(
   death: {
     grimoire_page: number;
-    by_seat_order: number | null;
-    by_seat_page: number | null;
+    by_participant_id: string | null;
     by_role_id: string | null;
+    participant_id: string;
   },
-  value: number | "custom" | null
+  value: string | "custom" | null
 ) {
-  const key = `${death.grimoire_page}:${death.seat_order}`;
+  const key = `${death.grimoire_page}:${death.participant_id}`;
   if (value === "custom") {
-    death.by_seat_order = null;
-    death.by_seat_page = null;
+    death.by_participant_id = null;
     deathCustomSeatSelections.value.add(key);
     return;
   }
 
   if (value === null) {
-    death.by_seat_order = null;
-    death.by_seat_page = null;
+    death.by_participant_id = null;
     death.by_role_id = null;
     deathCustomSeatSelections.value.delete(key);
     return;
   }
 
-  death.by_seat_order = value;
-  death.by_seat_page = death.grimoire_page;
-  const token = getTokenForSeat(death.grimoire_page, value);
+  death.by_participant_id = value;
+  const token = getTokenForParticipant(death.grimoire_page, value);
   if (token?.role_id) {
     death.by_role_id = token.role_id;
   }
   deathCustomSeatSelections.value.delete(key);
 }
 
+function onDeathCauseChange(death: {
+  grimoire_page: number;
+  participant_id: string;
+  by_participant_id: string | null;
+  by_role_id: string | null;
+}) {
+  death.by_participant_id = null;
+  death.by_role_id = null;
+  const key = `${death.grimoire_page}:${death.participant_id}`;
+  deathCustomSeatSelections.value.delete(key);
+}
+
 function allowManualDeathByRole(death: {
   grimoire_page: number;
-  seat_order: number;
+  participant_id: string;
   cause: DeathCause | null;
   death_type: DeathType | null;
-  by_seat_order: number | null;
+  by_participant_id: string | null;
   by_role_id: string | null;
 }) {
   const options = deathSeatOptionsForPage(
@@ -1643,7 +1908,7 @@ function allowManualDeathByRole(death: {
     death.death_type
   );
   if (options.length === 0) return true;
-  const key = `${death.grimoire_page}:${death.seat_order}`;
+  const key = `${death.grimoire_page}:${death.participant_id}`;
   return deathCustomSeatSelections.value.has(key);
 }
 
@@ -1720,14 +1985,12 @@ watch(
     ) {
       props.game.end_trigger_role_id = null;
       props.game.end_trigger_role = null;
-      props.game.end_trigger_seat_order = null;
-      props.game.end_trigger_seat_page = null;
+      props.game.end_trigger_participant_id = null;
     }
     // Clear any previously selected character whenever the trigger changes.
     props.game.end_trigger_role_id = null;
     props.game.end_trigger_role = null;
-    props.game.end_trigger_seat_order = null;
-    props.game.end_trigger_seat_page = null;
+    props.game.end_trigger_participant_id = null;
 
     if (
       value !== GameEndTrigger.GAME_ENDED_EARLY &&
@@ -2162,12 +2425,11 @@ function openEndTriggerRoleDialog() {
 
 function openDeathByRoleDialog(death: {
   grimoire_page: number;
-  seat_order: number;
+  participant_id: string;
   is_revival: boolean;
   death_type: DeathType | null;
   cause: DeathCause | null;
-  by_seat_page: number | null;
-  by_seat_order: number | null;
+  by_participant_id: string | null;
   player_name: string;
   role_id: string | null;
   by_role_id: string | null;
@@ -2180,8 +2442,7 @@ function openDeathByRoleDialog(death: {
 function clearEndTriggerRole() {
   props.game.end_trigger_role_id = null;
   props.game.end_trigger_role = null;
-  props.game.end_trigger_seat_order = null;
-  props.game.end_trigger_seat_page = null;
+  props.game.end_trigger_participant_id = null;
 }
 
 function toggleAlignment(token: Character) {
@@ -2225,13 +2486,11 @@ function selectRoleForToken(role: {
         initial_alignment: role.initial_alignment,
         name: role.name,
       };
-      props.game.end_trigger_seat_order = null;
-      props.game.end_trigger_seat_page = null;
+      props.game.end_trigger_participant_id = null;
     } else {
       props.game.end_trigger_role_id = null;
       props.game.end_trigger_role = null;
-      props.game.end_trigger_seat_order = null;
-      props.game.end_trigger_seat_page = null;
+      props.game.end_trigger_participant_id = null;
     }
     showRoleSelectionDialog.value = false;
     return;
@@ -2298,6 +2557,7 @@ function copyGrimoire(game: GameRecord) {
       is_dead: false,
       used_ghost_vote: false,
       order: token.order,
+      grimoire_participant_id: token.grimoire_participant_id ?? null,
       role_id: null,
       related_role_id: null,
       player_name: token.player_name,
@@ -2327,7 +2587,12 @@ function copyGrimoire(game: GameRecord) {
 }
 
 watchEffect(() => {
+  let normalizedAnyPage = false;
   props.game.grimoire.forEach((grimoire) => {
+    if (normalizePageTokenOrders(grimoire.tokens as { order: number }[])) {
+      normalizedAnyPage = true;
+    }
+
     while (
       (props.game.player_count || 0) + (props.game.traveler_count || 0) >
         grimoire.tokens.length &&
@@ -2339,6 +2604,7 @@ watchEffect(() => {
         is_dead: false,
         used_ghost_vote: false,
         order: grimoire.tokens.length,
+        grimoire_participant_id: null,
         role_id: null,
         related_role_id: null,
         player_name: "",
@@ -2360,8 +2626,12 @@ watchEffect(() => {
     });
   });
 
+  recomputeGrimoireParticipantIds();
+
   if (!deathSyncDone.value && props.game.grimoire.length > 0) {
     syncDeathEventsFromGrimoire();
+  } else if (normalizedAnyPage) {
+    syncDeathEventsFromGrimoire({ force: true, silent: true });
   }
 });
 
@@ -2493,6 +2763,7 @@ watch(
   props.game.grimoire,
   (value) => {
     const newTokens = value[grimPage.value].tokens;
+    const newTokensByOrder = new Map(newTokens.map((token) => [token.order, token]));
 
     const myCharacters: {
       name: string;
@@ -2558,8 +2829,10 @@ watch(
 
         // Only sync player identity across pages - keep all other data independent
         // to prevent data loss when editing earlier pages (e.g., reminder tokens)
-        token.player_id = newTokens[j].player_id;
-        token.player_name = newTokens[j].player_name;
+        const sourceToken = newTokensByOrder.get(token.order);
+        if (!sourceToken) return;
+        token.player_id = sourceToken.player_id;
+        token.player_name = sourceToken.player_name;
       });
     });
 
@@ -2660,6 +2933,7 @@ onMounted(async () => {
     });
   }
 
+  recomputeGrimoireParticipantIds();
   syncDeathEventsFromGrimoire();
 });
 </script>

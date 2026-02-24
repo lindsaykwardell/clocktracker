@@ -88,8 +88,7 @@ const game = reactive<{
   end_trigger: GameEndTrigger;
   end_trigger_role_id: string | null;
   end_trigger_note: string;
-  end_trigger_seat_page: number | null;
-  end_trigger_seat_order: number | null;
+  end_trigger_participant_id: string | null;
   end_trigger_role?: {
     token_url: string;
     type: string;
@@ -98,12 +97,11 @@ const game = reactive<{
   } | null;
   deaths: {
     grimoire_page: number;
-    seat_order: number;
+    participant_id: string;
     is_revival: boolean;
     death_type: DeathType | null;
     cause: DeathCause | null;
-    by_seat_page: number | null;
-    by_seat_order: number | null;
+    by_participant_id: string | null;
     player_name: string;
     role_id: string | null;
     by_role_id: string | null;
@@ -118,6 +116,7 @@ const game = reactive<{
       order: number;
       is_dead: boolean;
       used_ghost_vote: boolean;
+      grimoire_participant_id?: string | null;
       role_id: string | null;
       role?: {
         token_url: string;
@@ -195,8 +194,7 @@ const game = reactive<{
     savedGame.data.value?.end_trigger || GameEndTrigger.NOT_RECORDED,
   end_trigger_role_id: savedGame.data.value?.end_trigger_role_id || null,
   end_trigger_note: savedGame.data.value?.end_trigger_note || "",
-  end_trigger_seat_page: savedGame.data.value?.end_trigger_seat_page || null,
-  end_trigger_seat_order: savedGame.data.value?.end_trigger_seat_order || null,
+  end_trigger_participant_id: savedGame.data.value?.end_trigger_participant_id || null,
   end_trigger_role: savedGame.data.value?.end_trigger_role || null,
   deaths: savedGame.data.value?.deaths || [],
   notes: savedGame.data.value?.notes || "",
@@ -210,6 +208,7 @@ const game = reactive<{
           order: token.order,
           is_dead: token.is_dead,
           used_ghost_vote: token.used_ghost_vote,
+          grimoire_participant_id: token.grimoire_participant_id ?? null,
           role_id: token.role_id,
           role: token.role,
           related_role_id: token.related_role_id,
@@ -257,12 +256,11 @@ const formattedGame = computed(() => {
   })),
   deaths: game.deaths.map((death) => ({
     grimoire_page: death.grimoire_page,
-    seat_order: death.seat_order,
+    participant_id: death.participant_id,
     is_revival: death.is_revival,
     death_type: death.death_type,
     cause: death.cause,
-    by_seat_page: death.by_seat_page,
-    by_seat_order: death.by_seat_order,
+    by_participant_id: death.by_participant_id,
     player_name: death.player_name,
     role_id: death.role_id,
     by_role_id: death.by_role_id,

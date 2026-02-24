@@ -27,8 +27,7 @@ export default defineEventHandler(async (handler) => {
     end_trigger: GameEndTrigger | undefined;
     end_trigger_role_id: string | null | undefined;
     end_trigger_note: string | undefined;
-    end_trigger_seat_page: number | null | undefined;
-    end_trigger_seat_order: number | null | undefined;
+    end_trigger_participant_id: string | null | undefined;
     tags: string[];
     privacy: PrivacySetting | "";
   } | null>(handler);
@@ -86,14 +85,10 @@ export default defineEventHandler(async (handler) => {
           body.end_trigger_note === undefined
             ? payload.end_trigger_note
             : body.end_trigger_note,
-        end_trigger_seat_page:
-          body.end_trigger_seat_page === undefined
-            ? payload.end_trigger_seat_page
-            : body.end_trigger_seat_page,
-        end_trigger_seat_order:
-          body.end_trigger_seat_order === undefined
-            ? payload.end_trigger_seat_order
-            : body.end_trigger_seat_order,
+        end_trigger_participant_id:
+          body.end_trigger_participant_id === undefined
+            ? payload.end_trigger_participant_id
+            : body.end_trigger_participant_id,
         tags: [...payload.tags, ...body.tags],
         privacy: body.privacy || payload.privacy,
       },
@@ -178,8 +173,7 @@ export default defineEventHandler(async (handler) => {
       end_trigger: game.end_trigger,
       end_trigger_role_id: game.end_trigger_role_id,
       end_trigger_note: game.end_trigger_note,
-      end_trigger_seat_page: game.end_trigger_seat_page,
-      end_trigger_seat_order: game.end_trigger_seat_order,
+      end_trigger_participant_id: game.end_trigger_participant_id,
       tags: game.tags,
       privacy: game.privacy,
     });
@@ -288,8 +282,7 @@ export default defineEventHandler(async (handler) => {
               end_trigger: game.end_trigger,
               end_trigger_role_id: game.end_trigger_role_id,
               end_trigger_note: game.end_trigger_note,
-              end_trigger_seat_page: game.end_trigger_seat_page,
-              end_trigger_seat_order: game.end_trigger_seat_order,
+              end_trigger_participant_id: game.end_trigger_participant_id,
               demon_bluffs: {
                 deleteMany: relatedGame.demon_bluffs.map((g) => ({ id: g.id })),
                 create: game.demon_bluffs.map((g) => ({
@@ -407,8 +400,7 @@ export default defineEventHandler(async (handler) => {
                 end_trigger: game.end_trigger,
                 end_trigger_role_id: game.end_trigger_role_id,
                 end_trigger_note: game.end_trigger_note,
-                end_trigger_seat_page: game.end_trigger_seat_page,
-                end_trigger_seat_order: game.end_trigger_seat_order,
+                end_trigger_participant_id: game.end_trigger_participant_id,
                 demon_bluffs: {
                   deleteMany: childGame.demon_bluffs.map((g) => ({ id: g.id })),
                   create: game.demon_bluffs.map((g) => ({
