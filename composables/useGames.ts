@@ -70,8 +70,7 @@ export type GameRecord = Omit<Game, "win_v2"> & {
   end_trigger: GameEndTrigger;
   end_trigger_role_id: string | null;
   end_trigger_note: string;
-  end_trigger_seat_page: number | null;
-  end_trigger_seat_order: number | null;
+  end_trigger_participant_id: string | null;
   end_trigger_role?: {
     token_url: string;
     type: string;
@@ -81,12 +80,11 @@ export type GameRecord = Omit<Game, "win_v2"> & {
   deaths: {
     id: number;
     grimoire_page: number;
-    seat_order: number;
+    participant_id: string;
     is_revival: boolean;
     death_type: DeathType | null;
     cause: DeathCause | null;
-    by_seat_page: number | null;
-    by_seat_order: number | null;
+    by_participant_id: string | null;
     player_name: string;
     role_id: string | null;
     by_role_id: string | null;

@@ -94,8 +94,7 @@ const game = reactive<{
   end_trigger: GameEndTrigger | undefined;
   end_trigger_role_id: string | null;
   end_trigger_note: string;
-  end_trigger_seat_page: number | null;
-  end_trigger_seat_order: number | null;
+  end_trigger_participant_id: string | null;
   end_trigger_role?: {
     token_url: string;
     type: string;
@@ -104,12 +103,11 @@ const game = reactive<{
   } | null;
   deaths: {
     grimoire_page: number;
-    seat_order: number;
+    participant_id: string;
     is_revival: boolean;
     death_type: DeathType | null;
     cause: DeathCause | null;
-    by_seat_page: number | null;
-    by_seat_order: number | null;
+    by_participant_id: string | null;
     player_name: string;
     role_id: string | null;
     by_role_id: string | null;
@@ -159,8 +157,7 @@ const game = reactive<{
   end_trigger: undefined,
   end_trigger_role_id: null,
   end_trigger_note: "",
-  end_trigger_seat_page: null,
-  end_trigger_seat_order: null,
+  end_trigger_participant_id: null,
   end_trigger_role: null,
   deaths: [],
   notes: "",
@@ -194,10 +191,8 @@ const formattedGame = computed(() => ({
     game.end_trigger === undefined ? undefined : game.end_trigger_role_id,
   end_trigger_note:
     game.end_trigger === undefined ? undefined : game.end_trigger_note,
-  end_trigger_seat_page:
-    game.end_trigger === undefined ? undefined : game.end_trigger_seat_page,
-  end_trigger_seat_order:
-    game.end_trigger === undefined ? undefined : game.end_trigger_seat_order,
+  end_trigger_participant_id:
+    game.end_trigger === undefined ? undefined : game.end_trigger_participant_id,
   tags: game.tags,
   privacy: game.privacy,
 }));

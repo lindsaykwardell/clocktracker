@@ -21,54 +21,53 @@ model FeatureFlag {
 }
 
 model Game {
-  id                       String         @id @default(uuid())
-  bgg_id                   Int?           @unique
-  ls_game_id               Int?           @unique
-  ls_game                  LSGame?        @relation(fields: [ls_game_id], references: [id])
-  user_id                  String
-  created_at               DateTime?      @default(now()) @db.Timestamptz(6)
-  date                     DateTime       @default(now()) @db.Date
-  script                   String
-  script_id                Int?
-  location_type            LocationType   @default(ONLINE)
-  location                 String
-  community_name           String         @default("")
-  community                Community?     @relation(fields: [community_id], references: [id])
-  community_id             Int?
-  player_count             Int?
-  traveler_count           Int?
-  player_characters        Character[]
-  win_v2                   WinStatus_V2   @default(NOT_RECORDED)
-  end_trigger              GameEndTrigger @default(NOT_RECORDED)
-  end_trigger_role         Role?          @relation("GameEndTriggerRole", fields: [end_trigger_role_id], references: [id])
-  end_trigger_role_id      String?
-  end_trigger_note         String         @default("")
-  end_trigger_seat_page    Int?
-  end_trigger_seat_order   Int?
-  notes                    String
-  image_urls               String[]
-  old_image_urls           String[]
-  storyteller              String?
-  co_storytellers          String[]
-  user                     UserSettings?  @relation(fields: [user_id], references: [user_id])
-  associated_script        Script?        @relation(fields: [script_id], references: [id])
-  grimoire                 Grimoire[]
-  grimoire_id              Int?           @unique
-  is_storyteller           Boolean        @default(false)
-  parent_game              Game?          @relation("AssociatedGame", fields: [parent_game_id], references: [id])
-  parent_game_id           String?
-  child_games              Game[]         @relation("AssociatedGame")
-  ignore_for_stats         Boolean        @default(false)
-  tags                     String[]
-  waiting_for_confirmation Boolean        @default(false)
-  deleted                  Boolean        @default(false)
-  deleted_date             DateTime?
-  privacy                  PrivacySetting @default(PUBLIC)
-  demon_bluffs             DemonBluff[]
-  fabled                   Fabled[]
-  deaths                   DeathEvent[]
-  favorite                 FavoriteGame?
-  favorite_id              Int?           @unique
+  id                          String         @id @default(uuid())
+  bgg_id                      Int?           @unique
+  ls_game_id                  Int?           @unique
+  ls_game                     LSGame?        @relation(fields: [ls_game_id], references: [id])
+  user_id                     String
+  created_at                  DateTime?      @default(now()) @db.Timestamptz(6)
+  date                        DateTime       @default(now()) @db.Date
+  script                      String
+  script_id                   Int?
+  location_type               LocationType   @default(ONLINE)
+  location                    String
+  community_name              String         @default("")
+  community                   Community?     @relation(fields: [community_id], references: [id])
+  community_id                Int?
+  player_count                Int?
+  traveler_count              Int?
+  player_characters           Character[]
+  win_v2                      WinStatus_V2   @default(NOT_RECORDED)
+  end_trigger                 GameEndTrigger @default(NOT_RECORDED)
+  end_trigger_role            Role?          @relation("GameEndTriggerRole", fields: [end_trigger_role_id], references: [id])
+  end_trigger_role_id         String?
+  end_trigger_note            String         @default("")
+  end_trigger_participant_id String?
+  notes                       String
+  image_urls                  String[]
+  old_image_urls              String[]
+  storyteller                 String?
+  co_storytellers             String[]
+  user                        UserSettings?  @relation(fields: [user_id], references: [user_id])
+  associated_script           Script?        @relation(fields: [script_id], references: [id])
+  grimoire                    Grimoire[]
+  grimoire_id                 Int?           @unique
+  is_storyteller              Boolean        @default(false)
+  parent_game                 Game?          @relation("AssociatedGame", fields: [parent_game_id], references: [id])
+  parent_game_id              String?
+  child_games                 Game[]         @relation("AssociatedGame")
+  ignore_for_stats            Boolean        @default(false)
+  tags                        String[]
+  waiting_for_confirmation    Boolean        @default(false)
+  deleted                     Boolean        @default(false)
+  deleted_date                DateTime?
+  privacy                     PrivacySetting @default(PUBLIC)
+  demon_bluffs                DemonBluff[]
+  fabled                      Fabled[]
+  deaths                      DeathEvent[]
+  favorite                    FavoriteGame?
+  favorite_id                 Int?           @unique
 
   @@index([user_id])
 }
@@ -115,22 +114,21 @@ enum DeathType {
 }
 
 model DeathEvent {
-  id             Int        @id @default(autoincrement())
-  game           Game       @relation(fields: [game_id], references: [id])
-  game_id        String
-  grimoire_page  Int
-  seat_order     Int
-  is_revival     Boolean    @default(false)
-  death_type     DeathType?
-  cause          DeathCause?
-  by_seat_page   Int?
-  by_seat_order  Int?
-  player_name    String     @default("")
-  role_id        String?
-  role           Role?      @relation(fields: [role_id], references: [id])
-  by_role_id     String?
-  by_role        Role?      @relation("DeathEventByRole", fields: [by_role_id], references: [id])
-  created_at     DateTime   @default(now()) @db.Timestamptz(6)
+  id                Int        @id @default(autoincrement())
+  game              Game       @relation(fields: [game_id], references: [id])
+  game_id           String
+  grimoire_page     Int
+  participant_id    String     @default("")
+  is_revival        Boolean    @default(false)
+  death_type        DeathType?
+  cause             DeathCause?
+  by_participant_id String?
+  player_name       String     @default("")
+  role_id           String?
+  role              Role?      @relation(fields: [role_id], references: [id])
+  by_role_id        String?
+  by_role           Role?      @relation("DeathEventByRole", fields: [by_role_id], references: [id])
+  created_at        DateTime   @default(now()) @db.Timestamptz(6)
 }
 
 model Grimoire {
@@ -141,22 +139,23 @@ model Grimoire {
 }
 
 model Token {
-  id              Int             @id @default(autoincrement())
-  role            Role?           @relation(fields: [role_id], references: [id])
-  role_id         String?
-  related_role    Role?           @relation("RelatedToken", fields: [related_role_id], references: [id])
-  related_role_id String?
-  alignment       Alignment
-  is_dead         Boolean         @default(false)
-  used_ghost_vote Boolean         @default(false)
-  order           Int
-  created_at      DateTime        @default(now()) @db.Timestamptz(6)
-  grimoire        Grimoire?       @relation(fields: [grimoire_id], references: [id])
-  grimoire_id     Int?
-  player_name     String          @default("")
-  player          UserSettings?   @relation(fields: [player_id], references: [user_id])
-  player_id       String?
-  reminders       ReminderToken[]
+  id                      Int             @id @default(autoincrement())
+  grimoire_participant_id String?
+  role                    Role?           @relation(fields: [role_id], references: [id])
+  role_id                 String?
+  related_role            Role?           @relation("RelatedToken", fields: [related_role_id], references: [id])
+  related_role_id         String?
+  alignment               Alignment
+  is_dead                 Boolean         @default(false)
+  used_ghost_vote         Boolean         @default(false)
+  order                   Int
+  created_at              DateTime        @default(now()) @db.Timestamptz(6)
+  grimoire                Grimoire?       @relation(fields: [grimoire_id], references: [id])
+  grimoire_id             Int?
+  player_name             String          @default("")
+  player                  UserSettings?   @relation(fields: [player_id], references: [user_id])
+  player_id               String?
+  reminders               ReminderToken[]
 }
 
 model ReminderToken {

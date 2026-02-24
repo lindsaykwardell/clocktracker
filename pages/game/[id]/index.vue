@@ -1107,13 +1107,10 @@ const endTriggerSummary = computed(() => {
     let character = data.end_trigger_role?.name ?? "";
     let player = "";
 
-    if (
-        data.end_trigger_seat_page !== null &&
-        data.end_trigger_seat_order !== null &&
-        data.grimoire?.[data.end_trigger_seat_page]
-    ) {
-        const token = data.grimoire[data.end_trigger_seat_page].tokens.find(
-            (t) => t.order === data.end_trigger_seat_order,
+    if (data.end_trigger_participant_id && data.grimoire?.length) {
+        const token = data.grimoire[data.grimoire.length - 1].tokens.find(
+            (t) =>
+                t.grimoire_participant_id === data.end_trigger_participant_id,
         );
         if (token) {
             if (!character) character = token.role?.name ?? "";
@@ -1140,26 +1137,27 @@ const deathTooltipsForPage = computed(() => {
     const page = data.grimoire?.[pageIndex];
     if (!page) return {};
 
-    const ordered = page.tokens.slice().sort((a, b) => a.order - b.order);
-    const getTokenBySeat = (pIndex: number, seat: number) => {
+    const getTokenByParticipant = (pIndex: number, participantId: string) => {
         const p = data.grimoire?.[pIndex];
         if (!p) return null;
-        const orderedTokens = p.tokens
-            .slice()
-            .sort((a, b) => a.order - b.order);
-        return orderedTokens[seat] || null;
+        return (
+            p.tokens.find(
+                (token) =>
+                    token.grimoire_participant_id === participantId,
+            ) || null
+        );
     };
 
     const tooltips: Record<number, string> = {};
 
-    const deathsBySeat = new Map<number, { page: number; revival: boolean; death: typeof data.deaths[number] }>();
+    const deathsByParticipant = new Map<string, { page: number; revival: boolean; death: typeof data.deaths[number] }>();
 
     data.deaths
         .filter((death) => death.grimoire_page <= pageIndex)
         .forEach((death) => {
-            const existing = deathsBySeat.get(death.seat_order);
+            const existing = deathsByParticipant.get(death.participant_id);
             if (!existing || death.grimoire_page >= existing.page) {
-                deathsBySeat.set(death.seat_order, {
+                deathsByParticipant.set(death.participant_id, {
                     page: death.grimoire_page,
                     revival: death.is_revival,
                     death,
@@ -1167,9 +1165,12 @@ const deathTooltipsForPage = computed(() => {
             }
         });
 
-    deathsBySeat.forEach((entry, seat) => {
+    deathsByParticipant.forEach((entry, participantId) => {
         if (entry.revival) return;
         const death = entry.death;
+            const currentToken = getTokenByParticipant(pageIndex, participantId);
+            if (!currentToken) return;
+            const seat = currentToken.order;
             const typeLabel =
                 death.death_type === DeathType.EXECUTION
                     ? "Executed"
@@ -1182,13 +1183,10 @@ const deathTooltipsForPage = computed(() => {
                         : null;
 
             let byText = "";
-            if (
-                death.by_seat_page !== null &&
-                death.by_seat_order !== null
-            ) {
-                const byToken = getTokenBySeat(
-                    death.by_seat_page,
-                    death.by_seat_order,
+            if (death.by_participant_id) {
+                const byToken = getTokenByParticipant(
+                    death.grimoire_page,
+                    death.by_participant_id,
                 );
                 if (byToken) {
                     const byRole = byToken.role?.name || "Unknown role";
