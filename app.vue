@@ -121,8 +121,8 @@ watch(
       // console.log('userSettings watcher: newSettings is null, user might have logged out or fetch failed.');
     }
   },
-  { immediate: true, deep: true }
-); // deep: true because settings is an object
+  { immediate: true }
+);
 
 // Watch for user ID changes (e.g., login/logout), primarily for client-side scenarios
 // or if useAsyncData initially fails to load data for an authenticated user.
@@ -214,6 +214,10 @@ ChartJS.register(
 ChartJS.defaults.set("plugins.datalabels", {
   display: false,
 });
+
+// Disable animations to prevent requestAnimationFrame stutter when many
+// charts render or re-render simultaneously.
+ChartJS.defaults.set("animation", false);
 </script>
 
 <style>

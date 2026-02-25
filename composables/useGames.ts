@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { markRaw } from "vue";
 import type { FetchStatus } from "./useFetchStatus";
 import type {
   Game,
@@ -49,8 +50,8 @@ export type GameRecord = Omit<Game, "win_v2"> & {
   };
   win_v2: WinStatus_V2;
   player_characters: FullCharacter[];
-  demon_bluffs: FullDemonBluff[];
-  fabled: FullFabled[];
+  demon_bluffs?: FullDemonBluff[];
+  fabled?: FullFabled[];
   user: {
     username: string;
   };
@@ -63,7 +64,7 @@ export type GameRecord = Omit<Game, "win_v2"> & {
         name: string;
       };
       related_role?: { token_url: string };
-      reminders: ReminderToken[];
+      reminders?: ReminderToken[];
       player?: {
         username: string;
         display_name: string;
@@ -485,7 +486,7 @@ export const useGames = defineStore("games", {
 
         this.games.set(gameId, {
           status: Status.SUCCESS,
-          data: game,
+          data: markRaw(game),
         });
       } catch (err) {
         this.games.set(gameId, {
@@ -500,23 +501,34 @@ export const useGames = defineStore("games", {
 
       const games = await $fetch<GameRecord[]>(`/api/user/${username}/games`);
 
-      this.players.set(username, { status: Status.SUCCESS, data: 1 });
+      // Batch all reactive updates into a single notification.
+      // markRaw prevents Vue from creating deep Proxy wrappers for each game
+      // (characters, grimoire, tokens, roles, etc.) — game data is read-only.
+      const newGameIds = new Set(games.map((g) => g.id));
+      this.$patch((state) => {
+        state.players.set(username, { status: Status.SUCCESS, data: 1 });
 
-      for (const game of games) {
-        this.games.set(game.id, {
-          status: Status.SUCCESS,
-          data: game,
-        });
-      }
+        for (const game of games) {
+          state.games.set(game.id, {
+            status: Status.SUCCESS,
+            data: markRaw(game),
+          });
+        }
+      });
 
+      // Purge stale games outside the patch (needs getter access)
       const allGames = this.getByPlayer(username);
       if (allGames.status === Status.SUCCESS) {
-        for (const game of allGames.data) {
-          // If the game is in the new data, don't worry
-          if (games.map((g) => g.id).includes(game.id)) continue;
+        const toDelete = allGames.data
+          .filter((game) => !newGameIds.has(game.id))
+          .map((game) => game.id);
 
-          // Purge the game if it's not in the new data
-          this.games.delete(game.id);
+        if (toDelete.length) {
+          this.$patch((state) => {
+            for (const id of toDelete) {
+              state.games.delete(id);
+            }
+          });
         }
       }
     },
@@ -532,27 +544,31 @@ export const useGames = defineStore("games", {
         `/api/games/${gameId}/similar`
       );
 
-      this.similar.set(gameId, {
-        status: Status.SUCCESS,
-        data: similar.map((g) => g.id),
-      });
-
-      for (const game of similar) {
-        this.games.set(game.id, {
+      this.$patch((state) => {
+        state.similar.set(gameId, {
           status: Status.SUCCESS,
-          data: game,
+          data: similar.map((g) => g.id),
         });
-      }
+
+        for (const game of similar) {
+          state.games.set(game.id, {
+            status: Status.SUCCESS,
+            data: markRaw(game),
+          });
+        }
+      });
     },
     async fetchCommunityGames(slug: string) {
       const games = await $fetch<GameRecord[]>(`/api/games/community/${slug}`);
 
-      for (const game of games) {
-        this.games.set(game.id, {
-          status: Status.SUCCESS,
-          data: game,
-        });
-      }
+      this.$patch((state) => {
+        for (const game of games) {
+          state.games.set(game.id, {
+            status: Status.SUCCESS,
+            data: markRaw(game),
+          });
+        }
+      });
     },
     async importGames(showLoader: () => void) {
       const this_ = this;
@@ -584,12 +600,14 @@ export const useGames = defineStore("games", {
                 body: JSON.stringify({ csv }),
               });
 
-              for (const game of games) {
-                this_.games.set(game.id, {
-                  status: Status.SUCCESS,
-                  data: game,
-                });
-              }
+              this_.$patch((state) => {
+                for (const game of games) {
+                  state.games.set(game.id, {
+                    status: Status.SUCCESS,
+                    data: markRaw(game),
+                  });
+                }
+              });
 
               resolve(games);
             } catch (err) {

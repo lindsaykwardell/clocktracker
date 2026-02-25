@@ -182,6 +182,7 @@ export default defineEventHandler(async (handler) => {
         description: "asc",
       },
     ],
+    take: 50,
   });
 
   const scripts =
@@ -233,6 +234,7 @@ export default defineEventHandler(async (handler) => {
               author: "asc",
             },
           ],
+          take: 50,
         })
       : [];
 
@@ -293,6 +295,7 @@ export default defineEventHandler(async (handler) => {
               username: "asc",
             },
           ],
+          take: 50,
         })
       : [];
 
@@ -344,6 +347,7 @@ export default defineEventHandler(async (handler) => {
               name: "asc",
             },
           ],
+          take: 50,
         })
       : [];
 
