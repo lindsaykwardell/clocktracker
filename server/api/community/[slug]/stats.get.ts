@@ -124,6 +124,7 @@ export default defineEventHandler(async (handler) => {
       { created_at: "desc" },
       { id: "desc" },
     ],
+    take: 5000,
   });
 
   const memberIds = new Set(community.members.map((m) => m.user_id));

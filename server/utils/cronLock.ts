@@ -1,40 +1,34 @@
 import { PrismaClient } from "@prisma/client";
 import { prisma } from "./prisma";
 
-const wait = (time?: number) =>
-  new Promise((resolve) => {
-    setTimeout(resolve, time ?? Math.random() * 10000);
-  });
-
 export async function performLockedTask(
   task_id: string,
   callback: (prisma: PrismaClient) => Promise<void>
 ) {
-  await wait();
-
-  const lock = await prisma.cronLock.findUnique({
-    where: {
-      task_id: task_id,
-    },
-  });
-
-  if (lock !== null) {
-    return;
+  // Atomic lock acquisition: try to create the lock row, if it already exists
+  // (another machine grabbed it), bail out. This eliminates the race condition
+  // from the previous findUnique-then-create pattern.
+  try {
+    await prisma.cronLock.create({
+      data: {
+        task_id: task_id,
+      },
+    });
+  } catch (e: any) {
+    // Unique constraint violation means another machine already holds the lock
+    if (e?.code === "P2002") {
+      return;
+    }
+    throw e;
   }
-
-  await prisma.cronLock.create({
-    data: {
-      task_id: task_id,
-    },
-  });
 
   try {
     await callback(prisma);
   } catch (e) {
-    console.error(e)
+    console.error(e);
   } finally {
-    // Wait a minute
-    await wait(60 * 1000);
+    // Wait a minute before releasing so the other machine doesn't immediately re-run
+    await new Promise((resolve) => setTimeout(resolve, 60 * 1000));
 
     await prisma.cronLock.delete({
       where: {

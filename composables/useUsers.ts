@@ -115,11 +115,6 @@ export const useUsers = defineStore("users", {
           friends.fetchCommunityMembers();
           friends.fetchRequests();
 
-          setInterval(() => {
-            friends.fetchRequests();
-            // one minute
-          }, 1000 * 60);
-
           if (!me.finished_welcome) {
             router.push("/welcome");
           }
