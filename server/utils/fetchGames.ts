@@ -204,33 +204,34 @@ export async function fetchGames(user_id: string, me: User | null) {
           },
         },
       },
-      demon_bluffs: {
-        include: {
-          role: {
-            select: {
-              token_url: true,
-              type: true,
-            },
-          },
-        },
-      },
-      fabled: {
-        include: {
-          role: {
-            select: {
-              token_url: true,
-              type: true,
-            },
-          },
-        },
-      },
       grimoire: {
         include: {
           tokens: {
-            include: {
-              role: true,
-              related_role: true,
-              reminders: true,
+            select: {
+              id: true,
+              role_id: true,
+              related_role_id: true,
+              alignment: true,
+              is_dead: true,
+              used_ghost_vote: true,
+              order: true,
+              grimoire_id: true,
+              player_name: true,
+              player_id: true,
+              created_at: true,
+              role: {
+                select: {
+                  token_url: true,
+                  type: true,
+                  initial_alignment: true,
+                  name: true,
+                },
+              },
+              related_role: {
+                select: {
+                  token_url: true,
+                },
+              },
               player: {
                 select: {
                   display_name: true,

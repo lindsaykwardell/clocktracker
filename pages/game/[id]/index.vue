@@ -393,13 +393,13 @@
                             <!-- Row -->
                             <div
                                 v-if="
-                                    game.data.demon_bluffs.length ||
-                                    game.data.fabled.length
+                                    game.data.demon_bluffs?.length ||
+                                    game.data.fabled?.length
                                 "
                                 class="metadata-row"
                             >
                                 <div
-                                    v-if="game.data.demon_bluffs.length"
+                                    v-if="game.data.demon_bluffs?.length"
                                     class="metadata-item"
                                 >
                                     <span class="metadata-label"
@@ -422,13 +422,13 @@
                                     </div>
                                 </div>
                                 <div
-                                    v-if="game.data.fabled.length"
+                                    v-if="game.data.fabled?.length"
                                     class="metadata-item"
                                 >
                                     <span class="metadata-label">
                                         <template
                                             v-if="
-                                                game.data.fabled.some(
+                                                game.data.fabled?.some(
                                                     (r) =>
                                                         r.role?.type ===
                                                         'FABLED',
@@ -439,12 +439,12 @@
                                         </template>
                                         <template
                                             v-if="
-                                                game.data.fabled.some(
+                                                game.data.fabled?.some(
                                                     (r) =>
                                                         r.role?.type ===
                                                         'FABLED',
                                                 ) &&
-                                                game.data.fabled.some(
+                                                game.data.fabled?.some(
                                                     (r) =>
                                                         r.role?.type ===
                                                         'LORIC',
@@ -455,7 +455,7 @@
                                         </template>
                                         <template
                                             v-if="
-                                                game.data.fabled.some(
+                                                game.data.fabled?.some(
                                                     (r) =>
                                                         r.role?.type ===
                                                         'LORIC',
