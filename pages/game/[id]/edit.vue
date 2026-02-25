@@ -145,7 +145,7 @@ const game = reactive<{
     },
   ],
   demon_bluffs:
-    savedGame.data.value?.demon_bluffs.map((demon_bluff) => ({
+    savedGame.data.value?.demon_bluffs?.map((demon_bluff) => ({
       name: demon_bluff.name,
       role_id: demon_bluff.role_id,
       role: demon_bluff.role || {
@@ -154,7 +154,7 @@ const game = reactive<{
       },
     })) || [],
   fabled:
-    savedGame.data.value?.fabled.map((fabled) => ({
+    savedGame.data.value?.fabled?.map((fabled) => ({
       name: fabled.name,
       role_id: fabled.role_id,
       role: fabled.role || {
@@ -182,7 +182,7 @@ const game = reactive<{
             (token.role ? { token_url: "/1x1.png" } : undefined),
           player_name: token.player_name,
           player_id: token.player_id,
-          reminders: token.reminders.map((reminder) => ({
+          reminders: (token.reminders ?? []).map((reminder) => ({
             reminder: reminder.reminder,
             token_url: reminder.token_url,
           })),
@@ -209,11 +209,11 @@ const formattedGame = computed(() => ({
     role_id: character.role_id,
     related_role_id: character.related_role_id,
   })),
-  demon_bluffs: game.demon_bluffs.map((demon_bluff) => ({
+  demon_bluffs: (game.demon_bluffs ?? []).map((demon_bluff) => ({
     name: demon_bluff.name,
     role_id: demon_bluff.role_id,
   })),
-  fabled: game.fabled.map((fabled) => ({
+  fabled: (game.fabled ?? []).map((fabled) => ({
     name: fabled.name,
     role_id: fabled.role_id,
   })),

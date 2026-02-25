@@ -365,6 +365,7 @@
 <script setup lang="ts">
 import dayjs from "dayjs";
 import type { Event } from "~/composables/useCommunities";
+import type { GameRecord } from "~/composables/useGames";
 import { Status } from "~/composables/useFetchStatus.js";
 import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
 import { useClipboard } from "@vueuse/core";
@@ -392,17 +393,25 @@ const myCommunities = computed(() => {
   }
 });
 
-const getGame = computed(() => {
-  return (id: string) => {
-    const game = games.getGame(id);
-
-    if (game.status === Status.SUCCESS) {
-      return [game.data];
+// Pre-compute tagged game arrays so GameOverviewGrid instances get stable
+// references and don't re-render when unrelated store data changes.
+const taggedGameArrays = computed(() => {
+  const result: Record<string, GameRecord[]> = {};
+  if (!updates.data.value) return result;
+  for (const update of updates.data.value) {
+    if (update.kind === "tagged_game") {
+      const game = games.getGame(update.game.id);
+      if (game.status === Status.SUCCESS) {
+        result[update.game.id] = [game.data];
+      }
     }
-
-    return [];
-  };
+  }
+  return result;
 });
+
+const getGame = (id: string): GameRecord[] => {
+  return taggedGameArrays.value[id] ?? [];
+};
 
 const userGames = computed(() => {
   if (me.value.status !== Status.SUCCESS) return { status: Status.IDLE };

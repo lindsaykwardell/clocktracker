@@ -32,7 +32,7 @@ export type GameRecord = Game & {
         name: string;
       };
       related_role?: { token_url: string };
-      reminders: ReminderToken[];
+      reminders?: ReminderToken[];
       player?: {
         username: string;
         display_name: string;
