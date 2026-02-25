@@ -14,7 +14,7 @@
       >
         <div class="reminder-tokens">
           <div
-            v-for="(reminderToken, tokenIndex) in token.reminders"
+            v-for="(reminderToken, tokenIndex) in (token.reminders ?? [])"
             class="reminder-token"
             :style="`--ti: ${tokenIndex}`"
           >

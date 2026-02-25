@@ -45,12 +45,7 @@
                   class="script-chart absolute w-32 h-32 md:w-44 md:h-44 -left-2 -top-2 transition duration-200 ease-in-out print:hidden"
                 >
                   <Pie
-                    :data="
-                      perScriptRadioData(
-                        script.wins,
-                        script.count - script.wins
-                      )
-                    "
+                    :data="perScriptChartData[script.script]"
                     :options="scriptWinRatioOptions"
                   />
                 </div>
@@ -249,18 +244,22 @@ const winRatioData = computed(() => ({
   ],
 }));
 
-function perScriptRadioData(wins: number, losses: number) {
-  return {
-    labels: ["Win", "Loss"],
-    datasets: [
-      {
-        data: [wins, losses],
-        hoverOffset: 4,
-        backgroundColor: [chartColors.win, chartColors.loss],
-      },
-    ],
-  };
-}
+const perScriptChartData = computed(() => {
+  const map: Record<string, { labels: string[]; datasets: { data: number[]; hoverOffset: number; backgroundColor: string[] }[] }> = {};
+  for (const script of role_data.popular_scripts) {
+    map[script.script] = {
+      labels: ["Win", "Loss"],
+      datasets: [
+        {
+          data: [script.wins, script.count - script.wins],
+          hoverOffset: 4,
+          backgroundColor: [chartColors.win, chartColors.loss],
+        },
+      ],
+    };
+  }
+  return map;
+});
 
 const winRatioOptions = computed(() => ({
   responsive: true,
