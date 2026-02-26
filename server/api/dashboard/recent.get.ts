@@ -369,6 +369,7 @@ export default defineEventHandler(async (handler) => {
     orderBy: {
       created_at: "desc",
     },
+    take: 50,
   });
 
   const taggedGames = await prisma.game.findMany({
@@ -393,6 +394,10 @@ export default defineEventHandler(async (handler) => {
         },
       },
     },
+    orderBy: {
+      created_at: "desc",
+    },
+    take: 50,
   });
 
   const updates: Update[] = [];
