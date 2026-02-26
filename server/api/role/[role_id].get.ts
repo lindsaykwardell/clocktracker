@@ -1,4 +1,3 @@
-import { Alignment, WinStatus_V2 } from "@prisma/client";
 import dayjs from "dayjs";
 import { prisma } from "~/server/utils/prisma";
 
@@ -18,162 +17,202 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  // Fetch all games that have this role
-  const games = await prisma.game.findMany({
-    where: {
-      player_characters: {
-        some: {
-          role_id,
+  const escapedRoleId = role_id.replace(/'/g, "''");
+
+  // Run independent queries in parallel
+  const [totalCount, winLossRows, gameMonthDates, popular_scripts] =
+    await Promise.all([
+      // Total count of games with this role (any character position)
+      prisma.game.count({
+        where: {
+          player_characters: {
+            some: {
+              role_id,
+            },
+          },
         },
-      },
-    },
-    include: {
-      player_characters: true,
-    },
-  });
+      }),
 
-  // Calculate the win/loss ratio for all games
-  const win_loss = {
-    wins: 0,
-    losses: 0,
-  };
+      // Win/loss where the LAST character has this role, grouped by script_id
+      // so we can derive both overall and per-script rates from one query
+      prisma.$queryRawUnsafe<
+        {
+          script_id: number | null;
+          wins: bigint;
+          losses: bigint;
+        }[]
+      >(`
+        WITH last_chars AS (
+          SELECT DISTINCT ON (c."game_id")
+            c."game_id", c."role_id", c."alignment"
+          FROM "Character" c
+          WHERE c."game_id" IN (
+            SELECT DISTINCT c2."game_id"
+            FROM "Character" c2
+            WHERE c2."role_id" = '${escapedRoleId}' AND c2."game_id" IS NOT NULL
+          )
+          ORDER BY c."game_id", c."id" DESC
+        )
+        SELECT
+          g."script_id",
+          COUNT(*) FILTER (WHERE
+            (lc."alignment" = 'GOOD' AND g."win_v2" = 'GOOD_WINS') OR
+            (lc."alignment" = 'EVIL' AND g."win_v2" = 'EVIL_WINS')
+          )::bigint AS wins,
+          COUNT(*) FILTER (WHERE
+            g."win_v2" != 'NOT_RECORDED' AND NOT (
+              (lc."alignment" = 'GOOD' AND g."win_v2" = 'GOOD_WINS') OR
+              (lc."alignment" = 'EVIL' AND g."win_v2" = 'EVIL_WINS')
+            )
+          )::bigint AS losses
+        FROM last_chars lc
+        JOIN "Game" g ON g."id" = lc."game_id"
+        WHERE lc."role_id" = '${escapedRoleId}'
+        GROUP BY g."script_id"
+      `),
 
-  for (const game of games) {
-    const lastCharacter =
-      game.player_characters[game.player_characters.length - 1];
+      // Game dates for the past 12 months (lightweight, no characters loaded)
+      prisma.game.findMany({
+        where: {
+          player_characters: {
+            some: {
+              role_id,
+            },
+          },
+          date: {
+            gte: dayjs().subtract(12, "month").toDate(),
+          },
+        },
+        select: { date: true },
+      }),
 
-    if (lastCharacter.role_id === role_id) {
-      if (
-        (lastCharacter.alignment === Alignment.GOOD &&
-          game.win_v2 === WinStatus_V2.GOOD_WINS) ||
-        (lastCharacter.alignment === Alignment.EVIL &&
-          game.win_v2 === WinStatus_V2.EVIL_WINS)
-      ) {
-        win_loss.wins++;
-      } else if (game.win_v2 !== WinStatus_V2.NOT_RECORDED) {
-        win_loss.losses++;
-      }
-    }
+      // Top 10 most played scripts with this role (already efficient)
+      prisma.game.groupBy({
+        by: ["script_id", "script"],
+        where: {
+          player_characters: {
+            some: {
+              role_id,
+            },
+          },
+        },
+        orderBy: [
+          {
+            _count: {
+              script_id: "desc",
+            },
+          },
+          {
+            script: "asc",
+          },
+        ],
+        _count: {
+          script_id: true,
+        },
+        take: 10,
+      }),
+    ]);
+
+  // Compute overall win/loss by summing across all scripts
+  let totalWins = 0;
+  let totalLosses = 0;
+  const winRateByScript = new Map<
+    number | null,
+    { wins: number; losses: number }
+  >();
+
+  for (const row of winLossRows) {
+    const w = Number(row.wins);
+    const l = Number(row.losses);
+    totalWins += w;
+    totalLosses += l;
+    winRateByScript.set(row.script_id, { wins: w, losses: l });
   }
 
-  // Get the count of games played over the past 12 months
+  const winLossTotal = totalWins + totalLosses;
+
+  // Build games_by_month
   const months = Array.from(Array(12).keys())
     .map((i) => dayjs().subtract(i, "month").format("MMMM"))
     .reverse();
 
-  const games_by_month = Object.fromEntries(months.map((month) => [month, 0]));
+  const games_by_month: Record<string, number> = Object.fromEntries(
+    months.map((month) => [month, 0])
+  );
 
-  games.forEach((game) => {
-    // If the game is not in the past 12 months, skip it
-    if (dayjs(game.date).isBefore(dayjs().subtract(12, "month"))) {
-      return;
-    }
+  for (const game of gameMonthDates) {
     const month = dayjs(game.date).format("MMMM");
-    games_by_month[month] = games_by_month[month] + 1;
-  });
-
-  // Get top ten most played scripts with this role.
-  const popular_scripts = await prisma.game.groupBy({
-    by: ["script_id", "script"],
-    where: {
-      player_characters: {
-        some: {
-          role_id,
-        },
-      },
-    },
-    orderBy: [
-      {
-        _count: {
-          script_id: "desc",
-        },
-      },
-      {
-        script: "asc",
-      },
-    ],
-    _count: {
-      script_id: true,
-    },
-    take: 10,
-  });
-
-  const popular_scripts_formatted = [];
-
-  for (const script of popular_scripts) {
-    let logo: string | null = null;
-    let version: string | null = null;
-    let custom_script_id: string | null = null;
-
-    if (script.script_id) {
-      const associated_script = await prisma.script.findUnique({
-        where: {
-          id: script.script_id,
-        },
-        select: {
-          logo: true,
-          version: true,
-          script_id: true,
-          is_custom_script: true,
-        },
-      });
-
-      if (associated_script) {
-        logo = associated_script.logo;
-        version = associated_script.version;
-        if (associated_script.is_custom_script) {
-          custom_script_id = associated_script.script_id;
-        }
-      }
+    if (month in games_by_month) {
+      games_by_month[month]++;
     }
+  }
 
-    let wins = 0;
-    let total = 0;
+  // Batch fetch script metadata (instead of N+1 findUnique per script)
+  const scriptIds = popular_scripts
+    .map((s) => s.script_id)
+    .filter((id): id is number => id !== null);
 
-    for (const game of games) {
-      const lastCharacter =
-        game.player_characters[game.player_characters.length - 1];
-
-      if (
-        lastCharacter.role_id === role_id &&
-        game.script_id === script.script_id
-      ) {
-        total++;
-        if (
-          (lastCharacter.alignment === Alignment.GOOD &&
-            game.win_v2 === WinStatus_V2.GOOD_WINS) ||
-          (lastCharacter.alignment === Alignment.EVIL &&
-            game.win_v2 === WinStatus_V2.EVIL_WINS)
-        ) {
-          wins++;
-        }
-      }
+  const scriptsMap = new Map<
+    number,
+    {
+      logo: string | null;
+      version: string | null;
+      script_id: string;
+      is_custom_script: boolean;
     }
+  >();
 
-    const pct = +((wins / total) * 100).toFixed(2);
+  if (scriptIds.length > 0) {
+    const scripts = await prisma.script.findMany({
+      where: { id: { in: scriptIds } },
+      select: {
+        id: true,
+        logo: true,
+        version: true,
+        script_id: true,
+        is_custom_script: true,
+      },
+    });
+    for (const s of scripts) {
+      scriptsMap.set(s.id, s);
+    }
+  }
 
-    popular_scripts_formatted.push({
+  // Format popular scripts with win rates from the SQL result
+  const popular_scripts_formatted = popular_scripts.map((script) => {
+    const meta = script.script_id ? scriptsMap.get(script.script_id) : null;
+    const rates = winRateByScript.get(script.script_id) ?? {
+      wins: 0,
+      losses: 0,
+    };
+    const scriptTotal = rates.wins + rates.losses;
+    const pct =
+      scriptTotal === 0 ? 0 : +((rates.wins / scriptTotal) * 100).toFixed(2);
+
+    return {
       script_id: script.script_id,
       script: script.script,
-      version,
-      custom_script_id,
-      logo: logo,
-      wins,
+      version: meta?.version ?? null,
+      custom_script_id: meta?.is_custom_script ? meta.script_id : null,
+      logo: meta?.logo ?? null,
+      wins: rates.wins,
       pct,
       count: script._count.script_id,
-    });
-  }
+    };
+  });
 
   return {
     role,
     win_loss: {
-      ...win_loss,
-      pct: +((win_loss.wins / (win_loss.wins + win_loss.losses)) * 100).toFixed(
-        2
-      ),
+      wins: totalWins,
+      losses: totalLosses,
+      pct:
+        winLossTotal === 0
+          ? 0
+          : +((totalWins / winLossTotal) * 100).toFixed(2),
     },
     popular_scripts: popular_scripts_formatted,
     games_by_month,
-    count: games.length,
+    count: totalCount,
   };
 });
