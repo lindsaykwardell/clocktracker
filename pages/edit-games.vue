@@ -22,8 +22,8 @@
 import {
   WinStatus_V2,
   type GameEndTrigger,
-  DeathCause,
-  DeathType,
+  GrimoireEventCause,
+  GrimoireEventType,
 } from "~/composables/useGames";
 
 definePageMeta({
@@ -101,12 +101,11 @@ const game = reactive<{
     initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
     name: string;
   } | null;
-  deaths: {
+  grimoire_events: {
     grimoire_page: number;
     participant_id: string;
-    is_revival: boolean;
-    death_type: DeathType | null;
-    cause: DeathCause | null;
+    event_type: GrimoireEventType | null;
+    cause: GrimoireEventCause | null;
     by_participant_id: string | null;
     player_name: string;
     role_id: string | null;
@@ -159,7 +158,7 @@ const game = reactive<{
   end_trigger_note: "",
   end_trigger_participant_id: null,
   end_trigger_role: null,
-  deaths: [],
+  grimoire_events: [],
   notes: "",
   image_urls: [],
   grimoire: [

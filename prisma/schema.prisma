@@ -65,7 +65,7 @@ model Game {
   privacy                     PrivacySetting @default(PUBLIC)
   demon_bluffs                DemonBluff[]
   fabled                      Fabled[]
-  deaths                      DeathEvent[]
+  grimoire_events             GrimoireEvent[]
   favorite                    FavoriteGame?
   favorite_id                 Int?           @unique
 
@@ -103,31 +103,35 @@ enum GameEndTrigger {
   OTHER
 }
 
-enum DeathCause {
+enum GrimoireEventCause {
   ABILITY
   NOMINATION
 }
 
-enum DeathType {
+enum GrimoireEventType {
+  NOT_RECORDED
   DEATH
   EXECUTION
+  REVIVE
+  ROLE_CHANGE
+  SEAT_CHANGE
+  ALIGNMENT_CHANGE
 }
 
-model DeathEvent {
+model GrimoireEvent {
   id                Int        @id @default(autoincrement())
   game              Game       @relation(fields: [game_id], references: [id])
   game_id           String
   grimoire_page     Int
   participant_id    String     @default("")
-  is_revival        Boolean    @default(false)
-  death_type        DeathType?
-  cause             DeathCause?
+  event_type        GrimoireEventType @default(NOT_RECORDED)
+  cause             GrimoireEventCause?
   by_participant_id String?
   player_name       String     @default("")
   role_id           String?
   role              Role?      @relation(fields: [role_id], references: [id])
   by_role_id        String?
-  by_role           Role?      @relation("DeathEventByRole", fields: [by_role_id], references: [id])
+  by_role           Role?      @relation("GrimoireEventByRole", fields: [by_role_id], references: [id])
   created_at        DateTime   @default(now()) @db.Timestamptz(6)
 }
 
@@ -242,8 +246,8 @@ model Role {
   demon_bluffs         DemonBluff[]
   fabled               Fabled[]
   end_trigger_games    Game[]         @relation("GameEndTriggerRole")
-  death_events         DeathEvent[]
-  death_by_events      DeathEvent[]   @relation("DeathEventByRole")
+  grimoire_events      GrimoireEvent[]
+  grimoire_by_events   GrimoireEvent[]   @relation("GrimoireEventByRole")
   reminders            RoleReminder[]
   ls_campaigns         LSCampaign[]
   ls_games             LSGame[]       @relation("Games")

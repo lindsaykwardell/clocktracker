@@ -4,7 +4,7 @@ import type {
   Grimoire,
   Token,
   ReminderToken,
-  DeathEvent,
+  GrimoireEvent,
 } from "@prisma/client";
 import { PrivacySetting } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
@@ -20,7 +20,7 @@ export type FullCharacter = Character & {
 
 export type GameRecord = Game & {
   player_characters: FullCharacter[];
-  deaths: DeathEvent[];
+  grimoire_events: GrimoireEvent[];
   user: {
     username: string;
     privacy: PrivacySetting;
@@ -126,9 +126,9 @@ export async function anonymizeGame(
       }),
     );
 
-    game.deaths?.map((death) => {
-      if (death.player_name) {
-        death.player_name = shortenName(death.player_name);
+    game.grimoire_events?.map((grimoireEvent) => {
+      if (grimoireEvent.player_name) {
+        grimoireEvent.player_name = shortenName(grimoireEvent.player_name);
       }
     });
   }

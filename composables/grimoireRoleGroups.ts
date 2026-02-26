@@ -1,0 +1,33 @@
+export const WILDCARD_ROLE_IDS: string[] = [
+  "alchemist",
+  "amnesiac",
+  "atheist",
+  "cannibal",
+  "philosopher",
+  "pixie",
+  "hermit",
+  "wizard",
+  "plague_doctor",
+  "apprentice",
+  "bootlegger",
+];
+
+export const KILLING_DEMON_ROLE_IDS: string[] = [
+  "al-hadikhia",
+  "fang_gu",
+  "imp",
+  "kazali",
+  "legion",
+  "lil_monsta",
+  "lleech",
+  "lord_of_typhon",
+  "no_dashii",
+  "ojo",
+  "po",
+  "pukka",
+  "shabaloth",
+  "vigormortis",
+  "vortox",
+  "yaggababble",
+  "zombuul",
+];

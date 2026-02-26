@@ -924,8 +924,8 @@
 import {
     GameEndTrigger,
     WinStatus_V2,
-    DeathType,
-    DeathCause,
+    GrimoireEventType,
+    GrimoireEventCause,
 } from "~/composables/useGames";
 import type { GameRecord } from "~/composables/useGames";
 import { displayWinIconSvg } from "~/composables/useGames";
@@ -1150,43 +1150,43 @@ const deathTooltipsForPage = computed(() => {
 
     const tooltips: Record<number, string> = {};
 
-    const deathsByParticipant = new Map<string, { page: number; revival: boolean; death: typeof data.deaths[number] }>();
+    const grimoireEventsByParticipant = new Map<string, { page: number; revival: boolean; event: typeof data.grimoire_events[number] }>();
 
-    data.deaths
-        .filter((death) => death.grimoire_page <= pageIndex)
-        .forEach((death) => {
-            const existing = deathsByParticipant.get(death.participant_id);
-            if (!existing || death.grimoire_page >= existing.page) {
-                deathsByParticipant.set(death.participant_id, {
-                    page: death.grimoire_page,
-                    revival: death.is_revival,
-                    death,
+    data.grimoire_events
+        .filter((event) => event.grimoire_page <= pageIndex)
+        .forEach((event) => {
+            const existing = grimoireEventsByParticipant.get(event.participant_id);
+            if (!existing || event.grimoire_page >= existing.page) {
+                grimoireEventsByParticipant.set(event.participant_id, {
+                    page: event.grimoire_page,
+                    revival: event.event_type === GrimoireEventType.REVIVE,
+                    event,
                 });
             }
         });
 
-    deathsByParticipant.forEach((entry, participantId) => {
+    grimoireEventsByParticipant.forEach((entry, participantId) => {
         if (entry.revival) return;
-        const death = entry.death;
+        const event = entry.event;
             const currentToken = getTokenByParticipant(pageIndex, participantId);
             if (!currentToken) return;
             const seat = currentToken.order;
             const typeLabel =
-                death.death_type === DeathType.EXECUTION
+                event.event_type === GrimoireEventType.EXECUTION
                     ? "Executed"
                     : "Died";
             const causeLabel =
-                death.cause === DeathCause.NOMINATION
+                event.cause === GrimoireEventCause.NOMINATION
                     ? "nomination"
-                    : death.cause === DeathCause.ABILITY
+                    : event.cause === GrimoireEventCause.ABILITY
                         ? "ability"
                         : null;
 
             let byText = "";
-            if (death.by_participant_id) {
+            if (event.by_participant_id) {
                 const byToken = getTokenByParticipant(
-                    death.grimoire_page,
-                    death.by_participant_id,
+                    event.grimoire_page,
+                    event.by_participant_id,
                 );
                 if (byToken) {
                     const byRole = byToken.role?.name || "Unknown role";
