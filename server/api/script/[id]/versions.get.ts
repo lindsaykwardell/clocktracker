@@ -1,4 +1,4 @@
-import { User } from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 import { getScriptVersions } from "~/server/utils/getScriptVersions";
 import { prisma } from "~/server/utils/prisma";
 

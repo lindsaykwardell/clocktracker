@@ -1,11 +1,5 @@
 import type { User } from "@supabase/supabase-js";
-import {
-  Alignment,
-  Character,
-  LocationType,
-  Role,
-  WinStatus_V2,
-} from "@prisma/client";
+import { Alignment, type Character, LocationType, type Role, WinStatus_V2 } from "@prisma/client";
 import papaparse from "papaparse";
 import { prisma } from "~/server/utils/prisma";
 

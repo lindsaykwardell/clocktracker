@@ -1,4 +1,4 @@
-import { User } from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 import naturalOrder from "natural-order";
 import { prisma } from "~/server/utils/prisma";
 

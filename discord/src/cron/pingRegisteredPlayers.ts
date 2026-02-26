@@ -1,4 +1,4 @@
-import { PrismaClient, Event } from "@prisma/client";
+import { PrismaClient, type Event } from "@prisma/client";
 import { Client } from "discord.js";
 import dayjs from "dayjs";
 

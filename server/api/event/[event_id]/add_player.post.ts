@@ -1,5 +1,5 @@
 import { WhoCanRegister } from "@prisma/client";
-import { User } from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 import { fetchEventAndUpdateDiscord } from "~/server/utils/fetchEventAndUpdateDiscord";
 import { prisma } from "~/server/utils/prisma";
 

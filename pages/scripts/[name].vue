@@ -276,7 +276,7 @@ useHead({
   title: script.value.name,
   meta: [
     {
-      hid: "description",
+      key: "description",
       name: "description",
       content: `View stats and recent games for ${script.value.name}.`,
     },
