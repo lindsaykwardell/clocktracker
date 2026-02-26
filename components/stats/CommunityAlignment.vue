@@ -306,8 +306,9 @@ const perPlayerGames = computed<Map<string, PlayerGame[]>>(() => {
             token.player_name ||
             null;
           if (!rawName) continue;
-          const playerById = token.player?.user_id
-            ? playerIndexById.value.get(token.player.user_id)
+          const tokenPlayer = token.player as { user_id?: string; username?: string; display_name?: string; avatar?: string | null } | null;
+          const playerById = tokenPlayer?.user_id
+            ? playerIndexById.value.get(tokenPlayer.user_id)
             : null;
           const normalized = rawName.trim().startsWith("@")
             ? rawName.trim().slice(1)

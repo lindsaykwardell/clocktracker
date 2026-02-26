@@ -224,6 +224,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { Game, Character } from "@prisma/client";
+import type { GameRecord } from "~/composables/useGames";
 import { chartColors } from "~/composables/useChartColors";
 
 type Alignment = "GOOD" | "EVIL" | null;
@@ -268,9 +269,12 @@ type GameWithChars = Game & {
 };
 
 const props = defineProps<{
-  games: GameWithChars[];
+  games: GameRecord[];
   isMe?: boolean;
 }>();
+
+// Cast GameRecord[] to the wider local type for internal use.
+const internalGames = computed(() => props.games as unknown as GameWithChars[]);
 
 type AlignmentSwitchStats = {
   trackedGames: number;
@@ -300,7 +304,7 @@ type AlignmentStreaks = {
 };
 
 const orderedGames = computed(() => {
-  return [...props.games]
+  return [...internalGames.value]
     .map((game, index) => ({
       game,
       index,

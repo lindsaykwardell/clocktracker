@@ -1,43 +1,43 @@
 import { WhoCanRegister } from "@prisma/client";
-import { User } from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 import { prisma } from "~/server/utils/prisma";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
   const slug = handler.context.params!.slug;
 
-  const isModerator = !!(await prisma.community.findFirst({
-    where: {
-      slug,
-      admins: {
-        some: {
-          user_id: me?.id || "",
+  const [isModerator, isPendingMember, isBanned] = await Promise.all([
+    prisma.community.findFirst({
+      where: {
+        slug,
+        admins: {
+          some: {
+            user_id: me?.id || "",
+          },
         },
       },
-    },
-  }));
-
-  const isPendingMember = !!(await prisma.community.findFirst({
-    where: {
-      slug,
-      join_requests: {
-        some: {
-          user_id: me?.id || "",
+    }).then((r) => !!r),
+    prisma.community.findFirst({
+      where: {
+        slug,
+        join_requests: {
+          some: {
+            user_id: me?.id || "",
+          },
         },
       },
-    },
-  }));
-
-  const isBanned = !!(await prisma.community.findFirst({
-    where: {
-      slug,
-      banned_users: {
-        some: {
-          user_id: me?.id || "",
+    }).then((r) => !!r),
+    prisma.community.findFirst({
+      where: {
+        slug,
+        banned_users: {
+          some: {
+            user_id: me?.id || "",
+          },
         },
       },
-    },
-  }));
+    }).then((r) => !!r),
+  ]);
 
   const community = await prisma.community.findUnique({
     where: {

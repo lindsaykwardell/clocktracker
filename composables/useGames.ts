@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { markRaw } from "vue";
 import type { FetchStatus } from "./useFetchStatus";
 import type {
+  Alignment,
   Game,
   Character,
   Grimoire,
@@ -23,6 +24,7 @@ export type FullCharacter = Character & {
     token_url: string;
     type: string;
     initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+    alternate_token_urls?: string[] | null;
   };
   related_role?: { token_url: string };
 };
@@ -388,7 +390,7 @@ export const useGames = defineStore("games", {
             related_role_id: last.related_role_id ?? lastChar.related_role_id,
             role: last.role ?? lastChar.role,
             related_role: last.related_role ?? lastChar.related_role,
-          };
+          } as FullCharacter;
         }
 
         return characters[characters.length - 1];
@@ -711,7 +713,7 @@ export function displayWinIconSvg(game: GameRecord, showTeamWin: boolean = false
         <path d="m13.3 15.1-1.8-1.4c-.2-.1-.3-.2-.5-.3L9.6 13v-2.2l-.8-.8c-.1 0-.2.2-.2.4V13c0 .5.3.9.8 1l1.4.4h.2l.6.5h-7l.6-.5h.2l1.4-.4c.4-.1.8-.5.8-1v-2.6c0-.3-.2-.5-.5-.5-.5 0-1.7-.5-2.6-2.9-.2-.5-.4-1.1-.5-1.8L2.8 4c.1 1.1.4 2.1.6 2.9-1.1.2-2.1-.5-2.3-1.6-.2-.8.2-1.6.9-2.1l-.7-.7c-1 .8-1.5 2-1.3 3.1.4 1.6 2 2.6 3.6 2.3.8 1.9 1.9 2.8 2.8 3v2.2l-1.4.4c-.2 0-.4.1-.5.3l-1.8 1.4c-.1 0-.2.2-.2.4 0 .3.2.5.5.5h10c.2 0 .3 0 .4-.2.2-.2.1-.5-.1-.7Z"/><path d="M13.5 2V.5c0-.5-.2-.5-.5-.5H2.9l1 1h8.6v1.5c-.1 2-.5 3.5-.9 4.7-.2.4-.3.8-.5 1.1l.7.7c.2-.3.4-.6.5-1h.2c1.6.3 3.2-.8 3.4-2.5s-.8-3.2-2.5-3.4ZM15 5.4c-.2 1.1-1.2 1.8-2.3 1.6.3-1 .6-2.3.7-3.9 1.1.2 1.8 1.2 1.6 2.3Z"/><path d="M1.036.877 1.743.17l12.02 12.021-.707.707z"/>
       `
     ),
-    none: icon("No result", "")
+    none: icon("currentColor", "No result", "")
   };
 
   // Storyteller or team win.
@@ -722,7 +724,7 @@ export function displayWinIconSvg(game: GameRecord, showTeamWin: boolean = false
   }
 
   // Player-specific outcome.
-  if (game.player_characters.length === 0) return icons.none;
+  if (game.player_characters.length === 0 || !lastChar) return icons.none;
   const alignment = lastChar.alignment;
 
   if (

@@ -450,7 +450,7 @@ function resolvePlayerIdentity(
     };
   }
 
-  const name = player_name || player?.username;
+  const name = player_name;
   if (!name) return null;
 
   return {

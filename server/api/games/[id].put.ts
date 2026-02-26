@@ -1,14 +1,5 @@
 import type { User } from "@supabase/supabase-js";
-import {
-  Game,
-  Character,
-  Grimoire,
-  Token,
-  Alignment,
-  DemonBluff,
-  Fabled,
-  ReminderToken,
-} from "@prisma/client";
+import { type Game, type Character, type Grimoire, type Token, Alignment, type DemonBluff, type Fabled, type ReminderToken } from "@prisma/client";
 import { prisma } from "~/server/utils/prisma";
 
 export default defineEventHandler(async (handler) => {

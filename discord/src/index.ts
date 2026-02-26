@@ -1,15 +1,6 @@
 // use dotenv to load environment variables
 import "dotenv/config";
-import {
-  CacheType,
-  Client,
-  Collection,
-  CommandInteraction,
-  Events,
-  GatewayIntentBits,
-  REST,
-  Routes,
-} from "discord.js";
+import { type CacheType, Client, Collection, CommandInteraction, Events, GatewayIntentBits, REST, Routes } from "discord.js";
 import fs from "fs";
 import path from "path";
 import { CronJob } from "cron";

@@ -1,6 +1,6 @@
 import { PrivacySetting } from "@prisma/client";
-import { User } from "@supabase/supabase-js";
-import { GameRecord } from "~/server/utils/anonymizeGame";
+import type { User } from "@supabase/supabase-js";
+import type { GameRecord } from "~/server/utils/anonymizeGame";
 import { prisma } from "~/server/utils/prisma";
 
 export default defineEventHandler(async (handler) => {
@@ -98,33 +98,34 @@ export default defineEventHandler(async (handler) => {
           },
         },
       },
-      demon_bluffs: {
-        include: {
-          role: {
-            select: {
-              token_url: true,
-              type: true,
-            },
-          },
-        },
-      },
-      fabled: {
-        include: {
-          role: {
-            select: {
-              token_url: true,
-              type: true,
-            },
-          },
-        },
-      },
       grimoire: {
         include: {
           tokens: {
-            include: {
-              role: true,
-              related_role: true,
-              reminders: true,
+            select: {
+              id: true,
+              role_id: true,
+              related_role_id: true,
+              alignment: true,
+              is_dead: true,
+              used_ghost_vote: true,
+              order: true,
+              grimoire_id: true,
+              player_name: true,
+              player_id: true,
+              created_at: true,
+              role: {
+                select: {
+                  token_url: true,
+                  type: true,
+                  initial_alignment: true,
+                  name: true,
+                },
+              },
+              related_role: {
+                select: {
+                  token_url: true,
+                },
+              },
               player: {
                 select: {
                   display_name: true,
@@ -186,11 +187,7 @@ export default defineEventHandler(async (handler) => {
   for (const game of games) {
     anonymizedGames.push(
       await anonymizeGame(
-        {
-          ...game,
-          demon_bluffs: [],
-          fabled: [],
-        } as GameRecord,
+        game as GameRecord,
         me,
         false // always default to anonymous when loading on a community page
       )

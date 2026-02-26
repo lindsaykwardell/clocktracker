@@ -1,10 +1,10 @@
 import type { User } from "@supabase/supabase-js";
 import { PrivacySetting } from "@prisma/client";
-import { anonymizeGame, GameRecord } from "~/server/utils/anonymizeGame";
+import { anonymizeGame, type GameRecord } from "~/server/utils/anonymizeGame";
 import { prisma } from "./prisma";
 
 export async function fetchGames(user_id: string, me: User | null) {
-  const games = await prisma.game.findMany({
+  const [games, isFriend] = await Promise.all([prisma.game.findMany({
     where: {
       deleted: false,
       user_id,
@@ -280,12 +280,9 @@ export async function fetchGames(user_id: string, me: User | null) {
         id: "desc",
       },
     ],
-  });
-
-  const anonymizedGames: GameRecord[] = [];
-
-  // We need to know if the user is a friend of the game creator
-  const isFriend = !!(await prisma.friend.findFirst({
+  }),
+  // Run friend check in parallel with games query
+  prisma.friend.findFirst({
     where: {
       OR: [
         {
@@ -298,7 +295,10 @@ export async function fetchGames(user_id: string, me: User | null) {
         },
       ],
     },
-  }));
+  }).then((r) => !!r),
+  ]);
+
+  const anonymizedGames: GameRecord[] = [];
 
   for (const game of games) {
     anonymizedGames.push(await anonymizeGame(game as GameRecord, me, isFriend));

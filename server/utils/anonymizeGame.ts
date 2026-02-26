@@ -6,7 +6,7 @@ import type {
   ReminderToken,
 } from "@prisma/client";
 import { PrivacySetting } from "@prisma/client";
-import { User } from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 
 export type FullCharacter = Character & {
   role?: {

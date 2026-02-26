@@ -85,25 +85,27 @@
 <script setup lang="ts">
 import { useRoleImage } from "~/composables/useRoleImage";
 
+type TokenCharacter = {
+  alignment?: string | null;
+  name?: string | null;
+  related?: string | null;
+  role_id?: string | null;
+  related_role_id?: string | null;
+  role?: {
+    id?: string;
+    token_url?: string | null;
+    type?: string | null;
+    initial_alignment?: string | null;
+    name?: string | null;
+    custom_role?: boolean;
+    [key: string]: unknown;
+  } | null;
+  related_role?: { token_url?: string | null; id?: string; name?: string | null; [key: string]: unknown } | null;
+  [key: string]: unknown;
+};
+
 const props = defineProps<{
-  character?:
-    | {
-        alignment?: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
-        name?: string;
-        related?: string | null;
-        role_id?: string | null;
-        related_role_id?: string | null;
-        role?: {
-          id: string;
-          token_url?: string;
-          type: string;
-          initial_alignment?: "GOOD" | "EVIL" | "NEUTRAL";
-          name?: string;
-          custom_role?: boolean;
-        };
-        related_role?: { token_url?: string; id?: string; name?: string };
-      }
-    | undefined;
+  character?: TokenCharacter | undefined;
   size?: "sm" | "reminder" | "md" | "front" | "lg";
   alwaysShowAlignment?: boolean;
   hideRelated?: boolean;

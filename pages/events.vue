@@ -56,7 +56,7 @@ function canModifyEvent(event: Event) {
   if (me.value.status !== Status.SUCCESS) return false;
 
   return me.value.data.community_admin?.some(
-    (c) => c.id === event.community.id
+    (c) => c.id === event.community?.id
   );
 }
 

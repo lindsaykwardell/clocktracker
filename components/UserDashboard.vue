@@ -258,7 +258,6 @@
         <div class="flex-1">
           <div class="text-center">
             <Button
-              v-if="!featureFlags.isEnabled('ical')"
               component="nuxt-link"
               to="/event/create"
               size="sm"
@@ -272,48 +271,7 @@
             @selectDay="selectDay"
             :selectedDay="selectedDay"
             clickableDays
-          >
-            <Menu v-if="featureFlags.isEnabled('ical')">
-              <MenuButton>
-                <IconUI id="dots" :rounded="true" shadow />
-              </MenuButton>
-              <transition
-                enter-active-class="transition duration-100 ease-out"
-                enter-from-class="transform scale-95 opacity-0"
-                enter-to-class="transform scale-100 opacity-100"
-                leave-active-class="transition duration-75 ease-out"
-                leave-from-class="transform scale-100 opacity-100"
-                leave-to-class="transform scale-95 opacity-0"
-              >
-                <MenuItems
-                  class="ct-contextual-links right-0"
-                >
-                  <MenuItem>
-                    <ButtonSubmenu
-                      component="nuxt-link"
-                      to="/event/create"
-                      icon="calender-plus"
-                    >
-                      Create Event
-                    </ButtonSubmenu>
-                  </MenuItem>
-                  <MenuItem v-if="copyIsSupported">
-                    <ButtonSubmenu
-                      @click.prevent="copyCalendarLink"
-                      icon="copy"
-                      v-tooltip="{
-                        content: 'Copied!',
-                        shown: showCopyTooltip,
-                        triggers: [],
-                      }"
-                    >
-                      Copy Calendar Link
-                    </ButtonSubmenu>
-                  </MenuItem>
-                </MenuItems>
-              </transition>
-            </Menu>
-          </Calendar>
+          />
         </div>
         <div class="calendar-events custom-scrollbar flex flex-col gap-4 pl-2 pr-1">
           <template
@@ -367,8 +325,6 @@ import dayjs from "dayjs";
 import type { Event } from "~/composables/useCommunities";
 import type { GameRecord } from "~/composables/useGames";
 import { Status } from "~/composables/useFetchStatus.js";
-import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
-import { useClipboard } from "@vueuse/core";
 
 definePageMeta({
   middleware: "auth",
@@ -376,7 +332,6 @@ definePageMeta({
 
 const me = useMe();
 const games = useGames();
-const featureFlags = useFeatureFlags();
 const updates = await useFetch("/api/dashboard/recent");
 const roleOfTheDay = await useFetch("/api/role_of_the_day");
 const scriptsOfTheWeek = await useFetch("/api/scripts_of_the_week");
@@ -414,7 +369,7 @@ const getGame = (id: string): GameRecord[] => {
 };
 
 const userGames = computed(() => {
-  if (me.value.status !== Status.SUCCESS) return { status: Status.IDLE };
+  if (me.value.status !== Status.SUCCESS) return { status: Status.IDLE as const };
   return games.getByPlayer(me.value.data.username);
 });
 
@@ -482,36 +437,6 @@ const eventsOnDay = computed(() => {
     );
   });
 });
-
-const icalUrl = ref<string | null>(null);
-
-const copySource = computed(() => icalUrl.value ?? "");
-
-const {
-  copy,
-  copied,
-  isSupported: copyIsSupported,
-} = useClipboard({ source: copySource, legacy: true });
-const showCopyTooltip = ref(false);
-
-async function copyCalendarLink() {
-  try {
-    const url = await $fetch("/api/ical");
-    icalUrl.value = url;
-
-    if (copyIsSupported.value) {
-      await copy();
-      if (copied.value) {
-        showCopyTooltip.value = true;
-        setTimeout(() => {
-          showCopyTooltip.value = false;
-        }, 2000);
-      }
-    }
-  } catch (e) {
-    // Do nothing
-  }
-}
 
 function getScriptLink(script: {
   script_id: string;
