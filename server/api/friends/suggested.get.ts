@@ -71,10 +71,10 @@ export default defineEventHandler(async (handler) => {
                   bio: true,
                   location: true,
                   privacy: true,
-                  charts: true,
                 },
               },
             },
+            take: 20,
           },
         },
       },
@@ -129,13 +129,13 @@ export default defineEventHandler(async (handler) => {
       bio: true,
       location: true,
       privacy: true,
-      charts: true,
     },
     orderBy: [
       {
         created_at: "desc",
       },
     ],
+    take: 50,
   });
 
   return naturalOrder([
