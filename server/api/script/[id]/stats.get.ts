@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "~/server/utils/prisma";
 
 export default defineEventHandler(async (handler) => {
@@ -22,13 +23,13 @@ export default defineEventHandler(async (handler) => {
   // Build script filter: either matching script_id or (for S&V id=134) matching name
   const scriptFilter =
     script_id === 134
-      ? `(g."script_id" = ${script_id} OR LOWER(g."script") = 'sects & violets')`
-      : `g."script_id" = ${script_id}`;
+      ? Prisma.sql`(g."script_id" = ${script_id} OR LOWER(g."script") = 'sects & violets')`
+      : Prisma.sql`g."script_id" = ${script_id}`;
 
   // Overall count + good win count
-  const overallResult = await prisma.$queryRawUnsafe<
+  const overallResult = await prisma.$queryRaw<
     { total: bigint; good_wins: bigint }[]
-  >(`
+  >(Prisma.sql`
     SELECT
       COUNT(*)::bigint AS total,
       COUNT(*) FILTER (WHERE g."win_v2" = 'GOOD_WINS')::bigint AS good_wins
@@ -43,9 +44,9 @@ export default defineEventHandler(async (handler) => {
   const goodWins = Number(overallResult[0]?.good_wins ?? 0);
 
   // Games by month (last 12 months)
-  const monthRows = await prisma.$queryRawUnsafe<
+  const monthRows = await prisma.$queryRaw<
     { month_name: string; count: bigint }[]
-  >(`
+  >(Prisma.sql`
     SELECT
       TO_CHAR(g."date", 'Month') AS month_name,
       COUNT(*)::bigint AS count
@@ -93,16 +94,15 @@ export default defineEventHandler(async (handler) => {
   > = {};
 
   if (roleIds.length > 0) {
-    // Build a parameterized role list for the query
-    const roleIdList = roleIds.map((id) => `'${id.replace(/'/g, "''")}'`).join(",");
+    const roleIdList = Prisma.join(roleIds);
 
-    const roleWinRows = await prisma.$queryRawUnsafe<
+    const roleWinRows = await prisma.$queryRaw<
       {
         role_id: string;
         total: bigint;
         wins: bigint;
       }[]
-    >(`
+    >(Prisma.sql`
       WITH last_player_char AS (
         -- For non-storyteller games: the last Character per game
         SELECT DISTINCT ON (c."game_id")

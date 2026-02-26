@@ -17,3 +17,19 @@ export const prisma =
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;
 }
+
+// Periodically disconnect and reconnect Prisma to release engine memory.
+// The Rust-based query engine retains freed memory in its allocator pools;
+// disconnecting forces it to release those pools. Prisma auto-reconnects
+// on the next query.
+if (process.env.NODE_ENV === "production") {
+  const FOUR_HOURS = 4 * 60 * 60 * 1000;
+  setInterval(async () => {
+    try {
+      console.log("[prisma] Periodic disconnect to release engine memory");
+      await prisma.$disconnect();
+    } catch (e) {
+      console.error("[prisma] Disconnect error:", e);
+    }
+  }, FOUR_HOURS).unref();
+}
