@@ -109,8 +109,8 @@ const chartOptions = computed(() => ({
     datalabels: {
       display: true,
       color: chartColors.labelColor,
-      anchor: "center",
-      align: "center",
+      anchor: "center" as const,
+      align: "center" as const,
       clamp: true,
       backgroundColor: chartColors.labelBackground,
       borderRadius: chartColors.labelRadius,

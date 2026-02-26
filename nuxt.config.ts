@@ -83,7 +83,7 @@ export default defineNuxtConfig({
           src: "//gc.zgo.at/count.js",
         },
         {
-          children: `
+          innerHTML: `
           if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark')
           } else {

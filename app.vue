@@ -217,7 +217,7 @@ ChartJS.defaults.set("plugins.datalabels", {
 
 // Disable animations to prevent requestAnimationFrame stutter when many
 // charts render or re-render simultaneously.
-ChartJS.defaults.set("animation", false);
+ChartJS.defaults.set("animation", false as unknown as Record<string, unknown>);
 </script>
 
 <style>

@@ -1,5 +1,5 @@
 import { PrivacySetting } from "@prisma/client";
-import { User } from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 import { addUserKofiLevel } from "../utils/addUserKofiLevel";
 import geolib from "geolib";
 import { prisma } from "~/server/utils/prisma";
@@ -84,7 +84,8 @@ export default defineEventHandler(async (handler) => {
         )
       : null;
 
-  const communities = await prisma.community.findMany({
+  // Start all search queries eagerly so they run in parallel
+  const communitiesPromise = prisma.community.findMany({
     where: {
       OR: [
         {
@@ -185,171 +186,178 @@ export default defineEventHandler(async (handler) => {
     take: 50,
   });
 
-  const scripts =
-    query.length >= 3
-      ? await prisma.script.findMany({
-          where: {
-            AND: {
+  const scriptsPromise = query.length >= 3
+    ? prisma.script.findMany({
+        where: {
+          AND: {
+            OR: [
+              {
+                name: {
+                  contains: query,
+                  mode: "insensitive",
+                },
+              },
+              {
+                author: {
+                  contains: query,
+                  mode: "insensitive",
+                },
+              },
+            ],
+          },
+          OR: [
+            {
+              is_custom_script: false,
+            },
+            {
+              is_custom_script: true,
+              user_id: me?.id,
+            },
+          ],
+        },
+        include: {
+          _count: {
+            select: {
+              games: {
+                where: {
+                  parent_game_id: null,
+                },
+              },
+            },
+          },
+        },
+        orderBy: [
+          {
+            name: "asc",
+          },
+          {
+            author: "asc",
+          },
+        ],
+        take: 50,
+      })
+    : null;
+
+  const usersPromise = query.length >= 3
+    ? prisma.userSettings.findMany({
+        where: {
+          OR: [
+            {
+              display_name: {
+                contains: query,
+                mode: "insensitive",
+              },
+            },
+            {
+              username: {
+                contains: query,
+                mode: "insensitive",
+              },
+            },
+          ],
+          AND: [
+            {
               OR: [
                 {
-                  name: {
-                    contains: query,
-                    mode: "insensitive",
-                  },
+                  privacy: PrivacySetting.PUBLIC,
                 },
                 {
-                  author: {
-                    contains: query,
-                    mode: "insensitive",
+                  privacy: PrivacySetting.PRIVATE,
+                },
+                {
+                  privacy: PrivacySetting.FRIENDS_ONLY,
+                  friends: {
+                    some: {
+                      friend_id: me?.id || "",
+                    },
                   },
                 },
               ],
             },
-            OR: [
-              {
-                is_custom_script: false,
-              },
-              {
-                is_custom_script: true,
-                user_id: me?.id,
-              },
-            ],
-          },
-          include: {
-            _count: {
-              select: {
-                games: {
-                  where: {
-                    parent_game_id: null,
-                  },
-                },
-              },
-            },
-          },
-          orderBy: [
-            {
-              name: "asc",
-            },
-            {
-              author: "asc",
-            },
           ],
-          take: 50,
-        })
-      : [];
+        },
+        select: {
+          user_id: true,
+          username: true,
+          display_name: true,
+          avatar: true,
+          pronouns: true,
+          bio: true,
+          location: true,
+        },
+        orderBy: [
+          {
+            display_name: "asc",
+          },
+          {
+            username: "asc",
+          },
+        ],
+        take: 50,
+      })
+    : null;
 
-  const users =
-    query.length >= 3
-      ? await prisma.userSettings.findMany({
-          where: {
-            OR: [
-              {
-                display_name: {
-                  contains: query,
-                  mode: "insensitive",
-                },
-              },
-              {
-                username: {
-                  contains: query,
-                  mode: "insensitive",
-                },
-              },
-            ],
-            AND: [
-              {
-                OR: [
-                  {
-                    privacy: PrivacySetting.PUBLIC,
-                  },
-                  {
-                    privacy: PrivacySetting.PRIVATE,
-                  },
-                  {
-                    privacy: PrivacySetting.FRIENDS_ONLY,
-                    friends: {
-                      some: {
-                        friend_id: me?.id || "",
-                      },
-                    },
-                  },
-                ],
-              },
-            ],
+  const rolesPromise = query.length >= 3
+    ? prisma.role.findMany({
+        where: {
+          name: {
+            contains: query,
+            mode: "insensitive",
           },
-          select: {
-            user_id: true,
-            username: true,
-            display_name: true,
-            avatar: true,
-            pronouns: true,
-            bio: true,
-            location: true,
-            charts: true,
-          },
-          orderBy: [
+          OR: [
             {
-              display_name: "asc",
+              custom_role: false,
             },
             {
-              username: "asc",
+              custom_role: true,
+              scripts: {
+                some: {
+                  user_id: me?.id,
+                },
+              },
             },
           ],
-          take: 50,
-        })
-      : [];
+        },
+        // We need to count the number of games a given role appears in
+        // Roles are included in games via Character, which has a many to one relationship with Game
+        // We can't use _count here because it doesn't support nested includes
+        include: {
+          _count: {
+            select: {
+              scripts: true,
+            },
+          },
+          character: {
+            select: {
+              game: {
+                select: {
+                  id: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy: [
+          {
+            name: "asc",
+          },
+        ],
+        take: 50,
+      })
+    : null;
+
+  // Await all promises in parallel
+  const [communities, scriptsResult, usersResult, rolesResult] = await Promise.all([
+    communitiesPromise,
+    scriptsPromise ?? Promise.resolve(null),
+    usersPromise ?? Promise.resolve(null),
+    rolesPromise ?? Promise.resolve(null),
+  ]);
+  const scripts = scriptsResult ?? [];
+  const users = usersResult ?? [];
+  const roles = rolesResult ?? [];
 
   const usersWithKofiLevel = await Promise.all(users.map(addUserKofiLevel));
-
-  const roles =
-    query.length >= 3
-      ? await prisma.role.findMany({
-          where: {
-            name: {
-              contains: query,
-              mode: "insensitive",
-            },
-            OR: [
-              {
-                custom_role: false,
-              },
-              {
-                custom_role: true,
-                scripts: {
-                  some: {
-                    user_id: me?.id,
-                  },
-                },
-              },
-            ],
-          },
-          // We need to count the number of games a given role appears in
-          // Roles are included in games via Character, which has a many to one relationship with Game
-          // We can't use _count here because it doesn't support nested includes
-          include: {
-            _count: {
-              select: {
-                scripts: true,
-              },
-            },
-            character: {
-              select: {
-                game: {
-                  select: {
-                    id: true,
-                  },
-                },
-              },
-            },
-          },
-          orderBy: [
-            {
-              name: "asc",
-            },
-          ],
-          take: 50,
-        })
-      : [];
 
   const sortedCommunities = (() => {
     if (latitude && longitude) {

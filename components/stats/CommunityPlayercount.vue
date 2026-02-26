@@ -27,7 +27,7 @@ const props = defineProps<{
 function colorForTotalPlayers(total: number): string {
   const clamped = Math.min(20, Math.max(5, total));
   const key = `p${clamped}` as keyof typeof chartColors;
-  return chartColors[key] ?? "#6B21A8";
+  return (chartColors[key] as string) ?? "#6B21A8";
 }
 
 type SplitInfo = {
@@ -122,8 +122,8 @@ const chartOptions = computed(() => ({
     datalabels: {
       display: true,
       color: chartColors.labelColor,
-      anchor: "center",
-      align: "center",
+      anchor: "center" as const,
+      align: "center" as const,
       clamp: true,
       backgroundColor: chartColors.labelBackground,
       borderRadius: chartColors.labelRadius,
@@ -137,7 +137,6 @@ const chartOptions = computed(() => ({
     },
     tooltip: {
       callbacks: {
-        // @ts-expect-error Chart.js context typing
         title(context: any) {
           const idx = context[0].dataIndex;
           const group = groups.value[idx];
@@ -150,7 +149,6 @@ const chartOptions = computed(() => ({
             group.totalCount === 1 ? "" : "s"
           } (${pct}%)`;
         },
-        // @ts-expect-error Chart.js context typing
         label(context: any) {
           const idx = context.dataIndex;
           const group = groups.value[idx];

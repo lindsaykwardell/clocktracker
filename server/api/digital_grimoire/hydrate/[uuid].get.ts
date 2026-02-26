@@ -1,7 +1,7 @@
 import type { User } from "@supabase/supabase-js";
 import { Alignment, WinStatus_V2 } from "@prisma/client";
 import { mapOfficialIdToClocktrackerId } from "~/server/utils/getRoleMap";
-import { saveCustomScript, UploadedScript } from "~/server/utils/customScript";
+import { saveCustomScript, type UploadedScript } from "~/server/utils/customScript";
 import { prisma } from "~/server/utils/prisma";
 
 type DigitalGrimoireGame = {

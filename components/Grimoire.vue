@@ -187,13 +187,15 @@ type Token = {
   };
   related_role_id: string | null;
   related_role?: { token_url: string; name?: string };
-  reminders: { reminder: string; token_url: string }[];
+  reminders?: { reminder: string; token_url: string; [key: string]: unknown }[];
   player_name: string;
   player_id?: string | null;
   player?: {
     username: string;
     display_name: string;
+    [key: string]: unknown;
   };
+  [key: string]: unknown;
 };
 
 const friends = useFriends();
@@ -532,6 +534,9 @@ function openReminderDialog(token: Token) {
 
 function selectReminder(reminder: { reminder: string; token_url: string }) {
   if (focusedToken.value) {
+    if (!focusedToken.value.reminders) {
+      focusedToken.value.reminders = [];
+    }
     focusedToken.value.reminders.push({
       reminder: reminder.reminder,
       token_url: reminder.token_url,
@@ -544,7 +549,7 @@ function removeReminder(
   token: Token,
   reminder: { reminder: string; token_url: string }
 ) {
-  token.reminders = token.reminders.filter(
+  token.reminders = (token.reminders ?? []).filter(
     (r) =>
       r.reminder !== reminder.reminder && r.token_url !== reminder.token_url
   );

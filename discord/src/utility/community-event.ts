@@ -1,22 +1,5 @@
-import {
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  CacheType,
-  CommandInteraction,
-  EmbedBuilder,
-  User,
-} from "discord.js";
-import {
-  Community,
-  Event,
-  EventAttendee,
-  EventWaitlist,
-  EventWaitlistAttendee,
-  LocationType,
-  PrismaClient,
-  UserSettings,
-} from "@prisma/client";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, type CacheType, CommandInteraction, EmbedBuilder, User } from "discord.js";
+import { type Community, type Event, type EventAttendee, type EventWaitlist, type EventWaitlistAttendee, LocationType, PrismaClient, type UserSettings } from "@prisma/client";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";

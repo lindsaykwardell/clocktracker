@@ -1,5 +1,5 @@
 import { LocationType, WhoCanRegister } from "@prisma/client";
-import { User } from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 import { prisma } from "~/server/utils/prisma";
 
 export default defineEventHandler(async (handler) => {

@@ -1,4 +1,4 @@
-import { City } from "@prisma/client";
+import type { City } from "@prisma/client";
 import { prisma } from "./prisma";
 const URL = "https://photon.komoot.io/api/";
 
