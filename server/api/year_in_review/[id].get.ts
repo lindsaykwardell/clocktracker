@@ -1,4 +1,5 @@
 import {
+  Prisma,
   PrivacySetting,
   RoleType,
 } from "@prisma/client";
@@ -48,28 +49,27 @@ export default defineEventHandler(async (handler) => {
   const yearStart = new Date(year, 0, 1);
   const yearEnd = new Date(year + 1, 0, 1);
   const username = yearInReview.user.username;
-  const escapedUsername = username.replace(/'/g, "''");
-  const escapedUserId = userId.replace(/'/g, "''");
+  const atUsername = `@${username}`;
 
   // Common WHERE clause for this user's games in this year
-  const baseWhere = `
+  const baseWhere = Prisma.sql`
     g."deleted" = false
-    AND g."user_id" = '${escapedUserId}'
-    AND g."date" >= '${yearStart.toISOString()}'
-    AND g."date" < '${yearEnd.toISOString()}'
+    AND g."user_id" = ${userId}
+    AND g."date" >= ${yearStart}::timestamp
+    AND g."date" < ${yearEnd}::timestamp
   `;
 
   // Helper to detect storyteller games (same logic as JS version)
-  const isStorytellerExpr = `(
+  const isStorytellerExpr = Prisma.sql`(
     g."is_storyteller" = true
-    OR g."storyteller" = '@${escapedUsername}'
-    OR '@${escapedUsername}' = ANY(g."co_storytellers")
+    OR g."storyteller" = ${atUsername}
+    OR ${atUsername} = ANY(g."co_storytellers")
   )`;
 
   // 1. Games played/storytold counts
-  const countRows = await prisma.$queryRawUnsafe<
+  const countRows = await prisma.$queryRaw<
     { games_played: bigint; games_storytold: bigint }[]
-  >(`
+  >(Prisma.sql`
     SELECT
       COUNT(*) FILTER (WHERE NOT ${isStorytellerExpr})::bigint AS games_played,
       COUNT(*) FILTER (WHERE ${isStorytellerExpr})::bigint AS games_storytold
@@ -81,7 +81,7 @@ export default defineEventHandler(async (handler) => {
   const games_storytold = Number(countRows[0]?.games_storytold ?? 0);
 
   // 2. Role frequency (top roles) - last Character per non-storyteller game
-  const roleRows = await prisma.$queryRawUnsafe<
+  const roleRows = await prisma.$queryRaw<
     {
       role_id: string;
       count: bigint;
@@ -93,7 +93,7 @@ export default defineEventHandler(async (handler) => {
       r_type: string;
       r_custom_role: boolean;
     }[]
-  >(`
+  >(Prisma.sql`
     WITH last_char AS (
       SELECT DISTINCT ON (c."game_id")
         c."role_id"
@@ -136,7 +136,7 @@ export default defineEventHandler(async (handler) => {
   }));
 
   // 3. Related role frequency
-  const relatedRoleRows = await prisma.$queryRawUnsafe<
+  const relatedRoleRows = await prisma.$queryRaw<
     {
       related_role_id: string;
       count: bigint;
@@ -148,7 +148,7 @@ export default defineEventHandler(async (handler) => {
       r_type: string;
       r_custom_role: boolean;
     }[]
-  >(`
+  >(Prisma.sql`
     WITH last_char AS (
       SELECT DISTINCT ON (c."game_id")
         c."related_role_id"
@@ -191,14 +191,14 @@ export default defineEventHandler(async (handler) => {
   }));
 
   // 4. Win rates (overall, good, evil)
-  const winRateRows = await prisma.$queryRawUnsafe<
+  const winRateRows = await prisma.$queryRaw<
     {
       win_rate: bigint;
       win_rate_good: bigint;
       win_rate_evil: bigint;
       loss_rate: bigint;
     }[]
-  >(`
+  >(Prisma.sql`
     WITH last_char AS (
       SELECT DISTINCT ON (c."game_id")
         c."game_id",
@@ -235,9 +235,9 @@ export default defineEventHandler(async (handler) => {
   const loss_rate = Number(winRateRows[0]?.loss_rate ?? 0);
 
   // 5. Role type distribution
-  const roleTypeRows = await prisma.$queryRawUnsafe<
+  const roleTypeRows = await prisma.$queryRaw<
     { role_type: string; count: bigint }[]
-  >(`
+  >(Prisma.sql`
     WITH last_char AS (
       SELECT DISTINCT ON (c."game_id")
         c."role_id"
@@ -271,9 +271,9 @@ export default defineEventHandler(async (handler) => {
   }
 
   // 6. Winning and losing roles
-  const winLoseRoleRows = await prisma.$queryRawUnsafe<
+  const winLoseRoleRows = await prisma.$queryRaw<
     { role_id: string; win_count: bigint; loss_count: bigint }[]
-  >(`
+  >(Prisma.sql`
     WITH last_char AS (
       SELECT DISTINCT ON (c."game_id")
         c."game_id",
@@ -311,7 +311,7 @@ export default defineEventHandler(async (handler) => {
     .map((r) => ({ role_id: r.role_id, loss_count: Number(r.loss_count) }));
 
   // 7. Games by month (with win/loss/alignment breakdown)
-  const monthlyRows = await prisma.$queryRawUnsafe<
+  const monthlyRows = await prisma.$queryRaw<
     {
       month_name: string;
       total: bigint;
@@ -320,7 +320,7 @@ export default defineEventHandler(async (handler) => {
       good: bigint;
       evil: bigint;
     }[]
-  >(`
+  >(Prisma.sql`
     WITH last_char AS (
       SELECT DISTINCT ON (c."game_id")
         c."game_id",
@@ -384,9 +384,9 @@ export default defineEventHandler(async (handler) => {
   }
 
   // 8. Most common scripts (top 5)
-  const scriptRows = await prisma.$queryRawUnsafe<
+  const scriptRows = await prisma.$queryRaw<
     { script: string; logo: string | null; count: bigint }[]
-  >(`
+  >(Prisma.sql`
     SELECT
       g."script",
       s."logo",
@@ -408,9 +408,9 @@ export default defineEventHandler(async (handler) => {
   }));
 
   // 9. Most common storytold scripts (top 5)
-  const stScriptRows = await prisma.$queryRawUnsafe<
+  const stScriptRows = await prisma.$queryRaw<
     { script: string; logo: string | null; count: bigint }[]
-  >(`
+  >(Prisma.sql`
     SELECT
       g."script",
       s."logo",
@@ -433,9 +433,9 @@ export default defineEventHandler(async (handler) => {
   }));
 
   // 10. Most common communities
-  const communityRows = await prisma.$queryRawUnsafe<
+  const communityRows = await prisma.$queryRaw<
     { slug: string; icon: string; name: string; count: bigint }[]
-  >(`
+  >(Prisma.sql`
     SELECT
       c."slug",
       c."icon",
@@ -456,14 +456,14 @@ export default defineEventHandler(async (handler) => {
   }));
 
   // 11. Most common players (from last grimoire page tokens)
-  const playerRows = await prisma.$queryRawUnsafe<
+  const playerRows = await prisma.$queryRaw<
     {
       display_name: string;
       username: string | null;
       avatar: string | null;
       count: bigint;
     }[]
-  >(`
+  >(Prisma.sql`
     WITH last_page AS (
       SELECT gg."A" AS game_id, MAX(gg."B") AS grimoire_id
       FROM "_GameToGrimoire" gg
@@ -481,8 +481,8 @@ export default defineEventHandler(async (handler) => {
       JOIN "Token" t ON t."grimoire_id" = lp.grimoire_id
       LEFT JOIN "UserSettings" p ON p."user_id" = t."player_id"
       WHERE (t."player_id" IS NOT NULL OR t."player_name" != '')
-        AND t."player_name" != '${escapedUsername.replace(/'/g, "''")}'
-        AND (p."username" IS NULL OR p."username" != '${escapedUsername}')
+        AND t."player_name" != ${username}
+        AND (p."username" IS NULL OR p."username" != ${username})
     )
     SELECT
       pt.display_name,

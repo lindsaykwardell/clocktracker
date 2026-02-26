@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import dayjs from "dayjs";
 import { prisma } from "~/server/utils/prisma";
 
@@ -17,8 +18,6 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  const escapedRoleId = role_id.replace(/'/g, "''");
-
   // Run independent queries in parallel
   const [totalCount, winLossRows, gameMonthDates, popular_scripts] =
     await Promise.all([
@@ -35,13 +34,13 @@ export default defineEventHandler(async (handler) => {
 
       // Win/loss where the LAST character has this role, grouped by script_id
       // so we can derive both overall and per-script rates from one query
-      prisma.$queryRawUnsafe<
+      prisma.$queryRaw<
         {
           script_id: number | null;
           wins: bigint;
           losses: bigint;
         }[]
-      >(`
+      >(Prisma.sql`
         WITH last_chars AS (
           SELECT DISTINCT ON (c."game_id")
             c."game_id", c."role_id", c."alignment"
@@ -49,7 +48,7 @@ export default defineEventHandler(async (handler) => {
           WHERE c."game_id" IN (
             SELECT DISTINCT c2."game_id"
             FROM "Character" c2
-            WHERE c2."role_id" = '${escapedRoleId}' AND c2."game_id" IS NOT NULL
+            WHERE c2."role_id" = ${role_id} AND c2."game_id" IS NOT NULL
           )
           ORDER BY c."game_id", c."id" DESC
         )
@@ -67,7 +66,7 @@ export default defineEventHandler(async (handler) => {
           )::bigint AS losses
         FROM last_chars lc
         JOIN "Game" g ON g."id" = lc."game_id"
-        WHERE lc."role_id" = '${escapedRoleId}'
+        WHERE lc."role_id" = ${role_id}
         GROUP BY g."script_id"
       `),
 

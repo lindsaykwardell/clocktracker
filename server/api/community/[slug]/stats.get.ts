@@ -1,7 +1,6 @@
-import { PrismaClient, PrivacySetting } from "@prisma/client";
+import { PrivacySetting } from "@prisma/client";
 import type { User } from "@supabase/supabase-js";
-
-const prisma = new PrismaClient();
+import { prisma } from "~/server/utils/prisma";
 
 type PlayerSummary = {
   key: string;
