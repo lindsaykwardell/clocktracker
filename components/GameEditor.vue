@@ -588,40 +588,40 @@
           </summary>
           <ul class="grid grid-cols-[auto_1fr_auto] gap-x-8 gap-y-2 py-2">
             <li
-              v-for="death in pageGroup.events"
-              :key="`${pageGroup.page}-${death.participant_id}-${death.event_type}-${death.player_name}`"
+              v-for="event in pageGroup.events"
+              :key="`${pageGroup.page}-${event.participant_id}-${event.event_type}-${event.player_name}`"
               class="col-span-full grid grid-cols-subgrid items-center border border-stone-600 rounded p-3"
             >
               <div class="flex items-center flex-col gap-1">
                 <div class="relative flex justify-center items-center aspect-square">
                   <Token
-                    :character="grimoireEventSeatCharacter(death)"
+                    :character="grimoireEventSeatCharacter(event)"
                     size="md"
                     class="pointer-events-none"
                     hideRelated
                   />
                   <img
-                    v-if="showsShroudOverlay(death)"
+                    v-if="showsShroudOverlay(event)"
                     src="/img/shroud.png"
                     class="absolute top-0 w-8 md:w-10"
                     alt=""
                   />
                   <span
-                    v-else-if="death.event_type === GrimoireEventType.ALIGNMENT_CHANGE"
+                    v-else-if="event.event_type === GrimoireEventType.ALIGNMENT_CHANGE"
                     class="absolute top-0 grid h-8 w-8 place-items-center rounded-full bg-amber-500 text-[10px] font-bold text-black md:h-10 md:w-10 md:text-xs"
                     title="Alignment switch"
                   >
                     A
                   </span>
                   <span
-                    v-else-if="death.event_type === GrimoireEventType.SEAT_CHANGE"
+                    v-else-if="event.event_type === GrimoireEventType.SEAT_CHANGE"
                     class="absolute top-0 grid h-8 w-8 place-items-center rounded-full bg-sky-500 text-[10px] font-bold text-black md:h-10 md:w-10 md:text-xs"
                     title="Seat change"
                   >
                     S
                   </span>
                   <span
-                    v-else-if="death.event_type === GrimoireEventType.ROLE_CHANGE"
+                    v-else-if="event.event_type === GrimoireEventType.ROLE_CHANGE"
                     class="absolute top-0 grid h-8 w-8 place-items-center rounded-full bg-violet-500 text-[10px] font-bold text-black md:h-10 md:w-10 md:text-xs"
                     title="Character switch"
                   >
@@ -630,10 +630,10 @@
                 </div>
                 <div class="flex flex-col">
                   <span class="text-sm font-medium">
-                    {{ grimoireEventDisplayName(death) }}
+                    {{ grimoireEventDisplayName(event) }}
                   </span>
                   <span class="text-xs text-stone-400 sr-only">
-                    {{ eventSummaryLabel(death) }}
+                    {{ eventSummaryLabel(event) }}
                   </span>
                 </div>
               </div>
@@ -642,25 +642,25 @@
                   <span class="block text-xs">Event type</span>
                 <Input
                   mode="select"
-                  v-model="death.event_type"
-                  :disabled="isEventTypeLocked(death)"
+                  v-model="event.event_type"
+                  :disabled="isEventTypeLocked(event)"
                     @update:modelValue="
                     () => {
-                      death.cause = null;
-                      death.by_participant_id = null;
-                      death.by_role_id = null;
-                      if (death.event_type === GrimoireEventType.REVIVE) {
-                        death.cause = GrimoireEventCause.ABILITY;
+                      event.cause = null;
+                      event.by_participant_id = null;
+                      event.by_role_id = null;
+                      if (event.event_type === GrimoireEventType.REVIVE) {
+                        event.cause = GrimoireEventCause.ABILITY;
                       }
                     }
                   "
                 >
-                  <option v-if="death.event_type === GrimoireEventType.REVIVE" :value="GrimoireEventType.REVIVE">
+                  <option v-if="event.event_type === GrimoireEventType.REVIVE" :value="GrimoireEventType.REVIVE">
                     Revival
                   </option>
-                  <template v-else-if="isEventTypeLocked(death)">
-                    <option :value="death.event_type">
-                      {{ eventTypeOptionLabel(death.event_type) }}
+                  <template v-else-if="isEventTypeLocked(event)">
+                    <option :value="event.event_type">
+                      {{ eventTypeOptionLabel(event.event_type) }}
                     </option>
                   </template>
                   <template v-else>
@@ -674,23 +674,23 @@
                   </template>
                 </Input>
                 </label>
-                <template v-if="death.event_type !== null">
+                <template v-if="event.event_type !== null">
                   <label>
                     <span class="block text-xs">Cause</span>
                     <Input
                       mode="select"
-                      v-model="death.cause"
-                      :disabled="death.event_type === GrimoireEventType.REVIVE"
-                      @update:modelValue="onGrimoireEventCauseChange(death)"
+                      v-model="event.cause"
+                      :disabled="event.event_type === GrimoireEventType.REVIVE"
+                      @update:modelValue="onGrimoireEventCauseChange(event)"
                     >
-                      <option v-if="death.event_type === GrimoireEventType.REVIVE" :value="GrimoireEventCause.ABILITY">
+                      <option v-if="event.event_type === GrimoireEventType.REVIVE" :value="GrimoireEventCause.ABILITY">
                         Ability
                       </option>
                       <template v-else>
                         <option :value="null">Select cause</option>
                         <option :value="GrimoireEventCause.ABILITY">Ability</option>
                         <option
-                          v-if="death.event_type === GrimoireEventType.EXECUTION"
+                          v-if="event.event_type === GrimoireEventType.EXECUTION"
                           :value="GrimoireEventCause.NOMINATION"
                         >
                           Nomination
@@ -702,15 +702,15 @@
                     <span class="block text-xs">Select triggering character</span>
                     <Input
                       mode="select"
-                      :modelValue="getGrimoireEventSeatSelection(death)"
+                      :modelValue="getGrimoireEventSeatSelection(event)"
                       @update:modelValue="
-                        (value) => updateGrimoireEventSeatSelection(death, value as any)
+                        (value) => updateGrimoireEventSeatSelection(event, value as any)
                       "
-                      :disabled="death.event_type !== GrimoireEventType.REVIVE && death.cause === null"
+                      :disabled="event.event_type !== GrimoireEventType.REVIVE && event.cause === null"
                     >
                       <option :value="null">No character selected</option>
                       <option
-                        v-for="seat in grimoireEventSeatOptionsForPage(pageGroup.page, death.cause, death.event_type)"
+                        v-for="seat in grimoireEventSeatOptionsForPage(pageGroup.page, event.cause, event.event_type)"
                         :key="seat.participant_id"
                         :value="seat.participant_id"
                       >
@@ -722,28 +722,28 @@
                 </template>
               </div>
               <div
-                v-if="death.event_type !== null"
+                v-if="event.event_type !== null"
                 class="relative flex justify-center items-center aspect-square"
               >
                 <Token
-                  v-if="death.by_role_id"
-                  :character="grimoireEventByRoleCharacter(death)"
+                  v-if="event.by_role_id"
+                  :character="grimoireEventByRoleCharacter(event)"
                   size="md"
                   class="cursor-pointer"
                   :class="{
-                    'pointer-events-none opacity-50': !allowManualGrimoireEventByRole(death),
+                    'pointer-events-none opacity-50': !allowManualGrimoireEventByRole(event),
                   }"
-                  @clickRole="openGrimoireEventByRoleDialog(death)"
+                  @clickRole="openGrimoireEventByRoleDialog(event)"
                   hideRelated
                 />
                 <Token v-else outline size="md" class="font-sorts">
                   <button
                     type="button"
-                    @click="openGrimoireEventByRoleDialog(death)"
+                    @click="openGrimoireEventByRoleDialog(event)"
                     class="w-full h-full p-1 text-xs"
-                    :disabled="!allowManualGrimoireEventByRole(death)"
+                    :disabled="!allowManualGrimoireEventByRole(event)"
                   >
-                    <template v-if="allowManualGrimoireEventByRole(death)">
+                    <template v-if="allowManualGrimoireEventByRole(event)">
                       Add Role
                     </template>
                     <template v-else>
@@ -962,16 +962,16 @@
     :availableRoles="visibleRoles"
     :restrictRoleIds="roleRestrictIds"
     :showExcludeIrrelevantToggle="
-      tokenSet === 'end_trigger' || tokenSet === 'death_by_role'
+      tokenSet === 'end_trigger' || tokenSet === 'event_by_role'
     "
     @selectRole="selectRoleForToken"
     :alwaysShowFabled="tokenSet === 'fabled'"
     :hideTravelers="
       tokenSet !== 'player_characters' &&
       tokenSet !== 'end_trigger' &&
-      tokenSet !== 'death_by_role'
+      tokenSet !== 'event_by_role'
     "
-    :hideBlankRole="tokenSet === 'end_trigger' || tokenSet === 'death_by_role'"
+    :hideBlankRole="tokenSet === 'end_trigger' || tokenSet === 'event_by_role'"
   />
   <Dialog v-model:visible="showCopyGrimoireDialog" size="xl">
     <template #title>
@@ -1151,10 +1151,10 @@ const roles = ref<
 const scriptVersions = ref<{ id: number; version: string }[]>([]);
 const fetchingScriptVersions = ref(false);
 const tokenMode = ref<
-  "role" | "related_role" | "end_trigger_role" | "death_by_role"
+  "role" | "related_role" | "end_trigger_role" | "event_by_role"
 >("role");
 const tokenSet = ref<
-  "player_characters" | "demon_bluffs" | "fabled" | "end_trigger" | "death_by_role"
+  "player_characters" | "demon_bluffs" | "fabled" | "end_trigger" | "event_by_role"
 >("player_characters");
 const excludeIrrelevantEndTriggerRoles = ref(true);
 const excludeIrrelevantGrimoireEventRoles = ref(true);
@@ -1752,9 +1752,9 @@ function recordGrimoireEvent(payload: {
   const shouldRecordRevival = !payload.isDead && wasDeadPreviously;
 
   const existingIndex = props.game.grimoire_events.findIndex(
-    (death) =>
-      death.grimoire_page === payload.pageIndex &&
-      death.participant_id === participantId
+    (event) =>
+      event.grimoire_page === payload.pageIndex &&
+      event.participant_id === participantId
   );
   if (existingIndex >= 0) {
     props.game.grimoire_events.splice(existingIndex, 1);
@@ -2284,7 +2284,7 @@ const visibleRoles = computed(() => {
   if (tokenSet.value === "end_trigger") {
     return roles.value.length > 0 ? roles.value : allRoles.getAllRoles();
   }
-  if (tokenSet.value === "death_by_role") {
+  if (tokenSet.value === "event_by_role") {
     return roles.value.length > 0 ? roles.value : allRoles.getAllRoles();
   }
 
@@ -2310,7 +2310,7 @@ const endTriggerRestrictRoleIds = computed(() => {
 });
 
 const grimoireEventByRoleRestrictRoleIds = computed(() => {
-  if (tokenSet.value !== "death_by_role") return null;
+  if (tokenSet.value !== "event_by_role") return null;
   const event = focusedGrimoireEvent.value;
   if (!event) return null;
   const type = event.event_type ?? GrimoireEventType.NOT_RECORDED;
@@ -2328,7 +2328,7 @@ const grimoireEventByRoleRestrictRoleIds = computed(() => {
 
 const roleRestrictIds = computed(() => {
   if (tokenSet.value === "end_trigger") return endTriggerRestrictRoleIds.value;
-  if (tokenSet.value === "death_by_role")
+  if (tokenSet.value === "event_by_role")
     return grimoireEventByRoleRestrictRoleIds.value;
   return null;
 });
@@ -2338,7 +2338,7 @@ const excludeIrrelevantRoles = computed({
     if (tokenSet.value === "end_trigger") {
       return excludeIrrelevantEndTriggerRoles.value;
     }
-    if (tokenSet.value === "death_by_role") {
+    if (tokenSet.value === "event_by_role") {
       return excludeIrrelevantGrimoireEventRoles.value;
     }
     return false;
@@ -2346,7 +2346,7 @@ const excludeIrrelevantRoles = computed({
   set: (value) => {
     if (tokenSet.value === "end_trigger") {
       excludeIrrelevantEndTriggerRoles.value = value;
-    } else if (tokenSet.value === "death_by_role") {
+    } else if (tokenSet.value === "event_by_role") {
       excludeIrrelevantGrimoireEventRoles.value = value;
     }
   },
@@ -2671,13 +2671,13 @@ watchEffect(async () => {
 
 function openRoleSelectionDialog(
   token: Partial<Character> | null,
-  mode: "role" | "related_role" | "end_trigger_role" | "death_by_role",
+  mode: "role" | "related_role" | "end_trigger_role" | "event_by_role",
   set:
     | "player_characters"
     | "demon_bluffs"
     | "fabled"
     | "end_trigger"
-    | "death_by_role" = "player_characters"
+    | "event_by_role" = "player_characters"
 ) {
   focusedToken = token;
   tokenMode.value = mode;
@@ -2702,7 +2702,7 @@ function openGrimoireEventByRoleDialog(event: {
 }) {
   focusedGrimoireEvent.value = event;
   excludeIrrelevantGrimoireEventRoles.value = true;
-  openRoleSelectionDialog(null, "death_by_role", "death_by_role");
+  openRoleSelectionDialog(null, "event_by_role", "event_by_role");
 }
 
 function clearEndTriggerRole() {
@@ -2761,7 +2761,7 @@ function selectRoleForToken(role: {
     showRoleSelectionDialog.value = false;
     return;
   }
-  if (tokenMode.value === "death_by_role") {
+  if (tokenMode.value === "event_by_role") {
     const event = focusedGrimoireEvent.value;
     if (event) {
       event.by_role_id = role.id || null;
