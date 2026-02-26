@@ -232,7 +232,7 @@ useHead({
   title: username,
   meta: [
     {
-      hid: "description",
+      key: "description",
       name: "description",
       content: `View ${username}'s profile on ClockTracker`,
     },

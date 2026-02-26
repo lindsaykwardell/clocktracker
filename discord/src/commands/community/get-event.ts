@@ -1,4 +1,4 @@
-import { CacheType, CommandInteraction, SlashCommandBuilder } from "discord.js";
+import { type CacheType, CommandInteraction, SlashCommandBuilder } from "discord.js";
 import {
   findEvent,
   buildEmbed,

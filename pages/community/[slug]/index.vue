@@ -199,7 +199,7 @@ useHead({
   title: metadata.name,
   meta: [
     {
-      hid: "description",
+      key: "description",
       name: "description",
       content: metadata.description,
     },

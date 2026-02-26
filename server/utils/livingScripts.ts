@@ -1,4 +1,4 @@
-import { UploadedScript } from "./customScript";
+import type { UploadedScript } from "./customScript";
 
 export type LSCampaignResponse = {
   title: string;

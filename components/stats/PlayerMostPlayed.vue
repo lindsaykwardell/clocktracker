@@ -149,7 +149,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import type { Game, Character } from "@prisma/client";
+import type { GameRecord } from "~/composables/useGames";
 
 type RoleType = string;
 
@@ -159,17 +159,8 @@ type CharacterStat = {
   token_url: string | null;
 };
 
-type GameWithChars = Game & {
-  ignore_for_stats?: boolean | null;
-  player_characters: (Character & {
-    name: string | null;
-    role?: { token_url: string; type: string };
-    related_role?: { token_url: string };
-  })[];
-};
-
 const props = defineProps<{
-  games: GameWithChars[];
+  games: GameRecord[];
   isMe?: boolean;
 }>();
 

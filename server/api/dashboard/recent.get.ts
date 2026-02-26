@@ -1,5 +1,5 @@
-import { CommunityPost, Event } from "@prisma/client";
-import { User } from "@supabase/supabase-js";
+import type { CommunityPost, Event } from "@prisma/client";
+import type { User } from "@supabase/supabase-js";
 import { prisma } from "~/server/utils/prisma";
 
 type Update =
