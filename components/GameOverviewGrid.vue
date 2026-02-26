@@ -413,8 +413,8 @@ type OrbitRole = {
   name: string;
   token_url: string | null;
   alternate_token_urls?: string[] | null;
-  alignment: string | null;
-  initial_alignment: string | null;
+  alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
+  initial_alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
 };
 
 type GameOrbitData = {
@@ -467,8 +467,8 @@ const orbitDataMap = computed<Record<string, GameOrbitData>>(() => {
         token_url:
           character.role?.token_url ?? character.related_role?.token_url ?? null,
         alternate_token_urls: character.role?.alternate_token_urls ?? null,
-        alignment: character.alignment ?? null,
-        initial_alignment: character.role?.initial_alignment ?? null,
+        alignment: (character.alignment as OrbitRole["alignment"]) ?? null,
+        initial_alignment: (character.role?.initial_alignment as OrbitRole["initial_alignment"]) ?? null,
       });
     }
 
@@ -513,7 +513,7 @@ const computeTaggedPlayers = (game: GameRecord): TaggedPlayer[] => {
       const player = t.player;
       if (!t.player_id || !player) continue;
 
-      const key = player.id ?? player.username;
+      const key = t.player_id ?? player.username;
       if (!key || seen.has(key)) continue;
 
       seen.add(key);

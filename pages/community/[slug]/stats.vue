@@ -212,7 +212,7 @@
                 :anonymize-non-users="!isMember"
               />
               <StatsCommunityTopLocations
-                :games="filteredGames"
+                :games="(filteredGames as any)"
                 :is-member="isMember"
                 class="col-span-3 lg:col-span-2"
               />
@@ -220,9 +220,9 @@
           </section>
 
           <section>
-            <StatsCommunityHighlights 
+            <StatsCommunityHighlights
               :players="visiblePlayers"
-              :games="filteredGames"
+              :games="(filteredGames as any)"
               class="w-full xl:w-3/4 xl:mx-auto"
               :anonymize-non-users="!isMember"
             />
@@ -238,7 +238,7 @@
 
           <section v-if="filteredGames.length">
             <StatsCommunityAlignment
-              :games="{ status: Status.SUCCESS, data: filteredGames }"
+              :games="{ status: Status.SUCCESS, data: filteredGames } as any"
               :players="visiblePlayers"
               class="w-full xl:w-3/4 xl:mx-auto"
               :anonymize-non-users="!isMember"
@@ -246,8 +246,8 @@
           </section>
 
           <section v-if="filteredGames.length">
-            <StatsCommunityGamesOverTime 
-              :games="filteredGames" 
+            <StatsCommunityGamesOverTime
+              :games="(filteredGames as any)"
               class="w-full xl:w-3/4 xl:mx-auto"
             />
           </section>
@@ -260,12 +260,12 @@
                 </h2>
                 
                 <div class="col-span-4 lg:col-span-2 grid grid-cols-subgrid">
-                  <StatsCommunityPlayercount 
-                    :games="filteredGames"
+                  <StatsCommunityPlayercount
+                    :games="(filteredGames as any)"
                     class="col-span-2 lg:col-span-1"
                   />
-                  <StatsCommunityMinioncount 
-                    :games="filteredGames"
+                  <StatsCommunityMinioncount
+                    :games="(filteredGames as any)"
                     class="col-span-2 lg:col-span-1"
                   />
                 </div>
@@ -279,12 +279,12 @@
 
                 <div class="col-span-4 lg:col-span-3 grid grid-cols-subgrid">
                   <StatsCommunityScriptTypes
-                    :games="filteredGames"
+                    :games="(filteredGames as any)"
                     class="col-span-2 lg:col-span-1"
                   />
 
-                  <StatsCommunityTopScripts 
-                    :games="filteredGames" 
+                  <StatsCommunityTopScripts
+                    :games="(filteredGames as any)"
                     class="col-span-2"
                   />
                 </div>
@@ -303,7 +303,7 @@
 
           <section v-if="filteredGames.length">
             <StatsCommunityRoles
-              :games="{ status: Status.SUCCESS, data: filteredGames }"
+              :games="{ status: Status.SUCCESS, data: filteredGames } as any"
               :players="visiblePlayers"
               :anonymize-non-users="!isMember"
             />
@@ -480,8 +480,8 @@ const getUserByUsername = (username: string) => {
 
 const startDateRange = ref<string | null>(null);
 const endDateRange = ref<string | null>(null);
-const minPlayers = ref<number | null>(null);
-const maxPlayers = ref<number | null>(null);
+const minPlayers = ref<string | number | null>(null);
+const maxPlayers = ref<string | number | null>(null);
 const selectedLocation = ref<string | null>(null);
 const selectedTag = ref<string | null>(null);
 const selectedTags = ref<string[]>([]);

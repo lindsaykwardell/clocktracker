@@ -138,6 +138,7 @@ const communities = ref<
 const scripts = ref<
   {
     id: number;
+    script_id: string;
     name: string;
     version: string;
     author: string;

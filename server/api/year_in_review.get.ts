@@ -1,5 +1,5 @@
 import { PrivacySetting } from "@prisma/client";
-import { User } from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 import { nanoid } from "nanoid";
 import { prisma } from "~/server/utils/prisma";
 

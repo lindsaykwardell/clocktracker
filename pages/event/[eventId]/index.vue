@@ -341,7 +341,7 @@ watch(event, () => {
       } - ${event.value.data.title}`,
       meta: [
         {
-          hid: "description",
+          key: "description",
           name: "description",
           content: `${event.value.data.title}, hosted by ${
             event.value.data.community?.name ??

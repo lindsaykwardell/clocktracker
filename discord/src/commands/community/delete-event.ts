@@ -1,12 +1,4 @@
-import {
-  CacheType,
-  CommandInteraction,
-  SlashCommandBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  ActionRowBuilder,
-  EmbedBuilder,
-} from "discord.js";
+import { type CacheType, CommandInteraction, SlashCommandBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, EmbedBuilder } from "discord.js";
 import {
   buildEmbed,
   findEvent,
