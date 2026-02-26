@@ -224,7 +224,7 @@ export async function fetchGames(user_id: string, me: User | null) {
           },
         },
       },
-      deaths: true,
+      grimoire_events: true,
       end_trigger_role: {
         select: {
           token_url: true,
@@ -494,7 +494,7 @@ export async function fetchGame(
           },
         },
       },
-      deaths: true,
+      grimoire_events: true,
       end_trigger_role: {
         select: {
           token_url: true,

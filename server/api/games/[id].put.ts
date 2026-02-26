@@ -8,8 +8,8 @@ import {
   DemonBluff,
   Fabled,
   ReminderToken,
-  DeathEvent,
-  DeathType,
+  GrimoireEvent,
+  GrimoireEventType,
 } from "@prisma/client";
 import { prisma } from "~/server/utils/prisma";
 
@@ -21,7 +21,7 @@ export default defineEventHandler(async (handler) => {
         player_characters: (Character & { role?: { token_url: string } })[];
         demon_bluffs: (DemonBluff & { role?: { token_url: string } })[];
         fabled: (Fabled & { role?: { token_url: string } })[];
-        deaths?: DeathEvent[];
+        grimoire_events?: GrimoireEvent[];
         grimoire: Partial<
           Grimoire & {
             tokens: Partial<
@@ -56,6 +56,13 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
+  const {
+    grimoire_events: _incomingEvents,
+    ...gameData
+  } = body as any;
+
+  const incomingGrimoireEvents: GrimoireEvent[] = body.grimoire_events ?? [];
+
   const existingGame = await prisma.game.findUnique({
     where: {
       id: gameId,
@@ -79,7 +86,7 @@ export default defineEventHandler(async (handler) => {
       id: gameId,
     },
     data: {
-      ...body,
+      ...gameData,
       date: new Date(body.date),
       user_id: user.id,
       player_characters: {
@@ -106,19 +113,20 @@ export default defineEventHandler(async (handler) => {
         },
         create: [...body.fabled],
       },
-      deaths: {
+      grimoire_events: {
         deleteMany: {},
         create:
-          body.deaths?.map((death) => ({
-            grimoire_page: death.grimoire_page,
-            participant_id: death.participant_id,
-            is_revival: death.is_revival ?? false,
-            death_type: death.is_revival ? null : (death.death_type ?? DeathType.DEATH),
-            cause: death.cause ?? null,
-            by_participant_id: death.by_participant_id ?? null,
-            player_name: death.player_name ?? "",
-            role_id: death.role_id ?? null,
-            by_role_id: death.by_role_id ?? null,
+          incomingGrimoireEvents.map((grimoireEvent) => ({
+            grimoire_page: grimoireEvent.grimoire_page,
+            participant_id: grimoireEvent.participant_id,
+            event_type:
+              grimoireEvent.event_type ??
+              GrimoireEventType.NOT_RECORDED,
+            cause: grimoireEvent.cause ?? null,
+            by_participant_id: grimoireEvent.by_participant_id ?? null,
+            player_name: grimoireEvent.player_name ?? "",
+            role_id: grimoireEvent.role_id ?? null,
+            by_role_id: grimoireEvent.by_role_id ?? null,
           })) || [],
       },
       grimoire: {
@@ -249,7 +257,7 @@ export default defineEventHandler(async (handler) => {
       player_characters: true,
       demon_bluffs: true,
       fabled: true,
-      deaths: true,
+      grimoire_events: true,
       end_trigger_role: {
         select: {
           token_url: true,
@@ -371,7 +379,7 @@ export default defineEventHandler(async (handler) => {
       if (!relatedGame) {
         await prisma.game.create({
           data: {
-            ...body,
+            ...gameData,
             date: new Date(body.date),
             user_id: id,
             player_characters: {
@@ -418,19 +426,21 @@ export default defineEventHandler(async (handler) => {
             end_trigger_role_id: body.end_trigger_role_id,
             end_trigger_note: body.end_trigger_note,
             end_trigger_participant_id: body.end_trigger_participant_id,
-            deaths: {
+            ls_game_id: body.ls_game_id,
+            grimoire_events: {
               deleteMany: {},
               create:
-                body.deaths?.map((death) => ({
-                  grimoire_page: death.grimoire_page,
-                  participant_id: death.participant_id,
-                  is_revival: death.is_revival ?? false,
-                  death_type: death.is_revival ? null : (death.death_type ?? DeathType.DEATH),
-                  cause: death.cause ?? null,
-                  by_participant_id: death.by_participant_id ?? null,
-                  player_name: death.player_name ?? "",
-                  role_id: death.role_id ?? null,
-                  by_role_id: death.by_role_id ?? null,
+                incomingGrimoireEvents.map((grimoireEvent) => ({
+                  grimoire_page: grimoireEvent.grimoire_page,
+                  participant_id: grimoireEvent.participant_id,
+                  event_type:
+                    grimoireEvent.event_type ??
+                    GrimoireEventType.NOT_RECORDED,
+                  cause: grimoireEvent.cause ?? null,
+                  by_participant_id: grimoireEvent.by_participant_id ?? null,
+                  player_name: grimoireEvent.player_name ?? "",
+                  role_id: grimoireEvent.role_id ?? null,
+                  by_role_id: grimoireEvent.by_role_id ?? null,
                 })) || [],
             },
             demon_bluffs: {
@@ -505,7 +515,7 @@ export default defineEventHandler(async (handler) => {
         if (!childGame) {
           await prisma.game.create({
             data: {
-              ...body,
+              ...gameData,
               is_storyteller: true,
               date: new Date(body.date),
               user_id: friend.user_id,
@@ -545,25 +555,27 @@ export default defineEventHandler(async (handler) => {
               win_v2: body.win_v2,
               end_trigger: body.end_trigger,
               end_trigger_role_id: body.end_trigger_role_id,
-            end_trigger_note: body.end_trigger_note,
-            end_trigger_participant_id: body.end_trigger_participant_id,
-            deaths: {
-              deleteMany: {},
-              create:
-                body.deaths?.map((death) => ({
-                  grimoire_page: death.grimoire_page,
-                  participant_id: death.participant_id,
-                  is_revival: death.is_revival ?? false,
-                  death_type: death.is_revival ? null : (death.death_type ?? DeathType.DEATH),
-                  cause: death.cause ?? null,
-                  by_participant_id: death.by_participant_id ?? null,
-                  player_name: death.player_name ?? "",
-                  role_id: death.role_id ?? null,
-                  by_role_id: death.by_role_id ?? null,
-                })) || [],
-            },
-            demon_bluffs: {
-              deleteMany: childGame.demon_bluffs.map((g) => ({ id: g.id })),
+              end_trigger_note: body.end_trigger_note,
+              end_trigger_participant_id: body.end_trigger_participant_id,
+              ls_game_id: body.ls_game_id,
+              grimoire_events: {
+                deleteMany: {},
+                create:
+                  incomingGrimoireEvents.map((grimoireEvent) => ({
+                    grimoire_page: grimoireEvent.grimoire_page,
+                    participant_id: grimoireEvent.participant_id,
+                    event_type:
+                      grimoireEvent.event_type ??
+                      GrimoireEventType.NOT_RECORDED,
+                    cause: grimoireEvent.cause ?? null,
+                    by_participant_id: grimoireEvent.by_participant_id ?? null,
+                    player_name: grimoireEvent.player_name ?? "",
+                    role_id: grimoireEvent.role_id ?? null,
+                    by_role_id: grimoireEvent.by_role_id ?? null,
+                  })) || [],
+              },
+              demon_bluffs: {
+                deleteMany: childGame.demon_bluffs.map((g) => ({ id: g.id })),
                 create: game.demon_bluffs.map((g) => ({
                   ...g,
                   id: undefined,

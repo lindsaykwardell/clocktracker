@@ -26,14 +26,19 @@ export enum GameEndTrigger {
   OTHER = "OTHER",
 }
 
-export enum DeathCause {
+export enum GrimoireEventCause {
   ABILITY = "ABILITY",
   NOMINATION = "NOMINATION",
 }
 
-export enum DeathType {
+export enum GrimoireEventType {
+  NOT_RECORDED = "NOT_RECORDED",
   DEATH = "DEATH",
   EXECUTION = "EXECUTION",
+  REVIVE = "REVIVE",
+  ROLE_CHANGE = "ROLE_CHANGE",
+  SEAT_CHANGE = "SEAT_CHANGE",
+  ALIGNMENT_CHANGE = "ALIGNMENT_CHANGE",
 }
 
 export type FullCharacter = Character & {
@@ -77,13 +82,12 @@ export type GameRecord = Omit<Game, "win_v2"> & {
     initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
     name: string;
   } | null;
-  deaths: {
+  grimoire_events: {
     id: number;
     grimoire_page: number;
     participant_id: string;
-    is_revival: boolean;
-    death_type: DeathType | null;
-    cause: DeathCause | null;
+    event_type: GrimoireEventType;
+    cause: GrimoireEventCause | null;
     by_participant_id: string | null;
     player_name: string;
     role_id: string | null;

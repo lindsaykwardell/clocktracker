@@ -1,38 +1,8 @@
 import { GameEndTrigger } from "~/composables/useGames";
-
-// These could become anything..
-export const WILDCARDS: string[] = [
-  'amnesiac',
-  'cannibal',
-  'philosopher',
-  'pixie',
-  'hermit',
-  'wizard',
-  'plague_doctor', // Storyteller Assassin or Cerenovus killing the demon I guess?
-  'apprentice',
-  'bootlegger',
-];
-
-// Demons that kill or cause kills, including themselves.
-export const DEMONS_THAT_KILL: string[] = [
-  'al-hadikhia',
-  'fang_gu',
-  'imp',
-  'kazali',
-  'legion',
-  'lil_monsta',
-  'lleech',
-  'lord_of_typhon',
-  'no_dashii',
-  'ojo',
-  'po',
-  'pukka',
-  'shabaloth',
-  'vigormortis',
-  'vortox',
-  'yaggababble',
-  'zombuul',
-];
+import {
+  KILLING_DEMON_ROLE_IDS,
+  WILDCARD_ROLE_IDS,
+} from "~/composables/grimoireRoleGroups";
 
 export const END_TRIGGER_ROLE_INCLUDES: Record<
   GameEndTrigger,
@@ -41,7 +11,7 @@ export const END_TRIGGER_ROLE_INCLUDES: Record<
   [GameEndTrigger.NOT_RECORDED]: { base: [], conditional: [] },
   [GameEndTrigger.CHARACTER_ABILITY]: {
     base: [
-    ...WILDCARDS,
+    ...WILDCARD_ROLE_IDS,
     // Townsfolk
     'alsaahir',
     'atheist',
@@ -70,8 +40,8 @@ export const END_TRIGGER_ROLE_INCLUDES: Record<
   },
   [GameEndTrigger.NO_LIVING_DEMON]: {
     base: [
-    ...WILDCARDS,
-    ...DEMONS_THAT_KILL,
+    ...WILDCARD_ROLE_IDS,
+    ...KILLING_DEMON_ROLE_IDS,
 
     // Straight up kills/executions
     'slayer',
@@ -87,13 +57,13 @@ export const END_TRIGGER_ROLE_INCLUDES: Record<
     'gangster',
     'gnome',
     'angel', // Something bad could be death.
-    'hells_librarian', // Something bad could be death.
     'doomsayer',
+    'hells_librarian', // Something bad could be death.
     'big_wig',
 
     // (Unintended) swaps
     'barber', // Swap demon to dead player?
-    'pithag', // Could change the demon into non-demon.
+    'pit-hag', // Could change the demon into non-demon.
     'cacklejack', // Could change the demon into non-demon.
 
     // Storyteller choice/"yes-but-don't"
@@ -119,8 +89,8 @@ export const END_TRIGGER_ROLE_INCLUDES: Record<
   },
   [GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE]: {
     base: [
-    ...WILDCARDS,
-    ...DEMONS_THAT_KILL,
+    ...WILDCARD_ROLE_IDS,
+    ...KILLING_DEMON_ROLE_IDS,
     'mutant', // A Mutant could get themselves executed due to their ability during final 3.
     'boomdandy',
     'cerenovus', // Mad player could be executed during final 3.

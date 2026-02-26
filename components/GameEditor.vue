@@ -467,7 +467,7 @@
               :availableRoles="orderedRoles"
               :excludePlayers="storytellerNames"
               :pageIndex="grimPage"
-              @deathToggled="recordDeathEvent"
+              @deathToggled="recordGrimoireEvent"
               @selectedMe="applyMyRoleToGrimoire"
             />
             <div
@@ -571,17 +571,17 @@
       v-if="!editingMultipleGames"
       class="block border rounded border-stone-500 p-4 my-3 bg-center bg-cover"
     >
-      <legend>Deaths & Executions</legend>
-        <p v-if="game.deaths.length === 0" class="text-sm text-stone-400">
-          No deaths recorded yet. Toggle a shroud in the grimoire to add an entry.
+      <legend>Grimoire Events</legend>
+        <p v-if="game.grimoire_events.length === 0" class="text-sm text-stone-400">
+          No events recorded yet. Toggle a shroud in the grimoire to add an entry.
         </p>
-        <Alert v-if="deathSyncSummary" :color="deathSyncAlertColor">
-          {{ deathSyncSummary }}
+        <Alert v-if="grimoireEventSyncSummary" :color="grimoireEventSyncAlertColor">
+          {{ grimoireEventSyncSummary }}
         </Alert>
         <details
-          v-for="pageGroup in deathEventsByPage"
+          v-for="pageGroup in grimoireEventsByPage"
           :key="pageGroup.page"
-          :open="pageGroup.events.some((death) => death.is_revival || death.death_type !== null)"
+          :open="pageGroup.events.some((event) => event.event_type !== null)"
         >
           <summary class="cursor-pointer">
             Grimoire Page {{ pageGroup.page + 1 }}
@@ -589,76 +589,109 @@
           <ul class="grid grid-cols-[auto_1fr_auto] gap-x-8 gap-y-2 py-2">
             <li
               v-for="death in pageGroup.events"
-              :key="`${pageGroup.page}-${death.participant_id}-${death.is_revival}-${death.player_name}`"
+              :key="`${pageGroup.page}-${death.participant_id}-${death.event_type}-${death.player_name}`"
               class="col-span-full grid grid-cols-subgrid items-center border border-stone-600 rounded p-3"
             >
               <div class="flex items-center flex-col gap-1">
                 <div class="relative flex justify-center items-center aspect-square">
                   <Token
-                    :character="deathSeatCharacter(death)"
+                    :character="grimoireEventSeatCharacter(death)"
                     size="md"
                     class="pointer-events-none"
                     hideRelated
                   />
                   <img
-                    v-if="!death.is_revival"
+                    v-if="showsShroudOverlay(death)"
                     src="/img/shroud.png"
                     class="absolute top-0 w-8 md:w-10"
                     alt=""
                   />
+                  <span
+                    v-else-if="death.event_type === GrimoireEventType.ALIGNMENT_CHANGE"
+                    class="absolute top-0 grid h-8 w-8 place-items-center rounded-full bg-amber-500 text-[10px] font-bold text-black md:h-10 md:w-10 md:text-xs"
+                    title="Alignment switch"
+                  >
+                    A
+                  </span>
+                  <span
+                    v-else-if="death.event_type === GrimoireEventType.SEAT_CHANGE"
+                    class="absolute top-0 grid h-8 w-8 place-items-center rounded-full bg-sky-500 text-[10px] font-bold text-black md:h-10 md:w-10 md:text-xs"
+                    title="Seat change"
+                  >
+                    S
+                  </span>
+                  <span
+                    v-else-if="death.event_type === GrimoireEventType.ROLE_CHANGE"
+                    class="absolute top-0 grid h-8 w-8 place-items-center rounded-full bg-violet-500 text-[10px] font-bold text-black md:h-10 md:w-10 md:text-xs"
+                    title="Character switch"
+                  >
+                    C
+                  </span>
                 </div>
                 <div class="flex flex-col">
                   <span class="text-sm font-medium">
-                    {{ deathDisplayName(death) }}
+                    {{ grimoireEventDisplayName(death) }}
                   </span>
                   <span class="text-xs text-stone-400 sr-only">
-                    {{ death.is_revival ? "Revived" : "Died" }}
+                    {{ eventSummaryLabel(death) }}
                   </span>
                 </div>
               </div>
               <div class="grid grid-cols-2 gap-2">
                 <label>
-                  <span class="block text-xs">Death type</span>
+                  <span class="block text-xs">Event type</span>
                 <Input
                   mode="select"
-                  v-model="death.death_type"
-                  :disabled="death.is_revival"
+                  v-model="death.event_type"
+                  :disabled="isEventTypeLocked(death)"
                     @update:modelValue="
                     () => {
                       death.cause = null;
                       death.by_participant_id = null;
                       death.by_role_id = null;
+                      if (death.event_type === GrimoireEventType.REVIVE) {
+                        death.cause = GrimoireEventCause.ABILITY;
+                      }
                     }
                   "
                 >
-                  <option v-if="death.is_revival" :value="null">Revival</option>
-                  <option v-else :value="null">Not recorded</option>
-                  <option v-if="!death.is_revival" :value="DeathType.DEATH">
-                    Death
+                  <option v-if="death.event_type === GrimoireEventType.REVIVE" :value="GrimoireEventType.REVIVE">
+                    Revival
                   </option>
-                  <option v-if="!death.is_revival" :value="DeathType.EXECUTION">
-                    Execution
-                  </option>
+                  <template v-else-if="isEventTypeLocked(death)">
+                    <option :value="death.event_type">
+                      {{ eventTypeOptionLabel(death.event_type) }}
+                    </option>
+                  </template>
+                  <template v-else>
+                    <option :value="null">Not recorded</option>
+                    <option :value="GrimoireEventType.DEATH">
+                      Death
+                    </option>
+                    <option :value="GrimoireEventType.EXECUTION">
+                      Execution
+                    </option>
+                  </template>
                 </Input>
                 </label>
-                <template v-if="death.death_type !== null || death.is_revival">
+                <template v-if="death.event_type !== null">
                   <label>
                     <span class="block text-xs">Cause</span>
                     <Input
                       mode="select"
                       v-model="death.cause"
-                      :disabled="death.is_revival"
-                      @update:modelValue="onDeathCauseChange(death)"
+                      :disabled="death.event_type === GrimoireEventType.REVIVE"
+                      @update:modelValue="onGrimoireEventCauseChange(death)"
                     >
-                      <option v-if="death.is_revival" :value="DeathCause.ABILITY">
+                      <option v-if="death.event_type === GrimoireEventType.REVIVE" :value="GrimoireEventCause.ABILITY">
                         Ability
                       </option>
                       <template v-else>
                         <option :value="null">Select cause</option>
-                        <option :value="DeathCause.ABILITY">Ability</option>
+                        <option :value="GrimoireEventCause.ABILITY">Ability</option>
                         <option
-                          v-if="death.death_type !== DeathType.DEATH"
-                          :value="DeathCause.NOMINATION"
+                          v-if="death.event_type === GrimoireEventType.EXECUTION"
+                          :value="GrimoireEventCause.NOMINATION"
                         >
                           Nomination
                         </option>
@@ -669,15 +702,15 @@
                     <span class="block text-xs">Select triggering character</span>
                     <Input
                       mode="select"
-                      :modelValue="getDeathSeatSelection(death)"
+                      :modelValue="getGrimoireEventSeatSelection(death)"
                       @update:modelValue="
-                        (value) => updateDeathSeatSelection(death, value as any)
+                        (value) => updateGrimoireEventSeatSelection(death, value as any)
                       "
-                      :disabled="!death.is_revival && death.cause === null"
+                      :disabled="death.event_type !== GrimoireEventType.REVIVE && death.cause === null"
                     >
                       <option :value="null">No character selected</option>
                       <option
-                        v-for="seat in deathSeatOptionsForPage(pageGroup.page, death.cause, death.death_type)"
+                        v-for="seat in grimoireEventSeatOptionsForPage(pageGroup.page, death.cause, death.event_type)"
                         :key="seat.participant_id"
                         :value="seat.participant_id"
                       >
@@ -689,28 +722,28 @@
                 </template>
               </div>
               <div
-                v-if="death.death_type !== null || death.is_revival"
+                v-if="death.event_type !== null"
                 class="relative flex justify-center items-center aspect-square"
               >
                 <Token
                   v-if="death.by_role_id"
-                  :character="deathByRoleCharacter(death)"
+                  :character="grimoireEventByRoleCharacter(death)"
                   size="md"
                   class="cursor-pointer"
                   :class="{
-                    'pointer-events-none opacity-50': !allowManualDeathByRole(death),
+                    'pointer-events-none opacity-50': !allowManualGrimoireEventByRole(death),
                   }"
-                  @clickRole="openDeathByRoleDialog(death)"
+                  @clickRole="openGrimoireEventByRoleDialog(death)"
                   hideRelated
                 />
                 <Token v-else outline size="md" class="font-sorts">
                   <button
                     type="button"
-                    @click="openDeathByRoleDialog(death)"
+                    @click="openGrimoireEventByRoleDialog(death)"
                     class="w-full h-full p-1 text-xs"
-                    :disabled="!allowManualDeathByRole(death)"
+                    :disabled="!allowManualGrimoireEventByRole(death)"
                   >
-                    <template v-if="allowManualDeathByRole(death)">
+                    <template v-if="allowManualGrimoireEventByRole(death)">
                       Add Role
                     </template>
                     <template v-else>
@@ -964,12 +997,15 @@ import { useLocalStorage } from "@vueuse/core";
 import {
   GameEndTrigger,
   WinStatus_V2,
-  DeathCause,
-  DeathType,
+  GrimoireEventCause,
+  GrimoireEventType,
   type GameRecord,
 } from "~/composables/useGames";
 import { END_TRIGGER_ROLE_INCLUDES } from "~/composables/gameEndTriggerConfig";
-import { DEATH_ROLE_INCLUDES } from "~/composables/deathRoleConfig";
+import {
+  GRIMOIRE_EVENT_ROLE_INCLUDES,
+  type RoleIncludeConfig,
+} from "~/composables/grimoireEventRoleConfig";
 import dayjs from "dayjs";
 
 const props = defineProps<{
@@ -1031,13 +1067,12 @@ const props = defineProps<{
       initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
       name: string;
     } | null;
-    deaths: {
+    grimoire_events: {
       id?: number;
       grimoire_page: number;
       participant_id: string;
-      is_revival: boolean;
-      death_type: DeathType | null;
-      cause: DeathCause | null;
+      event_type: GrimoireEventType | null;
+      cause: GrimoireEventCause | null;
       by_participant_id: string | null;
       player_name: string;
       role_id: string | null;
@@ -1122,22 +1157,21 @@ const tokenSet = ref<
   "player_characters" | "demon_bluffs" | "fabled" | "end_trigger" | "death_by_role"
 >("player_characters");
 const excludeIrrelevantEndTriggerRoles = ref(true);
-const excludeIrrelevantDeathRoles = ref(true);
-const focusedDeathEvent = ref<{
+const excludeIrrelevantGrimoireEventRoles = ref(true);
+const focusedGrimoireEvent = ref<{
   grimoire_page: number;
   participant_id: string;
-  is_revival: boolean;
-  death_type: DeathType | null;
-  cause: DeathCause | null;
+  event_type: GrimoireEventType | null;
+  cause: GrimoireEventCause | null;
   by_participant_id: string | null;
   player_name: string;
   role_id: string | null;
   by_role_id: string | null;
 } | null>(null);
-const deathSyncSummary = ref("");
-const deathSyncStats = ref({ added: 0, updated: 0, removed: 0 });
-const deathSyncDone = ref(false);
-const deathCustomSeatSelections = ref(new Set<string>());
+const grimoireEventSyncSummary = ref("");
+const grimoireEventSyncStats = ref({ added: 0, updated: 0, removed: 0 });
+const grimoireEventSyncDone = ref(false);
+const grimoireEventCustomSeatSelections = ref(new Set<string>());
 
 // Grimoire
 const showCopyGrimoireDialog = ref(false);
@@ -1314,13 +1348,13 @@ function selectEndTriggerSeat() {
   }
 }
 
-const deathEventsByPage = computed(() => {
-  const groups = new Map<number, typeof props.game.deaths>();
-  for (const death of props.game.deaths || []) {
-    if (!groups.has(death.grimoire_page)) {
-      groups.set(death.grimoire_page, []);
+const grimoireEventsByPage = computed(() => {
+  const groups = new Map<number, typeof props.game.grimoire_events>();
+  for (const event of props.game.grimoire_events || []) {
+    if (!groups.has(event.grimoire_page)) {
+      groups.set(event.grimoire_page, []);
     }
-    groups.get(death.grimoire_page)!.push(death);
+    groups.get(event.grimoire_page)!.push(event);
   }
 
   return Array.from(groups.entries())
@@ -1537,19 +1571,32 @@ function findMatchingTokenOnPreviousPage(
   return byOrder;
 }
 
-function deathSeatOptionsForPage(
+function grimoireEventSeatOptionsForPage(
   pageIndex: number,
-  cause: DeathCause | null,
-  deathType: DeathType | null
+  cause: GrimoireEventCause | null,
+  eventType: GrimoireEventType | null
 ) {
   const page = props.game.grimoire[pageIndex];
   if (!page) return [];
   const previousPage =
     pageIndex > 0 ? props.game.grimoire[pageIndex - 1] : null;
   const ordered = page.tokens.slice().sort((a, b) => a.order - b.order);
+  const resolveIncludesForEventType = (type: GrimoireEventType) => {
+    const config: RoleIncludeConfig = GRIMOIRE_EVENT_ROLE_INCLUDES[type];
+    const includes = [
+      ...(config.base ?? []),
+      ...(config.conditional ?? [])
+        .filter((entry) =>
+          entry.requires.every((required) => scriptRoleIds.value.has(required))
+        )
+        .map((entry) => entry.role),
+    ];
+    return Array.from(new Set(includes));
+  };
+
   const abilityIncludes =
-    cause === DeathCause.ABILITY && deathType !== null
-      ? DEATH_ROLE_INCLUDES[deathType] || []
+    cause === GrimoireEventCause.ABILITY && eventType !== null
+      ? resolveIncludesForEventType(eventType)
       : [];
   const abilityAllowed =
     abilityIncludes.length > 0 ? new Set(abilityIncludes) : null;
@@ -1562,7 +1609,7 @@ function deathSeatOptionsForPage(
       ) {
         return false;
       }
-      if (cause !== DeathCause.NOMINATION) return true;
+      if (cause !== GrimoireEventCause.NOMINATION) return true;
       const prev =
         previousPage && pageIndex > 0
           ? findMatchingTokenOnPreviousPage(pageIndex, token)
@@ -1579,21 +1626,21 @@ function deathSeatOptionsForPage(
     }));
 }
 
-function deathDisplayName(death: {
+function grimoireEventDisplayName(event: {
   grimoire_page: number;
   participant_id: string;
   player_name: string;
 }) {
-  if (death.player_name) return death.player_name;
-  const token = getTokenForParticipant(death.grimoire_page, death.participant_id);
+  if (event.player_name) return event.player_name;
+  const token = getTokenForParticipant(event.grimoire_page, event.participant_id);
   return token?.player_name || token?.role?.name || "Unknown player";
 }
 
-function deathSeatCharacter(death: {
+function grimoireEventSeatCharacter(event: {
   grimoire_page: number;
   participant_id: string;
 }) {
-  const token = getTokenForParticipant(death.grimoire_page, death.participant_id);
+  const token = getTokenForParticipant(event.grimoire_page, event.participant_id);
   if (!token || !token.role) {
     return {
       name: "",
@@ -1617,7 +1664,60 @@ function deathSeatCharacter(death: {
   };
 }
 
-function recordDeathEvent(payload: {
+function showsShroudOverlay(event: {
+  event_type: GrimoireEventType | null;
+}) {
+  return (
+    event.event_type !== GrimoireEventType.REVIVE &&
+    (event.event_type === null ||
+      event.event_type === GrimoireEventType.DEATH ||
+      event.event_type === GrimoireEventType.EXECUTION)
+  );
+}
+
+function isEventTypeLocked(event: {
+  event_type: GrimoireEventType | null;
+}) {
+  return (
+    event.event_type === GrimoireEventType.REVIVE ||
+    event.event_type === GrimoireEventType.ROLE_CHANGE ||
+    event.event_type === GrimoireEventType.SEAT_CHANGE ||
+    event.event_type === GrimoireEventType.ALIGNMENT_CHANGE
+  );
+}
+
+function eventSummaryLabel(event: {
+  event_type: GrimoireEventType | null;
+}) {
+  if (event.event_type === GrimoireEventType.REVIVE) return "Revived";
+  if (event.event_type === GrimoireEventType.EXECUTION) return "Executed";
+  if (event.event_type === GrimoireEventType.ROLE_CHANGE) return "Character switched";
+  if (event.event_type === GrimoireEventType.SEAT_CHANGE) return "Seat changed";
+  if (event.event_type === GrimoireEventType.ALIGNMENT_CHANGE) return "Alignment switched";
+  return "Died";
+}
+
+function eventTypeOptionLabel(eventType: GrimoireEventType | null) {
+  if (eventType === GrimoireEventType.REVIVE) return "Revival";
+  if (eventType === GrimoireEventType.ROLE_CHANGE) return "Character switch";
+  if (eventType === GrimoireEventType.SEAT_CHANGE) return "Seat change";
+  if (eventType === GrimoireEventType.ALIGNMENT_CHANGE) return "Alignment switch";
+  if (eventType === GrimoireEventType.EXECUTION) return "Execution";
+  if (eventType === GrimoireEventType.DEATH) return "Death";
+  return "Not recorded";
+}
+
+function normalizeEventType(event: {
+  event_type: GrimoireEventType | null;
+}) {
+  return event.event_type;
+}
+
+function isReviveEventType(eventType: GrimoireEventType | null) {
+  return eventType === GrimoireEventType.REVIVE;
+}
+
+function recordGrimoireEvent(payload: {
   token: {
     order: number;
     player_name: string;
@@ -1651,62 +1751,116 @@ function recordDeathEvent(payload: {
   const shouldRecordDeath = payload.isDead && !wasDeadPreviously;
   const shouldRecordRevival = !payload.isDead && wasDeadPreviously;
 
-  const existingIndex = props.game.deaths.findIndex(
+  const existingIndex = props.game.grimoire_events.findIndex(
     (death) =>
       death.grimoire_page === payload.pageIndex &&
       death.participant_id === participantId
   );
   if (existingIndex >= 0) {
-    props.game.deaths.splice(existingIndex, 1);
+    props.game.grimoire_events.splice(existingIndex, 1);
   }
 
   // Only record when state changes between pages.
   if (!shouldRecordDeath && !shouldRecordRevival) {
-    syncDeathEventsFromGrimoire({ force: true, silent: true });
+    syncGrimoireEventsFromGrimoire({ force: true, silent: true });
     return;
   }
 
   const entry = {
     grimoire_page: payload.pageIndex,
     participant_id: participantId,
-    is_revival: shouldRecordRevival,
-    death_type: null,
-    cause: shouldRecordRevival ? DeathCause.ABILITY : null,
+    event_type: shouldRecordRevival ? GrimoireEventType.REVIVE : null,
+    cause: shouldRecordRevival ? GrimoireEventCause.ABILITY : null,
     by_participant_id: null,
     player_name: payload.token.player_name || "",
     role_id: payload.token.role_id ?? null,
     by_role_id: null,
   };
 
-  props.game.deaths.push(entry);
+  props.game.grimoire_events.push(entry);
 
-  syncDeathEventsFromGrimoire({ force: true, silent: true });
+  syncGrimoireEventsFromGrimoire({ force: true, silent: true });
 }
 
-function syncDeathEventsFromGrimoire(options?: {
+function syncGrimoireEventsFromGrimoire(options?: {
   force?: boolean;
   silent?: boolean;
 }) {
   const force = options?.force ?? false;
   const silent = options?.silent ?? false;
-  if ((deathSyncDone.value && !force) || props.editingMultipleGames) return;
+  if ((grimoireEventSyncDone.value && !force) || props.editingMultipleGames) return;
   if (!props.game.grimoire.length) return;
 
   let added = 0;
   let removed = 0;
   let updated = 0;
 
-  const events = props.game.deaths;
+  const events = props.game.grimoire_events;
   const expected = new Map<
     string,
-      {
-        grimoire_page: number;
-        participant_id: string;
-        is_revival: boolean;
-        player_name: string;
-        role_id: string | null;
+    {
+      grimoire_page: number;
+      participant_id: string;
+      event_type: GrimoireEventType | null;
+      player_name: string;
+      role_id: string | null;
     }
   >();
+
+  function eventKindFromValues(
+    eventType: GrimoireEventType | null
+  ): "death" | "revival" | "role" | "seat" | "alignment" {
+    if (isReviveEventType(eventType)) return "revival";
+    if (eventType === GrimoireEventType.ROLE_CHANGE) return "role";
+    if (eventType === GrimoireEventType.SEAT_CHANGE) return "seat";
+    if (eventType === GrimoireEventType.ALIGNMENT_CHANGE) return "alignment";
+    return "death";
+  }
+
+  function expectedKey(
+    grimoirePage: number,
+    participantId: string,
+    kind: "death" | "revival" | "role" | "seat" | "alignment"
+  ) {
+    return `${grimoirePage}:${participantId}:${kind}`;
+  }
+
+  function detectSingleSeatMove(
+    previousIds: string[],
+    currentIds: string[]
+  ): string | null {
+    if (previousIds.length !== currentIds.length) return null;
+    if (previousIds.join("|") === currentIds.join("|")) return null;
+
+    const prevSet = new Set(previousIds);
+    if (
+      prevSet.size !== previousIds.length ||
+      currentIds.some((id) => !prevSet.has(id))
+    ) {
+      return null;
+    }
+
+    let foundMovedId: string | null = null;
+    for (let from = 0; from < previousIds.length; from += 1) {
+      const moved = previousIds[from];
+      const withoutMoved = previousIds
+        .slice(0, from)
+        .concat(previousIds.slice(from + 1));
+      for (let to = 0; to <= withoutMoved.length; to += 1) {
+        const candidate = withoutMoved
+          .slice(0, to)
+          .concat([moved], withoutMoved.slice(to));
+        if (candidate.join("|") === currentIds.join("|")) {
+          if (foundMovedId && foundMovedId !== moved) {
+            return null;
+          }
+          foundMovedId = moved;
+        }
+      }
+    }
+
+    return foundMovedId;
+  }
 
   props.game.grimoire.forEach((page, pageIndex) => {
     const orderedTokens = page.tokens.slice().sort((a, b) => a.order - b.order);
@@ -1725,30 +1879,117 @@ function syncDeathEventsFromGrimoire(options?: {
       const shouldHaveDeath = token.is_dead && !wasDeadPreviously;
       const shouldHaveRevival = !token.is_dead && wasDeadPreviously;
 
-      if (!shouldHaveDeath && !shouldHaveRevival) return;
-
       if (!token.grimoire_participant_id) {
         token.grimoire_participant_id = createParticipantId();
       }
       const participantId = token.grimoire_participant_id;
-      const key = `${pageIndex}:${participantId}`;
-      expected.set(key, {
-        grimoire_page: pageIndex,
-        participant_id: participantId,
-        is_revival: shouldHaveRevival,
-        player_name: token.player_name || "",
-        role_id: token.role_id ?? null,
-      });
+
+      if (shouldHaveDeath) {
+        expected.set(expectedKey(pageIndex, participantId, "death"), {
+          grimoire_page: pageIndex,
+          participant_id: participantId,
+          event_type: null,
+          player_name: token.player_name || "",
+          role_id: token.role_id ?? null,
+        });
+      }
+
+      if (shouldHaveRevival) {
+        expected.set(expectedKey(pageIndex, participantId, "revival"), {
+          grimoire_page: pageIndex,
+          participant_id: participantId,
+          event_type: GrimoireEventType.REVIVE,
+          player_name: token.player_name || "",
+          role_id: token.role_id ?? null,
+        });
+      }
+
+      if (!previousToken) return;
+
+      const roleChanged =
+        token.role_id !== previousToken.role_id ||
+        token.related_role_id !== previousToken.related_role_id;
+      if (roleChanged) {
+        expected.set(expectedKey(pageIndex, participantId, "role"), {
+          grimoire_page: pageIndex,
+          participant_id: participantId,
+          event_type: GrimoireEventType.ROLE_CHANGE,
+          player_name: token.player_name || "",
+          role_id: token.role_id ?? null,
+        });
+      }
+
+      if (token.order !== previousToken.order) {
+        expected.set(expectedKey(pageIndex, participantId, "seat"), {
+          grimoire_page: pageIndex,
+          participant_id: participantId,
+          event_type: GrimoireEventType.SEAT_CHANGE,
+          player_name: token.player_name || "",
+          role_id: token.role_id ?? null,
+        });
+      }
+
+      if (token.alignment !== previousToken.alignment) {
+        expected.set(expectedKey(pageIndex, participantId, "alignment"), {
+          grimoire_page: pageIndex,
+          participant_id: participantId,
+          event_type: GrimoireEventType.ALIGNMENT_CHANGE,
+          player_name: token.player_name || "",
+          role_id: token.role_id ?? null,
+        });
+      }
     });
+
+    if (pageIndex > 0) {
+      const previousOrderedTokens = props.game.grimoire[pageIndex - 1].tokens
+        .slice()
+        .sort((a, b) => a.order - b.order);
+      const previousIds = previousOrderedTokens
+        .map((t) => t.grimoire_participant_id)
+        .filter((id): id is string => !!id);
+      const currentIds = orderedTokens
+        .map((t) => t.grimoire_participant_id)
+        .filter((id): id is string => !!id);
+
+      if (previousIds.length === currentIds.length && previousIds.length > 0) {
+        const singleMovedParticipantId = detectSingleSeatMove(previousIds, currentIds);
+        if (singleMovedParticipantId) {
+          const token = orderedTokens.find(
+            (t) => t.grimoire_participant_id === singleMovedParticipantId
+          );
+          if (token) {
+            expected.set(expectedKey(pageIndex, singleMovedParticipantId, "seat"), {
+              grimoire_page: pageIndex,
+              participant_id: singleMovedParticipantId,
+              event_type: GrimoireEventType.SEAT_CHANGE,
+              player_name: token.player_name || "",
+              role_id: token.role_id ?? null,
+            });
+          }
+
+          expected.forEach((value, key) => {
+            if (
+              key.startsWith(`${pageIndex}:`) &&
+              value.event_type === GrimoireEventType.SEAT_CHANGE &&
+              value.participant_id !== singleMovedParticipantId
+            ) {
+              expected.delete(key);
+            }
+          });
+        }
+      }
+    }
   });
 
   function takeExpectedByIdentity(event: (typeof events)[number]) {
     let bestKey: string | null = null;
     let bestScore = -1;
+    const kind = eventKindFromValues(normalizeEventType(event));
 
     expected.forEach((candidate, candidateKey) => {
       if (candidate.grimoire_page !== event.grimoire_page) return;
-      if (candidate.is_revival !== event.is_revival) return;
+      const candidateKind = eventKindFromValues(candidate.event_type);
+      if (candidateKind !== kind) return;
 
       let score = 0;
       if (event.participant_id && candidate.participant_id && event.participant_id === candidate.participant_id) score += 10;
@@ -1774,7 +2015,9 @@ function syncDeathEventsFromGrimoire(options?: {
 
   for (let i = events.length - 1; i >= 0; i -= 1) {
     const event = events[i];
-    const key = `${event.grimoire_page}:${event.participant_id}`;
+    const eventType = normalizeEventType(event);
+    const kind = eventKindFromValues(eventType);
+    const key = expectedKey(event.grimoire_page, event.participant_id, kind);
     let expectation = expected.get(key);
     if (expectation) {
       expected.delete(key);
@@ -1791,19 +2034,23 @@ function syncDeathEventsFromGrimoire(options?: {
       continue;
     }
 
-    if (event.is_revival !== expectation.is_revival) {
-      event.is_revival = expectation.is_revival;
-      if (event.is_revival) {
-        event.cause = DeathCause.ABILITY;
-        event.by_participant_id = null;
-        event.by_role_id = null;
-        event.death_type = null;
+    if (event.event_type !== expectation.event_type) {
+      const keepManualDeathType =
+        !isReviveEventType(eventType) &&
+        (expectation.event_type === null ||
+          expectation.event_type === GrimoireEventType.NOT_RECORDED) &&
+        (event.event_type === null ||
+          event.event_type === GrimoireEventType.NOT_RECORDED ||
+          event.event_type === GrimoireEventType.DEATH ||
+          event.event_type === GrimoireEventType.EXECUTION);
+      if (!keepManualDeathType) {
+        event.event_type = expectation.event_type;
+        updated += 1;
       }
-      updated += 1;
     }
 
-    if (event.is_revival && event.cause === null) {
-      event.cause = DeathCause.ABILITY;
+    if (event.event_type === GrimoireEventType.REVIVE && event.cause === null) {
+      event.cause = GrimoireEventCause.ABILITY;
     }
 
     if (!event.player_name) {
@@ -1819,9 +2066,10 @@ function syncDeathEventsFromGrimoire(options?: {
     events.push({
       grimoire_page: expectation.grimoire_page,
       participant_id: expectation.participant_id,
-      is_revival: expectation.is_revival,
-      death_type: null,
-      cause: expectation.is_revival ? DeathCause.ABILITY : null,
+      event_type: expectation.event_type,
+      cause: isReviveEventType(expectation.event_type)
+        ? GrimoireEventCause.ABILITY
+        : null,
       by_participant_id: null,
       player_name: expectation.player_name,
       role_id: expectation.role_id,
@@ -1832,88 +2080,99 @@ function syncDeathEventsFromGrimoire(options?: {
 
 
   if (!silent && (added || removed || updated)) {
-    deathSyncStats.value = { added, updated, removed };
-    deathSyncSummary.value = `Synced deaths: ${added} added, ${updated} updated, ${removed} removed.`;
+    grimoireEventSyncStats.value = { added, updated, removed };
+    grimoireEventSyncSummary.value = `Synced events: ${added} added, ${updated} updated, ${removed} removed.`;
   }
 
-  deathSyncDone.value = true;
+  grimoireEventSyncDone.value = true;
 }
 
-function getDeathSeatSelection(death: {
+function getGrimoireEventSeatSelection(event: {
   by_participant_id: string | null;
   by_role_id: string | null;
   grimoire_page: number;
   participant_id: string;
+  event_type: GrimoireEventType | null;
 }) {
-  if (death.by_participant_id !== null) return death.by_participant_id;
-  const key = `${death.grimoire_page}:${death.participant_id}`;
-  if (deathCustomSeatSelections.value.has(key)) return "custom";
+  if (event.by_participant_id !== null) return event.by_participant_id;
+  const key = grimoireEventSelectionKey(event);
+  if (grimoireEventCustomSeatSelections.value.has(key)) return "custom";
   return null;
 }
 
-function updateDeathSeatSelection(
-  death: {
+function updateGrimoireEventSeatSelection(
+  event: {
     grimoire_page: number;
     by_participant_id: string | null;
     by_role_id: string | null;
     participant_id: string;
+    event_type: GrimoireEventType | null;
   },
   value: string | "custom" | null
 ) {
-  const key = `${death.grimoire_page}:${death.participant_id}`;
+  const key = grimoireEventSelectionKey(event);
   if (value === "custom") {
-    death.by_participant_id = null;
-    deathCustomSeatSelections.value.add(key);
+    event.by_participant_id = null;
+    grimoireEventCustomSeatSelections.value.add(key);
     return;
   }
 
   if (value === null) {
-    death.by_participant_id = null;
-    death.by_role_id = null;
-    deathCustomSeatSelections.value.delete(key);
+    event.by_participant_id = null;
+    event.by_role_id = null;
+    grimoireEventCustomSeatSelections.value.delete(key);
     return;
   }
 
-  death.by_participant_id = value;
-  const token = getTokenForParticipant(death.grimoire_page, value);
+  event.by_participant_id = value;
+  const token = getTokenForParticipant(event.grimoire_page, value);
   if (token?.role_id) {
-    death.by_role_id = token.role_id;
+    event.by_role_id = token.role_id;
   }
-  deathCustomSeatSelections.value.delete(key);
+  grimoireEventCustomSeatSelections.value.delete(key);
 }
 
-function onDeathCauseChange(death: {
+function onGrimoireEventCauseChange(event: {
   grimoire_page: number;
   participant_id: string;
   by_participant_id: string | null;
   by_role_id: string | null;
+  event_type: GrimoireEventType | null;
 }) {
-  death.by_participant_id = null;
-  death.by_role_id = null;
-  const key = `${death.grimoire_page}:${death.participant_id}`;
-  deathCustomSeatSelections.value.delete(key);
+  event.by_participant_id = null;
+  event.by_role_id = null;
+  const key = grimoireEventSelectionKey(event);
+  grimoireEventCustomSeatSelections.value.delete(key);
 }
 
-function allowManualDeathByRole(death: {
+function allowManualGrimoireEventByRole(event: {
   grimoire_page: number;
   participant_id: string;
-  cause: DeathCause | null;
-  death_type: DeathType | null;
+  cause: GrimoireEventCause | null;
+  event_type: GrimoireEventType | null;
   by_participant_id: string | null;
   by_role_id: string | null;
 }) {
-  const options = deathSeatOptionsForPage(
-    death.grimoire_page,
-    death.cause,
-    death.death_type
+  const options = grimoireEventSeatOptionsForPage(
+    event.grimoire_page,
+    event.cause,
+    event.event_type
   );
   if (options.length === 0) return true;
-  const key = `${death.grimoire_page}:${death.participant_id}`;
-  return deathCustomSeatSelections.value.has(key);
+  const key = grimoireEventSelectionKey(event);
+  return grimoireEventCustomSeatSelections.value.has(key);
 }
 
-function deathByRoleCharacter(death: { by_role_id: string | null }) {
-  if (!death.by_role_id) {
+function grimoireEventSelectionKey(event: {
+  grimoire_page: number;
+  participant_id: string;
+  event_type: GrimoireEventType | null;
+}) {
+  return `${event.grimoire_page}:${event.participant_id}:${normalizeEventType(event) ?? "none"}`;
+}
+
+function grimoireEventByRoleCharacter(event: { by_role_id: string | null }) {
+  if (!event.by_role_id) {
     return {
       name: "",
       alignment: "NEUTRAL",
@@ -1924,7 +2183,7 @@ function deathByRoleCharacter(death: { by_role_id: string | null }) {
       },
     };
   }
-  const role = allRoles.getRole(death.by_role_id);
+  const role = allRoles.getRole(event.by_role_id);
   if (!role) {
     return {
       name: "",
@@ -1947,9 +2206,9 @@ function deathByRoleCharacter(death: { by_role_id: string | null }) {
   };
 }
 
-const deathSyncAlertColor = computed(() => {
-  if (!deathSyncSummary.value) return "info";
-  const { updated, removed } = deathSyncStats.value;
+const grimoireEventSyncAlertColor = computed(() => {
+  if (!grimoireEventSyncSummary.value) return "info";
+  const { updated, removed } = grimoireEventSyncStats.value;
   return updated > 0 || removed > 0 ? "caution" : "positive";
 });
 
@@ -2050,19 +2309,27 @@ const endTriggerRestrictRoleIds = computed(() => {
   return includes.length > 0 ? includes : null;
 });
 
-const deathByRoleRestrictRoleIds = computed(() => {
+const grimoireEventByRoleRestrictRoleIds = computed(() => {
   if (tokenSet.value !== "death_by_role") return null;
-  const death = focusedDeathEvent.value;
-  if (!death) return null;
-  const type = death.death_type ?? DeathType.DEATH;
-  const includes = DEATH_ROLE_INCLUDES[type] || [];
+  const event = focusedGrimoireEvent.value;
+  if (!event) return null;
+  const type = event.event_type ?? GrimoireEventType.NOT_RECORDED;
+  const config: RoleIncludeConfig = GRIMOIRE_EVENT_ROLE_INCLUDES[type];
+  const includes = [
+    ...(config.base ?? []),
+    ...(config.conditional ?? [])
+      .filter((entry) =>
+        entry.requires.every((required) => scriptRoleIds.value.has(required))
+      )
+      .map((entry) => entry.role),
+  ];
   return includes.length > 0 ? includes : null;
 });
 
 const roleRestrictIds = computed(() => {
   if (tokenSet.value === "end_trigger") return endTriggerRestrictRoleIds.value;
   if (tokenSet.value === "death_by_role")
-    return deathByRoleRestrictRoleIds.value;
+    return grimoireEventByRoleRestrictRoleIds.value;
   return null;
 });
 
@@ -2072,7 +2339,7 @@ const excludeIrrelevantRoles = computed({
       return excludeIrrelevantEndTriggerRoles.value;
     }
     if (tokenSet.value === "death_by_role") {
-      return excludeIrrelevantDeathRoles.value;
+      return excludeIrrelevantGrimoireEventRoles.value;
     }
     return false;
   },
@@ -2080,7 +2347,7 @@ const excludeIrrelevantRoles = computed({
     if (tokenSet.value === "end_trigger") {
       excludeIrrelevantEndTriggerRoles.value = value;
     } else if (tokenSet.value === "death_by_role") {
-      excludeIrrelevantDeathRoles.value = value;
+      excludeIrrelevantGrimoireEventRoles.value = value;
     }
   },
 });
@@ -2423,19 +2690,18 @@ function openEndTriggerRoleDialog() {
   openRoleSelectionDialog(null, "end_trigger_role", "end_trigger");
 }
 
-function openDeathByRoleDialog(death: {
+function openGrimoireEventByRoleDialog(event: {
   grimoire_page: number;
   participant_id: string;
-  is_revival: boolean;
-  death_type: DeathType | null;
-  cause: DeathCause | null;
+  event_type: GrimoireEventType | null;
+  cause: GrimoireEventCause | null;
   by_participant_id: string | null;
   player_name: string;
   role_id: string | null;
   by_role_id: string | null;
 }) {
-  focusedDeathEvent.value = death;
-  excludeIrrelevantDeathRoles.value = true;
+  focusedGrimoireEvent.value = event;
+  excludeIrrelevantGrimoireEventRoles.value = true;
   openRoleSelectionDialog(null, "death_by_role", "death_by_role");
 }
 
@@ -2496,9 +2762,9 @@ function selectRoleForToken(role: {
     return;
   }
   if (tokenMode.value === "death_by_role") {
-    const death = focusedDeathEvent.value;
-    if (death) {
-      death.by_role_id = role.id || null;
+    const event = focusedGrimoireEvent.value;
+    if (event) {
+      event.by_role_id = role.id || null;
     }
     showRoleSelectionDialog.value = false;
     return;
@@ -2628,10 +2894,10 @@ watchEffect(() => {
 
   recomputeGrimoireParticipantIds();
 
-  if (!deathSyncDone.value && props.game.grimoire.length > 0) {
-    syncDeathEventsFromGrimoire();
+  if (!grimoireEventSyncDone.value && props.game.grimoire.length > 0) {
+    syncGrimoireEventsFromGrimoire();
   } else if (normalizedAnyPage) {
-    syncDeathEventsFromGrimoire({ force: true, silent: true });
+    syncGrimoireEventsFromGrimoire({ force: true, silent: true });
   }
 });
 
@@ -2720,7 +2986,7 @@ function onSeatDrop() {
     token.order = index;
   });
 
-  syncDeathEventsFromGrimoire({ force: true, silent: true });
+  syncGrimoireEventsFromGrimoire({ force: true, silent: true });
 }
 
 function onSeatDragEnd() {
@@ -2743,7 +3009,7 @@ function rotateCurrentPageSeats(direction: "cw" | "ccw") {
   });
 
   onSeatDragEnd();
-  syncDeathEventsFromGrimoire({ force: true, silent: true });
+  syncGrimoireEventsFromGrimoire({ force: true, silent: true });
 }
 
 function pageBackward() {
@@ -2756,7 +3022,7 @@ function pageBackward() {
 function deletePage() {
   props.game.grimoire.splice(grimPage.value, 1);
   grimPage.value = Math.max(0, grimPage.value - 1);
-  syncDeathEventsFromGrimoire({ force: true, silent: true });
+  syncGrimoireEventsFromGrimoire({ force: true, silent: true });
 }
 
 watch(
@@ -2839,6 +3105,8 @@ watch(
     if (myCharacters.length > 0 || advancedModeEnabled.value) {
       props.game.player_characters = myCharacters;
     }
+
+    syncGrimoireEventsFromGrimoire({ force: true, silent: true });
   },
   { deep: true }
 );
@@ -2934,7 +3202,7 @@ onMounted(async () => {
   }
 
   recomputeGrimoireParticipantIds();
-  syncDeathEventsFromGrimoire();
+  syncGrimoireEventsFromGrimoire();
 });
 </script>
 

@@ -13,8 +13,8 @@
 import {
   GameEndTrigger,
   WinStatus_V2,
-  DeathCause,
-  DeathType,
+  GrimoireEventCause,
+  GrimoireEventType,
 } from "~/composables/useGames";
 
 definePageMeta({
@@ -95,12 +95,11 @@ const game = reactive<{
     initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
     name: string;
   } | null;
-  deaths: {
+  grimoire_events: {
     grimoire_page: number;
     participant_id: string;
-    is_revival: boolean;
-    death_type: DeathType | null;
-    cause: DeathCause | null;
+    event_type: GrimoireEventType | null;
+    cause: GrimoireEventCause | null;
     by_participant_id: string | null;
     player_name: string;
     role_id: string | null;
@@ -196,7 +195,7 @@ const game = reactive<{
   end_trigger_note: savedGame.data.value?.end_trigger_note || "",
   end_trigger_participant_id: savedGame.data.value?.end_trigger_participant_id || null,
   end_trigger_role: savedGame.data.value?.end_trigger_role || null,
-  deaths: savedGame.data.value?.deaths || [],
+  grimoire_events: savedGame.data.value?.grimoire_events || [],
   notes: savedGame.data.value?.notes || "",
   image_urls: savedGame.data.value?.image_urls || [],
   grimoire: savedGame.data.value?.grimoire.length
@@ -254,16 +253,15 @@ const formattedGame = computed(() => {
     name: fabled.name,
     role_id: fabled.role_id,
   })),
-  deaths: game.deaths.map((death) => ({
-    grimoire_page: death.grimoire_page,
-    participant_id: death.participant_id,
-    is_revival: death.is_revival,
-    death_type: death.death_type,
-    cause: death.cause,
-    by_participant_id: death.by_participant_id,
-    player_name: death.player_name,
-    role_id: death.role_id,
-    by_role_id: death.by_role_id,
+  grimoire_events: game.grimoire_events.map((event) => ({
+    grimoire_page: event.grimoire_page,
+    participant_id: event.participant_id,
+    event_type: event.event_type,
+    cause: event.cause,
+    by_participant_id: event.by_participant_id,
+    player_name: event.player_name,
+    role_id: event.role_id,
+    by_role_id: event.by_role_id,
   })),
   // If the game was waiting for confirmation, mark it as confirmed when saving
   waiting_for_confirmation: savedGame.data.value?.waiting_for_confirmation
