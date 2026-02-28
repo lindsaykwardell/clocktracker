@@ -23,7 +23,7 @@ if (process.env.NODE_ENV !== "production") {
 // disconnecting forces it to release those pools. Prisma auto-reconnects
 // on the next query.
 if (process.env.NODE_ENV === "production") {
-  const FOUR_HOURS = 4 * 60 * 60 * 1000;
+  const ONE_HOUR = 1 * 60 * 60 * 1000;
   setInterval(async () => {
     try {
       console.log("[prisma] Periodic disconnect to release engine memory");
@@ -31,5 +31,5 @@ if (process.env.NODE_ENV === "production") {
     } catch (e) {
       console.error("[prisma] Disconnect error:", e);
     }
-  }, FOUR_HOURS).unref();
+  }, ONE_HOUR).unref();
 }
