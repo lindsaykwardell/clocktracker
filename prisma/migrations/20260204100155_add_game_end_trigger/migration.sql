@@ -2,6 +2,12 @@
 CREATE TYPE "GameEndTrigger" AS ENUM ('NOT_RECORDED', 'TWO_PLAYERS_LEFT_ALIVE', 'NO_LIVING_DEMON', 'CHARACTER_ABILITY', 'GAME_ENDED_EARLY', 'OTHER');
 
 -- CreateEnum
+CREATE TYPE "GameEndTriggerType" AS ENUM ('DEATH', 'EXECUTION', 'CHARACTER_CHANGE', 'EXTRA_WIN_CONDITION', 'OTHER');
+
+-- CreateEnum
+CREATE TYPE "GameEndTriggerCause" AS ENUM ('ABILITY', 'NOMINATION', 'FAILED_ABILITY');
+
+-- CreateEnum
 CREATE TYPE "GrimoireEventCause" AS ENUM ('ABILITY', 'NOMINATION');
 
 -- CreateEnum
@@ -10,6 +16,8 @@ CREATE TYPE "GrimoireEventType" AS ENUM ('NOT_RECORDED', 'DEATH', 'EXECUTION', '
 -- AlterTable
 ALTER TABLE "Game"
 ADD COLUMN     "end_trigger" "GameEndTrigger" NOT NULL DEFAULT 'NOT_RECORDED',
+ADD COLUMN     "end_trigger_type" "GameEndTriggerType",
+ADD COLUMN     "end_trigger_cause" "GameEndTriggerCause",
 ADD COLUMN     "end_trigger_note" TEXT NOT NULL DEFAULT '',
 ADD COLUMN     "end_trigger_role_id" TEXT,
 ADD COLUMN     "end_trigger_participant_id" TEXT;

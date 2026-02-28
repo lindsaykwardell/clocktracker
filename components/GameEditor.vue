@@ -242,13 +242,15 @@
       </fieldset>
       <details :open="game.end_trigger !== GameEndTrigger.NOT_RECORDED">
         <summary class="cursor-pointer">Game end trigger</summary>
-        <div class="flex flex-col gap-3 w-full md:w-auto">
+        <div class="flex flex-col gap-3 w-full md:w-auto py-2">
           <label class="block">
             <Input mode="select" v-model="game.end_trigger">
               <option v-if="editingMultipleGames" :value="undefined">
                 Not updated
               </option>
-              <option :value="GameEndTrigger.NOT_RECORDED">Not recorded</option>
+              <option :value="GameEndTrigger.NOT_RECORDED">
+                Not recorded
+              </option>
               <option :value="GameEndTrigger.NO_LIVING_DEMON">
                 No living demon remained (Execution, Slayer, Pit-Hag, etc.)
               </option>
@@ -264,48 +266,103 @@
               <option :value="GameEndTrigger.OTHER">Other</option>
             </Input>
           </label>
-          <div
-            v-if="
-              game.end_trigger === GameEndTrigger.CHARACTER_ABILITY ||
-              game.end_trigger === GameEndTrigger.NO_LIVING_DEMON ||
-              game.end_trigger === GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE
-            "
-            class="flex flex-col gap-2"
+          <div 
+            v-if="shouldShowEndTriggerCharacterSection"
+            class="flex gap-4 border border-stone-600 rounded p-4"
           >
-            <label v-if="advancedModeEnabled" class="block">
-              <span class="block"
-                >Select triggering character</span
-              >
-              <Input
-                mode="select"
-                v-model="endTriggerSeatSelection"
-                @change="selectEndTriggerSeat"
-                :disabled="endTriggerSeatOptions.length === 0"
-              >
-                <option :value="null">No character selected</option>
-                <option
-                  v-for="seat in endTriggerSeatOptions"
-                  :key="seat.participant_id"
-                  :value="seat.participant_id"
+            <div class="flex-1 grid grid-cols-2 gap-2">
+              <label v-if="shouldShowEndTriggerType" class="block">
+                <span class="block text-xs mb-[0.125rem]">Trigger type</span>
+                <Input
+                  mode="select"
+                  v-model="game.end_trigger_type"
+                  :disabled="hasSingleEndTriggerTypeOption"
                 >
-                  {{ seat.label }}
-                </option>
-                <option value="custom">Custom character</option>
-              </Input>
-              <Alert
-                v-if="endTriggerSeatOptions.length === 0"
-                color="info"
-                class="mt-1"
+                  <option :value="null">Not recorded</option>
+                  <option
+                    v-for="option in endTriggerTypeOptions"
+                    :key="option.value"
+                    :value="option.value"
+                  >
+                    {{ option.label }}
+                  </option>
+                </Input>
+              </label>
+              <label
+                v-if="shouldShowEndTriggerCause && shouldShowEndTriggerFieldsAfterType"
+                class="block"
               >
-                No eligible characters for this trigger found in grimoire, but you can set a custom character below.
-              </Alert>
-              <p v-else class="text-xs text-stone-400 mt-1">
-                Select a character from the grimoire, or set a custom character.
-              </p>
-            </label>
-            <span v-else class="block">Select triggering character</span>
-            <div class="flex gap-3 flex-wrap items-center">
-              <div class="relative border border-stone-600 rounded p-4 flex justify-center items-center aspect-square">
+                <span class="block text-xs mb-[0.125rem]">Cause</span>
+                <Input
+                  mode="select"
+                  v-model="game.end_trigger_cause"
+                  :disabled="hasSingleEndTriggerCauseOption"
+                >
+                  <option :value="null">Choose cause</option>
+                  <option
+                    v-for="option in endTriggerCauseOptions"
+                    :key="option.value"
+                    :value="option.value"
+                  >
+                    {{ option.label }}
+                  </option>
+                </Input>
+              </label>
+              <label
+                v-if="advancedModeEnabled && shouldShowEndTriggerFieldsAfterType"
+                class="block col-span-2"
+              >
+                <span class="block text-xs mb-[0.125rem]"
+                  >Select triggering character</span
+                >
+                <Input
+                  mode="select"
+                  v-model="endTriggerSeatSelection"
+                  @change="selectEndTriggerSeat"
+                  :disabled="
+                    !shouldShowEndTriggerCharacter ||
+                    endTriggerSeatOptions.length === 0
+                  "
+                >
+                  <option :value="null">No character selected</option>
+                  <option
+                    v-for="seat in endTriggerSeatOptions"
+                    :key="seat.participant_id"
+                    :value="seat.participant_id"
+                  >
+                    {{ seat.label }}
+                  </option>
+                  <option value="custom">Set custom character</option>
+                </Input>
+                <Alert
+                  v-if="shouldShowEndTriggerCharacter && endTriggerSeatOptions.length === 0"
+                  color="info"
+                  class="mt-1"
+                >
+                  No eligible characters for this trigger found in grimoire, but you can add a custom character.
+                </Alert>
+                <p
+                  v-else-if="shouldShowEndTriggerCharacter"
+                  class="text-xs text-stone-400 mt-1"
+                >
+                  Select a character from the grimoire, or add custom character.
+                </p>
+                <p v-else class="text-xs text-stone-400 mt-1">
+                  Choose the trigger type and cause first.
+                </p>
+              </label>
+              <span
+                v-else-if="shouldShowEndTriggerFieldsAfterType"
+                class="block"
+              >
+                Select triggering character
+              </span>
+            </div>
+            <div
+              v-if="shouldShowEndTriggerFieldsAfterType"
+              class="flex gap-3 flex-wrap items-center"
+            >
+              <div class="relative flex justify-center items-center aspect-square">
                 <Button
                   v-if="game.end_trigger_role"
                   type="button"
@@ -316,7 +373,7 @@
                   icon="x-lg"
                   display="icon-only"
                   circular
-                  title="Clear ending cause"
+                  title="Clear triggering character"
                 >
                   Clear
                 </Button>
@@ -326,7 +383,8 @@
                   size="md"
                   class="cursor-pointer"
                   :class="{
-                    'pointer-events-none opacity-50': !allowManualEndTriggerRole,
+                    'pointer-events-none opacity-50':
+                      !allowManualEndTriggerRole || !shouldShowEndTriggerCharacter,
                   }"
                   @clickRole="openEndTriggerRoleDialog"
                   hideRelated
@@ -336,19 +394,20 @@
                     type="button"
                     @click="openEndTriggerRoleDialog"
                     class="w-full h-full p-1 text-sm"
-                    :disabled="!allowManualEndTriggerRole"
+                    :disabled="
+                      !allowManualEndTriggerRole || !shouldShowEndTriggerCharacter
+                    "
                   >
                     <template v-if="allowManualEndTriggerRole">
                       Add Character
                     </template>
                     <template v-else>
-                      Select Character Above
+                      No Character Selected
                     </template>
                   </button>
                 </Token>
               </div>
             </div>
-
           </div>
           <label
             v-if="
@@ -661,7 +720,6 @@
                       />
                       <img
                         v-if="
-                          hasGrimoireEventPreviousSeatCharacter(event) &&
                           (event.event_type === null ||
                           event.event_type === GrimoireEventType.NOT_RECORDED ||
                           event.event_type === GrimoireEventType.DEATH || 
@@ -773,7 +831,7 @@
                       >
                         {{ seat.label }}
                       </option>
-                      <option value="custom">Custom character</option>
+                      <option value="custom">Set custom character</option>
                     </Input>
                   </label>
                 </template>
@@ -804,10 +862,10 @@
                     :disabled="!allowManualGrimoireEventByRole(event)"
                   >
                     <template v-if="allowManualGrimoireEventByRole(event)">
-                      Add Role
+                      Add Character
                     </template>
                     <template v-else>
-                      Select Character
+                      No Character Selected
                     </template>
                   </button>
                 </Token>
@@ -1056,6 +1114,8 @@ import naturalOrder from "natural-order";
 import { useLocalStorage } from "@vueuse/core";
 import {
   GameEndTrigger,
+  GameEndTriggerType,
+  GameEndTriggerCause,
   WinStatus_V2,
   GrimoireEventCause,
   GrimoireEventType,
@@ -1118,6 +1178,8 @@ const props = defineProps<{
     }[];
     win_v2: WinStatus_V2 | undefined;
     end_trigger: GameEndTrigger | undefined;
+    end_trigger_type: GameEndTriggerType | null;
+    end_trigger_cause: GameEndTriggerCause | null;
     end_trigger_role_id: string | null;
     end_trigger_note: string;
     end_trigger_participant_id: string | null;
@@ -1282,20 +1344,155 @@ const endTriggerCharacter = computed(() => {
   };
 });
 
-const endTriggerSeatPageIndex = computed(() => {
-  return Math.max(0, props.game.grimoire.length - 1);
-});
-
 const endTriggerSeatTokens = computed(() => {
   if (!props.game.grimoire.length) return [];
-  return props.game.grimoire[endTriggerSeatPageIndex.value]?.tokens ?? [];
+  return props.game.grimoire[Math.max(0, props.game.grimoire.length - 1)]?.tokens ?? [];
 });
 
 const scriptRoleIds = computed(() => new Set(roles.value.map((role) => role.id)));
 
+const shouldShowEndTriggerCharacterSection = computed(
+  () =>
+    props.game.end_trigger === GameEndTrigger.CHARACTER_ABILITY ||
+    props.game.end_trigger === GameEndTrigger.NO_LIVING_DEMON ||
+    props.game.end_trigger === GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE
+);
+
+const shouldShowEndTriggerType = computed(
+  () => shouldShowEndTriggerCharacterSection.value
+);
+
+const shouldShowEndTriggerCause = computed(() => {
+  if (props.game.end_trigger === GameEndTrigger.CHARACTER_ABILITY) return true;
+  if (!shouldShowEndTriggerType.value) return false;
+  return props.game.end_trigger_type !== null;
+});
+
+const shouldShowEndTriggerCharacter = computed(() => {
+  if (!shouldShowEndTriggerCharacterSection.value) return false;
+  if (shouldShowEndTriggerType.value && props.game.end_trigger_type === null) {
+    return false;
+  }
+  return props.game.end_trigger_cause !== null;
+});
+
+const shouldShowEndTriggerFieldsAfterType = computed(() => {
+  if (!shouldShowEndTriggerCharacterSection.value) return false;
+  if (!shouldShowEndTriggerType.value) return true;
+  return props.game.end_trigger_type !== null;
+});
+
+const endTriggerTypeOptions = computed(() => {
+  if (!shouldShowEndTriggerType.value) return [];
+  if (props.game.end_trigger === GameEndTrigger.CHARACTER_ABILITY) {
+    return [
+      {
+        value: GameEndTriggerType.EXTRA_WIN_CONDITION,
+        label: "Extra win condition",
+      },
+    ];
+  }
+  return [
+    {
+      value: GameEndTriggerType.DEATH,
+      label: "Death",
+    },
+    {
+      value: GameEndTriggerType.EXECUTION,
+      label: "Execution",
+    },
+    {
+      value: GameEndTriggerType.CHARACTER_CHANGE,
+      label: "Character change",
+    },
+    {
+      value: GameEndTriggerType.OTHER,
+      label: "Other",
+    },
+  ];
+});
+
+const hasSingleEndTriggerTypeOption = computed(
+  () =>
+    endTriggerTypeOptions.value.length === 1 &&
+    props.game.end_trigger !== GameEndTrigger.CHARACTER_ABILITY
+);
+
+const endTriggerCauseOptions = computed(() => {
+  if (props.game.end_trigger === GameEndTrigger.CHARACTER_ABILITY) {
+    return [
+      {
+        value: GameEndTriggerCause.ABILITY,
+        label: "Ability",
+      },
+    ];
+  }
+
+  if (!shouldShowEndTriggerType.value) return [];
+
+  switch (props.game.end_trigger_type) {
+    case GameEndTriggerType.DEATH:
+      return [
+        {
+          value: GameEndTriggerCause.ABILITY,
+          label: "Ability",
+        },
+      ];
+    case GameEndTriggerType.EXECUTION:
+      return [
+        {
+          value: GameEndTriggerCause.ABILITY,
+          label: "Ability",
+        },
+        {
+          value: GameEndTriggerCause.NOMINATION,
+          label: "Nomination",
+        },
+      ];
+    case GameEndTriggerType.CHARACTER_CHANGE:
+      return [
+        {
+          value: GameEndTriggerCause.ABILITY,
+          label: "Ability",
+        },
+      ];
+    case GameEndTriggerType.OTHER:
+      return [
+        {
+          value: GameEndTriggerCause.FAILED_ABILITY,
+          label: "Failed ability",
+        },
+        {
+          value: GameEndTriggerCause.ABILITY,
+          label: "Ability",
+        },
+      ];
+    default:
+      return [];
+  }
+});
+
+const hasSingleEndTriggerCauseOption = computed(
+  () => endTriggerCauseOptions.value.length === 1
+);
+
+const endTriggerRoleConfig = computed(() => {
+  if (
+    !props.game.end_trigger ||
+    !props.game.end_trigger_type ||
+    !props.game.end_trigger_cause
+  ) {
+    return null;
+  }
+  return (
+    END_TRIGGER_ROLE_INCLUDES[props.game.end_trigger]?.[
+      props.game.end_trigger_type
+    ]?.[props.game.end_trigger_cause] ?? null
+  );
+});
+
 const endTriggerIncludeRoleIds = computed(() => {
-  if (!props.game.end_trigger) return [];
-  const config = END_TRIGGER_ROLE_INCLUDES[props.game.end_trigger];
+  const config = endTriggerRoleConfig.value;
   if (!config) return [];
 
   const base = config.base ?? [];
@@ -1314,12 +1511,10 @@ const endTriggerIncludeRoleIds = computed(() => {
 
 const endTriggerSeatOptions = computed(() => {
   let tokens = endTriggerSeatTokens.value;
-  if (props.game.end_trigger) {
+  if (endTriggerRoleConfig.value) {
     const includes = endTriggerIncludeRoleIds.value;
-    if (includes.length > 0) {
-      const allowed = new Set(includes);
-      tokens = tokens.filter((token) => token.role_id && allowed.has(token.role_id));
-    }
+    const allowed = new Set(includes);
+    tokens = tokens.filter((token) => token.role_id && allowed.has(token.role_id));
   }
 
   return tokens.map((token) => {
@@ -1372,6 +1567,11 @@ const allowManualEndTriggerRole = computed(() => {
 });
 
 function selectEndTriggerSeat() {
+  if (!shouldShowEndTriggerCharacter.value) {
+    props.game.end_trigger_participant_id = null;
+    return;
+  }
+
   const selection = endTriggerSeatSelection.value;
 
   if (selection === "custom") {
@@ -1929,12 +2129,6 @@ function eventTypeOptionLabel(eventType: GrimoireEventType | null) {
   return "Not recorded";
 }
 
-function normalizeEventType(event: {
-  event_type: GrimoireEventType | null;
-}) {
-  return event.event_type;
-}
-
 function isReviveEventType(eventType: GrimoireEventType | null) {
   return eventType === GrimoireEventType.REVIVE;
 }
@@ -2208,7 +2402,7 @@ function syncGrimoireEventsFromGrimoire(options?: {
   function takeExpectedByIdentity(event: (typeof events)[number]) {
     let bestKey: string | null = null;
     let bestScore = -1;
-    const kind = eventKindFromValues(normalizeEventType(event));
+    const kind = eventKindFromValues(event.event_type);
 
     expected.forEach((candidate, candidateKey) => {
       if (candidate.grimoire_page !== event.grimoire_page) return;
@@ -2239,7 +2433,7 @@ function syncGrimoireEventsFromGrimoire(options?: {
 
   for (let i = events.length - 1; i >= 0; i -= 1) {
     const event = events[i];
-    const eventType = normalizeEventType(event);
+    const eventType = event.event_type;
     const kind = eventKindFromValues(eventType);
     const key = expectedKey(event.grimoire_page, event.participant_id, kind);
     let expectation = expected.get(key);
@@ -2392,7 +2586,7 @@ function grimoireEventSelectionKey(event: {
   participant_id: string;
   event_type: GrimoireEventType | null;
 }) {
-  return `${event.grimoire_page}:${event.participant_id}:${normalizeEventType(event) ?? "none"}`;
+  return `${event.grimoire_page}:${event.participant_id}:${event.event_type ?? "none"}`;
 }
 
 function grimoireEventByRoleCharacter(event: { by_role_id: string | null }) {
@@ -2461,19 +2655,39 @@ watch(
   (value) => {
     if (value === undefined) return;
 
-    if (
-      value !== GameEndTrigger.CHARACTER_ABILITY &&
-      value !== GameEndTrigger.NO_LIVING_DEMON &&
-      value !== GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE
-    ) {
-      props.game.end_trigger_role_id = null;
-      props.game.end_trigger_role = null;
-      props.game.end_trigger_participant_id = null;
-    }
     // Clear any previously selected character whenever the trigger changes.
     props.game.end_trigger_role_id = null;
     props.game.end_trigger_role = null;
     props.game.end_trigger_participant_id = null;
+
+    if (
+      value !== GameEndTrigger.NO_LIVING_DEMON &&
+      value !== GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE &&
+      value !== GameEndTrigger.CHARACTER_ABILITY
+    ) {
+      props.game.end_trigger_type = null;
+    }
+
+    if (value === GameEndTrigger.CHARACTER_ABILITY) {
+      if (props.game.end_trigger_type === GameEndTriggerType.EXTRA_WIN_CONDITION) {
+        props.game.end_trigger_cause = GameEndTriggerCause.ABILITY;
+      } else {
+        props.game.end_trigger_type = null;
+        props.game.end_trigger_cause = null;
+      }
+    } else if (
+      props.game.end_trigger_type === GameEndTriggerType.EXTRA_WIN_CONDITION
+    ) {
+      props.game.end_trigger_type = null;
+      props.game.end_trigger_cause = null;
+    } else if (
+      value !== GameEndTrigger.NO_LIVING_DEMON &&
+      value !== GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE
+    ) {
+      props.game.end_trigger_cause = null;
+    } else {
+      props.game.end_trigger_cause = null;
+    }
 
     if (
       value !== GameEndTrigger.GAME_ENDED_EARLY &&
@@ -2481,6 +2695,57 @@ watch(
     ) {
       props.game.end_trigger_note = "";
     }
+  }
+);
+
+watch(
+  () => props.game.end_trigger_type,
+  (value) => {
+    if (!shouldShowEndTriggerType.value) return;
+
+    props.game.end_trigger_role_id = null;
+    props.game.end_trigger_role = null;
+    props.game.end_trigger_participant_id = null;
+    props.game.end_trigger_cause = null;
+
+    if (value === null) return;
+
+    if (endTriggerCauseOptions.value.length === 1) {
+      props.game.end_trigger_cause = endTriggerCauseOptions.value[0].value;
+    }
+  }
+);
+
+watch(
+  () => endTriggerTypeOptions.value,
+  (options) => {
+    if (props.game.end_trigger === GameEndTrigger.CHARACTER_ABILITY) return;
+    if (options.length !== 1) return;
+    const [onlyOption] = options;
+    if (props.game.end_trigger_type === onlyOption.value) return;
+    props.game.end_trigger_type = onlyOption.value;
+  },
+  { immediate: true }
+);
+
+watch(
+  () => endTriggerCauseOptions.value,
+  (options) => {
+    if (options.length !== 1) return;
+    const [onlyOption] = options;
+    if (props.game.end_trigger_cause === onlyOption.value) return;
+    props.game.end_trigger_cause = onlyOption.value;
+  },
+  { immediate: true }
+);
+
+watch(
+  () => props.game.end_trigger_cause,
+  (value, oldValue) => {
+    if (value === oldValue) return;
+    props.game.end_trigger_role_id = null;
+    props.game.end_trigger_role = null;
+    props.game.end_trigger_participant_id = null;
   }
 );
 

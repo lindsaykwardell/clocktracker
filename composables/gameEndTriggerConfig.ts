@@ -1,128 +1,198 @@
-import { GameEndTrigger } from "~/composables/useGames";
+import {
+  GameEndTrigger,
+  GameEndTriggerCause,
+  GameEndTriggerType,
+} from "~/composables/useGames";
 import {
   KILLING_DEMON_ROLE_IDS,
   WILDCARD_ROLE_IDS,
 } from "~/composables/grimoireRoleGroups";
 
-export const END_TRIGGER_ROLE_INCLUDES: Record<
-  GameEndTrigger,
-  { base: string[]; conditional: { role: string; requires: string[] }[] }
+export type EndTriggerRoleIncludeConfig = {
+  base: string[];
+  conditional: { role: string; requires: string[] }[];
+};
+
+export const END_TRIGGER_ROLE_INCLUDES: Partial<
+  Record<
+    GameEndTrigger,
+    Partial<
+      Record<
+        GameEndTriggerType,
+        Partial<Record<GameEndTriggerCause, EndTriggerRoleIncludeConfig>>
+      >
+    >
+  >
 > = {
-  [GameEndTrigger.NOT_RECORDED]: { base: [], conditional: [] },
   [GameEndTrigger.CHARACTER_ABILITY]: {
-    base: [
-    ...WILDCARD_ROLE_IDS,
-    // Townsfolk
-    'alsaahir',
-    'atheist',
-    'cult_leader',
-    'mayor',
+    [GameEndTriggerType.EXTRA_WIN_CONDITION]: {
+      [GameEndTriggerCause.ABILITY]: {
+        base: [
+          ...WILDCARD_ROLE_IDS,
+          // Townsfolk
+          "alsaahir",
+          "atheist",
+          "cult_leader",
+          "mayor",
 
-    // Outsider
-    'damsel',
-    'klutz',
-    'saint',
+          // Outsider
+          "damsel",
+          "klutz",
+          "saint",
 
-    // Minion
-    'evil_twin',
-    'fearmonger',
-    'goblin',
-    'mastermind',
+          // Minion
+          "evil_twin",
+          "fearmonger",
+          "goblin",
+          "mastermind",
 
-    // Demon
-    'leviathan',
-    'vortox',
+          // Demon
+          "leviathan",
+          "vortox",
 
-    // Fabled
-    'fiddler',
-    ],
-    conditional: [],
+          // Fabled
+          "fiddler",
+        ],
+        conditional: [],
+      },
+    },
   },
   [GameEndTrigger.NO_LIVING_DEMON]: {
-    base: [
-    ...WILDCARD_ROLE_IDS,
-    ...KILLING_DEMON_ROLE_IDS,
+    [GameEndTriggerType.DEATH]: {
+      [GameEndTriggerCause.ABILITY]: {
+        base: [
+          ...WILDCARD_ROLE_IDS,
+          ...KILLING_DEMON_ROLE_IDS,
+          // Straight-up kills/deaths
+          "slayer",
+          "assassin",
+          "godfather",
+          "psychopath",
+          "witch",
+          "gunslinger",
+          "gangster",
+          "gnome",
+          
+          // Storyteller choice/"yes-but-don't"
+          // "boomdandy", // Game would be over
+          "angel", // Something bad could be death.
+          "hells_librarian", // Something bad could be death.
+          "big_wig",
+          "doomsayer",
+        ],
+        conditional: [
+          // Boffin giving demon this character's ability?
+          { role: "acrobat", requires: ["boffin"] }, // Picks drunk/poisoned character
+          { role: "gambler", requires: ["boffin"] }, // Gambles wrong
+          { role: "grandmother", requires: ["boffin"] }, // Dies with grandchild
+          { role: "huntsman", requires: ["boffin"] }, // Not sure, but if the Boffin gives the demon the Damsel's ability and the Huntsman guesses them?
+          { role: "tinker", requires: ["boffin"] }, // Die at any time
+        ],
+      },
+    },
+    [GameEndTriggerType.EXECUTION]: {
+      [GameEndTriggerCause.ABILITY]: {
+        base: [
+          ...WILDCARD_ROLE_IDS,
+          "butcher", // Edge case: Could execute demon with extra nomination, which is specific player agency.
+          "judge", // Edge case: Could force execute demon, which is specific player agency.
 
-    // Straight up kills/executions
-    'slayer',
-    'assassin',
-    'boomdandy',
-    'godfather',
-    'psychopath',
-    'witch',
-    'vizier', // Edge case: Could force execute demon, which is specific player agency.
-    'gunslinger',
-    'butcher', // Edge case: Could execute demon with extra nomination, which is specific player agency.
-    'judge', // Edge case: Could force execute demon, which is specific player agency.
-    'gangster',
-    'gnome',
-    'angel', // Something bad could be death.
-    'doomsayer',
-    'hells_librarian', // Something bad could be death.
-    'big_wig',
+          // Storyteller choice/"yes-but-don't"
+          "vizier", // Edge case: Could force execute demon, which is specific player agency.
+          "cerenovus", // Mad demon could be executed.
+          "harpy", // // Mad demon could be executed.
+        ],
+        conditional: [],
+      },
+    },
+    [GameEndTriggerType.CHARACTER_CHANGE]: {
+      [GameEndTriggerCause.ABILITY]: {
+        base: [
+          ...WILDCARD_ROLE_IDS,
 
-    // (Unintended) swaps
-    'barber', // Swap demon to dead player?
-    'pit-hag', // Could change the demon into non-demon.
-    'cacklejack', // Could change the demon into non-demon.
+          // (Unintended) swaps
+          "barber", // Swap demon to dead player?
+          "pit-hag", // Could change the demon into non-demon.
+          "cacklejack", // Could change the demon into non-demon.
 
-    // Storyteller choice/"yes-but-don't"
-    'cerenovus', // Mad demon could be executed.
-    'harpy', // // Mad demon could be executed.
-    'farmer', // A good demon could be the last demon alive and become the farmer I guess?
-    'gossip', // Could kill the demon I guess?
-    'harlot',
-
-    ],
-    conditional: [
-      // Boffin giving demon this character's ability?
-      { role: 'acrobat', requires: ['boffin'] },
-      { role: 'gambler', requires: ['boffin'] },
-      { role: 'grandmother', requires: ['boffin'] },
-      { role: 'huntsman', requires: ['boffin'] }, // Not sure, but if the Boffin gives the demon the Damsel's ability and the Huntsman guesses them?
-      { role: 'tinker', requires: ['boffin'] },
-      { role: 'preacher', requires: ['summoner'] },
-      { role: 'sailor', requires: ['summoner'] },
-      { role: 'widow', requires: ['summoner'] },
-      { role: 'poisoner', requires: ['summoner'] },
-    ],
+          // Storyteller choice/"yes-but-don't"
+          "farmer", // A good demon could be the last demon alive and become the farmer I guess?
+        ],
+        conditional: [],
+      },
+    },
+    [GameEndTriggerType.OTHER]: {
+      [GameEndTriggerCause.FAILED_ABILITY]: {
+        base: [],
+        conditional: [
+          // Prevent summoning on day 3.
+          { role: "preacher", requires: ["summoner"] },
+          { role: "sailor", requires: ["summoner"] },
+          { role: "widow", requires: ["summoner"] },
+          { role: "poisoner", requires: ["summoner"] },
+        ],
+      },
+      [GameEndTriggerCause.ABILITY]: {
+        base: [],
+        conditional: [],
+      },
+    },
   },
   [GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE]: {
-    base: [
-    ...WILDCARD_ROLE_IDS,
-    ...KILLING_DEMON_ROLE_IDS,
-    'mutant', // A Mutant could get themselves executed due to their ability during final 3.
-    'boomdandy',
-    'cerenovus', // Mad player could be executed during final 3.
-    'harpy', // Mad player could be executed during final 3.
-    'psychopath', // Could kill during final 3.
-    'vizier', // Edge case: Could force execution during final 3, which is specific player agency.
-    'gunslinger',
-    'butcher', // Edge case: Could cause execute down to 2 with extra nomination, which is specific player agency.
-    'judge', // Edge case: Could force execution during final 3, which is specific player agency.
-    'gangster', // Could kill during final 3.
-    'gnome', // Could kill during final 3.
-    'angel', // Something bad could be death.
-    'hells_librarian', // Something bad could be death.
-    'big_wig',
+    [GameEndTriggerType.DEATH]: {
+      [GameEndTriggerCause.ABILITY]: {
+        base: [
+          ...WILDCARD_ROLE_IDS,
+          ...KILLING_DEMON_ROLE_IDS,
+          // Straight-up kills/deaths
+          "riot", // Nominee "dies" (not "is executed")
+          "psychopath", // Could kill during final 3.
+          "gnome", // Could kill during final 3.
+          "gangster", // Could kill during final 3.
+          "gunslinger", // Could kill during final 3.
+          
+          // Storyteller choice/"yes-but-don't"
+          // "boomdandy", // Invalid cause "Game would be over"
+          "angel", // Something bad could be death during final 3.
+          "hells_librarian", // Something bad could be death during final 3.
+          "big_wig", // Could die during final 3.
 
-    // Demons
-    'riot',
+          // Should these 'extra death at night' abilities be counted?
+          // These character could unexpectedly kill down to 2.
+          "acrobat",
+          "gambler",
+          "gossip",
+          "grandmother",
+          "moonchild",
+          "assassin",
+          "godfather",
+          "harlot",
+          "barista",
+        ],
+        conditional: [],
+      },
+    },
+    [GameEndTriggerType.EXECUTION]: {
+      [GameEndTriggerCause.ABILITY]: {
+        base: [
+          ...WILDCARD_ROLE_IDS,
+          "mutant", // A Mutant could get themselves executed due to their ability during final 3.
+          "cerenovus", // Mad player could be executed during final 3.
+          "harpy", // Mad player could be executed during final 3.
 
-    // Should these 'extra death at night' abilities be counted?
-    // These character could unexpectedly kill down to 2.
-    'acrobat', 
-    'assassin',
-    'gambler',
-    'gossip',
-    'grandmother',
-    'moonchild',
-    'godfather',
-    'harlot',
-    'barista',
-    ],
-    conditional: [],
+          // Edge cases
+          "vizier", // Could force execution during final 3, which is specific player agency.
+          "butcher", // Could cause execute down to 2 with extra nomination, which is specific player agency.
+          "judge", // Could force execution during final 3, which is specific player agency.
+        ],
+        conditional: [],
+      },
+    },
+    [GameEndTriggerType.CHARACTER_CHANGE]: {
+      [GameEndTriggerCause.ABILITY]: {
+        base: [],
+        conditional: [],
+      },
+    },
   },
-  [GameEndTrigger.GAME_ENDED_EARLY]: { base: [], conditional: [] },
-  [GameEndTrigger.OTHER]: { base: [], conditional: [] },
 };

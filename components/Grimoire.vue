@@ -168,18 +168,6 @@
         >
           Seat {{ token.order + 1 }}
         </div>
-        <div
-          v-if="!props.readonly"
-          class="text-[10px] text-stone-400 text-center break-all max-w-[150px]"
-        >
-          {{ token.grimoire_participant_id || "no-participant-id" }}
-        </div>
-        <div
-          v-if="!props.readonly"
-          class="text-[10px] text-stone-500 text-center"
-        >
-          score: {{ debugMatchScore(token) ?? "-" }}
-        </div>
       </div>
     </div>
   </div>

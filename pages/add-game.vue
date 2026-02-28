@@ -39,6 +39,8 @@
 import dayjs from "dayjs";
 import {
   GameEndTrigger,
+  GameEndTriggerType,
+  GameEndTriggerCause,
   WinStatus_V2,
   GrimoireEventCause,
   GrimoireEventType,
@@ -116,6 +118,8 @@ const game = reactive<{
   }[];
   win_v2: WinStatus_V2 | undefined;
   end_trigger: GameEndTrigger | undefined;
+  end_trigger_type: GameEndTriggerType | null;
+  end_trigger_cause: GameEndTriggerCause | null;
   end_trigger_role_id: string | null;
   end_trigger_note: string;
   end_trigger_participant_id: string | null;
@@ -215,6 +219,8 @@ const game = reactive<{
   ],
   win_v2: undefined,
   end_trigger: GameEndTrigger.NOT_RECORDED,
+  end_trigger_type: null,
+  end_trigger_cause: null,
   end_trigger_role_id: null,
   end_trigger_note: "",
   end_trigger_participant_id: null,
@@ -503,6 +509,8 @@ function resetGame() {
       ],
       win_v2: undefined,
       end_trigger: GameEndTrigger.NOT_RECORDED,
+      end_trigger_type: null,
+      end_trigger_cause: null,
       end_trigger_role_id: null,
       end_trigger_note: "",
       end_trigger_role: null,

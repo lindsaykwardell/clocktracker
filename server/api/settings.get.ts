@@ -139,6 +139,30 @@ export default defineEventHandler(async (handler) => {
       )?.username
     : null;
 
+  const existingByEmail = user.email
+    ? await prisma.userSettings.findUnique({
+        where: {
+          email: user.email,
+        },
+      })
+    : null;
+
+  if (existingByEmail) {
+    const updatedSettings = await prisma.userSettings.update({
+      where: {
+        email: user.email,
+      },
+      data: {
+        user_id: user.id,
+        avatar: user.user_metadata.avatar_url || existingByEmail.avatar,
+        display_name:
+          user.user_metadata.full_name || existingByEmail.display_name,
+      },
+    });
+
+    return addUserKofiLevel(updatedSettings);
+  }
+
   // If the username does not exist, use the full name from the user metadata.
   // Otherwise, generate a random username based on roles.
 

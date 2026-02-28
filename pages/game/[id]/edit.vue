@@ -12,6 +12,8 @@
 <script setup lang="ts">
 import {
   GameEndTrigger,
+  GameEndTriggerType,
+  GameEndTriggerCause,
   WinStatus_V2,
   GrimoireEventCause,
   GrimoireEventType,
@@ -86,6 +88,8 @@ const game = reactive<{
   }[];
   win_v2: WinStatus_V2;
   end_trigger: GameEndTrigger;
+  end_trigger_type: GameEndTriggerType | null;
+  end_trigger_cause: GameEndTriggerCause | null;
   end_trigger_role_id: string | null;
   end_trigger_note: string;
   end_trigger_participant_id: string | null;
@@ -191,6 +195,8 @@ const game = reactive<{
   win_v2: savedGame.data.value?.win_v2 || WinStatus_V2.NOT_RECORDED,
   end_trigger:
     savedGame.data.value?.end_trigger || GameEndTrigger.NOT_RECORDED,
+  end_trigger_type: savedGame.data.value?.end_trigger_type || null,
+  end_trigger_cause: savedGame.data.value?.end_trigger_cause || null,
   end_trigger_role_id: savedGame.data.value?.end_trigger_role_id || null,
   end_trigger_note: savedGame.data.value?.end_trigger_note || "",
   end_trigger_participant_id: savedGame.data.value?.end_trigger_participant_id || null,
