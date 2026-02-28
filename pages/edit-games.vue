@@ -22,6 +22,8 @@
 import {
   WinStatus_V2,
   type GameEndTrigger,
+  type GameEndTriggerType,
+  type GameEndTriggerCause,
   GrimoireEventCause,
   GrimoireEventType,
 } from "~/composables/useGames";
@@ -92,6 +94,8 @@ const game = reactive<{
   }[];
   win_v2: WinStatus_V2 | undefined;
   end_trigger: GameEndTrigger | undefined;
+  end_trigger_type: GameEndTriggerType | null | undefined;
+  end_trigger_cause: GameEndTriggerCause | null | undefined;
   end_trigger_role_id: string | null;
   end_trigger_note: string;
   end_trigger_participant_id: string | null;
@@ -154,6 +158,8 @@ const game = reactive<{
   fabled: [],
   win_v2: undefined,
   end_trigger: undefined,
+  end_trigger_type: undefined,
+  end_trigger_cause: undefined,
   end_trigger_role_id: null,
   end_trigger_note: "",
   end_trigger_participant_id: null,
@@ -186,6 +192,10 @@ const formattedGame = computed(() => ({
   traveler_count: game.traveler_count,
   win_v2: game.win_v2,
   end_trigger: game.end_trigger,
+  end_trigger_type:
+    game.end_trigger === undefined ? undefined : game.end_trigger_type,
+  end_trigger_cause:
+    game.end_trigger === undefined ? undefined : game.end_trigger_cause,
   end_trigger_role_id:
     game.end_trigger === undefined ? undefined : game.end_trigger_role_id,
   end_trigger_note:
