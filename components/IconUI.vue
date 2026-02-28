@@ -39,12 +39,13 @@
     rounded?: boolean;
     shadow?: boolean;
     dark?: boolean;
-    size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
+    size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'xl5';
     spin?: boolean;
     color?: "primary" | "neutral" | "positive" | "caution" | "negative" | "bgg" | "yellow";
     noHover?: boolean;
   }>();
 
+  const Arrow90degDown = resolveComponent("IconArrow90degDown");
   const ArrowRightShort = resolveComponent("IconArrowRightShort");
   const ArrowClockwise = resolveComponent("IconArrowClockwise");
   const ArrowCounterClockwise = resolveComponent("IconArrowCounterClockwise");
@@ -156,7 +157,9 @@
       case "journal-next":
         return JournalNext;
       case "location":
-        return Location; 
+        return Location;
+      case "arrow-90deg-down":
+        return Arrow90degDown;
       case "arrow-right-short":
         return ArrowRightShort;
       case "arrow-clockwise":
@@ -311,6 +314,10 @@
   svg {
     inline-size: auto;
     @apply h-[0.875rem] md:h-[1.125rem];
+
+    &.xl5 {
+      @apply h-[2rem] md:h-[3rem];
+    }
 
     &.xxl {
       @apply h-[1.75rem] md:h-[1.875rem];

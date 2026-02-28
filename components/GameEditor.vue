@@ -573,7 +573,7 @@
     >
       <legend>Grimoire Events</legend>
         <p v-if="game.grimoire_events.length === 0" class="text-sm text-stone-400">
-          No events recorded yet. Toggle a shroud in the grimoire to add an entry.
+          No events recorded yet.
         </p>
         <Alert v-if="grimoireEventSyncSummary" :color="grimoireEventSyncAlertColor">
           {{ grimoireEventSyncSummary }}
@@ -586,50 +586,102 @@
           <summary class="cursor-pointer">
             Grimoire Page {{ pageGroup.page + 1 }}
           </summary>
-          <ul class="grid grid-cols-[auto_1fr_auto] gap-x-8 gap-y-2 py-2">
+          <ul class="grid grid-cols-[auto_1fr_auto] gap-x-4 gap-y-2 py-2">
             <li
               v-for="event in pageGroup.events"
               :key="`${pageGroup.page}-${event.participant_id}-${event.event_type}-${event.player_name}`"
               class="col-span-full grid grid-cols-subgrid items-center border border-stone-600 rounded p-3"
             >
               <div class="flex items-center flex-col gap-1">
-                <div class="relative flex justify-center items-center aspect-square">
-                  <Token
-                    :character="grimoireEventSeatCharacter(event)"
-                    size="md"
-                    class="pointer-events-none"
-                    hideRelated
-                  />
-                  <img
-                    v-if="showsShroudOverlay(event)"
-                    src="/img/shroud.png"
-                    class="absolute top-0 w-8 md:w-10"
-                    alt=""
-                  />
+                <div class="relative flex justify-center items-center">
+                  <div class="relative token-container">
+                    <div class="initial-token absolute">
+                      <Token
+                        v-if="
+                          hasGrimoireEventPreviousSeatCharacter(event) &&
+                          event.event_type === GrimoireEventType.ROLE_CHANGE
+                        "
+                        :character="grimoireEventPreviousSeatCharacter(event)"
+                        size="md"
+                        labelPosition="top"
+                        class="pointer-events-none clip-token"
+                        hideRelated
+                      />
+                      <Token
+                        v-else-if="
+                          hasGrimoireEventPreviousSeatCharacter(event) &&
+                          event.event_type === GrimoireEventType.ALIGNMENT_CHANGE
+                        "
+                        :character="grimoireEventPreviousAlignmentCharacter(event)"
+                        size="md"
+                        labelPosition="top"
+                        class="pointer-events-none clip-token"
+                        hideRelated
+                      />
+                      <Token
+                        v-else-if="
+                          hasGrimoireEventPreviousSeatCharacter(event) &&
+                          event.event_type === GrimoireEventType.SEAT_CHANGE
+                        "
+                        :character="grimoireEventPreviousSeatTokenCharacter(event)"
+                        size="md"
+                        labelPosition="top"
+                        class="pointer-events-none clip-token"
+                        hideRelated
+                      />
+                      <Token
+                        v-else
+                        :character="grimoireEventSeatCharacter(event)"
+                        size="md"
+                        class="pointer-events-none clip-token"
+                        hideRelated
+                      />
+                      <img
+                        v-if="
+                          hasGrimoireEventPreviousSeatCharacter(event) &&
+                          event.event_type === GrimoireEventType.REVIVE
+                        "
+                        src="/img/shroud.png"
+                        class="absolute left-[50%] -translate-x-[50%] top-0 w-8 md:w-10"
+                        alt=""
+                      />
+                    </div>
+                    <div class="current-token relative">
+                      <Token
+                        :character="
+                          event.event_type === GrimoireEventType.ALIGNMENT_CHANGE
+                            ? grimoireEventSeatAlignmentCharacter(event)
+                            : event.event_type === GrimoireEventType.SEAT_CHANGE
+                              ? grimoireEventSeatTokenCharacter(event)
+                            : grimoireEventSeatCharacter(event)
+                        "
+                        size="md"
+                        class="pointer-events-none"
+                        hideRelated
+                      />
+                      <img
+                        v-if="
+                          hasGrimoireEventPreviousSeatCharacter(event) &&
+                          (event.event_type === null ||
+                          event.event_type === GrimoireEventType.NOT_RECORDED ||
+                          event.event_type === GrimoireEventType.DEATH || 
+                          event.event_type === GrimoireEventType.EXECUTION)
+                        "
+                        src="/img/shroud.png"
+                        class="absolute left-[50%] -translate-x-[50%] top-0 w-8 md:w-10"
+                        alt=""
+                      />
+                    </div>
+                  </div>
                   <span
-                    v-else-if="event.event_type === GrimoireEventType.ALIGNMENT_CHANGE"
-                    class="absolute top-0 grid h-8 w-8 place-items-center rounded-full bg-amber-500 text-[10px] font-bold text-black md:h-10 md:w-10 md:text-xs"
+                    class="absolute text-white top-1 left-[calc(50%+1rem)]"
                     title="Alignment switch"
                   >
-                    A
-                  </span>
-                  <span
-                    v-else-if="event.event_type === GrimoireEventType.SEAT_CHANGE"
-                    class="absolute top-0 grid h-8 w-8 place-items-center rounded-full bg-sky-500 text-[10px] font-bold text-black md:h-10 md:w-10 md:text-xs"
-                    title="Seat change"
-                  >
-                    S
-                  </span>
-                  <span
-                    v-else-if="event.event_type === GrimoireEventType.ROLE_CHANGE"
-                    class="absolute top-0 grid h-8 w-8 place-items-center rounded-full bg-violet-500 text-[10px] font-bold text-black md:h-10 md:w-10 md:text-xs"
-                    title="Character switch"
-                  >
-                    C
+                    <IconUI id="arrow-90deg-down" size="sm" class="-scale-x-100"/>
                   </span>
                 </div>
                 <div class="flex flex-col">
-                  <span class="text-sm font-medium">
+                  <span class="text-sm text-center font-medium text-balance max-w-40">
                     {{ grimoireEventDisplayName(event) }}
                   </span>
                   <span class="text-xs text-stone-400 sr-only">
@@ -639,7 +691,7 @@
               </div>
               <div class="grid grid-cols-2 gap-2">
                 <label>
-                  <span class="block text-xs">Event type</span>
+                  <span class="block text-xs mb-[0.125rem]">Event type</span>
                 <Input
                   mode="select"
                   v-model="event.event_type"
@@ -664,7 +716,7 @@
                     </option>
                   </template>
                   <template v-else>
-                    <option :value="null">Not recorded</option>
+                    <option :value="GrimoireEventType.NOT_RECORDED">Not recorded</option>
                     <option :value="GrimoireEventType.DEATH">
                       Death
                     </option>
@@ -674,9 +726,14 @@
                   </template>
                 </Input>
                 </label>
-                <template v-if="event.event_type !== null">
+                <template
+                  v-if="
+                    event.event_type !== null &&
+                    event.event_type !== GrimoireEventType.NOT_RECORDED
+                  "
+                >
                   <label>
-                    <span class="block text-xs">Cause</span>
+                    <span class="block text-xs mb-[0.125rem]">Cause</span>
                     <Input
                       mode="select"
                       v-model="event.cause"
@@ -699,7 +756,7 @@
                     </Input>
                   </label>
                   <label class="col-span-2">
-                    <span class="block text-xs">Select triggering character</span>
+                    <span class="block text-xs mb-[0.125rem]">Select triggering character</span>
                     <Input
                       mode="select"
                       :modelValue="getGrimoireEventSeatSelection(event)"
@@ -722,7 +779,10 @@
                 </template>
               </div>
               <div
-                v-if="event.event_type !== null"
+                v-if="
+                  event.event_type !== null &&
+                  event.event_type !== GrimoireEventType.NOT_RECORDED
+                "
                 class="relative flex justify-center items-center aspect-square"
               >
                 <Token
@@ -1348,6 +1408,24 @@ function selectEndTriggerSeat() {
   }
 }
 
+function grimoireEventSortPriority(eventType: GrimoireEventType | null) {
+  switch (eventType) {
+    case GrimoireEventType.SEAT_CHANGE:
+      return 0;
+    case GrimoireEventType.ROLE_CHANGE:
+      return 1;
+    case GrimoireEventType.ALIGNMENT_CHANGE:
+      return 2;
+    case GrimoireEventType.DEATH:
+    case GrimoireEventType.EXECUTION:
+    case GrimoireEventType.REVIVE:
+    case GrimoireEventType.NOT_RECORDED:
+    case null:
+    default:
+      return 3;
+  }
+}
+
 const grimoireEventsByPage = computed(() => {
   const groups = new Map<number, typeof props.game.grimoire_events>();
   for (const event of props.game.grimoire_events || []) {
@@ -1361,7 +1439,23 @@ const grimoireEventsByPage = computed(() => {
     .sort((a, b) => a[0] - b[0])
     .map(([page, events]) => ({
       page,
-      events,
+      events: events.slice().sort((a, b) => {
+        const aToken = getTokenForParticipant(page, a.participant_id);
+        const bToken = getTokenForParticipant(page, b.participant_id);
+        const aOrder = aToken?.order ?? Number.MAX_SAFE_INTEGER;
+        const bOrder = bToken?.order ?? Number.MAX_SAFE_INTEGER;
+        if (aOrder !== bOrder) return aOrder - bOrder;
+
+        const aPriority = grimoireEventSortPriority(a.event_type);
+        const bPriority = grimoireEventSortPriority(b.event_type);
+        if (aPriority !== bPriority) return aPriority - bPriority;
+
+        const aName = normalizePlayerName(a.player_name || aToken?.player_name);
+        const bName = normalizePlayerName(b.player_name || bToken?.player_name);
+        if (aName !== bName) return aName.localeCompare(bName);
+
+        return (a.participant_id || "").localeCompare(b.participant_id || "");
+      }),
     }));
 });
 
@@ -1664,15 +1758,143 @@ function grimoireEventSeatCharacter(event: {
   };
 }
 
-function showsShroudOverlay(event: {
-  event_type: GrimoireEventType | null;
+function grimoireEventSeatAlignmentCharacter(event: {
+  grimoire_page: number;
+  participant_id: string;
 }) {
-  return (
-    event.event_type !== GrimoireEventType.REVIVE &&
-    (event.event_type === null ||
-      event.event_type === GrimoireEventType.DEATH ||
-      event.event_type === GrimoireEventType.EXECUTION)
+  const token = getTokenForParticipant(event.grimoire_page, event.participant_id);
+  const alignment = token?.alignment ?? "NEUTRAL";
+  const tokenUrl =
+    alignment === "GOOD"
+      ? "/img/role/good.webp"
+      : alignment === "EVIL"
+        ? "/img/role/evil.webp"
+        : "/1x1.png";
+  return {
+    name:
+      alignment === "GOOD" ? "Good" : alignment === "EVIL" ? "Evil" : "",
+    alignment,
+    role: {
+      id: `alignment-${alignment.toLowerCase()}`,
+      token_url: tokenUrl,
+      custom_role: true,
+      type: "",
+      initial_alignment: alignment,
+    },
+  };
+}
+
+function hasGrimoireEventPreviousSeatCharacter(event: {
+  grimoire_page: number;
+  participant_id: string;
+}) {
+  if (event.grimoire_page <= 0) return false;
+  const token = getTokenForParticipant(
+    event.grimoire_page - 1,
+    event.participant_id
   );
+  return !!token;
+}
+
+function grimoireEventPreviousSeatCharacter(event: {
+  grimoire_page: number;
+  participant_id: string;
+}) {
+  const token = getTokenForParticipant(
+    event.grimoire_page - 1,
+    event.participant_id
+  );
+  if (!token || !token.role) {
+    return {
+      name: "",
+      alignment: "NEUTRAL",
+      role: {
+        token_url: "/1x1.png",
+        type: "",
+        initial_alignment: "NEUTRAL",
+      },
+    };
+  }
+
+  return {
+    name: token.role?.name ?? "",
+    alignment: token.alignment ?? "NEUTRAL",
+    role: {
+      token_url: token.role.token_url,
+      type: token.role.type,
+      initial_alignment: token.role.initial_alignment,
+    },
+  };
+}
+
+function grimoireEventPreviousAlignmentCharacter(event: {
+  grimoire_page: number;
+  participant_id: string;
+}) {
+  const token = getTokenForParticipant(
+    event.grimoire_page - 1,
+    event.participant_id
+  );
+  const alignment = token?.alignment ?? "NEUTRAL";
+  const tokenUrl =
+    alignment === "GOOD"
+      ? "/img/role/good.webp"
+      : alignment === "EVIL"
+        ? "/img/role/evil.webp"
+        : "/1x1.png";
+  return {
+    name:
+      alignment === "GOOD" ? "Good" : alignment === "EVIL" ? "Evil" : "",
+    alignment,
+    role: {
+      id: `alignment-${alignment.toLowerCase()}`,
+      token_url: tokenUrl,
+      custom_role: true,
+      type: "",
+      initial_alignment: alignment,
+    },
+  };
+}
+
+function grimoireEventSeatTokenCharacter(event: {
+  grimoire_page: number;
+  participant_id: string;
+}) {
+  const token = getTokenForParticipant(event.grimoire_page, event.participant_id);
+  const seatNumber = token ? token.order + 1 : null;
+  return {
+    name: seatNumber ? `Seat ${seatNumber}` : "",
+    alignment: "NEUTRAL" as const,
+    role: {
+      id: "seat-token-current",
+      token_url: "/img/role/seat.webp",
+      custom_role: true,
+      type: "",
+      initial_alignment: "NEUTRAL" as const,
+    },
+  };
+}
+
+function grimoireEventPreviousSeatTokenCharacter(event: {
+  grimoire_page: number;
+  participant_id: string;
+}) {
+  const token = getTokenForParticipant(
+    event.grimoire_page - 1,
+    event.participant_id
+  );
+  const seatNumber = token ? token.order + 1 : null;
+  return {
+    name: seatNumber ? `Seat ${seatNumber}` : "",
+    alignment: "NEUTRAL" as const,
+    role: {
+      id: "seat-token-previous",
+      token_url: "/img/role/seat.webp",
+      custom_role: true,
+      type: "",
+      initial_alignment: "NEUTRAL" as const,
+    },
+  };
 }
 
 function isEventTypeLocked(event: {
@@ -1769,7 +1991,9 @@ function recordGrimoireEvent(payload: {
   const entry = {
     grimoire_page: payload.pageIndex,
     participant_id: participantId,
-    event_type: shouldRecordRevival ? GrimoireEventType.REVIVE : null,
+    event_type: shouldRecordRevival
+      ? GrimoireEventType.REVIVE
+      : GrimoireEventType.NOT_RECORDED,
     cause: shouldRecordRevival ? GrimoireEventCause.ABILITY : null,
     by_participant_id: null,
     player_name: payload.token.player_name || "",
@@ -1888,7 +2112,7 @@ function syncGrimoireEventsFromGrimoire(options?: {
         expected.set(expectedKey(pageIndex, participantId, "death"), {
           grimoire_page: pageIndex,
           participant_id: participantId,
-          event_type: null,
+          event_type: GrimoireEventType.NOT_RECORDED,
           player_name: token.player_name || "",
           role_id: token.role_id ?? null,
         });
@@ -3241,5 +3465,16 @@ onMounted(async () => {
     scrollbar-width: thin;
     scrollbar-color: oklch(44.4% 0.011 73.639) transparent;
   }
+}
+
+.token-container {
+  .initial-token + .current-token {
+    @apply ml-10 md:ml-14 mt-6;
+  }
+}
+
+.clip-token {
+  /* clip-path: polygon(0% 0%, 25% 0, 50% 50%, 25% 100%, 0% 100%); */
+  /* position: absolute; */
 }
 </style>
