@@ -21,7 +21,7 @@
     >
       <path
         data-v-deec739a=""
-        d="M 13 75 C 13 160, 138 160, 138 75"
+        :d="labelPath"
         :id="curveId"
         fill="transparent"
       ></path>
@@ -32,6 +32,7 @@
         text-anchor="middle"
         font-size="90%"
         class="label mozilla"
+        :dy="labelDy"
       >
         <textPath data-v-deec739a="" :xlink:href="`#${curveId}`">
           {{ character?.name || character?.role?.name }}
@@ -108,6 +109,7 @@ const props = defineProps<{
   alwaysShowAlignment?: boolean;
   hideRelated?: boolean;
   hideName?: boolean;
+  labelPosition?: "top" | "bottom";
   outline?: boolean;
   relatedId?: string;
   curveId?: string;
@@ -221,6 +223,20 @@ const dynamicTokenClass = computed(() => {
   }
 
   return classes;
+});
+
+const labelPath = computed(() => {
+  if (props.labelPosition === "top") {
+    return "M 13 75 C 13 -10, 138 -10, 138 75";
+  }
+  return "M 13 75 C 13 160, 138 160, 138 75";
+});
+
+const labelDy = computed(() => {
+  if (props.labelPosition === "top") {
+    return 8;
+  }
+  return 0;
 });
 
 const imageSize = computed(() => {
