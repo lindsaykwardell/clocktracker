@@ -58,6 +58,7 @@ export default defineEventHandler(async (handler) => {
   }
 
   const games = await prisma.game.findMany({
+    take: 200,
     where: {
       deleted: false,
       community_id: community.id,
