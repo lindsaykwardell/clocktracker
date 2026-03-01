@@ -325,15 +325,7 @@ export default defineEventHandler(async (handler) => {
           _count: {
             select: {
               scripts: true,
-            },
-          },
-          character: {
-            select: {
-              game: {
-                select: {
-                  id: true,
-                },
-              },
+              character: true,
             },
           },
         },
@@ -405,13 +397,7 @@ export default defineEventHandler(async (handler) => {
       token_url: role.token_url,
       _count: {
         scripts: role._count.scripts,
-        games: role.character.reduce((acc, character) => {
-          if (character?.game && !acc.includes(character.game.id)) {
-            acc.push(character.game.id);
-          }
-
-          return acc;
-        }, [] as string[]).length,
+        games: role._count.character,
       },
     })),
   };
