@@ -9,6 +9,7 @@ export default defineEventHandler(async (handler) => {
   }
 
   return prisma.event.findMany({
+    take: 200,
     where: {
       OR: [
         {
