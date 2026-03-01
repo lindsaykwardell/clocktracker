@@ -9,6 +9,7 @@ export default defineEventHandler(async (handler) => {
   }
 
   const friends = await prisma.friend.findMany({
+    take: 500,
     where: {
       user_id: user.id,
     },
