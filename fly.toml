@@ -20,7 +20,7 @@ primary_region = 'sjc'
   processes = ['app']
 
 [[vm]]
-  memory = '1536mb'
+  memory = '1024mb'
   cpu_kind = 'shared'
   cpus = 1
 
