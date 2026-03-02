@@ -1,4 +1,4 @@
-import type { User } from "@supabase/supabase-js";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import type { UserSettings } from "@prisma/client";
 import { addUserKofiLevel } from "../utils/addUserKofiLevel";
 import { prisma } from "~/server/utils/prisma";
