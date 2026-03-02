@@ -95,7 +95,7 @@ const inFlight = ref(false);
 const errorMessage = ref<string>();
 const savedSuccessfully = ref(false);
 const users = useUsers();
-const user = useSupabaseUser();
+const user = useUser();
 
 const settings = await useFetch("/api/settings");
 

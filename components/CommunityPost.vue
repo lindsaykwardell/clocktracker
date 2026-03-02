@@ -127,7 +127,7 @@
 <script setup lang="ts">
 import VueMarkdown from "vue-markdown-render";
 
-const user = useSupabaseUser();
+const user = useUser();
 const communities = useCommunities();
 
 const props = defineProps<{

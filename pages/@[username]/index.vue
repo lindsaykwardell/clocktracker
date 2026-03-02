@@ -131,7 +131,7 @@ const users = useUsers();
 const friends = useFriends();
 const gameStore = useGames();
 const username = useRoute().params.username as string;
-const user = useSupabaseUser();
+const user = useUser();
 
 const me = computed(() => {
   if (!user.value) return null;

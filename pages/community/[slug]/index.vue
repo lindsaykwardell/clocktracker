@@ -147,7 +147,7 @@ const route = useRoute();
 const slug = route.params.slug as string;
 const communities = useCommunities();
 const games = useGames();
-const user = useSupabaseUser();
+const user = useUser();
 
 const metadata = await $fetch(`/api/community/${slug}/minimal`);
 const { data: stats } = await useFetch<{

@@ -1,4 +1,4 @@
-import type { User } from "@supabase/supabase-js";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import type { UserSettings } from "@prisma/client";
 import axios from "axios";
 import { prisma } from "~/server/utils/prisma";

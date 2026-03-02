@@ -256,7 +256,7 @@ const props = defineProps<{
 
 const emit = defineEmits(["save"]);
 
-const user = useSupabaseUser();
+const user = useUser();
 const users = useUsers();
 const games = useGames();
 const showScriptDialog = ref(false);
