@@ -923,6 +923,8 @@
 <script setup lang="ts">
 import {
     GameEndTrigger,
+    GameEndTriggerCause,
+    GameEndTriggerType,
     WinStatus_V2,
     GrimoireEventType,
     GrimoireEventCause,
@@ -1092,7 +1094,7 @@ const endTriggerSummary = computed(() => {
             case GameEndTrigger.NO_LIVING_DEMON:
                 return "No living demon";
             case GameEndTrigger.CHARACTER_ABILITY:
-                return "Character ability";
+                return "Character ability ended the game";
             case GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE:
                 return "Only two players left alive";
             case GameEndTrigger.GAME_ENDED_EARLY:
@@ -1101,6 +1103,36 @@ const endTriggerSummary = computed(() => {
                 return "Other";
             default:
                 return "Not recorded";
+        }
+    })();
+
+    const triggerTypeLabel = (() => {
+        switch (data.end_trigger_type) {
+            case GameEndTriggerType.DEATH:
+                return "death";
+            case GameEndTriggerType.EXECUTION:
+                return "execution";
+            case GameEndTriggerType.CHARACTER_CHANGE:
+                return "a character change";
+            case GameEndTriggerType.EXTRA_WIN_CONDITION:
+                return "an extra win condition";
+            case GameEndTriggerType.OTHER:
+                return "other means";
+            default:
+                return "";
+        }
+    })();
+
+    const triggerCauseLabel = (() => {
+        switch (data.end_trigger_cause) {
+            case GameEndTriggerCause.ABILITY:
+                return "the ability";
+            case GameEndTriggerCause.NOMINATION:
+                return "the nomination";
+            case GameEndTriggerCause.FAILED_ABILITY:
+                return "a failed ability";
+            default:
+                return "";
         }
     })();
 
@@ -1118,14 +1150,24 @@ const endTriggerSummary = computed(() => {
         }
     }
 
-    if (character && player) {
-        return `${triggerLabel} due to ${roleArticle(character)}${character} (${player})`;
+    const actorLabel = character
+        ? `${roleArticle(character)}${character}${player ? ` (${player})` : ""}`
+        : player;
+
+    if (triggerTypeLabel && triggerCauseLabel && actorLabel) {
+        return `${triggerLabel} due to ${triggerTypeLabel} by ${triggerCauseLabel} of ${actorLabel}`;
     }
-    if (character) {
-        return `${triggerLabel} due to ${roleArticle(character)}${character}`;
+    if (triggerTypeLabel && triggerCauseLabel) {
+        return `${triggerLabel} due to ${triggerTypeLabel} by ${triggerCauseLabel}`;
     }
-    if (player) {
-        return `${triggerLabel} due to ${player}`;
+    if (triggerTypeLabel && actorLabel) {
+        return `${triggerLabel} due to ${triggerTypeLabel} of ${actorLabel}`;
+    }
+    if (triggerTypeLabel) {
+        return `${triggerLabel} due to ${triggerTypeLabel}`;
+    }
+    if (actorLabel) {
+        return `${triggerLabel} due to ${actorLabel}`;
     }
     return triggerLabel;
 });
