@@ -99,6 +99,32 @@ export default defineEventHandler(async (handler) => {
           },
         },
       },
+      demon_bluffs: {
+        select: {
+          id: true,
+          role_id: true,
+          game_id: true,
+          role: {
+            select: {
+              token_url: true,
+              type: true,
+            },
+          },
+        },
+      },
+      fabled: {
+        select: {
+          id: true,
+          role_id: true,
+          game_id: true,
+          role: {
+            select: {
+              token_url: true,
+              type: true,
+            },
+          },
+        },
+      },
       grimoire: {
         include: {
           tokens: {
