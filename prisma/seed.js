@@ -6,14 +6,9 @@ const { v4: uuidv4 } = require("uuid");
 const dayjs = require("dayjs");
 const { roles, roleNames, reminders } = require("./roles");
 const citySeed = require("./city-seed.json");
-const { createClient } = require("@supabase/supabase-js");
 const scripts = require("./scripts.json");
 
 const prisma = new PrismaClient();
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_KEY
-);
 
 const existingRoleIds = roles.map((role) => ({
   id: role.id,
@@ -179,17 +174,13 @@ async function main() {
   });
 
   const myUsername = process.env.LOCAL_USERNAME || "ClockTrackerDeveloper";
-  const myPassword = process.env.LOCAL_PASSWORD || "password123";
-  const email = process.env.LOCAL_PASSWORD || "dev@clocktracker.app";
-
-  const data = await supabase.auth.signUp({
-    email,
-    password: myPassword,
-  });
+  const email = process.env.LOCAL_EMAIL || "dev@clocktracker.app";
+  const localUserId =
+    process.env.LOCAL_USER_ID || "00000000-0000-4000-8000-000000000001";
 
   const me = await prisma.userSettings.create({
     data: {
-      user_id: data.data.user.id,
+      user_id: localUserId,
       username: myUsername,
       finished_welcome: true,
       avatar:
@@ -711,10 +702,10 @@ async function main() {
   }
 
   console.log("Done!");
-  console.log(`Login details:
-    
+  console.log(`Seeded local dev user:
+
 Email: ${email}
-Password: ${myPassword}
+User ID: ${localUserId}
 
 Run "npm run dev" and go to http://localhost:3000/`);
 }
