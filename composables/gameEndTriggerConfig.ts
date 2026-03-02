@@ -1,7 +1,7 @@
 import {
-  GameEndTrigger,
-  GameEndTriggerCause,
-  GameEndTriggerType,
+  type GameEndTrigger,
+  type GameEndTriggerCause,
+  type GameEndTriggerType,
 } from "~/composables/useGames";
 import {
   KILLING_DEMON_ROLE_IDS,
@@ -24,9 +24,9 @@ export const END_TRIGGER_ROLE_INCLUDES: Partial<
     >
   >
 > = {
-  [GameEndTrigger.CHARACTER_ABILITY]: {
-    [GameEndTriggerType.EXTRA_WIN_CONDITION]: {
-      [GameEndTriggerCause.ABILITY]: {
+  CHARACTER_ABILITY: {
+    EXTRA_WIN_CONDITION: {
+      ABILITY: {
         base: [
           ...WILDCARD_ROLE_IDS,
           // Townsfolk
@@ -57,9 +57,9 @@ export const END_TRIGGER_ROLE_INCLUDES: Partial<
       },
     },
   },
-  [GameEndTrigger.NO_LIVING_DEMON]: {
-    [GameEndTriggerType.DEATH]: {
-      [GameEndTriggerCause.ABILITY]: {
+  NO_LIVING_DEMON: {
+    DEATH: {
+      ABILITY: {
         base: [
           ...WILDCARD_ROLE_IDS,
           ...KILLING_DEMON_ROLE_IDS,
@@ -90,8 +90,8 @@ export const END_TRIGGER_ROLE_INCLUDES: Partial<
         ],
       },
     },
-    [GameEndTriggerType.EXECUTION]: {
-      [GameEndTriggerCause.ABILITY]: {
+    EXECUTION: {
+      ABILITY: {
         base: [
           ...WILDCARD_ROLE_IDS,
           "butcher", // Edge case: Could execute demon with extra nomination, which is specific player agency.
@@ -105,8 +105,8 @@ export const END_TRIGGER_ROLE_INCLUDES: Partial<
         conditional: [],
       },
     },
-    [GameEndTriggerType.CHARACTER_CHANGE]: {
-      [GameEndTriggerCause.ABILITY]: {
+    CHARACTER_CHANGE: {
+      ABILITY: {
         base: [
           ...WILDCARD_ROLE_IDS,
 
@@ -121,8 +121,8 @@ export const END_TRIGGER_ROLE_INCLUDES: Partial<
         conditional: [],
       },
     },
-    [GameEndTriggerType.OTHER]: {
-      [GameEndTriggerCause.FAILED_ABILITY]: {
+    OTHER: {
+      FAILED_ABILITY: {
         base: [],
         conditional: [
           // Prevent summoning on day 3.
@@ -132,15 +132,15 @@ export const END_TRIGGER_ROLE_INCLUDES: Partial<
           { role: "poisoner", requires: ["summoner"] },
         ],
       },
-      [GameEndTriggerCause.ABILITY]: {
+      ABILITY: {
         base: [],
         conditional: [],
       },
     },
   },
-  [GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE]: {
-    [GameEndTriggerType.DEATH]: {
-      [GameEndTriggerCause.ABILITY]: {
+  TWO_PLAYERS_LEFT_ALIVE: {
+    DEATH: {
+      ABILITY: {
         base: [
           ...WILDCARD_ROLE_IDS,
           ...KILLING_DEMON_ROLE_IDS,
@@ -172,8 +172,8 @@ export const END_TRIGGER_ROLE_INCLUDES: Partial<
         conditional: [],
       },
     },
-    [GameEndTriggerType.EXECUTION]: {
-      [GameEndTriggerCause.ABILITY]: {
+    EXECUTION: {
+      ABILITY: {
         base: [
           ...WILDCARD_ROLE_IDS,
           "mutant", // A Mutant could get themselves executed due to their ability during final 3.
@@ -188,8 +188,8 @@ export const END_TRIGGER_ROLE_INCLUDES: Partial<
         conditional: [],
       },
     },
-    [GameEndTriggerType.CHARACTER_CHANGE]: {
-      [GameEndTriggerCause.ABILITY]: {
+    CHARACTER_CHANGE: {
+      ABILITY: {
         base: [],
         conditional: [],
       },
