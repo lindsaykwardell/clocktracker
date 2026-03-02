@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import type { User } from "@supabase/supabase-js";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "./prisma";
 
 export async function getFeatureFlags(me: User | null) {

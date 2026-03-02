@@ -1,4 +1,4 @@
-import type { User } from "@supabase/supabase-js";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { type Game, type Character, type Grimoire, type Token, Alignment, type DemonBluff, type Fabled, type ReminderToken } from "@prisma/client";
 import { prisma } from "~/server/utils/prisma";
 

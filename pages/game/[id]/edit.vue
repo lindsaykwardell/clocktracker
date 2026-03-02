@@ -18,7 +18,7 @@ definePageMeta({
 
 const route = useRoute();
 const savedGame = await useFetch<GameRecord>(`/api/games/${route.params.id}`);
-const user = useSupabaseUser();
+const user = useUser();
 const router = useRouter();
 const inFlight = ref(false);
 
