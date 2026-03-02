@@ -47,6 +47,7 @@
 
   const ArrowRightShort = resolveComponent("IconArrowRightShort");
   const Bgg = resolveComponent("IconBgg");
+  const Book = resolveComponent("IconBook");
   const Json = resolveComponent("IconBraces");
   const CalenderPlus = resolveComponent("IconCalenderPlus");
   const Check = resolveComponent("IconCheck");
@@ -130,6 +131,8 @@
         return Filter;
       case "bgg":
         return Bgg;
+      case "book":
+        return Book;
       case "view":
         return View;
       case "disabled":
