@@ -1,4 +1,4 @@
-import type { User } from "@supabase/supabase-js";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { addUserKofiLevel } from "../utils/addUserKofiLevel";
 import { prisma } from "~/server/utils/prisma";
 
@@ -79,18 +79,18 @@ export default defineEventHandler(async (handler) => {
   });
 
   if (settings) {
-    if (!settings.discord_id && user.app_metadata.provider === "discord") {
+    if (!settings.discord_id && user.app_metadata?.provider === "discord") {
       await prisma.userSettings.update({
         where: {
           user_id: user.id,
         },
         data: {
-          discord_id: user.user_metadata.provider_id,
+          discord_id: user.user_metadata?.provider_id,
         },
       });
     }
 
-    settings.discord_id = user.user_metadata.provider_id;
+    settings.discord_id = user.user_metadata?.provider_id;
 
     if (settings.charts.length <= 0) {
       const charts = await prisma.chart.createMany({
@@ -126,7 +126,7 @@ export default defineEventHandler(async (handler) => {
     return addUserKofiLevel(settings);
   }
 
-  const existingUsername = user.user_metadata.full_name
+  const existingUsername = user.user_metadata?.full_name
     ? (
         await prisma.userSettings.findFirst({
           where: {
@@ -145,15 +145,15 @@ export default defineEventHandler(async (handler) => {
   const randomName = generateName();
 
   const username = existingUsername
-    ? user.user_metadata.full_name
+    ? user.user_metadata?.full_name
     : randomName.username;
 
   const newSettings = await prisma.userSettings.create({
     data: {
       user_id: user.id,
       username,
-      display_name: user.user_metadata.full_name || randomName.display_name,
-      avatar: user.user_metadata.avatar_url || "/img/default.png",
+      display_name: user.user_metadata?.full_name || randomName.display_name,
+      avatar: user.user_metadata?.avatar_url || "/img/default.png",
       email: user.email,
       charts: {
         create: [

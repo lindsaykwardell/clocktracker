@@ -164,7 +164,7 @@
 const route = useRoute();
 const router = useRouter();
 const communities = useCommunities();
-const user = useSupabaseUser();
+const user = useUser();
 import { Status } from "@/composables/useFetchStatus";
 
 const props = defineProps<{

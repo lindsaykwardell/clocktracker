@@ -62,7 +62,7 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 const users = useUsers();
-const user = useSupabaseUser();
+const user = useUser();
 const featureFlags = useFeatureFlags();
 
 await featureFlags.init();

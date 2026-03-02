@@ -553,7 +553,7 @@ import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
 import type { WinStatus_V2 } from "~/composables/useGames";
 import { useLocalStorage } from "@vueuse/core";
 
-const user = useSupabaseUser();
+const user = useUser();
 const users = useUsers();
 const roles = useRoles();
 const allGames = useGames();

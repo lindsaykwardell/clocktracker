@@ -535,7 +535,7 @@ export const useGames = defineStore("games", {
       }
     },
     async fetchSimilarGames(gameId: string) {
-      const user = useSupabaseUser();
+      const user = useUser();
 
       if (!user.value) return;
 

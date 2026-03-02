@@ -1,5 +1,5 @@
 import { RoleType } from "@prisma/client";
-import type { User } from "@supabase/supabase-js";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import naturalOrder from "natural-order";
 import { isVersionOne } from "~/server/utils/getScriptVersions";
 import { prisma } from "~/server/utils/prisma";
