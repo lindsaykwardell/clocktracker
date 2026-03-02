@@ -8,7 +8,7 @@
             'bg-transparent pointer-events-none': showMenu,
         }"
     ></div>
-    <nav id="sidebar" :class="showMenu ? 'closed' : 'open'">
+    <nav id="sidebar" :class="showMenu ? 'closed' : 'open'" @click="handleNavClick">
         <ul>
             <li>
                 <div class="logo">
@@ -180,9 +180,25 @@
 </template>
 
 <script setup lang="ts">
-const { showMenu, toggleSidebar } = useSidebarState();
+const { showMenu, toggleSidebar, closeSidebar, isMobile } = useSidebarState();
 const me = useMe();
 const friends = useFriends();
+
+const handleNavClick = (event: MouseEvent) => {
+    if (!isMobile.value) {
+        return;
+    }
+
+    const target = event.target;
+
+    if (!(target instanceof HTMLElement)) {
+        return;
+    }
+
+    if (target.closest("a")) {
+        closeSidebar();
+    }
+};
 </script>
 
 <style scoped>
