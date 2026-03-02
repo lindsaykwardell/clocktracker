@@ -265,6 +265,24 @@
                 </div>
                 <div class="relative w-full md:w-auto">
                   <Button
+                    @click="selectAllVisibleGames"
+                    :disabled="!sortedGames.length"
+                    variant="soft"
+                  >
+                    Select all
+                  </Button>
+                </div>
+                <div class="relative w-full md:w-auto">
+                  <Button
+                    @click="clearVisibleSelection"
+                    :disabled="selectMultipleGames.selectedGames.length <= 0"
+                    variant="soft"
+                  >
+                    Select none
+                  </Button>
+                </div>
+                <div class="relative w-full md:w-auto">
+                  <Button
                     :disabled="selectMultipleGames.selectedGames.length <= 0"
                     @click="deleteMultipleGames"
                     color="negative"
@@ -911,6 +929,47 @@ async function deleteMultipleGames() {
 
     selectMultipleGames.toggleMode();
   }
+}
+
+function selectAllVisibleGames() {
+  if (!selectMultipleGames.enabled) {
+    return;
+  }
+
+  if (selectMultipleGames.selection.type !== "ON") {
+    return;
+  }
+
+  const visibleIds = sortedGames.value.map((game) => game.id);
+  const currentSelection = new Set(selectMultipleGames.selection.games);
+
+  for (const id of visibleIds) {
+    currentSelection.add(id);
+  }
+
+  selectMultipleGames.selection = {
+    type: "ON",
+    games: Array.from(currentSelection),
+  };
+}
+
+function clearVisibleSelection() {
+  if (!selectMultipleGames.enabled) {
+    return;
+  }
+
+  if (selectMultipleGames.selection.type !== "ON") {
+    return;
+  }
+
+  const visibleIds = new Set(sortedGames.value.map((game) => game.id));
+
+  selectMultipleGames.selection = {
+    type: "ON",
+    games: selectMultipleGames.selection.games.filter(
+      (id) => !visibleIds.has(id)
+    ),
+  };
 }
 
 function formatDate(date: Date) {
