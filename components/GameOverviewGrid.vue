@@ -301,7 +301,7 @@ const gamesStore = useGames();
 const users = useUsers();
 const me = useMe();
 const friends = useFriends();
-const user = useSupabaseUser();
+const user = useUser();
 
 const config = useRuntimeConfig();
 const scripts = useScripts();

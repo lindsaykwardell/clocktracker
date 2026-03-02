@@ -350,7 +350,7 @@ definePageMeta({
 
 const communities = useCommunities();
 const route = useRoute();
-const user = useSupabaseUser();
+const user = useUser();
 
 const slug = route.params.slug as string;
 

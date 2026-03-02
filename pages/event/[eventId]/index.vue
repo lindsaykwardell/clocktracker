@@ -233,7 +233,7 @@ const route = useRoute();
 const router = useRouter();
 const eventId = route.params.eventId as string;
 const users = useUsers();
-const user = useSupabaseUser();
+const user = useUser();
 const communities = useCommunities();
 const friends = useFriends();
 

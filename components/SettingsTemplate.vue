@@ -74,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-const user = useSupabaseUser();
+const user = useUser();
 const users = useUsers();
 
 const avatar = computed(() => {

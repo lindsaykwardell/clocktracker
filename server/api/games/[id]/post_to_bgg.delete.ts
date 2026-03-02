@@ -1,4 +1,4 @@
-import type { User } from "@supabase/supabase-js";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { Alignment, PrivacySetting } from "@prisma/client";
 import axios from "axios";
 // @ts-ignore

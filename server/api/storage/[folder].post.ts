@@ -2,7 +2,7 @@ import Jimp from "jimp";
 import http from "http";
 import formidable from "formidable";
 import { v4 as uuid } from "uuid";
-import type { User } from "@supabase/supabase-js";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";

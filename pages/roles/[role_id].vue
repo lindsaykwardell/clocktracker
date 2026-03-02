@@ -157,7 +157,7 @@ import { chartColors } from "~/composables/useChartColors";
 const route = useRoute();
 const role_id = route.params.role_id as string;
 const games = useGames();
-const user = useSupabaseUser();
+const user = useUser();
 const users = useUsers();
 const scripts = useScripts();
 const me = useMe();
