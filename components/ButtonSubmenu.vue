@@ -77,7 +77,7 @@
 
   .ct-btn-submenu {
     --btn-bg: var(--btn-color, theme(colors.white));
-    --btn-fg: var(--color-base-content);
+    --btn-fg: theme(colors.black);
     --btn-p: .5rem .75rem;
     --btn-gap: 0.375rem;
 
@@ -86,7 +86,7 @@
     outline-offset: 2px;
     color: var(--btn-fg);
     font-size: var(--fontsize, .875rem);
-    outline-color: var(--btn-color, var(--color-base-content));
+    outline-color: var(--btn-color, theme(colors.black));
     background-color: var(--btn-bg);
     touch-action: manipulation;
     flex-shrink: 0;
@@ -141,24 +141,24 @@
 
   @media(hover: hover) {
     .ct-btn-submenu:hover {
-      --btn-bg: var(--btn-color, var(--color-base-200));
+      --btn-bg: var(--btn-color, theme(colors.stone.100));
     }
 
     @supports (color: color-mix(in lab, red, red)) {
       .ct-btn-submenu:hover {
-        --btn-bg: color-mix(in oklab, var(--btn-color, var(--color-base-200)), #000 5%);
+        --btn-bg: color-mix(in oklab, var(--btn-color, theme(colors.stone.100)), #000 5%);
       }
     }
   }
 
   .ct-btn-submenu-soft:not(.ct-btn-submenu-active,:hover,:active:focus,:focus-visible,:disabled,[disabled],.ct-btn-submenu-disabled) {
-    --btn-fg: var(--btn-color, var(--color-base-content));
+    --btn-fg: var(--btn-color, theme(colors.black));
     --btn-bg: var(--btn-color, theme(colors.white));
   }
 
   @supports (color: color-mix(in lab,red,red)) {
     .ct-btn-submenu-soft:not(.ct-btn-submenu-active,:hover,:active:focus,:focus-visible,:disabled,[disabled],.ct-btn-submenu-disabled) {
-      --btn-fg: color-mix(in oklab, var(--btn-color, var(--color-base-content)), #000 10%);
+      --btn-fg: color-mix(in oklab, var(--btn-color, theme(colors.black)), #000 10%);
       --btn-bg: color-mix(in oklab, var(--btn-color, theme(colors.white)) 1%, theme(colors.white));
     }
   }
