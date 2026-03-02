@@ -4,7 +4,7 @@
       By Player
     </h2>
 
-    <div class="flex justify-center gap-2">
+    <div class="flex flex-wrap justify-center gap-2">
       <button
         v-for="option in sortOptions"
         :key="option.value"
