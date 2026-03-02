@@ -24,7 +24,7 @@ async function globalSetup() {
   const lastName = faker.person.lastName();
   const email = faker.internet.email({ firstName, lastName });
   const password = faker.internet.password();
-  const username = faker.internet.userName({ firstName, lastName });
+  const username = faker.internet.username({ firstName, lastName });
   const displayName = `${firstName} ${lastName}`;
   const pronouns = faker.helpers.arrayElement([
     "he/him",
