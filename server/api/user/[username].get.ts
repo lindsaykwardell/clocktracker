@@ -20,6 +20,7 @@ export default defineEventHandler(async (handler) => {
       location: "Unknown",
       privacy: PrivacySetting.PUBLIC,
       charts: [],
+      role_stat_cards: [],
     };
   }
 
@@ -119,6 +120,25 @@ export default defineEventHandler(async (handler) => {
       city_id: true,
       privacy: true,
       charts: true,
+      role_stat_cards: {
+        include: {
+          role: {
+            select: {
+              id: true,
+              name: true,
+              ability: true,
+              token_url: true,
+              type: true,
+              initial_alignment: true,
+            },
+          },
+        },
+        orderBy: [
+          {
+            created_at: "asc",
+          },
+        ],
+      },
       communities: {
         select: {
           id: true,

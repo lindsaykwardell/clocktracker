@@ -93,6 +93,7 @@ export type GameRecord = Omit<Game, "win_v2"> & {
   end_trigger_note: string;
   end_trigger_participant_id: string | null;
   end_trigger_role?: {
+    id: string;
     token_url: string;
     type: string;
     initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";

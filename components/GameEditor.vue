@@ -352,57 +352,62 @@
       </div>
       <details class="w-full">
         <summary class="cursor-pointer">Seating order</summary>
-        <p class="text-xs text-stone-300 mt-1">
-          Use drag and drop in the list below to move a player to a different seat (this page only).
-        </p>
-        <ul
-          class="mt-2 flex flex-col gap-1"
-          @dragover.prevent="onSeatListDragOver"
-          @drop.prevent="onSeatDrop"
-        >
-          <li
-            v-for="row in currentPageSeatRows"
-            :key="`seat-reorder-${row.order}-${row.token.id ?? row.order}`"
-            draggable="true"
-            @dragstart="onSeatDragStart(row.order, $event)"
-            @dragover.prevent="onSeatDragOver(row.order, $event)"
-            @dragend="onSeatDragEnd"
-            class="cursor-move flex items-center justify-between gap-2 rounded border border-stone-600 px-2 py-1 bg-stone-200/80 dark:bg-stone-900/80 relative"
-            :class="{
-              'opacity-60': draggedSeatOrder === row.order,
-              'border-t-4 border-t-primary': dragTargetOrder === row.order && !dragTargetAfter,
-              'border-b-4 border-b-primary': dragTargetOrder === row.order && dragTargetAfter,
-            }"
+        <template v-if="hasCurrentPageSeating">
+          <p class="text-xs text-stone-300 mt-1">
+            Use drag and drop in the list below to move a player to a different seat (this page only).
+          </p>
+          <ul
+            class="mt-2 flex flex-col gap-1"
+            @dragover.prevent="onSeatListDragOver"
+            @drop.prevent="onSeatDrop"
           >
-            <span class="flex items-center gap-2">
-              <IconUI id="arrows-move" size="xs" />
-              <span class="text-sm truncate">
-                {{ row.token.role?.name || "No Role" }} - {{ row.token.player_name || "No Player" }}
+            <li
+              v-for="row in currentPageSeatRows"
+              :key="`seat-reorder-${row.order}-${row.token.id ?? row.order}`"
+              draggable="true"
+              @dragstart="onSeatDragStart(row.order, $event)"
+              @dragover.prevent="onSeatDragOver(row.order, $event)"
+              @dragend="onSeatDragEnd"
+              class="cursor-move flex items-center justify-between gap-2 rounded border border-stone-600 px-2 py-1 bg-stone-200/80 dark:bg-stone-900/80 relative"
+              :class="{
+                'opacity-60': draggedSeatOrder === row.order,
+                'border-t-4 border-t-primary': dragTargetOrder === row.order && !dragTargetAfter,
+                'border-b-4 border-b-primary': dragTargetOrder === row.order && dragTargetAfter,
+              }"
+            >
+              <span class="flex items-center gap-2">
+                <IconUI id="arrows-move" size="xs" />
+                <span class="text-sm truncate">
+                  {{ row.token.role?.name || "No Role" }} - {{ row.token.player_name || "No Player" }}
+                </span>
               </span>
-            </span>
-            <span class="text-xs text-stone-500 shrink-0">
-              Seat {{ row.order + 1 }}
-            </span>
-          </li>
-        </ul>
-        <div class="mt-2 flex items-center gap-2">
-          <Button
-            type="button"
-            size="sm"
-            icon="arrow-clockwise"
-            @click="rotateCurrentPageSeats('cw')"
-          >
-            Move all seats clockwise
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            icon="arrow-counterclockwise"
-            @click="rotateCurrentPageSeats('ccw')"
-          >
-            Move all seats counterclockwise
-          </Button>
-        </div>
+              <span class="text-xs text-stone-500 shrink-0">
+                Seat {{ row.order + 1 }}
+              </span>
+            </li>
+          </ul>
+          <div class="mt-2 flex items-center gap-2">
+            <Button
+              type="button"
+              size="sm"
+              icon="arrow-clockwise"
+              @click="rotateCurrentPageSeats('cw')"
+            >
+              Move all seats clockwise
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              icon="arrow-counterclockwise"
+              @click="rotateCurrentPageSeats('ccw')"
+            >
+              Move all seats counterclockwise
+            </Button>
+          </div>
+        </template>
+        <p v-else class="text-xs text-stone-400 mt-1">
+          Set a playercount to enable seat reordering.
+        </p>
       </details>
     </fieldset>
     <GameEditorGrimoireEvents
@@ -877,6 +882,11 @@ const currentPageSeatRows = computed(() => {
     }));
 });
 
+const hasCurrentPageSeating = computed(() =>
+  currentPageSeatRows.value.some(({ token }) =>
+    Boolean(token.role_id || token.player_name?.trim())
+  )
+);
 
 function recordGrimoireEvent(payload: {
   token: {

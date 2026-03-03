@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import type { FetchStatus } from "./useFetchStatus";
 import type { Chart } from "@prisma/client";
+import type { RoleStatCardRecord } from "~/composables/useRoleStatCards";
 
 export enum PrivacySetting {
   PUBLIC = "PUBLIC",
@@ -20,6 +21,7 @@ export type User = {
   bio: string;
   privacy: PrivacySetting;
   charts: Chart[];
+  role_stat_cards: RoleStatCardRecord[];
   bgg_username: string | null;
   enable_bgstats: boolean;
   kofi_level: string;
