@@ -1,0 +1,623 @@
+<template>
+  <fieldset
+    id="game-results"
+    class="flex flex-col gap-5 border rounded border-stone-500 p-4 my-3"
+  >
+    <legend>Game Results</legend>
+    <fieldset class="flex gap-4 flex-wrap">
+      <label class="flex gap-2 items-center">
+        <input
+          type="radio"
+          v-model="game.win_v2"
+          :value="WinStatus_V2.GOOD_WINS"
+          class="border border-stone-500"
+        />
+        <span class="block whitespace-nowrap"> Good wins </span>
+      </label>
+      <label class="flex gap-2 items-center">
+        <input
+          type="radio"
+          v-model="game.win_v2"
+          :value="WinStatus_V2.EVIL_WINS"
+          class="border border-stone-500"
+        />
+        <span class="block whitespace-nowrap"> Evil wins </span>
+      </label>
+      <label class="flex gap-2 items-center">
+        <input
+          type="radio"
+          v-model="game.win_v2"
+          :value="WinStatus_V2.NOT_RECORDED"
+          class="border border-stone-500"
+        />
+        <span class="block whitespace-nowrap"> Not recorded </span>
+      </label>
+      <label v-if="editingMultipleGames" class="flex gap-2 items-center">
+        <input
+          type="radio"
+          v-model="game.win_v2"
+          :value="undefined"
+          class="border border-stone-500"
+        />
+        <span class="block whitespace-nowrap"> Not updated </span>
+      </label>
+      <label v-if="!editingMultipleGames" class="flex gap-2 items-center">
+        <input type="checkbox" v-model="game.ignore_for_stats" />
+        <span class="block whitespace-nowrap">Ignore for stats</span>
+      </label>
+    </fieldset>
+
+    <details :open="game.end_trigger !== GameEndTrigger.NOT_RECORDED">
+      <summary class="cursor-pointer">Game end trigger</summary>
+      <div class="flex flex-col gap-3 w-full md:w-auto py-2">
+        <label class="block">
+          <Input mode="select" v-model="game.end_trigger">
+            <option v-if="editingMultipleGames" :value="undefined">
+              Not updated
+            </option>
+            <option :value="GameEndTrigger.NOT_RECORDED">
+              Not recorded
+            </option>
+            <option :value="GameEndTrigger.NO_LIVING_DEMON">
+              No living demon remained (Execution, Slayer, Pit-Hag, etc.)
+            </option>
+            <option :value="GameEndTrigger.CHARACTER_ABILITY">
+              A character ability ended the game (Saint, Alsaahir, etc.)
+            </option>
+            <option :value="GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE">
+              Two players left alive (Execution, Imp, Mutant, etc.)
+            </option>
+            <option :value="GameEndTrigger.GAME_ENDED_EARLY">
+              Game ended early
+            </option>
+            <option :value="GameEndTrigger.OTHER">Other</option>
+          </Input>
+        </label>
+        <div
+          v-if="shouldShowEndTriggerCharacterSection"
+          class="flex gap-4 border border-stone-600 rounded p-4"
+        >
+          <div class="flex-1 grid grid-cols-2 gap-2">
+            <label v-if="shouldShowEndTriggerType" class="block">
+              <span class="block text-xs mb-[0.125rem]">Trigger type</span>
+              <Input
+                mode="select"
+                v-model="game.end_trigger_type"
+                :disabled="hasSingleEndTriggerTypeOption"
+              >
+                <option :value="null">Not recorded</option>
+                <option
+                  v-for="option in endTriggerTypeOptions"
+                  :key="option.value"
+                  :value="option.value"
+                >
+                  {{ option.label }}
+                </option>
+              </Input>
+            </label>
+            <label
+              v-if="shouldShowEndTriggerCause && shouldShowEndTriggerFieldsAfterType"
+              class="block"
+            >
+              <span class="block text-xs mb-[0.125rem]">Cause</span>
+              <Input
+                mode="select"
+                v-model="game.end_trigger_cause"
+                :disabled="hasSingleEndTriggerCauseOption"
+              >
+                <option :value="null">Choose cause</option>
+                <option
+                  v-for="option in endTriggerCauseOptions"
+                  :key="option.value"
+                  :value="option.value"
+                >
+                  {{ option.label }}
+                </option>
+              </Input>
+            </label>
+            <label
+              v-if="advancedModeEnabled && shouldShowEndTriggerFieldsAfterType"
+              class="block col-span-2"
+            >
+              <span class="block text-xs mb-[0.125rem]">Select triggering character</span>
+              <Input
+                mode="select"
+                v-model="endTriggerSeatSelection"
+                @change="selectEndTriggerSeat"
+                :disabled="!shouldShowEndTriggerCharacter || endTriggerSeatOptions.length === 0"
+              >
+                <option :value="null">No character selected</option>
+                <option
+                  v-for="seat in endTriggerSeatOptions"
+                  :key="seat.participant_id"
+                  :value="seat.participant_id"
+                >
+                  {{ seat.label }}
+                </option>
+                <option value="custom">Set custom character</option>
+              </Input>
+              <Alert
+                v-if="shouldShowEndTriggerCharacter && endTriggerSeatOptions.length === 0"
+                color="info"
+                class="mt-1"
+              >
+                No eligible characters for this trigger found in grimoire, but you can add a custom character.
+              </Alert>
+              <p
+                v-else-if="shouldShowEndTriggerCharacter"
+                class="text-xs text-stone-400 mt-1"
+              >
+                Select a character from the grimoire, or add custom character.
+              </p>
+              <p v-else class="text-xs text-stone-400 mt-1">
+                Choose the trigger type and cause first.
+              </p>
+            </label>
+            <span v-else-if="shouldShowEndTriggerFieldsAfterType" class="block">
+              Select triggering character
+            </span>
+          </div>
+          <div
+            v-if="shouldShowEndTriggerFieldsAfterType"
+            class="flex gap-3 flex-wrap items-center"
+          >
+            <div class="relative flex justify-center items-center aspect-square">
+              <Button
+                v-if="game.end_trigger_role"
+                type="button"
+                @click="clearEndTriggerRole"
+                class="absolute top-1 right-1 z-10"
+                color="contrast"
+                size="sm"
+                icon="x-lg"
+                display="icon-only"
+                circular
+                title="Clear triggering character"
+              >
+                Clear
+              </Button>
+              <Token
+                v-if="game.end_trigger_role"
+                :character="endTriggerCharacter"
+                size="md"
+                class="cursor-pointer"
+                :class="{
+                  'pointer-events-none opacity-50':
+                    !allowManualEndTriggerRole || !shouldShowEndTriggerCharacter,
+                }"
+                @clickRole="emit('open-role-dialog')"
+                hideRelated
+              />
+              <Token v-else outline size="md" class="font-sorts">
+                <button
+                  type="button"
+                  @click="emit('open-role-dialog')"
+                  class="w-full h-full p-1 text-sm"
+                  :disabled="!allowManualEndTriggerRole || !shouldShowEndTriggerCharacter"
+                >
+                  <template v-if="allowManualEndTriggerRole">
+                    Add Character
+                  </template>
+                  <template v-else>
+                    No Character Selected
+                  </template>
+                </button>
+              </Token>
+            </div>
+          </div>
+        </div>
+        <label
+          v-if="
+            game.end_trigger === GameEndTrigger.GAME_ENDED_EARLY ||
+            game.end_trigger === GameEndTrigger.OTHER
+          "
+          class="block"
+        >
+          <span class="block">Reason</span>
+          <Input type="text" v-model="game.end_trigger_note" />
+        </label>
+      </div>
+    </details>
+  </fieldset>
+</template>
+
+<script setup lang="ts">
+import {
+  GameEndTrigger,
+  GameEndTriggerCause,
+  GameEndTriggerType,
+  WinStatus_V2,
+} from "~/composables/useGames";
+import { END_TRIGGER_ROLE_INCLUDES } from "~/composables/gameEndTriggerConfig";
+
+type EndTriggerSeatToken = {
+  order: number;
+  player_name: string;
+  role_id: string | null;
+  grimoire_participant_id?: string | null;
+  role?: {
+    name?: string;
+    token_url: string;
+    type: string;
+    initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+  };
+};
+
+type EndTriggerPage = {
+  tokens: EndTriggerSeatToken[];
+};
+
+const props = defineProps<{
+  editingMultipleGames?: boolean;
+  advancedModeEnabled: boolean;
+  scriptRoleIds: Set<string>;
+  game: {
+    win_v2: WinStatus_V2 | undefined;
+    ignore_for_stats: boolean;
+    end_trigger: GameEndTrigger | undefined;
+    end_trigger_type: GameEndTriggerType | null;
+    end_trigger_cause: GameEndTriggerCause | null;
+    end_trigger_role_id: string | null;
+    end_trigger_note: string;
+    end_trigger_participant_id: string | null;
+    end_trigger_role?: {
+      token_url: string;
+      type: string;
+      initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+      name: string;
+    } | null;
+    grimoire: EndTriggerPage[];
+  };
+}>();
+
+const emit = defineEmits<{
+  (e: "open-role-dialog"): void;
+}>();
+
+const endTriggerCharacter = computed(() => {
+  const role = props.game.end_trigger_role;
+  if (!role) {
+    return {
+      name: "",
+      alignment: "NEUTRAL",
+      role: {
+        token_url: "/1x1.png",
+        type: "",
+        initial_alignment: "NEUTRAL",
+      },
+    };
+  }
+
+  return {
+    name: role.name,
+    alignment: role.initial_alignment,
+    role: {
+      token_url: role.token_url,
+      type: role.type,
+      initial_alignment: role.initial_alignment,
+    },
+  };
+});
+
+const endTriggerSeatTokens = computed(() => {
+  if (!props.game.grimoire.length) return [];
+  return props.game.grimoire[Math.max(0, props.game.grimoire.length - 1)]?.tokens ?? [];
+});
+
+const shouldShowEndTriggerCharacterSection = computed(
+  () =>
+    props.game.end_trigger === GameEndTrigger.CHARACTER_ABILITY ||
+    props.game.end_trigger === GameEndTrigger.NO_LIVING_DEMON ||
+    props.game.end_trigger === GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE
+);
+
+const shouldShowEndTriggerType = computed(
+  () => shouldShowEndTriggerCharacterSection.value
+);
+
+const shouldShowEndTriggerCause = computed(() => {
+  if (props.game.end_trigger === GameEndTrigger.CHARACTER_ABILITY) return true;
+  if (!shouldShowEndTriggerType.value) return false;
+  return props.game.end_trigger_type !== null;
+});
+
+const shouldShowEndTriggerCharacter = computed(() => {
+  if (!shouldShowEndTriggerCharacterSection.value) return false;
+  if (shouldShowEndTriggerType.value && props.game.end_trigger_type === null) {
+    return false;
+  }
+  return props.game.end_trigger_cause !== null;
+});
+
+const shouldShowEndTriggerFieldsAfterType = computed(() => {
+  if (!shouldShowEndTriggerCharacterSection.value) return false;
+  if (!shouldShowEndTriggerType.value) return true;
+  return props.game.end_trigger_type !== null;
+});
+
+const endTriggerTypeOptions = computed(() => {
+  if (!shouldShowEndTriggerType.value) return [];
+  if (props.game.end_trigger === GameEndTrigger.CHARACTER_ABILITY) {
+    return [
+      {
+        value: GameEndTriggerType.EXTRA_WIN_CONDITION,
+        label: "Extra win condition",
+      },
+    ];
+  }
+  return [
+    { value: GameEndTriggerType.DEATH, label: "Death" },
+    { value: GameEndTriggerType.EXECUTION, label: "Execution" },
+    { value: GameEndTriggerType.CHARACTER_CHANGE, label: "Character change" },
+    { value: GameEndTriggerType.OTHER, label: "Other" },
+  ];
+});
+
+const hasSingleEndTriggerTypeOption = computed(
+  () =>
+    endTriggerTypeOptions.value.length === 1 &&
+    props.game.end_trigger !== GameEndTrigger.CHARACTER_ABILITY
+);
+
+const endTriggerCauseOptions = computed(() => {
+  if (props.game.end_trigger === GameEndTrigger.CHARACTER_ABILITY) {
+    return [{ value: GameEndTriggerCause.ABILITY, label: "Ability" }];
+  }
+
+  if (!shouldShowEndTriggerType.value) return [];
+
+  switch (props.game.end_trigger_type) {
+    case GameEndTriggerType.DEATH:
+      return [{ value: GameEndTriggerCause.ABILITY, label: "Ability" }];
+    case GameEndTriggerType.EXECUTION:
+      return [
+        { value: GameEndTriggerCause.ABILITY, label: "Ability" },
+        { value: GameEndTriggerCause.NOMINATION, label: "Nomination" },
+      ];
+    case GameEndTriggerType.CHARACTER_CHANGE:
+      return [{ value: GameEndTriggerCause.ABILITY, label: "Ability" }];
+    case GameEndTriggerType.OTHER:
+      return [
+        { value: GameEndTriggerCause.FAILED_ABILITY, label: "Failed ability" },
+        { value: GameEndTriggerCause.ABILITY, label: "Ability" },
+      ];
+    default:
+      return [];
+  }
+});
+
+const hasSingleEndTriggerCauseOption = computed(
+  () => endTriggerCauseOptions.value.length === 1
+);
+
+const endTriggerRoleConfig = computed(() => {
+  if (
+    !props.game.end_trigger ||
+    !props.game.end_trigger_type ||
+    !props.game.end_trigger_cause
+  ) {
+    return null;
+  }
+  return (
+    END_TRIGGER_ROLE_INCLUDES[props.game.end_trigger]?.[
+      props.game.end_trigger_type
+    ]?.[props.game.end_trigger_cause] ?? null
+  );
+});
+
+const endTriggerIncludeRoleIds = computed(() => {
+  const config = endTriggerRoleConfig.value;
+  if (!config) return [];
+
+  const includes = [
+    ...(config.base ?? []),
+    ...(config.conditional ?? [])
+      .filter((entry) =>
+        entry.requires.every((required) => props.scriptRoleIds?.has(required) ?? false)
+      )
+      .map((entry) => entry.role),
+  ];
+
+  return Array.from(new Set(includes));
+});
+
+const endTriggerSeatOptions = computed(() => {
+  let tokens = endTriggerSeatTokens.value;
+  if (endTriggerRoleConfig.value) {
+    const allowed = new Set(endTriggerIncludeRoleIds.value);
+    tokens = tokens.filter((token) => token.role_id && allowed.has(token.role_id));
+  }
+
+  return tokens.map((token) => ({
+    order: token.order,
+    participant_id: token.grimoire_participant_id || `seat-${token.order}`,
+    label: `[Seat ${token.order + 1}] ${token.role?.name || "Unknown role"} - ${token.player_name || "Unknown player"}`,
+    token,
+  }));
+});
+
+const endTriggerSeatSelection = ref<string | "custom" | null>(
+  props.game.end_trigger_participant_id ?? null
+);
+
+watch(
+  () => props.game.end_trigger_participant_id,
+  (value) => {
+    if (value === null || value === undefined) {
+      endTriggerSeatSelection.value = null;
+    } else {
+      endTriggerSeatSelection.value = value as string;
+    }
+  }
+);
+
+watch(
+  () => endTriggerSeatOptions.value.length,
+  (length) => {
+    if (length === 0) {
+      endTriggerSeatSelection.value = "custom";
+    } else if (endTriggerSeatSelection.value === "custom") {
+      if (props.game.end_trigger_participant_id === null) {
+        endTriggerSeatSelection.value = null;
+      }
+    }
+  },
+  { immediate: true }
+);
+
+const allowManualEndTriggerRole = computed(() => {
+  if (!props.advancedModeEnabled) return true;
+  if (endTriggerSeatOptions.value.length === 0) return true;
+  return endTriggerSeatSelection.value === "custom";
+});
+
+function selectEndTriggerSeat() {
+  if (!shouldShowEndTriggerCharacter.value) {
+    props.game.end_trigger_participant_id = null;
+    return;
+  }
+
+  const selection = endTriggerSeatSelection.value;
+
+  if (selection === "custom") {
+    props.game.end_trigger_participant_id = null;
+    return;
+  }
+
+  if (selection === null) {
+    props.game.end_trigger_participant_id = null;
+    return;
+  }
+
+  props.game.end_trigger_participant_id = selection;
+  const seat = endTriggerSeatOptions.value.find(
+    (option) => option.token.grimoire_participant_id === selection
+  );
+  if (!seat?.token) return;
+
+  if (seat.token.role_id) {
+    props.game.end_trigger_role_id = seat.token.role_id;
+    if (seat.token.role) {
+      props.game.end_trigger_role = {
+        token_url: seat.token.role.token_url,
+        type: seat.token.role.type,
+        initial_alignment: seat.token.role.initial_alignment,
+        name: seat.token.role.name ?? "",
+      };
+    } else {
+      props.game.end_trigger_role = null;
+    }
+  } else {
+    props.game.end_trigger_role_id = null;
+    props.game.end_trigger_role = null;
+  }
+}
+
+function clearEndTriggerRole() {
+  props.game.end_trigger_role_id = null;
+  props.game.end_trigger_role = null;
+  props.game.end_trigger_participant_id = null;
+}
+
+function getRestrictRoleIds() {
+  return endTriggerIncludeRoleIds.value.length > 0 ? endTriggerIncludeRoleIds.value : null;
+}
+
+watch(
+  () => props.game.end_trigger,
+  (value) => {
+    if (value === undefined) return;
+
+    props.game.end_trigger_role_id = null;
+    props.game.end_trigger_role = null;
+    props.game.end_trigger_participant_id = null;
+
+    if (
+      value !== GameEndTrigger.NO_LIVING_DEMON &&
+      value !== GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE &&
+      value !== GameEndTrigger.CHARACTER_ABILITY
+    ) {
+      props.game.end_trigger_type = null;
+    }
+
+    if (value === GameEndTrigger.CHARACTER_ABILITY) {
+      if (props.game.end_trigger_type === GameEndTriggerType.EXTRA_WIN_CONDITION) {
+        props.game.end_trigger_cause = GameEndTriggerCause.ABILITY;
+      } else {
+        props.game.end_trigger_type = null;
+        props.game.end_trigger_cause = null;
+      }
+    } else if (
+      props.game.end_trigger_type === GameEndTriggerType.EXTRA_WIN_CONDITION
+    ) {
+      props.game.end_trigger_type = null;
+      props.game.end_trigger_cause = null;
+    } else {
+      props.game.end_trigger_cause = null;
+    }
+
+    if (
+      value !== GameEndTrigger.GAME_ENDED_EARLY &&
+      value !== GameEndTrigger.OTHER
+    ) {
+      props.game.end_trigger_note = "";
+    }
+  }
+);
+
+watch(
+  () => props.game.end_trigger_type,
+  (value) => {
+    if (!shouldShowEndTriggerType.value) return;
+
+    props.game.end_trigger_role_id = null;
+    props.game.end_trigger_role = null;
+    props.game.end_trigger_participant_id = null;
+    props.game.end_trigger_cause = null;
+
+    if (value === null) return;
+
+    if (endTriggerCauseOptions.value.length === 1) {
+      props.game.end_trigger_cause = endTriggerCauseOptions.value[0].value;
+    }
+  }
+);
+
+watch(
+  () => endTriggerTypeOptions.value,
+  (options) => {
+    if (props.game.end_trigger === GameEndTrigger.CHARACTER_ABILITY) return;
+    if (options.length !== 1) return;
+    const [onlyOption] = options;
+    if (props.game.end_trigger_type === onlyOption.value) return;
+    props.game.end_trigger_type = onlyOption.value;
+  },
+  { immediate: true }
+);
+
+watch(
+  () => endTriggerCauseOptions.value,
+  (options) => {
+    if (options.length !== 1) return;
+    const [onlyOption] = options;
+    if (props.game.end_trigger_cause === onlyOption.value) return;
+    props.game.end_trigger_cause = onlyOption.value;
+  },
+  { immediate: true }
+);
+
+watch(
+  () => props.game.end_trigger_cause,
+  (value, oldValue) => {
+    if (value === oldValue) return;
+    props.game.end_trigger_role_id = null;
+    props.game.end_trigger_role = null;
+    props.game.end_trigger_participant_id = null;
+  }
+);
+
+defineExpose({
+  getRestrictRoleIds,
+});
+</script>
+
