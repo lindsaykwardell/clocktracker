@@ -28,6 +28,25 @@ export default defineEventHandler(async (handler) => {
       city_id: true,
       privacy: true,
       charts: true,
+      role_stat_cards: {
+        include: {
+          role: {
+            select: {
+              id: true,
+              name: true,
+              ability: true,
+              token_url: true,
+              type: true,
+              initial_alignment: true,
+            },
+          },
+        },
+        orderBy: [
+          {
+            created_at: "asc",
+          },
+        ],
+      },
       bgg_username: true,
       enable_bgstats: true,
       discord_id: true,
@@ -212,6 +231,25 @@ export default defineEventHandler(async (handler) => {
       city_id: true,
       privacy: true,
       charts: true,
+      role_stat_cards: {
+        include: {
+          role: {
+            select: {
+              id: true,
+              name: true,
+              ability: true,
+              token_url: true,
+              type: true,
+              initial_alignment: true,
+            },
+          },
+        },
+        orderBy: [
+          {
+            created_at: "asc",
+          },
+        ],
+      },
       bgg_username: true,
       enable_bgstats: true,
       opt_into_testing: true,

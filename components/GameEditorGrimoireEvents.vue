@@ -588,6 +588,29 @@ function eventTypeOptionLabel(eventType: GrimoireEventType | null) {
   return "Not recorded";
 }
 
+/**
+ * Formats a triggering-character label for dropdowns.
+ * Falls back to seat when there is no player name, because page numbers add noise unless
+ * the source specifically came from the previous page.
+ */
+function grimoireEventSourceLabel(
+  token: {
+    order: number;
+    role?: { name?: string | null } | null;
+    player_name?: string | null;
+  },
+  options?: {
+    fromPreviousPage?: boolean;
+  }
+) {
+  const roleName = token.role?.name || "Unknown role";
+  const playerLabel = token.player_name?.trim()
+    ? token.player_name.trim()
+    : `Seat ${token.order + 1}`;
+  const previousSuffix = options?.fromPreviousPage ? " (from previous page)" : "";
+  return `${roleName} - ${playerLabel}${previousSuffix}`;
+}
+
 // Trigger selection helpers
 
 /**
@@ -625,6 +648,12 @@ function grimoireEventSeatOptionsForPage(
     pageIndex > 0 ? props.game.grimoire[pageIndex - 1] : null;
   const ordered = page.tokens.slice().sort((a, b) => a.order - b.order);
   const abilityAllowed = grimoireEventAllowedRoleIds(cause, eventType);
+  const shouldPreferPreviousPageSource =
+    cause === GrimoireEventCause.ABILITY &&
+    previousPage &&
+    abilityAllowed &&
+    (eventType === GrimoireEventType.ROLE_CHANGE ||
+      eventType === GrimoireEventType.ALIGNMENT_CHANGE);
 
   const currentOptions = ordered
     .filter((token) => {
@@ -642,18 +671,27 @@ function grimoireEventSeatOptionsForPage(
       const wasDead = prev?.is_dead ?? false;
       return !(token.is_dead && wasDead);
     })
-    .map((token) => ({
-      participant_id: token.grimoire_participant_id || `seat-${token.order}`,
-      label: `[Page ${pageIndex + 1}: Seat ${token.order + 1}] ${
-        token.role?.name || "Unknown role"
-      } - ${token.player_name || "Unknown player"}`,
-    }));
+    .map((token) => {
+      const participantId = token.grimoire_participant_id || `seat-${token.order}`;
+      const previousToken = shouldPreferPreviousPageSource
+        ? getTokenForParticipant(pageIndex - 1, participantId)
+        : null;
+      const sourceToken =
+        previousToken?.role_id &&
+        abilityAllowed.has(previousToken.role_id) &&
+        previousToken.role_id !== token.role_id
+          ? previousToken
+          : token;
+      const sourcePageIndex = sourceToken === previousToken ? pageIndex - 1 : pageIndex;
+      return {
+        participant_id: participantId,
+        label: grimoireEventSourceLabel(sourceToken, {
+          fromPreviousPage: sourcePageIndex !== pageIndex,
+        }),
+      };
+    });
 
-  if (
-    eventType !== GrimoireEventType.ROLE_CHANGE ||
-    !previousPage ||
-    !abilityAllowed
-  ) {
+  if (!shouldPreferPreviousPageSource) {
     return currentOptions;
   }
 
@@ -673,9 +711,7 @@ function grimoireEventSeatOptionsForPage(
     })
     .map((token) => ({
       participant_id: token.grimoire_participant_id || `seat-${token.order}`,
-      label: `[Page ${pageIndex}: Seat ${token.order + 1}] ${
-        token.role?.name || "Unknown role"
-      } - ${token.player_name || "Unknown player"}`,
+      label: grimoireEventSourceLabel(token, { fromPreviousPage: true }),
     }));
 
   return [...currentOptions, ...previousOptions];
@@ -696,7 +732,8 @@ function getSourceTokenForGrimoireEventSelection(
   const currentToken = getTokenForParticipant(event.grimoire_page, participantId);
 
   if (
-    event.event_type !== GrimoireEventType.ROLE_CHANGE ||
+    (event.event_type !== GrimoireEventType.ROLE_CHANGE &&
+      event.event_type !== GrimoireEventType.ALIGNMENT_CHANGE) ||
     event.cause !== GrimoireEventCause.ABILITY ||
     event.grimoire_page <= 0
   ) {

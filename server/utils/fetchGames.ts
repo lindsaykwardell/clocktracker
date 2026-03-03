@@ -227,6 +227,7 @@ export async function fetchGames(user_id: string, me: User | null) {
       grimoire_events: true,
       end_trigger_role: {
         select: {
+          id: true,
           token_url: true,
           type: true,
           initial_alignment: true,
@@ -497,6 +498,7 @@ export async function fetchGame(
       grimoire_events: true,
       end_trigger_role: {
         select: {
+          id: true,
           token_url: true,
           type: true,
           initial_alignment: true,

@@ -26,7 +26,7 @@ export const GRIMOIRE_EVENT_ROLE_INCLUDES: Record<GrimoireEventType, RoleInclude
     "gossip",
     "grandmother",
     "lycanthrope",
-    "mayor",
+    "mayor", // Is this correct?
     "slayer",
     "golem",
     "moonchild",
@@ -49,10 +49,9 @@ export const GRIMOIRE_EVENT_ROLE_INCLUDES: Record<GrimoireEventType, RoleInclude
     ...WILDCARD_ROLE_IDS,
     "virgin",
     "mutant",
-    "banshee", // Edge case?
     "cerenovus",
     "vizier", // Edge case: Could force execution, which is specific player agency.
-    "riot", // Not sure?
+    "riot", // @todo: Not sure?
     // "scapegoat",
   ], conditional: [] },
   [GrimoireEventType.REVIVE]: { base: [

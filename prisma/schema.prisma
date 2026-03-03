@@ -264,6 +264,7 @@ model Role {
   end_trigger_games    Game[]         @relation("GameEndTriggerRole")
   grimoire_events      GrimoireEvent[]
   grimoire_by_events   GrimoireEvent[]   @relation("GrimoireEventByRole")
+  role_stat_cards      RoleStatCard[]
   reminders            RoleReminder[]
   ls_campaigns         LSCampaign[]
   ls_games             LSGame[]       @relation("Games")
@@ -325,6 +326,7 @@ model UserSettings {
   friend_of               Friend[]                @relation("FriendOf")
   token                   Token[]
   charts                  Chart[]
+  role_stat_cards         RoleStatCard[]
   bgg_username            String?
   bgg_cookies             String[]
   enable_bgstats          Boolean                 @default(false)
@@ -425,6 +427,18 @@ model Chart {
   width            Int
   height           Int
   storyteller_only Boolean      @default(false)
+}
+
+model RoleStatCard {
+  id               Int          @id @default(autoincrement())
+  user             UserSettings @relation(fields: [user_id], references: [user_id])
+  user_id          String
+  role             Role?        @relation(fields: [role_id], references: [id])
+  role_id          String?
+  source           String
+  metric_key       String
+  storyteller_only Boolean      @default(false)
+  created_at       DateTime     @default(now()) @db.Timestamptz(6)
 }
 
 enum ChartType {
