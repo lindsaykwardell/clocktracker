@@ -115,7 +115,7 @@ const sizeClass = computed(() => {
 });
 
 const shapeClass = computed(() => {
-  if (props.display === 'icon-only') {
+  if (props.display === 'icon-only' && props.variant !== 'link') {
     if (props.circular) {
       return "ct-btn-circle";
     } else {

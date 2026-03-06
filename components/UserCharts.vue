@@ -237,32 +237,27 @@
           class="w-full xl:w-3/4 xl:mx-auto"
         />
 
-        <div
-          v-if="roleStatCardsForMode.length > 0 || isMe"
-          class="w-full xl:w-3/4 xl:mx-auto mt-4"
-        >
+        <div class="w-full xl:w-3/4 xl:mx-auto mt-4">
           <div class="flex flex-col items-center gap-6">
             <div class="grid gap-2 md:gap-4 grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               <RoleStatCard
-                v-for="card in roleStatCardsForMode"
-                :key="card.id"
+                v-for="card in selectedHighlightCards"
+                :key="card.id || `${card.metric_key}-${card.role_id ?? 'general'}`"
                 :card="card"
                 :games="filteredGames"
                 :is-me="!!isMe"
                 :username="username"
-                :show-controls="!!isMe"
-                @deleteCard="deleteRoleStatCard"
               />
             </div>
             <Button
-              v-if="isMe"
-              @click="addRoleStatCardDialogVisible = true"
+              component="nuxt-link"
+              :to="allCardsPageLink"
               color="primary"
-              icon="plus-lg"
+              icon="grid"
               size="sm"
               class="mb-2 md:mb-0 inline-flex"
             >
-              Add Stat Card
+              All Cards
             </Button>
           </div>
         </div>
@@ -417,77 +412,6 @@
     </template>    
   </div>
 
-  <Dialog v-model:visible="addRoleStatCardDialogVisible" size="md">
-    <template #title>
-      <div class="font-sorts text-lg">
-        Add Role Stat Card
-      </div>
-    </template>
-
-    <div class="p-4 pt-0 flex flex-col gap-4">
-      <div class="flex gap-2 justify-center">
-        <Button
-          @click="roleStatCardPickerTab = 'role'"
-          :active="roleStatCardPickerTab === 'role'"
-          color="primary"
-          variant="soft"
-        >
-          Character Cards
-        </Button>
-        <Button
-          @click="roleStatCardPickerTab = 'general'"
-          :active="roleStatCardPickerTab === 'general'"
-          color="primary"
-          variant="soft"
-        >
-          General Cards
-        </Button>
-      </div>
-
-      <p class="text-sm text-stone-600 dark:text-stone-300 text-center">
-        Stat cards without matching data are shown but disabled for the current filter.
-      </p>
-
-      <div
-        v-if="pickerPreviewCards.length === 0"
-        class="text-sm text-center text-stone-500 dark:text-stone-400 py-8"
-      >
-        No matching stat cards with data for the current filters.
-      </div>
-
-      <div
-        v-else
-        class="grid gap-3 grid-cols-1 md:grid-cols-3"
-      >
-        <button
-          v-for="previewCard in pickerPreviewCards"
-          :key="`${roleStatCardPickerTab}-${previewCard.metric_key}-${previewCard.role_id ?? 'general'}`"
-          type="button"
-          class="text-left transition-opacity"
-          :class="previewCard.preview.count === 0 ? 'opacity-40 cursor-not-allowed' : 'hover:opacity-90'"
-          :disabled="previewCard.preview.count === 0"
-          @click="saveRoleStatCard(previewCard.metric_key, previewCard.role_id, previewCard.source)"
-        >
-          <RoleStatCard
-            :card="previewCard"
-            :games="filteredGames"
-            :is-me="!!isMe"
-            :username="username"
-            tokenSize="md"
-          />
-        </button>
-      </div>
-
-      <div class="flex justify-center">
-        <Button
-          @click="addRoleStatCardDialogVisible = false"
-          color="caution"
-        >
-          Cancel
-        </Button>
-      </div>
-    </div>
-  </Dialog>
 </template>
 
 <script setup lang="ts">
@@ -582,29 +506,32 @@ const roleStatCardsForMode = computed(() => {
   return allRoleStatCards.value.filter((card) => !card.storyteller_only);
 });
 
-const addRoleStatCardDialogVisible = ref(false);
-const roleStatCardPickerTab = ref<"role" | "general">("role");
+const favoriteHighlightOrder = ref<number[]>([]);
 
-const pickerPreviewCards = computed(() => {
-  if (roleStatCardPickerTab.value === "role") {
-    return roles
-      .getAllRoles()
-      .filter((role) => getRoleCardDefinitions(role.id).length > 0)
-      .sort((a, b) => a.name.localeCompare(b.name))
-      .flatMap((role) =>
-        getRoleCardDefinitions(role.id).map((definition) =>
-          buildRoleStatCardPreview(
-            definition.id,
-            filteredGames.value,
-            !!isMe.value,
-            role,
-            props.username
-          )
+const pickerRoles = computed(() => {
+  return roles
+    .getAllRoles()
+    .filter((role) => getRoleCardDefinitions(role.id).length > 0)
+    .sort((a, b) => a.name.localeCompare(b.name));
+});
+
+const rolePickerPreviewCards = computed(() => {
+  return pickerRoles.value
+    .flatMap((role) =>
+      getRoleCardDefinitions(role.id).map((definition) =>
+        buildRoleStatCardPreview(
+          definition.id,
+          filteredGames.value,
+          !!isMe.value,
+          role,
+          props.username
         )
       )
-      .filter((card): card is NonNullable<typeof card> => !!card);
-  }
+    )
+    .filter((card): card is NonNullable<typeof card> => !!card);
+});
 
+const generalPickerPreviewCards = computed(() => {
   return getGeneralCardDefinitions()
     .map((definition) =>
       buildRoleStatCardPreview(
@@ -616,6 +543,33 @@ const pickerPreviewCards = computed(() => {
       )
     )
     .filter((card): card is NonNullable<typeof card> => !!card);
+});
+
+const allPickerPreviewCards = computed(() => {
+  return [...rolePickerPreviewCards.value, ...generalPickerPreviewCards.value];
+});
+
+const allCardsPageLink = computed(() => {
+  return `/@${props.username}/stats/cards`;
+});
+
+const selectedHighlightCards = computed(() => {
+  if (roleStatCardsForMode.value.length > 0) {
+    if (roleStatCardsForMode.value.length <= 4) {
+      return roleStatCardsForMode.value;
+    }
+
+    const order = new Map(
+      favoriteHighlightOrder.value.map((id, index) => [id, index])
+    );
+    return [...roleStatCardsForMode.value]
+      .sort((a, b) => (order.get(a.id) ?? 9999) - (order.get(b.id) ?? 9999))
+      .slice(0, 4);
+  }
+
+  return allPickerPreviewCards.value
+    .filter((card) => card.preview.count > 0)
+    .slice(0, 4);
 });
 
 const selectedTag = ref<string | null>(null);
@@ -737,37 +691,6 @@ async function deleteChart(chartId: number) {
   }
 }
 
-async function saveRoleStatCard(
-  metricKey: string,
-  roleId: string | null,
-  source: string
-) {
-  await $fetch("/api/role_stat_cards", {
-    method: "POST",
-    body: JSON.stringify({
-      role_id: roleId,
-      source,
-      metric_key: metricKey,
-      storyteller_only: mode.value === "storyteller",
-    }),
-  });
-
-  addRoleStatCardDialogVisible.value = false;
-  users.fetchUser(props.username);
-}
-
-async function deleteRoleStatCard(cardId: number) {
-  if (!confirm("Are you sure you want to delete this role stat card?")) {
-    return;
-  }
-
-  await $fetch(`/api/role_stat_cards/${cardId}`, {
-    method: "DELETE",
-  });
-
-  users.fetchUser(props.username);
-}
-
 onMounted(() => {
   const savedFilters = localStorage.getItem("charts__filters");
   if (savedFilters) {
@@ -856,21 +779,10 @@ watch(mode, (value) => {
   router.replace({ query: nextQuery });
 });
 
-watch(addRoleStatCardDialogVisible, (visible) => {
-  if (visible) {
-    roleStatCardPickerTab.value = getRoleCardDefinitionsForPicker().length > 0
-      ? "role"
-      : "general";
-
-    return;
-  }
-});
-
-function getRoleCardDefinitionsForPicker() {
-  return roles
-    .getAllRoles()
-    .filter((role) => getRoleCardDefinitions(role.id).length > 0);
-}
+watch(roleStatCardsForMode, (cards) => {
+  const ids = cards.map((card) => card.id);
+  favoriteHighlightOrder.value = [...ids].sort(() => Math.random() - 0.5);
+}, { immediate: true });
 
 function storytellerQueryToMode(
   value: string | undefined
