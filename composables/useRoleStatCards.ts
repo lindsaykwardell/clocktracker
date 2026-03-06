@@ -67,39 +67,6 @@ export type RoleStatCardDefinition = {
 
 export const ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
-    id: "snake_charmer_demons_charmed",
-    category: "role",
-    roleIds: ["snake_charmer"],
-    source: "grimoire_event",
-    label: "Demons Charmed",
-    getCount: ({ games, roleId }) =>
-      games.reduce((total, game) => {
-        if (!roleId || game.ignore_for_stats) return total;
-
-        return (
-          total +
-          game.grimoire_events.filter((event) => {
-            if (
-              event.by_role_id !== roleId ||
-              event.event_type !== GrimoireEventType.ROLE_CHANGE
-            ) {
-              return false;
-            }
-
-            const previousToken = getEventPreviousToken(game, event);
-            const currentToken = getEventCurrentToken(game, event);
-
-            return (
-              previousToken?.role?.type === "DEMON" &&
-              currentToken?.role_id === roleId
-            );
-          }).length
-        );
-      }, 0),
-    getSentence: ({ count, isMe }) =>
-      `As the Snake Charmer, ${subject(isMe)} successfully charmed ${count} demon${pluralize(count)}.`,
-  },
-  {
     id: "pit_hag_role_changes",
     category: "role",
     roleIds: ["pit_hag"],
@@ -363,7 +330,7 @@ export const ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["snake_charmer"],
     source: "grimoire_event",
-    label: "Careful What You Wish For",
+    label: "Calculated Risk",
     getCount: ({ games, roleId }) => {
       if (!roleId) return 0;
 
@@ -1046,7 +1013,7 @@ export const ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getCount: ({ games, roleId }) =>
       countGrimoireEvents(games, roleId, GrimoireEventType.REVIVE),
     getSentence: ({ count, isMe }) =>
-      `As Al-Hadikhia, ${subject(isMe)} had ${count} player${pluralize(count)} choose to live, and they did.`,
+      `As Al-Hadikhia, ${subject(isMe)} had ${count} dead player${pluralize(count)} choose to live, and they did.`,
   },
   {
     id: "al_hadikhia_all_die",
@@ -1271,6 +1238,379 @@ export const ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
       ),
     getSentence: ({ count, isMe }) =>
       `${isMe ? "You've" : "This player has"} been turned into a Minion by the Kazali ${count} time${pluralize(count)}.`,
+  },
+  {
+    id: "lord_of_typhon_line_changes_received",
+    category: "role",
+    roleIds: ["lord_of_typhon"],
+    source: "grimoire_event",
+    label: "Wrong Place and Time",
+    getCount: ({ games, username }) =>
+      countEventsAffectingPlayer(
+        games,
+        username,
+        (_, event) =>
+          event.event_type === GrimoireEventType.ROLE_CHANGE &&
+          event.by_role_id === "lord_of_typhon"
+      ),
+    getSentence: ({ count, isMe }) =>
+      `${isMe ? "You've" : "This player has"} been changed by being next to the Lord of Typhon ${count} time${pluralize(count)}.`,
+  },
+  {
+    id: "lord_of_typhon_line_changes_caused",
+    category: "role",
+    roleIds: ["lord_of_typhon"],
+    source: "grimoire_event",
+    label: "Cosmic Formation",
+    getCount: ({ games, roleId }) =>
+      countGrimoireEvents(games, roleId, GrimoireEventType.ROLE_CHANGE),
+    getSentence: ({ count, isMe }) =>
+      `As the Lord of Typhon, ${subject(isMe)} changed ${count} player${pluralize(count)} in your formation.`,
+  },
+  {
+    id: "cacklejack_role_changes_caused",
+    category: "role",
+    roleIds: ["cacklejack"],
+    source: "grimoire_event",
+    label: "BoiNgo-banGo!",
+    getCount: ({ games, roleId }) =>
+      countGrimoireEvents(games, roleId, GrimoireEventType.ROLE_CHANGE),
+    getSentence: ({ count, isMe }) =>
+      `As the Cacklejack, ${subject(isMe)} changed ${count} player${pluralize(count)} into a different character.`,
+  },
+  {
+    id: "cacklejack_role_changes_received",
+    category: "role",
+    roleIds: ["cacklejack"],
+    source: "grimoire_event",
+    label: "GAzOinks!",
+    getCount: ({ games, username }) =>
+      countEventsAffectingPlayer(
+        games,
+        username,
+        (_, event) =>
+          event.event_type === GrimoireEventType.ROLE_CHANGE &&
+          event.by_role_id === "cacklejack"
+      ),
+    getSentence: ({ count, isMe }) =>
+      `${isMe ? "You've" : "This player has"} been changed by the Cacklejack ${count} time${pluralize(count)}.`,
+  },
+  {
+    id: "pit_hag_role_changes_received",
+    category: "role",
+    roleIds: ["pit_hag"],
+    source: "grimoire_event",
+    label: "Dropped in the Cauldron",
+    getCount: ({ games, username }) =>
+      countEventsAffectingPlayer(
+        games,
+        username,
+        (_, event) =>
+          event.event_type === GrimoireEventType.ROLE_CHANGE &&
+          event.by_role_id === "pit_hag"
+      ),
+    getSentence: ({ count, isMe }) =>
+      `${isMe ? "You've" : "This player has"} been changed by the Pit-Hag ${count} time${pluralize(count)}.`,
+  },
+  {
+    id: "summoner_demon_changes_received",
+    category: "role",
+    roleIds: ["summoner"],
+    source: "grimoire_event",
+    label: "Summoned to Darkness",
+    getCount: ({ games, username }) =>
+      countEventsAffectingPlayer(
+        games,
+        username,
+        (game, event) => {
+          if (
+            event.event_type !== GrimoireEventType.ROLE_CHANGE ||
+            event.by_role_id !== "summoner"
+          ) {
+            return false;
+          }
+
+          const currentToken = getEventCurrentToken(game, event);
+          return currentToken?.role?.type === "DEMON";
+        }
+      ),
+    getSentence: ({ count, isMe }) =>
+      `${isMe ? "You've" : "This player has"} been turned into a demon by the Summoner ${count} time${pluralize(count)}.`,
+  },
+  {
+    id: "fang_gu_possessions_received",
+    category: "role",
+    roleIds: ["fang_gu"],
+    source: "grimoire_event",
+    label: "Jumped in the Night",
+    getCount: ({ games, username }) =>
+      countEventsAffectingPlayer(
+        games,
+        username,
+        (game, event) => {
+          if (
+            event.event_type !== GrimoireEventType.ROLE_CHANGE ||
+            event.by_role_id !== "fang_gu"
+          ) {
+            return false;
+          }
+
+          const currentToken = getEventCurrentToken(game, event);
+          return (
+            currentToken?.role_id === "fang_gu" &&
+            currentToken.alignment === "EVIL"
+          );
+        }
+      ),
+    getSentence: ({ count, isMe }) =>
+      `${isMe ? "You've" : "This player has"} been possessed by the Fang Gu ${count} time${pluralize(count)}.`,
+  },
+  {
+    id: "imp_starpasses_received",
+    category: "role",
+    roleIds: ["imp"],
+    source: "grimoire_event",
+    label: "Pass Received",
+    getCount: ({ games, username }) =>
+      countEventsAffectingPlayer(
+        games,
+        username,
+        (game, event) => {
+          if (
+            event.event_type !== GrimoireEventType.ROLE_CHANGE ||
+            event.by_role_id !== "imp"
+          ) {
+            return false;
+          }
+
+          const currentToken = getEventCurrentToken(game, event);
+          return currentToken?.role_id === "imp";
+        }
+      ),
+    getSentence: ({ count, isMe }) =>
+      `${isMe ? "You've" : "This player has"} received the Starpass ${count} time${pluralize(count)}.`,
+  },
+  {
+    id: "snake_charmer_role_changes_received",
+    category: "role",
+    roleIds: ["snake_charmer"],
+    source: "grimoire_event",
+    label: "Snakebit",
+    getCount: ({ games, username }) =>
+      countEventsAffectingPlayer(
+        games,
+        username,
+        (_, event) =>
+          event.event_type === GrimoireEventType.ROLE_CHANGE &&
+          event.by_role_id === "snake_charmer"
+      ),
+    getSentence: ({ count, isMe }) =>
+      `${isMe ? "You've" : "This player has"} been changed by the Snake Charmer ${count} time${pluralize(count)}.`,
+  },
+  {
+    id: "cult_leader_alignment_changes",
+    category: "role",
+    roleIds: ["cult_leader"],
+    source: "grimoire_event",
+    label: "Crisis of Faith",
+    getCount: ({ games, roleId }) =>
+      countGrimoireEvents(games, roleId, GrimoireEventType.ALIGNMENT_CHANGE),
+    getSentence: ({ count, isMe }) =>
+      `As the Cult Leader, ${subject(isMe)} changed alignment ${count} time${pluralize(count)}.`,
+  },
+  {
+    id: "cult_leader_evil_cult_wins",
+    category: "role",
+    roleIds: ["cult_leader"],
+    source: "end_trigger",
+    label: "Dark Congregation",
+    getCount: ({ games, roleId }) =>
+      games.filter(
+        (game) =>
+          !game.ignore_for_stats &&
+          !!roleId &&
+          game.end_trigger === GameEndTrigger.CHARACTER_ABILITY &&
+          game.end_trigger_type === GameEndTriggerType.EXTRA_WIN_CONDITION &&
+          game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
+          game.end_trigger_role_id === roleId &&
+          game.win_v2 === WinStatus_V2.EVIL_WINS
+      ).length,
+    getSentence: ({ count, isMe }) =>
+      `As the Cult Leader, ${subject(isMe)} won ${count} game${pluralize(count)} by forming an evil cult.`,
+  },
+  {
+    id: "cult_leader_good_cult_wins",
+    category: "role",
+    roleIds: ["cult_leader"],
+    source: "end_trigger",
+    label: "Holy Congregation",
+    getCount: ({ games, roleId }) =>
+      games.filter(
+        (game) =>
+          !game.ignore_for_stats &&
+          !!roleId &&
+          game.end_trigger === GameEndTrigger.CHARACTER_ABILITY &&
+          game.end_trigger_type === GameEndTriggerType.EXTRA_WIN_CONDITION &&
+          game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
+          game.end_trigger_role_id === roleId &&
+          game.win_v2 === WinStatus_V2.GOOD_WINS
+      ).length,
+    getSentence: ({ count, isMe }) =>
+      `As the Cult Leader, ${subject(isMe)} won ${count} game${pluralize(count)} by forming a good cult.`,
+  },
+  {
+    id: "goon_alignment_changes",
+    category: "role",
+    roleIds: ["goon"],
+    source: "grimoire_event",
+    label: "Shifting Loyalties",
+    getCount: ({ games, roleId }) =>
+      countGrimoireEvents(games, roleId, GrimoireEventType.ALIGNMENT_CHANGE),
+    getSentence: ({ count, isMe }) =>
+      `As the Goon, ${subject(isMe)} changed alignment ${count} time${pluralize(count)}.`,
+  },
+  {
+    id: "ogre_alignment_changes",
+    category: "role",
+    roleIds: ["ogre"],
+    source: "grimoire_event",
+    label: "Friend or Foe?",
+    getCount: ({ games, roleId }) =>
+      countGrimoireEvents(games, roleId, GrimoireEventType.ALIGNMENT_CHANGE),
+    getSentence: ({ count, isMe }) =>
+      `As the Ogre, ${subject(isMe)} changed alignment ${count} time${pluralize(count)}.`,
+  },
+  {
+    id: "politician_alignment_changes",
+    category: "role",
+    roleIds: ["politician"],
+    source: "grimoire_event",
+    label: "Crossing the Aisle",
+    getCount: ({ games, roleId }) =>
+      countGrimoireEvents(games, roleId, GrimoireEventType.ALIGNMENT_CHANGE),
+    getSentence: ({ count, isMe }) =>
+      `As the Politician, ${subject(isMe)} changed alignment ${count} time${pluralize(count)}.`,
+  },
+  {
+    id: "mezepheles_conversions_caused",
+    category: "role",
+    roleIds: ["mezepheles"],
+    source: "grimoire_event",
+    label: "A Word, Please?",
+    getCount: ({ games, roleId }) =>
+      countGrimoireEvents(games, roleId, GrimoireEventType.ALIGNMENT_CHANGE),
+    getSentence: ({ count, isMe }) =>
+      `As the Mezepheles, ${subject(isMe)} converted ${count} player${pluralize(count)} with your secret word.`,
+  },
+  {
+    id: "mezepheles_conversions_received",
+    category: "role",
+    roleIds: ["mezepheles"],
+    source: "grimoire_event",
+    label: "Spoke the Word",
+    getCount: ({ games, username }) =>
+      countEventsAffectingPlayer(
+        games,
+        username,
+        (_, event) =>
+          event.event_type === GrimoireEventType.ALIGNMENT_CHANGE &&
+          event.by_role_id === "mezepheles"
+      ),
+    getSentence: ({ count, isMe }) =>
+      `${isMe ? "You've" : "This player has"} been converted by the Mezepheles ${count} time${pluralize(count)}.`,
+  },
+  {
+    id: "bounty_hunter_townsfolk_turned_evil",
+    category: "role",
+    roleIds: ["bounty_hunter"],
+    source: "grimoire_event",
+    label: "Price of the Hunt",
+    getCount: ({ games, roleId }) =>
+      games.reduce((total, game) => {
+        if (!roleId || game.ignore_for_stats) return total;
+
+        return (
+          total +
+          game.grimoire_events.filter((event) => {
+            if (
+              event.by_role_id !== roleId ||
+              event.event_type !== GrimoireEventType.ALIGNMENT_CHANGE
+            ) {
+              return false;
+            }
+
+            const currentToken = getEventCurrentToken(game, event);
+            const previousToken = getEventPreviousToken(game, event);
+
+            return (
+              (currentToken?.alignment === "EVIL" ||
+                previousToken?.alignment === "EVIL") &&
+              (currentToken?.role?.type === "TOWNSFOLK" ||
+                previousToken?.role?.type === "TOWNSFOLK")
+            );
+          }).length
+        );
+      }, 0),
+    getSentence: ({ count, isMe }) =>
+      `As the Bounty Hunter, ${subject(isMe)} turned ${count} Townsfolk evil.`,
+  },
+  {
+    id: "bounty_hunter_evil_executions",
+    category: "role",
+    roleIds: ["bounty_hunter"],
+    source: "grimoire_event",
+    label: "No One Escapes",
+    getCount: ({ games, roleId }) =>
+      games.reduce((total, game) => {
+        if (!roleId || game.ignore_for_stats) return total;
+
+        return (
+          total +
+          game.grimoire_events.filter((event) => {
+            if (
+              event.by_role_id !== roleId ||
+              event.event_type !== GrimoireEventType.EXECUTION
+            ) {
+              return false;
+            }
+
+            const currentToken = getEventCurrentToken(game, event);
+            const previousToken = getEventPreviousToken(game, event);
+
+            return (
+              currentToken?.alignment === "EVIL" ||
+              previousToken?.alignment === "EVIL"
+            );
+          }).length
+        );
+      }, 0),
+    getSentence: ({ count, isMe }) =>
+      `As the Bounty Hunter, ${subject(isMe)} executed ${count} evil player${pluralize(count)} by nomination.`,
+  },
+  {
+    id: "bounty_hunter_alignment_changes_received",
+    category: "role",
+    roleIds: ["bounty_hunter"],
+    source: "grimoire_event",
+    label: "I Was Framed",
+    getCount: ({ games, username }) =>
+      countEventsAffectingPlayer(
+        games,
+        username,
+        (game, event) => {
+          if (
+            event.by_role_id !== "bounty_hunter" ||
+            event.event_type !== GrimoireEventType.ALIGNMENT_CHANGE
+          ) {
+            return false;
+          }
+
+          const currentToken = getEventCurrentToken(game, event);
+          return currentToken?.alignment === "EVIL";
+        }
+      ),
+    getSentence: ({ count, isMe }) =>
+      `${isMe ? "You've" : "This player has"} turned evil due to the Bounty Hunter ${count} time${pluralize(count)}.`,
   },
   {
     id: "demon_kills_minions",
