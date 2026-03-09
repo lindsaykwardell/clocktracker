@@ -55,69 +55,77 @@
           </div>
         </UserHeader>
 
-        <div class="w-full max-w-6xl mx-auto px-4 lg:px-8 pb-8 flex flex-col gap-4">
-          <div class="flex items-center justify-between">
-            <Button
-              component="nuxt-link"
-              :to="`/@${username}?view=stats`"
-              color="neutral"
-              variant="soft"
-              icon="arrow-left"
-            >
-              Back to Stats
-            </Button>
+        <div class="px-4 lg:px-8 pb-4 lg:pb-8 space-y-8 md:space-y-12 xl:space-y-16">
+          <div
+            class="flex flex-col gap-3 px-4"
+          >
+            <div class="flex items-center justify-between">
+              <Button
+                component="nuxt-link"
+                :to="`/@${username}?view=stats`"
+                color="neutral"
+                variant="soft"
+                icon="arrow-left"
+              >
+                Back to Stats
+              </Button>
 
-            <div class="flex gap-2 justify-center">
-              <Button
-                @click="tab = 'role'"
-                :active="tab === 'role'"
-                color="primary"
-                variant="soft"
-              >
-                Character
-              </Button>
-              <Button
-                @click="tab = 'general'"
-                :active="tab === 'general'"
-                color="primary"
-                variant="soft"
-              >
-                General
-              </Button>
+              <div class="flex gap-2 justify-center">
+                <Button
+                  @click="tab = 'role'"
+                  :active="tab === 'role'"
+                  color="primary"
+                  variant="soft"
+                >
+                  Character
+                </Button>
+                <Button
+                  @click="tab = 'general'"
+                  :active="tab === 'general'"
+                  color="primary"
+                  variant="soft"
+                >
+                  General
+                </Button>
+              </div>
             </div>
           </div>
 
-          <h2 class="font-sorts text-center text-xl lg:text-2xl mb-2 lg:mb-4">
-            Statistic Cards
-          </h2>
+          <section>
+            <div class="w-full px-4">
+              <h2 class="font-sorts text-center text-xl lg:text-2xl mb-2 lg:mb-4">
+                Statistic Cards
+              </h2>
 
-          <div
-            v-if="previewCards.length === 0"
-            class="text-sm text-center text-stone-500 dark:text-stone-400 py-8"
-          >
-            No matching cards available.
-          </div>
+              <div
+                v-if="previewCards.length === 0"
+                class="text-sm text-center text-stone-500 dark:text-stone-400 py-8"
+              >
+                No matching cards available.
+              </div>
 
-          <div
-            v-else
-            class="grid gap-2 grid-cols-2 md:grid-cols-3 xl:grid-cols-5"
-          >
-            <RoleStatCard
-              v-for="previewCard in previewCards"
-              :key="`${tab}-${previewCard.metric_key}-${previewCard.role_id ?? 'general'}`"
-              :card="previewCard"
-              :games="games.status === Status.SUCCESS ? games.data : []"
-              :is-me="isMe"
-              :username="username"
-              :show-favorite-control="isMe"
-              :is-favorite="isFavoriteCard(previewCard)"
-              class="transition-opacity"
-              :class="previewCard.preview.count === 0 ? 'opacity-40' : ''"
-              show-zero-overlay
-              tokenSize="md"
-              @toggleFavorite="toggleFavoriteCard(previewCard)"
-            />
-          </div>
+              <div
+                v-else
+                class="grid gap-2 grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
+              >
+                <RoleStatCard
+                  v-for="previewCard in previewCards"
+                  :key="`${tab}-${previewCard.metric_key}-${previewCard.role_id ?? 'general'}`"
+                  :card="previewCard"
+                  :games="games.status === Status.SUCCESS ? games.data : []"
+                  :is-me="isMe"
+                  :username="username"
+                  :show-favorite-control="isMe"
+                  :is-favorite="isFavoriteCard(previewCard)"
+                  class="transition-opacity"
+                  :class="previewCard.preview.count === 0 ? 'opacity-40' : ''"
+                  show-zero-overlay
+                  variant="horizontal"
+                  @toggleFavorite="toggleFavoriteCard(previewCard)"
+                />
+              </div>
+            </div>
+          </section>
         </div>
       </template>
     </div>

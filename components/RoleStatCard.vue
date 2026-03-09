@@ -1,5 +1,13 @@
 <template>
-  <div class="relative p-4 pt-6 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-3 max-w-xs">
+  <div 
+    class="relative flex gap-3 rounded-lg bg-stone-300/30 dark:bg-stone-900/40"
+    :class="{
+      'flex-col p-4 pt-6' : variant == 'vertical',
+      'items-center p-3 pr-8' : variant == 'horizontal',
+      'border dark:border-stone-700/50' : !isFavorite,
+      'border border-primary' : isFavorite,
+    }"
+    >
     <Button
       v-if="showFavoriteControl"
       @click="emit('toggleFavorite')"
@@ -10,37 +18,57 @@
       :iconColor="isFavorite ? 'primary' : ''"
       display="icon-only"
       size="md"
-      class="absolute top-1 right-1"
+      class="absolute"
+      :class="{
+        'top-1 right-1' : variant == 'vertical',
+        'top-2 right-2' : variant == 'horizontal',
+      }"
     >
       {{ isFavorite ? "Remove from favorites" : "Add to favorites" }}
     </Button>
 
-    <h3 
-      class="font-sorts text-center text-balance"
-      :class="tokenSize == 'md' ? '' : 'text-lg lg:text-xl'"
-    >
-      {{ titleCase(result.metricLabel) }}
-    </h3>
+    <template v-if="variant == 'vertical'">
+      <h3 
+        class="font-sorts text-center text-balance text-lg lg:text-xl"
+      >
+        {{ titleCase(result.metricLabel) }}
+      </h3>
+    </template>
 
-    <div class="flex flex-col items-center gap-3">
-      <nuxt-link v-if="roleLink" :to="roleLink">
-        <Token
-          :character="character"
-          :size="tokenSize ?? 'lg'"
-        />
-      </nuxt-link>
+    <div class="flex flex-col items-center gap-3 card-token">
+      <Token
+        :character="character"
+        :size="variant == 'horizontal' ? 'md' : 'lg'"
+      />
     </div>
 
-    <p class="text-sm text-center text-balance">
-      {{ sentenceWithAtLeast }}
-    </p>
-
-    <p
-      v-if="result.subtitle"
-      class="text-xs text-center text-stone-500 dark:text-stone-400 text-balance"
+    <div 
+      class="flex flex-col"
+      :class="variant == 'vertical' ? 'text-center gap-3' : ''"
     >
-      {{ result.subtitle }}
-    </p>
+      <template v-if="variant == 'horizontal'">
+        <h3 
+          class="font-sorts text-balance lg:text-lg"
+        >
+          {{ titleCase(result.metricLabel) }}
+        </h3>
+      </template>
+
+      <p 
+        class="text-sm"
+        :class="variant == 'vertical' ? 'text-balance' : 'text-pretty'"
+      >
+        {{ result.sentence }}
+      </p>
+
+      <p
+        v-if="result.subtitle"
+        class="text-xs text-stone-500 dark:text-stone-400"
+        :class="variant == 'vertical' ? 'text-balance' : 'text-pretty'"
+      >
+        {{ result.subtitle }}
+      </p>
+    </div>
 
     <div
       v-if="showZeroOverlay && result.count === 0"
@@ -54,30 +82,36 @@ import type { GameRecord } from "~/composables/useGames";
 import type { RoleStatCardRecord } from "~/composables/useRoleStatCards";
 import { buildRoleStatCardResult } from "~/composables/useRoleStatCards";
 
-const props = defineProps<{
-  card: RoleStatCardRecord & {
-    preview?: {
-      count: number;
-      metricLabel: string;
-      sentence: string;
-      subtitle?: string | null;
-      displayRole?: {
-        id: string;
-        name: string;
-        token_url: string;
-        type: string;
-        initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
-      } | null;
+const props = withDefaults(
+  defineProps<{
+    card: RoleStatCardRecord & {
+      preview?: {
+        count: number;
+        metricLabel: string;
+        sentence: string;
+        subtitle?: string | null;
+        displayRole?: {
+          id: string;
+          name: string;
+          token_url: string;
+          type: string;
+          initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+        } | null;
+      };
     };
-  };
-  games: GameRecord[];
-  isMe: boolean;
-  username?: string;
-  showFavoriteControl?: boolean;
-  isFavorite?: boolean;
-  showZeroOverlay?: boolean;
-  tokenSize?: "md" | "lg";
-}>();
+    games: GameRecord[];
+    isMe: boolean;
+    username?: string;
+    showFavoriteControl?: boolean;
+    isFavorite?: boolean;
+    showZeroOverlay?: boolean;
+    tokenSize?: "md" | "lg";
+    variant?: "vertical" | "horizontal";
+}>(),
+  { 
+    variant:"vertical",
+  }
+);
 
 const emit = defineEmits(["toggleFavorite"]);
 
@@ -113,77 +147,6 @@ const roleLink = computed(() => {
   if (!role?.name) return null;
   return `/roles/${role.name.toLowerCase().replace(/ /g, "_")}`;
 });
-
-const sentenceWithAtLeast = computed(() => {
-  if (result.value.count === 0) {
-    if (!shouldUseUnknownForZero.value) {
-      return result.value.sentence;
-    }
-
-    return replaceStandaloneCount(
-      result.value.sentence,
-      "0",
-      "an unknown number of"
-    );
-  }
-
-  return withAtLeast(result.value.sentence, result.value.count);
-});
-
-const hasEverBeenRole = computed(() => {
-  if (!props.username || !props.card.role_id) return false;
-
-  for (const game of props.games) {
-    for (const page of game.grimoire) {
-      for (const token of page.tokens) {
-        if (
-          token.player?.username === props.username &&
-          token.role_id === props.card.role_id
-        ) {
-          return true;
-        }
-      }
-    }
-  }
-
-  return false;
-});
-
-const shouldUseUnknownForZero = computed(() => {
-  if (!props.card.role_id) return true;
-  if (props.card.storyteller_only) return true;
-  return hasEverBeenRole.value;
-});
-
-function withAtLeast(sentence: string, count: number) {
-  const target = String(count);
-  if (!target.length || sentence.includes(`at least ${target}`)) {
-    return sentence;
-  }
-
-  return replaceStandaloneCount(sentence, target, `at least ${target}`);
-}
-
-function replaceStandaloneCount(
-  sentence: string,
-  target: string,
-  replacement: string
-) {
-  let idx = sentence.lastIndexOf(target);
-  while (idx !== -1) {
-    const before = idx === 0 ? "" : sentence[idx - 1];
-    const after = idx + target.length >= sentence.length ? "" : sentence[idx + target.length];
-    const isDigitBoundary = !/\d/.test(before) && !/\d/.test(after);
-
-    if (isDigitBoundary) {
-      return `${sentence.slice(0, idx)}${replacement}${sentence.slice(idx + target.length)}`;
-    }
-
-    idx = sentence.lastIndexOf(target, idx - 1);
-  }
-
-  return sentence;
-}
 
 function titleCase(value: string) {
   const lowerWords = new Set([
@@ -224,3 +187,9 @@ function titleCase(value: string) {
     .join(" ");
 }
 </script>
+
+<style>
+  .card-token > .token {
+    @apply w-16 h-16 md:w-20 md:h-20
+  }
+</style>

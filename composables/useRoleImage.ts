@@ -88,7 +88,7 @@ export const useRoleImage = () => {
   // Build final image URL: size folder + extension + cache-bust.
   const sizeAdjustedUrl = (
     url?: string,
-    size?: "sm" | "reminder" | "md" | "front" | "lg",
+    size?: "sm" | "sm-reminder" | "reminder" | "md" | "front" | "lg",
     extension = "webp"
   ) => {
     if (!url) {
@@ -103,6 +103,8 @@ export const useRoleImage = () => {
     const sizeFolder =
       size === "sm"
         ? "48x48"
+        : size === "sm-reminder"
+        ? "80x80"
         : size === "reminder"
         ? "80x80"
         : size === "md"

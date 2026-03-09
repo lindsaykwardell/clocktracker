@@ -1,7 +1,7 @@
 <template>
   <Token
     :character="{ role: { token_url: reminder.token_url, type: '' } }"
-    size="reminder"
+    :size="size ?? 'reminder'"
     :reminderText="reminder.reminder"
   >
   </Token>
@@ -13,5 +13,6 @@ defineProps<{
     token_url: string;
     reminder: string;
   };
+  size?: "sm-reminder" | "reminder";
 }>();
 </script>

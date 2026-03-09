@@ -132,23 +132,31 @@ enum GrimoireEventType {
   ROLE_CHANGE
   SEAT_CHANGE
   ALIGNMENT_CHANGE
+  MAD
+  DRUNK
+  POISONED
+  OTHER
 }
 
 model GrimoireEvent {
-  id                Int        @id @default(autoincrement())
-  game              Game       @relation(fields: [game_id], references: [id])
+  id                Int              @id @default(autoincrement())
+  game              Game             @relation(fields: [game_id], references: [id])
   game_id           String
   grimoire_page     Int
-  participant_id    String     @default("")
+  participant_id    String           @default("")
   event_type        GrimoireEventType @default(NOT_RECORDED)
   cause             GrimoireEventCause?
   by_participant_id String?
-  player_name       String     @default("")
+  player_name       String           @default("")
   role_id           String?
-  role              Role?      @relation(fields: [role_id], references: [id])
+  role              Role?            @relation(fields: [role_id], references: [id])
   by_role_id        String?
-  by_role           Role?      @relation("GrimoireEventByRole", fields: [by_role_id], references: [id])
-  created_at        DateTime   @default(now()) @db.Timestamptz(6)
+  by_role           Role?            @relation("GrimoireEventByRole", fields: [by_role_id], references: [id])
+  old_role_id       String?
+  new_role_id       String?
+  old_alignment     Alignment?
+  new_alignment     Alignment?
+  created_at        DateTime         @default(now()) @db.Timestamptz(6)
 }
 
 model Grimoire {
