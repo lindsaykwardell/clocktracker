@@ -4,7 +4,7 @@ import {
   LocationType,
   WinStatus_V2,
   PrivacySetting,
-} from "@prisma/client";
+} from "~/server/generated/prisma/client";
 import { prisma } from "~/server/utils/prisma";
 
 export default defineEventHandler(async (handler) => {

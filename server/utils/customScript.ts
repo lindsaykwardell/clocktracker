@@ -1,4 +1,4 @@
-import { Alignment, RoleType } from "@prisma/client";
+import { Alignment, RoleType } from "~/server/generated/prisma/client";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { nanoid } from "nanoid";
 import { prisma } from "./prisma";

@@ -1,4 +1,4 @@
-import { PrivacySetting, type UserSettings } from "@prisma/client";
+import { PrivacySetting, type UserSettings } from "~/server/generated/prisma/client";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import naturalOrder from "natural-order";
 import { prisma } from "~/server/utils/prisma";

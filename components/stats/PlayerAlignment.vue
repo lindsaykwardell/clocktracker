@@ -223,7 +223,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import type { Game, Character } from "@prisma/client";
+import type { Game, Character } from "~/server/generated/prisma/client";
 import type { GameRecord } from "~/composables/useGames";
 import { chartColors } from "~/composables/useChartColors";
 

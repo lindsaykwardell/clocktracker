@@ -1,4 +1,4 @@
-import type { Role, RoleReminder } from "@prisma/client";
+import type { Role, RoleReminder } from "~/server/generated/prisma/client";
 import { defineStore } from "pinia";
 
 export enum RoleType {

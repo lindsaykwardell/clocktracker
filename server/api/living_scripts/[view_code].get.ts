@@ -1,4 +1,4 @@
-import { WinStatus_V2 } from "@prisma/client";
+import { WinStatus_V2 } from "~/server/generated/prisma/client";
 import { mapOfficialIdToClocktrackerId } from "~/server/utils/getRoleMap";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
