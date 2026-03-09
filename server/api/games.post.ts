@@ -1,5 +1,5 @@
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
-import { type Game, type Character, type Token, type Grimoire, Alignment, type DemonBluff, type Fabled } from "@prisma/client";
+import { type Game, type Character, type Token, type Grimoire, Alignment, type DemonBluff, type Fabled } from "~/server/generated/prisma/client";
 import { prisma } from "~/server/utils/prisma";
 
 export default defineEventHandler(async (handler) => {

@@ -10,7 +10,7 @@ import type {
   DemonBluff,
   Fabled,
   ReminderToken,
-} from "@prisma/client";
+} from "~/server/generated/prisma/client";
 import naturalOrder from "natural-order";
 
 export enum WinStatus_V2 {

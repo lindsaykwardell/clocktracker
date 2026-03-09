@@ -1,35 +1,23 @@
-import { PrismaClient } from "@prisma/client";
-
-// PrismaClient is attached to the `global` object in development to prevent
-// exhausting your database connection limit.
-// Learn more: https://pris.ly/d/help/nextjs-best-practices
+import { PrismaClient } from "../generated/prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
-    log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
+function createPrismaClient() {
+  const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
+  return new PrismaClient({
+    adapter,
+    log:
+      process.env.NODE_ENV === "development"
+        ? ["query", "error", "warn"]
+        : ["error"],
   });
+}
+
+export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;
-}
-
-// Periodically disconnect and reconnect Prisma to release engine memory.
-// The Rust-based query engine retains freed memory in its allocator pools;
-// disconnecting forces it to release those pools. Prisma auto-reconnects
-// on the next query.
-if (process.env.NODE_ENV === "production") {
-  const ONE_HOUR = 1 * 60 * 60 * 1000;
-  setInterval(async () => {
-    try {
-      console.log("[prisma] Periodic disconnect to release engine memory");
-      await prisma.$disconnect();
-    } catch (e) {
-      console.error("[prisma] Disconnect error:", e);
-    }
-  }, ONE_HOUR).unref();
 }

@@ -1,5 +1,5 @@
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
-import type { UserSettings } from "@prisma/client";
+import type { UserSettings } from "~/server/generated/prisma/client";
 import { addUserKofiLevel } from "../utils/addUserKofiLevel";
 import { prisma } from "~/server/utils/prisma";
 

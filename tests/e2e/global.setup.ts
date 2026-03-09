@@ -2,9 +2,11 @@ import { faker } from "@faker-js/faker";
 import fs from "node:fs";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../../server/generated/prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 
-const prisma = new PrismaClient();
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
+const prisma = new PrismaClient({ adapter });
 
 async function globalSetup() {
   // Ensure SUPABASE_URL and SUPABASE_KEY are set in your environment
