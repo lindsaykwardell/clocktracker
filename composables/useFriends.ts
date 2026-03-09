@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import type { FetchStatus } from "./useFetchStatus";
-import type { FriendRequest } from "@prisma/client";
+import type { FriendRequest } from "~/server/generated/prisma/client";
 import type { User } from "./useUsers";
 import naturalOrder from "natural-order";
 

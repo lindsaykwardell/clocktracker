@@ -1,4 +1,4 @@
-import { LocationType } from "@prisma/client";
+import { LocationType } from "~/server/generated/prisma/client";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
 

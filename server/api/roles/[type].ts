@@ -1,4 +1,4 @@
-import { RoleType } from "@prisma/client";
+import { RoleType } from "~/server/generated/prisma/client";
 // @ts-ignore
 import dayjs from "dayjs";
 import { prisma } from "~/server/utils/prisma";

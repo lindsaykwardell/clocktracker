@@ -1,5 +1,5 @@
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
-import { PrivacySetting } from "@prisma/client";
+import { PrivacySetting } from "~/server/generated/prisma/client";
 import { fetchGame } from "~/server/utils/fetchGames";
 import { prisma } from "~/server/utils/prisma";
 

@@ -1,12 +1,14 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
-import { Alignment, PrismaClient, RoleType } from "@prisma/client";
+import { Alignment, PrismaClient, RoleType } from "../server/generated/prisma/client.js";
+import { PrismaPg } from "@prisma/adapter-pg";
 import fs from "fs";
 import path from "path";
 import ProgressBar from "progress";
 
 const url = "https://botcscripts.com";
-const prisma = new PrismaClient();
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
   const scriptList = [];

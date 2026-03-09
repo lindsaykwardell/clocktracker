@@ -1,4 +1,4 @@
-import Jimp from "jimp";
+import sharp from "sharp";
 import http from "http";
 import formidable from "formidable";
 import { v4 as uuid } from "uuid";
@@ -12,29 +12,21 @@ const S3 = new S3Client({
   endpoint: "https://fly.storage.tigris.dev",
 });
 
-const folders = new Map();
+const folders = new Map<
+  string,
+  { resize: (input: sharp.Sharp) => sharp.Sharp }
+>();
 
 folders.set("events", {
-  resize: (image: Jimp) => image.resize(600, Jimp.AUTO),
+  resize: (image) => image.resize(600, null),
 });
 
 folders.set("avatars", {
-  resize: (image: Jimp) => {
-    const height = image.bitmap.height;
-    const width = image.bitmap.width;
-
-    if (height > width && width > 300) {
-      image.resize(300, Jimp.AUTO);
-    } else if (height <= width && height > 300) {
-      image.resize(Jimp.AUTO, 300);
-    }
-
-    image.cover(300, 300);
-  },
+  resize: (image) => image.resize(300, 300, { fit: "cover" }),
 });
 
 folders.set("game-attachments", {
-  resize: (image: Jimp) => image.resize(800, Jimp.AUTO),
+  resize: (image) => image.resize(800, null),
 });
 
 export default defineEventHandler(async (handler) => {
@@ -90,9 +82,9 @@ async function uploadImage(
 ): Promise<string> {
   const key = `${folder}/${uuid()}`;
 
-  const image = await Jimp.read(file.filepath);
-  const resized = folders.get(folder)?.resize(image) || image;
-  const buffer = await resized.getBufferAsync(Jimp.MIME_JPEG);
+  const pipeline = sharp(file.filepath);
+  const resized = folders.get(folder)?.resize(pipeline) ?? pipeline;
+  const buffer = await resized.jpeg().toBuffer();
 
   const upload = new Upload({
     client: S3,
@@ -100,7 +92,7 @@ async function uploadImage(
       Bucket: "clocktracker-storage",
       Key: key,
       Body: buffer,
-      ContentType: Jimp.MIME_JPEG,
+      ContentType: "image/jpeg",
     },
   });
 

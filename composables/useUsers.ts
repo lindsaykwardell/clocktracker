@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import type { FetchStatus } from "./useFetchStatus";
-import type { Chart } from "@prisma/client";
+import type { Chart } from "~/server/generated/prisma/client";
 
 export enum PrivacySetting {
   PUBLIC = "PUBLIC",
