@@ -138,6 +138,10 @@ const game = reactive<{
     player_name: string;
     role_id: string | null;
     by_role_id: string | null;
+    old_role_id: string | null;
+    new_role_id: string | null;
+    old_alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
+    new_alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
   }[];
   notes: string;
   image_urls: string[];
@@ -411,6 +415,10 @@ const formattedGame = computed(() => {
     player_name: event.player_name,
     role_id: event.role_id,
     by_role_id: event.by_role_id,
+    old_role_id: event.old_role_id,
+    new_role_id: event.new_role_id,
+    old_alignment: event.old_alignment,
+    new_alignment: event.new_alignment,
   })),
   };
 });

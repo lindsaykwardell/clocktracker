@@ -127,6 +127,10 @@ export default defineEventHandler(async (handler) => {
             player_name: grimoireEvent.player_name ?? "",
             role_id: grimoireEvent.role_id ?? null,
             by_role_id: grimoireEvent.by_role_id ?? null,
+            old_role_id: (grimoireEvent as any).old_role_id ?? null,
+            new_role_id: (grimoireEvent as any).new_role_id ?? null,
+            old_alignment: (grimoireEvent as any).old_alignment ?? null,
+            new_alignment: (grimoireEvent as any).new_alignment ?? null,
           })) || [],
       },
       grimoire: {
@@ -443,6 +447,10 @@ export default defineEventHandler(async (handler) => {
                   player_name: grimoireEvent.player_name ?? "",
                   role_id: grimoireEvent.role_id ?? null,
                   by_role_id: grimoireEvent.by_role_id ?? null,
+                  old_role_id: (grimoireEvent as any).old_role_id ?? null,
+                  new_role_id: (grimoireEvent as any).new_role_id ?? null,
+                  old_alignment: (grimoireEvent as any).old_alignment ?? null,
+                  new_alignment: (grimoireEvent as any).new_alignment ?? null,
                 })) || [],
             },
             demon_bluffs: {
@@ -576,6 +584,10 @@ export default defineEventHandler(async (handler) => {
                     player_name: grimoireEvent.player_name ?? "",
                     role_id: grimoireEvent.role_id ?? null,
                     by_role_id: grimoireEvent.by_role_id ?? null,
+                    old_role_id: (grimoireEvent as any).old_role_id ?? null,
+                    new_role_id: (grimoireEvent as any).new_role_id ?? null,
+                    old_alignment: (grimoireEvent as any).old_alignment ?? null,
+                    new_alignment: (grimoireEvent as any).new_alignment ?? null,
                   })) || [],
               },
               demon_bluffs: {

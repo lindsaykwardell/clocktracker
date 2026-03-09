@@ -1197,6 +1197,12 @@ const deathTooltipsForPage = computed(() => {
     data.grimoire_events
         .filter((event) => event.grimoire_page <= pageIndex)
         .forEach((event) => {
+            const isDeathTimelineEvent =
+                event.event_type === GrimoireEventType.NOT_RECORDED ||
+                event.event_type === GrimoireEventType.DEATH ||
+                event.event_type === GrimoireEventType.EXECUTION ||
+                event.event_type === GrimoireEventType.REVIVE;
+            if (!isDeathTimelineEvent) return;
             const existing = grimoireEventsByParticipant.get(event.participant_id);
             if (!existing || event.grimoire_page >= existing.page) {
                 grimoireEventsByParticipant.set(event.participant_id, {

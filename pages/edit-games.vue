@@ -114,6 +114,10 @@ const game = reactive<{
     player_name: string;
     role_id: string | null;
     by_role_id: string | null;
+    old_role_id: string | null;
+    new_role_id: string | null;
+    old_alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
+    new_alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
   }[];
   notes: string;
   image_urls: string[];

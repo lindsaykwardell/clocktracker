@@ -105,7 +105,7 @@ const props = defineProps<{
         related_role?: { token_url?: string; id?: string; name?: string };
       }
     | undefined;
-  size?: "sm" | "reminder" | "md" | "front" | "lg";
+  size?: "sm" | "sm-reminder" | "reminder" | "md" | "front" | "lg";
   alwaysShowAlignment?: boolean;
   hideRelated?: boolean;
   hideName?: boolean;
@@ -168,6 +168,9 @@ const tokenClass = computed(() => {
   switch (props.size) {
     case "sm":
       classes += "w-8 h-8 md:w-12 md:h-12";
+      break;
+    case "sm-reminder":
+      classes += "reminder w-10 h-10 md:w-12 md:h-12";
       break;
     case "reminder":
       classes += "reminder w-12 h-12 md:w-16 md:h-16";
@@ -243,6 +246,8 @@ const imageSize = computed(() => {
   switch (props.size) {
     case "sm":
       return "md:w-12 md:h-12";
+    case "sm-reminder":
+      return "relative w-8 h-8 md:w-9 md:h-9";  
     case "reminder":
       return "relative w-8 h-8 md:w-12 md:h-12";
     case "md":
@@ -377,6 +382,9 @@ const reminderTextSize = computed(() => {
       return "leading-4 text-[0.5rem] md:text-xs";
     }
   }
+  if (props.size === "sm-reminder") {
+    return "text-[0.425rem] md:text-[0.625rem]";
+  }
   return "text-[0.5rem] md:text-xs";
 });
 
@@ -396,7 +404,7 @@ const sizedAlignmentImage = computed(() =>
 .token {
   background-image: url("/img/token-bg.webp");
 
-  &.reminder {
+  &.reminder{
     background-image: url("/img/reminder-token.webp");
   }
 

@@ -357,7 +357,7 @@
             Use drag and drop in the list below to move a player to a different seat (this page only).
           </p>
           <ul
-            class="mt-2 flex flex-col gap-1"
+            class="mt-2 space-y-1"
             @dragover.prevent="onSeatListDragOver"
             @drop.prevent="onSeatDrop"
           >
@@ -368,7 +368,7 @@
               @dragstart="onSeatDragStart(row.order, $event)"
               @dragover.prevent="onSeatDragOver(row.order, $event)"
               @dragend="onSeatDragEnd"
-              class="cursor-move flex items-center justify-between gap-2 rounded border border-stone-600 px-2 py-1 bg-stone-200/80 dark:bg-stone-900/80 relative"
+              class="cursor-move flex items-center justify-between gap-2 rounded border border-stone-600 px-2 py-1 bg-stone-300/50 dark:bg-stone-900/60 relative text-stone-700 dark:text-stone-300"
               :class="{
                 'opacity-60': draggedSeatOrder === row.order,
                 'border-t-4 border-t-primary': dragTargetOrder === row.order && !dragTargetAfter,
@@ -745,6 +745,10 @@ const props = defineProps<{
       player_name: string;
       role_id: string | null;
       by_role_id: string | null;
+      old_role_id: string | null;
+      new_role_id: string | null;
+      old_alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
+      new_alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
     }[];
     notes: string;
     image_urls: string[];
@@ -856,6 +860,10 @@ const focusedGrimoireEvent = ref<{
   player_name: string;
   role_id: string | null;
   by_role_id: string | null;
+  old_role_id: string | null;
+  new_role_id: string | null;
+  old_alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
+  new_alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
 } | null>(null);
 
 // Grimoire
@@ -1465,6 +1473,10 @@ function openGrimoireEventByRoleDialog(event: {
   player_name: string;
   role_id: string | null;
   by_role_id: string | null;
+  old_role_id: string | null;
+  new_role_id: string | null;
+  old_alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
+  new_alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
 }) {
   focusedGrimoireEvent.value = event;
   excludeIrrelevantGrimoireEventRoles.value = true;
