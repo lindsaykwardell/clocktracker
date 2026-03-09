@@ -83,7 +83,7 @@
 </template>
 
 <script setup lang="ts">
-import type { RoleReminder } from "@prisma/client";
+import type { RoleReminder } from "~/server/generated/prisma/client";
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/vue";
 
 const props = defineProps<{

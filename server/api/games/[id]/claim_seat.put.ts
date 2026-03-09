@@ -1,5 +1,5 @@
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
-import { Alignment } from "@prisma/client";
+import { Alignment } from "~/server/generated/prisma/client";
 import { fetchGame } from "~/server/utils/fetchGames";
 import { prisma } from "~/server/utils/prisma";
 

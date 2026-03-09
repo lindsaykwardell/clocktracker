@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma } from "~/server/generated/prisma/client";
 import dayjs from "dayjs";
 import { prisma } from "~/server/utils/prisma";
 

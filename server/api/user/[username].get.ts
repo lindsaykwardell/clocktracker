@@ -1,4 +1,4 @@
-import { PrivacySetting } from "@prisma/client";
+import { PrivacySetting } from "~/server/generated/prisma/client";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { addUserKofiLevel } from "~/server/utils/addUserKofiLevel";
 import { prisma } from "~/server/utils/prisma";

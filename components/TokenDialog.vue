@@ -49,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Role } from "@prisma/client";
+import type { Role } from "~/server/generated/prisma/client";
 import naturalOrder from "natural-order";
 import { RoleType } from "~/composables/useRoles";
 

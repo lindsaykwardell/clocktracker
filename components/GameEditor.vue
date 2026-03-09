@@ -612,7 +612,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Alignment } from "@prisma/client";
+import type { Alignment } from "~/server/generated/prisma/client";
 import type { RoleType } from "~/composables/useRoles";
 import naturalOrder from "natural-order";
 import { useLocalStorage } from "@vueuse/core";
