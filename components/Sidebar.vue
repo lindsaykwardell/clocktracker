@@ -116,6 +116,17 @@
       </li> -->
             <li>
                 <NavLink
+                    id="forum"
+                    to="/forum"
+                    icon="snitch"
+                    title="Discussions"
+                    :notificationCount="forumUnreadCount"
+                >
+                    Discussions
+                </NavLink>
+            </li>
+            <li>
+                <NavLink
                     id="search"
                     to="/search"
                     icon="investigator"
@@ -183,6 +194,14 @@
 const { showMenu, toggleSidebar, closeSidebar, isMobile } = useSidebarState();
 const me = useMe();
 const friends = useFriends();
+const forumUnreadCount = ref(0);
+
+onMounted(async () => {
+  try {
+    const data = await $fetch<{ count: number }>("/api/forum/subscriptions/unread-count");
+    forumUnreadCount.value = data.count;
+  } catch {}
+});
 
 const handleNavClick = (event: MouseEvent) => {
     if (!isMobile.value) {

@@ -1,0 +1,32 @@
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
+import { prisma } from "~/server/utils/prisma";
+import { isAdmin } from "~/server/utils/forum";
+
+export default defineEventHandler(async (handler) => {
+  const me: User | null = handler.context.user;
+
+  if (!me || !(await isAdmin(me.id))) {
+    throw createError({ status: 403, statusMessage: "Forbidden" });
+  }
+
+  const groups = await prisma.userGroup.findMany({
+    orderBy: { name: "asc" },
+    include: {
+      _count: { select: { members: true } },
+      members: {
+        include: {
+          user: {
+            select: {
+              user_id: true,
+              username: true,
+              display_name: true,
+              avatar: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  return groups;
+});
