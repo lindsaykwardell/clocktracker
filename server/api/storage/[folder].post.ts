@@ -26,7 +26,7 @@ folders.set("avatars", {
 });
 
 folders.set("game-attachments", {
-  resize: (image) => image.resize(800, null),
+  resize: (image) => image.resize(800, null, { withoutEnlargement: true }),
 });
 
 export default defineEventHandler(async (handler) => {

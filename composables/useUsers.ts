@@ -18,6 +18,7 @@ export type User = {
   avatar: string | null;
   pronouns: string | null;
   bio: string;
+  is_admin: boolean;
   privacy: PrivacySetting;
   charts: Chart[];
   bgg_username: string | null;
