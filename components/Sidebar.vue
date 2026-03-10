@@ -135,6 +135,16 @@
                     Search
                 </NavLink>
             </li>
+            <li v-if="me.status === Status.SUCCESS && me.data.is_admin">
+                <NavLink
+                    id="admin"
+                    to="/admin/feature-flags"
+                    icon="tor"
+                    title="Admin"
+                >
+                    Admin
+                </NavLink>
+            </li>
         </ul>
         <ul class="sidebar-bottom">
             <template v-if="me.status === Status.SUCCESS">
@@ -284,6 +294,17 @@ const handleNavClick = (event: MouseEvent) => {
     }
 }
 
+@media (min-width: 801px) {
+    #sidebar > ul > li {
+        margin-block-end: 0.5rem;
+    }
+
+    #sidebar li > a {
+        padding: 0.5rem;
+        font-size: 1rem;
+    }
+}
+
 @media (max-width: 800px) {
     #sidebar {
         position: fixed;
@@ -317,7 +338,7 @@ const handleNavClick = (event: MouseEvent) => {
 }
 
 #sidebar > ul > li {
-    margin-block-end: 0.5rem;
+    margin-block-end: 0.375rem;
 
     &:has(#sidebar-toggle) {
         display: flex;
@@ -354,8 +375,9 @@ const handleNavClick = (event: MouseEvent) => {
 #sidebar li > a {
     position: relative;
     border-radius: 0.5em;
-    padding: 0.5rem;
+    padding: 0.375rem 0.5rem;
     text-decoration: none;
+    font-size: 0.9rem;
 
     > span {
         flex-grow: 1;

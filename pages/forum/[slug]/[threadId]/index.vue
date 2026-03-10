@@ -1,6 +1,6 @@
 <template>
     <StandardTemplate>
-        <div class="px-4 lg:px-8 pt-4 lg:pt-8 pb-4 lg:pb-8 max-w-4xl mx-auto">
+        <div class="px-4 lg:px-8 pt-4 lg:pt-8 pb-4 lg:pb-8 max-w-4xl mx-auto overflow-hidden">
             <template v-if="threadData?.status === Status.SUCCESS">
                 <div class="flex items-center justify-between">
                     <nuxt-link
@@ -10,7 +10,7 @@
                         &larr; {{ threadData.data.thread.category.name }}
                     </nuxt-link>
 
-                    <div class="flex gap-1 shrink-0">
+                    <div class="flex items-center gap-1 shrink-0">
                         <Button
                             v-if="isLoggedIn"
                             size="xs"
@@ -20,74 +20,66 @@
                         >
                             {{ isSubscribed ? "Subscribed" : "Subscribe" }}
                         </Button>
-                        <Button
-                            v-if="canModerate"
-                            size="xs"
-                            color="secondary"
-                            icon="pin"
-                            @click="togglePin"
-                        >
-                            {{
-                                threadData.data.thread.is_pinned
-                                    ? "Unpin"
-                                    : "Pin"
-                            }}
-                        </Button>
-                        <Button
-                            v-if="canModerate"
-                            size="xs"
-                            color="secondary"
-                            :icon="
-                                threadData.data.thread.is_locked
-                                    ? 'unlock'
-                                    : 'lock'
-                            "
-                            @click="toggleLock"
-                        >
-                            {{
-                                threadData.data.thread.is_locked
-                                    ? "Unlock"
-                                    : "Lock"
-                            }}
-                        </Button>
-                        <Button
-                            v-if="canModerate"
-                            size="xs"
-                            color="secondary"
-                            icon="arrow-right-short"
-                            @click="showMoveDialog = true"
-                        >
-                            Move
-                        </Button>
-                        <Button
-                            v-if="canModerate"
-                            size="xs"
-                            color="negative"
-                            icon="trash"
-                            @click="handleDeleteThread"
-                        >
-                            Delete
-                        </Button>
-                        <Button
-                            v-if="canCreateGithubIssue && !threadData.data.thread.github_issue_url"
-                            size="xs"
-                            color="secondary"
-                            icon="github"
-                            :disabled="creatingGithubIssue"
-                            @click="createGithubIssue"
-                        >
-                            {{ creatingGithubIssue ? "Creating..." : "Create Issue" }}
-                        </Button>
-                        <a
-                            v-if="threadData.data.thread.github_issue_url"
-                            :href="threadData.data.thread.github_issue_url"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="inline-flex items-center gap-1 rounded px-2 py-1 text-xs font-medium bg-stone-200 dark:bg-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-300 dark:hover:bg-stone-600 transition-colors"
-                        >
-                            <IconUI id="github" size="xs" />
-                            GitHub Issue
-                        </a>
+                        <Menu v-if="canModerate || (canCreateGithubIssue && !threadData.data.thread.github_issue_url)" v-slot="{ open }" as="div" class="relative">
+                            <MenuButton>
+                                <IconUI id="dots" :rounded="true" shadow />
+                            </MenuButton>
+                            <transition
+                                enter-active-class="transition duration-100 ease-out"
+                                enter-from-class="transform scale-95 opacity-0"
+                                enter-to-class="transform scale-100 opacity-100"
+                                leave-active-class="transition duration-75 ease-out"
+                                leave-from-class="transform scale-100 opacity-100"
+                                leave-to-class="transform scale-95 opacity-0"
+                            >
+                                <div v-show="open">
+                                    <MenuItems static class="ct-contextual-links right-0">
+                                        <MenuItem v-if="canModerate">
+                                            <ButtonSubmenu
+                                                @click="togglePin"
+                                                icon="pin"
+                                            >
+                                                {{ threadData.data.thread.is_pinned ? "Unpin" : "Pin" }}
+                                            </ButtonSubmenu>
+                                        </MenuItem>
+                                        <MenuItem v-if="canModerate">
+                                            <ButtonSubmenu
+                                                @click="toggleLock"
+                                                :icon="threadData.data.thread.is_locked ? 'unlock' : 'lock'"
+                                            >
+                                                {{ threadData.data.thread.is_locked ? "Unlock" : "Lock" }}
+                                            </ButtonSubmenu>
+                                        </MenuItem>
+                                        <MenuItem v-if="canModerate">
+                                            <ButtonSubmenu
+                                                @click="showMoveDialog = true"
+                                                icon="arrow-right-short"
+                                            >
+                                                Move
+                                            </ButtonSubmenu>
+                                        </MenuItem>
+                                        <MenuItem v-if="canCreateGithubIssue && !threadData.data.thread.github_issue_url">
+                                            <ButtonSubmenu
+                                                @click="createGithubIssue"
+                                                icon="github"
+                                                :disabled="creatingGithubIssue"
+                                            >
+                                                {{ creatingGithubIssue ? "Creating..." : "Create GitHub Issue" }}
+                                            </ButtonSubmenu>
+                                        </MenuItem>
+                                        <MenuItem v-if="canModerate">
+                                            <ButtonSubmenu
+                                                @click="handleDeleteThread"
+                                                icon="trash"
+                                                color="negative"
+                                            >
+                                                Delete Thread
+                                            </ButtonSubmenu>
+                                        </MenuItem>
+                                    </MenuItems>
+                                </div>
+                            </transition>
+                        </Menu>
                         <span
                             v-if="githubIssueError"
                             class="text-xs text-red-500"
@@ -101,14 +93,11 @@
                     <h1 class="font-sorts text-2xl lg:text-3xl">
                         {{ threadData.data.thread.title }}
                     </h1>
-                    <p class="text-sm text-stone-500 dark:text-stone-400 mt-1">
-                        Started by
-                        {{
-                            threadData.data.thread.author.display_name
-                        }}
-                        &middot;
-                        {{ formatDate(threadData.data.thread.created_at) }}
-                    </p>
+                    <div class="flex flex-wrap items-center gap-x-1 text-sm text-stone-500 dark:text-stone-400 mt-1">
+                        <span>Started by {{ threadData.data.thread.author.display_name }}</span>
+                        <span>&middot;</span>
+                        <span>{{ formatDate(threadData.data.thread.created_at) }}</span>
+                    </div>
                     <div
                         class="flex items-center gap-1 mt-2"
                         v-if="
@@ -450,6 +439,7 @@
 
                         <!-- Normal post -->
                         <template v-else>
+                            <!-- Post actions: inline on desktop, 3-dot menu on mobile -->
                             <div
                                 v-if="
                                     isLoggedIn ||
@@ -457,65 +447,100 @@
                                     canDeletePost(post) ||
                                     canBanUser(post)
                                 "
-                                class="float-right flex items-center gap-5 ml-4"
+                                class="float-right ml-4"
                             >
-                                <button
-                                    v-if="
-                                        isLoggedIn &&
-                                        !threadData.data.thread.is_locked
-                                    "
-                                    type="button"
-                                    class="text-stone-400 hover:text-stone-200 transition-colors"
-                                    title="Quote"
-                                    @click="quotePost(post)"
-                                >
-                                    <IconUI id="reply" size="sm" />
-                                </button>
-                                <button
-                                    v-if="
-                                        isLoggedIn &&
-                                        !post.deleted &&
-                                        post.author.user_id !== user?.id
-                                    "
-                                    type="button"
-                                    class="text-stone-400 hover:text-stone-200 transition-colors"
-                                    title="Report"
-                                    @click="openReportDialog(post.id)"
-                                >
-                                    <IconUI id="exclamation-circle" size="sm" />
-                                </button>
-                                <button
-                                    v-if="canEditPost(post)"
-                                    type="button"
-                                    class="text-stone-400 hover:text-stone-200 transition-colors"
-                                    title="Edit"
-                                    @click="startEdit(post)"
-                                >
-                                    <IconUI id="edit" size="sm" />
-                                </button>
-                                <button
-                                    v-if="canDeletePost(post)"
-                                    type="button"
-                                    class="text-red-400 hover:text-red-300 transition-colors"
-                                    title="Delete"
-                                    @click="handleDeletePost(post.id)"
-                                >
-                                    <IconUI id="trash" size="sm" />
-                                </button>
-                                <button
-                                    v-if="canBanUser(post)"
-                                    type="button"
-                                    class="text-amber-400 hover:text-amber-300 transition-colors"
-                                    title="Ban user"
-                                    @click="
-                                        toggleBanForm(
-                                            post.author.user_id,
-                                            post.author.display_name,
-                                        )
-                                    "
-                                >
-                                    <IconUI id="disabled" size="sm" />
-                                </button>
+                                <!-- Desktop: inline icons -->
+                                <div class="hidden sm:flex items-center gap-5">
+                                    <button
+                                        v-if="isLoggedIn && !threadData.data.thread.is_locked"
+                                        type="button"
+                                        class="text-stone-400 hover:text-stone-200 transition-colors"
+                                        title="Quote"
+                                        @click="quotePost(post)"
+                                    >
+                                        <IconUI id="reply" size="sm" />
+                                    </button>
+                                    <button
+                                        v-if="isLoggedIn && !post.deleted && post.author.user_id !== user?.id"
+                                        type="button"
+                                        class="text-stone-400 hover:text-stone-200 transition-colors"
+                                        title="Report"
+                                        @click="openReportDialog(post.id)"
+                                    >
+                                        <IconUI id="exclamation-circle" size="sm" />
+                                    </button>
+                                    <button
+                                        v-if="canEditPost(post)"
+                                        type="button"
+                                        class="text-stone-400 hover:text-stone-200 transition-colors"
+                                        title="Edit"
+                                        @click="startEdit(post)"
+                                    >
+                                        <IconUI id="edit" size="sm" />
+                                    </button>
+                                    <button
+                                        v-if="canDeletePost(post)"
+                                        type="button"
+                                        class="text-red-400 hover:text-red-300 transition-colors"
+                                        title="Delete"
+                                        @click="handleDeletePost(post.id)"
+                                    >
+                                        <IconUI id="trash" size="sm" />
+                                    </button>
+                                    <button
+                                        v-if="canBanUser(post)"
+                                        type="button"
+                                        class="text-amber-400 hover:text-amber-300 transition-colors"
+                                        title="Ban user"
+                                        @click="toggleBanForm(post.author.user_id, post.author.display_name)"
+                                    >
+                                        <IconUI id="disabled" size="sm" />
+                                    </button>
+                                </div>
+                                <!-- Mobile: 3-dot menu -->
+                                <Menu as="div" class="relative sm:hidden" v-slot="{ open }">
+                                    <MenuButton class="text-stone-400 hover:text-stone-200 transition-colors">
+                                        <IconUI id="dots" size="sm" />
+                                    </MenuButton>
+                                    <transition
+                                        enter-active-class="transition duration-100 ease-out"
+                                        enter-from-class="transform scale-95 opacity-0"
+                                        enter-to-class="transform scale-100 opacity-100"
+                                        leave-active-class="transition duration-75 ease-out"
+                                        leave-from-class="transform scale-100 opacity-100"
+                                        leave-to-class="transform scale-95 opacity-0"
+                                    >
+                                        <div v-show="open">
+                                            <MenuItems static class="ct-contextual-links right-0">
+                                                <MenuItem v-if="isLoggedIn && !threadData.data.thread.is_locked">
+                                                    <ButtonSubmenu icon="reply" @click="quotePost(post)">
+                                                        Quote
+                                                    </ButtonSubmenu>
+                                                </MenuItem>
+                                                <MenuItem v-if="isLoggedIn && !post.deleted && post.author.user_id !== user?.id">
+                                                    <ButtonSubmenu icon="exclamation-circle" @click="openReportDialog(post.id)">
+                                                        Report
+                                                    </ButtonSubmenu>
+                                                </MenuItem>
+                                                <MenuItem v-if="canEditPost(post)">
+                                                    <ButtonSubmenu icon="edit" @click="startEdit(post)">
+                                                        Edit
+                                                    </ButtonSubmenu>
+                                                </MenuItem>
+                                                <MenuItem v-if="canDeletePost(post)">
+                                                    <ButtonSubmenu icon="trash" color="negative" @click="handleDeletePost(post.id)">
+                                                        Delete
+                                                    </ButtonSubmenu>
+                                                </MenuItem>
+                                                <MenuItem v-if="canBanUser(post)">
+                                                    <ButtonSubmenu icon="disabled" color="caution" @click="toggleBanForm(post.author.user_id, post.author.display_name)">
+                                                        Ban User
+                                                    </ButtonSubmenu>
+                                                </MenuItem>
+                                            </MenuItems>
+                                        </div>
+                                    </transition>
+                                </Menu>
                             </div>
                             <div class="flex items-center gap-2 mb-2">
                                 <nuxt-link :to="`/@${post.author.username}`">
@@ -1161,6 +1186,7 @@
 
 <script setup lang="ts">
 import VueMarkdown from "vue-markdown-render";
+import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
 import { Status } from "~/composables/useFetchStatus";
 import type { ForumPost } from "~/composables/useForum";
 
@@ -1285,6 +1311,14 @@ async function createGithubIssue() {
 
         // Fetch the new issue preview
         fetchGithubIssue();
+
+        // Post a reply linking to the new issue
+        try {
+            await forum.createPost(
+                threadId,
+                `New issue tracked: [${result.title}](${result.url})`,
+            );
+        } catch {};
     } catch (err: any) {
         githubIssueError.value =
             err?.data?.statusMessage || "Failed to create GitHub issue";

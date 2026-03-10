@@ -1,12 +1,11 @@
 <template>
   <StandardTemplate>
     <div class="px-4 lg:px-8 pt-4 lg:pt-8 pb-4 lg:pb-8">
-      <div class="flex items-center justify-between max-w-4xl mx-auto mb-4 lg:mb-8">
-        <div />
-        <h1 class="font-sorts text-center text-2xl lg:text-3xl">
+      <div class="max-w-4xl mx-auto mb-4 lg:mb-8">
+        <h1 class="font-sorts text-center text-2xl lg:text-3xl mb-3">
           Discussions
         </h1>
-        <div class="flex gap-2">
+        <div class="flex justify-center gap-2">
           <nuxt-link to="/forum/subscribed">
             <Button size="xs" color="secondary" icon="star">Subscribed</Button>
           </nuxt-link>
@@ -26,40 +25,11 @@
             v-if="forum.categories.data.ungrouped.length"
             class="flex flex-col gap-2"
           >
-            <nuxt-link
+            <ForumCategoryRow
               v-for="category in forum.categories.data.ungrouped"
               :key="category.id"
-              :to="`/forum/${category.slug}`"
-              class="flex items-center justify-between p-4 rounded border
-                     border-stone-300 dark:border-stone-700/50
-                     bg-stone-300/40 dark:bg-stone-900/50
-                     hover:bg-stone-300/60 dark:hover:bg-stone-800/50
-                     transition-colors"
-            >
-              <div class="flex items-center gap-3">
-                <span
-                  v-if="category.unread_count"
-                  class="w-2 h-2 rounded-full bg-primary shrink-0"
-                />
-                <div>
-                  <h3 class="font-sorts text-lg">{{ category.name }}</h3>
-                  <p
-                    v-if="category.description"
-                    class="text-sm text-stone-500 dark:text-stone-400"
-                  >
-                    {{ category.description }}
-                  </p>
-                </div>
-              </div>
-              <div class="text-right text-sm text-stone-500 dark:text-stone-400 shrink-0 ml-4">
-                <div>
-                  {{ category.threadCount }} threads<template v-if="category.unread_count"> · <span class="text-primary/80">{{ category.unread_count }} unread</span></template>
-                </div>
-                <div v-if="category.lastPost" class="text-xs mt-1">
-                  Latest by {{ category.lastPost.author.display_name }}
-                </div>
-              </div>
-            </nuxt-link>
+              :category="category"
+            />
           </div>
 
           <!-- Grouped categories -->
@@ -71,40 +41,11 @@
             <h2 class="font-sorts text-lg text-stone-600 dark:text-stone-300">
               {{ group.name }}
             </h2>
-            <nuxt-link
+            <ForumCategoryRow
               v-for="category in group.categories"
               :key="category.id"
-              :to="`/forum/${category.slug}`"
-              class="flex items-center justify-between p-4 rounded border
-                     border-stone-300 dark:border-stone-700/50
-                     bg-stone-300/40 dark:bg-stone-900/50
-                     hover:bg-stone-300/60 dark:hover:bg-stone-800/50
-                     transition-colors"
-            >
-              <div class="flex items-center gap-3">
-                <span
-                  v-if="category.unread_count"
-                  class="w-2 h-2 rounded-full bg-primary shrink-0"
-                />
-                <div>
-                  <h3 class="font-sorts text-lg">{{ category.name }}</h3>
-                  <p
-                    v-if="category.description"
-                    class="text-sm text-stone-500 dark:text-stone-400"
-                  >
-                    {{ category.description }}
-                  </p>
-                </div>
-              </div>
-              <div class="text-right text-sm text-stone-500 dark:text-stone-400 shrink-0 ml-4">
-                <div>
-                  {{ category.threadCount }} threads<template v-if="category.unread_count"> · <span class="text-primary/80">{{ category.unread_count }} unread</span></template>
-                </div>
-                <div v-if="category.lastPost" class="text-xs mt-1">
-                  Latest by {{ category.lastPost.author.display_name }}
-                </div>
-              </div>
-            </nuxt-link>
+              :category="category"
+            />
           </div>
 
           <p

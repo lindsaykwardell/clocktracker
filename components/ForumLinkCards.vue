@@ -1,9 +1,9 @@
 <template>
-    <div v-if="cards.length > 0" class="flex flex-col gap-2 mt-3">
+    <div v-if="cards.length > 0" class="flex flex-col gap-2 mt-3 min-w-0">
         <div
             v-for="card in cards"
             :key="card.url"
-            class="rounded border border-stone-300 dark:border-stone-700/50 bg-stone-200/50 dark:bg-stone-800/50 overflow-hidden"
+            class="rounded border border-stone-300 dark:border-stone-700/50 bg-stone-200/50 dark:bg-stone-800/50 overflow-hidden min-w-0"
         >
             <!-- Loading -->
             <div
@@ -26,10 +26,10 @@
                     background
                 />
                 <div class="min-w-0">
-                    <div class="text-sm font-semibold truncate">
+                    <div class="text-sm font-semibold">
                         {{ card.data.display_name }}
                     </div>
-                    <div class="text-xs text-stone-400 truncate">
+                    <div class="text-xs text-stone-400">
                         @{{ card.data.username }}
                         <template v-if="card.data.pronouns">
                             &middot; {{ card.data.pronouns }}
@@ -37,7 +37,7 @@
                     </div>
                     <div
                         v-if="card.data.bio"
-                        class="text-xs text-stone-400 truncate mt-0.5"
+                        class="text-xs text-stone-400 mt-0.5"
                     >
                         {{ card.data.bio }}
                     </div>
@@ -61,7 +61,7 @@
                     class="w-10 h-10 rounded-full bg-stone-300 dark:bg-stone-600 shrink-0"
                 />
                 <div class="min-w-0">
-                    <div class="text-sm font-semibold truncate">
+                    <div class="text-sm font-semibold">
                         {{ card.data.name }}
                     </div>
                     <div class="text-xs text-stone-400 capitalize">
@@ -73,7 +73,7 @@
                     </div>
                     <div
                         v-if="card.data.ability"
-                        class="text-xs text-stone-400 truncate mt-0.5"
+                        class="text-xs text-stone-400 mt-0.5"
                     >
                         {{ card.data.ability }}
                     </div>
@@ -99,10 +99,10 @@
                     <IconUI id="book" size="sm" />
                 </div>
                 <div class="min-w-0">
-                    <div class="text-sm font-semibold truncate">
+                    <div class="text-sm font-semibold">
                         {{ card.data.name }}
                     </div>
-                    <div class="text-xs text-stone-400 truncate">
+                    <div class="text-xs text-stone-400">
                         <template v-if="card.data.author">
                             by {{ card.data.author }}
                         </template>
@@ -132,18 +132,18 @@
                     <IconUI id="players" size="sm" />
                 </div>
                 <div class="min-w-0">
-                    <div class="text-sm font-semibold truncate">
+                    <div class="text-sm font-semibold">
                         {{ card.data.name }}
                     </div>
                     <div
                         v-if="card.data.description"
-                        class="text-xs text-stone-400 truncate"
+                        class="text-xs text-stone-400"
                     >
                         {{ card.data.description }}
                     </div>
                     <div
                         v-if="card.data.location"
-                        class="text-xs text-stone-400 truncate"
+                        class="text-xs text-stone-400"
                     >
                         {{ card.data.location }}
                     </div>
@@ -169,10 +169,10 @@
                     <IconUI id="book" size="sm" />
                 </div>
                 <div class="min-w-0">
-                    <div class="text-sm font-semibold truncate">
+                    <div class="text-sm font-semibold">
                         {{ card.data.script }}
                     </div>
-                    <div class="text-xs text-stone-400 truncate">
+                    <div class="text-xs text-stone-400">
                         {{ formatGameDate(card.data.date) }}
                         <template v-if="card.data.is_storyteller">
                             &middot; Storyteller
@@ -188,7 +188,7 @@
                     </div>
                     <div
                         v-if="card.data.community_name || card.data.location"
-                        class="text-xs text-stone-400 truncate"
+                        class="text-xs text-stone-400"
                     >
                         {{
                             card.data.community_name || card.data.location
@@ -242,30 +242,27 @@
                     </svg>
                 </div>
                 <div class="min-w-0 flex-1">
-                    <div class="text-sm font-semibold truncate">
+                    <div class="text-sm font-semibold">
                         {{ card.data.title }}
-                        <span class="text-stone-400 font-normal"
-                            >#{{ card.data.number }}</span
-                        >
+                        <span class="text-stone-400 font-normal">#{{ card.data.number }}</span>
                     </div>
-                    <div class="text-xs text-stone-400 truncate">
-                        {{ card.data.is_pull_request ? "Pull Request" : "Issue" }}
-                        &middot;
+                    <div class="flex flex-wrap items-center gap-x-1 text-xs text-stone-400">
+                        <span>{{ card.data.is_pull_request ? "Pull Request" : "Issue" }}</span>
+                        <span>&middot;</span>
                         <span
                             :class="
                                 card.data.state === 'open'
                                     ? 'text-green-400'
                                     : 'text-purple-400'
                             "
-                            >{{ card.data.state }}</span
-                        >
+                        >{{ card.data.state }}</span>
                         <template v-if="card.data.author">
-                            &middot; {{ card.data.author }}
+                            <span>&middot;</span>
+                            <span>{{ card.data.author }}</span>
                         </template>
                         <template v-if="card.data.comments > 0">
-                            &middot; {{ card.data.comments }} comment{{
-                                card.data.comments === 1 ? "" : "s"
-                            }}
+                            <span>&middot;</span>
+                            <span>{{ card.data.comments }} {{ card.data.comments === 1 ? "comment" : "comments" }}</span>
                         </template>
                     </div>
                     <div
