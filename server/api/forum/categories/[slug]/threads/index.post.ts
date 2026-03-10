@@ -87,14 +87,15 @@ export default defineEventHandler(async (handler) => {
     },
   });
 
-  // Auto-subscribe thread author
-  await prisma.forumThreadSubscription.create({
-    data: {
-      thread_id: thread.id,
-      user_id: me.id,
-      last_read_at: now,
-    },
-  });
+  // Mark as read and auto-subscribe thread author
+  await Promise.all([
+    prisma.forumThreadRead.create({
+      data: { thread_id: thread.id, user_id: me.id, last_read_at: now },
+    }),
+    prisma.forumThreadSubscription.create({
+      data: { thread_id: thread.id, user_id: me.id, last_read_at: now },
+    }),
+  ]);
 
   return thread;
 });

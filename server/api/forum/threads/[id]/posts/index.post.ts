@@ -91,23 +91,23 @@ export default defineEventHandler(async (handler) => {
     }),
   ]);
 
-  // Auto-subscribe replier (upsert to avoid duplicates)
-  await prisma.forumThreadSubscription.upsert({
-    where: {
-      thread_id_user_id: {
-        thread_id: threadId,
-        user_id: me.id,
+  // Mark thread as read and auto-subscribe replier
+  await Promise.all([
+    prisma.forumThreadRead.upsert({
+      where: {
+        thread_id_user_id: { thread_id: threadId, user_id: me.id },
       },
-    },
-    create: {
-      thread_id: threadId,
-      user_id: me.id,
-      last_read_at: now,
-    },
-    update: {
-      last_read_at: now,
-    },
-  });
+      create: { thread_id: threadId, user_id: me.id, last_read_at: now },
+      update: { last_read_at: now },
+    }),
+    prisma.forumThreadSubscription.upsert({
+      where: {
+        thread_id_user_id: { thread_id: threadId, user_id: me.id },
+      },
+      create: { thread_id: threadId, user_id: me.id, last_read_at: now },
+      update: { last_read_at: now },
+    }),
+  ]);
 
   const [nameColor, badges] = await Promise.all([
     getForumNameColor(me.id),

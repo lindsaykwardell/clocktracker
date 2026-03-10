@@ -1,6 +1,6 @@
 <template>
   <StandardTemplate>
-    <div class="px-4 lg:px-8 pt-4 lg:pt-8 pb-4 lg:pb-8 max-w-4xl mx-auto">
+    <div class="px-4 lg:px-8 pt-4 lg:pt-8 pb-4 lg:pb-8 max-w-4xl mx-auto overflow-hidden">
       <nuxt-link
         to="/forum"
         class="text-sm text-stone-500 dark:text-stone-400 hover:underline"
@@ -8,12 +8,12 @@
         &larr; Discussions
       </nuxt-link>
 
-      <div class="flex items-center justify-between mt-3 mb-2">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-3 mb-2 gap-2">
         <h1 class="font-sorts text-2xl lg:text-3xl">
           {{ categoryName }}
         </h1>
-        <nuxt-link v-if="isLoggedIn && canCreateThread" :to="`/forum/${slug}/new`">
-          <Button color="primary">New Thread</Button>
+        <nuxt-link v-if="isLoggedIn && canCreateThread" :to="`/forum/${slug}/new`" class="shrink-0">
+          <Button color="primary" size="sm">New Thread</Button>
         </nuxt-link>
       </div>
 
@@ -34,50 +34,42 @@
             v-for="thread in threadData.data.threads"
             :key="thread.id"
             :to="threadLink(thread)"
-            class="flex items-center justify-between p-4 rounded border
+            class="flex items-start gap-3 p-3 sm:p-4 rounded border
                    border-stone-300 dark:border-stone-700/50
                    bg-stone-300/40 dark:bg-stone-900/50
                    hover:bg-stone-300/60 dark:hover:bg-stone-800/50
                    transition-colors"
           >
-            <div class="flex items-center gap-3 min-w-0">
-              <div class="relative shrink-0">
-                <Avatar
-                  :value="thread.author.avatar"
-                  size="sm"
-                  class="border-stone-800"
-                  background
-                />
-                <span
-                  v-if="thread.has_unread"
-                  class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-primary border-2 border-stone-100 dark:border-stone-900"
-                />
-              </div>
-              <div class="min-w-0">
-                <div class="flex items-center gap-2">
-                  <h3 class="font-semibold truncate" :class="thread.has_unread ? '' : 'text-stone-400 dark:text-stone-500'">{{ thread.title }}</h3>
-                  <div class="flex items-center gap-1 shrink-0" v-if="thread.is_pinned || thread.is_locked">
-                    <IconUI v-if="thread.is_pinned" id="pin" size="sm" class="text-primary" />
-                    <Badge v-if="thread.is_locked" color="caution" size="sm">Locked</Badge>
-                  </div>
-                </div>
-                <p class="text-sm text-stone-500 dark:text-stone-400">
-                  by {{ thread.author.display_name }}
-                  &middot; {{ formatDate(thread.created_at) }}
-                </p>
-              </div>
-            </div>
-            <div class="flex items-center gap-2 shrink-0 ml-4">
-              <IconUI
-                v-if="thread.is_subscribed"
-                id="star"
+            <div class="relative shrink-0">
+              <Avatar
+                :value="thread.author.avatar"
                 size="sm"
-                class="text-primary shrink-0"
-                title="Subscribed"
+                class="border-stone-800"
+                background
               />
-              <div class="text-right text-sm text-stone-500 dark:text-stone-400">
-                <div>{{ thread._count.posts }} posts</div>
-                <div class="text-xs">{{ formatDate(thread.last_post_at) }}</div>
+              <span
+                v-if="thread.has_unread"
+                class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-primary border-2 border-stone-100 dark:border-stone-900"
+              />
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-1.5">
+                <h3 class="font-semibold break-words min-w-0" :class="thread.has_unread ? '' : 'text-stone-400 dark:text-stone-500'">{{ thread.title }}</h3>
+                <IconUI v-if="thread.is_pinned" id="pin" size="sm" class="text-primary shrink-0" />
+                <Badge v-if="thread.is_locked" color="caution" size="sm" class="shrink-0">Locked</Badge>
+              </div>
+              <div class="flex flex-wrap items-center gap-x-3 text-sm text-stone-500 dark:text-stone-400">
+                <span>by {{ thread.author.display_name }} &middot; {{ formatDate(thread.created_at) }}</span>
+                <span class="flex items-center gap-1">
+                  <IconUI
+                    v-if="thread.is_subscribed"
+                    id="star"
+                    size="xs"
+                    class="text-primary"
+                    title="Subscribed"
+                  />
+                  {{ thread._count.posts }} posts &middot; {{ formatDate(thread.last_post_at) }}
+                </span>
               </div>
             </div>
           </nuxt-link>
