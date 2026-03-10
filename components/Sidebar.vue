@@ -114,7 +114,7 @@
           Scripts
         </NavLink>
       </li> -->
-            <li>
+            <li v-if="featureFlags.isEnabled('forum')">
                 <NavLink
                     id="forum"
                     to="/forum"
@@ -194,13 +194,16 @@
 const { showMenu, toggleSidebar, closeSidebar, isMobile } = useSidebarState();
 const me = useMe();
 const friends = useFriends();
+const featureFlags = useFeatureFlags();
 const forumUnreadCount = ref(0);
 
 onMounted(async () => {
-  try {
-    const data = await $fetch<{ count: number }>("/api/forum/subscriptions/unread-count");
-    forumUnreadCount.value = data.count;
-  } catch {}
+  if (featureFlags.isEnabled('forum')) {
+    try {
+      const data = await $fetch<{ count: number }>("/api/forum/subscriptions/unread-count");
+      forumUnreadCount.value = data.count;
+    } catch {}
+  }
 });
 
 const handleNavClick = (event: MouseEvent) => {
