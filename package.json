@@ -53,6 +53,7 @@
     "floating-vue": "^5.2.2",
     "formidable": "^3.5.1",
     "geolib": "^3.3.4",
+    "jose": "^6.2.1",
     "nanoid": "^5.0.7",
     "natural-order": "^2.0.2",
     "nuxt-cron": "^1.6.0",

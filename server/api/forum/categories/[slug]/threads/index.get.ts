@@ -56,6 +56,58 @@ export default defineEventHandler(async (handler) => {
     prisma.forumThread.count({ where }),
   ]);
 
+  // Determine unread and subscribed status per thread
+  let readMap = new Map<string, Date>();
+  let subscribedSet = new Set<string>();
+  let firstVisit: Date | null = null;
+  if (me) {
+    const [userSettings, ...rest] = await Promise.all([
+      prisma.userSettings.findUnique({
+        where: { user_id: me.id },
+        select: { forum_first_visit_at: true },
+      }),
+    ]);
+
+    firstVisit = userSettings?.forum_first_visit_at
+      ? new Date(userSettings.forum_first_visit_at)
+      : null;
+
+    const threadIds = threads.map((t) => t.id);
+    if (threadIds.length > 0) {
+      const [reads, subscriptions] = await Promise.all([
+        prisma.forumThreadRead.findMany({
+          where: { user_id: me.id, thread_id: { in: threadIds } },
+          select: { thread_id: true, last_read_at: true },
+        }),
+        prisma.forumThreadSubscription.findMany({
+          where: { user_id: me.id, thread_id: { in: threadIds } },
+          select: { thread_id: true },
+        }),
+      ]);
+
+      for (const r of reads) {
+        readMap.set(r.thread_id, new Date(r.last_read_at));
+      }
+      for (const s of subscriptions) {
+        subscribedSet.add(s.thread_id);
+      }
+    }
+  }
+
+  const threadsWithUnread = threads.map((t) => {
+    if (!me) {
+      return { ...t, has_unread: false, is_subscribed: false };
+    }
+    const lastPostAt = new Date(t.last_post_at);
+    // Threads with activity before the user's first forum visit are implicitly read
+    if (firstVisit && lastPostAt < firstVisit) {
+      return { ...t, has_unread: false, is_subscribed: subscribedSet.has(t.id) };
+    }
+    const lastRead = readMap.get(t.id);
+    const hasUnread = !lastRead || lastPostAt > lastRead;
+    return { ...t, has_unread: hasUnread, is_subscribed: subscribedSet.has(t.id) };
+  });
+
   return {
     category: {
       id: category.id,
@@ -65,7 +117,7 @@ export default defineEventHandler(async (handler) => {
       is_private: category.is_private,
       mod_posting_only: category.mod_posting_only,
     },
-    threads,
+    threads: threadsWithUnread,
     total,
     page,
     perPage,
