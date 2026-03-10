@@ -485,7 +485,7 @@
       </details>
     </fieldset>
     <fieldset class="border rounded border-stone-500 p-4 my-3">
-      <legend>Notes</legend>
+      <legend class="flex items-center gap-2">Notes <MarkdownHelp /></legend>
       <ExpandingTextarea
         v-if="!editingMultipleGames"
         v-model="game.notes"
