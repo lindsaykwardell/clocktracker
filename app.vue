@@ -1,34 +1,32 @@
 <template>
     <NuxtPage />
-    <!-- <AnnouncementDialog
-    id="year-in-review-2025"
-    v-if="shouldShowAnnouncement"
-  >
-    <template #title>
-      <h1 class="text-2xl font-bold font-sorts">Year In Review Begins!</h1>
-      <div class="text-lg text-stone-400">{{ formattedAnnouncementDate }}</div>
-    </template>
-    <template v-slot="{ close }">
-      <div class="p-2">
-        <p class="p-2 pt-6">
-          We've reached the end of the year once again, and it's time to see how
-          your corner of Ravenswood Bluff has been handling all these demon
-          attacks!
-        </p>
-        <div class="w-[300px] m-auto" @click="close">
-          <YearInReviewLink id="year-in-review-dialog"/>
+    <AnnouncementDialog
+      v-if="announcement"
+      :id="`announcement-${announcement.threadId}`"
+    >
+      <template #title>
+        <h1 class="text-2xl font-bold font-sorts">{{ announcement.title }}</h1>
+        <div class="text-lg text-stone-400">{{ formatAnnouncementDate(announcement.createdAt) }}</div>
+      </template>
+      <template v-slot="{ close }">
+        <div class="p-2">
+          <VueMarkdown
+            class="post text-lg max-w-[80ch]"
+            :source="announcement.body"
+            :options="{ html: false }"
+          />
+          <div class="flex justify-center mt-4">
+            <nuxt-link
+              :to="`/forum/${announcement.categorySlug}/${announcement.threadId}`"
+              class="text-sm text-primary hover:underline"
+              @click="close"
+            >
+              View full thread &rarr;
+            </nuxt-link>
+          </div>
         </div>
-        <p class="p-2 pt-6">
-          Check out your "Year In Review" to see how you've fared over the past
-          year, which characters did the best for you, your favorite scripts,
-          and more.
-        </p>
-        <p class="p-2 pt-6">
-          Your year in review is available starting now through January!
-        </p>
-      </div>
-    </template>
-  </AnnouncementDialog> -->
+      </template>
+    </AnnouncementDialog>
     <VitePwaManifest />
 </template>
 
@@ -55,6 +53,7 @@ import ChartDataLabels from "chartjs-plugin-datalabels";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
+import VueMarkdown from "vue-markdown-render";
 import type { User } from "~/composables/useUsers";
 import { nanoid } from "nanoid";
 
@@ -162,6 +161,32 @@ watch(
         deep: false,
     },
 );
+
+// Forum announcement
+const announcement = ref<{
+    threadId: string;
+    title: string;
+    body: string;
+    postId: string;
+    author: { display_name: string };
+    createdAt: string;
+    categorySlug: string;
+} | null>(null);
+
+onMounted(async () => {
+    try {
+        const data = await $fetch("/api/forum/announcement");
+        if (data) {
+            announcement.value = data;
+        }
+    } catch {}
+});
+
+function formatAnnouncementDate(date: string) {
+    return new Intl.DateTimeFormat(navigator.language, {
+        dateStyle: "medium",
+    }).format(new Date(date));
+}
 
 const announcementDate = dayjs.tz("2025-12-01", "America/Los_Angeles");
 const maintenanceMode = featureFlags.maintenanceIsScheduled;
@@ -306,6 +331,14 @@ body {
     --color-base-200: theme(colors.stone.900);
     --color-base-300: theme(colors.stone.950);
     --color-base-content: theme(colors.stone.100);
+}
+
+.post img {
+    @apply max-w-full rounded mx-auto block;
+}
+
+.post blockquote {
+    @apply border-l-2 border-stone-400 dark:border-stone-600 pl-4 py-1 my-2 opacity-75;
 }
 
 .v-select {
