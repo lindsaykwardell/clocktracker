@@ -14,6 +14,7 @@ model FeatureFlag {
   active                 Boolean        @default(false)
   active_for             UserSettings[]
   enabled_for_supporters Boolean        @default(false)
+  rollout_percentage     Int?
   effective_date         DateTime?
   created_at             DateTime       @default(now()) @db.Timestamptz(6)
 }
