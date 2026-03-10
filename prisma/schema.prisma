@@ -286,6 +286,8 @@ model UserSettings {
   forum_edits             ForumPostEdit[]
   forum_mod_logs          ForumModLog[]
   forum_subscriptions     ForumThreadSubscription[]
+  forum_reads             ForumThreadRead[]
+  forum_first_visit_at    DateTime?               @db.Timestamptz(6)
 }
 
 model Did {
@@ -632,11 +634,13 @@ model ForumThread {
   is_locked    Boolean       @default(false)
   created_at   DateTime      @default(now()) @db.Timestamptz(6)
   last_post_at DateTime      @default(now()) @db.Timestamptz(6)
-  deleted_at   DateTime?     @db.Timestamptz(6)
+  deleted_at       DateTime?     @db.Timestamptz(6)
+  github_issue_url String?
   category      ForumCategory           @relation(fields: [category_id], references: [id])
   author        UserSettings            @relation(fields: [author_id], references: [user_id])
   posts         ForumPost[]
   subscriptions ForumThreadSubscription[]
+  reads         ForumThreadRead[]
 
   @@index([category_id, deleted_at])
   @@index([last_post_at])
@@ -665,6 +669,18 @@ model ForumThreadSubscription {
   user_id       String
   last_read_at  DateTime     @default(now()) @db.Timestamptz(6)
   created_at    DateTime     @default(now()) @db.Timestamptz(6)
+  thread        ForumThread  @relation(fields: [thread_id], references: [id], onDelete: Cascade)
+  user          UserSettings @relation(fields: [user_id], references: [user_id])
+
+  @@unique([thread_id, user_id])
+  @@index([user_id])
+}
+
+model ForumThreadRead {
+  id            String       @id @default(uuid())
+  thread_id     String
+  user_id       String
+  last_read_at  DateTime     @default(now()) @db.Timestamptz(6)
   thread        ForumThread  @relation(fields: [thread_id], references: [id], onDelete: Cascade)
   user          UserSettings @relation(fields: [user_id], references: [user_id])
 

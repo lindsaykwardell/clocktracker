@@ -36,17 +36,25 @@
                      hover:bg-stone-300/60 dark:hover:bg-stone-800/50
                      transition-colors"
             >
-              <div>
-                <h3 class="font-sorts text-lg">{{ category.name }}</h3>
-                <p
-                  v-if="category.description"
-                  class="text-sm text-stone-500 dark:text-stone-400"
-                >
-                  {{ category.description }}
-                </p>
+              <div class="flex items-center gap-3">
+                <span
+                  v-if="category.unread_count"
+                  class="w-2 h-2 rounded-full bg-primary shrink-0"
+                />
+                <div>
+                  <h3 class="font-sorts text-lg">{{ category.name }}</h3>
+                  <p
+                    v-if="category.description"
+                    class="text-sm text-stone-500 dark:text-stone-400"
+                  >
+                    {{ category.description }}
+                  </p>
+                </div>
               </div>
               <div class="text-right text-sm text-stone-500 dark:text-stone-400 shrink-0 ml-4">
-                <div>{{ category.threadCount }} threads</div>
+                <div>
+                  {{ category.threadCount }} threads<template v-if="category.unread_count"> · <span class="text-primary/80">{{ category.unread_count }} unread</span></template>
+                </div>
                 <div v-if="category.lastPost" class="text-xs mt-1">
                   Latest by {{ category.lastPost.author.display_name }}
                 </div>
@@ -73,17 +81,25 @@
                      hover:bg-stone-300/60 dark:hover:bg-stone-800/50
                      transition-colors"
             >
-              <div>
-                <h3 class="font-sorts text-lg">{{ category.name }}</h3>
-                <p
-                  v-if="category.description"
-                  class="text-sm text-stone-500 dark:text-stone-400"
-                >
-                  {{ category.description }}
-                </p>
+              <div class="flex items-center gap-3">
+                <span
+                  v-if="category.unread_count"
+                  class="w-2 h-2 rounded-full bg-primary shrink-0"
+                />
+                <div>
+                  <h3 class="font-sorts text-lg">{{ category.name }}</h3>
+                  <p
+                    v-if="category.description"
+                    class="text-sm text-stone-500 dark:text-stone-400"
+                  >
+                    {{ category.description }}
+                  </p>
+                </div>
               </div>
               <div class="text-right text-sm text-stone-500 dark:text-stone-400 shrink-0 ml-4">
-                <div>{{ category.threadCount }} threads</div>
+                <div>
+                  {{ category.threadCount }} threads<template v-if="category.unread_count"> · <span class="text-primary/80">{{ category.unread_count }} unread</span></template>
+                </div>
                 <div v-if="category.lastPost" class="text-xs mt-1">
                   Latest by {{ category.lastPost.author.display_name }}
                 </div>

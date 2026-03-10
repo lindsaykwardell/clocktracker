@@ -13,7 +13,8 @@ export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
   const threadId = handler.context.params!.id;
   const query = getQuery(handler);
-  const page = Math.max(1, Number(query.page) || 1);
+  const wantUnread = query.unread === "1" || query.unread === "true";
+  let page = Math.max(1, Number(query.page) || 1);
   const perPage = 25;
 
   const thread = await prisma.forumThread.findFirst({
@@ -25,6 +26,7 @@ export default defineEventHandler(async (handler) => {
       is_locked: true,
       created_at: true,
       last_post_at: true,
+      github_issue_url: true,
       category_id: true,
       author: { select: forumUserSelect },
       category: {
@@ -58,6 +60,62 @@ export default defineEventHandler(async (handler) => {
   const viewerIsMod = me
     ? (await isAdmin(me.id)) || (await isModerator(me.id))
     : false;
+
+  // Compute first unread post info for logged-in users
+  let firstUnreadPostId: string | null = null;
+  if (me && wantUnread) {
+    const [readRecord, userSettings] = await Promise.all([
+      prisma.forumThreadRead.findUnique({
+        where: { thread_id_user_id: { thread_id: threadId, user_id: me.id } },
+        select: { last_read_at: true },
+      }),
+      prisma.userSettings.findUnique({
+        where: { user_id: me.id },
+        select: { forum_first_visit_at: true },
+      }),
+    ]);
+
+    // Effective cutoff: the later of last_read_at and forum_first_visit_at
+    const lastRead = readRecord?.last_read_at
+      ? new Date(readRecord.last_read_at)
+      : null;
+    const firstVisit = userSettings?.forum_first_visit_at
+      ? new Date(userSettings.forum_first_visit_at)
+      : null;
+
+    let cutoff: Date | null = null;
+    if (lastRead && firstVisit) {
+      cutoff = lastRead > firstVisit ? lastRead : firstVisit;
+    } else {
+      cutoff = lastRead || firstVisit;
+    }
+
+    if (cutoff) {
+      // Find the first post created after the cutoff
+      const firstUnread = await prisma.forumPost.findFirst({
+        where: { thread_id: threadId, created_at: { gt: cutoff } },
+        orderBy: { created_at: "asc" },
+        select: { id: true },
+      });
+
+      if (firstUnread) {
+        firstUnreadPostId = firstUnread.id;
+        // Count posts before this one to determine its page
+        const positionIndex = await prisma.forumPost.count({
+          where: { thread_id: threadId, created_at: { lte: cutoff } },
+        });
+        page = Math.floor(positionIndex / perPage) + 1;
+      } else {
+        // All posts are read — go to the last page
+        const totalPosts = await prisma.forumPost.count({
+          where: { thread_id: threadId },
+        });
+        page = Math.max(1, Math.ceil(totalPosts / perPage));
+      }
+    } else {
+      // No cutoff (new user, never visited) — just show page 1
+    }
+  }
 
   const where = { thread_id: threadId };
 
@@ -219,15 +277,20 @@ export default defineEventHandler(async (handler) => {
     };
   });
 
-  // Update last_read_at for subscribed users
+  // Track read state and update subscription last_read_at
   if (me) {
-    await prisma.forumThreadSubscription.updateMany({
-      where: {
-        thread_id: threadId,
-        user_id: me.id,
-      },
-      data: { last_read_at: new Date() },
-    });
+    const now = new Date();
+    await Promise.all([
+      prisma.forumThreadRead.upsert({
+        where: { thread_id_user_id: { thread_id: threadId, user_id: me.id } },
+        create: { thread_id: threadId, user_id: me.id, last_read_at: now },
+        update: { last_read_at: now },
+      }),
+      prisma.forumThreadSubscription.updateMany({
+        where: { thread_id: threadId, user_id: me.id },
+        data: { last_read_at: now },
+      }),
+    ]);
   }
 
   // Check if user is subscribed
@@ -251,5 +314,6 @@ export default defineEventHandler(async (handler) => {
     page,
     perPage,
     subscribed,
+    firstUnreadPostId,
   };
 });

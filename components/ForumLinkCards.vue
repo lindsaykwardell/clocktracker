@@ -197,21 +197,118 @@
                 </div>
             </nuxt-link>
 
+            <!-- GitHub Issue/PR Card -->
+            <a
+                v-else-if="card.type === 'github' && card.data"
+                :href="card.url"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="flex items-center gap-3 px-3 py-2 hover:bg-stone-300/50 dark:hover:bg-stone-700/30 transition-colors"
+            >
+                <div
+                    class="w-10 h-10 rounded shrink-0 flex items-center justify-center"
+                    :class="
+                        card.data.state === 'open'
+                            ? 'bg-green-500/20 text-green-400'
+                            : 'bg-purple-500/20 text-purple-400'
+                    "
+                >
+                    <svg
+                        viewBox="0 0 16 16"
+                        class="w-5 h-5"
+                        fill="currentColor"
+                    >
+                        <template v-if="card.data.is_pull_request">
+                            <path
+                                d="M1.5 3.25a2.25 2.25 0 1 1 3 2.122v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.25 2.25 0 0 1 1.5 3.25Zm5.677-.177L9.573.677A.25.25 0 0 1 10 .854V2.5h1A2.5 2.5 0 0 1 13.5 5v5.628a2.251 2.251 0 1 1-1.5 0V5a1 1 0 0 0-1-1h-1v1.646a.25.25 0 0 1-.427.177L7.177 3.427a.25.25 0 0 1 0-.354ZM3.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm0 9.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm8.25.75a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0Z"
+                            />
+                        </template>
+                        <template v-else-if="card.data.state === 'open'">
+                            <path
+                                d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"
+                            />
+                            <path
+                                d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Z"
+                            />
+                        </template>
+                        <template v-else>
+                            <path
+                                d="M11.28 6.78a.75.75 0 0 0-1.06-1.06L7.25 8.69 5.78 7.22a.75.75 0 0 0-1.06 1.06l2 2a.75.75 0 0 0 1.06 0l3.5-3.5Z"
+                            />
+                            <path
+                                d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0Zm-1.5 0a6.5 6.5 0 1 0-13 0 6.5 6.5 0 0 0 13 0Z"
+                            />
+                        </template>
+                    </svg>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <div class="text-sm font-semibold truncate">
+                        {{ card.data.title }}
+                        <span class="text-stone-400 font-normal"
+                            >#{{ card.data.number }}</span
+                        >
+                    </div>
+                    <div class="text-xs text-stone-400 truncate">
+                        {{ card.data.is_pull_request ? "Pull Request" : "Issue" }}
+                        &middot;
+                        <span
+                            :class="
+                                card.data.state === 'open'
+                                    ? 'text-green-400'
+                                    : 'text-purple-400'
+                            "
+                            >{{ card.data.state }}</span
+                        >
+                        <template v-if="card.data.author">
+                            &middot; {{ card.data.author }}
+                        </template>
+                        <template v-if="card.data.comments > 0">
+                            &middot; {{ card.data.comments }} comment{{
+                                card.data.comments === 1 ? "" : "s"
+                            }}
+                        </template>
+                    </div>
+                    <div
+                        v-if="card.data.labels?.length"
+                        class="flex gap-1 mt-1 flex-wrap"
+                    >
+                        <span
+                            v-for="label in card.data.labels.slice(0, 5)"
+                            :key="label.name"
+                            class="inline-block px-1.5 py-0.5 text-[0.625rem] rounded-full font-medium"
+                            :style="{
+                                backgroundColor: `#${label.color}33`,
+                                color: `#${label.color}`,
+                            }"
+                        >
+                            {{ label.name }}
+                        </span>
+                    </div>
+                </div>
+            </a>
+
             <!-- Failed to load -->
             <div
                 v-else-if="!card.loading && !card.data"
                 class="px-3 py-2 text-xs text-stone-400"
             >
-                <nuxt-link :to="card.url" class="hover:underline">
+                <component
+                    :is="card.type === 'github' ? 'a' : 'nuxt-link'"
+                    :to="card.type !== 'github' ? card.url : undefined"
+                    :href="card.type === 'github' ? card.url : undefined"
+                    :target="card.type === 'github' ? '_blank' : undefined"
+                    :rel="card.type === 'github' ? 'noopener noreferrer' : undefined"
+                    class="hover:underline"
+                >
                     {{ card.url }}
-                </nuxt-link>
+                </component>
             </div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-type CardType = "user" | "role" | "script" | "community" | "game";
+type CardType = "user" | "role" | "script" | "community" | "game" | "github";
 
 type InternalLink = {
     type: CardType;
@@ -229,6 +326,22 @@ type CardState = {
 const props = defineProps<{
     body: string;
 }>();
+
+// Client-side cache shared across all ForumLinkCards instances
+const cardCache = new Map<string, { data: any; fetchedAt: number }>();
+const CARD_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+function getCached(key: string): any | undefined {
+    const entry = cardCache.get(key);
+    if (entry && Date.now() - entry.fetchedAt < CARD_CACHE_TTL) {
+        return entry.data;
+    }
+    return undefined;
+}
+
+function setCache(key: string, data: any): void {
+    cardCache.set(key, { data, fetchedAt: Date.now() });
+}
 
 function formatGameDate(date: string | null): string {
     if (!date) return "";
@@ -259,6 +372,20 @@ function extractInternalLinks(body: string): InternalLink[] {
     while ((match = bareUrlRegex.exec(body)) !== null) {
         const url = match[1];
         processUrl(url, links, seen);
+    }
+
+    // Match GitHub issue/PR URLs (both markdown link targets and bare)
+    const githubRegex =
+        /https:\/\/github\.com\/([\w.-]+)\/([\w.-]+)\/(issues|pull)\/(\d+)/g;
+    while ((match = githubRegex.exec(body)) !== null) {
+        const fullUrl = match[0];
+        if (seen.has(fullUrl)) continue;
+        seen.add(fullUrl);
+        links.push({
+            type: "github",
+            url: fullUrl,
+            param: `${match[1]}/${match[2]}/${match[3] === "pull" ? "pulls" : "issues"}/${match[4]}`,
+        });
     }
 
     return links;
@@ -302,8 +429,21 @@ function processUrl(
 }
 
 async function fetchCard(link: InternalLink): Promise<any> {
+    const cacheKey = `${link.type}:${link.param}`;
+    const cached = getCached(cacheKey);
+    if (cached !== undefined) return cached;
+
     try {
-        switch (link.type) {
+        const result = await fetchCardData(link);
+        if (result !== null) setCache(cacheKey, result);
+        return result;
+    } catch {
+        return null;
+    }
+}
+
+async function fetchCardData(link: InternalLink): Promise<any> {
+    switch (link.type) {
             case "user": {
                 const data = await $fetch<any>(
                     `/api/user/${link.param}`,
@@ -375,10 +515,14 @@ async function fetchCard(link: InternalLink): Promise<any> {
                     community_name: data.community_name,
                 };
             }
+            case "github": {
+                // param format: owner/repo/type/number
+                const [owner, repo, type, number] = link.param.split("/");
+                return await $fetch("/api/forum/github-preview", {
+                    query: { owner, repo, type, number },
+                });
+            }
         }
-    } catch {
-        return null;
-    }
 }
 
 watch(

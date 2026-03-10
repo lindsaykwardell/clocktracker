@@ -178,7 +178,7 @@ const isAdminUser = computed(() => {
 const allPermissions = [
   "CREATE_THREAD", "CREATE_POST", "EDIT_OWN_POST", "DELETE_OWN_POST",
   "EDIT_ANY_POST", "DELETE_ANY_POST", "LOCK_THREAD", "PIN_THREAD",
-  "BAN_USER", "MANAGE_CATEGORIES",
+  "BAN_USER", "MANAGE_CATEGORIES", "GITHUB",
 ];
 
 const groups = ref<any[]>([]);

@@ -27,6 +27,7 @@ export type ForumCategory = {
   is_private: boolean;
   group_id: string | null;
   threadCount: number;
+  unread_count?: number;
   lastPost: {
     threadId: string;
     threadTitle: string;
@@ -47,6 +48,9 @@ export type ForumThread = {
   is_locked: boolean;
   created_at: string;
   last_post_at: string;
+  github_issue_url?: string | null;
+  has_unread?: boolean;
+  is_subscribed?: boolean;
   author: ForumUser;
   _count: { posts: number };
 };
@@ -97,6 +101,7 @@ export type ThreadDetailResponse = {
   page: number;
   perPage: number;
   subscribed: boolean;
+  firstUnreadPostId: string | null;
 };
 
 export const useForum = defineStore("forum", {
@@ -129,12 +134,14 @@ export const useForum = defineStore("forum", {
       }
     },
 
-    async fetchThread(threadId: string, page = 1) {
+    async fetchThread(threadId: string, page = 1, unread = false) {
       this.threadDetail.set(threadId, { status: Status.LOADING });
       try {
+        const params: Record<string, any> = { page };
+        if (unread) params.unread = "1";
         const data = await $fetch<ThreadDetailResponse>(
           `/api/forum/threads/${threadId}`,
-          { params: { page } }
+          { params }
         );
         this.threadDetail.set(threadId, { status: Status.SUCCESS, data });
       } catch (err) {

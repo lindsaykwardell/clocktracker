@@ -114,6 +114,11 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
+    githubAppId: process.env.GITHUB_APP_ID ?? "",
+    githubPrivateKey: process.env.GITHUB_PRIVATE_KEY ?? "",
+    githubInstallationId: process.env.GITHUB_INSTALLATION_ID ?? "",
+    githubRepoOwner: process.env.GITHUB_REPO_OWNER ?? "lindsaykwardell",
+    githubRepoName: process.env.GITHUB_REPO_NAME ?? "clocktracker",
     public: {
       assetVersion: process.env.NUXT_PUBLIC_ASSET_VERSION ?? "v1",
     },

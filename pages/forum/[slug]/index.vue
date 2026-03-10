@@ -33,7 +33,7 @@
           <nuxt-link
             v-for="thread in threadData.data.threads"
             :key="thread.id"
-            :to="`/forum/${slug}/${thread.id}`"
+            :to="threadLink(thread)"
             class="flex items-center justify-between p-4 rounded border
                    border-stone-300 dark:border-stone-700/50
                    bg-stone-300/40 dark:bg-stone-900/50
@@ -41,15 +41,21 @@
                    transition-colors"
           >
             <div class="flex items-center gap-3 min-w-0">
-              <Avatar
-                :value="thread.author.avatar"
-                size="sm"
-                class="border-stone-800 shrink-0"
-                background
-              />
+              <div class="relative shrink-0">
+                <Avatar
+                  :value="thread.author.avatar"
+                  size="sm"
+                  class="border-stone-800"
+                  background
+                />
+                <span
+                  v-if="thread.has_unread"
+                  class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-primary border-2 border-stone-100 dark:border-stone-900"
+                />
+              </div>
               <div class="min-w-0">
                 <div class="flex items-center gap-2">
-                  <h3 class="font-semibold truncate">{{ thread.title }}</h3>
+                  <h3 class="font-semibold truncate" :class="thread.has_unread ? '' : 'text-stone-400 dark:text-stone-500'">{{ thread.title }}</h3>
                   <div class="flex items-center gap-1 shrink-0" v-if="thread.is_pinned || thread.is_locked">
                     <IconUI v-if="thread.is_pinned" id="pin" size="sm" class="text-primary" />
                     <Badge v-if="thread.is_locked" color="caution" size="sm">Locked</Badge>
@@ -61,9 +67,18 @@
                 </p>
               </div>
             </div>
-            <div class="text-right text-sm text-stone-500 dark:text-stone-400 shrink-0 ml-4">
-              <div>{{ thread._count.posts }} posts</div>
-              <div class="text-xs">{{ formatDate(thread.last_post_at) }}</div>
+            <div class="flex items-center gap-2 shrink-0 ml-4">
+              <IconUI
+                v-if="thread.is_subscribed"
+                id="star"
+                size="sm"
+                class="text-primary shrink-0"
+                title="Subscribed"
+              />
+              <div class="text-right text-sm text-stone-500 dark:text-stone-400">
+                <div>{{ thread._count.posts }} posts</div>
+                <div class="text-xs">{{ formatDate(thread.last_post_at) }}</div>
+              </div>
             </div>
           </nuxt-link>
         </div>
@@ -144,6 +159,16 @@ const categoryDescription = computed(() => {
   if (data?.status === Status.SUCCESS) return data.data.category.description;
   return null;
 });
+
+function threadLink(thread: { id: string; has_unread?: boolean; _count: { posts: number } }) {
+  const base = `/forum/${slug.value}/${thread.id}`;
+  if (thread.has_unread) return `${base}?unread=1`;
+  // If all read and multi-page, go to last page
+  const perPage = 25;
+  const lastPage = Math.ceil(thread._count.posts / perPage);
+  if (lastPage > 1) return `${base}?page=${lastPage}`;
+  return base;
+}
 
 function formatDate(date: string) {
   return new Intl.DateTimeFormat(navigator.language, {
