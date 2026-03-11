@@ -2,6 +2,7 @@ import { PrivacySetting } from "~/server/generated/prisma/client";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import type { GameRecord } from "~/server/utils/anonymizeGame";
 import { prisma } from "~/server/utils/prisma";
+import { hasPermission } from "~/server/utils/permissions";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
@@ -47,13 +48,15 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
+  const canViewPrivate = me ? await hasPermission(me.id, "VIEW_PRIVATE_GAMES") : false;
+
   // If the community is private, only members can see the games
   // But it's not an error.
   const isMember = community.members.some(
     (member) => member.user_id === me?.id
   );
 
-  if (community.is_private && !isMember) {
+  if (community.is_private && !isMember && !canViewPrivate) {
     return [];
   }
 
@@ -62,7 +65,7 @@ export default defineEventHandler(async (handler) => {
     where: {
       deleted: false,
       community_id: community.id,
-      ...(isMember ? {} : { privacy: PrivacySetting.PUBLIC }),
+      ...(isMember || canViewPrivate ? {} : { privacy: PrivacySetting.PUBLIC }),
       parent_game_id: null,
     },
     include: {
@@ -216,7 +219,7 @@ export default defineEventHandler(async (handler) => {
       await anonymizeGame(
         game as GameRecord,
         me,
-        false // always default to anonymous when loading on a community page
+        canViewPrivate // bypass anonymization for users with VIEW_PRIVATE_GAMES
       )
     );
   }

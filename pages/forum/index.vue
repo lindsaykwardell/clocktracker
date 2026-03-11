@@ -12,7 +12,7 @@
           <nuxt-link to="/forum/search">
             <Button size="xs" color="secondary" icon="search">Search</Button>
           </nuxt-link>
-          <nuxt-link v-if="canAccessAdmin" to="/forum/admin">
+          <nuxt-link v-if="canAccessAdmin" to="/admin">
             <Button size="xs" color="caution" icon="edit">Admin</Button>
           </nuxt-link>
         </div>
@@ -70,13 +70,13 @@ import { Status } from "~/composables/useFetchStatus";
 const forum = useForum();
 const me = useMe();
 
-const MOD_PERMISSIONS = [
-  "EDIT_ANY_POST",
-  "DELETE_ANY_POST",
-  "LOCK_THREAD",
-  "PIN_THREAD",
-  "BAN_USER",
+const ADMIN_PAGE_PERMISSIONS = [
   "MANAGE_CATEGORIES",
+  "MANAGE_GROUPS",
+  "BAN_USER",
+  "MANAGE_FEATURE_FLAGS",
+  "VIEW_REPORTS",
+  "VIEW_MOD_LOG",
 ];
 
 const forumMe = ref<{ permissions: string[]; is_admin: boolean } | null>(null);
@@ -84,7 +84,7 @@ const forumMe = ref<{ permissions: string[]; is_admin: boolean } | null>(null);
 const canAccessAdmin = computed(() => {
   if (!forumMe.value) return false;
   if (forumMe.value.is_admin) return true;
-  return forumMe.value.permissions.some((p) => MOD_PERMISSIONS.includes(p));
+  return forumMe.value.permissions.some((p) => ADMIN_PAGE_PERMISSIONS.includes(p));
 });
 
 onMounted(async () => {

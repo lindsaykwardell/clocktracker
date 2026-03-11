@@ -1,10 +1,13 @@
 import { WhoCanRegister } from "~/server/generated/prisma/client";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
+import { hasPermission } from "~/server/utils/permissions";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
   const slug = handler.context.params!.slug;
+
+  const canViewPrivate = me ? await hasPermission(me.id, "VIEW_PRIVATE_COMMUNITIES") : false;
 
   const [isModerator, isPendingMember, isBanned] = await Promise.all([
     prisma.community.findFirst({
@@ -297,7 +300,7 @@ export default defineEventHandler(async (handler) => {
     (member) => member.user_id === (me?.id || "")
   );
 
-  if (isBanned || (community.is_private && !isMember)) {
+  if (isBanned || (community.is_private && !isMember && !canViewPrivate)) {
     community.members = [];
     community.admins = [];
     community.posts = [];

@@ -135,10 +135,10 @@
                     Search
                 </NavLink>
             </li>
-            <li v-if="me.status === Status.SUCCESS && me.data.is_admin">
+            <li v-if="canAccessAdmin">
                 <NavLink
                     id="admin"
-                    to="/admin/feature-flags"
+                    to="/admin"
                     icon="tor"
                     title="Admin"
                 >
@@ -201,17 +201,34 @@
 </template>
 
 <script setup lang="ts">
+import { Status } from "~/composables/useFetchStatus";
+
+const ADMIN_PAGE_PERMISSIONS = [
+  "MANAGE_CATEGORIES", "MANAGE_GROUPS", "BAN_USER",
+  "MANAGE_FEATURE_FLAGS", "VIEW_REPORTS", "VIEW_MOD_LOG",
+];
+
 const { showMenu, toggleSidebar, closeSidebar, isMobile } = useSidebarState();
 const me = useMe();
 const friends = useFriends();
 const featureFlags = useFeatureFlags();
 const forumUnreadCount = ref(0);
+const canAccessAdmin = ref(false);
 
 onMounted(async () => {
   if (featureFlags.isEnabled('forum')) {
     try {
       const data = await $fetch<{ count: number }>("/api/forum/subscriptions/unread-count");
       forumUnreadCount.value = data.count;
+    } catch {}
+  }
+
+  if (me.value.status === Status.SUCCESS && me.value.data.is_admin) {
+    canAccessAdmin.value = true;
+  } else {
+    try {
+      const forumMe = await $fetch<{ permissions: string[] }>("/api/forum/me");
+      canAccessAdmin.value = forumMe.permissions.some((p) => ADMIN_PAGE_PERMISSIONS.includes(p));
     } catch {}
   }
 });

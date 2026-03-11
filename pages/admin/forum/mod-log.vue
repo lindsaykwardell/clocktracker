@@ -1,5 +1,5 @@
 <template>
-  <ForumAdminTemplate title="Mod Log" :has-access="true">
+  <AdminTemplate title="Mod Log" :has-access="canViewModLog">
 
       <Loading v-if="loading" />
       <p v-else-if="logs.length === 0" class="text-center py-8 text-stone-400">
@@ -55,11 +55,27 @@
           </Button>
         </div>
       </div>
-  </ForumAdminTemplate>
+  </AdminTemplate>
 </template>
 
 <script setup lang="ts">
+import { Status } from "~/composables/useFetchStatus";
+
 definePageMeta({ middleware: "auth" });
+
+const me = useMe();
+const forumMe = ref<{ permissions: string[]; is_admin: boolean } | null>(null);
+
+const isAdminUser = computed(() => {
+  const meVal = me.value;
+  return meVal.status === Status.SUCCESS && meVal.data.is_admin;
+});
+
+const canViewModLog = computed(() => {
+  if (isAdminUser.value) return true;
+  if (!forumMe.value) return false;
+  return forumMe.value.permissions.includes("VIEW_MOD_LOG");
+});
 
 type ResolvedTarget = {
   label: string;
@@ -121,7 +137,17 @@ function formatDate(date: string) {
   }).format(new Date(date));
 }
 
-onMounted(fetchLogs);
+onMounted(async () => {
+  try {
+    forumMe.value = await $fetch("/api/forum/me");
+  } catch {}
+  if (canViewModLog.value) fetchLogs();
+});
+
+watch(canViewModLog, (val) => {
+  if (val) fetchLogs();
+});
+
 watch(page, fetchLogs);
 
 useHead({ title: "Mod Log" });
