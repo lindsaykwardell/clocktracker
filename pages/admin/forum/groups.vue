@@ -239,7 +239,11 @@
               <div class="flex gap-2 items-end">
                 <div class="flex flex-col gap-1 flex-1">
                   <label class="text-xs text-stone-500">Add user by username</label>
-                  <Input v-model="addMemberUsername[group.id]" placeholder="username" />
+                  <UserSearchInput
+                    :ref="(el: any) => memberSearchRefs[group.id] = el"
+                    placeholder="Search for a user..."
+                    @select="addMemberUsername[group.id] = $event"
+                  />
                 </div>
                 <Button size="sm" color="primary" @click="addMember(group.id)">Add</Button>
               </div>
@@ -286,6 +290,7 @@ const PERMISSION_LABELS: Record<string, string> = {
   VIEW_PRIVATE_USERS: "View Private Users",
   VIEW_PRIVATE_GAMES: "View Private Games",
   VIEW_PRIVATE_COMMUNITIES: "View Private Communities",
+  EXPORT_USER_DATA: "Export User Data",
   GITHUB: "GitHub Integration",
 };
 
@@ -310,7 +315,7 @@ const permissionGroups = [
   },
   {
     label: "Administration",
-    permissions: ["MANAGE_CATEGORIES", "MANAGE_GROUPS", "MANAGE_FEATURE_FLAGS", "VIEW_REPORTS", "VIEW_MOD_LOG", "VIEW_PRIVATE_USERS", "VIEW_PRIVATE_GAMES", "VIEW_PRIVATE_COMMUNITIES", "GITHUB"],
+    permissions: ["MANAGE_CATEGORIES", "MANAGE_GROUPS", "MANAGE_FEATURE_FLAGS", "VIEW_REPORTS", "VIEW_MOD_LOG", "VIEW_PRIVATE_USERS", "VIEW_PRIVATE_GAMES", "VIEW_PRIVATE_COMMUNITIES", "EXPORT_USER_DATA", "GITHUB"],
   },
 ];
 
@@ -347,6 +352,7 @@ const showNewGroup = ref(false);
 const groupError = ref("");
 const addMemberUsername = reactive<Record<string, string>>({});
 const memberError = reactive<Record<string, string>>({});
+const memberSearchRefs = reactive<Record<string, any>>({});
 const newGroup = reactive({
   name: "",
   permissions: [] as string[],
@@ -401,6 +407,7 @@ async function addMember(groupId: string) {
       body: { user_id: userResult.user_id },
     });
     addMemberUsername[groupId] = "";
+    memberSearchRefs[groupId]?.clear();
     await fetchGroups();
   } catch (err: any) {
     memberError[groupId] = err?.data?.statusMessage || "Failed to add member";
