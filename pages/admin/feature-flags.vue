@@ -1,15 +1,6 @@
 <template>
-  <StandardTemplate>
-    <div class="px-4 lg:px-8 pt-4 lg:pt-8 pb-4 lg:pb-8 max-w-4xl mx-auto">
-      <h1 class="font-sorts text-2xl lg:text-3xl mb-6">Feature Flags</h1>
-
-      <template v-if="!isAdmin">
-        <p class="text-center py-8 text-stone-400">
-          You do not have permission to access this page.
-        </p>
-      </template>
-
-      <template v-else-if="loading">
+  <AdminTemplate title="Feature Flags" :has-access="isAdmin">
+      <template v-if="loading">
         <Loading />
       </template>
 
@@ -195,8 +186,7 @@
           </p>
         </div>
       </template>
-    </div>
-  </StandardTemplate>
+  </AdminTemplate>
 </template>
 
 <script setup lang="ts">
@@ -223,9 +213,12 @@ type Flag = {
 };
 
 const me = useMe();
+const forumMe = ref<{ permissions: string[]; is_admin: boolean } | null>(null);
+
 const isAdmin = computed(() => {
-  const meVal = me.value;
-  return meVal.status === Status.SUCCESS && meVal.data.is_admin;
+  if (me.value.status === Status.SUCCESS && me.value.data.is_admin) return true;
+  if (!forumMe.value) return false;
+  return forumMe.value.permissions.includes("MANAGE_FEATURE_FLAGS");
 });
 
 const flags = ref<Flag[]>([]);
@@ -402,7 +395,16 @@ async function removeUser(flagId: number, userId: string) {
   }
 }
 
-onMounted(() => fetchFlags());
+onMounted(async () => {
+  try {
+    forumMe.value = await $fetch("/api/forum/me");
+  } catch {}
+  if (isAdmin.value) fetchFlags();
+});
+
+watch(isAdmin, (val) => {
+  if (val) fetchFlags();
+});
 
 useHead({ title: "Feature Flags" });
 </script>

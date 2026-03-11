@@ -1,6 +1,6 @@
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
-import { isAdmin, isModerator, forumUserSelect } from "~/server/utils/forum";
+import { hasPermission, forumUserSelect } from "~/server/utils/forum";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
@@ -8,9 +8,7 @@ export default defineEventHandler(async (handler) => {
     throw createError({ status: 401, statusMessage: "Unauthorized" });
   }
 
-  const admin = await isAdmin(me.id);
-  const mod = await isModerator(me.id);
-  if (!admin && !mod) {
+  if (!(await hasPermission(me.id, "VIEW_REPORTS"))) {
     throw createError({ status: 403, statusMessage: "Forbidden" });
   }
 

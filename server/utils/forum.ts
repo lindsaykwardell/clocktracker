@@ -1,4 +1,14 @@
 import { prisma } from "./prisma";
+export {
+  isAdmin,
+  hasPermission,
+  getUserPermissions,
+  getUserRestrictions,
+  hasRestriction,
+  getUserPermissions as getUserForumPermissions,
+  hasPermission as hasForumPermission,
+} from "./permissions";
+import { isAdmin, getUserPermissions, hasRestriction } from "./permissions";
 
 // Lightweight user select for forum responses
 export const forumUserSelect = {
@@ -8,53 +18,6 @@ export const forumUserSelect = {
   avatar: true,
   created_at: true,
 } as const;
-
-// Default permissions for users with no group memberships
-const DEFAULT_PERMISSIONS = [
-  "CREATE_THREAD",
-  "CREATE_POST",
-  "EDIT_OWN_POST",
-  "DELETE_OWN_POST",
-];
-
-export async function isAdmin(userId: string): Promise<boolean> {
-  const user = await prisma.userSettings.findUnique({
-    where: { user_id: userId },
-    select: { is_admin: true },
-  });
-  return user?.is_admin ?? false;
-}
-
-export async function getUserForumPermissions(
-  userId: string
-): Promise<string[]> {
-  const memberships = await prisma.userGroupMembership.findMany({
-    where: { user_id: userId },
-    include: { group: true },
-  });
-
-  if (memberships.length === 0) {
-    return DEFAULT_PERMISSIONS;
-  }
-
-  const permissions = new Set<string>(DEFAULT_PERMISSIONS);
-  for (const m of memberships) {
-    for (const p of m.group.permissions) {
-      permissions.add(p);
-    }
-  }
-  return Array.from(permissions);
-}
-
-export async function hasForumPermission(
-  userId: string,
-  permission: string
-): Promise<boolean> {
-  if (await isAdmin(userId)) return true;
-
-  const permissions = await getUserForumPermissions(userId);
-  return permissions.includes(permission);
-}
 
 export async function userCanViewCategory(
   userId: string | null,
@@ -78,7 +41,7 @@ export async function userCanViewCategory(
 }
 
 export async function isModerator(userId: string): Promise<boolean> {
-  const permissions = await getUserForumPermissions(userId);
+  const permissions = await getUserPermissions(userId);
   return (
     permissions.includes("EDIT_ANY_POST") ||
     permissions.includes("DELETE_ANY_POST") ||
@@ -101,8 +64,8 @@ export async function userCanPostInCategory(
     return await isModerator(userId);
   }
 
-  const hasPermission = await hasForumPermission(userId, "CREATE_POST");
-  if (!hasPermission) return false;
+  // Users can post by default unless restricted
+  if (await hasRestriction(userId, "CREATE_POST")) return false;
 
   if (!isPrivate) return true;
 
@@ -305,7 +268,7 @@ export async function checkPostLength(
   if (body.length <= POST_BODY_MAX_LENGTH) return;
   if (await isAdmin(userId)) return;
 
-  const permissions = await getUserForumPermissions(userId);
+  const permissions = await getUserPermissions(userId);
   const isModerator = permissions.includes("EDIT_ANY_POST") || permissions.includes("DELETE_ANY_POST");
   if (isModerator) return;
 

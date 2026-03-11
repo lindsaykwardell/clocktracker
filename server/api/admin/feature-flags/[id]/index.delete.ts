@@ -1,16 +1,12 @@
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
+import { hasPermission } from "~/server/utils/permissions";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
   if (!me) throw createError({ status: 401, statusMessage: "Unauthorized" });
 
-  const admin = await prisma.userSettings.findUnique({
-    where: { user_id: me.id },
-    select: { is_admin: true },
-  });
-
-  if (!admin?.is_admin) {
+  if (!(await hasPermission(me.id, "MANAGE_FEATURE_FLAGS"))) {
     throw createError({ status: 403, statusMessage: "Forbidden" });
   }
 

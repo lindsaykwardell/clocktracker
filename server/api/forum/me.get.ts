@@ -1,17 +1,18 @@
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
-import { getUserForumPermissions, isAdmin } from "~/server/utils/forum";
+import { getUserForumPermissions, getUserRestrictions, isAdmin } from "~/server/utils/forum";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
 
   if (!me) {
-    return { permissions: [], is_admin: false };
+    return { permissions: [], restrictions: [], is_admin: false };
   }
 
-  const [permissions, admin] = await Promise.all([
+  const [permissions, restrictions, admin] = await Promise.all([
     getUserForumPermissions(me.id),
+    getUserRestrictions(me.id),
     isAdmin(me.id),
   ]);
 
-  return { permissions, is_admin: admin };
+  return { permissions, restrictions, is_admin: admin };
 });

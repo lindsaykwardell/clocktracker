@@ -2,6 +2,7 @@ import { WhoCanRegister } from "~/server/generated/prisma/client";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { fetchEventAndUpdateDiscord } from "~/server/utils/fetchEventAndUpdateDiscord";
 import { prisma } from "~/server/utils/prisma";
+import { hasRestriction } from "~/server/utils/permissions";
 
 // In-memory rate limit cache with TTL-based eviction
 const rateLimitCache = new Map<string, { last: string; requests: number }>();
@@ -124,6 +125,13 @@ export default defineEventHandler(async (handler) => {
     throw createError({
       status: 400,
       statusMessage: "Bad Request",
+    });
+  }
+
+  if (me && await hasRestriction(me.id, "REGISTER_FOR_EVENT")) {
+    throw createError({
+      status: 403,
+      statusMessage: "Forbidden",
     });
   }
 

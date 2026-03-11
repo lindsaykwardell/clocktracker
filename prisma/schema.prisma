@@ -568,14 +568,15 @@ model LSGame {
 // ---- Forum ----
 
 model UserGroup {
-  id          String                @id @default(uuid())
-  name        String                @unique
-  permissions String[]
-  is_default  Boolean               @default(false)
-  color       String?
-  created_at  DateTime              @default(now()) @db.Timestamptz(6)
-  members     UserGroupMembership[]
-  categories  CategoryAccess[]
+  id           String                @id @default(uuid())
+  name         String                @unique
+  permissions  String[]
+  restrictions String[]              @default([])
+  is_default   Boolean               @default(false)
+  color        String?
+  created_at   DateTime              @default(now()) @db.Timestamptz(6)
+  members      UserGroupMembership[]
+  categories   CategoryAccess[]
 }
 
 model UserGroupMembership {

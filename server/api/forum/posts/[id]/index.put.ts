@@ -1,6 +1,6 @@
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
-import { forumUserSelect, hasForumPermission, checkPostLength } from "~/server/utils/forum";
+import { forumUserSelect, hasForumPermission, checkPostLength, hasRestriction } from "~/server/utils/forum";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
@@ -26,7 +26,7 @@ export default defineEventHandler(async (handler) => {
 
   const isAuthor = post.author_id === me.id;
   const canEditOwn =
-    isAuthor && (await hasForumPermission(me.id, "EDIT_OWN_POST"));
+    isAuthor && !(await hasRestriction(me.id, "EDIT_OWN_POST"));
   const canEditAny = await hasForumPermission(me.id, "EDIT_ANY_POST");
 
   if (!canEditOwn && !canEditAny) {
