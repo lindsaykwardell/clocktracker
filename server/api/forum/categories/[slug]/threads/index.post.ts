@@ -6,6 +6,7 @@ import {
   checkForumBan,
   isRateLimited,
   checkPostLength,
+  hasRestriction,
 } from "~/server/utils/forum";
 
 export default defineEventHandler(async (handler) => {
@@ -31,6 +32,10 @@ export default defineEventHandler(async (handler) => {
 
   if (!category) {
     throw createError({ status: 404, statusMessage: "Not Found" });
+  }
+
+  if (await hasRestriction(me.id, "CREATE_THREAD")) {
+    throw createError({ status: 403, statusMessage: "Forbidden" });
   }
 
   const canPost = await userCanPostInCategory(

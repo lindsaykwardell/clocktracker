@@ -3,6 +3,7 @@ import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { addUserKofiLevel } from "../utils/addUserKofiLevel";
 import geolib from "geolib";
 import { prisma } from "~/server/utils/prisma";
+import { hasPermission } from "~/server/utils/permissions";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
@@ -238,6 +239,31 @@ export default defineEventHandler(async (handler) => {
       })
     : null;
 
+  const canViewPrivateUsers = me ? await hasPermission(me.id, "VIEW_PRIVATE_USERS") : false;
+
+  const userPrivacyFilter = canViewPrivateUsers
+    ? []
+    : [
+        {
+          OR: [
+            {
+              privacy: PrivacySetting.PUBLIC,
+            },
+            {
+              privacy: PrivacySetting.PRIVATE,
+            },
+            {
+              privacy: PrivacySetting.FRIENDS_ONLY,
+              friends: {
+                some: {
+                  friend_id: me?.id || "",
+                },
+              },
+            },
+          ],
+        },
+      ];
+
   const usersPromise = query.length >= 3
     ? prisma.userSettings.findMany({
         where: {
@@ -255,26 +281,7 @@ export default defineEventHandler(async (handler) => {
               },
             },
           ],
-          AND: [
-            {
-              OR: [
-                {
-                  privacy: PrivacySetting.PUBLIC,
-                },
-                {
-                  privacy: PrivacySetting.PRIVATE,
-                },
-                {
-                  privacy: PrivacySetting.FRIENDS_ONLY,
-                  friends: {
-                    some: {
-                      friend_id: me?.id || "",
-                    },
-                  },
-                },
-              ],
-            },
-          ],
+          AND: userPrivacyFilter,
         },
         select: {
           user_id: true,

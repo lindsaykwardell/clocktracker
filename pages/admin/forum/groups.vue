@@ -33,9 +33,34 @@
                   :class="newGroup.permissions.includes(perm)
                     ? 'bg-primary border-primary text-white'
                     : 'border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 hover:border-stone-400 dark:hover:border-stone-500'"
-                  @click="togglePermission(newGroup.permissions, perm)"
+                  @click="toggleListItem(newGroup.permissions, perm)"
                 >
                   {{ PERMISSION_LABELS[perm] }}
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-semibold">Restrictions</label>
+            <p class="text-xs text-stone-500">Members of this group will be blocked from these actions.</p>
+            <div
+              v-for="rg in restrictionGroups"
+              :key="rg.label"
+              class="flex flex-col gap-1.5"
+            >
+              <span class="text-xs font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wide">{{ rg.label }}</span>
+              <div class="flex flex-wrap gap-1.5">
+                <button
+                  v-for="r in rg.restrictions"
+                  :key="r"
+                  type="button"
+                  class="px-2.5 py-1 text-xs rounded-full border transition-colors"
+                  :class="newGroup.restrictions.includes(r)
+                    ? 'bg-red-600 border-red-600 text-white'
+                    : 'border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 hover:border-stone-400 dark:hover:border-stone-500'"
+                  @click="toggleListItem(newGroup.restrictions, r)"
+                >
+                  {{ RESTRICTION_LABELS[r] }}
                 </button>
               </div>
             </div>
@@ -92,9 +117,34 @@
                         :class="editUserGroup.permissions.includes(perm)
                           ? 'bg-primary border-primary text-white'
                           : 'border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 hover:border-stone-400 dark:hover:border-stone-500'"
-                        @click="togglePermission(editUserGroup.permissions, perm)"
+                        @click="toggleListItem(editUserGroup.permissions, perm)"
                       >
                         {{ PERMISSION_LABELS[perm] }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex flex-col gap-2">
+                  <label class="text-sm font-semibold">Restrictions</label>
+                  <p class="text-xs text-stone-500">Members of this group will be blocked from these actions.</p>
+                  <div
+                    v-for="rg in restrictionGroups"
+                    :key="rg.label"
+                    class="flex flex-col gap-1.5"
+                  >
+                    <span class="text-xs font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wide">{{ rg.label }}</span>
+                    <div class="flex flex-wrap gap-1.5">
+                      <button
+                        v-for="r in rg.restrictions"
+                        :key="r"
+                        type="button"
+                        class="px-2.5 py-1 text-xs rounded-full border transition-colors"
+                        :class="editUserGroup.restrictions.includes(r)
+                          ? 'bg-red-600 border-red-600 text-white'
+                          : 'border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 hover:border-stone-400 dark:hover:border-stone-500'"
+                        @click="toggleListItem(editUserGroup.restrictions, r)"
+                      >
+                        {{ RESTRICTION_LABELS[r] }}
                       </button>
                     </div>
                   </div>
@@ -140,13 +190,23 @@
                   </button>
                 </div>
               </div>
-              <div class="flex flex-wrap gap-1 mb-3">
+              <div class="flex flex-wrap gap-1 mb-1">
                 <span
                   v-for="perm in group.permissions"
                   :key="perm"
                   class="text-xs px-2 py-0.5 rounded-full bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300"
                 >
                   {{ PERMISSION_LABELS[perm] || perm }}
+                </span>
+                <span v-if="!group.permissions?.length" class="text-xs text-stone-400">No permissions</span>
+              </div>
+              <div v-if="group.restrictions?.length" class="flex flex-wrap gap-1 mb-3">
+                <span
+                  v-for="r in group.restrictions"
+                  :key="r"
+                  class="text-xs px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300"
+                >
+                  {{ RESTRICTION_LABELS[r] || r }}
                 </span>
               </div>
 
@@ -213,10 +273,6 @@ const canManageGroups = computed(() => {
 });
 
 const PERMISSION_LABELS: Record<string, string> = {
-  CREATE_THREAD: "Create Threads",
-  CREATE_POST: "Create Posts",
-  EDIT_OWN_POST: "Edit Own Posts",
-  DELETE_OWN_POST: "Delete Own Posts",
   EDIT_ANY_POST: "Edit Any Post",
   DELETE_ANY_POST: "Delete Any Post",
   LOCK_THREAD: "Lock Threads",
@@ -227,30 +283,62 @@ const PERMISSION_LABELS: Record<string, string> = {
   MANAGE_FEATURE_FLAGS: "Manage Feature Flags",
   VIEW_REPORTS: "View Reports",
   VIEW_MOD_LOG: "View Mod Log",
+  VIEW_PRIVATE_USERS: "View Private Users",
+  VIEW_PRIVATE_GAMES: "View Private Games",
+  VIEW_PRIVATE_COMMUNITIES: "View Private Communities",
   GITHUB: "GitHub Integration",
 };
 
+const RESTRICTION_LABELS: Record<string, string> = {
+  CREATE_THREAD: "Create Threads",
+  CREATE_POST: "Create Posts",
+  EDIT_OWN_POST: "Edit Own Posts",
+  DELETE_OWN_POST: "Delete Own Posts",
+  SEND_FRIEND_REQUEST: "Send Friend Requests",
+  JOIN_COMMUNITY: "Join Communities",
+  CREATE_COMMUNITY: "Create Communities",
+  CREATE_EVENT: "Create Events",
+  REGISTER_FOR_EVENT: "Register for Events",
+  UPLOAD_AVATAR: "Upload Avatar",
+  UPLOAD_ATTACHMENT: "Upload Attachments",
+};
+
 const permissionGroups = [
-  {
-    label: "Basic",
-    permissions: ["CREATE_THREAD", "CREATE_POST", "EDIT_OWN_POST", "DELETE_OWN_POST"],
-  },
   {
     label: "Moderation",
     permissions: ["EDIT_ANY_POST", "DELETE_ANY_POST", "LOCK_THREAD", "PIN_THREAD", "BAN_USER"],
   },
   {
     label: "Administration",
-    permissions: ["MANAGE_CATEGORIES", "MANAGE_GROUPS", "MANAGE_FEATURE_FLAGS", "VIEW_REPORTS", "VIEW_MOD_LOG", "GITHUB"],
+    permissions: ["MANAGE_CATEGORIES", "MANAGE_GROUPS", "MANAGE_FEATURE_FLAGS", "VIEW_REPORTS", "VIEW_MOD_LOG", "VIEW_PRIVATE_USERS", "VIEW_PRIVATE_GAMES", "VIEW_PRIVATE_COMMUNITIES", "GITHUB"],
   },
 ];
 
-function togglePermission(list: string[], perm: string) {
-  const idx = list.indexOf(perm);
+const restrictionGroups = [
+  {
+    label: "Forum",
+    restrictions: ["CREATE_THREAD", "CREATE_POST", "EDIT_OWN_POST", "DELETE_OWN_POST"],
+  },
+  {
+    label: "Social",
+    restrictions: ["SEND_FRIEND_REQUEST", "JOIN_COMMUNITY", "CREATE_COMMUNITY"],
+  },
+  {
+    label: "Events",
+    restrictions: ["CREATE_EVENT", "REGISTER_FOR_EVENT"],
+  },
+  {
+    label: "Uploads",
+    restrictions: ["UPLOAD_AVATAR", "UPLOAD_ATTACHMENT"],
+  },
+];
+
+function toggleListItem(list: string[], item: string) {
+  const idx = list.indexOf(item);
   if (idx >= 0) {
     list.splice(idx, 1);
   } else {
-    list.push(perm);
+    list.push(item);
   }
 }
 
@@ -262,6 +350,7 @@ const memberError = reactive<Record<string, string>>({});
 const newGroup = reactive({
   name: "",
   permissions: [] as string[],
+  restrictions: [] as string[],
   color: "",
 });
 
@@ -277,12 +366,14 @@ async function createGroup() {
       body: {
         name: newGroup.name,
         permissions: newGroup.permissions,
+        restrictions: newGroup.restrictions,
         color: newGroup.color || null,
       },
     });
     showNewGroup.value = false;
     newGroup.name = "";
     newGroup.permissions = [];
+    newGroup.restrictions = [];
     newGroup.color = "";
     await fetchGroups();
   } catch (err: any) {
@@ -331,6 +422,7 @@ const editingUserGroupId = ref<string | null>(null);
 const editUserGroup = reactive({
   name: "",
   permissions: [] as string[],
+  restrictions: [] as string[],
   color: "",
 });
 const editUserGroupError = ref("");
@@ -339,6 +431,7 @@ function startEditUserGroup(group: any) {
   editingUserGroupId.value = group.id;
   editUserGroup.name = group.name;
   editUserGroup.permissions = [...group.permissions];
+  editUserGroup.restrictions = [...(group.restrictions || [])];
   editUserGroup.color = group.color || "";
   editUserGroupError.value = "";
 }
@@ -352,6 +445,7 @@ async function saveEditUserGroup() {
       body: {
         name: editUserGroup.name.trim(),
         permissions: editUserGroup.permissions,
+        restrictions: editUserGroup.restrictions,
         color: editUserGroup.color || null,
       },
     });

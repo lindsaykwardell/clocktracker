@@ -1,6 +1,6 @@
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
-import { hasForumPermission, logModAction } from "~/server/utils/forum";
+import { hasForumPermission, hasRestriction, logModAction } from "~/server/utils/forum";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
@@ -29,7 +29,7 @@ export default defineEventHandler(async (handler) => {
 
   const isAuthor = post.author_id === me.id;
   const canDeleteOwn =
-    isAuthor && (await hasForumPermission(me.id, "DELETE_OWN_POST"));
+    isAuthor && !(await hasRestriction(me.id, "DELETE_OWN_POST"));
   const canDeleteAny = await hasForumPermission(me.id, "DELETE_ANY_POST");
 
   if (!canDeleteOwn && !canDeleteAny) {
