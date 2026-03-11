@@ -1,5 +1,5 @@
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
-import { Alignment, WinStatus_V2 } from "@prisma/client";
+import { Alignment, WinStatus_V2 } from "~/server/generated/prisma/client";
 import { mapOfficialIdToClocktrackerId } from "~/server/utils/getRoleMap";
 import { saveCustomScript, type UploadedScript } from "~/server/utils/customScript";
 import { prisma } from "~/server/utils/prisma";

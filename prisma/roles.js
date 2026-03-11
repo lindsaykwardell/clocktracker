@@ -1,4 +1,4 @@
-const { Alignment, RoleType } = require("@prisma/client");
+const { Alignment, RoleType } = require("../server/generated/prisma/client");
 const fs = require("fs");
 const path = require("path");
 const raw_roles = require("./roles.json");

@@ -114,6 +114,17 @@
           Scripts
         </NavLink>
       </li> -->
+            <li v-if="featureFlags.isEnabled('forum')">
+                <NavLink
+                    id="forum"
+                    to="/forum"
+                    icon="snitch"
+                    title="Discussions"
+                    :notificationCount="forumUnreadCount"
+                >
+                    Discussions
+                </NavLink>
+            </li>
             <li>
                 <NavLink
                     id="search"
@@ -122,6 +133,16 @@
                     title="Search"
                 >
                     Search
+                </NavLink>
+            </li>
+            <li v-if="me.status === Status.SUCCESS && me.data.is_admin">
+                <NavLink
+                    id="admin"
+                    to="/admin/feature-flags"
+                    icon="tor"
+                    title="Admin"
+                >
+                    Admin
                 </NavLink>
             </li>
         </ul>
@@ -183,6 +204,17 @@
 const { showMenu, toggleSidebar, closeSidebar, isMobile } = useSidebarState();
 const me = useMe();
 const friends = useFriends();
+const featureFlags = useFeatureFlags();
+const forumUnreadCount = ref(0);
+
+onMounted(async () => {
+  if (featureFlags.isEnabled('forum')) {
+    try {
+      const data = await $fetch<{ count: number }>("/api/forum/subscriptions/unread-count");
+      forumUnreadCount.value = data.count;
+    } catch {}
+  }
+});
 
 const handleNavClick = (event: MouseEvent) => {
     if (!isMobile.value) {
@@ -262,6 +294,17 @@ const handleNavClick = (event: MouseEvent) => {
     }
 }
 
+@media (min-width: 801px) {
+    #sidebar > ul > li {
+        margin-block-end: 0.5rem;
+    }
+
+    #sidebar li > a {
+        padding: 0.5rem;
+        font-size: 1rem;
+    }
+}
+
 @media (max-width: 800px) {
     #sidebar {
         position: fixed;
@@ -295,7 +338,7 @@ const handleNavClick = (event: MouseEvent) => {
 }
 
 #sidebar > ul > li {
-    margin-block-end: 0.5rem;
+    margin-block-end: 0.375rem;
 
     &:has(#sidebar-toggle) {
         display: flex;
@@ -332,8 +375,9 @@ const handleNavClick = (event: MouseEvent) => {
 #sidebar li > a {
     position: relative;
     border-radius: 0.5em;
-    padding: 0.5rem;
+    padding: 0.375rem 0.5rem;
     text-decoration: none;
+    font-size: 0.9rem;
 
     > span {
         flex-grow: 1;

@@ -305,7 +305,7 @@ import {
     ListboxOption,
     ListboxOptions,
 } from "@headlessui/vue";
-import type { LSCampaign, LSGame, Script } from "@prisma/client";
+import type { LSCampaign, LSGame, Script } from "~/server/generated/prisma/client";
 
 type LoadedLSCampaign = LSCampaign & { games: (LSGame & { script: Script })[] };
 

@@ -1,5 +1,5 @@
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
-import { Alignment, PrivacySetting } from "@prisma/client";
+import { Alignment, PrivacySetting } from "~/server/generated/prisma/client";
 import axios from "axios";
 // @ts-ignore
 import dayjs from "dayjs";

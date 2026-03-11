@@ -78,6 +78,11 @@
   .ct-btn-submenu {
     --btn-bg: var(--btn-color, theme(colors.white));
     --btn-fg: theme(colors.black);
+
+    &:where(.dark, .dark *) {
+      --btn-bg: var(--btn-color, theme(colors.stone.900));
+      --btn-fg: theme(colors.stone.100);
+    }
     --btn-p: .5rem .75rem;
     --btn-gap: 0.375rem;
 
@@ -144,9 +149,17 @@
       --btn-bg: var(--btn-color, theme(colors.stone.100));
     }
 
+    .ct-btn-submenu:hover:where(.dark, .dark *) {
+      --btn-bg: var(--btn-color, theme(colors.stone.800));
+    }
+
     @supports (color: color-mix(in lab, red, red)) {
       .ct-btn-submenu:hover {
         --btn-bg: color-mix(in oklab, var(--btn-color, theme(colors.stone.100)), #000 5%);
+      }
+
+      .ct-btn-submenu:hover:where(.dark, .dark *) {
+        --btn-bg: color-mix(in oklab, var(--btn-color, theme(colors.stone.800)), #fff 5%);
       }
     }
   }
@@ -156,10 +169,20 @@
     --btn-bg: var(--btn-color, theme(colors.white));
   }
 
+  .ct-btn-submenu-soft:not(.ct-btn-submenu-active,:hover,:active:focus,:focus-visible,:disabled,[disabled],.ct-btn-submenu-disabled):where(.dark, .dark *) {
+    --btn-fg: var(--btn-color, theme(colors.stone.100));
+    --btn-bg: var(--btn-color, theme(colors.stone.900));
+  }
+
   @supports (color: color-mix(in lab,red,red)) {
     .ct-btn-submenu-soft:not(.ct-btn-submenu-active,:hover,:active:focus,:focus-visible,:disabled,[disabled],.ct-btn-submenu-disabled) {
       --btn-fg: color-mix(in oklab, var(--btn-color, theme(colors.black)), #000 10%);
       --btn-bg: color-mix(in oklab, var(--btn-color, theme(colors.white)) 1%, theme(colors.white));
+    }
+
+    .ct-btn-submenu-soft:not(.ct-btn-submenu-active,:hover,:active:focus,:focus-visible,:disabled,[disabled],.ct-btn-submenu-disabled):where(.dark, .dark *) {
+      --btn-fg: color-mix(in oklab, var(--btn-color, theme(colors.stone.100)), #fff 10%);
+      --btn-bg: color-mix(in oklab, var(--btn-color, theme(colors.stone.900)) 1%, theme(colors.stone.900));
     }
   }
 

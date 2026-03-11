@@ -1,4 +1,4 @@
-import type { FavoriteGame } from "@prisma/client";
+import type { FavoriteGame } from "~/server/generated/prisma/client";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
 

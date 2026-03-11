@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Role } from "@prisma/client";
+import type { Role } from "~/server/generated/prisma/client";
 const props = defineProps<{
   role: Role & { _count: { scripts: number; games: number } };
 }>();

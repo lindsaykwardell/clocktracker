@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma } from "~/server/generated/prisma/client";
 import { prisma } from "~/server/utils/prisma";
 
 export default defineEventHandler(async (handler) => {

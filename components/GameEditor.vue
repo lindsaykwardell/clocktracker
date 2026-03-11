@@ -485,7 +485,7 @@
       </details>
     </fieldset>
     <fieldset class="border rounded border-stone-500 p-4 my-3">
-      <legend>Notes</legend>
+      <legend class="flex items-center gap-2">Notes <MarkdownHelp /></legend>
       <ExpandingTextarea
         v-if="!editingMultipleGames"
         v-model="game.notes"
@@ -612,7 +612,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Alignment } from "@prisma/client";
+import type { Alignment } from "~/server/generated/prisma/client";
 import type { RoleType } from "~/composables/useRoles";
 import naturalOrder from "natural-order";
 import { useLocalStorage } from "@vueuse/core";

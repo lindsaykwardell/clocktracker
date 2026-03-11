@@ -100,6 +100,10 @@
   const MenuClose = resolveComponent("IconMenuClose");
   const Sun = resolveComponent("IconSun");
   const Moon = resolveComponent("IconMoon");
+  const Search = resolveComponent("IconSearch");
+  const Pin = resolveComponent("IconPin");
+  const Lock = resolveComponent("IconLock");
+  const Unlock = resolveComponent("IconUnlock");
 
   // Socials
   const Website = resolveComponent("IconGlobe");
@@ -237,7 +241,15 @@
       case "sun":
         return Sun;
       case "moon":
-        return Moon;            
+        return Moon;
+      case "search":
+        return Search;
+      case "pin":
+        return Pin;
+      case "lock":
+        return Lock;
+      case "unlock":
+        return Unlock;
       default:
         return EyeSlash;
     }

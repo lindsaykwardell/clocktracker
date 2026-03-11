@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "~/server/generated/prisma/client";
 import dayjs from "dayjs";
 
 export async function getScriptsOfTheWeek(prisma: PrismaClient, limit = 5) {

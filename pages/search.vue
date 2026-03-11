@@ -101,7 +101,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Role } from "@prisma/client";
+import type { Role } from "~/server/generated/prisma/client";
 import { useGeolocation } from "@vueuse/core";
 const router = useRouter();
 const route = useRoute();
