@@ -1,14 +1,8 @@
 <template>
   <StandardTemplate>
     <div class="px-4 lg:px-8 pt-4 lg:pt-8 pb-4 lg:pb-8 max-w-4xl mx-auto">
-      <nuxt-link
-        to="/forum"
-        class="text-sm text-stone-500 dark:text-stone-400 hover:underline"
-      >
-        &larr; Discussions
-      </nuxt-link>
-      <h1 class="font-sorts text-2xl lg:text-3xl mt-2 mb-6">
-        Discussions Administration
+      <h1 class="font-sorts text-2xl lg:text-3xl mb-6">
+        Administration
       </h1>
 
       <template v-if="!canAccessAdmin">
@@ -20,29 +14,32 @@
       <template v-else>
         <!-- Navigation -->
         <div class="flex flex-wrap gap-2 mb-8">
-          <nuxt-link v-if="isAdminUser" to="/forum/admin/categories">
+          <nuxt-link v-if="canManageFeatureFlags" to="/admin/feature-flags">
+            <Button color="secondary" size="sm" icon="sign">Feature Flags</Button>
+          </nuxt-link>
+          <nuxt-link v-if="canManageCategories" to="/admin/forum/categories">
             <Button color="secondary" size="sm" icon="grid">Categories</Button>
           </nuxt-link>
-          <nuxt-link v-if="isAdminUser" to="/forum/admin/groups">
+          <nuxt-link v-if="canManageGroups" to="/admin/forum/groups">
             <Button color="secondary" size="sm" icon="players">User Groups</Button>
           </nuxt-link>
-          <nuxt-link v-if="canManageBans" to="/forum/admin/bans">
+          <nuxt-link v-if="canManageBans" to="/admin/forum/bans">
             <Button color="secondary" size="sm" icon="disabled">Banned Users</Button>
           </nuxt-link>
-          <nuxt-link to="/forum/admin/reports">
+          <nuxt-link v-if="canViewReports" to="/admin/forum/reports">
             <Button color="secondary" size="sm" icon="exclamation-circle">All Reports</Button>
           </nuxt-link>
-          <nuxt-link to="/forum/admin/mod-log">
+          <nuxt-link v-if="canViewModLog" to="/admin/forum/mod-log">
             <Button color="secondary" size="sm" icon="book">Full Mod Log</Button>
           </nuxt-link>
         </div>
 
         <div class="flex flex-col gap-8">
           <!-- Open Reports -->
-          <section>
+          <section v-if="canViewReports">
             <div class="flex items-center justify-between mb-3">
               <h2 class="font-sorts text-xl">Open Reports</h2>
-              <nuxt-link to="/forum/admin/reports" class="text-sm text-primary hover:underline">
+              <nuxt-link to="/admin/forum/reports" class="text-sm text-primary hover:underline">
                 View all &rarr;
               </nuxt-link>
             </div>
@@ -64,10 +61,10 @@
           </section>
 
           <!-- Recent Mod Actions -->
-          <section>
+          <section v-if="canViewModLog">
             <div class="flex items-center justify-between mb-3">
               <h2 class="font-sorts text-xl">Recent Mod Actions</h2>
-              <nuxt-link to="/forum/admin/mod-log" class="text-sm text-primary hover:underline">
+              <nuxt-link to="/admin/forum/mod-log" class="text-sm text-primary hover:underline">
                 View all &rarr;
               </nuxt-link>
             </div>
@@ -119,9 +116,9 @@ definePageMeta({ middleware: "auth" });
 const me = useMe();
 const forumMe = ref<{ permissions: string[]; is_admin: boolean } | null>(null);
 
-const MOD_PERMISSIONS = [
-  "EDIT_ANY_POST", "DELETE_ANY_POST", "LOCK_THREAD",
-  "PIN_THREAD", "BAN_USER", "MANAGE_CATEGORIES",
+const ADMIN_PAGE_PERMISSIONS = [
+  "MANAGE_CATEGORIES", "MANAGE_GROUPS", "BAN_USER",
+  "MANAGE_FEATURE_FLAGS", "VIEW_REPORTS", "VIEW_MOD_LOG",
 ];
 
 const isAdminUser = computed(() => {
@@ -132,14 +129,21 @@ const isAdminUser = computed(() => {
 const canAccessAdmin = computed(() => {
   if (isAdminUser.value) return true;
   if (!forumMe.value) return false;
-  return forumMe.value.permissions.some((p) => MOD_PERMISSIONS.includes(p));
+  return forumMe.value.permissions.some((p) => ADMIN_PAGE_PERMISSIONS.includes(p));
 });
 
-const canManageBans = computed(() => {
+function hasPerm(perm: string) {
   if (isAdminUser.value) return true;
   if (!forumMe.value) return false;
-  return forumMe.value.permissions.includes("BAN_USER");
-});
+  return forumMe.value.permissions.includes(perm);
+}
+
+const canManageCategories = computed(() => hasPerm("MANAGE_CATEGORIES"));
+const canManageGroups = computed(() => hasPerm("MANAGE_GROUPS"));
+const canManageBans = computed(() => hasPerm("BAN_USER"));
+const canManageFeatureFlags = computed(() => hasPerm("MANAGE_FEATURE_FLAGS"));
+const canViewReports = computed(() => hasPerm("VIEW_REPORTS"));
+const canViewModLog = computed(() => hasPerm("VIEW_MOD_LOG"));
 
 // Reports
 const reports = ref<ForumReport[]>([]);
@@ -244,13 +248,20 @@ onMounted(async () => {
   } catch {}
 
   if (canAccessAdmin.value) {
-    await Promise.all([fetchReports(), fetchLogs()]);
+    const fetches: Promise<void>[] = [];
+    if (canViewReports.value) fetches.push(fetchReports());
+    if (canViewModLog.value) fetches.push(fetchLogs());
+    await Promise.all(fetches);
   }
 });
 
 watch(canAccessAdmin, async (val) => {
-  if (val) await Promise.all([fetchReports(), fetchLogs()]);
+  if (!val) return;
+  const fetches: Promise<void>[] = [];
+  if (canViewReports.value) fetches.push(fetchReports());
+  if (canViewModLog.value) fetches.push(fetchLogs());
+  await Promise.all(fetches);
 });
 
-useHead({ title: "Discussions Admin" });
+useHead({ title: "Administration" });
 </script>

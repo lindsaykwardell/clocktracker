@@ -2,7 +2,7 @@
   <StandardTemplate>
     <div class="px-4 lg:px-8 pt-4 lg:pt-8 pb-4 lg:pb-8 max-w-4xl mx-auto">
       <nuxt-link
-        to="/forum/admin"
+        to="/admin"
         class="text-sm text-stone-500 dark:text-stone-400 hover:underline"
       >
         &larr; Administration
