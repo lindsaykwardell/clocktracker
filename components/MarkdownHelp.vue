@@ -2,7 +2,7 @@
   <div class="relative inline-block">
     <button
       type="button"
-      class="text-stone-400 hover:text-stone-200 transition-colors"
+      class="text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 transition-colors"
       title="Markdown help"
       @click="open = !open"
     >
@@ -17,7 +17,7 @@
     >
       <button
         type="button"
-        class="absolute top-1 right-1 text-stone-400 hover:text-stone-200"
+        class="absolute top-1 right-1 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200"
         @click="open = false"
       >
         <IconUI id="x" size="xs" />

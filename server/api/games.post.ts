@@ -1,6 +1,10 @@
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { type Game, type Character, type Token, type Grimoire, Alignment, type DemonBluff, type Fabled } from "~/server/generated/prisma/client";
 import { prisma } from "~/server/utils/prisma";
+import {
+  findOrCreatePlayerChildGame,
+  findOrCreateStorytellerChildGame,
+} from "~/server/utils/childGame";
 
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
@@ -84,6 +88,8 @@ export default defineEventHandler(async (handler) => {
         },
       },
       player_characters: true,
+      demon_bluffs: true,
+      fabled: true,
       grimoire: {
         include: {
           tokens: {
@@ -157,34 +163,11 @@ export default defineEventHandler(async (handler) => {
       }[],
     );
 
-    await prisma.game.create({
-      data: {
-        ...body,
-        is_storyteller: false,
-        storyteller:
-          newGame.is_storyteller && newGame.user
-            ? `@${newGame.user.username}`
-            : newGame.storyteller,
-        date: new Date(body.date),
-        user_id: id,
-        player_characters: {
-          create: [...player_characters],
-        },
-        demon_bluffs: {
-          create: [...body.demon_bluffs],
-        },
-        fabled: {
-          create: [...body.fabled],
-        },
-        notes: "",
-        // map the already created grimoires to the new game
-        grimoire: {
-          connect: newGame.grimoire.map((g) => ({ id: g.id })),
-        },
-        parent_game_id: newGame.id,
-        waiting_for_confirmation: true,
-        tags: [],
-      },
+    await findOrCreatePlayerChildGame({
+      game: newGame,
+      playerId: id,
+      playerCharacters: player_characters,
+      relatedGames: [], // new game has no children yet
     });
   }
 
@@ -205,27 +188,10 @@ export default defineEventHandler(async (handler) => {
       });
 
       if (friend !== null) {
-        await prisma.game.create({
-          data: {
-            ...body,
-            is_storyteller: true,
-            date: new Date(body.date),
-            user_id: friend.user_id,
-            player_characters: {},
-            demon_bluffs: {
-              create: [...body.demon_bluffs],
-            },
-            fabled: {
-              create: [...body.fabled],
-            },
-            notes: "",
-            grimoire: {
-              connect: newGame.grimoire.map((g) => ({ id: g.id })),
-            },
-            parent_game_id: newGame.id,
-            waiting_for_confirmation: true,
-            tags: [],
-          },
+        await findOrCreateStorytellerChildGame({
+          game: newGame,
+          storytellerUserId: friend.user_id,
+          childGames: [], // new game has no children yet
         });
       }
     }
