@@ -2,6 +2,7 @@ import { WhoCanRegister } from "~/server/generated/prisma/client";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import dayjs from "dayjs";
 import { prisma } from "~/server/utils/prisma";
+import { hasPermission } from "~/server/utils/permissions";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
@@ -14,29 +15,22 @@ export default defineEventHandler(async (handler) => {
   // Get the first day of the next month
   const end = dayjs(start).add(1, "month").add(1, "day").toDate();
 
+  const canViewPrivate = me ? await hasPermission(me.id, "VIEW_PRIVATE_COMMUNITIES") : false;
+
+  const communityFilter = canViewPrivate
+    ? { slug, banned_users: { none: { user_id: me?.id || "" } } }
+    : {
+        slug,
+        banned_users: { none: { user_id: me?.id || "" } },
+        OR: [
+          { is_private: false },
+          { members: { some: { user_id: me?.id || "" } }, is_private: true },
+        ],
+      };
+
   const event = await prisma.event.findMany({
     where: {
-      community: {
-        slug,
-        banned_users: {
-          none: {
-            user_id: me?.id || "",
-          },
-        },
-        OR: [
-          {
-            is_private: false,
-          },
-          {
-            members: {
-              some: {
-                user_id: me?.id || "",
-              },
-            },
-            is_private: true,
-          },
-        ],
-      },
+      community: communityFilter,
       start: {
         gte: start,
         lt: end,

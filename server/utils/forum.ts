@@ -3,10 +3,12 @@ export {
   isAdmin,
   hasPermission,
   getUserPermissions,
+  getUserRestrictions,
+  hasRestriction,
   getUserPermissions as getUserForumPermissions,
   hasPermission as hasForumPermission,
 } from "./permissions";
-import { isAdmin, getUserPermissions } from "./permissions";
+import { isAdmin, getUserPermissions, hasRestriction } from "./permissions";
 
 // Lightweight user select for forum responses
 export const forumUserSelect = {
@@ -62,8 +64,8 @@ export async function userCanPostInCategory(
     return await isModerator(userId);
   }
 
-  const hasPermission = await hasForumPermission(userId, "CREATE_POST");
-  if (!hasPermission) return false;
+  // Users can post by default unless restricted
+  if (await hasRestriction(userId, "CREATE_POST")) return false;
 
   if (!isPrivate) return true;
 

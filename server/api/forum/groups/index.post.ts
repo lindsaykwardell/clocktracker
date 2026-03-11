@@ -12,6 +12,7 @@ export default defineEventHandler(async (handler) => {
   const body = await readBody<{
     name: string;
     permissions: string[];
+    restrictions?: string[];
     color?: string | null;
   } | null>(handler);
 
@@ -23,6 +24,7 @@ export default defineEventHandler(async (handler) => {
     data: {
       name: body.name.trim(),
       permissions: body.permissions ?? [],
+      restrictions: body.restrictions ?? [],
       color: body.color || null,
     },
   });

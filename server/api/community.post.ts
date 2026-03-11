@@ -1,6 +1,7 @@
 import type { Community } from "~/server/generated/prisma/client";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
+import { hasRestriction } from "~/server/utils/permissions";
 
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
@@ -17,6 +18,13 @@ export default defineEventHandler(async (handler) => {
     throw createError({
       status: 400,
       statusMessage: "Bad Request",
+    });
+  }
+
+  if (await hasRestriction(user.id, "CREATE_COMMUNITY")) {
+    throw createError({
+      status: 403,
+      statusMessage: "Forbidden",
     });
   }
 

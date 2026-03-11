@@ -1,5 +1,6 @@
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
+import { hasRestriction } from "~/server/utils/permissions";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
@@ -9,6 +10,13 @@ export default defineEventHandler(async (handler) => {
     throw createError({
       status: 401,
       statusMessage: "Unauthorized",
+    });
+  }
+
+  if (await hasRestriction(me.id, "JOIN_COMMUNITY")) {
+    throw createError({
+      status: 403,
+      statusMessage: "Forbidden",
     });
   }
 

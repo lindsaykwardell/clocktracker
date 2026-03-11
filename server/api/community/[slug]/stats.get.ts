@@ -1,6 +1,7 @@
 import { PrivacySetting } from "~/server/generated/prisma/client";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
+import { hasPermission } from "~/server/utils/permissions";
 
 type PlayerSummary = {
   key: string;
@@ -52,9 +53,12 @@ export default defineEventHandler(async (handler) => {
     throw createError({ status: 403, statusMessage: "Forbidden" });
   }
 
+  const canViewPrivate = me ? await hasPermission(me.id, "VIEW_PRIVATE_COMMUNITIES") : false;
+
   if (
     community.is_private &&
-    !community.members.some((member) => member.user_id === me?.id)
+    !community.members.some((member) => member.user_id === me?.id) &&
+    !canViewPrivate
   ) {
     return emptyStats();
   }
