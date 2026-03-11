@@ -1,14 +1,14 @@
 <template>
     <div class="relative inline-block forum-link-insert">
-        <button
-            type="button"
-            class="inline-flex items-center gap-1 text-xs text-stone-400 hover:text-stone-200 transition-colors"
+        <Button
+            variant="link"
+            size="sm"
+            icon="sign"
             title="Insert link to user, role, script, or game"
             @click="toggle"
         >
-            <IconUI id="sign" size="sm" />
             Link to content
-        </button>
+        </Button>
         <div
             v-if="open"
             class="absolute z-20 bottom-full mb-2 left-0 w-80 rounded border border-stone-300 dark:border-stone-700 bg-stone-100 dark:bg-stone-800 shadow-lg"
@@ -23,7 +23,7 @@
                     :class="
                         tab === 'search'
                             ? 'text-primary border-b border-primary'
-                            : 'text-stone-400 hover:text-stone-200'
+                            : 'text-stone-400 hover:text-stone-600 dark:hover:text-stone-200'
                     "
                     @click="tab = 'search'"
                 >
@@ -35,7 +35,7 @@
                     :class="
                         tab === 'games'
                             ? 'text-primary border-b border-primary'
-                            : 'text-stone-400 hover:text-stone-200'
+                            : 'text-stone-400 hover:text-stone-600 dark:hover:text-stone-200'
                     "
                     @click="switchToGames"
                 >

@@ -1,6 +1,10 @@
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { type Game, type Character, type Grimoire, type Token, Alignment, type DemonBluff, type Fabled, type ReminderToken } from "~/server/generated/prisma/client";
 import { prisma } from "~/server/utils/prisma";
+import {
+  findOrCreatePlayerChildGame,
+  findOrCreateStorytellerChildGame,
+} from "~/server/utils/childGame";
 
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
@@ -326,90 +330,19 @@ export default defineEventHandler(async (handler) => {
       }[]
     );
 
-    const relatedGame = related_games?.find((g) => g!.user_id === id);
-
     try {
-      if (!relatedGame) {
-        await prisma.game.create({
-          data: {
-            ...body,
-            date: new Date(body.date),
-            user_id: id,
-            player_characters: {
-              create: [...player_characters],
-            },
-            demon_bluffs: {
-              create: [...body.demon_bluffs],
-            },
-            fabled: {
-              create: [...body.fabled],
-            },
-            // map the already created grimoires to the new game
-            grimoire: {
-              connect: game.grimoire.map((g) => ({ id: g.id })),
-            },
-            parent_game_id: game.parent_game_id || game.id,
-            waiting_for_confirmation: true,
-            is_storyteller: false,
-            storyteller:
-              game.is_storyteller && game.user
-                ? `@${game.user.username}`
-                : game.storyteller,
-          },
-        });
-      } else {
-        await prisma.game.update({
-          where: {
-            id: relatedGame.id,
-          },
-          data: {
-            date: new Date(body.date),
-            script: body.script,
-            script_id: body.script_id,
-            location_type: body.location_type,
-            location: body.location,
-            community_name: body.community_name,
-            community_id: body.community_id,
-            player_count: body.player_count,
-            traveler_count: body.traveler_count,
-            storyteller: body.storyteller,
-            co_storytellers: body.co_storytellers,
-            win_v2: body.win_v2,
-            demon_bluffs: {
-              deleteMany: relatedGame.demon_bluffs.map((g) => ({ id: g.id })),
-              create: game.demon_bluffs.map((g) => ({
-                ...g,
-                id: undefined,
-                game_id: undefined,
-              })),
-            },
-            fabled: {
-              deleteMany: relatedGame.fabled.map((g) => ({ id: g.id })),
-              create: game.fabled.map((g) => ({
-                ...g,
-                id: undefined,
-                game_id: undefined,
-              })),
-            },
-            player_characters: {
-              deleteMany: relatedGame.player_characters.map((g) => ({
-                id: g.id,
-              })),
-              create: player_characters,
-            },
-            grimoire: {
-              connect: game.grimoire.map((g) => ({ id: g.id })),
-            },
-          },
-        });
-      }
+      await findOrCreatePlayerChildGame({
+        game,
+        playerId: id,
+        playerCharacters: player_characters,
+        relatedGames: related_games,
+      });
     } catch (err: any) {
       const messageLines = err.message.split("\n");
       const message =
         messageLines[messageLines.length - 1].length > 0
           ? messageLines[messageLines.length - 1]
           : err.message;
-      // get the name from the game.grimoire
       const taggedPlayer =
         game.grimoire.flatMap((g) => g.tokens).find((t) => t.player_id === id)
           ?.player_name || "Unknown";
@@ -440,73 +373,11 @@ export default defineEventHandler(async (handler) => {
       });
 
       if (friend !== null) {
-        const childGame = game.child_games?.find(
-          (g) => g.user_id === friend.user_id
-        );
-
-        if (!childGame) {
-          await prisma.game.create({
-            data: {
-              ...body,
-              is_storyteller: true,
-              date: new Date(body.date),
-              user_id: friend.user_id,
-              player_characters: {},
-              demon_bluffs: {
-                create: [...body.demon_bluffs],
-              },
-              fabled: {
-                create: [...body.fabled],
-              },
-              notes: "",
-              grimoire: {
-                connect: game.grimoire.map((g) => ({ id: g.id })),
-              },
-              parent_game_id: game.id,
-              waiting_for_confirmation: true,
-              tags: [],
-            },
-          });
-        } else {
-          await prisma.game.update({
-            where: {
-              id: childGame.id,
-            },
-            data: {
-              date: new Date(body.date),
-              script: body.script,
-              script_id: body.script_id,
-              location_type: body.location_type,
-              location: body.location,
-              community_name: body.community_name,
-              community_id: body.community_id,
-              player_count: body.player_count,
-              traveler_count: body.traveler_count,
-              storyteller: body.storyteller,
-              co_storytellers: body.co_storytellers,
-              win_v2: body.win_v2,
-              demon_bluffs: {
-                deleteMany: childGame.demon_bluffs.map((g) => ({ id: g.id })),
-                create: game.demon_bluffs.map((g) => ({
-                  ...g,
-                  id: undefined,
-                  game_id: undefined,
-                })),
-              },
-              fabled: {
-                deleteMany: childGame.fabled.map((g) => ({ id: g.id })),
-                create: game.fabled.map((g) => ({
-                  ...g,
-                  id: undefined,
-                  game_id: undefined,
-                })),
-              },
-              grimoire: {
-                connect: game.grimoire.map((g) => ({ id: g.id })),
-              },
-            },
-          });
-        }
+        await findOrCreateStorytellerChildGame({
+          game,
+          storytellerUserId: friend.user_id,
+          childGames: game.child_games,
+        });
       }
     }
   }

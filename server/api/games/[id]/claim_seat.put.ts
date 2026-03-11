@@ -2,6 +2,7 @@ import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { Alignment } from "~/server/generated/prisma/client";
 import { fetchGame } from "~/server/utils/fetchGames";
 import { prisma } from "~/server/utils/prisma";
+import { findOrCreatePlayerChildGame } from "~/server/utils/childGame";
 
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
@@ -334,51 +335,19 @@ export default defineEventHandler(async (handler) => {
   );
 
   if (game.user_id !== user.id) {
+    const related_games = [...game.child_games];
+    if (game.parent_game) {
+      related_games.push(game.parent_game);
+      related_games.push(...game.parent_game.child_games);
+    }
+
     try {
-      await prisma.game.create({
-        data: {
-          ...game,
-          ls_game: undefined,
-          id: undefined,
-          community: undefined,
-          associated_script: undefined,
-          user: undefined,
-          parent_game: undefined,
-          parent_game_id: game.parent_game_id || game.id,
-          child_games: undefined,
-          user_id: user.id,
-          player_characters: {
-            create: [...player_characters],
-          },
-          demon_bluffs: {
-            create: [
-              ...game.demon_bluffs.map((d) => ({
-                ...d,
-                id: undefined,
-                game_id: undefined,
-              })),
-            ],
-          },
-          fabled: {
-            create: [
-              ...game.fabled.map((f) => ({
-                ...f,
-                id: undefined,
-                game_id: undefined,
-              })),
-            ],
-          },
-          // map the already created grimoires to the new game
-          grimoire: {
-            connect: game.grimoire.map((g) => ({ id: g.id })),
-          },
-          waiting_for_confirmation: false,
-          is_storyteller: false,
-          storyteller:
-            game.is_storyteller && game.user
-              ? `@${game.user.username}`
-              : game.storyteller,
-        },
+      await findOrCreatePlayerChildGame({
+        game,
+        playerId: user.id,
+        playerCharacters: player_characters,
+        relatedGames: related_games,
+        waitingForConfirmation: false,
       });
     } catch (err: any) {
       const messageLines = err.message.split("\n");
@@ -386,7 +355,6 @@ export default defineEventHandler(async (handler) => {
         messageLines[messageLines.length - 1].length > 0
           ? messageLines[messageLines.length - 1]
           : err.message;
-      // get the name from the game.grimoire
       const taggedPlayer =
         game.grimoire
           .flatMap((g) => g.tokens)

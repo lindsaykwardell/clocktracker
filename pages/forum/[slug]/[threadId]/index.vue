@@ -450,56 +450,68 @@
                                 class="float-right ml-4"
                             >
                                 <!-- Desktop: inline icons -->
-                                <div class="hidden sm:flex items-center gap-5">
-                                    <button
+                                <div class="hidden sm:flex items-center gap-1">
+                                    <Button
                                         v-if="isLoggedIn && !threadData.data.thread.is_locked"
-                                        type="button"
-                                        class="text-stone-400 hover:text-stone-200 transition-colors"
+                                        variant="link"
+                                        size="sm"
+                                        icon="reply"
+                                        display="icon-only"
                                         title="Quote"
                                         @click="quotePost(post)"
                                     >
-                                        <IconUI id="reply" size="sm" />
-                                    </button>
-                                    <button
+                                        Quote
+                                    </Button>
+                                    <Button
                                         v-if="isLoggedIn && !post.deleted && post.author.user_id !== user?.id"
-                                        type="button"
-                                        class="text-stone-400 hover:text-stone-200 transition-colors"
+                                        variant="link"
+                                        size="sm"
+                                        icon="exclamation-circle"
+                                        display="icon-only"
                                         title="Report"
                                         @click="openReportDialog(post.id)"
                                     >
-                                        <IconUI id="exclamation-circle" size="sm" />
-                                    </button>
-                                    <button
+                                        Report
+                                    </Button>
+                                    <Button
                                         v-if="canEditPost(post)"
-                                        type="button"
-                                        class="text-stone-400 hover:text-stone-200 transition-colors"
+                                        variant="link"
+                                        size="sm"
+                                        icon="edit"
+                                        display="icon-only"
                                         title="Edit"
                                         @click="startEdit(post)"
                                     >
-                                        <IconUI id="edit" size="sm" />
-                                    </button>
-                                    <button
+                                        Edit
+                                    </Button>
+                                    <Button
                                         v-if="canDeletePost(post)"
-                                        type="button"
-                                        class="text-red-400 hover:text-red-300 transition-colors"
+                                        variant="link"
+                                        size="sm"
+                                        color="negative"
+                                        icon="trash"
+                                        display="icon-only"
                                         title="Delete"
                                         @click="handleDeletePost(post.id)"
                                     >
-                                        <IconUI id="trash" size="sm" />
-                                    </button>
-                                    <button
+                                        Delete
+                                    </Button>
+                                    <Button
                                         v-if="canBanUser(post)"
-                                        type="button"
-                                        class="text-amber-400 hover:text-amber-300 transition-colors"
+                                        variant="link"
+                                        size="sm"
+                                        color="caution"
+                                        icon="disabled"
+                                        display="icon-only"
                                         title="Ban user"
                                         @click="toggleBanForm(post.author.user_id, post.author.display_name)"
                                     >
-                                        <IconUI id="disabled" size="sm" />
-                                    </button>
+                                        Ban user
+                                    </Button>
                                 </div>
                                 <!-- Mobile: 3-dot menu -->
                                 <Menu as="div" class="relative sm:hidden" v-slot="{ open }">
-                                    <MenuButton class="text-stone-400 hover:text-stone-200 transition-colors">
+                                    <MenuButton class="text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 transition-colors">
                                         <IconUI id="dots" size="sm" />
                                     </MenuButton>
                                     <transition
@@ -622,7 +634,7 @@
                                                 :class="
                                                     editTab === 'write'
                                                         ? 'border-primary text-primary'
-                                                        : 'border-transparent text-stone-400 hover:text-stone-200'
+                                                        : 'border-transparent text-stone-400 hover:text-stone-600 dark:hover:text-stone-200'
                                                 "
                                                 @click="editTab = 'write'"
                                             >
@@ -634,7 +646,7 @@
                                                 :class="
                                                     editTab === 'preview'
                                                         ? 'border-primary text-primary'
-                                                        : 'border-transparent text-stone-400 hover:text-stone-200'
+                                                        : 'border-transparent text-stone-400 hover:text-stone-600 dark:hover:text-stone-200'
                                                 "
                                                 @click="editTab = 'preview'"
                                             >
@@ -680,25 +692,16 @@
                                             >
                                                 Cancel
                                             </Button>
-                                            <button
-                                                type="button"
-                                                class="inline-flex items-center gap-1 text-xs text-stone-400 hover:text-stone-200 transition-colors"
+                                            <Button
+                                                variant="link"
+                                                size="sm"
+                                                :icon="uploadingImage ? 'dots' : 'upload'"
+                                                :icon-spin="uploadingImage"
                                                 :disabled="uploadingImage"
                                                 @click="uploadImage('edit')"
                                             >
-                                                <IconUI
-                                                    v-if="!uploadingImage"
-                                                    id="upload"
-                                                    size="sm"
-                                                />
-                                                <IconUI
-                                                    v-else
-                                                    id="dots"
-                                                    size="sm"
-                                                    class="animate-pulse"
-                                                />
                                                 Upload image
-                                            </button>
+                                            </Button>
                                             <ForumLinkInsert
                                                 @insert="editBody += $event"
                                             />
@@ -1071,7 +1074,7 @@
                                 :class="
                                     replyTab === 'write'
                                         ? 'border-primary text-primary'
-                                        : 'border-transparent text-stone-400 hover:text-stone-200'
+                                        : 'border-transparent text-stone-400 hover:text-stone-600 dark:hover:text-stone-200'
                                 "
                                 @click="replyTab = 'write'"
                             >
@@ -1083,7 +1086,7 @@
                                 :class="
                                     replyTab === 'preview'
                                         ? 'border-primary text-primary'
-                                        : 'border-transparent text-stone-400 hover:text-stone-200'
+                                        : 'border-transparent text-stone-400 hover:text-stone-600 dark:hover:text-stone-200'
                                 "
                                 @click="replyTab = 'preview'"
                             >
@@ -1120,25 +1123,16 @@
                             >
                                 Post Reply
                             </Button>
-                            <button
-                                type="button"
-                                class="inline-flex items-center gap-1 text-xs text-stone-400 hover:text-stone-200 transition-colors"
+                            <Button
+                                variant="link"
+                                size="sm"
+                                :icon="uploadingImage ? 'dots' : 'upload'"
+                                :icon-spin="uploadingImage"
                                 :disabled="uploadingImage"
                                 @click="uploadImage('reply')"
                             >
-                                <IconUI
-                                    v-if="!uploadingImage"
-                                    id="upload"
-                                    size="sm"
-                                />
-                                <IconUI
-                                    v-else
-                                    id="dots"
-                                    size="sm"
-                                    class="animate-pulse"
-                                />
                                 Upload image
-                            </button>
+                            </Button>
                             <ForumLinkInsert @insert="replyBody += $event" />
                         </div>
                         <span
@@ -1166,9 +1160,9 @@
 
                 <!-- Subscription footer -->
                 <div v-if="isLoggedIn" class="mt-6 text-center">
-                    <button
-                        type="button"
-                        class="text-sm text-stone-400 hover:text-stone-200 hover:underline transition-colors"
+                    <Button
+                        variant="link-underline"
+                        size="sm"
                         @click="toggleSubscribe"
                     >
                         {{
@@ -1176,7 +1170,7 @@
                                 ? "Unsubscribe from this thread"
                                 : "Subscribe to this thread"
                         }}
-                    </button>
+                    </Button>
                 </div>
             </template>
             <Loading v-else />

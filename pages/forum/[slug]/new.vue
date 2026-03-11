@@ -28,7 +28,7 @@
                                 :class="
                                     bodyTab === 'write'
                                         ? 'border-primary text-primary'
-                                        : 'border-transparent text-stone-400 hover:text-stone-200'
+                                        : 'border-transparent text-stone-400 hover:text-stone-600 dark:hover:text-stone-200'
                                 "
                                 @click="bodyTab = 'write'"
                             >
@@ -40,7 +40,7 @@
                                 :class="
                                     bodyTab === 'preview'
                                         ? 'border-primary text-primary'
-                                        : 'border-transparent text-stone-400 hover:text-stone-200'
+                                        : 'border-transparent text-stone-400 hover:text-stone-600 dark:hover:text-stone-200'
                                 "
                                 @click="bodyTab = 'preview'"
                             >
@@ -90,21 +90,16 @@
                     >
                         {{ submitting ? "Creating..." : "Create Thread" }}
                     </Button>
-                    <button
-                        type="button"
-                        class="inline-flex items-center gap-1 text-xs text-stone-400 hover:text-stone-200 transition-colors"
+                    <Button
+                        variant="link"
+                        size="sm"
+                        :icon="uploadingImage ? 'dots' : 'upload'"
+                        :icon-spin="uploadingImage"
                         :disabled="uploadingImage"
                         @click="handleUploadImage"
                     >
-                        <IconUI v-if="!uploadingImage" id="upload" size="sm" />
-                        <IconUI
-                            v-else
-                            id="dots"
-                            size="sm"
-                            class="animate-pulse"
-                        />
                         Upload image
-                    </button>
+                    </Button>
                     <ForumLinkInsert @insert="body += $event" />
                 </div>
                 <p v-if="error" class="text-sm text-red-500">{{ error }}</p>
