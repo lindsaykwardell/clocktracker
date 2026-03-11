@@ -1,5 +1,5 @@
 <template>
-  <ForumAdminTemplate title="Reported Posts" :has-access="true">
+  <AdminTemplate title="Reported Posts" :has-access="canViewReports">
 
       <div class="flex gap-2 mb-4">
         <Button
@@ -32,13 +32,28 @@
           @edited="onEdited"
         />
       </div>
-  </ForumAdminTemplate>
+  </AdminTemplate>
 </template>
 
 <script setup lang="ts">
+import { Status } from "~/composables/useFetchStatus";
 import type { ForumReport } from "~/components/ForumReportCard.vue";
 
 definePageMeta({ middleware: "auth" });
+
+const me = useMe();
+const forumMe = ref<{ permissions: string[]; is_admin: boolean } | null>(null);
+
+const isAdminUser = computed(() => {
+  const meVal = me.value;
+  return meVal.status === Status.SUCCESS && meVal.data.is_admin;
+});
+
+const canViewReports = computed(() => {
+  if (isAdminUser.value) return true;
+  if (!forumMe.value) return false;
+  return forumMe.value.permissions.includes("VIEW_REPORTS");
+});
 
 const showResolved = ref(false);
 const reports = ref<ForumReport[]>([]);
@@ -81,7 +96,17 @@ function onEdited(reportId: string, newBody: string) {
   }
 }
 
-onMounted(fetchReports);
+onMounted(async () => {
+  try {
+    forumMe.value = await $fetch("/api/forum/me");
+  } catch {}
+  if (canViewReports.value) fetchReports();
+});
+
+watch(canViewReports, (val) => {
+  if (val) fetchReports();
+});
+
 watch(showResolved, fetchReports);
 
 useHead({ title: "Reported Posts" });

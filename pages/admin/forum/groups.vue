@@ -1,5 +1,5 @@
 <template>
-  <ForumAdminTemplate title="User Groups" :has-access="isAdminUser">
+  <AdminTemplate title="User Groups" :has-access="canManageGroups">
         <div class="mb-4">
           <Button color="primary" size="sm" @click="showNewGroup = true">
             New Group
@@ -16,13 +16,28 @@
             <label class="text-sm font-semibold">Name</label>
             <Input v-model="newGroup.name" />
           </div>
-          <div class="flex flex-col gap-1">
+          <div class="flex flex-col gap-2">
             <label class="text-sm font-semibold">Permissions</label>
-            <div class="flex flex-wrap gap-2">
-              <label v-for="perm in allPermissions" :key="perm" class="flex items-center gap-1 text-sm">
-                <input type="checkbox" :value="perm" v-model="newGroup.permissions" />
-                {{ perm }}
-              </label>
+            <div
+              v-for="group in permissionGroups"
+              :key="group.label"
+              class="flex flex-col gap-1.5"
+            >
+              <span class="text-xs font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wide">{{ group.label }}</span>
+              <div class="flex flex-wrap gap-1.5">
+                <button
+                  v-for="perm in group.permissions"
+                  :key="perm"
+                  type="button"
+                  class="px-2.5 py-1 text-xs rounded-full border transition-colors"
+                  :class="newGroup.permissions.includes(perm)
+                    ? 'bg-primary border-primary text-white'
+                    : 'border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 hover:border-stone-400 dark:hover:border-stone-500'"
+                  @click="togglePermission(newGroup.permissions, perm)"
+                >
+                  {{ PERMISSION_LABELS[perm] }}
+                </button>
+              </div>
             </div>
           </div>
           <div class="flex flex-col gap-1">
@@ -60,13 +75,28 @@
                   <label class="text-sm font-semibold">Name</label>
                   <Input v-model="editUserGroup.name" />
                 </div>
-                <div class="flex flex-col gap-1">
+                <div class="flex flex-col gap-2">
                   <label class="text-sm font-semibold">Permissions</label>
-                  <div class="flex flex-wrap gap-2">
-                    <label v-for="perm in allPermissions" :key="perm" class="flex items-center gap-1 text-sm">
-                      <input type="checkbox" :value="perm" v-model="editUserGroup.permissions" />
-                      {{ perm }}
-                    </label>
+                  <div
+                    v-for="pg in permissionGroups"
+                    :key="pg.label"
+                    class="flex flex-col gap-1.5"
+                  >
+                    <span class="text-xs font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wide">{{ pg.label }}</span>
+                    <div class="flex flex-wrap gap-1.5">
+                      <button
+                        v-for="perm in pg.permissions"
+                        :key="perm"
+                        type="button"
+                        class="px-2.5 py-1 text-xs rounded-full border transition-colors"
+                        :class="editUserGroup.permissions.includes(perm)
+                          ? 'bg-primary border-primary text-white'
+                          : 'border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 hover:border-stone-400 dark:hover:border-stone-500'"
+                        @click="togglePermission(editUserGroup.permissions, perm)"
+                      >
+                        {{ PERMISSION_LABELS[perm] }}
+                      </button>
+                    </div>
                   </div>
                 </div>
                 <div class="flex flex-col gap-1">
@@ -114,9 +144,9 @@
                 <span
                   v-for="perm in group.permissions"
                   :key="perm"
-                  class="text-xs px-2 py-0.5 rounded bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300"
+                  class="text-xs px-2 py-0.5 rounded-full bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300"
                 >
-                  {{ perm }}
+                  {{ PERMISSION_LABELS[perm] || perm }}
                 </span>
               </div>
 
@@ -160,7 +190,7 @@
             No user groups yet.
           </p>
         </div>
-  </ForumAdminTemplate>
+  </AdminTemplate>
 </template>
 
 <script setup lang="ts">
@@ -169,17 +199,60 @@ import { Status } from "~/composables/useFetchStatus";
 definePageMeta({ middleware: "auth" });
 
 const me = useMe();
+const forumMe = ref<{ permissions: string[]; is_admin: boolean } | null>(null);
 
 const isAdminUser = computed(() => {
   const meVal = me.value;
   return meVal.status === Status.SUCCESS && meVal.data.is_admin;
 });
 
-const allPermissions = [
-  "CREATE_THREAD", "CREATE_POST", "EDIT_OWN_POST", "DELETE_OWN_POST",
-  "EDIT_ANY_POST", "DELETE_ANY_POST", "LOCK_THREAD", "PIN_THREAD",
-  "BAN_USER", "MANAGE_CATEGORIES", "GITHUB",
+const canManageGroups = computed(() => {
+  if (isAdminUser.value) return true;
+  if (!forumMe.value) return false;
+  return forumMe.value.permissions.includes("MANAGE_GROUPS");
+});
+
+const PERMISSION_LABELS: Record<string, string> = {
+  CREATE_THREAD: "Create Threads",
+  CREATE_POST: "Create Posts",
+  EDIT_OWN_POST: "Edit Own Posts",
+  DELETE_OWN_POST: "Delete Own Posts",
+  EDIT_ANY_POST: "Edit Any Post",
+  DELETE_ANY_POST: "Delete Any Post",
+  LOCK_THREAD: "Lock Threads",
+  PIN_THREAD: "Pin Threads",
+  BAN_USER: "Ban Users",
+  MANAGE_CATEGORIES: "Manage Categories",
+  MANAGE_GROUPS: "Manage Groups",
+  MANAGE_FEATURE_FLAGS: "Manage Feature Flags",
+  VIEW_REPORTS: "View Reports",
+  VIEW_MOD_LOG: "View Mod Log",
+  GITHUB: "GitHub Integration",
+};
+
+const permissionGroups = [
+  {
+    label: "Basic",
+    permissions: ["CREATE_THREAD", "CREATE_POST", "EDIT_OWN_POST", "DELETE_OWN_POST"],
+  },
+  {
+    label: "Moderation",
+    permissions: ["EDIT_ANY_POST", "DELETE_ANY_POST", "LOCK_THREAD", "PIN_THREAD", "BAN_USER"],
+  },
+  {
+    label: "Administration",
+    permissions: ["MANAGE_CATEGORIES", "MANAGE_GROUPS", "MANAGE_FEATURE_FLAGS", "VIEW_REPORTS", "VIEW_MOD_LOG", "GITHUB"],
+  },
 ];
+
+function togglePermission(list: string[], perm: string) {
+  const idx = list.indexOf(perm);
+  if (idx >= 0) {
+    list.splice(idx, 1);
+  } else {
+    list.push(perm);
+  }
+}
 
 const groups = ref<any[]>([]);
 const showNewGroup = ref(false);
@@ -290,10 +363,13 @@ async function saveEditUserGroup() {
 }
 
 onMounted(async () => {
-  if (isAdminUser.value) await fetchGroups();
+  try {
+    forumMe.value = await $fetch("/api/forum/me");
+  } catch {}
+  if (canManageGroups.value) await fetchGroups();
 });
 
-watch(isAdminUser, async (val) => {
+watch(canManageGroups, async (val) => {
   if (val) await fetchGroups();
 });
 
