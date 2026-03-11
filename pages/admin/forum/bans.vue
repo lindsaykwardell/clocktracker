@@ -1,5 +1,5 @@
 <template>
-  <ForumAdminTemplate title="Banned Users" :has-access="canManageBans">
+  <AdminTemplate title="Banned Users" :has-access="canManageBans">
         <div class="flex flex-col gap-2">
           <div
             v-for="ban in bans"
@@ -27,7 +27,7 @@
             No active bans.
           </p>
         </div>
-  </ForumAdminTemplate>
+  </AdminTemplate>
 </template>
 
 <script setup lang="ts">

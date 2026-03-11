@@ -1,11 +1,11 @@
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
-import { isAdmin } from "~/server/utils/forum";
+import { hasPermission } from "~/server/utils/forum";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
 
-  if (!me || !(await isAdmin(me.id))) {
+  if (!me || !(await hasPermission(me.id, "MANAGE_GROUPS"))) {
     throw createError({ status: 403, statusMessage: "Forbidden" });
   }
 
@@ -13,6 +13,7 @@ export default defineEventHandler(async (handler) => {
   const body = await readBody<{
     name?: string;
     permissions?: string[];
+    restrictions?: string[];
     color?: string | null;
   } | null>(handler);
 
@@ -33,6 +34,7 @@ export default defineEventHandler(async (handler) => {
     data: {
       name: body.name?.trim() ?? group.name,
       permissions: body.permissions ?? group.permissions,
+      restrictions: body.restrictions ?? group.restrictions,
       color: body.color !== undefined ? (body.color || null) : group.color,
     },
   });

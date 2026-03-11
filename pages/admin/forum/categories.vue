@@ -1,5 +1,5 @@
 <template>
-  <ForumAdminTemplate title="Categories" :has-access="isAdminUser">
+  <AdminTemplate title="Categories" :has-access="canManageCategories">
         <div class="flex gap-2 mb-4">
           <Button color="secondary" size="sm" @click="showNewCategoryGroup = true">
             New Group
@@ -338,7 +338,7 @@
             No categories yet.
           </p>
         </div>
-  </ForumAdminTemplate>
+  </AdminTemplate>
 </template>
 
 <script setup lang="ts">
@@ -348,10 +348,17 @@ import { Status } from "~/composables/useFetchStatus";
 definePageMeta({ middleware: "auth" });
 
 const me = useMe();
+const forumMe = ref<{ permissions: string[]; is_admin: boolean } | null>(null);
 
 const isAdminUser = computed(() => {
   const meVal = me.value;
   return meVal.status === Status.SUCCESS && meVal.data.is_admin;
+});
+
+const canManageCategories = computed(() => {
+  if (isAdminUser.value) return true;
+  if (!forumMe.value) return false;
+  return forumMe.value.permissions.includes("MANAGE_CATEGORIES");
 });
 
 // Category Groups
@@ -614,12 +621,15 @@ async function removeAccess(slug: string, groupId: string) {
 }
 
 onMounted(async () => {
-  if (isAdminUser.value) {
+  try {
+    forumMe.value = await $fetch("/api/forum/me");
+  } catch {}
+  if (canManageCategories.value) {
     await Promise.all([fetchCategoryGroups(), fetchCategories(), fetchGroups()]);
   }
 });
 
-watch(isAdminUser, async (val) => {
+watch(canManageCategories, async (val) => {
   if (val) await Promise.all([fetchCategoryGroups(), fetchCategories(), fetchGroups()]);
 });
 
