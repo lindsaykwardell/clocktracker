@@ -1,39 +1,5 @@
 <template>
-  <StandardTemplate>
-    <div class="px-4 lg:px-8 pt-4 lg:pt-8 pb-4 lg:pb-8 max-w-4xl mx-auto">
-      <h1 class="font-sorts text-2xl lg:text-3xl mb-6">
-        Administration
-      </h1>
-
-      <template v-if="!canAccessAdmin">
-        <p class="text-center py-8 text-stone-400">
-          You do not have permission to access this page.
-        </p>
-      </template>
-
-      <template v-else>
-        <!-- Navigation -->
-        <div class="flex flex-wrap gap-2 mb-8">
-          <nuxt-link v-if="canManageFeatureFlags" to="/admin/feature-flags">
-            <Button color="secondary" size="sm" icon="sign">Feature Flags</Button>
-          </nuxt-link>
-          <nuxt-link v-if="canManageCategories" to="/admin/forum/categories">
-            <Button color="secondary" size="sm" icon="grid">Categories</Button>
-          </nuxt-link>
-          <nuxt-link v-if="canManageGroups" to="/admin/forum/groups">
-            <Button color="secondary" size="sm" icon="players">User Groups</Button>
-          </nuxt-link>
-          <nuxt-link v-if="canManageBans" to="/admin/forum/bans">
-            <Button color="secondary" size="sm" icon="disabled">Banned Users</Button>
-          </nuxt-link>
-          <nuxt-link v-if="canViewReports" to="/admin/forum/reports">
-            <Button color="secondary" size="sm" icon="exclamation-circle">All Reports</Button>
-          </nuxt-link>
-          <nuxt-link v-if="canViewModLog" to="/admin/forum/mod-log">
-            <Button color="secondary" size="sm" icon="book">Full Mod Log</Button>
-          </nuxt-link>
-        </div>
-
+  <AdminTemplate title="Administration" :has-access="canAccessAdmin">
         <div class="flex flex-col gap-8">
           <!-- Open Reports -->
           <section v-if="canViewReports">
@@ -102,9 +68,7 @@
             </div>
           </section>
         </div>
-      </template>
-    </div>
-  </StandardTemplate>
+  </AdminTemplate>
 </template>
 
 <script setup lang="ts">
@@ -119,6 +83,7 @@ const forumMe = ref<{ permissions: string[]; is_admin: boolean } | null>(null);
 const ADMIN_PAGE_PERMISSIONS = [
   "MANAGE_CATEGORIES", "MANAGE_GROUPS", "BAN_USER",
   "MANAGE_FEATURE_FLAGS", "VIEW_REPORTS", "VIEW_MOD_LOG",
+  "EXPORT_USER_DATA",
 ];
 
 const isAdminUser = computed(() => {
@@ -138,10 +103,6 @@ function hasPerm(perm: string) {
   return forumMe.value.permissions.includes(perm);
 }
 
-const canManageCategories = computed(() => hasPerm("MANAGE_CATEGORIES"));
-const canManageGroups = computed(() => hasPerm("MANAGE_GROUPS"));
-const canManageBans = computed(() => hasPerm("BAN_USER"));
-const canManageFeatureFlags = computed(() => hasPerm("MANAGE_FEATURE_FLAGS"));
 const canViewReports = computed(() => hasPerm("VIEW_REPORTS"));
 const canViewModLog = computed(() => hasPerm("VIEW_MOD_LOG"));
 
