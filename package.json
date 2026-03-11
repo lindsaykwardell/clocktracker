@@ -7,7 +7,7 @@
     "db:reset": "supabase db reset && prisma migrate reset --force && prisma db seed",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "prisma generate && nuxt prepare",
+    "postinstall": "nuxt prepare && prisma generate",
     "test": "playwright test"
   },
   "devDependencies": {
