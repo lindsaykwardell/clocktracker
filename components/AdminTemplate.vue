@@ -69,6 +69,14 @@
             >
               User Data
             </nuxt-link>
+            <nuxt-link
+              v-if="isAdminUser"
+              to="/admin/circular-games"
+              class="profile-tab"
+              :class="tabClass('/admin/circular-games')"
+            >
+              Circular Games
+            </nuxt-link>
           </nav>
         </div>
       </div>
