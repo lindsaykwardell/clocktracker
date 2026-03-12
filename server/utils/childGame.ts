@@ -150,15 +150,6 @@ export async function findOrCreatePlayerChildGame(opts: {
   // No existing game — create a new child game
   const parentId = resolveRootParentId(game);
 
-  // Cycle guard: don't create if it would form a cycle
-  // (This is the fix for the race condition)
-  if (await wouldCreateCycle(playerId, parentId)) {
-    console.warn(
-      `Skipping child game creation for player ${playerId}: would create cycle with parent ${parentId}`
-    );
-    return null;
-  }
-
   // Double-check: does the player already have a game in this tree?
   // This is the atomic check that prevents the TOCTOU race.
   const existingInTree = await prisma.game.findFirst({
@@ -302,13 +293,6 @@ export async function findOrCreateStorytellerChildGame(opts: {
 
   // No existing game — create new
   const parentId = game.id; // storyteller children always point to this game directly
-
-  if (await wouldCreateCycle(storytellerUserId, parentId)) {
-    console.warn(
-      `Skipping storyteller child game creation for ${storytellerUserId}: would create cycle`
-    );
-    return null;
-  }
 
   // Atomic double-check
   const existingInTree = await prisma.game.findFirst({
