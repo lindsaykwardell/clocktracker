@@ -42,9 +42,23 @@ export default defineEventHandler(async (handler) => {
 
   const newGame = await prisma.game.create({
     data: {
-      ...body,
       date: new Date(body.date),
       user_id: user.id,
+      script: body.script,
+      script_id: body.script_id,
+      storyteller: body.storyteller,
+      co_storytellers: body.co_storytellers,
+      is_storyteller: body.is_storyteller,
+      location_type: body.location_type,
+      location: body.location,
+      community_name: body.community_name,
+      community_id: body.community_id,
+      player_count: body.player_count,
+      traveler_count: body.traveler_count,
+      win_v2: body.win_v2,
+      tags: body.tags,
+      notes: body.notes,
+      privacy: body.privacy,
       player_characters: {
         create: [...body.player_characters],
       },
@@ -163,12 +177,19 @@ export default defineEventHandler(async (handler) => {
       }[],
     );
 
-    await findOrCreatePlayerChildGame({
-      game: newGame,
-      playerId: id,
-      playerCharacters: player_characters,
-      relatedGames: [], // new game has no children yet
-    });
+    try {
+      await findOrCreatePlayerChildGame({
+        game: newGame,
+        playerId: id,
+        playerCharacters: player_characters,
+        relatedGames: [], // new game has no children yet
+      });
+    } catch (err: any) {
+      const taggedPlayer =
+        newGame.grimoire.flatMap((g) => g.tokens).find((t) => t.player_id === id)
+          ?.player_name || "Unknown";
+      console.error(`Error creating child game for ${taggedPlayer}: ${err.message}`);
+    }
   }
 
   const storytellers = [newGame.storyteller, ...newGame.co_storytellers];
@@ -188,11 +209,15 @@ export default defineEventHandler(async (handler) => {
       });
 
       if (friend !== null) {
-        await findOrCreateStorytellerChildGame({
-          game: newGame,
-          storytellerUserId: friend.user_id,
-          childGames: [], // new game has no children yet
-        });
+        try {
+          await findOrCreateStorytellerChildGame({
+            game: newGame,
+            storytellerUserId: friend.user_id,
+            childGames: [], // new game has no children yet
+          });
+        } catch (err: any) {
+          console.error(`Error creating storyteller child game for ${storyteller}: ${err.message}`);
+        }
       }
     }
   }

@@ -434,6 +434,12 @@ export async function fetchGame(
           id: "asc",
         },
       },
+      child_games: {
+        select: {
+          id: true,
+          user_id: true,
+        },
+      },
       parent_game: {
         select: {
           user: {
