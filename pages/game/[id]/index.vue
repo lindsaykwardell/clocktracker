@@ -707,6 +707,21 @@
                         {{ game.data.grimoire.length }}
                     </div>
                 </div>
+                <div
+                    v-if="isTaggedWithoutChildGame"
+                    class="flex items-center gap-3 p-3 rounded-lg border border-amber-500/50 bg-amber-500/10 text-sm"
+                >
+                    <span class="text-stone-600 dark:text-stone-300">
+                        You're tagged in this game but it hasn't been added to your profile yet.
+                    </span>
+                    <Button
+                        size="sm"
+                        color="primary"
+                        @click="claimTaggedSeat"
+                    >
+                        Add to my profile
+                    </Button>
+                </div>
                 <Dialog v-model:visible="showSimilarGamesDialog" size="lg">
                     <template #title>
                         <h2 class="text-2xl font-sorts">Similar Games</h2>
@@ -1112,16 +1127,39 @@ const storytellers = computed(() => {
     });
 });
 
+// Detect if the user is tagged on a token but has no child game (stuck state).
+// This happens when child game creation failed after the token was saved.
+const isTaggedWithoutChildGame = computed(() => {
+    if (game.value.status !== Status.SUCCESS) return false;
+    if (me.value.status !== Status.SUCCESS) return false;
+
+    const myUserId = me.value.data.user_id;
+    const isTagged = game.value.data.grimoire.some((page) =>
+        page.tokens.some(
+            (token) => token.player_id === myUserId,
+        ),
+    );
+
+    if (!isTagged) return false;
+
+    // Check if a child game exists for this user
+    const hasChildGame = game.value.data.child_games?.some(
+        (child) => child.user_id === myUserId,
+    );
+
+    return !hasChildGame;
+});
+
 const canClaimSeat = computed(() => {
     if (game.value.status !== Status.SUCCESS) return false;
 
-    /** Reasons to disallow claimining the seat:
+    /** Reasons to disallow claiming the seat:
      * 1. The user is not signed in
      * 2. The user is not a friend of the game creator
      * 3. The user is not in a community with the game creator
      * 4. The user is a storyteller
      * 5. The user is a co-storyteller
-     * 6. The user already has a seat in the grimoire
+     * 6. The user already has a seat in the grimoire (unless stuck without child game)
      */
 
     if (me.value.status !== Status.SUCCESS) return false;
@@ -1149,6 +1187,9 @@ const canClaimSeat = computed(() => {
     ) {
         return false;
     }
+
+    // Allow if the user is tagged but has no child game (recovery path)
+    if (isTaggedWithoutChildGame.value) return true;
 
     // Check if the user already has a seat in the grimoire
     if (
@@ -1241,6 +1282,39 @@ function isFavorite(game: GameRecord) {
     if (user.status !== Status.SUCCESS) return false;
 
     return user.data.favorites.some((f) => f.game_id === game.id);
+}
+
+async function claimTaggedSeat() {
+    if (
+        game.value.status !== Status.SUCCESS ||
+        me.value.status !== Status.SUCCESS
+    ) {
+        return;
+    }
+
+    // Find the token this user is already tagged on
+    const myUserId = me.value.data.user_id;
+    const taggedToken = game.value.data.grimoire
+        .flatMap((page) => page.tokens)
+        .find((token) => token.player_id === myUserId);
+
+    if (!taggedToken) return;
+
+    try {
+        const result = await $fetch<GameRecord>(
+            `/api/games/${gameId}/claim_seat`,
+            {
+                method: "PUT",
+                body: { order: taggedToken.order },
+            },
+        );
+
+        games.games.set(gameId, { status: Status.SUCCESS, data: result });
+    } catch (error: any) {
+        alert(
+            `There was a problem adding this game: ${error.statusMessage}`,
+        );
+    }
 }
 
 async function toggleFavorite() {
