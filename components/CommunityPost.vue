@@ -29,7 +29,7 @@
         </div>
         
         <div class="w-full">
-          <VueMarkdown class="post text-sm max-w-[80ch]" :source="post.content" />
+          <MarkdownRenderer class="post text-sm max-w-[80ch]" :source="post.content" />
         </div>
   
         <div class="flex gap-4 items-center text-stone-600 dark:text-stone-400">
@@ -86,7 +86,7 @@
             </time>
           </div>
           <div class="w-full">
-            <VueMarkdown class="post text-sm max-w-[80ch]" :source="reply.content" />
+            <MarkdownRenderer class="post text-sm max-w-[80ch]" :source="reply.content" />
           </div>
           
         </div>
@@ -125,7 +125,6 @@
 </template>
 
 <script setup lang="ts">
-import VueMarkdown from "vue-markdown-render";
 
 const user = useUser();
 const communities = useCommunities();
