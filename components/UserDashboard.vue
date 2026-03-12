@@ -1,76 +1,6 @@
 <template>
   <template v-if="me.status === Status.SUCCESS">
     <div class="dashboard">
-      <div class="content custom-scrollbar hidden lg:flex flex-col gap-4 p-4 bg-stone-200/30 dark:bg-stone-950">
-        <YearInReviewLink id="year-in-review-menu" />
-        <h1 class="text-xl font-sorts text-center">My Profile</h1>
-        <ul class="px-4">
-          <li>
-            <nuxt-link
-              :to="`/@${me.data.username}?view=games`"
-              class="hover:underline"
-              >My Games</nuxt-link
-            >
-          </li>
-          <li>
-            <nuxt-link
-              :to="`/@${me.data.username}?view=pending`"
-              class="hover:underline"
-              >Tagged Games</nuxt-link
-            >
-          </li>
-          <li>
-            <nuxt-link
-              :to="`/@${me.data.username}?view=stats`"
-              class="hover:underline"
-              >Stats</nuxt-link
-            >
-          </li>
-        </ul>
-        <hr class="border-stone-300 dark:border-stone-700/50" />
-        <h1 class="text-xl font-sorts text-center">Role of the Day</h1>
-        <nuxt-link
-          class="flex flex-col items-center"
-          :to="`/roles/${roleOfTheDay.data.value?.id}`"
-        >
-          <Token
-            size="front"
-            :character="{ 
-              name: roleOfTheDay.data.value?.name,
-              alignment: roleOfTheDay.data.value?.initial_alignment,
-              role: roleOfTheDay.data.value!, 
-            }"
-          />
-        </nuxt-link>
-        <hr class="border-stone-300 dark:border-stone-700/50" />
-        <template v-if="scriptsOfTheWeek.data.value">
-          <h1 class="text-xl font-sorts text-center">Popular Scripts</h1>
-          <ul class="px-4">
-            <li v-for="script in scriptsOfTheWeek.data.value">
-              <nuxt-link :to="getScriptLink(script)" class="hover:underline">
-                {{ script.script }}
-              </nuxt-link>
-            </li>
-          </ul>
-          <hr class="border-stone-300 dark:border-stone-700/50" />
-        </template>
-        <template v-if="(myCommunities?.length ?? 0) > 0">
-          <h1 class="font-sorts text-xl text-center">Communities</h1>
-          <ul class="flex flex-col gap-1">
-            <li
-              v-for="community in myCommunities"
-              class="flex gap-2 items-center"
-            >
-              <Avatar :value="community.icon" size="xs" aria-hidden="true" />
-              <nuxt-link
-                :to="`/community/${community.slug}`"
-                class="hover:underline"
-                >{{ community.name }}</nuxt-link
-              >
-            </li>
-          </ul>
-        </template>
-      </div>
       <div
         class="content custom-scrollbar md:overflow-y-scroll pb-20 md:pb-0 px-4"
         :class="{
@@ -95,10 +25,47 @@
             </div>
           </div>
 
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div v-if="roleOfTheDay.data.value" class="flex items-center gap-4 rounded-lg border border-stone-300 dark:border-stone-700/50 p-4">
+              <nuxt-link
+                :to="`/roles/${roleOfTheDay.data.value.id}`"
+                class="shrink-0"
+              >
+                <Token
+                  size="front"
+                  :character="{
+                    name: roleOfTheDay.data.value.name,
+                    alignment: roleOfTheDay.data.value.initial_alignment,
+                    role: roleOfTheDay.data.value,
+                  }"
+                />
+              </nuxt-link>
+              <div>
+                <h3 class="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">Role of the Day</h3>
+                <nuxt-link
+                  :to="`/roles/${roleOfTheDay.data.value.id}`"
+                  class="text-lg font-sorts hover:underline"
+                >
+                  {{ roleOfTheDay.data.value.name }}
+                </nuxt-link>
+              </div>
+            </div>
+            <div v-if="scriptsOfTheWeek.data.value" class="rounded-lg border border-stone-300 dark:border-stone-700/50 p-4">
+              <h3 class="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-2">Popular Scripts</h3>
+              <ul class="space-y-1">
+                <li v-for="script in scriptsOfTheWeek.data.value" :key="script.script_id">
+                  <nuxt-link :to="getScriptLink(script)" class="text-sm hover:underline">
+                    {{ script.script }}
+                  </nuxt-link>
+                </li>
+              </ul>
+            </div>
+          </div>
+
           <hr class="border-stone-300 dark:border-stone-700/50" />
 
           <div class="space-y-2">
-            <h2 class="text-3xl font-sorts ">Activity Feed</h2>
+            <h2 class="text-3xl font-sorts">Activity Feed</h2>
             <ClientOnly>
               <ul class="mt-4 flex flex-col gap-3 lg:gap-6">
                 <li v-for="update in updates.data.value" class="max-w-[800px] w-full mx-auto">
@@ -340,14 +307,6 @@ const { data: events } = await useFetch<Event[]>("/api/events");
 const selectedDay = ref<dayjs.Dayjs | null>(dayjs());
 const selectedTab = ref<"updates" | "events">("updates");
 
-const myCommunities = computed(() => {
-  if (me.value.status === Status.SUCCESS) {
-    return me.value.data.communities;
-  } else {
-    return [];
-  }
-});
-
 // Pre-compute tagged game arrays so GameOverviewGrid instances get stable
 // references and don't re-render when unrelated store data changes.
 const taggedGameArrays = computed(() => {
@@ -472,10 +431,6 @@ onMounted(async () => {
     grid-template-columns: 1fr 300px;
     height: calc(100vh - 50px);
     overflow-y: hidden;
-  }
-
-  @media (min-width: 1024px) {
-    grid-template-columns: 300px 1fr 300px;
   }
 
   & .content {

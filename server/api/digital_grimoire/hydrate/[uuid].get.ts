@@ -42,18 +42,20 @@ type DigitalGrimoireGame = {
   win: "GOOD_WINS" | "EVIL_WINS" | "NOT_RECORDED";
   demon_bluffs: string[];
   fabled: string[];
-  grimoire: {
+  grimoire: GrimoireToken[] | GrimoireToken[][];
+};
+
+type GrimoireToken = {
+  role_id: string;
+  alignment: "GOOD" | "EVIL" | "NEUTRAL";
+  is_dead: boolean;
+  used_ghost_vote: boolean;
+  order: number;
+  created_at: Date;
+  player_name: string;
+  reminders: {
     role_id: string;
-    alignment: "GOOD" | "EVIL" | "NEUTRAL";
-    is_dead: boolean;
-    used_ghost_vote: boolean;
-    order: number;
-    created_at: Date;
-    player_name: string;
-    reminders: {
-      role_id: string;
-      reminder: string;
-    }[];
+    reminder: string;
   }[];
 };
 
@@ -132,35 +134,45 @@ export default defineEventHandler(async (handler) => {
     scriptId = savedScript.id;
   }
 
-  // Map role IDs for grimoire tokens
-  const mappedGrimoire = await Promise.all(
-    body.grimoire.map(async (token) => {
-      const role_id = await mapOfficialIdToClocktrackerId(token.role_id);
+  // Normalize grimoire to pages: single flat array becomes one page, nested arrays are multiple pages
+  const grimoirePages: GrimoireToken[][] =
+    body.grimoire.length > 0 && Array.isArray(body.grimoire[0])
+      ? (body.grimoire as GrimoireToken[][])
+      : [body.grimoire as GrimoireToken[]];
 
-      const mappedReminders = await Promise.all(
-        token.reminders.map(async (reminder) => {
-          const reminderRole = await prisma.role.findUnique({
-            where: { id: reminder.role_id },
-            select: { token_url: true },
-          });
+  // Map role IDs for each grimoire page
+  const mappedGrimoirePages = await Promise.all(
+    grimoirePages.map((page) =>
+      Promise.all(
+        page.map(async (token) => {
+          const role_id = await mapOfficialIdToClocktrackerId(token.role_id);
+
+          const mappedReminders = await Promise.all(
+            token.reminders.map(async (reminder) => {
+              const reminderRole = await prisma.role.findUnique({
+                where: { id: reminder.role_id },
+                select: { token_url: true },
+              });
+
+              return {
+                reminder: reminder.reminder,
+                token_url: reminderRole?.token_url || "",
+              };
+            })
+          );
 
           return {
-            reminder: reminder.reminder,
-            token_url: reminderRole?.token_url || "",
+            role_id: role_id || null,
+            alignment: token.alignment as Alignment,
+            is_dead: token.is_dead,
+            used_ghost_vote: token.used_ghost_vote,
+            order: token.order,
+            player_name: token.player_name,
+            reminders: mappedReminders,
           };
         })
-      );
-
-      return {
-        role_id: role_id || null,
-        alignment: token.alignment as Alignment,
-        is_dead: token.is_dead,
-        used_ghost_vote: token.used_ghost_vote,
-        order: token.order,
-        player_name: token.player_name,
-        reminders: mappedReminders,
-      };
-    })
+      )
+    )
   );
 
   // Map demon bluffs
@@ -217,23 +229,21 @@ export default defineEventHandler(async (handler) => {
     waiting_for_confirmation: true,
     demon_bluffs: mappedDemonBluffs,
     fabled: mappedFabled,
-    grimoire: [
-      {
-        tokens: {
-          create: mappedGrimoire.map((token, index) => ({
-            role_id: token.role_id,
-            alignment: token.alignment,
-            is_dead: token.is_dead,
-            used_ghost_vote: token.used_ghost_vote,
-            order: token.order ?? index,
-            player_name: token.player_name,
-            reminders: {
-              create: token.reminders,
-            },
-          })),
-        },
+    grimoire: mappedGrimoirePages.map((page) => ({
+      tokens: {
+        create: page.map((token, index) => ({
+          role_id: token.role_id,
+          alignment: token.alignment,
+          is_dead: token.is_dead,
+          used_ghost_vote: token.used_ghost_vote,
+          order: token.order ?? index,
+          player_name: token.player_name,
+          reminders: {
+            create: token.reminders,
+          },
+        })),
       },
-    ],
+    })),
   };
 
   // delete the payload

@@ -93,15 +93,6 @@ export default defineEventHandler(async (handler) => {
           },
         ],
       },
-      grimoire: {
-        some: {
-          tokens: {
-            none: {
-              player_id: user.id,
-            },
-          },
-        },
-      },
     },
     include: {
       ls_game: {
@@ -250,51 +241,47 @@ export default defineEventHandler(async (handler) => {
       });
     }
 
-    if (
-      gameExists.grimoire.some((g) =>
-        g.tokens.some((t) => t.player_id === user.id)
-      )
-    ) {
-      throw createError({
-        status: 400,
-        statusMessage: "You already have a seat in this game.",
-      });
-    }
-
     throw createError({
       status: 400,
       statusMessage: "Bad Request",
     });
   }
 
-  // Update the grimoire to tag the user as the player in the correct seat
+  // Check if the user is already tagged on a token (recovery path for
+  // when child game creation previously failed).
+  const alreadyTagged = game.grimoire.some((g) =>
+    g.tokens.some((t) => t.player_id === user.id)
+  );
 
-  await prisma.token.updateMany({
-    where: {
-      order: body.order,
-      grimoire: {
-        game: {
-          some: {
-            id: gameId,
+  // Only update tokens if the user isn't already tagged
+  if (!alreadyTagged) {
+    await prisma.token.updateMany({
+      where: {
+        order: body.order,
+        grimoire: {
+          game: {
+            some: {
+              id: gameId,
+            },
           },
         },
       },
-    },
-    data: {
-      player_id: user.id,
-      player_name: userDetails.display_name,
-    },
-  });
-
-  // Mirror this change in the fetched game
-  game.grimoire.forEach((g) => {
-    g.tokens.forEach((t) => {
-      if (t.order === body.order) {
-        t.player_id = user.id;
-        t.player_name = userDetails.display_name;
-      }
+      data: {
+        player_id: user.id,
+        player_name: userDetails.display_name,
+      },
     });
-  });
+
+    // Mirror this change in the fetched game
+    game.grimoire.forEach((g) => {
+      g.tokens.forEach((t) => {
+        if (t.order === body.order) {
+          t.player_id = user.id;
+          t.player_name = userDetails.display_name;
+        }
+      });
+    });
+  }
 
   // Reduce grimoire to find all tokens that have this player_id
   const player_characters = game.grimoire.reduce(
