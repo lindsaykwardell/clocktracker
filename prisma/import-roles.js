@@ -1,3 +1,4 @@
+require("dotenv/config");
 const { PrismaClient } = require("../server/generated/prisma/client");
 const { PrismaPg } = require("@prisma/adapter-pg");
 const { roles, reminders } = require("./roles");
