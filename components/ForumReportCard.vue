@@ -47,7 +47,7 @@
           class="text-sm text-stone-400"
           :class="{ 'line-clamp-3': !expanded }"
         >
-          <VueMarkdown
+          <MarkdownRenderer
             class="post text-sm"
             :source="report.post.body"
             :options="{ html: false }"
@@ -144,7 +144,6 @@
 </template>
 
 <script setup lang="ts">
-import VueMarkdown from "vue-markdown-render";
 
 export type ForumReport = {
   id: string;
