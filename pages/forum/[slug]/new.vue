@@ -55,7 +55,7 @@
                         :rows="5"
                     />
                     <div v-else class="min-h-[7.5rem] p-2">
-                        <VueMarkdown
+                        <MarkdownRenderer
                             v-if="body.trim()"
                             class="post text-sm"
                             :source="body"
@@ -109,7 +109,6 @@
 </template>
 
 <script setup lang="ts">
-import VueMarkdown from "vue-markdown-render";
 
 definePageMeta({ middleware: "auth" });
 

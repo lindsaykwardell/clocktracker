@@ -10,12 +10,12 @@
       </template>
       <template v-slot="{ close }">
         <div class="p-2">
-          <VueMarkdown
+          <MarkdownRenderer
             class="post text-lg max-w-[80ch]"
             :source="announcement.body"
             :options="{ html: false }"
           />
-          <div class="flex justify-center mt-4">
+          <div v-if="featureFlags.isEnabled('forum')" class="flex justify-center mt-4">
             <nuxt-link
               :to="`/forum/${announcement.categorySlug}/${announcement.threadId}`"
               class="text-sm text-primary hover:underline"
@@ -53,7 +53,6 @@ import ChartDataLabels from "chartjs-plugin-datalabels";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
-import VueMarkdown from "vue-markdown-render";
 import type { User } from "~/composables/useUsers";
 import { nanoid } from "nanoid";
 
