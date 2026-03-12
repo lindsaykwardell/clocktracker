@@ -71,9 +71,24 @@ export default defineEventHandler(async (handler) => {
       id: gameId,
     },
     data: {
-      ...body,
       date: new Date(body.date),
       user_id: user.id,
+      script: body.script,
+      script_id: body.script_id,
+      storyteller: body.storyteller,
+      co_storytellers: body.co_storytellers,
+      is_storyteller: body.is_storyteller,
+      location_type: body.location_type,
+      location: body.location,
+      community_name: body.community_name,
+      community_id: body.community_id,
+      player_count: body.player_count,
+      traveler_count: body.traveler_count,
+      win_v2: body.win_v2,
+      tags: body.tags,
+      notes: body.notes,
+      privacy: body.privacy,
+      image_urls: body.image_urls,
       player_characters: {
         deleteMany: {
           id: {
@@ -137,7 +152,6 @@ export default defineEventHandler(async (handler) => {
                 id: g.id,
               },
               data: {
-                ...g,
                 tokens: {
                   deleteMany: {
                     id: {
@@ -338,21 +352,10 @@ export default defineEventHandler(async (handler) => {
         relatedGames: related_games,
       });
     } catch (err: any) {
-      const messageLines = err.message.split("\n");
-      const message =
-        messageLines[messageLines.length - 1].length > 0
-          ? messageLines[messageLines.length - 1]
-          : err.message;
       const taggedPlayer =
         game.grimoire.flatMap((g) => g.tokens).find((t) => t.player_id === id)
           ?.player_name || "Unknown";
-
-      console.error(`Error saving for ${taggedPlayer}: ${message}`);
-
-      throw createError({
-        status: 500,
-        statusMessage: `Error saving for ${taggedPlayer}: ${message}`,
-      });
+      console.error(`Error creating child game for ${taggedPlayer}: ${err.message}`);
     }
   }
 
@@ -373,11 +376,15 @@ export default defineEventHandler(async (handler) => {
       });
 
       if (friend !== null) {
-        await findOrCreateStorytellerChildGame({
-          game,
-          storytellerUserId: friend.user_id,
-          childGames: game.child_games,
-        });
+        try {
+          await findOrCreateStorytellerChildGame({
+            game,
+            storytellerUserId: friend.user_id,
+            childGames: game.child_games,
+          });
+        } catch (err: any) {
+          console.error(`Error creating storyteller child game for ${storyteller}: ${err.message}`);
+        }
       }
     }
   }
