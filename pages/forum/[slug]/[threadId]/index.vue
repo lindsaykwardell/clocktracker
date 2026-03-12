@@ -414,7 +414,7 @@
                                     post.deleted_body
                                 "
                             >
-                                <VueMarkdown
+                                <MarkdownRenderer
                                     class="post text-sm opacity-60"
                                     :source="post.deleted_body"
                                     :options="{ html: false }"
@@ -661,7 +661,7 @@
                                         :rows="5"
                                     />
                                     <div v-else class="min-h-[7.5rem] p-2">
-                                        <VueMarkdown
+                                        <MarkdownRenderer
                                             v-if="editBody.trim()"
                                             class="post text-sm"
                                             :source="editBody"
@@ -728,7 +728,7 @@
                             </template>
                             <!-- Display mode -->
                             <template v-else>
-                                <VueMarkdown
+                                <MarkdownRenderer
                                     class="post"
                                     :class="
                                         isAnnouncementFirstPost(postIndex)
@@ -1101,7 +1101,7 @@
                         :rows="5"
                     />
                     <div v-else class="min-h-[7.5rem] p-2">
-                        <VueMarkdown
+                        <MarkdownRenderer
                             v-if="replyBody.trim()"
                             class="post text-sm"
                             :source="replyBody"
@@ -1179,7 +1179,6 @@
 </template>
 
 <script setup lang="ts">
-import VueMarkdown from "vue-markdown-render";
 import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
 import { Status } from "~/composables/useFetchStatus";
 import type { ForumPost } from "~/composables/useForum";

@@ -604,7 +604,7 @@
                             v-if="game.data.notes"
                             class="notes bg-stone-100 dark:bg-stone-900 p-4 shadow-lg mt-3"
                         >
-                            <VueMarkdown
+                            <MarkdownRenderer
                                 class="max-w-[80ch]"
                                 :source="game.data.notes"
                             />
@@ -933,7 +933,6 @@ import { WinStatus_V2 } from "~/composables/useGames";
 import type { GameRecord } from "~/composables/useGames";
 import { displayWinIconSvg } from "~/composables/useGames";
 import dayjs from "dayjs";
-import VueMarkdown from "vue-markdown-render";
 import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
 import { Status } from "~/composables/useFetchStatus";
 
