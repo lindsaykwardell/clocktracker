@@ -112,7 +112,7 @@ function toRole(name, type, alignment) {
     .replace(/\(/g, "")
     .replace(/\)/g, "");
 
-  const token_url = `/img/role/160x160/${image_name}.webp`;
+  const token_url = `/img/role/${image_name}.webp`;
   const alternate_token_urls = [];
 
   // Check the image folder to see if the alternate images exist

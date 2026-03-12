@@ -51,5 +51,7 @@ const items = [
   { syntax: "- item", label: "List" },
   { syntax: "> quote", label: "Blockquote" },
   { syntax: "`code`", label: "Inline code" },
+  { syntax: "->text<-", label: "Center" },
+  { syntax: "->text->", label: "Right align" },
 ];
 </script>
