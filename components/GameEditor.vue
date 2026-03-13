@@ -491,33 +491,10 @@
         v-model="game.notes"
         class="block w-full border border-stone-500 rounded-md p-2 min-h-[10rem]"
       />
-      <label class="block py-2">
-        <span class="block">Add Tag</span>
-        <Input
-          type="text"
-          v-model="tagsInput"
-          @keydown.enter.prevent="addTag"
-          list="tags"
-          placeholder="Enter a tag, then press enter"
-        />
-        <datalist id="tags">
-          <option
-            v-for="tag in myTags.filter((tag) => !game.tags.includes(tag))"
-            :value="tag"
-          />
-        </datalist>
-      </label>
-      <div class="flex flex-wrap gap-2">
-        <Button
-          v-for="(tag, index) in game.tags"
-          @click.prevent="game.tags.splice(index, 1)"
-          size="sm"
-          removableTag
-          :title="`Remove ${tag}`"
-        >
-          {{ tag }}
-        </Button>
-      </div>
+      <TagInput
+        v-model="game.tags"
+        :availableTags="myTags"
+      />
     </fieldset>
     <fieldset class="border rounded border-stone-500 p-4 my-3">
       <legend>External Links</legend>
@@ -747,7 +724,6 @@ const tokenSet = ref<"player_characters" | "demon_bluffs" | "fabled">(
 // Grimoire
 const showCopyGrimoireDialog = ref(false);
 const grimPage = ref(props.game.grimoire.length - 1);
-const tagsInput = ref("");
 const bggIdInput = ref("");
 const bggIdIsValid = ref(true);
 const customBackground = ref<string | null>(null);
@@ -975,13 +951,6 @@ function addDemonBluff() {
     "role",
     "demon_bluffs"
   );
-}
-
-function addTag() {
-  if (tagsInput.value) {
-    props.game.tags.push(tagsInput.value);
-    tagsInput.value = "";
-  }
 }
 
 function removeCharacter(i: number) {
