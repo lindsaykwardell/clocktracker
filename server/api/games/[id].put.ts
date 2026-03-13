@@ -66,6 +66,53 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
+  // Snapshot existing grimoire state before any modifications
+  const existingGrimoires = await prisma.grimoire.findMany({
+    where: {
+      game: { some: { id: gameId } },
+    },
+    include: {
+      tokens: {
+        include: {
+          role: true,
+          related_role: true,
+          reminders: true,
+        },
+      },
+    },
+  });
+
+  if (existingGrimoires.length > 0) {
+    await prisma.grimoireSnapshot.create({
+      data: {
+        game_id: gameId,
+        snapshot: JSON.parse(JSON.stringify({
+          pages: existingGrimoires.map((grimoire) => ({
+            id: grimoire.id,
+            tokens: grimoire.tokens.map((token) => ({
+              id: token.id,
+              role_id: token.role_id,
+              role_name: token.role?.name ?? null,
+              related_role_id: token.related_role_id,
+              related_role_name: token.related_role?.name ?? null,
+              alignment: token.alignment,
+              is_dead: token.is_dead,
+              used_ghost_vote: token.used_ghost_vote,
+              order: token.order,
+              player_name: token.player_name,
+              player_id: token.player_id,
+              reminders: token.reminders.map((r) => ({
+                id: r.id,
+                reminder: r.reminder,
+                token_url: r.token_url,
+              })),
+            })),
+          })),
+        })),
+      },
+    });
+  }
+
   const game = await prisma.game.update({
     where: {
       id: gameId,

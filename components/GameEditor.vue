@@ -330,27 +330,31 @@
             ? { '--bg-image-url' : `url(${customBackground})` }
             : {}
         "
+        ref="grimoireSection"
         class="grimoire grimoire-edit relative w-full flex flex-col gap-2"
       >
-        <div class="relative">
-          <div 
-            class="w-full max-w-[calc(100vw-4rem)] md:w-auto md:max-w-[966px] overflow-scroll bg-center bg-cover script-bg"
-            :class="{
-              ...scriptBgClasses(game.script, !!customBackground),
-            }"
-          >
-            <Grimoire
-              :tokens="game.grimoire[grimPage].tokens"
-              :availableRoles="orderedRoles"
-              :excludePlayers="storytellerNames"
-              @selectedMe="applyMyRoleToGrimoire"
-            />
+        <div class="relative grim-page-container">
+          <Transition :name="pageDirection === 'forward' ? 'page-forward' : 'page-backward'" mode="out-in">
             <div
-              class="absolute bottom-0 w-full xl:w-[calc(100%-0.625rem)] text-center bg-gradient-to-b from-transparent via-stone-800 to-stone-800 text-white"
+              :key="grimPage"
+              class="w-full max-w-[calc(100vw-4rem)] md:w-auto md:max-w-[966px] overflow-scroll bg-center bg-cover script-bg"
+              :class="{
+                ...scriptBgClasses(game.script, !!customBackground),
+              }"
             >
-              Page {{ grimPage + 1 }} of {{ game.grimoire.length }}
+              <Grimoire
+                :tokens="game.grimoire[grimPage].tokens"
+                :availableRoles="orderedRoles"
+                :excludePlayers="storytellerNames"
+                @selectedMe="applyMyRoleToGrimoire"
+              />
+              <div
+                class="absolute bottom-0 w-full xl:w-[calc(100%-0.625rem)] text-center bg-gradient-to-b from-transparent via-stone-800 to-stone-800 text-white"
+              >
+                Page {{ grimPage + 1 }} of {{ game.grimoire.length }}
+              </div>
             </div>
-          </div>
+          </Transition>
         </div>
         
         <Button
@@ -385,6 +389,15 @@
               grimPage === game.grimoire.length - 1 ? "Add page" : "Next page"
             }}
           </span>
+        </Button>
+        <Button
+          v-if="gameId"
+          type="button"
+          @click="fetchSnapshots(); showSnapshotDialog = true"
+          icon="clock-history"
+          class="md:absolute top-1 left-1 z-10"
+        >
+          Restore from history
         </Button>
       </div>
     </fieldset>
@@ -489,35 +502,14 @@
       <ExpandingTextarea
         v-if="!editingMultipleGames"
         v-model="game.notes"
-        class="block w-full border border-stone-500 rounded-md p-2 min-h-[10rem]"
+        class="block w-full border border-stone-500 rounded-md p-2"
+        rows="3"
       />
-      <label class="block py-2">
-        <span class="block">Add Tag</span>
-        <Input
-          type="text"
-          v-model="tagsInput"
-          @keydown.enter.prevent="addTag"
-          list="tags"
-          placeholder="Enter a tag, then press enter"
-        />
-        <datalist id="tags">
-          <option
-            v-for="tag in myTags.filter((tag) => !game.tags.includes(tag))"
-            :value="tag"
-          />
-        </datalist>
-      </label>
-      <div class="flex flex-wrap gap-2">
-        <Button
-          v-for="(tag, index) in game.tags"
-          @click.prevent="game.tags.splice(index, 1)"
-          size="sm"
-          removableTag
-          :title="`Remove ${tag}`"
-        >
-          {{ tag }}
-        </Button>
-      </div>
+      <TagInput
+        class="mt-4"
+        v-model="game.tags"
+        :availableTags="myTags"
+      />
     </fieldset>
     <fieldset class="border rounded border-stone-500 p-4 my-3">
       <legend>External Links</legend>
@@ -609,6 +601,64 @@
       <GameOverviewList :games="myGames" readonly :onClick="copyGrimoire" />
     </div>
   </Dialog>
+  <Dialog v-model:visible="showSnapshotDialog" size="lg">
+    <template #title>
+      <h2 class="text-2xl font-bold">Grimoire History</h2>
+      <p class="text-sm text-stone-400 py-2">
+        Each time a game is saved, a snapshot of the grimoire is stored.
+        You can restore a previous version if something was lost.
+      </p>
+    </template>
+
+    <div class="text-black dark:text-stone-200">
+      <div v-if="loadingSnapshots" class="text-center py-8">
+        Loading snapshots...
+      </div>
+      <div v-else-if="snapshots.length === 0" class="text-center py-8 text-stone-400">
+        No snapshots available for this game.
+      </div>
+      <div v-else class="flex flex-col gap-3 max-h-[60vh] overflow-y-auto">
+        <div
+          v-for="snapshot in snapshots"
+          :key="snapshot.id"
+          class="border border-stone-300 dark:border-stone-600 rounded p-3"
+        >
+          <div class="flex justify-between items-start gap-2">
+            <div class="flex-1">
+              <div class="font-bold text-sm">
+                {{ new Date(snapshot.created_at).toLocaleDateString(undefined, { dateStyle: "medium" }) }}
+                {{ new Date(snapshot.created_at).toLocaleTimeString(undefined, { timeStyle: "short" }) }}
+              </div>
+              <div class="text-xs text-stone-400 mt-1">
+                {{ snapshot.snapshot.pages.length }} page{{ snapshot.snapshot.pages.length !== 1 ? 's' : '' }}
+              </div>
+              <div v-for="(page, pi) in snapshot.snapshot.pages" :key="pi" class="mt-2">
+                <div v-if="snapshot.snapshot.pages.length > 1" class="text-xs text-stone-400 mb-1">
+                  Page {{ pi + 1 }}
+                </div>
+                <div class="flex flex-wrap gap-1">
+                  <span
+                    v-for="(token, i) in page.tokens"
+                    :key="i"
+                    class="text-xs bg-stone-200 dark:bg-stone-700 rounded px-2 py-0.5"
+                  >
+                    {{ token.player_name || 'Empty seat' }}
+                    <template v-if="token.role_name"> — {{ token.role_name }}</template>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <Button
+              size="sm"
+              @click="restoreSnapshot(snapshot)"
+            >
+              Restore
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
@@ -622,6 +672,7 @@ import dayjs from "dayjs";
 const props = defineProps<{
   inFlight: boolean;
   editingMultipleGames?: boolean;
+  gameId?: string;
   game: {
     date: string;
     script: string;
@@ -745,12 +796,88 @@ const tokenSet = ref<"player_characters" | "demon_bluffs" | "fabled">(
 );
 
 // Grimoire
+const grimoireSection = ref<HTMLElement | null>(null);
 const showCopyGrimoireDialog = ref(false);
+const showSnapshotDialog = ref(false);
 const grimPage = ref(props.game.grimoire.length - 1);
-const tagsInput = ref("");
+const pageDirection = ref<"forward" | "backward">("forward");
 const bggIdInput = ref("");
 const bggIdIsValid = ref(true);
 const customBackground = ref<string | null>(null);
+
+// Grimoire snapshots
+type GrimoireSnapshot = {
+  id: number;
+  created_at: string;
+  snapshot: {
+    pages: {
+      id: number;
+      tokens: {
+        role_id: string | null;
+        role_name: string | null;
+        related_role_id: string | null;
+        related_role_name: string | null;
+        alignment: string;
+        is_dead: boolean;
+        used_ghost_vote: boolean;
+        order: number;
+        player_name: string;
+        player_id: string | null;
+        reminders: { reminder: string; token_url: string }[];
+      }[];
+    }[];
+  };
+};
+const snapshots = ref<GrimoireSnapshot[]>([]);
+const loadingSnapshots = ref(false);
+
+async function fetchSnapshots() {
+  if (!props.gameId) return;
+  loadingSnapshots.value = true;
+  try {
+    snapshots.value = await $fetch<GrimoireSnapshot[]>(
+      `/api/games/${props.gameId}/grimoire-snapshots`
+    );
+  } catch {
+    snapshots.value = [];
+  } finally {
+    loadingSnapshots.value = false;
+  }
+}
+
+function restoreSnapshot(snapshot: GrimoireSnapshot) {
+  const restored = snapshot.snapshot.pages.map((page) => ({
+    tokens: page.tokens.map((token, index) => {
+      const role = token.role_id ? allRoles.getRole(token.role_id) : undefined;
+      const relatedRole = token.related_role_id ? allRoles.getRole(token.related_role_id) : undefined;
+      return {
+        alignment: token.alignment as "GOOD" | "EVIL" | "NEUTRAL",
+        order: token.order ?? index,
+        is_dead: token.is_dead,
+        used_ghost_vote: token.used_ghost_vote,
+        role_id: token.role_id,
+        role: role
+          ? { token_url: role.token_url, type: role.type, initial_alignment: role.initial_alignment, name: role.name }
+          : undefined,
+        related_role_id: token.related_role_id,
+        related_role: relatedRole
+          ? { token_url: relatedRole.token_url, name: relatedRole.name }
+          : undefined,
+        player_name: token.player_name,
+        player_id: token.player_id,
+        reminders: token.reminders.map((r) => ({
+          reminder: r.reminder,
+          token_url: r.token_url,
+        })),
+      };
+    }),
+  }));
+
+  props.game.grimoire.splice(0, props.game.grimoire.length, ...restored);
+  props.game.player_count = restored[0]?.tokens.length ?? props.game.player_count;
+  grimPage.value = restored.length - 1;
+  showSnapshotDialog.value = false;
+}
 
 watch(bggIdInput, () => {
   // Validate the URL
@@ -975,13 +1102,6 @@ function addDemonBluff() {
     "role",
     "demon_bluffs"
   );
-}
-
-function addTag() {
-  if (tagsInput.value) {
-    props.game.tags.push(tagsInput.value);
-    tagsInput.value = "";
-  }
 }
 
 function removeCharacter(i: number) {
@@ -1276,6 +1396,7 @@ watchEffect(() => {
 });
 
 function pageForward() {
+  pageDirection.value = "forward";
   const nextPage = grimPage.value + 1;
   if (nextPage < props.game.grimoire.length) {
     grimPage.value = nextPage;
@@ -1285,10 +1406,14 @@ function pageForward() {
         .tokens,
     };
     grimPage.value = nextPage;
+    nextTick(() => {
+      grimoireSection.value?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
   }
 }
 
 function pageBackward() {
+  pageDirection.value = "backward";
   const previousPage = grimPage.value - 1;
   if (previousPage >= 0) {
     grimPage.value = previousPage;
@@ -1296,6 +1421,7 @@ function pageBackward() {
 }
 
 function deletePage() {
+  pageDirection.value = "backward";
   props.game.grimoire.splice(grimPage.value, 1);
   grimPage.value = Math.max(0, grimPage.value - 1);
 }
@@ -1508,5 +1634,37 @@ onMounted(async () => {
     scrollbar-width: thin;
     scrollbar-color: oklch(44.4% 0.011 73.639) transparent;
   }
+}
+
+/* Forward (next page / add page) */
+.page-forward-enter-active,
+.page-forward-leave-active {
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.page-forward-leave-to {
+  transform: translateX(-8%);
+  opacity: 0;
+}
+
+.page-forward-enter-from {
+  transform: translateX(8%);
+  opacity: 0;
+}
+
+/* Backward (previous page) */
+.page-backward-enter-active,
+.page-backward-leave-active {
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.page-backward-leave-to {
+  transform: translateX(8%);
+  opacity: 0;
+}
+
+.page-backward-enter-from {
+  transform: translateX(-8%);
+  opacity: 0;
 }
 </style>
