@@ -390,6 +390,15 @@
             }}
           </span>
         </Button>
+        <Button
+          v-if="gameId"
+          type="button"
+          @click="fetchSnapshots(); showSnapshotDialog = true"
+          icon="clock-history"
+          class="md:absolute top-1 left-1 z-10"
+        >
+          Restore from history
+        </Button>
       </div>
     </fieldset>
     <fieldset
@@ -592,6 +601,64 @@
       <GameOverviewList :games="myGames" readonly :onClick="copyGrimoire" />
     </div>
   </Dialog>
+  <Dialog v-model:visible="showSnapshotDialog" size="lg">
+    <template #title>
+      <h2 class="text-2xl font-bold">Grimoire History</h2>
+      <p class="text-sm text-stone-400 py-2">
+        Each time a game is saved, a snapshot of the grimoire is stored.
+        You can restore a previous version if something was lost.
+      </p>
+    </template>
+
+    <div class="text-black dark:text-stone-200">
+      <div v-if="loadingSnapshots" class="text-center py-8">
+        Loading snapshots...
+      </div>
+      <div v-else-if="snapshots.length === 0" class="text-center py-8 text-stone-400">
+        No snapshots available for this game.
+      </div>
+      <div v-else class="flex flex-col gap-3 max-h-[60vh] overflow-y-auto">
+        <div
+          v-for="snapshot in snapshots"
+          :key="snapshot.id"
+          class="border border-stone-300 dark:border-stone-600 rounded p-3"
+        >
+          <div class="flex justify-between items-start gap-2">
+            <div class="flex-1">
+              <div class="font-bold text-sm">
+                {{ new Date(snapshot.created_at).toLocaleDateString(undefined, { dateStyle: "medium" }) }}
+                {{ new Date(snapshot.created_at).toLocaleTimeString(undefined, { timeStyle: "short" }) }}
+              </div>
+              <div class="text-xs text-stone-400 mt-1">
+                {{ snapshot.snapshot.pages.length }} page{{ snapshot.snapshot.pages.length !== 1 ? 's' : '' }}
+              </div>
+              <div v-for="(page, pi) in snapshot.snapshot.pages" :key="pi" class="mt-2">
+                <div v-if="snapshot.snapshot.pages.length > 1" class="text-xs text-stone-400 mb-1">
+                  Page {{ pi + 1 }}
+                </div>
+                <div class="flex flex-wrap gap-1">
+                  <span
+                    v-for="(token, i) in page.tokens"
+                    :key="i"
+                    class="text-xs bg-stone-200 dark:bg-stone-700 rounded px-2 py-0.5"
+                  >
+                    {{ token.player_name || 'Empty seat' }}
+                    <template v-if="token.role_name"> — {{ token.role_name }}</template>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <Button
+              size="sm"
+              @click="restoreSnapshot(snapshot)"
+            >
+              Restore
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
@@ -605,6 +672,7 @@ import dayjs from "dayjs";
 const props = defineProps<{
   inFlight: boolean;
   editingMultipleGames?: boolean;
+  gameId?: string;
   game: {
     date: string;
     script: string;
@@ -730,11 +798,86 @@ const tokenSet = ref<"player_characters" | "demon_bluffs" | "fabled">(
 // Grimoire
 const grimoireSection = ref<HTMLElement | null>(null);
 const showCopyGrimoireDialog = ref(false);
+const showSnapshotDialog = ref(false);
 const grimPage = ref(props.game.grimoire.length - 1);
 const pageDirection = ref<"forward" | "backward">("forward");
 const bggIdInput = ref("");
 const bggIdIsValid = ref(true);
 const customBackground = ref<string | null>(null);
+
+// Grimoire snapshots
+type GrimoireSnapshot = {
+  id: number;
+  created_at: string;
+  snapshot: {
+    pages: {
+      id: number;
+      tokens: {
+        role_id: string | null;
+        role_name: string | null;
+        related_role_id: string | null;
+        related_role_name: string | null;
+        alignment: string;
+        is_dead: boolean;
+        used_ghost_vote: boolean;
+        order: number;
+        player_name: string;
+        player_id: string | null;
+        reminders: { reminder: string; token_url: string }[];
+      }[];
+    }[];
+  };
+};
+const snapshots = ref<GrimoireSnapshot[]>([]);
+const loadingSnapshots = ref(false);
+
+async function fetchSnapshots() {
+  if (!props.gameId) return;
+  loadingSnapshots.value = true;
+  try {
+    snapshots.value = await $fetch<GrimoireSnapshot[]>(
+      `/api/games/${props.gameId}/grimoire-snapshots`
+    );
+  } catch {
+    snapshots.value = [];
+  } finally {
+    loadingSnapshots.value = false;
+  }
+}
+
+function restoreSnapshot(snapshot: GrimoireSnapshot) {
+  const restored = snapshot.snapshot.pages.map((page) => ({
+    tokens: page.tokens.map((token, index) => {
+      const role = token.role_id ? allRoles.getRole(token.role_id) : undefined;
+      const relatedRole = token.related_role_id ? allRoles.getRole(token.related_role_id) : undefined;
+      return {
+        alignment: token.alignment as "GOOD" | "EVIL" | "NEUTRAL",
+        order: token.order ?? index,
+        is_dead: token.is_dead,
+        used_ghost_vote: token.used_ghost_vote,
+        role_id: token.role_id,
+        role: role
+          ? { token_url: role.token_url, type: role.type, initial_alignment: role.initial_alignment, name: role.name }
+          : undefined,
+        related_role_id: token.related_role_id,
+        related_role: relatedRole
+          ? { token_url: relatedRole.token_url, name: relatedRole.name }
+          : undefined,
+        player_name: token.player_name,
+        player_id: token.player_id,
+        reminders: token.reminders.map((r) => ({
+          reminder: r.reminder,
+          token_url: r.token_url,
+        })),
+      };
+    }),
+  }));
+
+  props.game.grimoire.splice(0, props.game.grimoire.length, ...restored);
+  props.game.player_count = restored[0]?.tokens.length ?? props.game.player_count;
+  grimPage.value = restored.length - 1;
+  showSnapshotDialog.value = false;
+}
 
 watch(bggIdInput, () => {
   // Validate the URL
