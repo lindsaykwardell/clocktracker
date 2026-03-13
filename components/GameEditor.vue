@@ -489,9 +489,11 @@
       <ExpandingTextarea
         v-if="!editingMultipleGames"
         v-model="game.notes"
-        class="block w-full border border-stone-500 rounded-md p-2 min-h-[10rem]"
+        class="block w-full border border-stone-500 rounded-md p-2"
+        rows="3"
       />
       <TagInput
+        class="mt-4"
         v-model="game.tags"
         :availableTags="myTags"
       />
