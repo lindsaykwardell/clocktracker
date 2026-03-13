@@ -29,7 +29,9 @@
                       v-for="link in community.data.links"
                       :href="link"
                     >
-                      {{ link.replace(/https?:\/\//, "").replace(/\/$/, "") }}
+                      <span class="max-w-[200px] truncate inline-block align-bottom">
+                        {{ link.replace(/https?:\/\//, "").replace(/\/$/, "") }}
+                      </span>
                     </SocialLink>
                   </div>
                 </div>
@@ -69,7 +71,7 @@
               </div>
             </div>
             <hr class="border-stone-100 w-full" />
-            <p class="whitespace-pre-wrap w-full text-center md:text-start text-balance">
+            <p class="whitespace-pre-wrap break-words w-full text-center md:text-start text-balance">
               {{ community.data.description }}
             </p>
             <nav
