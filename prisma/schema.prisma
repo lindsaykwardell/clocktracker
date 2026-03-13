@@ -61,6 +61,7 @@ model Game {
   fabled                   Fabled[]
   favorite                 FavoriteGame?
   favorite_id              Int?           @unique
+  grimoire_snapshots       GrimoireSnapshot[]
 
   @@index([user_id])
 }
@@ -88,10 +89,20 @@ enum WinStatus_V2 {
 }
 
 model Grimoire {
-  id         Int      @id @default(autoincrement())
-  created_at DateTime @default(now()) @db.Timestamptz(6)
+  id         Int                 @id @default(autoincrement())
+  created_at DateTime            @default(now()) @db.Timestamptz(6)
   tokens     Token[]
   game       Game[]
+}
+
+model GrimoireSnapshot {
+  id           Int      @id @default(autoincrement())
+  game_id      String
+  game         Game     @relation(fields: [game_id], references: [id])
+  snapshot     Json
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([game_id])
 }
 
 model Token {

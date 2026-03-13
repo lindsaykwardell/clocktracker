@@ -53,6 +53,7 @@
   const Check = resolveComponent("IconCheck");
   const CheckCircle = resolveComponent("IconCheckCircle");
   const ChevronDown = resolveComponent("IconChevronDown");
+  const ClockHistory = resolveComponent("IconClockHistory");
   const ChevronLeft = resolveComponent("IconChevronLeft");
   const ChevronRight = resolveComponent("IconChevronRight");
   const Copy = resolveComponent("IconCopy");
@@ -228,6 +229,8 @@
         return GraphUpArrow;   
       case "check-circle":
         return CheckCircle;
+      case "clock-history":
+        return ClockHistory;
       case "exclamation-circle":
         return ExclamationCircle;
       case "info-circle":
