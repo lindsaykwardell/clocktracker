@@ -24,7 +24,9 @@ export type UploadedScript = [
           | "minion"
           | "demon"
           | "traveler"
-          | "fabled";
+          | "traveller"
+          | "fabled"
+          | "loric";
         ability?: string;
       }
     | string
@@ -111,8 +113,11 @@ export async function saveCustomScript(
         case "demon":
           return Alignment.EVIL;
         case "traveler":
+        case "traveller":
           return Alignment.NEUTRAL;
         case "fabled":
+          return Alignment.NEUTRAL;
+        case "loric":
           return Alignment.NEUTRAL;
         default:
           return Alignment.NEUTRAL;
@@ -130,9 +135,12 @@ export async function saveCustomScript(
         case "demon":
           return RoleType.DEMON;
         case "traveler":
+        case "traveller":
           return RoleType.TRAVELER;
         case "fabled":
           return RoleType.FABLED;
+        case "loric":
+          return RoleType.LORIC;
         default:
           return RoleType.TOWNSFOLK;
       }
