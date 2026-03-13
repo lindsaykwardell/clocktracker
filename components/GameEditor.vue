@@ -330,27 +330,31 @@
             ? { '--bg-image-url' : `url(${customBackground})` }
             : {}
         "
+        ref="grimoireSection"
         class="grimoire grimoire-edit relative w-full flex flex-col gap-2"
       >
-        <div class="relative">
-          <div 
-            class="w-full max-w-[calc(100vw-4rem)] md:w-auto md:max-w-[966px] overflow-scroll bg-center bg-cover script-bg"
-            :class="{
-              ...scriptBgClasses(game.script, !!customBackground),
-            }"
-          >
-            <Grimoire
-              :tokens="game.grimoire[grimPage].tokens"
-              :availableRoles="orderedRoles"
-              :excludePlayers="storytellerNames"
-              @selectedMe="applyMyRoleToGrimoire"
-            />
+        <div class="relative grim-page-container">
+          <Transition :name="pageDirection === 'forward' ? 'page-forward' : 'page-backward'" mode="out-in">
             <div
-              class="absolute bottom-0 w-full xl:w-[calc(100%-0.625rem)] text-center bg-gradient-to-b from-transparent via-stone-800 to-stone-800 text-white"
+              :key="grimPage"
+              class="w-full max-w-[calc(100vw-4rem)] md:w-auto md:max-w-[966px] overflow-scroll bg-center bg-cover script-bg"
+              :class="{
+                ...scriptBgClasses(game.script, !!customBackground),
+              }"
             >
-              Page {{ grimPage + 1 }} of {{ game.grimoire.length }}
+              <Grimoire
+                :tokens="game.grimoire[grimPage].tokens"
+                :availableRoles="orderedRoles"
+                :excludePlayers="storytellerNames"
+                @selectedMe="applyMyRoleToGrimoire"
+              />
+              <div
+                class="absolute bottom-0 w-full xl:w-[calc(100%-0.625rem)] text-center bg-gradient-to-b from-transparent via-stone-800 to-stone-800 text-white"
+              >
+                Page {{ grimPage + 1 }} of {{ game.grimoire.length }}
+              </div>
             </div>
-          </div>
+          </Transition>
         </div>
         
         <Button
@@ -724,8 +728,10 @@ const tokenSet = ref<"player_characters" | "demon_bluffs" | "fabled">(
 );
 
 // Grimoire
+const grimoireSection = ref<HTMLElement | null>(null);
 const showCopyGrimoireDialog = ref(false);
 const grimPage = ref(props.game.grimoire.length - 1);
+const pageDirection = ref<"forward" | "backward">("forward");
 const bggIdInput = ref("");
 const bggIdIsValid = ref(true);
 const customBackground = ref<string | null>(null);
@@ -1247,6 +1253,7 @@ watchEffect(() => {
 });
 
 function pageForward() {
+  pageDirection.value = "forward";
   const nextPage = grimPage.value + 1;
   if (nextPage < props.game.grimoire.length) {
     grimPage.value = nextPage;
@@ -1256,10 +1263,14 @@ function pageForward() {
         .tokens,
     };
     grimPage.value = nextPage;
+    nextTick(() => {
+      grimoireSection.value?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
   }
 }
 
 function pageBackward() {
+  pageDirection.value = "backward";
   const previousPage = grimPage.value - 1;
   if (previousPage >= 0) {
     grimPage.value = previousPage;
@@ -1267,6 +1278,7 @@ function pageBackward() {
 }
 
 function deletePage() {
+  pageDirection.value = "backward";
   props.game.grimoire.splice(grimPage.value, 1);
   grimPage.value = Math.max(0, grimPage.value - 1);
 }
@@ -1479,5 +1491,37 @@ onMounted(async () => {
     scrollbar-width: thin;
     scrollbar-color: oklch(44.4% 0.011 73.639) transparent;
   }
+}
+
+/* Forward (next page / add page) */
+.page-forward-enter-active,
+.page-forward-leave-active {
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.page-forward-leave-to {
+  transform: translateX(-8%);
+  opacity: 0;
+}
+
+.page-forward-enter-from {
+  transform: translateX(8%);
+  opacity: 0;
+}
+
+/* Backward (previous page) */
+.page-backward-enter-active,
+.page-backward-leave-active {
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.page-backward-leave-to {
+  transform: translateX(8%);
+  opacity: 0;
+}
+
+.page-backward-enter-from {
+  transform: translateX(-8%);
+  opacity: 0;
 }
 </style>
