@@ -434,7 +434,7 @@ async function main() {
     communities.push(community);
 
     for (const post of posts) {
-      const created_at = faker.date.past();
+      const created_at = faker.date.recent({ days: 30 });
       await prisma.communityPost.create({
         data: {
           user_id: post.user_id,
@@ -512,7 +512,7 @@ async function main() {
               user_id: player.user_id,
             })),
           },
-          created_at: event.start,
+          created_at: faker.date.recent({ days: 30 }),
           created_by_id: communityUsers[0].user_id,
         },
       });
@@ -893,7 +893,15 @@ async function main() {
   async function seedThread(categoryId, title, postCount, options = {}) {
     const { pinned = false, locked = false, addReactions = false, addEdits = false } = options;
     const threadAuthor = randomUser();
-    const created_at = faker.date.past({ years: 1 });
+    // Thread starts 1-3 months ago so replies scatter into recent weeks
+    const created_at = faker.date.between({
+      from: dayjs().subtract(3, "months").toDate(),
+      to: dayjs().subtract(1, "months").toDate(),
+    });
+
+    // Replies are scattered between thread creation and now, but never in the future
+    const now = new Date();
+    const timeSpan = now.getTime() - created_at.getTime();
 
     const thread = await prisma.forumThread.create({
       data: {
@@ -929,11 +937,18 @@ async function main() {
     });
     if (firstPost) allPostIds.push(firstPost.id);
 
+    // Generate staggered reply times scattered across the full timespan
+    const replyOffsets = [];
+    for (let i = 1; i < postCount; i++) {
+      replyOffsets.push(Math.random());
+    }
+    replyOffsets.sort();
+
     let lastPostAt = created_at;
     for (let i = 1; i < postCount; i++) {
       const replyAuthor = randomUser();
       const replyDate = new Date(
-        lastPostAt.getTime() + Math.random() * 1000 * 60 * 60 * 24 * 2 + 60000
+        created_at.getTime() + timeSpan * replyOffsets[i - 1]
       );
       lastPostAt = replyDate;
 

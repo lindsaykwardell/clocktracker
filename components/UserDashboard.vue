@@ -2,6 +2,7 @@
   <template v-if="me.status === Status.SUCCESS">
     <div class="dashboard">
       <div
+        ref="scrollContainerRef"
         class="content custom-scrollbar md:overflow-y-scroll pb-20 md:pb-0 px-4"
         :class="{
           block: selectedTab === 'updates',
@@ -25,7 +26,7 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="hidden md:grid grid-cols-2 gap-4">
             <div v-if="roleOfTheDay.data.value" class="flex items-center gap-4 rounded-lg border border-stone-300 dark:border-stone-700/50 p-4">
               <nuxt-link
                 :to="`/roles/${roleOfTheDay.data.value.id}`"
@@ -68,7 +69,7 @@
             <h2 class="text-3xl font-sorts">Activity Feed</h2>
             <ClientOnly>
               <ul class="mt-4 flex flex-col gap-3 lg:gap-6">
-                <li v-for="update in updates.data.value" class="max-w-[800px] w-full mx-auto">
+                <li v-for="update in allUpdates" class="max-w-[800px] w-full mx-auto">
                   <div class="flex flex-col gap-2">
                     <template v-if="update.kind === 'new_event'">
                       <div class="flex gap-2 items-center">
@@ -207,9 +208,42 @@
                         />
                       </div>
                     </template>
+                    <template v-else-if="update.kind === 'forum_post' && featureFlags.isEnabled('forum')">
+                      <div class="flex gap-2 items-center">
+                        <Avatar
+                          :value="update.forumPost.author.avatar"
+                          size="xs"
+                          aria-hidden="true"
+                        />
+                        <div class="flex flex-col">
+                          <span class="text-sm text-stone-500 dark:text-stone-400">
+                            New post in
+                            <nuxt-link
+                              :to="`/forum/${update.forumPost.thread.category.slug}/${update.forumPost.thread.id}#post-${update.forumPost.id}`"
+                              class="font-semibold hover:underline"
+                            >
+                              {{ update.forumPost.thread.title }}
+                            </nuxt-link>
+                          </span>
+                        </div>
+                      </div>
+                      <ForumPost
+                        :post="update.forumPost"
+                        :threadId="update.forumPost.thread.id"
+                        :threadIsLocked="update.forumPost.thread.is_locked"
+                        :currentUserId="me.data.user_id"
+                        :canEditPost="me.data.is_admin || update.forumPost.author.user_id === me.data.user_id"
+                        :canDeletePost="me.data.is_admin || update.forumPost.author.user_id === me.data.user_id"
+                        @quote="dashboardQuotePost(update.forumPost)"
+                        @deleted="forumPostDeleted"
+                      />
+                    </template>
                   </div>
                 </li>
               </ul>
+              <div v-if="nextCursor" ref="sentinelRef" class="flex justify-center py-8">
+                <Loading v-if="loadingMore" />
+              </div>
             </ClientOnly>
 
           </div>
@@ -299,9 +333,59 @@ definePageMeta({
 
 const me = useMe();
 const games = useGames();
-const updates = await useFetch("/api/dashboard/recent");
+const featureFlags = useFeatureFlags();
+const { data: initialPage } = await useFetch("/api/dashboard/recent");
 const roleOfTheDay = await useFetch("/api/role_of_the_day");
 const scriptsOfTheWeek = await useFetch("/api/scripts_of_the_week");
+
+// Pagination state
+const allUpdates = ref(initialPage.value?.updates ?? []);
+const nextCursor = ref(initialPage.value?.nextCursor ?? null);
+const loadingMore = ref(false);
+const sentinelRef = ref<HTMLElement | null>(null);
+
+watch(initialPage, (val) => {
+  if (val) {
+    allUpdates.value = val.updates;
+    nextCursor.value = val.nextCursor;
+  }
+});
+
+async function loadMore() {
+  if (loadingMore.value || !nextCursor.value) return;
+  loadingMore.value = true;
+  try {
+    const data = await $fetch("/api/dashboard/recent", {
+      query: { cursor: nextCursor.value },
+    });
+    allUpdates.value = [...allUpdates.value, ...data.updates];
+    nextCursor.value = data.nextCursor;
+  } finally {
+    loadingMore.value = false;
+  }
+}
+
+const scrollContainerRef = ref<HTMLElement | null>(null);
+
+onMounted(() => {
+  let observer: IntersectionObserver | null = null;
+
+  watch([sentinelRef, scrollContainerRef], ([sentinel, root]) => {
+    if (observer) observer.disconnect();
+    if (!sentinel) return;
+    observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          loadMore();
+        }
+      },
+      { root: root || null, rootMargin: "200px" }
+    );
+    observer.observe(sentinel);
+  }, { immediate: true });
+
+  onUnmounted(() => observer?.disconnect());
+});
 
 const { data: events } = await useFetch<Event[]>("/api/events");
 const selectedDay = ref<dayjs.Dayjs | null>(dayjs());
@@ -311,8 +395,7 @@ const selectedTab = ref<"updates" | "events">("updates");
 // references and don't re-render when unrelated store data changes.
 const taggedGameArrays = computed(() => {
   const result: Record<string, GameRecord[]> = {};
-  if (!updates.data.value) return result;
-  for (const update of updates.data.value) {
+  for (const update of allUpdates.value) {
     if (update.kind === "tagged_game") {
       const game = games.getGame(update.game.id);
       if (game.status === Status.SUCCESS) {
@@ -347,36 +430,47 @@ function canModifyEvent(event: Event) {
 }
 
 function postDeleted(id: string) {
-  if (updates.data.value) {
-    updates.data.value = (
-      JSON.parse(
-        JSON.stringify(updates.data.value)
-      ) as typeof updates.data.value
-    ).reduce((acc, update) => {
-      switch (update.kind) {
-        case "new_event":
-          acc.push(update);
-          break;
-        case "new_post":
-          if (update.post.id !== id) {
-            const replyIndex = update.post.replies.findIndex(
-              (r) => r.id === id
-            );
+  allUpdates.value = (
+    JSON.parse(
+      JSON.stringify(allUpdates.value)
+    ) as typeof allUpdates.value
+  ).reduce((acc, update) => {
+    switch (update.kind) {
+      case "new_event":
+        acc.push(update);
+        break;
+      case "new_post":
+        if (update.post.id !== id) {
+          const replyIndex = update.post.replies.findIndex(
+            (r) => r.id === id
+          );
 
-            if (replyIndex === -1) {
-              acc.push(update);
-            } else {
-              update.post.replies.splice(replyIndex, 1);
-              update.post._count.replies--;
-              acc.push(update);
-            }
-            break;
+          if (replyIndex === -1) {
+            acc.push(update);
+          } else {
+            update.post.replies.splice(replyIndex, 1);
+            update.post._count.replies--;
+            acc.push(update);
           }
-      }
+          break;
+        }
+      default:
+        acc.push(update);
+        break;
+    }
 
-      return acc;
-    }, [] as typeof updates.data.value);
-  }
+    return acc;
+  }, [] as typeof allUpdates.value);
+}
+
+function dashboardQuotePost(forumPost: { thread: { id: string; category: { slug: string } }; id: string }) {
+  navigateTo(`/forum/${forumPost.thread.category.slug}/${forumPost.thread.id}?quote=${forumPost.id}`);
+}
+
+function forumPostDeleted(id: string) {
+  allUpdates.value = allUpdates.value.filter(
+    (update) => !(update.kind === "forum_post" && update.forumPost.id === id)
+  );
 }
 
 function removeEvent(id: string) {
