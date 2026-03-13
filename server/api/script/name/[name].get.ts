@@ -77,9 +77,10 @@ export default defineEventHandler(async (handler) => {
     }
   }
 
-  // If the characters have not been fetched, fetch them
+  // If the characters have not been fetched, fetch them from the json_url.
+  // Custom scripts have an empty json_url, so skip them.
   for (const script of scripts) {
-    if (script.roles.length === 0) {
+    if (script.roles.length === 0 && script.json_url) {
       const roleIds: { id: string }[] = (
         await fetch(script.json_url).then((res) => res.json())
       )
