@@ -5,9 +5,9 @@ import {
   userCanViewCategory,
   getForumNameColors,
   getForumBadges,
-  isAdmin,
   isModerator,
 } from "~/server/utils/forum";
+import { isAdmin } from "~/server/utils/permissions";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
