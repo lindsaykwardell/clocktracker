@@ -6,8 +6,8 @@ import {
   checkForumBan,
   isRateLimited,
   checkPostLength,
-  hasRestriction,
 } from "~/server/utils/forum";
+import { hasRestriction } from "~/server/utils/permissions";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
