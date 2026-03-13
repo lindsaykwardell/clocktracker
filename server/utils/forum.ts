@@ -1,10 +1,5 @@
 import { prisma } from "./prisma";
 export {
-  isAdmin,
-  hasPermission,
-  getUserPermissions,
-  getUserRestrictions,
-  hasRestriction,
   getUserPermissions as getUserForumPermissions,
   hasPermission as hasForumPermission,
 } from "./permissions";

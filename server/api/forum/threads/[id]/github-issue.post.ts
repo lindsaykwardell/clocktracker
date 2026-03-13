@@ -1,5 +1,6 @@
 import { githubApiFetch } from "~/server/utils/github";
-import { hasForumPermission, isAdmin } from "~/server/utils/forum";
+import { hasForumPermission } from "~/server/utils/forum";
+import { isAdmin } from "~/server/utils/permissions";
 import { prisma } from "~/server/utils/prisma";
 
 export default defineEventHandler(async (handler) => {
