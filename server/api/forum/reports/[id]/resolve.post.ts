@@ -1,6 +1,7 @@
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
-import { hasPermission, logModAction } from "~/server/utils/forum";
+import { hasPermission } from "~/server/utils/permissions";
+import { logModAction } from "~/server/utils/forum";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;

@@ -111,6 +111,7 @@ export default defineNuxtConfig({
 
   supabase: {
     redirect: false,
+    types: false,
   },
 
   runtimeConfig: {

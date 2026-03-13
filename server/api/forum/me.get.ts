@@ -1,5 +1,6 @@
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
-import { getUserForumPermissions, getUserRestrictions, isAdmin } from "~/server/utils/forum";
+import { getUserForumPermissions } from "~/server/utils/forum";
+import { getUserRestrictions, isAdmin } from "~/server/utils/permissions";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
