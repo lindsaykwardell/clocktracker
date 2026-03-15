@@ -3,6 +3,14 @@ export enum Theme {
   DARK = "dark",
 }
 
+function tryLocalStorage(fn: () => void) {
+  try {
+    fn();
+  } catch {
+    // localStorage may be unavailable (e.g. Safari private browsing, disabled cookies)
+  }
+}
+
 export function themeIs() {
   if (document.documentElement.classList.contains("dark")) {
     return Theme.DARK;
@@ -21,24 +29,32 @@ export function themeIsDark() {
 
 // Whenever the user explicitly chooses light mode
 export function useLightMode() {
-  localStorage.theme = "light";
+  tryLocalStorage(() => { localStorage.theme = "light"; });
   document.documentElement.classList.remove("dark");
 }
 
 // Whenever the user explicitly chooses dark mode
 export function useDarkMode() {
-  localStorage.theme = "dark";
+  tryLocalStorage(() => { localStorage.theme = "dark"; });
   document.documentElement.classList.add("dark");
 }
 
 // Whenever the user explicitly chooses to respect the OS preference
 export function useOSDefaultMode() {
-  localStorage.removeItem("theme");
+  tryLocalStorage(() => { localStorage.removeItem("theme"); });
+
+  let storedTheme: string | null = null;
+  let hasTheme = false;
+  try {
+    storedTheme = localStorage.theme;
+    hasTheme = "theme" in localStorage;
+  } catch {
+    // localStorage unavailable
+  }
 
   if (
-    localStorage.theme === "dark" ||
-    (!("theme" in localStorage) &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches)
+    storedTheme === "dark" ||
+    (!hasTheme && window.matchMedia("(prefers-color-scheme: dark)").matches)
   ) {
     document.documentElement.classList.add("dark");
   } else {
