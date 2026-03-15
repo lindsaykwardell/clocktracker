@@ -249,9 +249,8 @@
                           <MenuItems
                             class="ct-contextual-links right-0 top-full"
                           >
-                            <MenuItem>
+                            <MenuItem v-if="!isMe(member.user_id)">
                               <ButtonSubmenu
-                                v-if="!isMe(member.user_id)"
                                 @click="toggleAdmin(member.user_id)"
                               >
                                 <template
