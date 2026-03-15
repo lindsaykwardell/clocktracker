@@ -1016,68 +1016,60 @@ if (gameMetadata.error.value) {
     throw gameMetadata.error.value;
 }
 
-useHead({
-    title: `${gameMetadata.data.value!.user!.display_name} - ${
-        gameMetadata.data.value!.script
-    }`,
-    meta: [
-        {
-            key: "description",
-            name: "description",
-            content: `Game of ${gameMetadata.data.value!.script} played by ${
-                gameMetadata.data.value!.user!.display_name
-            } on ${dayjs(gameMetadata.data.value!.date).format("MMMM D, YYYY")}.`,
-        },
-        {
-            property: "og:title",
-            content: `${gameMetadata.data.value!.user!.display_name} - ${
-                gameMetadata.data.value!.script
-            }`,
-        },
-        {
-            property: "og:description",
-            content: `Game of ${gameMetadata.data.value!.script} played by ${
-                gameMetadata.data.value!.user!.display_name
-            } on ${dayjs(gameMetadata.data.value!.date).format("MMMM D, YYYY")}.`,
-        },
-        {
-            property: "og:image",
-            content:
-                gameMetadata.data.value?.associated_script?.logo ??
-                scriptLogo(gameMetadata.data.value!.script as string),
-        },
-        {
-            property: "og:url",
-            content: route.fullPath,
-        },
-        {
-            property: "twitter:card",
-            content: "summary_large_image",
-        },
-        {
-            property: "twitter:url",
-            content: route.fullPath,
-        },
-        {
-            property: "twitter:title",
-            content: `${gameMetadata.data.value!.user!.display_name} - ${
-                gameMetadata.data.value!.script
-            }`,
-        },
-        {
-            property: "twitter:description",
-            content: `Game of ${gameMetadata.data.value!.script} played by ${
-                gameMetadata.data.value!.user!.display_name
-            } on ${dayjs(gameMetadata.data.value!.date).format("MMMM D, YYYY")}.`,
-        },
-        {
-            property: "twitter:image",
-            content:
-                gameMetadata.data.value?.associated_script?.logo ??
-                scriptLogo(gameMetadata.data.value!.script as string),
-        },
-    ],
-});
+const meta = gameMetadata.data.value;
+if (meta?.user) {
+    const displayName = meta.user.display_name;
+    const script = meta.script;
+    const dateStr = dayjs(meta.date).format("MMMM D, YYYY");
+    const image = meta.associated_script?.logo ?? scriptLogo(script as string);
+
+    useHead({
+        title: `${displayName} - ${script}`,
+        meta: [
+            {
+                key: "description",
+                name: "description",
+                content: `Game of ${script} played by ${displayName} on ${dateStr}.`,
+            },
+            {
+                property: "og:title",
+                content: `${displayName} - ${script}`,
+            },
+            {
+                property: "og:description",
+                content: `Game of ${script} played by ${displayName} on ${dateStr}.`,
+            },
+            {
+                property: "og:image",
+                content: image,
+            },
+            {
+                property: "og:url",
+                content: route.fullPath,
+            },
+            {
+                property: "twitter:card",
+                content: "summary_large_image",
+            },
+            {
+                property: "twitter:url",
+                content: route.fullPath,
+            },
+            {
+                property: "twitter:title",
+                content: `${displayName} - ${script}`,
+            },
+            {
+                property: "twitter:description",
+                content: `Game of ${script} played by ${displayName} on ${dateStr}.`,
+            },
+            {
+                property: "twitter:image",
+                content: image,
+            },
+        ],
+    });
+}
 
 const last_character = computed(() => {
     return games.getLastCharater(gameId);
