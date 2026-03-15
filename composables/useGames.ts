@@ -306,7 +306,7 @@ export const useGames = defineStore("games", {
 
         const communities = new Set<string>();
         for (const game of games.data) {
-          if (game.community_name) {
+          if (game.community_name?.trim()) {
             communities.add(game.community_name);
           }
         }
