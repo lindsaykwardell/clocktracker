@@ -598,29 +598,22 @@ const myTags = computed(() => {
 });
 
 const mySelectedPlayers = computed(() => {
-  if (props.games.status === Status.SUCCESS) {
-    return [
-      ...new Set(
-        naturalOrder([
-          ...props.games.data.flatMap((game) =>
-            game.grimoire.flatMap((g) =>
-              g.tokens.map((t) => t.player?.display_name || t.player_name)
-            )
-          ),
-          ...props.games.data.map(
-            (game) =>
-              (game.is_storyteller ? game.user.username : game.storyteller) ??
-              ""
-          ),
-          ...props.games.data.flatMap((game) => game.co_storytellers),
-        ])
-          .sort()
-          .filter((n) => n !== "")
-      ),
-    ];
-  } else {
+  if (props.games.status !== Status.SUCCESS) {
     return [];
   }
+  const players = [
+    ...props.games.data.flatMap((game) =>
+      game.grimoire.flatMap((g) =>
+        g.tokens.map((t) => t.player?.display_name || t.player_name)
+      )
+    ),
+    ...props.games.data.map(
+      (game) =>
+        (game.is_storyteller ? game.user.username : game.storyteller) ?? ""
+    ),
+    ...props.games.data.flatMap((game) => game.co_storytellers),
+  ].filter((n) => !!n);
+  return naturalOrder([...new Set(players)]).sort();
 });
 
 const myRoles = computed(() => {
@@ -643,9 +636,8 @@ const myRoles = computed(() => {
 const myCommunities = computed(() => {
   if (!props.player) {
     return [];
-  } else {
-    return allGames.getCommunityNamesByPlayer(props.player.username);
   }
+  return allGames.getCommunityNamesByPlayer(props.player.username);
 });
 
 const myScripts = computed(() => {
@@ -666,8 +658,8 @@ const myLocations = computed(() => {
   return naturalOrder([
     ...new Set(
       props.games.data
-        .filter((game) => game.location)
         .map((game) => game.location)
+        .filter((loc) => !!loc)
     ),
   ]).sort();
   // if (props.communitySlug) {
@@ -754,14 +746,18 @@ watchEffect(() => {
 
 watchEffect(() => {
   if (selectedTag.value) {
-    selectedTags.value.push(selectedTag.value);
+    if (!selectedTags.value.includes(selectedTag.value)) {
+      selectedTags.value.push(selectedTag.value);
+    }
     selectedTag.value = null;
   }
 });
 
 watchEffect(() => {
   if (selectedPlayer.value) {
-    selectedPlayers.value.push(selectedPlayer.value);
+    if (!selectedPlayers.value.includes(selectedPlayer.value)) {
+      selectedPlayers.value.push(selectedPlayer.value);
+    }
     selectedPlayer.value = null;
   }
 });
