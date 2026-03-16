@@ -5,6 +5,7 @@ import {
   findOrCreatePlayerChildGame,
   findOrCreateStorytellerChildGame,
 } from "~/server/utils/childGame";
+import { sendPushNotifications } from "~/server/utils/sendPushNotifications";
 
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
@@ -406,6 +407,17 @@ export default defineEventHandler(async (handler) => {
     }
   }
 
+  // Notify tagged players
+  const playerIdsToNotify = [...taggedPlayers].filter((id): id is string => !!id && id !== user.id);
+  if (playerIdsToNotify.length > 0) {
+    void sendPushNotifications({
+      userIds: playerIdsToNotify,
+      title: "You've been tagged in a game",
+      body: `${game.user.username} tagged you in a game of ${game.script}`,
+      url: `/@${game.user.username}`,
+    });
+  }
+
   const storytellers = [game.storyteller, ...game.co_storytellers];
 
   for (const storyteller of storytellers) {
@@ -432,6 +444,13 @@ export default defineEventHandler(async (handler) => {
         } catch (err: any) {
           console.error(`Error creating storyteller child game for ${storyteller}: ${err.message}`);
         }
+
+        void sendPushNotifications({
+          userIds: [friend.user_id],
+          title: "You've been tagged as storyteller",
+          body: `${game.user.username} tagged you as storyteller in a game of ${game.script}`,
+          url: `/@${game.user.username}`,
+        });
       }
     }
   }
