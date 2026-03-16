@@ -45,7 +45,16 @@
               Integrations
             </nuxt-link>
           </li>
-          <li>  
+          <li v-if="featureFlags.isEnabled('push-notifications')">
+            <nuxt-link
+              to="/settings/notifications"
+              class="block w-full p-2 border-l-[6px] hover:border-primary hover:text-primary-content hover:bg-primary dark:hover:bg-dark-primary duration-150"
+              active-class="border-primary dark:border-dark-primary"
+            >
+              Notifications
+            </nuxt-link>
+          </li>
+          <li>
             <nuxt-link
               to="/settings/account"
               class="block w-full p-2 border-l-[6px] hover:border-primary hover:text-primary-content hover:bg-primary dark:hover:bg-dark-primary duration-150"
@@ -76,6 +85,7 @@
 <script setup lang="ts">
 const user = useUser();
 const users = useUsers();
+const featureFlags = useFeatureFlags();
 
 const avatar = computed(() => {
   const u = users.getUserById(user.value?.id);

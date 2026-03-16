@@ -120,8 +120,12 @@ export default defineNuxtConfig({
     githubInstallationId: process.env.GITHUB_INSTALLATION_ID ?? "",
     githubRepoOwner: process.env.GITHUB_REPO_OWNER ?? "lindsaykwardell",
     githubRepoName: process.env.GITHUB_REPO_NAME ?? "clocktracker",
+    vapidPublicKey: process.env.VAPID_PUBLIC_KEY ?? "",
+    vapidPrivateKey: process.env.VAPID_PRIVATE_KEY ?? "",
+    vapidSubject: process.env.VAPID_SUBJECT ?? "",
     public: {
       assetVersion: process.env.NUXT_PUBLIC_ASSET_VERSION ?? "v1",
+      vapidPublicKey: process.env.VAPID_PUBLIC_KEY ?? "",
     },
   },
 
@@ -158,6 +162,7 @@ export default defineNuxtConfig({
       "launch-2048x2732.png",
     ],
     workbox: {
+      importScripts: ["/push-sw.js"],
       globPatterns: ["**/*.{js,css,html}"],
       runtimeCaching: [
         {
