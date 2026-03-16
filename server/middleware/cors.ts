@@ -1,0 +1,27 @@
+export default defineEventHandler((event) => {
+  const origin = getHeader(event, "origin");
+
+  const allowedOrigins = ["capacitor://localhost", "http://localhost"];
+  if (!origin || !allowedOrigins.includes(origin)) {
+    return;
+  }
+
+  setHeader(event, "Access-Control-Allow-Origin", origin);
+  setHeader(
+    event,
+    "Access-Control-Allow-Headers",
+    "Authorization, Content-Type"
+  );
+  setHeader(
+    event,
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS"
+  );
+  setHeader(event, "Access-Control-Allow-Credentials", "true");
+
+  // Handle preflight
+  if (event.method === "OPTIONS") {
+    event.node.res.statusCode = 204;
+    event.node.res.end();
+  }
+});

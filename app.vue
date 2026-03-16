@@ -27,7 +27,7 @@
         </div>
       </template>
     </AnnouncementDialog>
-    <VitePwaManifest />
+    <VitePwaManifest v-if="!runtimeConfig.public.isCapacitorBuild" />
 </template>
 
 <script setup lang="ts">
@@ -59,6 +59,7 @@ import { nanoid } from "nanoid";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
+const runtimeConfig = useRuntimeConfig();
 const users = useUsers();
 const user = useUser();
 const featureFlags = useFeatureFlags();
@@ -112,7 +113,7 @@ watch(
             // console.log('userSettings watcher: Storing new settings in Pinia');
             users.storeUser(newSettings);
             // Re-register push subscription on this browser if user has notifications enabled
-            if (import.meta.client) {
+            if (import.meta.client && !runtimeConfig.public.isCapacitorBuild) {
                 syncPushSubscription(!!newSettings.push_notifications_enabled);
             }
         } else if (oldSettings && !newSettings) {

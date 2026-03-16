@@ -54,6 +54,47 @@ export async function sendForumNotifications({
 }
 
 /**
+ * Send push notifications to category subscribers
+ * when a new thread is created in a subscribed category.
+ */
+export async function sendCategoryNewThreadNotifications({
+  threadId,
+  threadTitle,
+  categorySlug,
+  categoryName,
+  postBody,
+  authorDisplayName,
+  subscriberUserIds,
+}: {
+  threadId: string;
+  threadTitle: string;
+  categorySlug: string;
+  categoryName: string;
+  postBody: string;
+  authorDisplayName: string;
+  subscriberUserIds: string[];
+}) {
+  try {
+    if (subscriberUserIds.length === 0) return;
+
+    const snippet = postBody
+      .replace(/[#*_~`>\[\]()!|\\-]/g, "")
+      .replace(/\n+/g, " ")
+      .trim()
+      .slice(0, 200);
+
+    await sendPushNotifications({
+      userIds: subscriberUserIds,
+      title: `New thread in ${categoryName}: ${threadTitle}`,
+      body: `${authorDisplayName}: ${snippet}`,
+      url: `/forum/${categorySlug}/${threadId}`,
+    });
+  } catch (err) {
+    console.error("[push] Category subscription notification error:", err);
+  }
+}
+
+/**
  * Send push notifications to all users with push enabled
  * when a new announcement thread is created.
  */
