@@ -9,6 +9,7 @@ import {
   getForumNameColor,
   getForumBadges,
 } from "~/server/utils/forum";
+import { sendForumNotifications } from "~/server/utils/sendForumNotifications";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
@@ -108,6 +109,13 @@ export default defineEventHandler(async (handler) => {
       update: { last_read_at: now },
     }),
   ]);
+
+  // Fire-and-forget push notifications to thread subscribers
+  void sendForumNotifications({
+    threadId,
+    posterId: me.id,
+    posterDisplayName: post.author.display_name,
+  });
 
   const [nameColor, badges] = await Promise.all([
     getForumNameColor(me.id),
