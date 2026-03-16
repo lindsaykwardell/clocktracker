@@ -16,6 +16,7 @@ export async function sendForumNotifications({
     const config = useRuntimeConfig();
 
     if (!config.vapidPublicKey || !config.vapidPrivateKey || !config.vapidSubject) {
+      console.warn("[push] VAPID keys not configured, skipping notifications");
       return;
     }
 
@@ -33,7 +34,10 @@ export async function sendForumNotifications({
       },
     });
 
-    if (!thread) return;
+    if (!thread) {
+      console.warn("[push] Thread not found:", threadId);
+      return;
+    }
 
     const subscriptions = await prisma.forumThreadSubscription.findMany({
       where: {
@@ -57,6 +61,10 @@ export async function sendForumNotifications({
     });
 
     const pushSubs = subscriptions.flatMap((s) => s.user.push_subscriptions);
+
+    console.log(`[push] Sending to ${pushSubs.length} device(s) for thread "${thread.title}"`);
+
+    if (pushSubs.length === 0) return;
 
     const results = await Promise.allSettled(
       pushSubs.map((sub) =>
@@ -87,7 +95,11 @@ export async function sendForumNotifications({
         where: { endpoint: { in: expiredEndpoints } },
       });
     }
-  } catch {
-    // Never throw — this is fire-and-forget
+    const failed = results.filter((r) => r.status === "rejected");
+    if (failed.length > 0) {
+      console.warn(`[push] ${failed.length} notification(s) failed:`, failed.map((r) => (r as PromiseRejectedResult).reason?.message || r));
+    }
+  } catch (err) {
+    console.error("[push] Unexpected error:", err);
   }
 }
