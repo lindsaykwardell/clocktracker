@@ -16,6 +16,7 @@ logs
 .DS_Store
 .fleet
 .idea
+*:Zone.Identifier
 
 # Local env files
 .env

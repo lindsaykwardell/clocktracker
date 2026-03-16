@@ -1,5 +1,5 @@
 import type { User } from "@supabase/supabase-js";
-import { Alignment, WinStatus_V2 } from "@prisma/client";
+import { Alignment, ReminderType, WinStatus_V2 } from "@prisma/client";
 import { mapOfficialIdToClocktrackerId } from "~/server/utils/getRoleMap";
 import { saveCustomScript, UploadedScript } from "~/server/utils/customScript";
 import { prisma } from "~/server/utils/prisma";
@@ -139,14 +139,30 @@ export default defineEventHandler(async (handler) => {
 
       const mappedReminders = await Promise.all(
         token.reminders.map(async (reminder) => {
-          const reminderRole = await prisma.role.findUnique({
-            where: { id: reminder.role_id },
-            select: { token_url: true },
-          });
+          const mappedReminderRoleId =
+            (await mapOfficialIdToClocktrackerId(reminder.role_id)) ??
+            reminder.role_id;
+
+          const [reminderRole, roleReminder] = await Promise.all([
+            prisma.role.findUnique({
+              where: { id: mappedReminderRoleId },
+              select: { token_url: true },
+            }),
+            prisma.roleReminder.findUnique({
+              where: {
+                role_id_reminder: {
+                  role_id: mappedReminderRoleId,
+                  reminder: reminder.reminder,
+                },
+              },
+              select: { type: true },
+            }),
+          ]);
 
           return {
             reminder: reminder.reminder,
             token_url: reminderRole?.token_url || "",
+            type: roleReminder?.type ?? ReminderType.CUSTOM,
           };
         })
       );

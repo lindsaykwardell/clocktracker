@@ -108,6 +108,7 @@ export type GameRecord = Omit<Game, "win_v2"> & {
     grimoire_page: number;
     participant_id: string;
     event_type: GrimoireEventType;
+    status_source: string | null;
     cause: GrimoireEventCause | null;
     by_participant_id: string | null;
     player_name: string;

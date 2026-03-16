@@ -132,5 +132,10 @@ export const GRIMOIRE_EVENT_ROLE_INCLUDES: Record<GrimoireEventType, RoleInclude
   [GrimoireEventType.OTHER]: { base: [
     ...WILDCARD_ROLE_IDS,
     "cannibal",
+    "exorcist",
+    "mayor",
+    "fisherman",
+    "fool",
+    "fortune_teller",
   ], conditional: [] },
 };

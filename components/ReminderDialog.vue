@@ -8,16 +8,31 @@
       </div>
     </template>
     <template v-if="show">
-      <div class="flex flex-wrap justify-around gap-3 p-4">
-        <button
-          v-for="reminder in reminders"
-          :key="reminder.id"
-          type="button"
-          class="flex flex-col items-center"
-          @click="emit('selectReminder', reminder)"
+      <div class="flex flex-col gap-4 p-4">
+        <div
+          v-for="group in reminderGroups"
+          :key="group.key"
         >
-          <ReminderToken :reminder="reminder" />
-        </button>
+          <div class="mb-2">
+            <h3 class="text-lg font-bold font-sorts text-center">
+              {{ group.label }}
+            </h3>
+            <p v-if="group.description" class="text-xs text-center text-stone-500">{{ group.description }}</p>
+          </div>
+          
+          <hr class="border-stone-700">
+          <div class="flex flex-wrap justify-center gap-3 p-4">
+            <button
+              v-for="reminder in group.reminders"
+              :key="reminder.id"
+              type="button"
+              class="flex flex-col items-center"
+              @click="emit('selectReminder', reminder)"
+            >
+              <ReminderToken :reminder="reminder" />
+            </button>
+          </div>
+        </div>
       </div>
       <form
         class="flex flex-col gap-2 p-4"
@@ -25,6 +40,7 @@
           $emit('selectReminder', {
             reminder: customReminder,
             token_url: tokenUrl,
+            type: 'CUSTOM',
           })
         "
       >
@@ -71,6 +87,7 @@
               $emit('selectReminder', {
                 reminder: customReminder,
                 token_url: tokenUrl,
+                type: 'CUSTOM',
               })
             "
           >
@@ -102,6 +119,27 @@ function setTokenUrlAndClose(url: string, close: () => void) {
 
 const availableTokenUrls = computed(() => {
   return [...new Set(props.reminders.map((reminder) => reminder.token_url))];
+});
+
+const reminderGroups = computed(() => {
+  const grouped = {
+    OFFICIAL: props.reminders.filter((reminder) => reminder.type === "OFFICIAL"),
+    TRACKING: props.reminders.filter((reminder) => reminder.type === "TRACKING"),
+    CUSTOM: props.reminders.filter((reminder) => reminder.type === "CUSTOM"),
+    OTHER: props.reminders.filter(
+      (reminder) =>
+        reminder.type !== "OFFICIAL" &&
+        reminder.type !== "TRACKING" &&
+        reminder.type !== "CUSTOM"
+    ),
+  };
+
+  return [
+    { key: "OFFICIAL", label: "Official Reminders", reminders: grouped.OFFICIAL },
+    { key: "TRACKING", label: "Clocktracker Reminders", description: "These are additional reminders used by Clocktracker to auto-populate the grimoire events.", reminders: grouped.TRACKING },
+    { key: "CUSTOM", label: "Custom Reminders", description: "These reminders were imported from the uploaded script.", reminders: grouped.CUSTOM },
+    { key: "OTHER", label: "Other Reminders", reminders: grouped.OTHER },
+  ].filter((group) => group.reminders.length > 0);
 });
 
 const show = computed({

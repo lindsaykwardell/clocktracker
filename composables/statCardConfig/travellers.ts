@@ -1,0 +1,343 @@
+import {
+  GameEndTrigger,
+  GameEndTriggerCause,
+  GameEndTriggerType,
+  GrimoireEventType,
+  WinStatus_V2,
+} from "~/composables/useGames";
+import {
+  countEventsAffectingPlayer,
+  countGrimoireEvents,
+  getByRoleForEvent,
+  getEventCurrentToken,
+  getEventPreviousToken,
+  getMostCommonByRole,
+  getMostCommonByRoleSubtitle,
+  getMostCommonEndTriggerRole,
+  getMostCommonEndTriggerRoleSubtitle,
+  isDemonKillEvent,
+  pluralize,
+} from "./shared";
+import type { RoleStatCardDefinition } from "./shared";
+
+export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
+  // Scapegoat: @todo
+  {
+    id: "gunslinger_kills",
+    category: "role",
+    roleIds: ["gunslinger"],
+    script: "tb",
+    source: "grimoire_event",
+    label: "Deadeye",
+    getCount: ({ games, roleId }) =>
+      countGrimoireEvents(games, roleId, GrimoireEventType.DEATH),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Gunslinger, you've killed ${count} player${pluralize(count)} with your ability.`
+          : `As the Gunslinger, this player has killed ${count} player${pluralize(count)} with their ability.`)
+        : `As the Gunslinger, kill a player with your ability.`,
+  },
+  {
+    id: "beggar_alms_received",
+    category: "role",
+    roleIds: ["beggar"],
+    script: "tb",
+    source: "grimoire_event",
+    label: "Charity",
+    getCount: ({ games, roleId }) =>
+      games.reduce((total, game) => {
+        if (!roleId || game.ignore_for_stats) return total;
+
+        return (
+          total +
+          game.grimoire_events.filter(
+            (event) =>
+              event.by_role_id === roleId &&
+              event.event_type === GrimoireEventType.OTHER &&
+              event.status_source === "Alm"
+          ).length
+        );
+      }, 0),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Beggar, you've received ${count} alm${pluralize(count)}.`
+          : `As the Beggar, this player has received ${count} alm${pluralize(count)}.`)
+        : `As the Beggar, receive someone's vote token.`,
+  },
+  {
+    id: "beggar_alms_given_received",
+    category: "role",
+    roleIds: ["beggar"],
+    script: "tb",
+    source: "grimoire_event",
+    label: "Token Donation",
+    getCount: ({ games, username }) =>
+      countEventsAffectingPlayer(
+        games,
+        username,
+        (_, event) =>
+          event.by_role_id === "beggar" &&
+          event.event_type === GrimoireEventType.OTHER &&
+          event.status_source === "Alm"
+      ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `You've given your vote token to the Beggar ${count} time${pluralize(count)}.`
+          : `This player has given their vote token to the Beggar ${count} time${pluralize(count)}.`)
+        : `Give your vote token to the Beggar.`,
+  },
+  {
+    id: "bureaucrat_extra_votes_given",
+    category: "role",
+    roleIds: ["bureaucrat"],
+    script: "tb",
+    source: "grimoire_event",
+    label: "Stacked the Ballot",
+    getCount: ({ games, roleId }) =>
+      games.reduce((total, game) => {
+        if (!roleId || game.ignore_for_stats) return total;
+
+        return (
+          total +
+          game.grimoire_events.filter(
+            (event) =>
+              event.by_role_id === roleId &&
+              event.event_type === GrimoireEventType.OTHER &&
+              event.status_source === "3 Votes"
+          ).length
+        );
+      }, 0),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Bureaucrat, you've given players extra votes ${count} time${pluralize(count)}.`
+          : `As the Bureaucrat, this player has given players extra votes ${count} time${pluralize(count)}.`)
+        : `As the Bureaucrat, give players extra votes.`,
+  },
+  {
+    id: "bureaucrat_extra_votes_received",
+    category: "role",
+    roleIds: ["bureaucrat"],
+    script: "tb",
+    source: "grimoire_event",
+    label: "Backed by Bureaucracy",
+    getCount: ({ games, username }) =>
+      countEventsAffectingPlayer(
+        games,
+        username,
+        (_, event) =>
+          event.by_role_id === "bureaucrat" &&
+          event.event_type === GrimoireEventType.OTHER &&
+          event.status_source === "3 Votes"
+      ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `You've received extra votes from the Bureaucrat ${count} time${pluralize(count)}.`
+          : `This player has received extra votes from the Bureaucrat ${count} time${pluralize(count)}.`)
+        : `Receive extra votes from the Bureaucrat.`,
+  },
+  {
+    id: "thief_votes_stolen",
+    category: "role",
+    roleIds: ["thief"],
+    script: "tb",
+    source: "grimoire_event",
+    label: "Sticky Fingers",
+    getCount: ({ games, roleId }) =>
+      games.reduce((total, game) => {
+        if (!roleId || game.ignore_for_stats) return total;
+
+        return (
+          total +
+          game.grimoire_events.filter(
+            (event) =>
+              event.by_role_id === roleId &&
+              event.event_type === GrimoireEventType.OTHER &&
+              event.status_source === "Negative Vote"
+          ).length
+        );
+      }, 0),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Thief, you've stolen ${count} vote${pluralize(count)}.`
+          : `As the Thief, this player has stolen ${count} vote${pluralize(count)}.`)
+        : `As the Thief, steal a vote.`,
+  },
+  {
+    id: "thief_votes_stolen_received",
+    category: "role",
+    roleIds: ["thief"],
+    script: "tb",
+    source: "grimoire_event",
+    label: "Pickpocketed",
+    getCount: ({ games, username }) =>
+      countEventsAffectingPlayer(
+        games,
+        username,
+        (_, event) =>
+          event.by_role_id === "thief" &&
+          event.event_type === GrimoireEventType.OTHER &&
+          event.status_source === "Negative Vote"
+      ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `You've had ${count} vote${pluralize(count)} stolen by the Thief.`
+          : `This player has had ${count} vote${pluralize(count)} stolen by the Thief.`)
+        : `Have a vote stolen by the Thief.`,
+  },
+
+  {
+    id: "butcher_additional_executions",
+    category: "role",
+    roleIds: ["butcher"],
+    script: "snv",
+    source: "grimoire_event",
+    label: "Meat Grinder",
+    getCount: ({ games, roleId }) =>
+      games.reduce((total, game) => {
+        if (!roleId || game.ignore_for_stats) return total;
+
+        return (
+          total +
+          game.grimoire_events.filter(
+            (event) =>
+              event.by_role_id === roleId &&
+              event.event_type === GrimoireEventType.EXECUTION &&
+              event.status_source === "Butchered"
+          ).length
+        );
+      }, 0),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Butcher, you've executed ${count} extra player${pluralize(count)} due to your ability.`
+          : `As the Butcher, this player has executed ${count} extra player${pluralize(count)} due to their ability.`)
+        : `As the Butcher, execute an extra player due to your ability.`,
+  },
+  // Bone Collector: Too complex
+  {
+    id: "harlot_deaths",
+    category: "role",
+    roleIds: ["harlot"],
+    script:"snv",
+    source: "grimoire_event",
+    label: "Dangerous Liaison",
+    getCount: ({ games, roleId }) =>
+      countGrimoireEvents(games, roleId, GrimoireEventType.DEATH),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Harlot, you've died alongside another player ${count} time${pluralize(count)} due to your ability.`
+          : `As the Harlot, this player has died alongside another player ${count} time${pluralize(count)} due to their ability.`)
+        : `As the Harlot, die alongside another player due to your ability.`,
+  },
+  // Barista: Too complex
+  // Deviant: No reminder token(s), but might be cool to track how many times they were not exiled.
+
+  // Apprentice: Too complex
+  {
+    id: "matron_seat_changes_caused",
+    category: "role",
+    roleIds: ["matron"],
+    script: "bmr",
+    source: "grimoire_event",
+    label: "Table Manners",
+    getCount: ({ games, roleId }) => {
+      const seatChanges = countGrimoireEvents(
+        games,
+        roleId,
+        GrimoireEventType.SEAT_CHANGE
+      );
+
+      // Matron swaps are recorded per moved player, so convert to swap actions.
+      return Math.floor(seatChanges / 2);
+    },
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Matron, you've caused ${count} seat swap${pluralize(count)} with your ability.`
+          : `As the Matron, this player has caused ${count} seat swaps${pluralize(count)} with their ability.`)
+        : `As the Matron, swap two players' seating positions with your ability.`,
+  },
+  // Voudon: Nothing to track really.
+  // Judge: @todo
+  // Bishop: @todo
+
+  {
+    id: "cacklejack_role_changes_caused",
+    category: "role",
+    roleIds: ["cacklejack"],
+    script: "experimental",
+    source: "grimoire_event",
+    label: "BoiNgo-banGo!",
+    getCount: ({ games, roleId }) =>
+      countGrimoireEvents(games, roleId, GrimoireEventType.ROLE_CHANGE),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Cacklejack, you've caused ${count} player${pluralize(count)} to change into a different character.`
+          : `As the Cacklejack, this player has caused ${count} player${pluralize(count)} to change into a different character.`)
+        : `As the Cacklejack, cause a player to be changed into a different character.`,
+  },
+  {
+    id: "cacklejack_role_changes_received",
+    category: "role",
+    roleIds: ["cacklejack"],
+    script: "experimental",
+    source: "grimoire_event",
+    label: "GAzOinks!",
+    getCount: ({ games, username }) =>
+      countEventsAffectingPlayer(
+        games,
+        username,
+        (_, event) =>
+          event.event_type === GrimoireEventType.ROLE_CHANGE &&
+          event.by_role_id === "cacklejack"
+      ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `You've been changed into a different character due to the Cacklejack ${count} time${pluralize(count)}.`
+          : `This player has been changed into a different character due to the Cacklejack ${count} time${pluralize(count)}.`)
+        : `Be changed into a different character due to the Cacklejack.`,
+  },
+  {
+    id: "gangster_kills",
+    category: "role",
+    roleIds: ["gangster"],
+    script: "experimental",
+    source: "grimoire_event",
+    label: "Contract Killing",
+    getCount: ({ games, roleId }) =>
+      countGrimoireEvents(games, roleId, GrimoireEventType.DEATH),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Gangster, you've arranged ${count} hit${pluralize(count)} on your neighbors.`
+          : `As the Gangster, this player has arranged ${count} hit${pluralize(count)} on their neighbors.`)
+        : `As the Gangster, kill one of your neighbors with your ability.`,
+  },
+  {
+    id: "gnome_kills",
+    category: "role",
+    roleIds: ["gnome"],
+    script: "experimental",
+    source: "grimoire_event",
+    label: "Hands Off My Amigo",
+    getCount: ({ games, roleId }) =>
+      countGrimoireEvents(games, roleId, GrimoireEventType.DEATH),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Gnome, you've killed ${count} player${pluralize(count)} for nominating your amigo.`
+          : `As the Gnome, this player has killed ${count} player${pluralize(count)} for nominating their amigo.`)
+        : `As the Gnome, kill a player for nominating your amigo.`,
+  },
+
+];

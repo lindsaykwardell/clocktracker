@@ -7,7 +7,7 @@
 
       <template v-else-if="playerFetchStatus === Status.ERROR || games.status === Status.ERROR">
         <p class="text-center text-xl font-sorts my-8">
-          Unable to load stat cards.
+          Unable to load achievements.
         </p>
       </template>
 
@@ -94,17 +94,75 @@
           <section>
             <div class="w-full px-4">
               <h2 class="font-sorts text-center text-xl lg:text-2xl mb-2 lg:mb-4">
-                Statistic Cards
+                Achievements
               </h2>
 
               <div
-                v-if="previewCards.length === 0"
+                v-if="tab === 'role' && rolePreviewCardGroups.length === 0"
+                class="text-sm text-center text-stone-500 dark:text-stone-400 py-8"
+              >
+                No achievements available.
+              </div>
+              <template v-else-if="tab === 'role'">
+                <div class="space-y-12">
+                  <section
+                    v-for="scriptGroup in rolePreviewCardGroups"
+                    :key="scriptGroup.script"
+                    class="space-y-4"
+                  >
+                    <div class="flex flex-col items-center gap-4">
+                      <img
+                        :src="scriptGroup.image"
+                        :alt="scriptGroup.title"
+                        class="w-64 h-auto max-w-full"
+                      >  
+                      <h3 class="sr-only">
+                        {{ scriptGroup.title }}
+                      </h3>
+
+                      <p class="font-sorts text-2xl">
+                        <span class="sr-only">Completion: </span>
+                        {{ scriptGroup.achievedCount }}/{{ scriptGroup.totalCount }}
+                      </p>
+                    </div>
+                    
+                    <section
+                      v-for="typeGroup in scriptGroup.typeGroups"
+                      :key="`${scriptGroup.script}-${typeGroup.type}`"
+                      class="space-y-2"
+                    >
+                      <h4 class="sr-only">
+                        {{ typeGroup.title }}
+                      </h4>
+                      <ul class="grid gap-2 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+                        <RoleStatCard
+                          v-for="previewCard in typeGroup.cards"
+                          :key="`${tab}-${previewCard.metric_key}-${previewCard.role_id ?? 'general'}`"
+                          :card="previewCard"
+                          :games="games.status === Status.SUCCESS ? games.data : []"
+                          :is-me="isMe"
+                          :username="username"
+                          :show-favorite-control="isMe"
+                          :is-favorite="isFavoriteCard(previewCard)"
+                          class="transition-opacity"
+                          :class="previewCard.preview.count === 0 ? 'opacity-40' : ''"
+                          show-zero-overlay
+                          variant="horizontal"
+                          @toggleFavorite="toggleFavoriteCard(previewCard)"
+                        />
+                      </ul>
+                    </section>
+                  </section>
+                </div>
+              </template>
+              <div
+                v-else-if="previewCards.length === 0"
                 class="text-sm text-center text-stone-500 dark:text-stone-400 py-8"
               >
                 No matching cards available.
               </div>
 
-              <div
+              <ul
                 v-else
                 class="grid gap-2 grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
               >
@@ -123,7 +181,7 @@
                   variant="horizontal"
                   @toggleFavorite="toggleFavoriteCard(previewCard)"
                 />
-              </div>
+              </ul>
             </div>
           </section>
         </div>
@@ -133,9 +191,11 @@
 </template>
 
 <script setup lang="ts">
+import { RoleType } from "~/composables/useRoles";
 import {
   buildRoleStatCardPreview,
   getGeneralCardDefinitions,
+  getRoleStatCardDefinition,
   getRoleCardDefinitions,
 } from "~/composables/useRoleStatCards";
 
@@ -210,6 +270,147 @@ const rolePreviewCards = computed(() => {
       )
     )
     .filter((card): card is NonNullable<typeof card> => !!card);
+});
+
+const ROLE_TYPE_ORDER: RoleType[] = [
+  RoleType.TOWNSFOLK,
+  RoleType.OUTSIDER,
+  RoleType.MINION,
+  RoleType.DEMON,
+  RoleType.TRAVELER,
+  RoleType.FABLED,
+  RoleType.LORIC,
+];
+
+const SCRIPT_ORDER = ["tb", "snv", "bmr", "experimental", "npc", "unknown"] as const;
+
+function roleTypeOrderValue(type: string | null | undefined) {
+  const index = ROLE_TYPE_ORDER.indexOf(type as RoleType);
+  return index === -1 ? ROLE_TYPE_ORDER.length : index;
+}
+
+function roleTypeLabel(type: RoleType) {
+  if (type === RoleType.TRAVELER) return "Traveler";
+  if (type === RoleType.FABLED) return "Fabled";
+  if (type === RoleType.LORIC) return "Loric";
+  return `${type.charAt(0)}${type.slice(1).toLowerCase()}`;
+}
+
+function normalizeScript(script: string | null | undefined) {
+  if (!script) return "unknown";
+
+  const normalized = script.trim().toLowerCase();
+  if (["tb", "trouble brewing"].includes(normalized)) return "tb";
+  if (["snv", "sects & violets", "sects and violets"].includes(normalized)) return "snv";
+  if (["bmr", "bad moon rising"].includes(normalized)) return "bmr";
+  if (normalized === "npc") return "npc";
+  if (["experimental", "exp"].includes(normalized)) return "experimental";
+
+  return normalized;
+}
+
+function scriptOrderValue(script: string | null | undefined) {
+  const normalized = normalizeScript(script);
+  const index = SCRIPT_ORDER.indexOf(
+    normalized as (typeof SCRIPT_ORDER)[number]
+  );
+  return index === -1 ? SCRIPT_ORDER.length : index;
+}
+
+function scriptLabel(script: string) {
+  if (script === "tb") return "Trouble Brewing";
+  if (script === "snv") return "Sects & Violets";
+  if (script === "bmr") return "Bad Moon Rising";
+  if (script === "experimental") return "Experimental";
+  if (script === "npc") return "Fabled & Loric";
+  if (script === "unknown") return "Unsorted";
+  return script;
+}
+
+function scriptImage(script: string) {
+  if (script === "tb") return "/img/trouble-brewing.webp";
+  if (script === "snv") return "/img/sects-and-violets.webp";
+  if (script === "bmr") return "/img/bad-moon-rising.webp";
+  if (script === "npc") return "/img/fabled-loric.webp";
+  return "/img/custom-script.webp";
+}
+
+function getRoleTypeFromCard(card: (typeof rolePreviewCards.value)[number]) {
+  const roleFromStore = card.role_id ? roles.getRole(card.role_id) : undefined;
+  return roleFromStore?.type ?? card.role?.type;
+}
+
+function getRoleNameFromCard(card: (typeof rolePreviewCards.value)[number]) {
+  const roleFromStore = card.role_id ? roles.getRole(card.role_id) : undefined;
+  return roleFromStore?.name ?? card.role?.name ?? "";
+}
+
+function getScriptFromCard(card: (typeof rolePreviewCards.value)[number]) {
+  const definition = getRoleStatCardDefinition(card.metric_key);
+  return normalizeScript(definition?.script);
+}
+
+const rolePreviewCardGroups = computed(() => {
+  const sorted = rolePreviewCards.value
+    .slice()
+    .sort((a, b) => {
+    const scriptCompare =
+      scriptOrderValue(getScriptFromCard(a)) - scriptOrderValue(getScriptFromCard(b));
+    if (scriptCompare !== 0) return scriptCompare;
+
+    const typeCompare =
+      roleTypeOrderValue(getRoleTypeFromCard(a)) - roleTypeOrderValue(getRoleTypeFromCard(b));
+    if (typeCompare !== 0) return typeCompare;
+
+    const roleNameA = getRoleNameFromCard(a);
+    const roleNameB = getRoleNameFromCard(b);
+    if (roleNameA !== roleNameB) return roleNameA.localeCompare(roleNameB);
+
+      return a.metric_key.localeCompare(b.metric_key);
+    });
+
+  const scriptGroups = new Map<string, Map<RoleType, typeof sorted>>();
+
+  for (const card of sorted) {
+    const type = getRoleTypeFromCard(card);
+    if (!type || !ROLE_TYPE_ORDER.includes(type)) continue;
+    const script = getScriptFromCard(card);
+
+    if (!scriptGroups.has(script)) {
+      scriptGroups.set(script, new Map<RoleType, typeof sorted>());
+    }
+    const groupedByType = scriptGroups.get(script)!;
+    if (!groupedByType.has(type)) {
+      groupedByType.set(type, []);
+    }
+    groupedByType.get(type)!.push(card);
+  }
+
+  return Array.from(scriptGroups.entries())
+    .sort(([scriptA], [scriptB]) => scriptOrderValue(scriptA) - scriptOrderValue(scriptB))
+    .map(([script, typeMap]) => {
+      const typeGroups = ROLE_TYPE_ORDER
+        .map((type) => ({
+          type,
+          title: roleTypeLabel(type),
+          cards: typeMap.get(type) ?? [],
+        }))
+        .filter((group) => group.cards.length > 0);
+
+      const allCards = typeGroups.flatMap((group) => group.cards);
+      const achievedCount = allCards.filter((card) => card.preview.count > 0).length;
+      const totalCount = allCards.length;
+
+      return {
+        script,
+        title: scriptLabel(script),
+        image: scriptImage(script),
+        achievedCount,
+        totalCount,
+        typeGroups,
+      };
+    })
+    .filter((group) => group.typeGroups.length > 0);
 });
 
 const generalPreviewCards = computed(() => {

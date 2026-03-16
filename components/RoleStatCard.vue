@@ -1,5 +1,5 @@
 <template>
-  <div 
+  <li 
     class="relative flex gap-3 rounded-lg bg-stone-300/30 dark:bg-stone-900/40"
     :class="{
       'flex-col p-4 pt-6' : variant == 'vertical',
@@ -35,7 +35,10 @@
       </h3>
     </template>
 
-    <div class="flex flex-col items-center gap-3 card-token">
+    <div 
+      class="flex flex-col items-center gap-3"
+      :class="variant == 'horizontal' ? 'card-token' : ''"
+    >
       <Token
         :character="character"
         :size="variant == 'horizontal' ? 'md' : 'lg'"
@@ -72,9 +75,9 @@
 
     <div
       v-if="showZeroOverlay && result.count === 0"
-      class="absolute inset-0 rounded-lg bg-stone-900/25 dark:bg-black/35 pointer-events-none"
+      class="absolute inset-0 rounded-lg bg-neutral-300/20 dark:bg-stone-900/50 pointer-events-none"
     />
-  </div>
+  </li>
 </template>
 
 <script setup lang="ts">
@@ -190,6 +193,7 @@ function titleCase(value: string) {
 
 <style>
   .card-token > .token {
-    @apply w-16 h-16 md:w-20 md:h-20
+    inline-size: 5.5rem;
+    block-size: 5.5rem;
   }
 </style>

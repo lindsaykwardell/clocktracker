@@ -404,8 +404,16 @@ const sizedAlignmentImage = computed(() =>
 .token {
   background-image: url("/img/token-bg.webp");
 
-  &.reminder{
+  &.reminder {
     background-image: url("/img/reminder-token.webp");
+  }
+
+  &.reminder--tracking {
+    background-image: url("/img/reminder-token-tracking.webp");
+  }
+
+  &.reminder--custom {
+    background-image: url("/img/reminder-token-custom.webp");
   }
 
   .token-image {

@@ -128,16 +128,7 @@
                       mode="select"
                       v-model="event.event_type"
                       :disabled="isEventTypeLocked(event)"
-                      @update:modelValue="
-                        () => {
-                          event.cause = null;
-                          event.by_participant_id = null;
-                          event.by_role_id = null;
-                          if (event.event_type === GrimoireEventType.REVIVE) {
-                            event.cause = GrimoireEventCause.ABILITY;
-                          }
-                        }
-                      "
+                      @update:modelValue="onGrimoireEventTypeChange(event)"
                     >
                       <option
                         v-if="event.event_type === GrimoireEventType.REVIVE"
@@ -199,6 +190,26 @@
                             Nomination
                           </option>
                         </template>
+                      </Input>
+                    </label>
+                    <label
+                      v-if="isStatusEventType(event.event_type)"
+                      class="col-span-2"
+                    >
+                      <span class="block text-xs mb-[0.125rem]">Status reminder</span>
+                      <Input
+                        mode="select"
+                        v-model="event.status_source"
+                        :disabled="isStatusSourceLocked(event)"
+                      >
+                        <option :value="null">Select reminder</option>
+                        <option
+                          v-for="option in grimoireEventStatusSourceOptions(event)"
+                          :key="option"
+                          :value="option"
+                        >
+                          {{ option }}
+                        </option>
                       </Input>
                     </label>
                     <label class="col-span-2">
@@ -320,6 +331,7 @@ type GrimoireEventLike = {
   participant_id: string;
   player_name: string;
   event_type: GrimoireEventType | null;
+  status_source: string | null;
   cause: GrimoireEventCause | null;
   by_participant_id: string | null;
   by_role_id: string | null;
@@ -591,6 +603,91 @@ function isEventTypeLocked(event: { event_type: GrimoireEventType | null }) {
     event.event_type === GrimoireEventType.POISONED ||
     event.event_type === GrimoireEventType.OTHER
   );
+}
+
+function isStatusEventType(eventType: GrimoireEventType | null) {
+  return (
+    eventType === GrimoireEventType.MAD ||
+    eventType === GrimoireEventType.DRUNK ||
+    eventType === GrimoireEventType.POISONED ||
+    eventType === GrimoireEventType.OTHER
+  );
+}
+
+function defaultStatusSourceForEventType(eventType: GrimoireEventType | null) {
+  if (eventType === GrimoireEventType.MAD) return "Mad";
+  if (eventType === GrimoireEventType.DRUNK) return "Drunk";
+  if (eventType === GrimoireEventType.POISONED) return "Poisoned";
+  return null;
+}
+
+function grimoireEventStatusSourceOptions(event: {
+  event_type: GrimoireEventType | null;
+  by_role_id: string | null;
+  status_source: string | null;
+}) {
+  if (!isStatusEventType(event.event_type)) return [];
+
+  const options = new Set<string>();
+
+  for (const config of GRIMOIRE_REMINDER_EVENT_CONFIG) {
+    if (config.eventType !== event.event_type) continue;
+    if (
+      event.by_role_id &&
+      config.sourceRoleIds.length > 0 &&
+      !config.sourceRoleIds.includes(event.by_role_id)
+    ) {
+      continue;
+    }
+    options.add(config.reminder);
+  }
+
+  if (options.size === 0) {
+    const fallback = defaultStatusSourceForEventType(event.event_type);
+    if (fallback) options.add(fallback);
+  }
+
+  if (event.status_source) options.add(event.status_source);
+
+  return Array.from(options).sort((a, b) => a.localeCompare(b));
+}
+
+function onGrimoireEventTypeChange(event: {
+  event_type: GrimoireEventType | null;
+  status_source: string | null;
+  cause: GrimoireEventCause | null;
+  by_participant_id: string | null;
+  by_role_id: string | null;
+}) {
+  event.cause = null;
+  event.by_participant_id = null;
+  event.by_role_id = null;
+
+  if (event.event_type === GrimoireEventType.REVIVE) {
+    event.cause = GrimoireEventCause.ABILITY;
+    event.status_source = null;
+    return;
+  }
+
+  if (isStatusEventType(event.event_type)) {
+    event.cause = GrimoireEventCause.ABILITY;
+    if (!event.status_source) {
+      event.status_source = defaultStatusSourceForEventType(event.event_type);
+    }
+    return;
+  }
+
+  event.status_source = null;
+}
+
+function isStatusSourceLocked(event: {
+  grimoire_page: number;
+  participant_id: string;
+  event_type: GrimoireEventType | null;
+  status_source: string | null;
+}) {
+  if (!isStatusEventType(event.event_type)) return false;
+  return !!grimoireEventStatusReminder(event);
 }
 
 /**
@@ -1087,7 +1184,12 @@ function countReminderByName(
   }, 0);
 }
 
-function reminderNameForStatusEventType(eventType: GrimoireEventType | null) {
+function reminderNameForStatusEvent(event: {
+  event_type: GrimoireEventType | null;
+  status_source?: string | null;
+}) {
+  if (event.status_source) return event.status_source;
+  const eventType = event.event_type;
   if (eventType === GrimoireEventType.MAD) return "Mad";
   if (eventType === GrimoireEventType.DRUNK) return "Drunk";
   if (eventType === GrimoireEventType.POISONED) return "Poisoned";
@@ -1099,8 +1201,9 @@ function grimoireEventStatusReminder(event: {
   grimoire_page: number;
   participant_id: string;
   event_type: GrimoireEventType | null;
+  status_source?: string | null;
 }) {
-  const reminderName = reminderNameForStatusEventType(event.event_type);
+  const reminderName = reminderNameForStatusEvent(event);
   if (!reminderName) return null;
 
   const currentToken = getTokenForParticipant(event.grimoire_page, event.participant_id);
@@ -1324,6 +1427,7 @@ function recordGrimoireEvent(payload: {
     event_type: shouldRecordRevival
       ? GrimoireEventType.REVIVE
       : GrimoireEventType.NOT_RECORDED,
+    status_source: null,
     cause: shouldRecordRevival ? GrimoireEventCause.ABILITY : null,
     by_participant_id: null,
     player_name: payload.token.player_name || "",
@@ -1362,6 +1466,7 @@ function syncGrimoireEventsFromGrimoire(options?: {
       grimoire_page: number;
       participant_id: string;
       event_type: GrimoireEventType | null;
+      status_source: string | null;
       by_participant_id: string | null;
       player_name: string;
       role_id: string | null;
@@ -1402,20 +1507,7 @@ function syncGrimoireEventsFromGrimoire(options?: {
   /**
    * Builds the reconciliation key for an expected event entry.
    */
-  function expectedKey(
-    grimoirePage: number,
-    participantId: string,
-    kind:
-      | "death"
-      | "revival"
-      | "role"
-      | "seat"
-      | "alignment"
-      | "mad"
-      | "drunk"
-      | "poisoned"
-      | "other"
-  ) {
+  function expectedKey(grimoirePage: number, participantId: string, kind: string) {
     return `${grimoirePage}:${participantId}:${kind}`;
   }
 
@@ -1493,6 +1585,7 @@ function syncGrimoireEventsFromGrimoire(options?: {
             ? GrimoireEventType.DEATH
             : GrimoireEventType.NOT_RECORDED,
           by_participant_id: deadReminderSource?.by_participant_id ?? null,
+          status_source: null,
           player_name: token.player_name || "",
           role_id: token.role_id ?? null,
           by_role_id: deadReminderSource?.by_role_id ?? null,
@@ -1508,6 +1601,7 @@ function syncGrimoireEventsFromGrimoire(options?: {
           grimoire_page: pageIndex,
           participant_id: participantId,
           event_type: GrimoireEventType.REVIVE,
+          status_source: null,
           by_participant_id: null,
           player_name: token.player_name || "",
           role_id: token.role_id ?? null,
@@ -1530,6 +1624,7 @@ function syncGrimoireEventsFromGrimoire(options?: {
             grimoire_page: pageIndex,
             participant_id: participantId,
             event_type: GrimoireEventType.ROLE_CHANGE,
+            status_source: null,
             by_participant_id: null,
             player_name: token.player_name || "",
             role_id: token.role_id ?? null,
@@ -1546,6 +1641,7 @@ function syncGrimoireEventsFromGrimoire(options?: {
             grimoire_page: pageIndex,
             participant_id: participantId,
             event_type: GrimoireEventType.SEAT_CHANGE,
+            status_source: null,
             by_participant_id: null,
             player_name: token.player_name || "",
             role_id: token.role_id ?? null,
@@ -1562,6 +1658,7 @@ function syncGrimoireEventsFromGrimoire(options?: {
             grimoire_page: pageIndex,
             participant_id: participantId,
             event_type: GrimoireEventType.ALIGNMENT_CHANGE,
+            status_source: null,
             by_participant_id: null,
             player_name: token.player_name || "",
             role_id: token.role_id ?? null,
@@ -1608,12 +1705,15 @@ function syncGrimoireEventsFromGrimoire(options?: {
           expectedKey(
             pageIndex,
             affectedParticipantId,
-            eventKindFromValues(config.eventType)
+            `${eventKindFromValues(config.eventType)}:${normalizeReminderName(
+              config.reminder
+            )}`
           ),
           {
             grimoire_page: pageIndex,
             participant_id: affectedParticipantId,
             event_type: config.eventType,
+            status_source: config.reminder,
             by_participant_id: source?.by_participant_id ?? null,
             player_name: affectedToken.player_name || "",
             role_id: affectedToken.role_id ?? null,
@@ -1653,6 +1753,7 @@ function syncGrimoireEventsFromGrimoire(options?: {
               grimoire_page: pageIndex,
               participant_id: singleMovedParticipantId,
               event_type: GrimoireEventType.SEAT_CHANGE,
+              status_source: null,
               by_participant_id: null,
               player_name: token.player_name || "",
               role_id: token.role_id ?? null,
@@ -1723,7 +1824,15 @@ function syncGrimoireEventsFromGrimoire(options?: {
   for (let i = events.length - 1; i >= 0; i -= 1) {
     const event = events[i];
     const eventType = event.event_type;
-    const kind = eventKindFromValues(eventType);
+    const baseKind = eventKindFromValues(eventType);
+    const kind =
+      (eventType === GrimoireEventType.MAD ||
+        eventType === GrimoireEventType.DRUNK ||
+        eventType === GrimoireEventType.POISONED ||
+        eventType === GrimoireEventType.OTHER) &&
+      event.status_source
+        ? `${baseKind}:${normalizeReminderName(event.status_source)}`
+        : baseKind;
     const key = expectedKey(event.grimoire_page, event.participant_id, kind);
     let expectation = expected.get(key);
     if (expectation) {
@@ -1800,6 +1909,9 @@ function syncGrimoireEventsFromGrimoire(options?: {
     if (event.new_alignment !== expectation.new_alignment) {
       event.new_alignment = expectation.new_alignment;
     }
+    if (event.status_source !== expectation.status_source) {
+      event.status_source = expectation.status_source;
+    }
   }
 
   expected.forEach((expectation) => {
@@ -1807,6 +1919,7 @@ function syncGrimoireEventsFromGrimoire(options?: {
       grimoire_page: expectation.grimoire_page,
       participant_id: expectation.participant_id,
       event_type: expectation.event_type,
+      status_source: expectation.status_source,
       cause:
         isReviveEventType(expectation.event_type) ||
         expectation.event_type === GrimoireEventType.MAD ||
