@@ -8,6 +8,7 @@ import {
   checkPostLength,
 } from "~/server/utils/forum";
 import { hasRestriction } from "~/server/utils/permissions";
+import { sendAnnouncementNotifications } from "~/server/utils/sendForumNotifications";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
@@ -101,6 +102,16 @@ export default defineEventHandler(async (handler) => {
       data: { thread_id: thread.id, user_id: me.id, last_read_at: now },
     }),
   ]);
+
+  // Send push notifications if this is an announcement category
+  if (category.is_announcement) {
+    void sendAnnouncementNotifications({
+      threadId: thread.id,
+      threadTitle: thread.title,
+      categorySlug: slug,
+      postBody: body.body.trim(),
+    });
+  }
 
   return thread;
 });

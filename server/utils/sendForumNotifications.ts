@@ -1,33 +1,20 @@
-import webPush from "web-push";
 import { prisma } from "~/server/utils/prisma";
+import { sendPushNotifications } from "~/server/utils/sendPushNotifications";
 
 interface SendForumNotificationsOptions {
   threadId: string;
   posterId: string;
   posterDisplayName: string;
+  postBody: string;
 }
 
 export async function sendForumNotifications({
   threadId,
   posterId,
   posterDisplayName,
+  postBody,
 }: SendForumNotificationsOptions) {
   try {
-    const config = useRuntimeConfig();
-
-    const vapidPublicKey = config.public.vapidPublicKey as string;
-
-    if (!vapidPublicKey || !config.vapidPrivateKey || !config.vapidSubject) {
-      console.warn("[push] VAPID keys not configured, skipping notifications");
-      return;
-    }
-
-    webPush.setVapidDetails(
-      config.vapidSubject,
-      vapidPublicKey,
-      config.vapidPrivateKey
-    );
-
     const thread = await prisma.forumThread.findUnique({
       where: { id: threadId },
       select: {
@@ -36,72 +23,73 @@ export async function sendForumNotifications({
       },
     });
 
-    if (!thread) {
-      console.warn("[push] Thread not found:", threadId);
-      return;
-    }
+    if (!thread) return;
 
     const subscriptions = await prisma.forumThreadSubscription.findMany({
       where: {
         thread_id: threadId,
         user_id: { not: posterId },
-        user: { push_notifications_enabled: true },
       },
-      select: {
-        user: {
-          select: {
-            push_subscriptions: true,
-          },
-        },
-      },
+      select: { user_id: true },
     });
 
-    const payload = JSON.stringify({
-      title: `New post in: ${thread.title}`,
-      body: `${posterDisplayName} replied`,
+    if (subscriptions.length === 0) return;
+
+    // Strip markdown and truncate for the notification snippet
+    const snippet = postBody
+      .replace(/[#*_~`>\[\]()!|\\-]/g, "")
+      .replace(/\n+/g, " ")
+      .trim()
+      .slice(0, 200);
+
+    await sendPushNotifications({
+      userIds: subscriptions.map((s) => s.user_id),
+      title: `${posterDisplayName} replied in: ${thread.title}`,
+      body: snippet,
       url: `/forum/${thread.category.slug}/${threadId}`,
     });
+  } catch (err) {
+    console.error("[push] Forum notification error:", err);
+  }
+}
 
-    const pushSubs = subscriptions.flatMap((s) => s.user.push_subscriptions);
-
-    console.log(`[push] Sending to ${pushSubs.length} device(s) for thread "${thread.title}"`);
-
-    if (pushSubs.length === 0) return;
-
-    const results = await Promise.allSettled(
-      pushSubs.map((sub) =>
-        webPush.sendNotification(
-          {
-            endpoint: sub.endpoint,
-            keys: { p256dh: sub.p256dh, auth: sub.auth },
-          },
-          payload
-        )
-      )
-    );
-
-    // Clean up expired subscriptions (410 Gone)
-    const expiredEndpoints: string[] = [];
-    results.forEach((result, index) => {
-      if (
-        result.status === "rejected" &&
-        "statusCode" in result.reason &&
-        result.reason.statusCode === 410
-      ) {
-        expiredEndpoints.push(pushSubs[index].endpoint);
-      }
+/**
+ * Send push notifications to all users with push enabled
+ * when a new announcement thread is created.
+ */
+export async function sendAnnouncementNotifications({
+  threadId,
+  threadTitle,
+  categorySlug,
+  postBody,
+}: {
+  threadId: string;
+  threadTitle: string;
+  categorySlug: string;
+  postBody: string;
+}) {
+  try {
+    // Get all users who have push notifications enabled
+    const users = await prisma.userSettings.findMany({
+      where: { push_notifications_enabled: true },
+      select: { user_id: true },
     });
 
-    if (expiredEndpoints.length > 0) {
-      await prisma.pushSubscription.deleteMany({
-        where: { endpoint: { in: expiredEndpoints } },
-      });
-    }
-    const failed = results.filter((r) => r.status === "rejected");
-    if (failed.length > 0) {
-      console.warn(`[push] ${failed.length} notification(s) failed:`, failed.map((r) => (r as PromiseRejectedResult).reason?.message || r));
-    }
+    if (users.length === 0) return;
+
+    const snippet = postBody
+      .replace(/[#*_~`>\[\]()!|\\-]/g, "")
+      .replace(/\n+/g, " ")
+      .trim()
+      .slice(0, 200);
+
+    await sendPushNotifications({
+      userIds: users.map((u) => u.user_id),
+      title: `Announcement: ${threadTitle}`,
+      body: snippet,
+      url: `/forum/${categorySlug}/${threadId}`,
+    });
   } catch (err) {
-    console.error("[push] Unexpected error:", err);
+    console.error("[push] Announcement notification error:", err);
   }
 }
