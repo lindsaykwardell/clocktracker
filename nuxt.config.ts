@@ -120,7 +120,6 @@ export default defineNuxtConfig({
     githubInstallationId: process.env.GITHUB_INSTALLATION_ID ?? "",
     githubRepoOwner: process.env.GITHUB_REPO_OWNER ?? "lindsaykwardell",
     githubRepoName: process.env.GITHUB_REPO_NAME ?? "clocktracker",
-    vapidPublicKey: process.env.VAPID_PUBLIC_KEY ?? "",
     vapidPrivateKey: process.env.VAPID_PRIVATE_KEY ?? "",
     vapidSubject: process.env.VAPID_SUBJECT ?? "",
     public: {
