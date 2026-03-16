@@ -34,6 +34,7 @@ export default defineEventHandler(async (handler) => {
       discord_id: true,
       opt_into_testing: true,
       disable_tutorials: true,
+      push_notifications_enabled: true,
       community_admin: {
         select: {
           id: true,
@@ -194,6 +195,7 @@ export default defineEventHandler(async (handler) => {
       enable_bgstats: true,
       opt_into_testing: true,
       disable_tutorials: true,
+      push_notifications_enabled: true,
       community_admin: {
         select: {
           id: true,
