@@ -111,6 +111,10 @@ watch(
         if (newSettings) {
             // console.log('userSettings watcher: Storing new settings in Pinia');
             users.storeUser(newSettings);
+            // Re-register push subscription on this browser if user has notifications enabled
+            if (import.meta.client) {
+                syncPushSubscription(!!newSettings.push_notifications_enabled);
+            }
         } else if (oldSettings && !newSettings) {
             // Handle user logging out or settings becoming null after being populated
             // You might want to clear the specific user from Pinia store or reset to an initial state.

@@ -15,14 +15,16 @@ export async function sendForumNotifications({
   try {
     const config = useRuntimeConfig();
 
-    if (!config.vapidPublicKey || !config.vapidPrivateKey || !config.vapidSubject) {
+    const vapidPublicKey = config.public.vapidPublicKey as string;
+
+    if (!vapidPublicKey || !config.vapidPrivateKey || !config.vapidSubject) {
       console.warn("[push] VAPID keys not configured, skipping notifications");
       return;
     }
 
     webPush.setVapidDetails(
       config.vapidSubject,
-      config.vapidPublicKey,
+      vapidPublicKey,
       config.vapidPrivateKey
     );
 
