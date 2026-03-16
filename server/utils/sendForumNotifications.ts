@@ -5,12 +5,14 @@ interface SendForumNotificationsOptions {
   threadId: string;
   posterId: string;
   posterDisplayName: string;
+  postBody: string;
 }
 
 export async function sendForumNotifications({
   threadId,
   posterId,
   posterDisplayName,
+  postBody,
 }: SendForumNotificationsOptions) {
   try {
     const config = useRuntimeConfig();
@@ -56,9 +58,16 @@ export async function sendForumNotifications({
       },
     });
 
+    // Strip markdown and truncate for the notification snippet
+    const snippet = postBody
+      .replace(/[#*_~`>\[\]()!|\\-]/g, "")
+      .replace(/\n+/g, " ")
+      .trim()
+      .slice(0, 200);
+
     const payload = JSON.stringify({
-      title: `New post in: ${thread.title}`,
-      body: `${posterDisplayName} replied`,
+      title: `${posterDisplayName} replied in: ${thread.title}`,
+      body: snippet,
       url: `/forum/${thread.category.slug}/${threadId}`,
     });
 

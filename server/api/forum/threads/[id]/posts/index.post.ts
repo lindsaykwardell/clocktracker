@@ -115,6 +115,7 @@ export default defineEventHandler(async (handler) => {
     threadId,
     posterId: me.id,
     posterDisplayName: post.author.display_name,
+    postBody: post.body,
   });
 
   const [nameColor, badges] = await Promise.all([
