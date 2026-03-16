@@ -60,13 +60,24 @@ export default defineEventHandler(async (handler) => {
   let readMap = new Map<string, Date>();
   let subscribedSet = new Set<string>();
   let firstVisit: Date | null = null;
+  let isCategorySubscribed = false;
   if (me) {
-    const [userSettings, ...rest] = await Promise.all([
+    const [userSettings, categorySub] = await Promise.all([
       prisma.userSettings.findUnique({
         where: { user_id: me.id },
         select: { forum_first_visit_at: true },
       }),
+      prisma.forumCategorySubscription.findUnique({
+        where: {
+          category_id_user_id: {
+            category_id: category.id,
+            user_id: me.id,
+          },
+        },
+      }),
     ]);
+
+    isCategorySubscribed = !!categorySub;
 
     firstVisit = userSettings?.forum_first_visit_at
       ? new Date(userSettings.forum_first_visit_at)
@@ -116,6 +127,7 @@ export default defineEventHandler(async (handler) => {
       description: category.description,
       is_private: category.is_private,
       mod_posting_only: category.mod_posting_only,
+      is_subscribed: isCategorySubscribed,
     },
     threads: threadsWithUnread,
     total,

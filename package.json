@@ -8,9 +8,14 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare && prisma generate",
-    "test": "playwright test"
+    "test": "playwright test",
+    "build:capacitor": "CAPACITOR_BUILD=true nuxt generate",
+    "cap:sync": "npx cap sync",
+    "cap:ios": "npm run build:capacitor && npm run cap:sync && npx cap open ios",
+    "cap:android": "npm run build:capacitor && npm run cap:sync && npx cap open android"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.2.0",
     "@faker-js/faker": "^10.0.0",
     "@nuxt/devtools": "^2.4.0",
     "@nuxt/test-utils": "^3.23.0",
@@ -39,6 +44,9 @@
     "@aws-sdk/client-s3": "^3.1000.0",
     "@aws-sdk/lib-storage": "^3.1000.0",
     "@aws-sdk/s3-request-presigner": "^3.1000.0",
+    "@capacitor/app": "^8.0.1",
+    "@capacitor/browser": "^8.0.2",
+    "@capacitor/core": "^8.2.0",
     "@fontsource/sorts-mill-goudy": "^5.1.1",
     "@headlessui/vue": "^1.7.23",
     "@pinia/nuxt": "^0.11.0",

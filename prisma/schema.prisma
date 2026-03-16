@@ -298,6 +298,7 @@ model UserSettings {
   forum_edits             ForumPostEdit[]
   forum_mod_logs          ForumModLog[]
   forum_subscriptions     ForumThreadSubscription[]
+  forum_category_subscriptions ForumCategorySubscription[]
   forum_reads             ForumThreadRead[]
   forum_first_visit_at    DateTime?               @db.Timestamptz(6)
   push_notifications_enabled Boolean              @default(false)
@@ -626,6 +627,7 @@ model ForumCategory {
   threads          ForumThread[]
   access           CategoryAccess[]
   bans             ForumBan[]
+  subscriptions    ForumCategorySubscription[]
 }
 
 model CategoryAccess {
@@ -676,6 +678,18 @@ model ForumPost {
   edits      ForumPostEdit[]
 
   @@index([thread_id, deleted_at])
+}
+
+model ForumCategorySubscription {
+  id          String        @id @default(uuid())
+  category_id String
+  user_id     String
+  created_at  DateTime      @default(now()) @db.Timestamptz(6)
+  category    ForumCategory @relation(fields: [category_id], references: [id], onDelete: Cascade)
+  user        UserSettings  @relation(fields: [user_id], references: [user_id])
+
+  @@unique([category_id, user_id])
+  @@index([user_id])
 }
 
 model ForumThreadSubscription {

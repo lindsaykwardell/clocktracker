@@ -1,5 +1,8 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+const isCapacitorBuild = process.env.CAPACITOR_BUILD === "true";
+
 export default defineNuxtConfig({
+  ssr: !isCapacitorBuild,
   experimental: {
     viewTransition: false,
   },
@@ -14,10 +17,10 @@ export default defineNuxtConfig({
   modules: [
     "@nuxtjs/tailwindcss",
     "@nuxtjs/supabase",
-    "@vite-pwa/nuxt",
+    ...(!isCapacitorBuild ? ["@vite-pwa/nuxt"] : []),
     "@pinia/nuxt",
     "floating-vue/nuxt",
-    "nuxt-cron",
+    ...(!isCapacitorBuild ? ["nuxt-cron"] : []),
     "nuxt-bugsnag",
   ],
 
@@ -125,6 +128,8 @@ export default defineNuxtConfig({
     public: {
       assetVersion: process.env.NUXT_PUBLIC_ASSET_VERSION ?? "v1",
       vapidPublicKey: process.env.VAPID_PUBLIC_KEY ?? "",
+      apiBaseUrl: isCapacitorBuild ? "https://clocktracker.app" : "",
+      isCapacitorBuild,
     },
   },
 
@@ -140,7 +145,7 @@ export default defineNuxtConfig({
     },
   },
 
-  pwa: {
+  ...(!isCapacitorBuild ? { pwa: {
     registerType: "autoUpdate",
     includeAssets: [
       "/img/**",
@@ -222,11 +227,11 @@ export default defineNuxtConfig({
         },
       ],
     },
-  },
+  } } : {}),
 
-  cron: {
+  ...(!isCapacitorBuild ? { cron: {
     timeZone: "America/Los_Angeles",
-  },
+  } } : {}),
 
   routeRules: {
     "/img/role/**": {
