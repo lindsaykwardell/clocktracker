@@ -1,5 +1,6 @@
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
+import { sendPushNotifications } from "~/server/utils/sendPushNotifications";
 
 export default defineEventHandler(async (handler) => {
   const requestId = +(handler.context.params?.id as string);
@@ -51,6 +52,19 @@ export default defineEventHandler(async (handler) => {
       user_id: friendRequest.from_user_id,
       friend_id: friendRequest.user_id,
     },
+  });
+
+  // Notify the original requester that their friend request was accepted
+  const accepter = await prisma.userSettings.findUnique({
+    where: { user_id: user.id },
+    select: { display_name: true, username: true },
+  });
+
+  void sendPushNotifications({
+    userIds: [friendRequest.from_user_id],
+    title: "Friend Request Accepted",
+    body: `${accepter?.display_name ?? "Someone"} accepted your friend request`,
+    url: `/@${accepter?.username}`,
   });
 
   return friend;

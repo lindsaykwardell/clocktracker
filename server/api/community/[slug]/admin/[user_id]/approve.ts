@@ -1,6 +1,7 @@
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { addUserKofiLevel } from "~/server/utils/addUserKofiLevel";
 import { prisma } from "~/server/utils/prisma";
+import { sendPushNotifications } from "~/server/utils/sendPushNotifications";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
@@ -79,6 +80,13 @@ export default defineEventHandler(async (handler) => {
         },
       },
     },
+  });
+
+  void sendPushNotifications({
+    userIds: [user.user_id],
+    title: `Welcome to ${community.name}!`,
+    body: "Your join request has been approved",
+    url: `/community/${community_slug}`,
   });
 
   return addUserKofiLevel(user);
