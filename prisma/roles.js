@@ -1,7 +1,8 @@
-const { Alignment, RoleType } = require("@prisma/client");
+const { Alignment, RoleType, ReminderType } = require("@prisma/client");
 const fs = require("fs");
 const path = require("path");
 const raw_roles = require("./roles.json");
+const { trackingReminders } = require("./trackingReminders");
 
 function nameToId(name) {
   return name
@@ -80,6 +81,7 @@ for (const role of all_raw_roles) {
       reminders.push({
         role_id,
         reminder,
+        type: ReminderType.OFFICIAL,
       });
     }
 
@@ -88,6 +90,7 @@ for (const role of all_raw_roles) {
         reminders.push({
           role_id,
           reminder,
+          type: ReminderType.OFFICIAL,
         });
       }
     }
@@ -184,6 +187,6 @@ module.exports = {
   loric,
   roleNames,
   roles,
-  reminders,
+  reminders: [...reminders, ...trackingReminders],
   abilities,
 };

@@ -145,6 +145,7 @@ model GrimoireEvent {
   grimoire_page     Int
   participant_id    String           @default("")
   event_type        GrimoireEventType @default(NOT_RECORDED)
+  status_source     String?
   cause             GrimoireEventCause?
   by_participant_id String?
   player_name       String           @default("")
@@ -189,6 +190,7 @@ model Token {
 model ReminderToken {
   id         Int      @id @default(autoincrement())
   reminder   String   @default("")
+  type       ReminderType @default(CUSTOM)
   token_url  String   @default("")
   created_at DateTime @default(now()) @db.Timestamptz(6)
   token      Token?   @relation(fields: [token_id], references: [id])
@@ -283,10 +285,17 @@ model Role {
 model RoleReminder {
   id       Int    @id @default(autoincrement())
   reminder String
+  type     ReminderType @default(OFFICIAL)
   role_id  String
   role     Role   @relation(fields: [role_id], references: [id])
 
   @@unique([role_id, reminder])
+}
+
+enum ReminderType {
+  OFFICIAL
+  TRACKING
+  CUSTOM
 }
 
 enum Alignment {

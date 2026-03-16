@@ -9,6 +9,7 @@ import {
   Fabled,
   GrimoireEvent,
   GrimoireEventType,
+  ReminderToken,
 } from "@prisma/client";
 import { prisma } from "~/server/utils/prisma";
 
@@ -24,7 +25,7 @@ export default defineEventHandler(async (handler) => {
           Grimoire & {
             tokens: Partial<
               Token & {
-                reminders: Partial<{ reminder: string; token_url: string }>[];
+                reminders: Partial<ReminderToken>[];
               }
             >[];
           }
@@ -85,6 +86,7 @@ export default defineEventHandler(async (handler) => {
             new_role_id: (grimoireEvent as any).new_role_id ?? null,
             old_alignment: (grimoireEvent as any).old_alignment ?? null,
             new_alignment: (grimoireEvent as any).new_alignment ?? null,
+            status_source: (grimoireEvent as any).status_source ?? null,
           })) || [],
       },
       grimoire: {
@@ -107,6 +109,7 @@ export default defineEventHandler(async (handler) => {
                     token.reminders?.map((reminder) => ({
                       reminder: reminder.reminder,
                       token_url: reminder.token_url,
+                      type: reminder.type ?? undefined,
                     })) || [],
                 },
               })),
@@ -240,6 +243,7 @@ export default defineEventHandler(async (handler) => {
             new_role_id: (grimoireEvent as any).new_role_id ?? null,
             old_alignment: (grimoireEvent as any).old_alignment ?? null,
             new_alignment: (grimoireEvent as any).new_alignment ?? null,
+            status_source: (grimoireEvent as any).status_source ?? null,
           })) || [],
         },
         notes: "",
@@ -301,6 +305,7 @@ export default defineEventHandler(async (handler) => {
             new_role_id: (grimoireEvent as any).new_role_id ?? null,
             old_alignment: (grimoireEvent as any).old_alignment ?? null,
             new_alignment: (grimoireEvent as any).new_alignment ?? null,
+            status_source: (grimoireEvent as any).status_source ?? null,
           })) || [],
         },
         notes: "",

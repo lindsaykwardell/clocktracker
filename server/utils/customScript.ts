@@ -1,4 +1,4 @@
-import { Alignment, RoleType } from "@prisma/client";
+import { Alignment, ReminderType, RoleType } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
 import { nanoid } from "nanoid";
 import { prisma } from "./prisma";
@@ -184,6 +184,7 @@ export async function saveCustomScript(
             )
             .map((reminder) => ({
               reminder,
+              type: ReminderType.CUSTOM,
             })),
         },
       },

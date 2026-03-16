@@ -1,35 +1,7 @@
 import type { GameRecord } from "~/composables/useGames";
-import {
-  GameEndTrigger,
-  GameEndTriggerCause,
-  GameEndTriggerType,
-  GrimoireEventType,
-} from "~/composables/useGames";
-import { TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS } from "~/composables/statCardConfig/townsfolk";
-import { OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS } from "~/composables/statCardConfig/outsiders";
-import { MINIONS_ROLE_STAT_CARD_DEFINITIONS } from "~/composables/statCardConfig/minions";
-import { DEMONS_ROLE_STAT_CARD_DEFINITIONS } from "~/composables/statCardConfig/demons";
-import { TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS } from "~/composables/statCardConfig/travellers";
-import { FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS } from "~/composables/statCardConfig/fabledLoric";
-import { GENERAL_ROLE_STAT_CARD_DEFINITIONS } from "~/composables/statCardConfig/general";
+import { GrimoireEventType } from "~/composables/useGames";
 
 export type RoleStatCardCategory = "role" | "general";
-
-export type RoleStatCardRecord = {
-  id: number;
-  role_id: string | null;
-  source: string;
-  metric_key: string;
-  storyteller_only: boolean;
-  role?: {
-    id: string;
-    name: string;
-    ability: string;
-    token_url: string;
-    type: string;
-    initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
-  } | null;
-};
 
 export type RoleStatCardDisplayRole = {
   id: string;
@@ -37,14 +9,6 @@ export type RoleStatCardDisplayRole = {
   token_url: string;
   type: string;
   initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
-};
-
-export type RoleStatCardResult = {
-  count: number;
-  metricLabel: string;
-  sentence: string;
-  subtitle?: string | null;
-  displayRole?: RoleStatCardDisplayRole | null;
 };
 
 type RoleStatCardContext = {
@@ -59,7 +23,6 @@ export type RoleStatCardDefinition = {
   id: string;
   category: RoleStatCardCategory;
   roleIds?: string[];
-  script?: string | null;
   source: string;
   label: string;
   getCount: (context: RoleStatCardContext) => number;
@@ -74,166 +37,7 @@ export type RoleStatCardDefinition = {
   getDisplayRole?: (context: RoleStatCardContext & { count: number }) => RoleStatCardDisplayRole | null;
 };
 
-export const ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
-  ...TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS,
-  ...OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS,
-  ...MINIONS_ROLE_STAT_CARD_DEFINITIONS,
-  ...DEMONS_ROLE_STAT_CARD_DEFINITIONS,
-  ...TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS,
-  ...FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS,
-  ...GENERAL_ROLE_STAT_CARD_DEFINITIONS,
-];
-
-export function getRoleStatCardDefinition(metricKey: string) {
-  return ROLE_STAT_CARD_DEFINITIONS.find((definition) => definition.id === metricKey) ?? null;
-}
-
-export function getAvailableRoleCardDefinitions(games: GameRecord[], roleId: string) {
-  return ROLE_STAT_CARD_DEFINITIONS.filter((definition) => {
-    if (definition.category !== "role") return false;
-    if (!definition.roleIds?.includes(roleId)) return false;
-    return definition.getCount({ games, roleId }) > 0;
-  });
-}
-
-export function getAvailableGeneralCardDefinitions(games: GameRecord[]) {
-  return ROLE_STAT_CARD_DEFINITIONS.filter((definition) => {
-    if (definition.category !== "general") return false;
-    return definition.getCount({ games }) > 0;
-  });
-}
-
-export function getRoleCardDefinitions(roleId: string) {
-  return ROLE_STAT_CARD_DEFINITIONS.filter((definition) => {
-    if (definition.category !== "role") return false;
-    return definition.roleIds?.includes(roleId) ?? false;
-  });
-}
-
-export function getGeneralCardDefinitions() {
-  return ROLE_STAT_CARD_DEFINITIONS.filter((definition) => {
-    return definition.category === "general";
-  });
-}
-
-export function buildRoleStatCardResult(
-  card: RoleStatCardRecord,
-  games: GameRecord[],
-  isMe: boolean,
-  username?: string
-): RoleStatCardResult {
-  const definition = getRoleStatCardDefinition(card.metric_key);
-  const roleName = card.role?.name ?? null;
-
-  if (!definition) {
-    return {
-      count: 0,
-      sentence: "This stat card is no longer configured.",
-      metricLabel: "Unknown Stat Card",
-      subtitle: null,
-      displayRole: null,
-    };
-  }
-
-  const count = definition.getCount({
-    games,
-    roleId: card.role_id,
-    roleName,
-    isMe,
-    username,
-  });
-
-  return {
-    count,
-    metricLabel: definition.label,
-    sentence: definition.getSentence({
-      games,
-      count,
-        roleId: card.role_id,
-        roleName,
-        isMe,
-        username,
-      }),
-    subtitle:
-      definition.getSubtitle?.({
-        games,
-        count,
-        roleId: card.role_id,
-        roleName,
-        isMe,
-        username,
-      }) ?? null,
-    displayRole:
-      definition.getDisplayRole?.({
-        games,
-        count,
-        roleId: card.role_id,
-        roleName,
-        isMe,
-        username,
-      }) ?? null,
-  };
-}
-
-export function buildRoleStatCardPreview(
-  definitionId: string,
-  games: GameRecord[],
-  isMe: boolean,
-  role?: RoleStatCardRecord["role"] | null,
-  username?: string
-) {
-  const definition = getRoleStatCardDefinition(definitionId);
-  if (!definition) return null;
-
-  const count = definition.getCount({
-    games,
-    roleId: role?.id ?? null,
-    roleName: role?.name ?? null,
-    isMe,
-    username,
-  });
-
-  return {
-    id: 0,
-    role_id: role?.id ?? null,
-    source: definition.source,
-    metric_key: definition.id,
-    storyteller_only: false,
-    role: role ?? null,
-    preview: {
-      count,
-      metricLabel: definition.label,
-      sentence: definition.getSentence({
-        games,
-        count,
-          roleId: role?.id ?? null,
-          roleName: role?.name ?? null,
-          isMe,
-          username,
-        }),
-      subtitle:
-        definition.getSubtitle?.({
-          games,
-          count,
-          roleId: role?.id ?? null,
-          roleName: role?.name ?? null,
-          isMe,
-          username,
-        }) ?? null,
-      displayRole:
-        definition.getDisplayRole?.({
-          games,
-          count,
-          roleId: role?.id ?? null,
-          roleName: role?.name ?? null,
-          isMe,
-          username,
-        }) ?? null,
-    },
-  };
-}
-
-function countEventsAffectingPlayer(
+export function countEventsAffectingPlayer(
   games: GameRecord[],
   username: string | undefined,
   predicate: (game: GameRecord, event: GameRecord["grimoire_events"][number]) => boolean
@@ -263,7 +67,7 @@ function countEventsAffectingPlayer(
   return total;
 }
 
-function countGrimoireEvents(
+export function countGrimoireEvents(
   games: GameRecord[],
   roleId: string | null | undefined,
   eventType: GrimoireEventType
@@ -282,7 +86,7 @@ function countGrimoireEvents(
   }, 0);
 }
 
-function getEventCurrentToken(
+export function getEventCurrentToken(
   game: GameRecord,
   event: GameRecord["grimoire_events"][number]
 ) {
@@ -293,7 +97,7 @@ function getEventCurrentToken(
   );
 }
 
-function getEventPreviousToken(
+export function getEventPreviousToken(
   game: GameRecord,
   event: GameRecord["grimoire_events"][number]
 ) {
@@ -306,7 +110,7 @@ function getEventPreviousToken(
   );
 }
 
-function getByRoleForEvent(
+export function getByRoleForEvent(
   game: GameRecord,
   event: GameRecord["grimoire_events"][number]
 ) {
@@ -339,7 +143,7 @@ function getByRoleForEvent(
   return anyMatch?.role ?? null;
 }
 
-function getMostCommonByRoleSubtitle(
+export function getMostCommonByRoleSubtitle(
   games: GameRecord[],
   predicate: (game: GameRecord, event: GameRecord["grimoire_events"][number]) => boolean
 ) {
@@ -347,7 +151,7 @@ function getMostCommonByRoleSubtitle(
   return top ? `Most often as ${top.name}` : null;
 }
 
-function getMostCommonByRole(
+export function getMostCommonByRole(
   games: GameRecord[],
   predicate: (game: GameRecord, event: GameRecord["grimoire_events"][number]) => boolean
 ) {
@@ -380,7 +184,7 @@ function getMostCommonByRole(
   return top?.role ?? null;
 }
 
-function getMostCommonEndTriggerRoleSubtitle(
+export function getMostCommonEndTriggerRoleSubtitle(
   games: GameRecord[],
   predicate: (game: GameRecord) => boolean
 ) {
@@ -388,7 +192,7 @@ function getMostCommonEndTriggerRoleSubtitle(
   return top ? `Most often as ${top.name}` : null;
 }
 
-function getMostCommonEndTriggerRole(
+export function getMostCommonEndTriggerRole(
   games: GameRecord[],
   predicate: (game: GameRecord) => boolean
 ) {
@@ -422,7 +226,7 @@ function getMostCommonEndTriggerRole(
   return top?.role ?? null;
 }
 
-function isDemonKillEvent(
+export function isDemonKillEvent(
   game: GameRecord,
   event: GameRecord["grimoire_events"][number]
 ) {
@@ -431,15 +235,15 @@ function isDemonKillEvent(
   return sourceRole?.type === "DEMON";
 }
 
-function pluralize(count: number) {
+export function pluralize(count: number) {
   return count === 1 ? "" : "s";
 }
 
-function subject(isMe: boolean) {
+export function subject(isMe: boolean) {
   return isMe ? "you've" : "this player has";
 }
 
-function rolePrefix(roleName?: string | null) {
+export function rolePrefix(roleName?: string | null) {
   if (!roleName) return "this role";
   if (roleName.startsWith("The ")) return roleName;
   if (["Legion", "Lil' Monsta", "Riot"].includes(roleName)) return roleName;

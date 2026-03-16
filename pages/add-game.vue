@@ -133,6 +133,7 @@ const game = reactive<{
     grimoire_page: number;
     participant_id: string;
     event_type: GrimoireEventType | null;
+    status_source: string | null;
     cause: GrimoireEventCause | null;
     by_participant_id: string | null;
     player_name: string;
@@ -410,6 +411,7 @@ const formattedGame = computed(() => {
     grimoire_page: event.grimoire_page,
     participant_id: event.participant_id,
     event_type: event.event_type,
+    status_source: event.status_source,
     cause: event.cause,
     by_participant_id: event.by_participant_id,
     player_name: event.player_name,

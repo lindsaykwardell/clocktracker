@@ -207,7 +207,11 @@ type Token = {
   };
   related_role_id: string | null;
   related_role?: { token_url: string; name?: string };
-  reminders: { reminder: string; token_url: string }[];
+  reminders: {
+    reminder: string;
+    token_url: string;
+    type?: "OFFICIAL" | "TRACKING" | "CUSTOM" | null;
+  }[];
   player_name: string;
   player_id?: string | null;
   player?: {
@@ -293,7 +297,12 @@ const props = defineProps<{
     token_url: string;
     name: string;
     initial_alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
-    reminders: { id: number; reminder: string; role_id: string }[];
+    reminders: {
+      id: number;
+      reminder: string;
+      role_id: string;
+      type: "OFFICIAL" | "TRACKING" | "CUSTOM";
+    }[];
   }[];
   readonly?: boolean;
   excludePlayers?: string[];
@@ -588,11 +597,16 @@ function openReminderDialog(token: Token) {
   showReminderDialog.value = true;
 }
 
-function selectReminder(reminder: { reminder: string; token_url: string }) {
+function selectReminder(reminder: {
+  reminder: string;
+  token_url: string;
+  type?: "OFFICIAL" | "TRACKING" | "CUSTOM" | null;
+}) {
   if (focusedToken.value) {
     focusedToken.value.reminders.push({
       reminder: reminder.reminder,
       token_url: reminder.token_url,
+      type: reminder.type ?? "CUSTOM",
     });
   }
   showReminderDialog.value = false;
@@ -600,7 +614,11 @@ function selectReminder(reminder: { reminder: string; token_url: string }) {
 
 function removeReminder(
   token: Token,
-  reminder: { reminder: string; token_url: string }
+  reminder: {
+    reminder: string;
+    token_url: string;
+    type?: "OFFICIAL" | "TRACKING" | "CUSTOM" | null;
+  }
 ) {
   token.reminders = token.reminders.filter(
     (r) =>
