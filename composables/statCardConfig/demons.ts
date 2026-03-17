@@ -165,6 +165,7 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["fang_gu"],
     script: "snv",
+    sao: 1,
     source: "grimoire_event",
     label: "Possession",
     getCount: ({ games, roleId }) =>
@@ -204,6 +205,7 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["fang_gu"],
     script: "snv",
+    sao: 1,
     source: "grimoire_event",
     label: "Jumped in the Night",
     getCount: ({ games, username }) =>
@@ -237,6 +239,7 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["imp"],
     script: "tb",
+    sao: 1,
     source: "grimoire_event",
     label: "The Starpass",
     getCount: ({ games, roleId }) =>
@@ -269,13 +272,14 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         ? (isMe
           ? `As the Imp, you've starpassed to a Minion ${count} time${pluralize(count)}.`
           : `As the Imp, this player has starpassed to a Minion ${count} time${pluralize(count)}.`)
-        : `As the Imp, starpassed to a Minion`,
+        : `As the Imp, starpass to a Minion`,
   },
   {
     id: "imp_starpasses_received",
     category: "role",
     roleIds: ["imp"],
     script: "tb",
+    sao: 1,
     source: "grimoire_event",
     label: "Pass Received",
     getCount: ({ games, username }) =>
@@ -299,7 +303,7 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         ? (isMe
           ? `You've received the Starpass ${count} time${pluralize(count)}.`
           : `This player has received the Starpass ${count} time${pluralize(count)}.`)
-        : `Receive a Starpass from the Demon.`,
+        : `Receive a Starpass from the Imp.`,
   },
   {
     id: "kazali_minion_role_changes_caused",
@@ -366,7 +370,29 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   },
   // Legion: Nothing to track really.
   // Leviathan: @todo
-  // Lil' Monsta: @todo
+  {
+    id: "lil_monsta_babysat_received",
+    category: "role",
+    roleIds: ["lil_monsta"],
+    script: "experimental",
+    source: "grimoire_event",
+    label: "Babysitter Duty",
+    getCount: ({ games, username }) =>
+      countEventsAffectingPlayer(
+        games,
+        username,
+        (_, event) =>
+          event.by_role_id === "lil_monsta" &&
+          event.event_type === GrimoireEventType.OTHER &&
+          event.status_source === "Is The Demon"
+      ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `You've babysat Lil' Monsta ${count} time${pluralize(count)}.`
+          : `This player has babysat Lil' Monsta ${count} time${pluralize(count)}.`)
+        : `Babysit Lil' Monsta.`,
+  },
   {
     id: "lleech_hosts_received",
     category: "role",
@@ -427,16 +453,17 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `This player has been changed into a minion by sitting next to the Lord of Typhon ${count} time${pluralize(count)}.`)
         : `Be turned into a minion by sitting next to the Lord of Typhon.`,
   },
-  // No Dashii: @todo
+  // No Dashii sao: 3,: @todo
   // Ojo: No reminder token(s), would be cool if we could track how many times they chose (in)correctly.
   // Po: @todo
-  // Pukka: Nothing to track really? @todo unless we track poisoned by?
+  // Pukka: sao: 2, Nothing to track really? @todo unless we track poisoned by?
   // Riot: @todo
   {
     id: "shabaloth_revives",
     category: "role",
     roleIds: ["shabaloth"],
     script: "bmr",
+    sao: 3,
     source: "grimoire_event",
     label: "Returned From The Maw",
     getCount: ({ games, roleId }) =>
@@ -453,6 +480,7 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["vigormortis"],
     script: "snv",
+    sao: 2,
     source: "grimoire_event",
     label: "Disposable Assets",
     getCount: ({ games, roleId }) =>
@@ -491,6 +519,7 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["vigormortis"],
     script: "snv",
+    sao: 2,
     source: "grimoire_event",
     label: "Parting gift",
     getCount: ({ games, username }) =>
@@ -508,7 +537,7 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `The Vigormortis poisoned this player by killing a minion ${count} time${pluralize(count)}.`)
         : `Have The Vigormortis poison you by killing one of their minions.`,
   },
-  // Vortox: @todo
+  // Vortox sao: 4,: @todo
   // Yaggababble: @todo
-  // Zombuul: Would be cool if we could track how many times they died.
+  // Zombuul sao: 1,: Would be cool if we could track how many times they died.
 ];

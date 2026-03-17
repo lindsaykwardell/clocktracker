@@ -125,33 +125,23 @@
                         {{ scriptGroup.achievedCount }}/{{ scriptGroup.totalCount }}
                       </p>
                     </div>
-                    
-                    <section
-                      v-for="typeGroup in scriptGroup.typeGroups"
-                      :key="`${scriptGroup.script}-${typeGroup.type}`"
-                      class="space-y-2"
-                    >
-                      <h4 class="sr-only">
-                        {{ typeGroup.title }}
-                      </h4>
-                      <ul class="grid gap-2 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-                        <RoleStatCard
-                          v-for="previewCard in typeGroup.cards"
-                          :key="`${tab}-${previewCard.metric_key}-${previewCard.role_id ?? 'general'}`"
-                          :card="previewCard"
-                          :games="games.status === Status.SUCCESS ? games.data : []"
-                          :is-me="isMe"
-                          :username="username"
-                          :show-favorite-control="isMe"
-                          :is-favorite="isFavoriteCard(previewCard)"
-                          class="transition-opacity"
-                          :class="previewCard.preview.count === 0 ? 'opacity-40' : ''"
-                          show-zero-overlay
-                          variant="horizontal"
-                          @toggleFavorite="toggleFavoriteCard(previewCard)"
-                        />
-                      </ul>
-                    </section>
+                    <ul class="grid gap-2 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+                      <RoleStatCard
+                        v-for="previewCard in scriptGroup.cards"
+                        :key="`${tab}-${previewCard.metric_key}-${previewCard.role_id ?? 'general'}`"
+                        :card="cardForDisplay(previewCard)"
+                        :games="games.status === Status.SUCCESS ? games.data : []"
+                        :is-me="isMe"
+                        :username="username"
+                        :show-favorite-control="isMe"
+                        :is-favorite="isFavoriteCard(previewCard)"
+                        class="transition-opacity"
+                        :class="previewCard.preview.count === 0 ? 'opacity-40' : ''"
+                        show-zero-overlay
+                        variant="horizontal"
+                        @toggleFavorite="toggleFavoriteCard(previewCard)"
+                      />
+                    </ul>
                   </section>
                 </div>
               </template>
@@ -169,7 +159,7 @@
                 <RoleStatCard
                   v-for="previewCard in previewCards"
                   :key="`${tab}-${previewCard.metric_key}-${previewCard.role_id ?? 'general'}`"
-                  :card="previewCard"
+                  :card="cardForDisplay(previewCard)"
                   :games="games.status === Status.SUCCESS ? games.data : []"
                   :is-me="isMe"
                   :username="username"
@@ -193,6 +183,7 @@
 <script setup lang="ts">
 import { RoleType } from "~/composables/useRoles";
 import {
+  ROLE_STAT_CARD_DEFINITIONS,
   buildRoleStatCardPreview,
   getGeneralCardDefinitions,
   getRoleStatCardDefinition,
@@ -289,13 +280,6 @@ function roleTypeOrderValue(type: string | null | undefined) {
   return index === -1 ? ROLE_TYPE_ORDER.length : index;
 }
 
-function roleTypeLabel(type: RoleType) {
-  if (type === RoleType.TRAVELER) return "Traveler";
-  if (type === RoleType.FABLED) return "Fabled";
-  if (type === RoleType.LORIC) return "Loric";
-  return `${type.charAt(0)}${type.slice(1).toLowerCase()}`;
-}
-
 function normalizeScript(script: string | null | undefined) {
   if (!script) return "unknown";
 
@@ -332,7 +316,7 @@ function scriptImage(script: string) {
   if (script === "snv") return "/img/sects-and-violets.webp";
   if (script === "bmr") return "/img/bad-moon-rising.webp";
   if (script === "npc") return "/img/fabled-loric.webp";
-  return "/img/custom-script.webp";
+  return "/img/carousel.webp";
 }
 
 function getRoleTypeFromCard(card: (typeof rolePreviewCards.value)[number]) {
@@ -350,6 +334,24 @@ function getScriptFromCard(card: (typeof rolePreviewCards.value)[number]) {
   return normalizeScript(definition?.script);
 }
 
+function getSaoFromCard(card: (typeof rolePreviewCards.value)[number]) {
+  const definition = getRoleStatCardDefinition(card.metric_key);
+  return definition?.sao ?? Number.MAX_SAFE_INTEGER;
+}
+
+const definitionOrderById = new Map(
+  ROLE_STAT_CARD_DEFINITIONS.map((definition, index) => [definition.id, index])
+);
+
+function definitionOrderValue(card: (typeof rolePreviewCards.value)[number]) {
+  return definitionOrderById.get(card.metric_key) ?? Number.MAX_SAFE_INTEGER;
+}
+
+function isHiddenCard(card: (typeof rolePreviewCards.value)[number]) {
+  const definition = getRoleStatCardDefinition(card.metric_key);
+  return !!definition?.hidden;
+}
+
 const rolePreviewCardGroups = computed(() => {
   const sorted = rolePreviewCards.value
     .slice()
@@ -358,18 +360,24 @@ const rolePreviewCardGroups = computed(() => {
       scriptOrderValue(getScriptFromCard(a)) - scriptOrderValue(getScriptFromCard(b));
     if (scriptCompare !== 0) return scriptCompare;
 
+    const hiddenCompare = Number(isHiddenCard(a)) - Number(isHiddenCard(b));
+    if (hiddenCompare !== 0) return hiddenCompare;
+
     const typeCompare =
       roleTypeOrderValue(getRoleTypeFromCard(a)) - roleTypeOrderValue(getRoleTypeFromCard(b));
     if (typeCompare !== 0) return typeCompare;
+
+    const saoCompare = getSaoFromCard(a) - getSaoFromCard(b);
+    if (saoCompare !== 0) return saoCompare;
 
     const roleNameA = getRoleNameFromCard(a);
     const roleNameB = getRoleNameFromCard(b);
     if (roleNameA !== roleNameB) return roleNameA.localeCompare(roleNameB);
 
-      return a.metric_key.localeCompare(b.metric_key);
+    return definitionOrderValue(a) - definitionOrderValue(b);
     });
 
-  const scriptGroups = new Map<string, Map<RoleType, typeof sorted>>();
+  const scriptGroups = new Map<string, typeof sorted>();
 
   for (const card of sorted) {
     const type = getRoleTypeFromCard(card);
@@ -377,29 +385,16 @@ const rolePreviewCardGroups = computed(() => {
     const script = getScriptFromCard(card);
 
     if (!scriptGroups.has(script)) {
-      scriptGroups.set(script, new Map<RoleType, typeof sorted>());
+      scriptGroups.set(script, []);
     }
-    const groupedByType = scriptGroups.get(script)!;
-    if (!groupedByType.has(type)) {
-      groupedByType.set(type, []);
-    }
-    groupedByType.get(type)!.push(card);
+    scriptGroups.get(script)!.push(card);
   }
 
   return Array.from(scriptGroups.entries())
     .sort(([scriptA], [scriptB]) => scriptOrderValue(scriptA) - scriptOrderValue(scriptB))
-    .map(([script, typeMap]) => {
-      const typeGroups = ROLE_TYPE_ORDER
-        .map((type) => ({
-          type,
-          title: roleTypeLabel(type),
-          cards: typeMap.get(type) ?? [],
-        }))
-        .filter((group) => group.cards.length > 0);
-
-      const allCards = typeGroups.flatMap((group) => group.cards);
-      const achievedCount = allCards.filter((card) => card.preview.count > 0).length;
-      const totalCount = allCards.length;
+    .map(([script, cards]) => {
+      const achievedCount = cards.filter((card) => card.preview.count > 0).length;
+      const totalCount = cards.length;
 
       return {
         script,
@@ -407,10 +402,10 @@ const rolePreviewCardGroups = computed(() => {
         image: scriptImage(script),
         achievedCount,
         totalCount,
-        typeGroups,
+        cards,
       };
     })
-    .filter((group) => group.typeGroups.length > 0);
+    .filter((group) => group.cards.length > 0);
 });
 
 const generalPreviewCards = computed(() => {
@@ -432,6 +427,19 @@ const generalPreviewCards = computed(() => {
 const previewCards = computed(() => {
   return tab.value === "role" ? rolePreviewCards.value : generalPreviewCards.value;
 });
+
+function cardForDisplay<T extends {
+  role_id: string | null;
+  role?: { id: string } | null;
+  preview?: { isHiddenLocked?: boolean };
+}>(card: T): T {
+  if (!card.preview?.isHiddenLocked) return card;
+  return {
+    ...card,
+    role_id: null,
+    role: null,
+  };
+}
 
 function getCardKey(metricKey: string, roleId: string | null, source: string) {
   return `${source}::${metricKey}::${roleId ?? "general"}`;

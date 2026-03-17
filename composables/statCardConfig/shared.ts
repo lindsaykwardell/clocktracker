@@ -23,6 +23,9 @@ export type RoleStatCardDefinition = {
   id: string;
   category: RoleStatCardCategory;
   roleIds?: string[];
+  script?: string | null;
+  sao?: number;
+  hidden?: boolean;
   source: string;
   label: string;
   getCount: (context: RoleStatCardContext) => number;

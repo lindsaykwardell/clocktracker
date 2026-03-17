@@ -26,6 +26,7 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["assassin"],
     script: "bmr",
+    sao: 3,
     source: "grimoire_event",
     label: "Certain Death",
     getCount: ({ games, roleId }) =>
@@ -42,6 +43,8 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["assassin"],
     script: "bmr",
+    sao: 3,
+    hidden: true,
     source: "grimoire_event",
     label: "Et Tu, Brute?",
     getCount: ({ games, roleId }) =>
@@ -75,7 +78,7 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `As the Assassin, this player has turned their blade on an evil player ${count} time${pluralize(count)}.`)
         : `As the Assassin, kill an evil player with your ability.`,
   },
-  // Baron: Nothing to track really.
+  // Baron sao: 3,: Nothing to track really.
   // Boffin: @todo Some end triggers?
   {
     id: "boomdandy_kills",
@@ -143,6 +146,7 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["cerenovus"],
     script: "snv",
+    sao: 3,
     source: "grimoire_event",
     label: "Reality Override",
     getCount: ({ games, roleId }) =>
@@ -159,6 +163,7 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["cerenovus"],
     script: "snv",
+    sao: 3,
     source: "grimoire_event",
     label: "Forced Compliance",
     getCount: ({ games, roleId }) =>
@@ -170,8 +175,76 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `As the Cerenovus, this player has caused ${count} execution${pluralize(count)} from broken madness.`)
         : `As the Cerenovus, cause an execution due to your ability.`,
   },
-  // Devil's Advocate: Would be cool if we could track how many times they saved somebody.
-  // Evil Twin: @todo
+  {
+    id: "devils_advocate_saves",
+    category: "role",
+    roleIds: ["devilsadvocate"],
+    script: "bmr",
+    sao: 2,
+    source: "grimoire_event",
+    label: "Appeal Granted",
+    getCount: ({ games, roleId }) =>
+      games.reduce((total, game) => {
+        if (!roleId || game.ignore_for_stats) return total;
+
+        return (
+          total +
+          game.grimoire_events.filter(
+            (event) =>
+              event.by_role_id === roleId &&
+              event.event_type === GrimoireEventType.OTHER &&
+              event.status_source === "Saved"
+          ).length
+        );
+      }, 0),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Devil's Advocate, you've saved ${count} player${pluralize(count)} from execution.`
+          : `As the Devil's Advocate, this player has saved ${count} player${pluralize(count)} from execution.`)
+        : `As the Devil's Advocate, save a player from execution.`,
+  },
+  {
+    id: "devils_advocate_demon_saves",
+    category: "role",
+    roleIds: ["devilsadvocate"],
+    script: "bmr",
+    sao: 2,
+    source: "grimoire_event",
+    label: "Client Privilege",
+    getCount: ({ games, roleId }) =>
+      games.reduce((total, game) => {
+        if (!roleId || game.ignore_for_stats) return total;
+
+        return (
+          total +
+          game.grimoire_events.filter((event) => {
+            if (
+              event.by_role_id !== roleId ||
+              event.event_type !== GrimoireEventType.OTHER ||
+              event.status_source !== "Saved"
+            ) {
+              return false;
+            }
+
+            const currentToken = getEventCurrentToken(game, event);
+            const previousToken = getEventPreviousToken(game, event);
+
+            return (
+              currentToken?.role?.type === "DEMON" ||
+              previousToken?.role?.type === "DEMON"
+            );
+          }).length
+        );
+      }, 0),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Devil's Advocate, you've saved the Demon from execution ${count} time${pluralize(count)}.`
+          : `As the Devil's Advocate, this player has saved the Demon from execution ${count} time${pluralize(count)}.`)
+        : `As the Devil's Advocate, save the Demon from execution.`,
+  },
+  // Evil Twin sao: 1,: @todo
   {
     id: "fearmonger_game_endings",
     category: "role",
@@ -196,7 +269,48 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `As the Fearmonger, this player ended ${count} game${pluralize(count)} by nominating and executing their target.`)
         : `As the Fearmonger, end a game due to your ability.`,
   },
-  // Goblin: @todo Check how many times player executed a goblin after claiming?
+  // {
+  //   id: "goblin_claimed_executions",
+  //   category: "role",
+  //   roleIds: ["goblin"],
+  //   script: "experimental",
+  //   source: "grimoire_event",
+  //   label: "Dare Accepted",
+  //   getCount: ({ games, roleId }) =>
+  //     games.reduce((total, game) => {
+  //       if (!roleId || game.ignore_for_stats) return total;
+
+  //       return (
+  //         total +
+  //         game.grimoire_events.filter((event) => {
+  //           if (event.event_type !== GrimoireEventType.EXECUTION) {
+  //             return false;
+  //           }
+
+  //           const currentToken = getEventCurrentToken(game, event);
+  //           const previousToken = getEventPreviousToken(game, event);
+  //           const isGoblinExecution =
+  //             currentToken?.role_id === roleId || previousToken?.role_id === roleId;
+  //           if (!isGoblinExecution) return false;
+
+  //           return game.grimoire_events.some(
+  //             (marker) =>
+  //               marker.by_role_id === roleId &&
+  //               marker.event_type === GrimoireEventType.OTHER &&
+  //               marker.status_source === "Claimed" &&
+  //               marker.grimoire_page === event.grimoire_page &&
+  //               marker.participant_id === event.participant_id
+  //           );
+  //         }).length
+  //       );
+  //     }, 0),
+  //   getSentence: ({ count, isMe }) =>
+  //     count > 0
+  //       ? (isMe
+  //         ? `As the Goblin, you've been executed after claiming Goblin ${count} time${pluralize(count)}.`
+  //         : `As the Goblin, this player has been executed after claiming Goblin ${count} time${pluralize(count)}.`)
+  //       : `As the Goblin, be executed after claiming Goblin.`,
+  // },
   {
     id: "goblin_ability_wins",
     category: "role",
@@ -222,11 +336,69 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `As the Goblin, this player has won ${count} game${pluralize(count)} by being executed after claiming Goblin.`)
         : `As the Goblin, win a game due to your ability.`,
   },
+    {
+    id: "goblin_claimed_executions_caused",
+    category: "role",
+    roleIds: ["goblin"],
+    script: "experimental",
+    source: "grimoire_event",
+    label: "Called the Bluff",
+    getCount: ({ games, username }) => {
+      if (!username) return 0;
+
+      return games.reduce((total, game) => {
+        if (game.ignore_for_stats) return total;
+
+        const participantIds = new Set(
+          game.grimoire
+            .flatMap((page) => page.tokens)
+            .filter((token) => token.player?.username === username)
+            .map((token) => token.grimoire_participant_id)
+            .filter((id): id is string => !!id)
+        );
+        if (!participantIds.size) return total;
+
+        const causedExecutions = game.grimoire_events.filter((event) => {
+          if (
+            event.event_type !== GrimoireEventType.EXECUTION ||
+            !event.by_participant_id ||
+            !participantIds.has(event.by_participant_id)
+          ) {
+            return false;
+          }
+
+          const currentToken = getEventCurrentToken(game, event);
+          const previousToken = getEventPreviousToken(game, event);
+          const isGoblinExecution =
+            currentToken?.role_id === "goblin" || previousToken?.role_id === "goblin";
+          if (!isGoblinExecution) return false;
+
+          return game.grimoire_events.some(
+            (marker) =>
+              marker.by_role_id === "goblin" &&
+              marker.event_type === GrimoireEventType.OTHER &&
+              marker.status_source === "Claimed" &&
+              marker.grimoire_page === event.grimoire_page &&
+              marker.participant_id === event.participant_id
+          );
+        }).length;
+
+        return total + causedExecutions;
+      }, 0);
+    },
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `You've nominated and executed a claimed Goblin ${count} time${pluralize(count)}.`
+          : `This player has nominated and executed a claimed Goblin ${count} time${pluralize(count)}.`)
+        : `Nominate and execute a claimed Goblin.`,
+  },
   {
     id: "godfather_kills",
     category: "role",
     roleIds: ["godfather"],
     script: "bmr",
+    sao: 1,
     source: "grimoire_event",
     label: "Just Business",
     getCount: ({ games, roleId }) =>
@@ -276,6 +448,7 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["mastermind"],
     script: "bmr",
+    sao: 4,
     source: "end_trigger",
     label: "Planned Finale",
     getCount: ({ games, roleId }) =>
@@ -300,6 +473,7 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["mastermind"],
     script: "bmr",
+    sao: 4,
     source: "end_trigger",
     label: "Perfect Scheme",
     getCount: ({ games, roleId }) =>
@@ -395,6 +569,7 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["pit_hag"],
     script: "snv",
+    sao: 4,
     source: "grimoire_event",
     label: "Cauldron's Work",
     getCount: ({ games, roleId }) =>
@@ -407,69 +582,11 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `As the Pit-Hag, change a player into a different character.`,
   },
   {
-    id: "pit_hag_good_demons_created",
-    category: "role",
-    roleIds: ["pit-hag"],
-    script: "snv",
-    source: "grimoire_event",
-    label: "Monstrous Creations",
-    getCount: ({ games, roleId }) =>
-      games.reduce((total, game) => {
-        if (!roleId || game.ignore_for_stats) return total;
-
-        return (
-          total +
-          game.grimoire_events.filter((event) => {
-            if (
-              event.by_role_id !== roleId ||
-              event.event_type !== GrimoireEventType.ROLE_CHANGE
-            ) {
-              return false;
-            }
-
-            const currentToken = getEventCurrentToken(game, event);
-            return (
-              currentToken?.role?.type === "DEMON" &&
-              currentToken.alignment === "GOOD"
-            );
-          }).length
-        );
-      }, 0),
-    getSentence: ({ count, isMe }) =>
-      count > 0
-        ? (isMe
-          ? `As the Pit-Hag, you've created ${count} good demon${pluralize(count)}.`
-          : `As the Pit-Hag, this player has created ${count} good demon${pluralize(count)}.`)
-        : `As the Pit-Hag, create a good demon.`,
-  },
-  {
-    id: "pit_hag_accidental_game_endings",
-    category: "role",
-    roleIds: ["pit-hag"],
-    script: "snv",
-    source: "end_trigger",
-    label: "Cauldron Catastrophe",
-    getCount: ({ games, roleId }) =>
-      games.filter(
-        (game) =>
-          !game.ignore_for_stats &&
-          roleId &&
-          game.end_trigger === GameEndTrigger.NO_LIVING_DEMON &&
-          game.end_trigger_type === GameEndTriggerType.CHARACTER_CHANGE &&
-          game.end_trigger_role_id === roleId
-      ).length,
-    getSentence: ({ count, isMe }) =>
-      count > 0
-        ? (isMe
-          ? `As the Pit-Hag, you've ended the game ${count} time${pluralize(count)} by removing the last living demon.`
-          : `As the Pit-Hag, this player has ended the game ${count} time${pluralize(count)} by removing the last living demon.`)
-        : `As the Pit-Hag, end the game by removing the last living demon.`,
-  },
-  {
     id: "pit_hag_demon_to_demon_changes",
     category: "role",
     roleIds: ["pit-hag"],
     script: "snv",
+    sao: 4,
     source: "grimoire_event",
     label: "Demon Decanted",
     getCount: ({ games, roleId }) =>
@@ -509,6 +626,7 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["pit-hag"],
     script: "snv",
+    sao: 4,
     source: "grimoire_event",
     label: "Self-Transformation",
     getCount: ({ games, roleId }) =>
@@ -543,10 +661,73 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `As the Pit-Hag, change yourself into a different character.`,
   },
   {
+    id: "pit_hag_good_demons_created",
+    category: "role",
+    roleIds: ["pit-hag"],
+    script: "snv",
+    sao: 4,
+    hidden: true,
+    source: "grimoire_event",
+    label: "Monstrous Creations",
+    getCount: ({ games, roleId }) =>
+      games.reduce((total, game) => {
+        if (!roleId || game.ignore_for_stats) return total;
+
+        return (
+          total +
+          game.grimoire_events.filter((event) => {
+            if (
+              event.by_role_id !== roleId ||
+              event.event_type !== GrimoireEventType.ROLE_CHANGE
+            ) {
+              return false;
+            }
+
+            const currentToken = getEventCurrentToken(game, event);
+            return (
+              currentToken?.role?.type === "DEMON" &&
+              currentToken.alignment === "GOOD"
+            );
+          }).length
+        );
+      }, 0),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Pit-Hag, you've created ${count} good demon${pluralize(count)}.`
+          : `As the Pit-Hag, this player has created ${count} good demon${pluralize(count)}.`)
+        : `As the Pit-Hag, create a good demon.`,
+  },
+  {
+    id: "pit_hag_accidental_game_endings",
+    category: "role",
+    roleIds: ["pit-hag"],
+    script: "snv",
+    hidden: true,
+    source: "end_trigger",
+    label: "Cauldron Catastrophe",
+    getCount: ({ games, roleId }) =>
+      games.filter(
+        (game) =>
+          !game.ignore_for_stats &&
+          roleId &&
+          game.end_trigger === GameEndTrigger.NO_LIVING_DEMON &&
+          game.end_trigger_type === GameEndTriggerType.CHARACTER_CHANGE &&
+          game.end_trigger_role_id === roleId
+      ).length,
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Pit-Hag, you've ended the game ${count} time${pluralize(count)} by removing the last living demon.`
+          : `As the Pit-Hag, this player has ended the game ${count} time${pluralize(count)} by removing the last living demon.`)
+        : `As the Pit-Hag, end the game by removing the last living demon.`,
+  },
+  {
     id: "pit_hag_role_changes_received",
     category: "role",
     roleIds: ["pit-hag"],
     script: "snv",
+    sao: 4,
     source: "grimoire_event",
     label: "Dropped in the Cauldron",
     getCount: ({ games, username }) =>
@@ -569,6 +750,7 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["poisoner"],
     script: "tb",
+    sao: 1,
     source: "grimoire_event",
     label: "Deadly Drip",
     getCount: ({ games, roleId }) =>
@@ -600,6 +782,7 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     id: "scarlet_woman_demon_changes",
     category: "role",
     roleIds: ["scarlet_woman"],
+    sao: 4,
     script: "tb",
     source: "grimoire_event",
     label: "The New Master",
@@ -610,9 +793,217 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         ? (isMe
           ? `As the Scarlet Woman, you've inherited the demon's mantle ${count} time${pluralize(count)}.`
           : `As the Scarlet Woman, this player has inherited the demon's mantle ${count} time${pluralize(count)}.`)
-        : `As the Scarlet Woman, become a demon when a demon dies.`,
+        : `As the Scarlet Woman, become a demon due to your ability.`,
   },
-  // Spy: @todo
+  {
+    id: "spy_washerwoman_received",
+    category: "role",
+    script: "tb",
+    roleIds: ["spy"],
+    sao: 2,
+    source: "grimoire_event",
+    label: "Clean Alibi",
+    getCount: ({ games, username }) =>
+      countEventsAffectingPlayer(games, username, (game, event) => {
+        if (
+          event.by_role_id !== "washerwoman" ||
+          event.event_type !== GrimoireEventType.OTHER ||
+          event.status_source !== "Townsfolk"
+        ) {
+          return false;
+        }
+
+        const currentToken = getEventCurrentToken(game, event);
+        const previousToken = getEventPreviousToken(game, event);
+
+        return (
+          currentToken?.role_id === "spy" ||
+          previousToken?.role_id === "spy"
+        );
+      }),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Spy, you've been seen as a Townsfolk by the Washerwoman ${count} time${pluralize(count)}.`
+          : `As the Spy, this player has been seen as a Townsfolk by the Washerwoman ${count} time${pluralize(count)}.`)
+        : `As the Spy, be seen as a Townsfolk by the Washerwoman.`,
+  },
+  {
+    id: "spy_librarian_received",
+    category: "role",
+    script: "tb",
+    roleIds: ["spy"],
+    sao: 2,
+    source: "grimoire_event",
+    label: "Forged Library Card",
+    getCount: ({ games, username }) =>
+      countEventsAffectingPlayer(games, username, (game, event) => {
+        if (
+          event.by_role_id !== "librarian" ||
+          event.event_type !== GrimoireEventType.OTHER ||
+          event.status_source !== "Outsider"
+        ) {
+          return false;
+        }
+
+        const currentToken = getEventCurrentToken(game, event);
+        const previousToken = getEventPreviousToken(game, event);
+
+        return (
+          currentToken?.role_id === "spy" ||
+          previousToken?.role_id === "spy"
+        );
+      }),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Spy, you've been seen as an Outsider by the Librarian ${count} time${pluralize(count)}.`
+          : `As the Spy, this player has been seen as an Outsider by the Librarian ${count} time${pluralize(count)}.`)
+        : `As the Spy, be seen as an Outsider by the Librarian.`,
+  },
+  {
+    id: "spy_steward_received",
+    category: "role",
+    script: "tb",
+    roleIds: ["spy"],
+    sao: 2,
+    source: "grimoire_event",
+    label: "A Good-Looking Cover",
+    getCount: ({ games, username }) =>
+      countEventsAffectingPlayer(games, username, (game, event) => {
+        if (
+          event.by_role_id !== "steward" ||
+          event.event_type !== GrimoireEventType.OTHER ||
+          event.status_source !== "Know"
+        ) {
+          return false;
+        }
+
+        const currentToken = getEventCurrentToken(game, event);
+        const previousToken = getEventPreviousToken(game, event);
+
+        return (
+          currentToken?.role_id === "spy" ||
+          previousToken?.role_id === "spy"
+        );
+      }),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Spy, you've been seen as good by the Steward ${count} time${pluralize(count)}.`
+          : `As the Spy, this player has been seen as good by the Steward ${count} time${pluralize(count)}.`)
+        : `As the Spy, be seen as good by the Steward.`,
+  },
+  {
+    id: "spy_virgin_executions",
+    category: "role",
+    script: "tb",
+    sao: 2,
+    roleIds: ["spy"],
+    hidden: true,
+    source: "grimoire_event",
+    label: "False Witness",
+    getCount: ({ games, roleId }) =>
+      games.reduce((total, game) => {
+        if (!roleId || game.ignore_for_stats) return total;
+
+        return (
+          total +
+          game.grimoire_events.filter((event) => {
+            if (
+              event.by_role_id !== roleId ||
+              event.event_type !== GrimoireEventType.EXECUTION
+            ) {
+              return false;
+            }
+
+            const currentToken = getEventCurrentToken(game, event);
+            const previousToken = getEventPreviousToken(game, event);
+
+            return (
+              currentToken?.role_id === "spy" ||
+              previousToken?.role_id === "spy"
+            );
+          }).length
+        );
+      }, 0),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Spy, you've been executed ${count} time${pluralize(count)} when nominating the Virgin.`
+          : `As the Spy, this player has been executed ${count} time${pluralize(count)} when nominating the Virgin.`)
+        : `As the Spy, be executed when nominating the Virgin.`,
+  },
+  {
+    id: "spy_moonchild_deaths_received",
+    category: "role",
+    script: "experimental",
+    roleIds: ["spy"],
+    source: "grimoire_event",
+    label: "Stars Misaligned",
+    getCount: ({ games, username }) =>
+      countEventsAffectingPlayer(
+        games,
+        username,
+        (game, event) => {
+          if (
+            event.event_type !== GrimoireEventType.DEATH ||
+            event.by_role_id !== "moonchild"
+          ) {
+            return false;
+          }
+
+          const currentToken = getEventCurrentToken(game, event);
+          const previousToken = getEventPreviousToken(game, event);
+
+          return (
+            currentToken?.role_id === "spy" ||
+            previousToken?.role_id === "spy"
+          );
+        }
+      ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Spy, you've been killed by the Moonchild ${count} time${pluralize(count)} due to misregistering as good.`
+          : `As the Spy, this player has been killed by the Moonchild ${count} time${pluralize(count)} due to misregistering as good.`)
+        : `As the Spy, be killed by the Moonchild due to misregistering as good.`,
+  },
+  {
+    id: "spy_lycanthrope_deaths_received",
+    category: "role",
+    script: "experimental",
+    roleIds: ["spy"],
+    source: "grimoire_event",
+    label: "Moonlight Mishap",
+    getCount: ({ games, username }) =>
+      countEventsAffectingPlayer(
+        games,
+        username,
+        (game, event) => {
+          if (
+            event.event_type !== GrimoireEventType.DEATH ||
+            event.by_role_id !== "lycanthrope"
+          ) {
+            return false;
+          }
+
+          const currentToken = getEventCurrentToken(game, event);
+          const previousToken = getEventPreviousToken(game, event);
+
+          return (
+            currentToken?.role_id === "spy" ||
+            previousToken?.role_id === "spy"
+          );
+        }
+      ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Spy, you've been killed by the Lycanthrope ${count} time${pluralize(count)} due to misregistering as good.`
+          : `As the Spy, this player has been killed by the Lycanthrope ${count} time${pluralize(count)} due to misregistering as good.`)
+        : `As the Spy, be killed by the Lycanthrope due to misregistering as good.`,
+  },
   {
     id: "summoner_demon_changes",
     category: "role",
@@ -785,6 +1176,7 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["witch"],
     script: "snv",
+    sao: 2,
     source: "grimoire_event",
     label: "Curses!",
     getCount: ({ games, roleId }) =>

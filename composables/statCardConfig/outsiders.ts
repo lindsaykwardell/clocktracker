@@ -29,6 +29,7 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["barber"],
     script: 'snv',
+    sao: 3,
     source: "grimoire_event",
     label: "Shear Chaos",
     getCount: ({ games, roleId }) =>
@@ -45,6 +46,7 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["butler"],
     script: 'tb',
+    sao: 1,
     source: "grimoire_event",
     label: "At Your Service",
     getCount: ({ games, username }) =>
@@ -87,7 +89,7 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `As the Damsel, this player has ended the game ${count} time${pluralize(count)} due to their ability.`)
         : `As the Damsel, end the game due to your ability.`,
   },
-  // Drunk: Nothing to track really.
+  // Drunk [sao: 4]: Too complex.
   {
     id: "golem_kills",
     category: "role",
@@ -147,6 +149,7 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["goon"],
     script: 'bmr',
+    sao: 1,
     source: "grimoire_event",
     label: "Shifting Loyalties",
     getCount: ({ games, roleId }) =>
@@ -163,6 +166,7 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["goon"],
     script: 'bmr',
+    sao: 1,
     source: "grimoire_event",
     label: "A Friendly Explanation",
     getCount: ({ games, username }) =>
@@ -203,6 +207,7 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["klutz"],
     script: 'snv',
+    sao: 4,
     source: "end_trigger",
     label: "Fatal Fumble",
     getCount: ({ games, roleId }) =>
@@ -222,12 +227,50 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `As the Klutz, this player has ended a game ${count} time${pluralize(count)} by making the wrong choice.`)
         : `As the Klutz, end a game due to your ability.`,
   },
-  // Lunatic: @todo (Followed picks?)
+  {
+    id: "lunatic_followed_picks",
+    category: "role",
+    roleIds: ["lunatic"],
+    script: "snv",
+    sao: 2,
+    source: "grimoire_event",
+    label: "Make Believe",
+    getCount: ({ games, roleId }) =>
+      games.reduce((total, game) => {
+        if (!roleId || game.ignore_for_stats) return total;
+
+        const chosenEvents = game.grimoire_events.filter(
+          (event) =>
+            event.by_role_id === roleId &&
+            event.event_type === GrimoireEventType.OTHER &&
+            event.status_source === "Chosen"
+        );
+
+        const followedPicks = chosenEvents.filter((chosenEvent) =>
+          game.grimoire_events.some(
+            (event) =>
+              event.event_type === GrimoireEventType.DEATH &&
+              event.participant_id === chosenEvent.participant_id &&
+              event.grimoire_page === chosenEvent.grimoire_page &&
+              isDemonKillEvent(game, event)
+          )
+        ).length;
+
+        return total + followedPicks;
+      }, 0),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Lunatic, your chosen player was killed by the Demon ${count} time${pluralize(count)}.`
+          : `As the Lunatic, this player's chosen player was killed by the Demon ${count} time${pluralize(count)}.`)
+        : `As the Lunatic, have your chosen player killed by the Demon.`,
+  },
   {
     id: "moonchild_kills",
     category: "role",
     roleIds: ["moonchild"],
     script: 'bmr',
+    sao: 4,
     source: "grimoire_event",
     label: "Star-Crossed",
     getCount: ({ games, roleId }) =>
@@ -282,6 +325,7 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["mutant"],
     script: 'snv',
+    sao: 1,
     source: "grimoire_event",
     label: "Slip of the Tongue",
     getCount: ({ games, roleId }) =>
@@ -309,7 +353,34 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `As the Ogre, this player has changed alignment ${count} time${pluralize(count)}.`)
         : `As the Ogre, change alignment due to your ability.`,
   },
-  // Plague Doctor: @todo
+  {
+    id: "plague_doctor_storyteller_abilities",
+    category: "role",
+    roleIds: ["plague_doctor"],
+    script: "experimental",
+    source: "grimoire_event",
+    label: "Doctor's Orders",
+    getCount: ({ games, roleId }) =>
+      games.reduce((total, game) => {
+        if (!roleId || game.ignore_for_stats) return total;
+
+        return (
+          total +
+          game.grimoire_events.filter(
+            (event) =>
+              event.by_role_id === roleId &&
+              event.event_type === GrimoireEventType.OTHER &&
+              event.status_source === "Storyteller Ability"
+          ).length
+        );
+      }, 0),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Plague Doctor, you've given the Storyteller an ability ${count} time${pluralize(count)}.`
+          : `As the Plague Doctor, this player has given the Storyteller an ability ${count} time${pluralize(count)}.`)
+        : `As the Plague Doctor, give the Storyteller an ability.`,
+  },
   {
     id: "politician_alignment_changes",
     category: "role",
@@ -326,13 +397,214 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `As the Politician, this player has changed alignment at the end of a game ${count} time${pluralize(count)}.`)
         : `As the Politician, change alignment due to your ability.`,
   },
-  // Puzzle Master: @todo
-  // Recluse: @todo
+  {
+    id: "puzzlemaster_guesses_used",
+    category: "role",
+    roleIds: ["puzzlemaster"],
+    script: "snv",
+    sao: 4,
+    source: "grimoire_event",
+    label: "Brain Teaser",
+    getCount: ({ games, roleId }) =>
+      games.reduce((total, game) => {
+        if (!roleId || game.ignore_for_stats) return total;
+
+        return (
+          total +
+          game.grimoire_events.filter(
+            (event) =>
+              event.by_role_id === roleId &&
+              event.event_type === GrimoireEventType.OTHER &&
+              event.status_source === "Guess Used"
+          ).length
+        );
+      }, 0),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Puzzlemaster, you've used your guess ${count} time${pluralize(count)}.`
+          : `As the Puzzlemaster, this player has used their guess ${count} time${pluralize(count)}.`)
+        : `As the Puzzlemaster, use your guess.`,
+  },
+  {
+    id: "puzzlemaster_correct_guesses",
+    category: "role",
+    roleIds: ["puzzlemaster"],
+    script: "snv",
+    sao: 4,
+    source: "grimoire_event",
+    label: "Solved",
+    getCount: ({ games, roleId }) =>
+      games.reduce((total, game) => {
+        if (!roleId || game.ignore_for_stats) return total;
+
+        return (
+          total +
+          game.grimoire_events.filter((event) => {
+            if (
+              event.by_role_id !== roleId ||
+              event.event_type !== GrimoireEventType.OTHER ||
+              event.status_source !== "Demon"
+            ) {
+              return false;
+            }
+
+            const currentToken = getEventCurrentToken(game, event);
+            const previousToken = getEventPreviousToken(game, event);
+
+            return (
+              currentToken?.role?.type === "DEMON" ||
+              previousToken?.role?.type === "DEMON"
+            );
+          }).length
+        );
+      }, 0),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Puzzlemaster, you've guessed correctly and seen the Demon ${count} time${pluralize(count)}.`
+          : `As the Puzzlemaster, this player has guessed correctly and seen the Demon ${count} time${pluralize(count)}.`)
+        : `As the Puzzlemaster, guess correctly and see the Demon.`,
+  },
+  {
+    id: "puzzlemaster_drunk_received",
+    category: "role",
+    roleIds: ["puzzlemaster"],
+    script: "snv",
+    sao: 4,
+    source: "grimoire_event",
+    label: "Puzzledrunk",
+    getCount: ({ games, username }) =>
+      countEventsAffectingPlayer(
+        games,
+        username,
+        (_, event) =>
+          event.event_type === GrimoireEventType.DRUNK &&
+          event.by_role_id === "puzzlemaster"
+      ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `You've been made drunk by the Puzzlemaster ${count} time${pluralize(count)}.`
+          : `This player has been made drunk by the Puzzlemaster ${count} time${pluralize(count)}.`)
+        : `Be made drunk by the Puzzlemaster.`,
+  },
+  {
+    id: "recluse_fortune_teller_received",
+    category: "role",
+    script: "tb",
+    roleIds: ["recluse"],
+    sao: 3,
+    source: "grimoire_event",
+    label: "Unlucky Reading",
+    getCount: ({ games, username }) =>
+      countEventsAffectingPlayer(
+        games,
+        username,
+        (game, event) => {
+          if (
+            event.event_type !== GrimoireEventType.OTHER ||
+            event.by_role_id !== "fortune_teller" ||
+            event.status_source !== "Yes"
+          ) {
+            return false;
+          }
+
+          const currentToken = getEventCurrentToken(game, event);
+          const previousToken = getEventPreviousToken(game, event);
+
+          return (
+            currentToken?.role_id === "recluse" ||
+            previousToken?.role_id === "recluse"
+          );
+        }
+      ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Recluse, you've been seen as a Demon by the Fortune Teller ${count} time${pluralize(count)}.`
+          : `As the Recluse, this player has been seen as a Demon by the Fortune Teller ${count} time${pluralize(count)}.`)
+        : `As the Recluse, be seen as a Demon by the Fortune Teller.`,
+  },
+  {
+    id: "recluse_investigator_received",
+    category: "role",
+    script: "tb",
+    roleIds: ["recluse"],
+    sao: 3,
+    source: "grimoire_event",
+    label: "Framed Suspect",
+    getCount: ({ games, username }) =>
+      countEventsAffectingPlayer(
+        games,
+        username,
+        (game, event) => {
+          if (
+            event.event_type !== GrimoireEventType.OTHER ||
+            event.by_role_id !== "investigator" ||
+            event.status_source !== "Minion"
+          ) {
+            return false;
+          }
+
+          const currentToken = getEventCurrentToken(game, event);
+          const previousToken = getEventPreviousToken(game, event);
+
+          return (
+            currentToken?.role_id === "recluse" ||
+            previousToken?.role_id === "recluse"
+          );
+        }
+      ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Recluse, you've been seen as a Minion by the Investigator ${count} time${pluralize(count)}.`
+          : `As the Recluse, this player has been seen as a Minion by the Investigator ${count} time${pluralize(count)}.`)
+        : `As the Recluse, be seen as a Minion by the Investigator.`,
+  },
+  {
+    id: "recluse_imp_starpasses_received",
+    category: "role",
+    roleIds: ["recluse"],
+    script: "tb",
+    sao: 3,
+    source: "grimoire_event",
+    label: "Yes, But Don't",
+    getCount: ({ games, username }) =>
+      countEventsAffectingPlayer(
+        games,
+        username,
+        (game, event) => {
+          if (
+            event.event_type !== GrimoireEventType.ROLE_CHANGE ||
+            event.by_role_id !== "imp"
+          ) {
+            return false;
+          }
+
+          const currentToken = getEventCurrentToken(game, event);
+          const previousToken = getEventPreviousToken(game, event);
+
+          return (
+            currentToken?.role_id === "imp" &&
+            (event.old_role_id === "recluse" || previousToken?.role_id === "recluse")
+          );
+        }
+      ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Recluse, you've received the Imp's starpass ${count} time${pluralize(count)}.`
+          : `As the Recluse, this player has received the Imp's starpass ${count} time${pluralize(count)}.`)
+        : `As the Recluse, receive the Imp's starpass.`,
+  },
   {
     id: "saint_game_endings",
     category: "role",
     roleIds: ["saint"],
     script: 'tb',
+    sao: 2,
     source: "end_trigger",
     label: "Holy Misfire",
     getCount: ({ games, roleId }) =>
@@ -357,6 +629,8 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["saint"],
     script: 'tb',
+    sao: 2,
+    hidden: true,
     source: "end_trigger",
     label: "Condemned the Holy",
     getCount: ({ games, username }) => {
@@ -409,12 +683,13 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `This player has ended the game by executing the Saint ${count} time${pluralize(count)}.`)
         : `End the game by executing the Saint.`,
   },
-  // Snitch: Nothing to track really.
+  // Snitch: Nothing relevant. Only option: None?
   {
     id: "sweetheart_drunk_on_death",
     category: "role",
     roleIds: ["sweetheart"],
     script: 'snv',
+    sao: 2,
     source: "grimoire_event",
     label: "Heartbreak Hangover",
     getCount: ({ games, roleId }) =>
@@ -431,6 +706,7 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["sweetheart"],
     script: 'snv',
+    sao: 2,
     source: "grimoire_event",
     label: "Grief-Struck",
     getCount: ({ games, username }) =>
@@ -453,6 +729,7 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["tinker"],
     script: 'bmr',
+    sao: 3,
     source: "grimoire_event",
     label: "Oops!",
     getCount: ({ games, roleId }) =>
@@ -464,5 +741,5 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `As the Tinker, this player has had ${count} fatal mishap${pluralize(count)}.`)
         : `As the Tinker, die due to your ability.`,
   },
-  // Zealot: Nothing to track really.
+  // Zealot: Nothing relevant. Only option: None?
 ];

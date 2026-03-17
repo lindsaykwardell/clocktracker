@@ -38,6 +38,7 @@ export const GRIMOIRE_EVENT_ROLE_INCLUDES: Record<GrimoireEventType, RoleInclude
     "pit-hag", // Extra deaths from demon switch
     "psychopath",
     "witch",
+    "gunslinger",
     'harlot',
     'gangster',
     'gnome',
