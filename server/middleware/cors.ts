@@ -21,7 +21,7 @@ export default defineEventHandler((event) => {
 
   // Handle preflight
   if (event.method === "OPTIONS") {
-    event.node.res.statusCode = 204;
-    event.node.res.end();
+    setResponseStatus(event, 204);
+    return "";
   }
 });
