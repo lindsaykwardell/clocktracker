@@ -1701,29 +1701,60 @@ function syncGrimoireEventsFromGrimoire(options?: {
           }
         }
 
-        expected.set(
-          expectedKey(
-            pageIndex,
-            affectedParticipantId,
-            `${eventKindFromValues(config.eventType)}:${normalizeReminderName(
-              config.reminder
-            )}`
-          ),
-          {
-            grimoire_page: pageIndex,
-            participant_id: affectedParticipantId,
-            event_type: config.eventType,
-            status_source: config.reminder,
-            by_participant_id: source?.by_participant_id ?? null,
-            player_name: affectedToken.player_name || "",
-            role_id: affectedToken.role_id ?? null,
-            by_role_id: source?.by_role_id ?? null,
-            old_role_id: affectedPreviousToken?.role_id ?? null,
-            new_role_id: affectedToken.role_id ?? null,
-            old_alignment: affectedPreviousToken?.alignment ?? null,
-            new_alignment: affectedToken.alignment ?? null,
-          }
+        const reminderBaseKind = eventKindFromValues(config.eventType);
+        const reminderKind =
+          (config.eventType === GrimoireEventType.MAD ||
+            config.eventType === GrimoireEventType.DRUNK ||
+            config.eventType === GrimoireEventType.POISONED ||
+            config.eventType === GrimoireEventType.OTHER) &&
+          config.reminder
+            ? `${reminderBaseKind}:${normalizeReminderName(config.reminder)}`
+            : reminderBaseKind;
+
+        const reminderExpectedKey = expectedKey(
+          pageIndex,
+          affectedParticipantId,
+          reminderKind
         );
+        const existingExpectation = expected.get(reminderExpectedKey);
+        const isLifecycleEventType =
+          config.eventType === GrimoireEventType.DEATH ||
+          config.eventType === GrimoireEventType.EXECUTION ||
+          config.eventType === GrimoireEventType.REVIVE;
+
+        // Lifecycle events should only come from shroud/death-state changes.
+        // Reminders may enrich those rows but must not create them on their own.
+        if (isLifecycleEventType && !existingExpectation) {
+          continue;
+        }
+
+        expected.set(reminderExpectedKey, {
+          grimoire_page: pageIndex,
+          participant_id: affectedParticipantId,
+          event_type: existingExpectation?.event_type ?? config.eventType,
+          status_source: config.reminder,
+          by_participant_id:
+            isLifecycleEventType
+              ? existingExpectation?.by_participant_id ??
+                source?.by_participant_id ??
+                null
+              : source?.by_participant_id ??
+                existingExpectation?.by_participant_id ??
+                null,
+          player_name: affectedToken.player_name || "",
+          role_id: affectedToken.role_id ?? null,
+          by_role_id: isLifecycleEventType
+            ? existingExpectation?.by_role_id ?? source?.by_role_id ?? null
+            : source?.by_role_id ?? existingExpectation?.by_role_id ?? null,
+          old_role_id:
+            affectedPreviousToken?.role_id ?? existingExpectation?.old_role_id ?? null,
+          new_role_id: affectedToken.role_id ?? null,
+          old_alignment:
+            affectedPreviousToken?.alignment ??
+            existingExpectation?.old_alignment ??
+            null,
+          new_alignment: affectedToken.alignment ?? null,
+        });
       }
     });
 

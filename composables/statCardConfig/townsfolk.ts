@@ -24,8 +24,8 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "acrobat_self_deaths",
     category: "role",
-    script: "experimental",
     roleIds: ["acrobat"],
+    script: "experimental",
     source: "grimoire_event",
     label: "Fatal Stunts",
     getCount: ({ games, roleId }) =>
@@ -41,8 +41,8 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "alsaahir_game_endings",
     category: "role",
-    script: "experimental",
     roleIds: ["alsaahir"],
+    script: "experimental",
     source: "end_trigger",
     label: "Last Draw",
     getCount: ({ games, roleId }) =>
@@ -63,10 +63,39 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `As the Alsaahir, end the game by guessing correctly.`,
   },
   {
+    id: "amnesiac_ability_guesses",
+    category: "role",
+    roleIds: ["amnesiac"],
+    script: "experimental",
+    source: "grimoire_event",
+    label: "That's a Bingo!",
+    getCount: ({ games, roleId }) =>
+      games.reduce((total, game) => {
+        if (!roleId || game.ignore_for_stats) return total;
+
+        return (
+          total +
+          game.grimoire_events.filter(
+            (event) =>
+              event.by_role_id === roleId &&
+              event.event_type === GrimoireEventType.OTHER &&
+              event.status_source === "Bingo"
+          ).length
+        );
+      }, 0),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Amnesiac, you've correctly identified your ability ${count} time${pluralize(count)}.`
+          : `As the Amnesiac, this player has correctly identified their ability ${count} time${pluralize(count)}.`)
+        : `As the Amnesiac, correctly identify your ability.`,
+  },
+  {
     id: "artist_ability_uses",
     category: "role",
-    script: "experimental",
     roleIds: ["artist"],
+    script: "snv",
+    sao: 11,
     source: "grimoire_event",
     label: "Single Stroke",
     getCount: ({ games, roleId }) =>
@@ -91,13 +120,40 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `As the Artist, ask the Storyteller a question.`,
   },
   // Atheist: @todo (game end)
-  // Balloonist: Nothing to track really.
-  // Banshee: @todo ?
+  // Balloonist: Nothing relevant. Only option: How many times they spotted the demon?
+  {
+    id: "banshee_awakenings",
+    category: "role",
+    roleIds: ["banshee"],
+    script: "experimental",
+    source: "grimoire_event",
+    label: "Awakened Fury",
+    getCount: ({ games, roleId }) =>
+      games.reduce((total, game) => {
+        if (!roleId || game.ignore_for_stats) return total;
+
+        return (
+          total +
+          game.grimoire_events.filter(
+            (event) =>
+              event.by_role_id === roleId &&
+              event.event_type === GrimoireEventType.OTHER &&
+              event.status_source === "Has Ability"
+          ).length
+        );
+      }, 0),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Banshee, you've been awakened ${count} time${pluralize(count)} due to your ability.`
+          : `As the Banshee, this player has been awakened ${count} time${pluralize(count)} due to their ability.`)
+        : `As the Banshee, be awakened due to your ability.`,
+  },
   {
     id: "bounty_hunter_townsfolk_turned_evil",
     category: "role",
-    script: "experimental",
     roleIds: ["bounty_hunter"],
+    script: "experimental",
     source: "grimoire_event",
     label: "Price of the Hunt",
     getCount: ({ games, roleId }) =>
@@ -256,15 +312,86 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `As the Cannibal, this player has been poisoned ${count} time${pluralize(count)} from eating an evil player.`)
         : `As the Cannibal, become poisoned by eating an evil player.`,
   },
-  // Chambermaid: No reminder token(s) and nothing to track really.
-  // Chef: No reminder token(s), would have been cool to track highest number somehow.
-  // Choirboy: No reminder token(s), would have been cool to track how many times their ability worked somehow.
-  // Clockmaker: No reminder token(s) and nothing to track really.
+  // Chambermaid [sao: 3]: Nothing relevant. Only option: Highest number received, Or highest number of players checked in one game?
+  // Chef [sao: 4]: @todo: Would have been cool to track highest number somehow. but I don't want to add 1-18 reminder tokens (which is the highest it can get according to Reddit).
+  {
+    id: "choirboy_demon_reveals",
+    category: "role",
+    roleIds: ["choirboy"],
+    script: "experimental",
+    source: "grimoire_event",
+    label: "Funeral Hymn",
+    getCount: ({ games, roleId }) =>
+      games.reduce((total, game) => {
+        if (!roleId || game.ignore_for_stats) return total;
+
+        return (
+          total +
+          game.grimoire_events.filter((event) => {
+            if (
+              event.by_role_id !== roleId ||
+              event.event_type !== GrimoireEventType.OTHER ||
+              event.status_source !== "Demon"
+            ) {
+              return false;
+            }
+
+            const currentToken = getEventCurrentToken(game, event);
+            const previousToken = getEventPreviousToken(game, event);
+
+            return (
+              currentToken?.role?.type === "DEMON" ||
+              previousToken?.role?.type === "DEMON"
+            );
+          }).length
+        );
+      }, 0),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Choirboy, you've learned the Demon ${count} time${pluralize(count)} due to your ability when the King was killed.`
+          : `As the Choirboy, this player has learned the Demon ${count} time${pluralize(count)} due to their ability when the King was killed.`)
+        : `As the Choirboy, learn the Demon due to your ability when the King is killed.`,
+  },
+  {
+    id: "choirboy_demon_reveals_received",
+    category: "role",
+    roleIds: ["choirboy"],
+    script: "experimental",
+    source: "grimoire_event",
+    label: "Royal Suspect",
+    getCount: ({ games, username }) =>
+      countEventsAffectingPlayer(games, username, (game, event) => {
+        if (
+          event.by_role_id !== "choirboy" ||
+          event.event_type !== GrimoireEventType.OTHER ||
+          event.status_source !== "Demon"
+        ) {
+          return false;
+        }
+
+        const currentToken = getEventCurrentToken(game, event);
+        const previousToken = getEventPreviousToken(game, event);
+
+        return (
+          currentToken?.role?.type === "DEMON" ||
+          previousToken?.role?.type === "DEMON"
+        );
+      }),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `You've been revealed to the Choirboy as the Demon ${count} time${pluralize(count)}.`
+          : `This player has been revealed to the Choirboy as the Demon ${count} time${pluralize(count)}.`)
+        : `As the Demon, be shown to the Choirboy after you kill the King.`,
+  },
+  // Clockmaker [sao: 1]: Nothing relevant. Only option: Highest number received?
   {
     id: "courtier_drunk",
     category: "role",
-    script: "bmr",
     roleIds: ["courtier"],
+    script: "bmr",
+    sao: 8,
     source: "grimoire_event",
     label: "Menu Selection",
     getCount: ({ games, roleId }) =>
@@ -279,8 +406,9 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "courtier_drunk_received",
     category: "role",
-    script: "bmr",
     roleIds: ["courtier"],
+    script: "bmr",
+    sao: 8,
     source: "grimoire_event",
     label: "Three-Day Hangover",
     getCount: ({ games, username }) =>
@@ -364,8 +492,47 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `As the Cult Leader, this player has ended ${count} game${pluralize(count)} by forming a good cult.`)
         : `As the Cult Leader, end the game by forming a good cult.`,
   },
-  // Dreamer: No reminder token(s) to track, would have been cool to track how many times they picked the demon.
-  // Empath: No reminder tokens to track. Load grim and check first page for sitting next to two evils?
+  {
+    id: "dreamer_demon_picks",
+    category: "role",
+    roleIds: ["dreamer"],
+    script: "snv",
+    sao: 2,
+    source: "grimoire_event",
+    label: "Nightmare Fuel",
+    getCount: ({ games, roleId }) =>
+      games.reduce((total, game) => {
+        if (!roleId || game.ignore_for_stats) return total;
+
+        return (
+          total +
+          game.grimoire_events.filter((event) => {
+            if (
+              event.by_role_id !== roleId ||
+              event.event_type !== GrimoireEventType.OTHER ||
+              event.status_source !== "Chosen"
+            ) {
+              return false;
+            }
+
+            const currentToken = getEventCurrentToken(game, event);
+            const previousToken = getEventPreviousToken(game, event);
+
+            return (
+              currentToken?.role?.type === "DEMON" ||
+              previousToken?.role?.type === "DEMON"
+            );
+          }).length
+        );
+      }, 0),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Dreamer, you've dreamed the Demon ${count} time${pluralize(count)}.`
+          : `As the Dreamer, this player has dreamed the Demon ${count} time${pluralize(count)}.`)
+        : `As the Dreamer, dream the Demon.`,
+  },
+  // Empath [sao: 5]: @todo: Load grim and check first page for sitting next to two evils? Performance impact?
   {
     id: "engineer_uses",
     category: "role",
@@ -407,8 +574,9 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "exorcist_demon_picks",
     category: "role",
-    script: "bmr",
     roleIds: ["exorcist"],
+    script: "bmr",
+    sao: 4,
     source: "grimoire_event",
     label: "The Power of Christ Compels You",
     getCount: ({ games, roleId }) =>
@@ -487,12 +655,13 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `As the Fisherman, this player has asked the storyteller for advice ${count} time${pluralize(count)}.`)
         : `As the Fisherman, ask the storyteller for advice.`,
   },
-  // Flowergirl: Nothing to track really.
+  // Flowergirl [sao: 5]: Nothing relevant. Only option: How many times they got a yes?
   {
     id: "fool_saved_from_death",
     category: "role",
-    script: "bmr",
     roleIds: ["fool"],
+    script: "bmr",
+    sao: 13,
     source: "grimoire_event",
     label: "Not Today",
     getCount: ({ games, roleId }) =>
@@ -517,32 +686,10 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `As the Fool, survive death due to your ability.`,
   },
   {
-    id: "fortune_teller_red_herring_received",
-    category: "role",
-    script: "tb",
-    roleIds: ["fortune_teller"],
-    source: "grimoire_event",
-    label: "False Trail",
-    getCount: ({ games, username }) =>
-      countEventsAffectingPlayer(
-        games,
-        username,
-        (_, event) =>
-          event.event_type === GrimoireEventType.OTHER &&
-          event.by_role_id === "fortune_teller" &&
-          event.status_source === "Red Herring"
-      ),
-    getSentence: ({ count, isMe }) =>
-      count > 0
-        ? (isMe
-          ? `You've been the Fortune Teller's red herring ${count} time${pluralize(count)}.`
-          : `This player has been the Fortune Teller's red herring ${count} time${pluralize(count)}.`)
-        : `Be the Fortune Teller's red herring.`,
-  },
-  {
     id: "fortune_teller_demon",
     category: "role",
     script: "tb",
+    sao: 6,
     roleIds: ["fortune_teller"],
     source: "grimoire_event",
     label: "True Omen",
@@ -582,6 +729,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     id: "fortune_teller_recluse",
     category: "role",
     script: "tb",
+    sao: 6,
     roleIds: ["fortune_teller"],
     source: "grimoire_event",
     label: "Misleading Glow",
@@ -618,46 +766,35 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `As the Fortune Teller, get a "Yes" on the Recluse.`,
   },
   {
-    id: "fortune_teller_recluse_received",
+    id: "fortune_teller_red_herring_received",
     category: "role",
     script: "tb",
+    sao: 6,
     roleIds: ["fortune_teller"],
     source: "grimoire_event",
-    label: "Unlucky Reading",
+    label: "False Trail",
     getCount: ({ games, username }) =>
       countEventsAffectingPlayer(
         games,
         username,
-        (game, event) => {
-          if (
-            event.event_type !== GrimoireEventType.OTHER ||
-            event.by_role_id !== "fortune_teller" ||
-            event.status_source !== "Yes"
-          ) {
-            return false;
-          }
-
-          const currentToken = getEventCurrentToken(game, event);
-          const previousToken = getEventPreviousToken(game, event);
-
-          return (
-            currentToken?.role_id === "recluse" ||
-            previousToken?.role_id === "recluse"
-          );
-        }
+        (_, event) =>
+          event.event_type === GrimoireEventType.OTHER &&
+          event.by_role_id === "fortune_teller" &&
+          event.status_source === "Red Herring"
       ),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Recluse, you've been seen as a Demon by the Fortune Teller ${count} time${pluralize(count)}.`
-          : `As the Recluse, this player has been seen as a Demon by the Fortune Teller ${count} time${pluralize(count)}.`)
-        : `As the Recluse, be seen as a Demon by the Fortune Teller.`,
+          ? `You've been the Fortune Teller's red herring ${count} time${pluralize(count)}.`
+          : `This player has been the Fortune Teller's red herring ${count} time${pluralize(count)}.`)
+        : `Be the Fortune Teller's red herring.`,
   },
   {
     id: "gambler_self_deaths",
     category: "role",
-    script: "bmr",
     roleIds: ["gambler"],
+    script: "bmr",
+    sao: 6,
     source: "grimoire_event",
     label: "Came Up Tails",
     getCount: ({ games, roleId }) =>
@@ -669,12 +806,13 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `As the Gambler, this player has died ${count} time${pluralize(count)} by guessing a character wrong.`)
         : `As the Gambler, die by guessing a character wrong.`,
   },
-  // General: No reminder token(s) and nothing to track really.
+  // General: Nothing relevant. Only option: I don't know here. Which side you were shown most? Is that even interesting?
   {
     id: "gossip_kills",
     category: "role",
-    script: "bmr",
     roleIds: ["gossip"],
+    script: "bmr",
+    sao: 7,
     source: "grimoire_event",
     label: "Loose Lips",
     getCount: ({ games, roleId }) =>
@@ -689,8 +827,9 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "grandmother_ability_deaths",
     category: "role",
-    script: "bmr",
     roleIds: ["grandmother"],
+    script: "bmr",
+    sao: 1,
     source: "grimoire_event",
     label: "Shared Fate",
     getCount: ({ games, roleId }) =>
@@ -702,12 +841,50 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `As the Grandmother, this player has died ${count} time${pluralize(count)} when their grandchild was killed by the Demon.`)
         : `As the Grandmother, die when your grandchild is killed by the Demon.`,
   },
-  // High Priestess: No reminder token(s), would have been cool to track how many times they were sent to evil? Or how many times the priestess was sent to you.
+  {
+    id: "high_priestess_evil_visits",
+    category: "role",
+    roleIds: ["high_priestess"],
+    script: "experimental",
+    source: "grimoire_event",
+    label: "Deceptive Intuition",
+    getCount: ({ games, roleId }) =>
+      games.reduce((total, game) => {
+        if (!roleId || game.ignore_for_stats) return total;
+
+        return (
+          total +
+          game.grimoire_events.filter((event) => {
+            if (
+              event.by_role_id !== roleId ||
+              event.event_type !== GrimoireEventType.OTHER ||
+              event.status_source !== "Visit"
+            ) {
+              return false;
+            }
+
+            const currentToken = getEventCurrentToken(game, event);
+            const previousToken = getEventPreviousToken(game, event);
+
+            return (
+              currentToken?.alignment === "EVIL" ||
+              previousToken?.alignment === "EVIL"
+            );
+          }).length
+        );
+      }, 0),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the High Priestess, you've been directed to an evil player ${count} time${pluralize(count)}.`
+          : `As the High Priestess, this player has been directed to an evil player ${count} time${pluralize(count)}.`)
+        : `As the High Priestess, be directed to an evil player.`,
+  },
   {
     id: "huntsman_damsel_saves",
     category: "role",
-    script: "experimental",
     roleIds: ["huntsman"],
+    script: "experimental",
     source: "grimoire_event",
     label: "Just In Time",
     getCount: ({ games, roleId }) =>
@@ -788,8 +965,9 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "innkeeper_drunk_caused",
     category: "role",
-    script: "bmr",
     roleIds: ["innkeeper"],
+    script: "bmr",
+    sao: 5,
     source: "grimoire_event",
     label: "House Special",
     getCount: ({ games, roleId }) =>
@@ -804,8 +982,9 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "innkeeper_drunk_received",
     category: "role",
-    script: "bmr",
     roleIds: ["innkeeper"],
+    script: "bmr",
+    sao: 5,
     source: "grimoire_event",
     label: "Innkeeper's Pour",
     getCount: ({ games, username }) =>
@@ -823,12 +1002,52 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `This player has been made drunk by the Innkeeper ${count} time${pluralize(count)}.`)
         : `Become drunk due to the Innkeeper.`,
   },
-  // Investigator: Nothing to track really.
+  {
+    id: "investigator_recluse",
+    category: "role",
+    script: "tb",
+    sao: 3,
+    roleIds: ["investigator"],
+    source: "grimoire_event",
+    label: "False Lead",
+    getCount: ({ games, roleId }) =>
+      games.reduce((total, game) => {
+        if (!roleId || game.ignore_for_stats) return total;
+
+        return (
+          total +
+          game.grimoire_events.filter((event) => {
+            if (
+              event.by_role_id !== roleId ||
+              event.event_type !== GrimoireEventType.OTHER ||
+              event.status_source !== "Minion"
+            ) {
+              return false;
+            }
+
+            const currentToken = getEventCurrentToken(game, event);
+            const previousToken = getEventPreviousToken(game, event);
+
+            return (
+              currentToken?.role_id === "recluse" ||
+              previousToken?.role_id === "recluse"
+            );
+          }).length
+        );
+      }, 0),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Investigator, you've seen the Recluse as a Minion ${count} time${pluralize(count)}.`
+          : `As the Investigator, this player has seen the Recluse as a Minion ${count} time${pluralize(count)}.`)
+        : `As the Investigator, see the Recluse as a Minion.`,
+  },
   {
     id: "juggler_correct",
     category: "role",
-    script: "snv",
     roleIds: ["juggler"],
+    script: "snv",
+    sao: 12,
     source: "grimoire_event",
     label: "On the Mark",
     getCount: ({ games, roleId }) =>
@@ -855,8 +1074,9 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "juggler_highest_correct_single_game",
     category: "role",
-    script: "snv",
     roleIds: ["juggler"],
+    script: "snv",
+    sao: 12,
     source: "grimoire_event",
     label: "Showstopper",
     getCount: ({ games, roleId }) => {
@@ -879,21 +1099,22 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         }
       }
 
-      return maxCorrectInSingleGame;
+      return maxCorrectInSingleGame > 1 ? maxCorrectInSingleGame : 0;
     },
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
           ? `As the Juggler, your highest number of correct juggles in a single game is ${count}.`
           : `As the Juggler, this player's highest number of correct juggles in a single game is ${count}.`)
-        : `As the Juggler, have a correct juggle in a single game.`,
+        : `As the Juggler, have multiple correct juggles in a single game.`,
   },
-  // King: Nothing to track really.
-  // Knight: Nothing to track really.
+  // King: Nothing relevant. Only option: Highest number of characters learned in one game?
+  // Knight: Nothing relevant. Only option: This players was shown to the knight. Is that interesting?
   {
     id: "librarian_spy",
     category: "role",
     script: "tb",
+    sao: 2,
     roleIds: ["librarian"],
     source: "grimoire_event",
     label: "Membership Under Review",
@@ -928,38 +1149,6 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Librarian, you've been shown the Spy as an Outsider ${count} time${pluralize(count)}.`
           : `As the Librarian, this player has been shown the Spy as an Outsider ${count} time${pluralize(count)}.`)
         : `As the Librarian, see the Spy as an Outsider.`,
-  },
-  {
-    id: "librarian_spy_received",
-    category: "role",
-    script: "tb",
-    roleIds: ["librarian"],
-    source: "grimoire_event",
-    label: "Membership Forged",
-    getCount: ({ games, username }) =>
-      countEventsAffectingPlayer(games, username, (game, event) => {
-        if (
-          event.by_role_id !== "librarian" ||
-          event.event_type !== GrimoireEventType.OTHER ||
-          event.status_source !== "Outsider"
-        ) {
-          return false;
-        }
-
-        const currentToken = getEventCurrentToken(game, event);
-        const previousToken = getEventPreviousToken(game, event);
-
-        return (
-          currentToken?.role_id === "spy" ||
-          previousToken?.role_id === "spy"
-        );
-      }),
-    getSentence: ({ count, isMe }) =>
-      count > 0
-        ? (isMe
-          ? `As the Spy, you've been seen as an Outsider by the Librarian ${count} time${pluralize(count)}.`
-          : `As the Spy, this player has been seen as an Outsider by the Librarian ${count} time${pluralize(count)}.`)
-        : `As the Spy, be seen as an Outsider by the Librarian.`,
   },
   {
     id: "lycanthrope_good_kills",
@@ -1037,12 +1226,61 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `As the Lycanthrope, this player has killed the Spy ${count} time${pluralize(count)}.`)
         : `As the Lycanthrope, kill the Spy.`,
   },
-  // Magician: No reminder token(s) and nothing to track really.
-  // Mathematician: @todo
+  // Magician: Nothing relevant. Only option: Can't think of anything..
+  {
+    id: "mathematician_highest_abnormal",
+    category: "role",
+    script: "snv",
+    sao: 4,
+    roleIds: ["mathematician"],
+    source: "grimoire_event",
+    label: "Statistical Anomaly",
+    getCount: ({ games, roleId }) => {
+      if (!roleId) return 0;
+
+      let maxAbnormalLearned = 0;
+
+      for (const game of games) {
+        if (game.ignore_for_stats) continue;
+
+        const abnormalByPage = new Map<number, number>();
+
+        for (const event of game.grimoire_events) {
+          if (
+            event.by_role_id !== roleId ||
+            event.event_type !== GrimoireEventType.OTHER ||
+            event.status_source !== "Abnormal"
+          ) {
+            continue;
+          }
+
+          abnormalByPage.set(
+            event.grimoire_page,
+            (abnormalByPage.get(event.grimoire_page) ?? 0) + 1
+          );
+        }
+
+        for (const count of abnormalByPage.values()) {
+          if (count > maxAbnormalLearned) {
+            maxAbnormalLearned = count;
+          }
+        }
+      }
+
+      return maxAbnormalLearned;
+    },
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Mathematician, your highest number of abnormal abilities learned is ${count}.`
+          : `As the Mathematician, this player's highest number of abnormal abilities learned is ${count}.`)
+        : `As the Mathematician, learn a number higher than 0.`,
+  },
   {
     id: "mayor_game_endings",
     category: "role",
     script: "tb",
+    sao: 13,
     roleIds: ["mayor"],
     source: "end_trigger",
     label: "Mayoral Mandate",
@@ -1091,11 +1329,12 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `As the Mayor, this player has caused ${count} death${pluralize(count)} to bounce to someone else.`)
         : `As the Mayor, have your death bounced to someone else.`,
   },
-  // Minstrel: @todo
+  // Minstrel [sao: 10]: @todo
   {
     id: "monk_saves",
     category: "role",
     script: "tb",
+    sao: 8,
     roleIds: ["monk"],
     source: "grimoire_event",
     label: "Divine Protection",
@@ -1171,13 +1410,14 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `This player has been visited by the Nightwatchman ${count} time${pluralize(count)}.`)
         : `Be visited by the Nightwatchman at night.`,
   },
-  // Noble: Nothing to track really. (Unless we track how many times demon was in 3?)
-  // Oracle: No reminder token(s) and nothing to track really.
+  // Noble: Nothing relevant. Only option: Track how many times demon was in three shown?
+  // Oracle [sao: 7]: Nothing relevant. Only option: Highest number learned in one game?
   {
     id: "pacifist_saves",
     category: "role",
-    script: "bmr",
     roleIds: ["pacifist"],
+    script: "bmr",
+    sao: 12,
     source: "grimoire_event",
     label: "Peacekeeper",
     getCount: ({ games, roleId }) =>
@@ -1204,8 +1444,9 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "philosopher_drunk",
     category: "role",
-    script: "snv",
     roleIds: ["philosopher"],
+    script: "snv",
+    sao: 10,
     source: "grimoire_event",
     label: "Price of Insight",
     getCount: ({ games, roleId }) =>
@@ -1220,8 +1461,9 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "philosopher_drunk_received",
     category: "role",
-    script: "snv",
     roleIds: ["philosopher"],
+    script: "snv",
+    sao: 10,
     source: "grimoire_event",
     label: "Borrowed Identity",
     getCount: ({ games, username }) =>
@@ -1487,6 +1729,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["professor"],
     script: "bmr",
+    sao: 9,
     source: "grimoire_event",
     label: "It's Alive!",
     getCount: ({ games, roleId }) =>
@@ -1498,13 +1741,71 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `As the Professor, this player has brought ${count} Townsfolk back to life.`)
         : `As the Professor, bring a Townsfolk back to life.`,
   },
-  // Ravenkeeper: No reminder token(s) to track, would have been cool to track how many times they picked the demon.
-  // Sage: No reminder token(s) and nothing to track really.
+  {
+    id: "ravenkeeper_demon_choices",
+    category: "role",
+    roleIds: ["ravenkeeper"],
+    script: "tb",
+    sao: 9,
+    source: "grimoire_event",
+    label: "Dying Insight",
+    getCount: ({ games, roleId }) =>
+      games.reduce((total, game) => {
+        if (!roleId || game.ignore_for_stats) return total;
+
+        return (
+          total +
+          game.grimoire_events.filter((event) => {
+            if (
+              event.by_role_id !== roleId ||
+              event.event_type !== GrimoireEventType.OTHER ||
+              event.status_source !== "Chosen"
+            ) {
+              return false;
+            }
+
+            const currentToken = getEventCurrentToken(game, event);
+            const previousToken = getEventPreviousToken(game, event);
+
+            return (
+              currentToken?.role?.type === "DEMON" ||
+              previousToken?.role?.type === "DEMON"
+            );
+          }).length
+        );
+      }, 0),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Ravenkeeper, you've chosen the Demon ${count} time${pluralize(count)} due to your ability.`
+          : `As the Ravenkeeper, this player has chosen the Demon ${count} time${pluralize(count)} due to their ability.`)
+        : `As the Ravenkeeper, choose the Demon due to your ability.`,
+  },
+  {
+    id: "sage_demon_kills_received",
+    category: "role",
+    roleIds: ["sage"],
+    script: "snv",
+    sao: 13,
+    source: "grimoire_event",
+    label: "Candle Extinguished",
+    getCount: ({ games, username }) =>
+      countEventsAffectingPlayer(games, username, (game, event) =>
+        isDemonKillEvent(game, event)
+      ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Sage, you've been killed by the Demon ${count} time${pluralize(count)}.`
+          : `As the Sage, this player has been killed by the Demon ${count} time${pluralize(count)}.`)
+        : `As the Sage, be killed by the Demon.`,
+  },
   {
     id: "sailor_drunk",
     category: "role",
     roleIds: ["sailor"],
     script: "bmr",
+    sao: 2,
     source: "grimoire_event",
     label: "Shared Bottle",
     getCount: ({ games, roleId }) =>
@@ -1534,6 +1835,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["sailor"],
     script: "bmr",
+    sao: 2,
     source: "grimoire_event",
     label: "Drank Too Deep",
     getCount: ({ games, roleId }) =>
@@ -1558,14 +1860,15 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `As the Sailor, this player has made themselves drunk ${count} time${pluralize(count)}.`)
         : `As the Sailor, make yourself drunk.`,
   },
-  // Savant: No reminder token(s) and nothing to track really.
-  // Seamstress: No reminder token(s) and nothing to track really.
-  // Shugenja: No reminder token(s) and nothing to track really.
+  // Savant [sao: 8]: Nothing relevant. Only option: Can't think of anything..
+  // Seamstress [sao: 9]: Nothing relevant. Only option: If they picked two different aligments?
+  // Shugenja: Nothing relevant. Only option: If they had more clockwise or counterclockwise?
   {
     id: "slayer_kills",
     category: "role",
     roleIds: ["slayer"],
     script: "tb",
+    sao: 11,
     source: "grimoire_event",
     label: "Bullseye",
     getCount: ({ games, roleId }) =>
@@ -1583,6 +1886,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     roleIds: ["slayer"],
     script: "tb",
     source: "end_trigger",
+    sao: 11,
     label: "Finishing Shot",
     getCount: ({ games, roleId }) =>
       games.filter(
@@ -1604,6 +1908,8 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["slayer"],
     script: "tb",
+    sao: 11,
+    hidden: true,
     source: "grimoire_event",
     label: "Collateral Damage",
     getCount: ({ games, roleId }) =>
@@ -1642,6 +1948,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["snake_charmer"],
     script: "snv",
+    sao: 3,
     source: "grimoire_event",
     label: "Charmed, I'm Sure",
     getCount: ({ games, roleId }) =>
@@ -1680,6 +1987,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["snake_charmer"],
     script: "snv",
+    sao: 3,
     source: "grimoire_event",
     label: "Calculated Risk",
     getCount: ({ games, roleId }) => {
@@ -1727,6 +2035,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["snake_charmer"],
     script: "snv",
+    sao: 3,
     source: "grimoire_event",
     label: "Snakebit",
     getCount: ({ games, username }) =>
@@ -1745,81 +2054,11 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `As a Demon, be charmed by the Snake Charmer.`,
   },
   {
-    id: "choirboy_demon_reveals",
-    category: "role",
-    roleIds: ["choirboy"],
-    script: "experimental",
-    source: "grimoire_event",
-    label: "Funeral Hymn",
-    getCount: ({ games, roleId }) =>
-      games.reduce((total, game) => {
-        if (!roleId || game.ignore_for_stats) return total;
-
-        return (
-          total +
-          game.grimoire_events.filter((event) => {
-            if (
-              event.by_role_id !== roleId ||
-              event.event_type !== GrimoireEventType.OTHER ||
-              event.status_source !== "Shown"
-            ) {
-              return false;
-            }
-
-            const currentToken = getEventCurrentToken(game, event);
-            const previousToken = getEventPreviousToken(game, event);
-
-            return (
-              currentToken?.role?.type === "DEMON" ||
-              previousToken?.role?.type === "DEMON"
-            );
-          }).length
-        );
-      }, 0),
-    getSentence: ({ count, isMe }) =>
-      count > 0
-        ? (isMe
-          ? `As the Choirboy, you've learned the Demon ${count} time${pluralize(count)} due to your ability when the King was killed.`
-          : `As the Choirboy, this player has learned the Demon ${count} time${pluralize(count)} due to their ability when the King was killed.`)
-        : `As the Choirboy, learn the Demon due to your ability when the King is killed.`,
-  },
-  {
-    id: "choirboy_demon_reveals_received",
-    category: "role",
-    roleIds: ["choirboy"],
-    script: "experimental",
-    source: "grimoire_event",
-    label: "Royal Suspect",
-    getCount: ({ games, username }) =>
-      countEventsAffectingPlayer(games, username, (game, event) => {
-        if (
-          event.by_role_id !== "choirboy" ||
-          event.event_type !== GrimoireEventType.OTHER ||
-          event.status_source !== "Shown"
-        ) {
-          return false;
-        }
-
-        const currentToken = getEventCurrentToken(game, event);
-        const previousToken = getEventPreviousToken(game, event);
-
-        return (
-          currentToken?.role?.type === "DEMON" ||
-          previousToken?.role?.type === "DEMON"
-        );
-      }),
-    getSentence: ({ count, isMe }) =>
-      count > 0
-        ? (isMe
-          ? `You've been revealed to the Choirboy as the Demon ${count} time${pluralize(count)}.`
-          : `This player has been revealed to the Choirboy as the Demon ${count} time${pluralize(count)}.`)
-        : `As the Demon, be shown to the Choirboy after you kill the King.`,
-  },
-  {
     id: "soldier_saved_from_demon_kill",
     category: "role",
     roleIds: ["soldier"],
     script: "tb",
+    sao: 12,
     source: "grimoire_event",
     label: "Battle-Hardened",
     getCount: ({ games, roleId }) =>
@@ -1843,12 +2082,52 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `As the Soldier, this player has survived a Demon attack ${count} time${pluralize(count)} due to their ability.`)
         : `As the Soldier, survive a Demon attack due to your ability.`,
   },
-  // Steward: @todo (Shown you?)
+  {
+    id: "steward_spy",
+    category: "role",
+    roleIds: ["steward"],
+    script: "tb",
+    sao: 1,
+    source: "grimoire_event",
+    label: "Misplaced Trust",
+    getCount: ({ games, roleId }) =>
+      games.reduce((total, game) => {
+        if (!roleId || game.ignore_for_stats) return total;
+
+        return (
+          total +
+          game.grimoire_events.filter((event) => {
+            if (
+              event.by_role_id !== roleId ||
+              event.event_type !== GrimoireEventType.OTHER ||
+              event.status_source !== "Know"
+            ) {
+              return false;
+            }
+
+            const currentToken = getEventCurrentToken(game, event);
+            const previousToken = getEventPreviousToken(game, event);
+
+            return (
+              currentToken?.role_id === "spy" ||
+              previousToken?.role_id === "spy"
+            );
+          }).length
+        );
+      }, 0),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Steward, you've seen the Spy as a good player ${count} time${pluralize(count)}.`
+          : `As the Steward, this player has seen the Spy as a good player ${count} time${pluralize(count)}.`)
+        : `As the Steward, see the Spy as a good player.`,
+  },
   {
     id: "tea_lady_saved_players",
     category: "role",
     roleIds: ["tea_lady"],
     script: "bmr",
+    sao: 11,
     source: "grimoire_event",
     label: "Safe in Company",
     getCount: ({ games, roleId }) =>
@@ -1872,8 +2151,54 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `As the Tea Lady, this player has saved ${count} player${pluralize(count)}.`)
         : `As the Tea Lady, save a player.`,
   },
-  // Town Crier: Nothing to track really.
-  // Undertaker: @todo
+  // Town Crier [sao: 6]: Nothing relevant. Only option: If they got a yes?
+  {
+    id: "undertaker_burials",
+    category: "role",
+    roleIds: ["undertaker"],
+    script: "tb",
+    sao: 7,
+    source: "grimoire_event",
+    label: "Graveyard Shift",
+    getCount: ({ games, roleId }) =>
+      games.reduce((total, game) => {
+        if (!roleId || game.ignore_for_stats) return total;
+
+        return (
+          total +
+          game.grimoire_events.filter((event) => {
+            if (
+              event.by_role_id !== roleId ||
+              event.event_type !== GrimoireEventType.OTHER ||
+              event.status_source !== "Died Today"
+            ) {
+              return false;
+            }
+
+            const undertakerOnPage =
+              game.grimoire[event.grimoire_page]?.tokens.find(
+                (token) =>
+                  !!event.by_participant_id &&
+                  token.grimoire_participant_id === event.by_participant_id
+              ) ??
+              game.grimoire[event.grimoire_page]?.tokens.find(
+                (token) => token.role_id === roleId
+              );
+
+            return (
+              undertakerOnPage?.role_id === roleId &&
+              undertakerOnPage.is_dead === false
+            );
+          }).length
+        );
+      }, 0),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Undertaker, you've buried ${count} player${pluralize(count)}.`
+          : `As the Undertaker, this player has buried ${count} player${pluralize(count)}.`)
+        : `As the Undertaker, bury a player.`,
+  },
   {
     id: "village_idiot_drunk_received",
     category: "role",
@@ -1901,6 +2226,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["virgin"],
     script: "tb",
+    sao: 10,
     source: "grimoire_event",
     label: "Unblemished",
     getCount: ({ games, roleId }) =>
@@ -1913,12 +2239,13 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `As the Virgin, cause an immediate execution due to your ability.`,
   },
   {
-    id: "virgin_spy_executions",
+    id: "washerwoman_spy",
     category: "role",
+    roleIds: ["washerwoman"],
     script: "tb",
-    roleIds: ["virgin"],
+    sao: 1,
     source: "grimoire_event",
-    label: "False Witness",
+    label: "Dirty Laundry",
     getCount: ({ games, roleId }) =>
       games.reduce((total, game) => {
         if (!roleId || game.ignore_for_stats) return total;
@@ -1928,7 +2255,8 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           game.grimoire_events.filter((event) => {
             if (
               event.by_role_id !== roleId ||
-              event.event_type !== GrimoireEventType.EXECUTION
+              event.event_type !== GrimoireEventType.OTHER ||
+              event.status_source !== "Townsfolk"
             ) {
               return false;
             }
@@ -1946,9 +2274,8 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Virgin, you've caused the Spy to be executed ${count} time${pluralize(count)} when they nominated you.`
-          : `As the Virgin, this player has caused the Spy to be executed ${count} time${pluralize(count)} when they nominated them.`)
-        : `As the Virgin, cause the Spy to be executed by your ability.`,
+          ? `As the Washerwoman, you've seen the Spy as a Townsfolk ${count} time${pluralize(count)}.`
+          : `As the Washerwoman, this player has seen the Spy as a Townsfolk ${count} time${pluralize(count)}.`)
+        : `As the Washerwoman, see the Spy as a Townsfolk.`,
   },
-  // Washerwoman: @todo (Spy)
 ];

@@ -93,6 +93,7 @@ const props = withDefaults(
         metricLabel: string;
         sentence: string;
         subtitle?: string | null;
+        isHiddenLocked?: boolean;
         displayRole?: {
           id: string;
           name: string;
@@ -129,6 +130,19 @@ const result = computed(() => {
 });
 
 const character = computed(() => {
+  if (result.value.isHiddenLocked) {
+    return {
+      name: "",
+      role: {
+        id: "",
+        name: "",
+        token_url: "",
+        type: "",
+        initial_alignment: "NEUTRAL" as const,
+      },
+    };
+  }
+
   const role = props.card.role ?? result.value.displayRole;
   if (!role) return null;
 

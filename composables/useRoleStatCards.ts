@@ -45,6 +45,7 @@ export type RoleStatCardResult = {
   sentence: string;
   subtitle?: string | null;
   displayRole?: RoleStatCardDisplayRole | null;
+  isHiddenLocked?: boolean;
 };
 
 type RoleStatCardContext = {
@@ -60,6 +61,8 @@ export type RoleStatCardDefinition = {
   category: RoleStatCardCategory;
   roleIds?: string[];
   script?: string | null;
+  sao?: number;
+  hidden?: boolean;
   source: string;
   label: string;
   getCount: (context: RoleStatCardContext) => number;
@@ -142,11 +145,14 @@ export function buildRoleStatCardResult(
     isMe,
     username,
   });
+  const isHiddenLocked = !!definition.hidden && count === 0;
 
   return {
     count,
-    metricLabel: definition.label,
-    sentence: definition.getSentence({
+    metricLabel: isHiddenLocked ? "Hidden statistic" : definition.label,
+    sentence: isHiddenLocked
+      ? "Details for this stat will be shown when unlocked."
+      : definition.getSentence({
       games,
       count,
         roleId: card.role_id,
@@ -154,8 +160,11 @@ export function buildRoleStatCardResult(
         isMe,
         username,
       }),
+    isHiddenLocked,
     subtitle:
-      definition.getSubtitle?.({
+      isHiddenLocked
+        ? null
+        : definition.getSubtitle?.({
         games,
         count,
         roleId: card.role_id,
@@ -164,7 +173,9 @@ export function buildRoleStatCardResult(
         username,
       }) ?? null,
     displayRole:
-      definition.getDisplayRole?.({
+      isHiddenLocked
+        ? null
+        : definition.getDisplayRole?.({
         games,
         count,
         roleId: card.role_id,
@@ -192,6 +203,7 @@ export function buildRoleStatCardPreview(
     isMe,
     username,
   });
+  const isHiddenLocked = !!definition.hidden && count === 0;
 
   return {
     id: 0,
@@ -202,8 +214,10 @@ export function buildRoleStatCardPreview(
     role: role ?? null,
     preview: {
       count,
-      metricLabel: definition.label,
-      sentence: definition.getSentence({
+      metricLabel: isHiddenLocked ? "Hidden statistic" : definition.label,
+      sentence: isHiddenLocked
+        ? "Details for this stat will be shown when unlocked."
+        : definition.getSentence({
         games,
         count,
           roleId: role?.id ?? null,
@@ -211,8 +225,11 @@ export function buildRoleStatCardPreview(
           isMe,
           username,
         }),
+      isHiddenLocked,
       subtitle:
-        definition.getSubtitle?.({
+        isHiddenLocked
+          ? null
+          : definition.getSubtitle?.({
           games,
           count,
           roleId: role?.id ?? null,
@@ -221,7 +238,9 @@ export function buildRoleStatCardPreview(
           username,
         }) ?? null,
       displayRole:
-        definition.getDisplayRole?.({
+        isHiddenLocked
+          ? null
+          : definition.getDisplayRole?.({
           games,
           count,
           roleId: role?.id ?? null,

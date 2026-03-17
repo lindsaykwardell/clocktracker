@@ -42,7 +42,7 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
         : `Be struck down by the Angel.`,
   },
   // Angel: @todo Protected?
-  // Buddhist: Nothing to track really.
+  // Buddhist: OK.
   {
     id: "doomsayer_deaths",
     category: "role",
@@ -83,7 +83,28 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
         ? `${isMe ? "Hell's Librarian has" : "Hell's Librarian has"} fined ${isMe ? "you" : "this player"} with death ${count} time${pluralize(count)}.`
         : `Die due to Hell's Librarian.`,
   },
-  // Fiddler: @todo
+  {
+    id: "fiddler_game_end_trigger_received",
+    category: "role",
+    roleIds: ["fiddler"],
+    script: "npc",
+    source: "game",
+    label: "Curtain Call",
+    getCount: ({ games }) =>
+      games.filter(
+        (game) =>
+          !game.ignore_for_stats &&
+          game.end_trigger === GameEndTrigger.CHARACTER_ABILITY &&
+          game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
+          game.end_trigger_role_id === "fiddler"
+      ).length,
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `Your game has ended due to the Fiddler ${count} time${pluralize(count)}.`
+          : `This player's game has ended due to the Fiddler ${count} time${pluralize(count)}.`)
+        : `Have a game end due to the Fiddler.`,
+  },
   // Revolutionary: Nothing to track really.
   // Toymaker: Nothing to track really.
   // Djinn: Nothing to track really.

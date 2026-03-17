@@ -220,7 +220,34 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `As the Butcher, this player has executed ${count} extra player${pluralize(count)} due to their ability.`)
         : `As the Butcher, execute an extra player due to your ability.`,
   },
-  // Bone Collector: Too complex
+  {
+    id: "bone_collector_restored_abilities",
+    category: "role",
+    roleIds: ["bone_collector"],
+    script: "snv",
+    source: "grimoire_event",
+    label: "Unearthed Potential",
+    getCount: ({ games, roleId }) =>
+      games.reduce((total, game) => {
+        if (!roleId || game.ignore_for_stats) return total;
+
+        return (
+          total +
+          game.grimoire_events.filter(
+            (event) =>
+              event.by_role_id === roleId &&
+              event.event_type === GrimoireEventType.OTHER &&
+              event.status_source === "Has Ability"
+          ).length
+        );
+      }, 0),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Bone Collector, you've made ${count} player${pluralize(count)} regain their ability.`
+          : `As the Bone Collector, this player has made ${count} player${pluralize(count)} regain their ability.`)
+        : `As the Bone Collector, make a dead player regain their ability.`,
+  },
   {
     id: "harlot_deaths",
     category: "role",
@@ -237,8 +264,35 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `As the Harlot, this player has died alongside another player ${count} time${pluralize(count)} due to their ability.`)
         : `As the Harlot, die alongside another player due to your ability.`,
   },
-  // Barista: Too complex
-  // Deviant: No reminder token(s), but might be cool to track how many times they were not exiled.
+  // Barista: Too complex, (@todo: or not?)
+  {
+    id: "deviant_exiles_avoided",
+    category: "role",
+    roleIds: ["deviant"],
+    script: "snv",
+    source: "grimoire_event",
+    label: "Last Laugh",
+    getCount: ({ games, roleId }) =>
+      games.reduce((total, game) => {
+        if (!roleId || game.ignore_for_stats) return total;
+
+        return (
+          total +
+          game.grimoire_events.filter(
+            (event) =>
+              event.by_role_id === roleId &&
+              event.event_type === GrimoireEventType.OTHER &&
+              event.status_source === "Saved"
+          ).length
+        );
+      }, 0),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Deviant, you've saved yourself from exile ${count} time${pluralize(count)} due to your ability.`
+          : `As the Deviant, this player has saved themselves from exile ${count} time${pluralize(count)} due to their ability.`)
+        : `As the Deviant, save yourself from exile due to your ability.`,
+  },
 
   // Apprentice: Too complex
   {

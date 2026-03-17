@@ -60,16 +60,34 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     sourceRoleIds: ["cannibal"],
   },
   {
+    reminder: "Abnormal",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "each_night",
+    sourceRoleIds: ["mathematician"],
+  },
+  {
     reminder: "Chosen",
     eventType: GrimoireEventType.OTHER,
     cadence: "each_night",
-    sourceRoleIds: ["exorcist"],
+    sourceRoleIds: ["exorcist", "dreamer", "lunatic"],
+  },
+  {
+    reminder: "Visit",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "each_night",
+    sourceRoleIds: ["high_priestess"],
   },
   {
     reminder: "Chosen",
     eventType: GrimoireEventType.OTHER,
     cadence: "once",
     sourceRoleIds: ["nightwatchman"],
+  },
+  {
+    reminder: "Chosen",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "once",
+    sourceRoleIds: ["ravenkeeper"],
   },
   {
     reminder: "Bounce",
@@ -88,6 +106,12 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     eventType: GrimoireEventType.OTHER,
     cadence: "once",
     sourceRoleIds: ["artist"],
+  },
+  {
+    reminder: "Bingo",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "once",
+    sourceRoleIds: ["amnesiac"],
   },
   {
     reminder: "No Ability",
@@ -126,6 +150,18 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     sourceRoleIds: ["tea_lady"],
   },
   {
+    reminder: "Saved",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "each_night",
+    sourceRoleIds: ["devilsadvocate"],
+  },
+  {
+    reminder: "Saved",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "once",
+    sourceRoleIds: ["deviant"],
+  },
+  {
     reminder: "No Ability",
     eventType: GrimoireEventType.OTHER,
     cadence: "each_night",
@@ -136,6 +172,12 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     eventType: GrimoireEventType.OTHER,
     cadence: "once",
     sourceRoleIds: ["juggler"],
+  },
+  {
+    reminder: "Guess Used",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "once",
+    sourceRoleIds: ["puzzlemaster"],
   },
   {
     reminder: "Evil Wakes",
@@ -156,16 +198,46 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     sourceRoleIds: ["fortune_teller"],
   },
   {
-    reminder: "Shown",
+    reminder: "Demon",
     eventType: GrimoireEventType.OTHER,
     cadence: "once",
     sourceRoleIds: ["choirboy"],
+  },
+  {
+    reminder: "Demon",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "once",
+    sourceRoleIds: ["puzzlemaster"],
   },
   {
     reminder: "Outsider",
     eventType: GrimoireEventType.OTHER,
     cadence: "once",
     sourceRoleIds: ["librarian"],
+  },
+  {
+    reminder: "Townsfolk",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "once",
+    sourceRoleIds: ["washerwoman"],
+  },
+  {
+    reminder: "Minion",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "once",
+    sourceRoleIds: ["investigator"],
+  },
+  {
+    reminder: "Know",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "once",
+    sourceRoleIds: ["steward"],
+  },
+  {
+    reminder: "Died Today",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "each_night",
+    sourceRoleIds: ["undertaker"],
   },
   {
     reminder: "Doesn't Kill",
@@ -178,6 +250,18 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     eventType: GrimoireEventType.OTHER,
     cadence: "each_night",
     sourceRoleIds: ["butler"],
+  },
+  {
+    reminder: "Claimed",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "once",
+    sourceRoleIds: ["goblin"],
+  },
+  {
+    reminder: "Storyteller Ability",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "once",
+    sourceRoleIds: ["plague_doctor"],
   },
   {
     reminder: "Dead",
@@ -216,6 +300,18 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     sourceRoleIds: ["stormcatcher"],
   },
   {
+    reminder: "Has Ability",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "once",
+    sourceRoleIds: ["bone_collector"],
+  },
+  {
+    reminder: "Has Ability",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "once",
+    sourceRoleIds: ["banshee"],
+  },
+  {
     reminder: "Goal",
     eventType: GrimoireEventType.OTHER,
     cadence: "persistent",
@@ -226,6 +322,12 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     eventType: GrimoireEventType.OTHER,
     cadence: "once",
     sourceRoleIds: ["zenomancer"],
+  },
+  {
+    reminder: "Is The Demon",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "each_night",
+    sourceRoleIds: ["lil_monsta"],
   },
   {
     reminder: "DEAD",

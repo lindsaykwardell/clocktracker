@@ -13,7 +13,27 @@ const trackingReminders = [
   },
   {
     role_id: "choirboy",
-    reminder: "Shown",
+    reminder: "Demon",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "amnesiac",
+    reminder: "Bingo",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "ravenkeeper",
+    reminder: "Chosen",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "dreamer",
+    reminder: "Chosen",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "high_priestess",
+    reminder: "Visit",
     type: ReminderType.TRACKING,
   },
   {
@@ -33,6 +53,16 @@ const trackingReminders = [
   },
   {
     role_id: "tea_lady",
+    reminder: "Saved",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "deviant",
+    reminder: "Saved",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "devilsadvocate",
     reminder: "Saved",
     type: ReminderType.TRACKING,
   },
@@ -59,6 +89,11 @@ const trackingReminders = [
   {
     role_id: "big_wig",
     reminder: "Dead",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "puzzlemaster",
+    reminder: "Demon",
     type: ReminderType.TRACKING,
   },
 ];
