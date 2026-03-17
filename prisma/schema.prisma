@@ -303,6 +303,7 @@ model UserSettings {
   forum_first_visit_at    DateTime?               @db.Timestamptz(6)
   push_notifications_enabled Boolean              @default(false)
   push_subscriptions      PushSubscription[]
+  fcm_tokens              FcmToken[]
 }
 
 model Did {
@@ -782,6 +783,16 @@ model PushSubscription {
   user       UserSettings @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 
   @@unique([user_id, endpoint])
+  @@index([user_id])
+}
+
+model FcmToken {
+  user_id    String
+  token      String
+  created_at DateTime     @default(now()) @db.Timestamptz(6)
+  user       UserSettings @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@id([user_id, token])
   @@index([user_id])
 }
 

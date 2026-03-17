@@ -5,13 +5,11 @@ const config: CapacitorConfig = {
   appName: "ClockTracker",
   webDir: ".output/public",
   server: {
-    // Allow mixed content for development; Capacitor apps load from capacitor:// or http://localhost
     androidScheme: "https",
   },
   plugins: {
-    App: {
-      // Deep link handling for OAuth callback
-      url: "clocktracker",
+    PushNotifications: {
+      presentationOptions: ["badge", "sound", "alert"],
     },
   },
 };
