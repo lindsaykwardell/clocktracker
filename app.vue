@@ -50,14 +50,7 @@ import {
     Filler,
 } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
-import timezone from "dayjs/plugin/timezone";
 import type { User } from "~/composables/useUsers";
-import { nanoid } from "nanoid";
-
-dayjs.extend(utc);
-dayjs.extend(timezone);
 
 const runtimeConfig = useRuntimeConfig();
 const users = useUsers();
@@ -191,36 +184,6 @@ function formatAnnouncementDate(date: string) {
         dateStyle: "medium",
     }).format(new Date(date));
 }
-
-const announcementDate = dayjs.tz("2025-12-01", "America/Los_Angeles");
-const maintenanceMode = featureFlags.maintenanceIsScheduled;
-
-const formattedAnnouncementDate = computed(() => {
-    return new Intl.DateTimeFormat(navigator.language, {
-        dateStyle: "full",
-    }).format(announcementDate.toDate());
-});
-
-const formattedMaintenceDayAndMonth = computed(() => {
-    if (!maintenanceMode) return "";
-
-    return new Intl.DateTimeFormat(navigator.language, {
-        dateStyle: "full",
-    }).format(maintenanceMode);
-});
-
-const formattedMaintenanceStart = computed(() => {
-    if (!maintenanceMode) return "";
-
-    return new Intl.DateTimeFormat(navigator.language, {
-        dateStyle: "full",
-        timeStyle: "short",
-    }).format(maintenanceMode);
-});
-
-const shouldShowAnnouncement = computed(() => {
-    return dayjs().isAfter(announcementDate);
-});
 
 useHead({
     titleTemplate: (titleChunk) => {
