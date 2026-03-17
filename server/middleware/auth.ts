@@ -2,6 +2,11 @@ import { serverSupabaseUser } from "#supabase/server";
 import { jwtVerify } from "jose";
 
 export default defineEventHandler(async (event) => {
+  // Skip auth for CORS preflight requests
+  if (event.method === "OPTIONS") {
+    return;
+  }
+
   // Check for Bearer token auth (used by Capacitor mobile app)
   const authHeader = getHeader(event, "authorization");
   if (authHeader?.startsWith("Bearer ")) {
