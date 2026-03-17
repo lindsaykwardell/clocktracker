@@ -91,4 +91,7 @@ export async function sendPushNotifications({
   } catch (err) {
     console.error("[push] Unexpected error:", err);
   }
+
+  // Also send via FCM for native app users
+  sendFcmNotifications({ userIds, excludeUserId, title, body, url });
 }

@@ -33,6 +33,5 @@ test-results/*
 playwright-report/*
 tests/e2e/test-account.json
 
-# Capacitor native projects (generated on demand)
+# Capacitor iOS (no Apple Developer account yet)
 ios/
-android/
