@@ -13,8 +13,10 @@ export default defineEventHandler((event) => {
         ? "cookie"
         : "anon";
 
+    const userId = event.context.user?.id ?? "-";
+
     console.log(
-      ` ${ip} [${method}] ${status} ${url} ${duration}ms auth=${auth}`,
+      `${ip} [${method}] ${status} ${url} ${duration}ms auth=${auth} user=${userId}`,
     );
   });
 });
