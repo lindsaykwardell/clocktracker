@@ -1,7 +1,11 @@
 export default defineEventHandler((event) => {
   const origin = getHeader(event, "origin");
 
-  const allowedOrigins = ["capacitor://localhost", "http://localhost"];
+  const allowedOrigins = [
+    "capacitor://localhost",
+    "http://localhost",
+    "https://localhost",
+  ];
   if (!origin || !allowedOrigins.includes(origin)) {
     return;
   }
