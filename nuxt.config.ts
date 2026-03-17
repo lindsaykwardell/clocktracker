@@ -21,7 +21,7 @@ export default defineNuxtConfig({
     "@pinia/nuxt",
     "floating-vue/nuxt",
     ...(!isCapacitorBuild ? ["nuxt-cron"] : []),
-    "nuxt-bugsnag",
+    ...(!isCapacitorBuild ? ["nuxt-bugsnag"] : []),
   ],
 
   app: {
@@ -133,105 +133,118 @@ export default defineNuxtConfig({
     },
   },
 
-  bugsnag: {
-    publishRelease: true,
-    // performance: true,
-    baseUrl: "https://clocktracker.app",
-    disableLog: true,
-    config: {
-      apiKey: process.env.BUGSNAG_API_KEY!,
-      enabledReleaseStages: ["production"],
-      releaseStage: process.env.NODE_ENV,
-    },
-  },
-
-  ...(!isCapacitorBuild ? { pwa: {
-    registerType: "autoUpdate",
-    includeAssets: [
-      "/img/**",
-      "/img/role/**",
-      "fonts/tradegothic.ttf",
-      "/logo-ct-sm.png",
-      "logo.png",
-      "robots.txt",
-      "index.css",
-      "/_nuxt/**.css",
-      "/_nuxt/**.js",
-      "launch-640x1136.png",
-      "launch-750x1294.png",
-      "launch-1242x2148.png",
-      "launch-1125x2436.png",
-      "launch-1536x2048.png",
-      "launch-1668x2224.png",
-      "launch-2048x2732.png",
-    ],
-    workbox: {
-      importScripts: ["/push-sw.js"],
-      globPatterns: ["**/*.{js,css,html}"],
-      runtimeCaching: [
-        {
-          urlPattern:
-            /^https:\/\/[a-z]*\.supabase\.co\/storage\/v1\/object\/public.*/i,
-          handler: "CacheFirst",
-          options: {
-            cacheName: "supabase-cache",
-            expiration: {
-              maxEntries: 10,
-              maxAgeSeconds: 60 * 60 * 24 * 365, // <== 365 days
-            },
-            cacheableResponse: {
-              statuses: [0, 200],
-            },
+  ...(!isCapacitorBuild
+    ? {
+        bugsnag: {
+          publishRelease: true,
+          // performance: true,
+          baseUrl: "https://clocktracker.app",
+          disableLog: true,
+          config: {
+            apiKey: process.env.BUGSNAG_API_KEY!,
+            enabledReleaseStages: ["production"],
+            releaseStage: process.env.NODE_ENV,
           },
         },
-        // Cache the API requests to the ClockTracker API
-        {
-          urlPattern: ({ url }) => url.pathname.startsWith("/api/"),
-          handler: "StaleWhileRevalidate",
-          options: {
-            cacheName: "clocktracker-api-cache",
-            cacheableResponse: {
-              statuses: [0, 200],
-            },
+      }
+    : {}),
+
+  ...(!isCapacitorBuild
+    ? {
+        pwa: {
+          registerType: "autoUpdate",
+          includeAssets: [
+            "/img/**",
+            "/img/role/**",
+            "fonts/tradegothic.ttf",
+            "/logo-ct-sm.png",
+            "logo.png",
+            "robots.txt",
+            "index.css",
+            "/_nuxt/**.css",
+            "/_nuxt/**.js",
+            "launch-640x1136.png",
+            "launch-750x1294.png",
+            "launch-1242x2148.png",
+            "launch-1125x2436.png",
+            "launch-1536x2048.png",
+            "launch-1668x2224.png",
+            "launch-2048x2732.png",
+          ],
+          workbox: {
+            importScripts: ["/push-sw.js"],
+            globPatterns: ["**/*.{js,css,html}"],
+            runtimeCaching: [
+              {
+                urlPattern:
+                  /^https:\/\/[a-z]*\.supabase\.co\/storage\/v1\/object\/public.*/i,
+                handler: "CacheFirst",
+                options: {
+                  cacheName: "supabase-cache",
+                  expiration: {
+                    maxEntries: 10,
+                    maxAgeSeconds: 60 * 60 * 24 * 365, // <== 365 days
+                  },
+                  cacheableResponse: {
+                    statuses: [0, 200],
+                  },
+                },
+              },
+              // Cache the API requests to the ClockTracker API
+              {
+                urlPattern: ({ url }) => url.pathname.startsWith("/api/"),
+                handler: "StaleWhileRevalidate",
+                options: {
+                  cacheName: "clocktracker-api-cache",
+                  cacheableResponse: {
+                    statuses: [0, 200],
+                  },
+                },
+              },
+            ],
+          },
+          manifest: {
+            name: "ClockTracker",
+            short_name: "ClockTracker",
+            description:
+              "Record your game details from Blood on the Clocktower",
+            theme_color: "#292524",
+            background_color: "#1C1917",
+            orientation: "any",
+            display_override: ["standalone", "window-controls-overlay"],
+            handle_links: "auto",
+            categories: ["games", "entertainment"],
+            dir: "ltr",
+            icons: [
+              {
+                src: "/pwa-192x192.png",
+                sizes: "192x192",
+                type: "image/png",
+              },
+              {
+                src: "/pwa-512x512.png",
+                sizes: "512x512",
+                type: "image/png",
+                purpose: "any",
+              },
+              {
+                src: "/pwa-128x128.png",
+                sizes: "128x128",
+                type: "image/png",
+              },
+            ],
           },
         },
-      ],
-    },
-    manifest: {
-      name: "ClockTracker",
-      short_name: "ClockTracker",
-      description: "Record your game details from Blood on the Clocktower",
-      theme_color: "#292524",
-      background_color: "#1C1917",
-      orientation: "any",
-      display_override: ["standalone", "window-controls-overlay"],
-      handle_links: "auto",
-      categories: ["games", "entertainment"],
-      dir: "ltr",
-      icons: [
-        {
-          src: "/pwa-192x192.png",
-          sizes: "192x192",
-          type: "image/png",
-        },
-        {
-          src: "/pwa-512x512.png",
-          sizes: "512x512",
-          type: "image/png",
-          purpose: "any",
-        },
-        {
-          src: "/pwa-128x128.png",
-          sizes: "128x128",
-          type: "image/png",
-        },
-      ],
-    },
-  } } : {}),
+      }
+    : {}),
 
-  ...(!isCapacitorBuild ? { cron: {
-    timeZone: "America/Los_Angeles",
-  } } : {}),
+  ...(!isCapacitorBuild
+    ? {
+        cron: {
+          timeZone: "America/Los_Angeles",
+        },
+      }
+    : {}),
 
   routeRules: {
     "/img/role/**": {
