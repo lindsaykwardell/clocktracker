@@ -34,7 +34,7 @@
             </div>
         </template>
     </AnnouncementDialog>
-    <VitePwaManifest v-if="!runtimeConfig.public.isCapacitorBuild" />
+    <VitePwaManifest />
 </template>
 
 <script setup lang="ts">
@@ -57,9 +57,15 @@ import {
     Filler,
 } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 import type { User } from "~/composables/useUsers";
+import { nanoid } from "nanoid";
 
-const runtimeConfig = useRuntimeConfig();
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
 const users = useUsers();
 const user = useUser();
 const featureFlags = useFeatureFlags();
@@ -113,7 +119,7 @@ watch(
             // console.log('userSettings watcher: Storing new settings in Pinia');
             users.storeUser(newSettings);
             // Re-register push subscription on this browser if user has notifications enabled
-            if (import.meta.client && !runtimeConfig.public.isCapacitorBuild) {
+            if (import.meta.client) {
                 syncPushSubscription(!!newSettings.push_notifications_enabled);
             }
         } else if (oldSettings && !newSettings) {
@@ -191,6 +197,36 @@ function formatAnnouncementDate(date: string) {
         dateStyle: "medium",
     }).format(new Date(date));
 }
+
+const announcementDate = dayjs.tz("2025-12-01", "America/Los_Angeles");
+const maintenanceMode = featureFlags.maintenanceIsScheduled;
+
+const formattedAnnouncementDate = computed(() => {
+    return new Intl.DateTimeFormat(navigator.language, {
+        dateStyle: "full",
+    }).format(announcementDate.toDate());
+});
+
+const formattedMaintenceDayAndMonth = computed(() => {
+    if (!maintenanceMode) return "";
+
+    return new Intl.DateTimeFormat(navigator.language, {
+        dateStyle: "full",
+    }).format(maintenanceMode);
+});
+
+const formattedMaintenanceStart = computed(() => {
+    if (!maintenanceMode) return "";
+
+    return new Intl.DateTimeFormat(navigator.language, {
+        dateStyle: "full",
+        timeStyle: "short",
+    }).format(maintenanceMode);
+});
+
+const shouldShowAnnouncement = computed(() => {
+    return dayjs().isAfter(announcementDate);
+});
 
 useHead({
     titleTemplate: (titleChunk) => {
