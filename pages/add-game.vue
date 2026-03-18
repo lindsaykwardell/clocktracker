@@ -51,6 +51,7 @@ const router = useRouter();
 const route = useRoute();
 const rolesStore = useRoles();
 const inFlight = ref(false);
+const { notification: hapticNotification } = useHaptics();
 const userSettings = await useFetch("/api/settings");
 
 const importGamesDialogVisible = ref(false);
@@ -392,6 +393,7 @@ async function submitGame() {
       inFlight.value = false;
       console.error(error.value);
     } else {
+      hapticNotification("Success" as any);
       localStorage.removeItem("draftGame");
       router.push(`/game/${data.value?.id}?new=true`);
     }

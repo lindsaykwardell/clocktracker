@@ -574,6 +574,18 @@
                             >
                                 View Campaign
                             </Button>
+                            <Button
+                                v-if="shareIsSupported || copyIsSupported"
+                                @click="shareGame"
+                                v-tooltip="{
+                                    content: 'Link copied!',
+                                    shown: showShareTooltip,
+                                    triggers: [],
+                                }"
+                                wide
+                            >
+                                Share
+                            </Button>
                         </div>
                         <template v-if="game.data.bgg_id">
                             <Button
@@ -935,6 +947,7 @@ import { displayWinIconSvg } from "~/composables/useGames";
 import dayjs from "dayjs";
 import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
 import { Status } from "~/composables/useFetchStatus";
+import { useShare, useClipboard } from "@vueuse/core";
 
 const { scriptLogo, isBaseScript, scriptBgClasses } = useScripts();
 const config = useRuntimeConfig();
@@ -979,6 +992,50 @@ const similarGames = computed(() => games.getSimilarGames(gameId));
 const showSimilarGamesDialog = ref(false);
 
 const { canPostToBGStats, link: bgStatsLink } = useBGStats(game);
+
+// Share
+const isCapacitor = config.public.isCapacitorBuild;
+const shareDetails = ref({ title: "", text: "", url: "" });
+const copySource = computed(() => shareDetails.value.url);
+const { share, isSupported: shareIsSupported } = useShare(shareDetails);
+const { copy, copied, isSupported: copyIsSupported } = useClipboard({
+  source: copySource,
+  legacy: true,
+});
+const showShareTooltip = ref(false);
+
+async function shareGame() {
+  if (game.value.status !== Status.SUCCESS) return;
+
+  const g = game.value.data;
+  const baseUrl = config.public.apiBaseUrl || window.location.origin;
+  const title = `${g.script} - ClockTracker`;
+  const text = g.is_storyteller
+    ? `I storytold a game of ${g.script}!`
+    : `I played a game of ${g.script}!`;
+  const url = `${baseUrl}/game/${gameId}`;
+
+  if (isCapacitor) {
+    const { Share } = await import("@capacitor/share");
+    await Share.share({ title, text, url, dialogTitle: "Share game" });
+    return;
+  }
+
+  shareDetails.value = { title, text, url };
+
+  if (shareIsSupported.value) {
+    share().catch(() => {});
+  } else if (copyIsSupported.value) {
+    copy().then(() => {
+      if (copied.value) {
+        showShareTooltip.value = true;
+        setTimeout(() => {
+          showShareTooltip.value = false;
+        }, 2000);
+      }
+    });
+  }
+}
 
 const isMe = computed(() => {
     if (user.value && game.value.status === Status.SUCCESS) {
