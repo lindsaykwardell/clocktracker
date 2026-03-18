@@ -1,31 +1,38 @@
 <template>
     <NuxtPage />
     <AnnouncementDialog
-      v-if="announcement"
-      :id="`announcement-${announcement.threadId}`"
+        v-if="announcement"
+        :id="`announcement-${announcement.threadId}`"
     >
-      <template #title>
-        <h1 class="text-2xl font-bold font-sorts">{{ announcement.title }}</h1>
-        <div class="text-lg text-stone-400">{{ formatAnnouncementDate(announcement.createdAt) }}</div>
-      </template>
-      <template v-slot="{ close }">
-        <div class="p-2">
-          <MarkdownRenderer
-            class="post text-lg max-w-[80ch]"
-            :source="announcement.body"
-            :options="{ html: false }"
-          />
-          <div v-if="featureFlags.isEnabled('forum')" class="flex justify-center mt-4">
-            <nuxt-link
-              :to="`/forum/${announcement.categorySlug}/${announcement.threadId}`"
-              class="text-sm text-primary hover:underline"
-              @click="close"
-            >
-              View full thread &rarr;
-            </nuxt-link>
-          </div>
-        </div>
-      </template>
+        <template #title>
+            <h1 class="text-2xl font-bold font-sorts">
+                {{ announcement.title }}
+            </h1>
+            <div class="text-lg text-stone-400">
+                {{ formatAnnouncementDate(announcement.createdAt) }}
+            </div>
+        </template>
+        <template v-slot="{ close }">
+            <div class="p-2">
+                <MarkdownRenderer
+                    class="post text-lg max-w-[80ch]"
+                    :source="announcement.body"
+                    :options="{ html: false }"
+                />
+                <div
+                    v-if="featureFlags.isEnabled('forum')"
+                    class="flex justify-center mt-4"
+                >
+                    <nuxt-link
+                        :to="`/forum/${announcement.categorySlug}/${announcement.threadId}`"
+                        class="text-sm text-primary hover:underline"
+                        @click="close"
+                    >
+                        View full thread &rarr;
+                    </nuxt-link>
+                </div>
+            </div>
+        </template>
     </AnnouncementDialog>
     <VitePwaManifest v-if="!runtimeConfig.public.isCapacitorBuild" />
 </template>
