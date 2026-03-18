@@ -5,12 +5,11 @@ export default defineNuxtPlugin(async () => {
   const { PushNotifications } = await import("@capacitor/push-notifications");
   const router = useRouter();
   const supabase = useSupabaseClient();
-
-  let currentToken: string | null = null;
+  const { setToken } = useCapacitorPush();
 
   // Register the device token with the server
   async function registerToken(token: string) {
-    currentToken = token;
+    setToken(token);
     try {
       await $fetch("/api/fcm-token", {
         method: "POST",
@@ -23,16 +22,17 @@ export default defineNuxtPlugin(async () => {
 
   // Unregister the device token from the server
   async function unregisterToken() {
-    if (!currentToken) return;
+    const { fcmToken } = useCapacitorPush();
+    if (!fcmToken.value) return;
     try {
       await $fetch("/api/fcm-token", {
         method: "DELETE",
-        body: { token: currentToken },
+        body: { token: fcmToken.value },
       });
     } catch (err) {
       console.error("[push] Failed to unregister FCM token:", err);
     }
-    currentToken = null;
+    setToken(null);
   }
 
   // Request permission and register for push

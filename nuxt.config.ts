@@ -125,9 +125,9 @@ export default defineNuxtConfig({
     githubRepoName: process.env.GITHUB_REPO_NAME ?? "clocktracker",
     vapidPrivateKey: process.env.VAPID_PRIVATE_KEY ?? "",
     vapidSubject: process.env.VAPID_SUBJECT ?? "",
-    fcmProjectId: process.env.FCM_PROJECT_ID ?? "",
-    fcmClientEmail: process.env.FCM_CLIENT_EMAIL ?? "",
-    fcmPrivateKey: process.env.FCM_PRIVATE_KEY ?? "",
+    fcmProjectId: "",
+    fcmClientEmail: "",
+    fcmPrivateKey: "",
     public: {
       assetVersion: process.env.NUXT_PUBLIC_ASSET_VERSION ?? "v1",
       vapidPublicKey: process.env.VAPID_PUBLIC_KEY ?? "",

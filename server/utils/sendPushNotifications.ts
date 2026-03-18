@@ -50,43 +50,43 @@ export async function sendPushNotifications({
       },
     });
 
-    if (pushSubs.length === 0) return;
+    if (pushSubs.length > 0) {
+      const payload = JSON.stringify({ title, body, url });
 
-    const payload = JSON.stringify({ title, body, url });
-
-    const results = await Promise.allSettled(
-      pushSubs.map((sub) =>
-        webPush.sendNotification(
-          { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
-          payload
+      const results = await Promise.allSettled(
+        pushSubs.map((sub) =>
+          webPush.sendNotification(
+            { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+            payload
+          )
         )
-      )
-    );
-
-    // Clean up expired subscriptions (410 Gone)
-    const expiredEndpoints: string[] = [];
-    results.forEach((result, index) => {
-      if (
-        result.status === "rejected" &&
-        "statusCode" in result.reason &&
-        result.reason.statusCode === 410
-      ) {
-        expiredEndpoints.push(pushSubs[index].endpoint);
-      }
-    });
-
-    if (expiredEndpoints.length > 0) {
-      await prisma.pushSubscription.deleteMany({
-        where: { endpoint: { in: expiredEndpoints } },
-      });
-    }
-
-    const failed = results.filter((r) => r.status === "rejected");
-    if (failed.length > 0) {
-      console.warn(
-        `[push] ${failed.length} notification(s) failed:`,
-        failed.map((r) => (r as PromiseRejectedResult).reason?.message || r)
       );
+
+      // Clean up expired subscriptions (410 Gone)
+      const expiredEndpoints: string[] = [];
+      results.forEach((result, index) => {
+        if (
+          result.status === "rejected" &&
+          "statusCode" in result.reason &&
+          result.reason.statusCode === 410
+        ) {
+          expiredEndpoints.push(pushSubs[index].endpoint);
+        }
+      });
+
+      if (expiredEndpoints.length > 0) {
+        await prisma.pushSubscription.deleteMany({
+          where: { endpoint: { in: expiredEndpoints } },
+        });
+      }
+
+      const failed = results.filter((r) => r.status === "rejected");
+      if (failed.length > 0) {
+        console.warn(
+          `[push] ${failed.length} notification(s) failed:`,
+          failed.map((r) => (r as PromiseRejectedResult).reason?.message || r)
+        );
+      }
     }
   } catch (err) {
     console.error("[push] Unexpected error:", err);

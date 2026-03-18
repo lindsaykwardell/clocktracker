@@ -20,7 +20,9 @@
         <div v-else-if="permissionDenied" class="text-stone-500 dark:text-stone-400">
           <p>
             Notification permission was denied. To enable push notifications,
-            update your browser's notification settings for this site, then refresh the page.
+            update your {{ isCapacitor ? "device" : "browser's" }} notification
+            settings for {{ isCapacitor ? "ClockTracker" : "this site" }}, then
+            refresh the page.
           </p>
         </div>
 
@@ -41,6 +43,7 @@ definePageMeta({
 });
 
 const config = useRuntimeConfig();
+const isCapacitor = config.public.isCapacitorBuild;
 
 const isSupported = ref(false);
 const permissionDenied = ref(false);
@@ -49,6 +52,30 @@ const loading = ref(false);
 let currentSubscription: PushSubscription | null = null;
 
 onMounted(async () => {
+  if (isCapacitor) {
+    await initCapacitor();
+  } else {
+    await initWebPush();
+  }
+});
+
+async function initCapacitor() {
+  const { PushNotifications } = await import("@capacitor/push-notifications");
+
+  isSupported.value = true;
+
+  const permStatus = await PushNotifications.checkPermissions();
+  if (permStatus.receive === "denied") {
+    permissionDenied.value = true;
+    return;
+  }
+
+  // Check if user already has push enabled via their settings
+  const settings = await $fetch("/api/settings");
+  pushEnabled.value = settings.push_notifications_enabled;
+}
+
+async function initWebPush() {
   isSupported.value = "PushManager" in window && "serviceWorker" in navigator;
 
   if (!isSupported.value) return;
@@ -58,11 +85,10 @@ onMounted(async () => {
     return;
   }
 
-  // Check for existing subscription
   const registration = await navigator.serviceWorker.ready;
   currentSubscription = await registration.pushManager.getSubscription();
   pushEnabled.value = !!currentSubscription;
-});
+}
 
 watch(pushEnabled, async (enabled, oldValue) => {
   // Skip the initial watch trigger
@@ -70,10 +96,18 @@ watch(pushEnabled, async (enabled, oldValue) => {
 
   loading.value = true;
   try {
-    if (enabled) {
-      await subscribe();
+    if (isCapacitor) {
+      if (enabled) {
+        await subscribeCapacitor();
+      } else {
+        await unsubscribeCapacitor();
+      }
     } else {
-      await unsubscribe();
+      if (enabled) {
+        await subscribe();
+      } else {
+        await unsubscribe();
+      }
     }
   } catch {
     // Revert on failure
@@ -82,6 +116,34 @@ watch(pushEnabled, async (enabled, oldValue) => {
     loading.value = false;
   }
 });
+
+async function subscribeCapacitor() {
+  const { PushNotifications } = await import("@capacitor/push-notifications");
+
+  let permStatus = await PushNotifications.checkPermissions();
+  if (permStatus.receive === "prompt") {
+    permStatus = await PushNotifications.requestPermissions();
+  }
+
+  if (permStatus.receive !== "granted") {
+    permissionDenied.value = permStatus.receive === "denied";
+    throw new Error("Permission not granted");
+  }
+
+  await PushNotifications.register();
+  // Token registration is handled by the capacitor-push plugin listener
+}
+
+async function unsubscribeCapacitor() {
+  const { fcmToken } = useCapacitorPush();
+
+  if (fcmToken.value) {
+    await $fetch("/api/fcm-token", {
+      method: "DELETE",
+      body: { token: fcmToken.value },
+    });
+  }
+}
 
 async function subscribe() {
   const permission = await Notification.requestPermission();
