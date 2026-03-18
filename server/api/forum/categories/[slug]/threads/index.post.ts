@@ -8,7 +8,10 @@ import {
   checkPostLength,
 } from "~/server/utils/forum";
 import { hasRestriction } from "~/server/utils/permissions";
-import { sendAnnouncementNotifications } from "~/server/utils/sendForumNotifications";
+import {
+  sendAnnouncementNotifications,
+  sendCategoryNewThreadNotifications,
+} from "~/server/utils/sendForumNotifications";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
@@ -93,7 +96,16 @@ export default defineEventHandler(async (handler) => {
     },
   });
 
-  // Mark as read and auto-subscribe thread author
+  // Get category subscribers (excluding the thread author)
+  const categorySubscribers = await prisma.forumCategorySubscription.findMany({
+    where: {
+      category_id: category.id,
+      user_id: { not: me.id },
+    },
+    select: { user_id: true },
+  });
+
+  // Mark as read and auto-subscribe thread author + category subscribers
   await Promise.all([
     prisma.forumThreadRead.create({
       data: { thread_id: thread.id, user_id: me.id, last_read_at: now },
@@ -101,6 +113,23 @@ export default defineEventHandler(async (handler) => {
     prisma.forumThreadSubscription.create({
       data: { thread_id: thread.id, user_id: me.id, last_read_at: now },
     }),
+    // Auto-subscribe category subscribers to the new thread
+    ...categorySubscribers.map((sub) =>
+      prisma.forumThreadSubscription.upsert({
+        where: {
+          thread_id_user_id: {
+            thread_id: thread.id,
+            user_id: sub.user_id,
+          },
+        },
+        create: {
+          thread_id: thread.id,
+          user_id: sub.user_id,
+          last_read_at: new Date(0), // Mark as unread
+        },
+        update: {},
+      })
+    ),
   ]);
 
   // Send push notifications if this is an announcement category
@@ -110,6 +139,19 @@ export default defineEventHandler(async (handler) => {
       threadTitle: thread.title,
       categorySlug: slug,
       postBody: body.body.trim(),
+    });
+  }
+
+  // Notify category subscribers about the new thread
+  if (categorySubscribers.length > 0) {
+    void sendCategoryNewThreadNotifications({
+      threadId: thread.id,
+      threadTitle: thread.title,
+      categorySlug: slug,
+      categoryName: category.name,
+      postBody: body.body.trim(),
+      authorDisplayName: thread.author.display_name,
+      subscriberUserIds: categorySubscribers.map((s) => s.user_id),
     });
   }
 

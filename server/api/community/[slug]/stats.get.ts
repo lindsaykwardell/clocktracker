@@ -67,7 +67,9 @@ export default defineEventHandler(async (handler) => {
     where: {
       deleted: false,
       community_id: community.id,
-      privacy: PrivacySetting.PUBLIC,
+      privacy: community.is_private
+        ? { in: [PrivacySetting.PUBLIC, PrivacySetting.PRIVATE, PrivacySetting.FRIENDS_ONLY] }
+        : PrivacySetting.PUBLIC,
       parent_game_id: null,
     },
     select: {

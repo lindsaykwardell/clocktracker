@@ -12,9 +12,20 @@
         <h1 class="font-sorts text-2xl lg:text-3xl">
           {{ categoryName }}
         </h1>
-        <nuxt-link v-if="isLoggedIn && canCreateThread" :to="`/forum/${slug}/new`" class="shrink-0">
-          <Button color="primary" size="sm">New Thread</Button>
-        </nuxt-link>
+        <div class="flex items-center gap-2 shrink-0">
+          <Button
+            v-if="isLoggedIn"
+            :color="isCategorySubscribed ? 'primary' : 'secondary'"
+            size="sm"
+            @click="toggleCategorySubscription"
+            :disabled="subscribing"
+          >
+            {{ isCategorySubscribed ? "Subscribed" : "Subscribe" }}
+          </Button>
+          <nuxt-link v-if="isLoggedIn && canCreateThread" :to="`/forum/${slug}/new`">
+            <Button color="primary" size="sm">New Thread</Button>
+          </nuxt-link>
+        </div>
       </div>
 
       <p
@@ -119,6 +130,8 @@ const me = useMe();
 const page = ref(1);
 
 const forumMe = ref<{ permissions: string[]; is_admin: boolean } | null>(null);
+const isCategorySubscribed = ref(false);
+const subscribing = ref(false);
 
 const isLoggedIn = computed(() => !!user.value);
 
@@ -151,6 +164,27 @@ const categoryDescription = computed(() => {
   if (data?.status === Status.SUCCESS) return data.data.category.description;
   return null;
 });
+
+// Sync category subscription status from fetched data
+watch(threadData, (data) => {
+  if (data?.status === Status.SUCCESS) {
+    isCategorySubscribed.value = data.data.category.is_subscribed ?? false;
+  }
+}, { immediate: true });
+
+async function toggleCategorySubscription() {
+  subscribing.value = true;
+  try {
+    const result = await $fetch<{ subscribed: boolean }>(`/api/forum/categories/${slug.value}/subscribe`, {
+      method: "POST",
+    });
+    isCategorySubscribed.value = result.subscribed;
+  } catch {
+    // ignore
+  } finally {
+    subscribing.value = false;
+  }
+}
 
 function threadLink(thread: { id: string; has_unread?: boolean; _count: { posts: number } }) {
   const base = `/forum/${slug.value}/${thread.id}`;
