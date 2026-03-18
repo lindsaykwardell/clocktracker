@@ -93,5 +93,6 @@ export async function sendPushNotifications({
   }
 
   // Also send via FCM for native app users
+  console.log("[push] Handing off to FCM...");
   sendFcmNotifications({ userIds, excludeUserId, title, body, url });
 }

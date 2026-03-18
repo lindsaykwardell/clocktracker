@@ -74,12 +74,19 @@ export async function sendFcmNotifications({
     const config = useRuntimeConfig();
     const { fcmProjectId, fcmClientEmail, fcmPrivateKey } = config;
 
+    console.log(`[fcm] called with ${userIds.length} userIds, excludeUserId=${excludeUserId ?? "none"}`);
+    console.log(`[fcm] config: projectId=${fcmProjectId ? "set" : "MISSING"}, clientEmail=${fcmClientEmail ? "set" : "MISSING"}, privateKey=${fcmPrivateKey ? "set" : "MISSING"}`);
+
     if (!fcmProjectId || !fcmClientEmail || !fcmPrivateKey) {
+      console.warn("[fcm] Missing FCM config — skipping");
       return;
     }
 
     const filteredIds = userIds.filter((id) => id !== excludeUserId);
-    if (filteredIds.length === 0) return;
+    if (filteredIds.length === 0) {
+      console.log("[fcm] No user IDs after filtering — skipping");
+      return;
+    }
 
     const tokens = await prisma.fcmToken.findMany({
       where: {
@@ -88,12 +95,16 @@ export async function sendFcmNotifications({
       },
     });
 
+    console.log(`[fcm] Found ${tokens.length} FCM token(s) for ${filteredIds.length} user(s)`);
+
     if (tokens.length === 0) return;
 
     const accessToken = await getAccessToken(
       fcmClientEmail,
       fcmPrivateKey.replace(/\\n/g, "\n")
     );
+
+    console.log("[fcm] Got access token, sending notifications...");
 
     const results = await Promise.allSettled(
       tokens.map(async (fcmToken) => {
@@ -149,10 +160,12 @@ export async function sendFcmNotifications({
       })
     );
 
+    const succeeded = results.filter((r) => r.status === "fulfilled").length;
     const failed = results.filter((r) => r.status === "rejected");
+    console.log(`[fcm] Results: ${succeeded} succeeded, ${failed.length} failed`);
     if (failed.length > 0) {
       console.warn(
-        `[fcm] ${failed.length} notification(s) failed:`,
+        `[fcm] Failed details:`,
         failed.map((r) => (r as PromiseRejectedResult).reason?.message || r)
       );
     }
