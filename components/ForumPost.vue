@@ -463,6 +463,7 @@ const emit = defineEmits<{
 }>();
 
 const user = useUser();
+const { pickImages } = useImagePicker();
 const forum = useForum();
 
 const isLoggedIn = computed(() => !!user.value);
@@ -626,30 +627,24 @@ async function submitEdit() {
   }
 }
 
-function uploadImage() {
-  const input = document.createElement("input");
-  input.type = "file";
-  input.accept = "image/jpg, image/jpeg, image/png, image/gif, image/webp";
-  input.onchange = async (e: Event) => {
-    const files = (e.target as HTMLInputElement).files;
-    if (!files?.length) return;
+async function uploadImage() {
+  const files = await pickImages();
+  if (files.length === 0) return;
 
-    uploadingImage.value = true;
-    try {
-      const formData = new FormData();
-      formData.append("file", files[0]);
-      const urls = await $fetch<string[]>("/api/storage/game-attachments", {
-        method: "POST",
-        body: formData,
-      });
-      editBody.value += `\n![image](${urls[0]})\n`;
-    } catch (err: any) {
-      console.error("Image upload failed", err);
-    } finally {
-      uploadingImage.value = false;
-    }
-  };
-  input.click();
+  uploadingImage.value = true;
+  try {
+    const formData = new FormData();
+    formData.append("file", files[0]);
+    const urls = await $fetch<string[]>("/api/storage/game-attachments", {
+      method: "POST",
+      body: formData,
+    });
+    editBody.value += `\n![image](${urls[0]})\n`;
+  } catch (err: any) {
+    console.error("Image upload failed", err);
+  } finally {
+    uploadingImage.value = false;
+  }
 }
 
 // --- Delete ---

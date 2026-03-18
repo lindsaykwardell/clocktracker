@@ -667,6 +667,7 @@ const router = useRouter();
 const threadId = route.params.threadId as string;
 const forum = useForum();
 const user = useUser();
+const { pickImages } = useImagePicker();
 const me = useMe();
 const page = ref(Math.max(1, Number(route.query.page) || 1));
 const wantUnread = ref(route.query.unread === "1");
@@ -1023,35 +1024,29 @@ function quotePost(post: ForumPost) {
     }
 }
 
-function uploadImage() {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/jpg, image/jpeg, image/png, image/gif, image/webp";
-    input.onchange = async (e: Event) => {
-        const files = (e.target as HTMLInputElement).files;
-        if (!files?.length) return;
+async function uploadImage() {
+    const files = await pickImages();
+    if (files.length === 0) return;
 
-        uploadingImage.value = true;
-        try {
-            const formData = new FormData();
-            formData.append("file", files[0]);
+    uploadingImage.value = true;
+    try {
+        const formData = new FormData();
+        formData.append("file", files[0]);
 
-            const urls = await $fetch<string[]>(
-                "/api/storage/game-attachments",
-                {
-                    method: "POST",
-                    body: formData,
-                },
-            );
+        const urls = await $fetch<string[]>(
+            "/api/storage/game-attachments",
+            {
+                method: "POST",
+                body: formData,
+            },
+        );
 
-            replyBody.value += `\n![image](${urls[0]})\n`;
-        } catch (err: any) {
-            console.error("Image upload failed", err);
-        } finally {
-            uploadingImage.value = false;
-        }
-    };
-    input.click();
+        replyBody.value += `\n![image](${urls[0]})\n`;
+    } catch (err: any) {
+        console.error("Image upload failed", err);
+    } finally {
+        uploadingImage.value = false;
+    }
 }
 
 onMounted(async () => {

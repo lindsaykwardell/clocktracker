@@ -350,6 +350,7 @@ definePageMeta({
 const communities = useCommunities();
 const route = useRoute();
 const user = useUser();
+const { pickImages } = useImagePicker();
 
 const slug = route.params.slug as string;
 
@@ -387,23 +388,12 @@ function isMe(id: string) {
   return user.value?.id === id;
 }
 
-function selectCommunityAvatar() {
-  const input = document.createElement("input");
-  input.type = "file";
-  input.accept = "image/jpg, image/jpeg, image/png";
-  input.onchange = uploadAvatar;
-  input.click();
-}
-
-async function uploadAvatar(event: Event) {
-  const newlyUploadedAvatar = (event.target as HTMLInputElement).files?.[0];
-
-  if (!newlyUploadedAvatar) {
-    return;
-  }
+async function selectCommunityAvatar() {
+  const files = await pickImages();
+  if (files.length === 0) return;
 
   const formData = new FormData();
-  formData.append("file", newlyUploadedAvatar);
+  formData.append("file", files[0]);
 
   const url = (
     await $fetch(`/api/storage/avatars`, {
