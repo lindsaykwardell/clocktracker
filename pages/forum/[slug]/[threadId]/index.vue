@@ -1,6 +1,8 @@
 <template>
     <StandardTemplate>
-        <div class="px-4 lg:px-8 pt-4 lg:pt-8 pb-4 lg:pb-8 max-w-4xl mx-auto overflow-hidden">
+        <div
+            class="px-4 lg:px-8 pt-4 lg:pt-8 pb-4 lg:pb-8 max-w-4xl mx-auto overflow-hidden"
+        >
             <template v-if="threadData?.status === Status.SUCCESS">
                 <div class="flex items-center justify-between">
                     <nuxt-link
@@ -20,7 +22,16 @@
                         >
                             {{ isSubscribed ? "Subscribed" : "Subscribe" }}
                         </Button>
-                        <Menu v-if="canModerate || (canCreateGithubIssue && !threadData.data.thread.github_issue_url)" v-slot="{ open }" as="div" class="relative">
+                        <Menu
+                            v-if="
+                                canModerate ||
+                                (canCreateGithubIssue &&
+                                    !threadData.data.thread.github_issue_url)
+                            "
+                            v-slot="{ open }"
+                            as="div"
+                            class="relative"
+                        >
                             <MenuButton>
                                 <IconUI id="dots" :rounded="true" shadow />
                             </MenuButton>
@@ -33,21 +44,39 @@
                                 leave-to-class="transform scale-95 opacity-0"
                             >
                                 <div v-show="open">
-                                    <MenuItems static class="ct-contextual-links right-0">
+                                    <MenuItems
+                                        static
+                                        class="ct-contextual-links right-0"
+                                    >
                                         <MenuItem v-if="canModerate">
                                             <ButtonSubmenu
                                                 @click="togglePin"
                                                 icon="pin"
                                             >
-                                                {{ threadData.data.thread.is_pinned ? "Unpin" : "Pin" }}
+                                                {{
+                                                    threadData.data.thread
+                                                        .is_pinned
+                                                        ? "Unpin"
+                                                        : "Pin"
+                                                }}
                                             </ButtonSubmenu>
                                         </MenuItem>
                                         <MenuItem v-if="canModerate">
                                             <ButtonSubmenu
                                                 @click="toggleLock"
-                                                :icon="threadData.data.thread.is_locked ? 'unlock' : 'lock'"
+                                                :icon="
+                                                    threadData.data.thread
+                                                        .is_locked
+                                                        ? 'unlock'
+                                                        : 'lock'
+                                                "
                                             >
-                                                {{ threadData.data.thread.is_locked ? "Unlock" : "Lock" }}
+                                                {{
+                                                    threadData.data.thread
+                                                        .is_locked
+                                                        ? "Unlock"
+                                                        : "Lock"
+                                                }}
                                             </ButtonSubmenu>
                                         </MenuItem>
                                         <MenuItem v-if="canModerate">
@@ -58,13 +87,23 @@
                                                 Move
                                             </ButtonSubmenu>
                                         </MenuItem>
-                                        <MenuItem v-if="canCreateGithubIssue && !threadData.data.thread.github_issue_url">
+                                        <MenuItem
+                                            v-if="
+                                                canCreateGithubIssue &&
+                                                !threadData.data.thread
+                                                    .github_issue_url
+                                            "
+                                        >
                                             <ButtonSubmenu
                                                 @click="createGithubIssue"
                                                 icon="github"
                                                 :disabled="creatingGithubIssue"
                                             >
-                                                {{ creatingGithubIssue ? "Creating..." : "Create GitHub Issue" }}
+                                                {{
+                                                    creatingGithubIssue
+                                                        ? "Creating..."
+                                                        : "Create GitHub Issue"
+                                                }}
                                             </ButtonSubmenu>
                                         </MenuItem>
                                         <MenuItem v-if="canModerate">
@@ -93,10 +132,19 @@
                     <h1 class="font-sorts text-2xl lg:text-3xl">
                         {{ threadData.data.thread.title }}
                     </h1>
-                    <div class="flex flex-wrap items-center gap-x-1 text-sm text-stone-500 dark:text-stone-400 mt-1">
-                        <span>Started by {{ threadData.data.thread.author.display_name }}</span>
+                    <div
+                        class="flex flex-wrap items-center gap-x-1 text-sm text-stone-500 dark:text-stone-400 mt-1"
+                    >
+                        <span
+                            >Started by
+                            {{
+                                threadData.data.thread.author.display_name
+                            }}</span
+                        >
                         <span>&middot;</span>
-                        <span>{{ formatDate(threadData.data.thread.created_at) }}</span>
+                        <span>{{
+                            formatDate(threadData.data.thread.created_at)
+                        }}</span>
                     </div>
                     <div
                         class="flex items-center gap-1 mt-2"
@@ -178,7 +226,11 @@
                             >
                         </div>
                         <div class="text-xs text-stone-400 truncate">
-                            {{ githubIssue.is_pull_request ? "Pull Request" : "Issue" }}
+                            {{
+                                githubIssue.is_pull_request
+                                    ? "Pull Request"
+                                    : "Issue"
+                            }}
                             &middot;
                             <span
                                 :class="
@@ -211,7 +263,11 @@
                             </span>
                         </div>
                     </div>
-                    <IconUI id="github" size="sm" class="text-stone-400 shrink-0" />
+                    <IconUI
+                        id="github"
+                        size="sm"
+                        class="text-stone-400 shrink-0"
+                    />
                 </a>
                 <div
                     v-else-if="githubIssueLoading"
@@ -274,31 +330,34 @@
                         v-for="(post, postIndex) in threadData.data.posts"
                         :key="post.id"
                     >
-                    <!-- Unread divider -->
-                    <div
-                        v-if="post.id === threadData.data.firstUnreadPostId"
-                        id="unread-divider"
-                        class="flex items-center gap-3 py-1"
-                    >
-                        <div class="flex-1 border-t border-primary/50" />
-                        <span class="text-xs font-semibold text-primary uppercase tracking-wider">New</span>
-                        <div class="flex-1 border-t border-primary/50" />
-                    </div>
-                    <ForumPost
-                        :post="post"
-                        :threadId="threadId"
-                        :threadIsLocked="threadData.data.thread.is_locked"
-                        :currentUserId="user?.id"
-                        :canEditPost="canEditPost(post)"
-                        :canDeletePost="canDeletePost(post)"
-                        :showBanAction="canBanUser(post)"
-                        :largeText="isAnnouncementFirstPost(postIndex)"
-                        @quote="quotePost"
-                        @deleted="onPostDeleted"
-                        @threadDeleted="onThreadDeleted"
-                        @ban="toggleBanForm"
-                        @edited="onPostEdited"
-                    />
+                        <!-- Unread divider -->
+                        <div
+                            v-if="post.id === threadData.data.firstUnreadPostId"
+                            id="unread-divider"
+                            class="flex items-center gap-3 py-1"
+                        >
+                            <div class="flex-1 border-t border-primary/50" />
+                            <span
+                                class="text-xs font-semibold text-primary uppercase tracking-wider"
+                                >New</span
+                            >
+                            <div class="flex-1 border-t border-primary/50" />
+                        </div>
+                        <ForumPost
+                            :post="post"
+                            :threadId="threadId"
+                            :threadIsLocked="threadData.data.thread.is_locked"
+                            :currentUserId="user?.id"
+                            :canEditPost="canEditPost(post)"
+                            :canDeletePost="canDeletePost(post)"
+                            :showBanAction="canBanUser(post)"
+                            :largeText="isAnnouncementFirstPost(postIndex)"
+                            @quote="quotePost"
+                            @deleted="onPostDeleted"
+                            @threadDeleted="onThreadDeleted"
+                            @ban="toggleBanForm"
+                            @edited="onPostEdited"
+                        />
                     </template>
                 </div>
 
@@ -391,10 +450,7 @@
                                 </option>
                             </template>
                         </select>
-                        <p
-                            v-if="moveError"
-                            class="text-xs text-red-500"
-                        >
+                        <p v-if="moveError" class="text-xs text-red-500">
                             {{ moveError }}
                         </p>
                         <div class="flex gap-2 justify-end">
@@ -413,11 +469,7 @@
                                 "
                                 @click="moveThread"
                             >
-                                {{
-                                    movingThread
-                                        ? "Moving..."
-                                        : "Move Thread"
-                                }}
+                                {{ movingThread ? "Moving..." : "Move Thread" }}
                             </Button>
                         </div>
                     </div>
@@ -474,7 +526,11 @@
                 <!-- Reply form -->
                 <form
                     ref="replyFormEl"
-                    v-if="isLoggedIn && !threadData.data.thread.is_locked && page === totalPages"
+                    v-if="
+                        isLoggedIn &&
+                        !threadData.data.thread.is_locked &&
+                        page === totalPages
+                    "
                     @submit.prevent="submitReply"
                     class="mt-6 p-4 rounded border border-stone-300 dark:border-stone-700/50 bg-stone-300/40 dark:bg-stone-900/50 flex flex-col gap-2"
                 >
@@ -550,7 +606,7 @@
                             <ForumLinkInsert @insert="replyBody += $event" />
                         </div>
                         <span
-                            class="text-xs"
+                            class="hidden md:inline text-xs"
                             :class="
                                 replyBody.length > POST_BODY_MAX_LENGTH
                                     ? 'text-red-500'
@@ -600,10 +656,10 @@ import type { ForumPost } from "~/composables/useForum";
 const POST_BODY_MAX_LENGTH = 10_000;
 
 function formatDate(date: string | Date): string {
-  return new Intl.DateTimeFormat(navigator.language, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(date));
+    return new Intl.DateTimeFormat(navigator.language, {
+        dateStyle: "medium",
+        timeStyle: "short",
+    }).format(new Date(date));
 }
 
 const route = useRoute();
@@ -611,6 +667,7 @@ const router = useRouter();
 const threadId = route.params.threadId as string;
 const forum = useForum();
 const user = useUser();
+const { pickImages } = useImagePicker();
 const me = useMe();
 const page = ref(Math.max(1, Number(route.query.page) || 1));
 const wantUnread = ref(route.query.unread === "1");
@@ -692,7 +749,7 @@ async function createGithubIssue() {
                 threadId,
                 `New issue tracked: [${result.title}](${result.url})`,
             );
-        } catch {};
+        } catch {}
     } catch (err: any) {
         githubIssueError.value =
             err?.data?.statusMessage || "Failed to create GitHub issue";
@@ -712,7 +769,9 @@ const githubIssue = ref<{
 } | null>(null);
 const githubIssueLoading = ref(false);
 
-function parseGithubUrl(url: string): { owner: string; repo: string; number: string } | null {
+function parseGithubUrl(
+    url: string,
+): { owner: string; repo: string; number: string } | null {
     const match = url.match(/github\.com\/([\w.-]+)\/([\w.-]+)\/issues\/(\d+)/);
     if (!match) return null;
     return { owner: match[1], repo: match[2], number: match[3] };
@@ -720,7 +779,8 @@ function parseGithubUrl(url: string): { owner: string; repo: string; number: str
 
 async function fetchGithubIssue() {
     const data = threadData.value;
-    if (data?.status !== Status.SUCCESS || !data.data.thread.github_issue_url) return;
+    if (data?.status !== Status.SUCCESS || !data.data.thread.github_issue_url)
+        return;
 
     const parsed = parseGithubUrl(data.data.thread.github_issue_url);
     if (!parsed) return;
@@ -728,7 +788,12 @@ async function fetchGithubIssue() {
     githubIssueLoading.value = true;
     try {
         githubIssue.value = await $fetch("/api/forum/github-preview", {
-            query: { owner: parsed.owner, repo: parsed.repo, type: "issues", number: parsed.number },
+            query: {
+                owner: parsed.owner,
+                repo: parsed.repo,
+                type: "issues",
+                number: parsed.number,
+            },
         });
     } catch {
         githubIssue.value = null;
@@ -872,8 +937,7 @@ async function moveThread() {
         // Redirect to the thread in its new category
         router.push(`/forum/${result.category.slug}/${threadId}`);
     } catch (err: any) {
-        moveError.value =
-            err?.data?.statusMessage || "Failed to move thread";
+        moveError.value = err?.data?.statusMessage || "Failed to move thread";
     } finally {
         movingThread.value = false;
     }
@@ -960,35 +1024,29 @@ function quotePost(post: ForumPost) {
     }
 }
 
-function uploadImage() {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/jpg, image/jpeg, image/png, image/gif, image/webp";
-    input.onchange = async (e: Event) => {
-        const files = (e.target as HTMLInputElement).files;
-        if (!files?.length) return;
+async function uploadImage() {
+    const files = await pickImages();
+    if (files.length === 0) return;
 
-        uploadingImage.value = true;
-        try {
-            const formData = new FormData();
-            formData.append("file", files[0]);
+    uploadingImage.value = true;
+    try {
+        const formData = new FormData();
+        formData.append("file", files[0]);
 
-            const urls = await $fetch<string[]>(
-                "/api/storage/game-attachments",
-                {
-                    method: "POST",
-                    body: formData,
-                },
-            );
+        const urls = await $fetch<string[]>(
+            "/api/storage/game-attachments",
+            {
+                method: "POST",
+                body: formData,
+            },
+        );
 
-            replyBody.value += `\n![image](${urls[0]})\n`;
-        } catch (err: any) {
-            console.error("Image upload failed", err);
-        } finally {
-            uploadingImage.value = false;
-        }
-    };
-    input.click();
+        replyBody.value += `\n![image](${urls[0]})\n`;
+    } catch (err: any) {
+        console.error("Image upload failed", err);
+    } finally {
+        uploadingImage.value = false;
+    }
 }
 
 onMounted(async () => {
@@ -1000,16 +1058,22 @@ onMounted(async () => {
     // Handle ?quote=postId from dashboard navigation
     const quotePostId = route.query.quote as string | undefined;
     if (quotePostId) {
-        const unwatch = watch(threadData, (data) => {
-            if (data?.status !== Status.SUCCESS) return;
-            // Find the post across all pages - it might not be on the current page,
-            // so fetch it directly
-            const postOnPage = data.data.posts.find((p) => p.id === quotePostId);
-            if (postOnPage) {
-                quotePost(postOnPage);
-                unwatch();
-            }
-        }, { immediate: true });
+        const unwatch = watch(
+            threadData,
+            (data) => {
+                if (data?.status !== Status.SUCCESS) return;
+                // Find the post across all pages - it might not be on the current page,
+                // so fetch it directly
+                const postOnPage = data.data.posts.find(
+                    (p) => p.id === quotePostId,
+                );
+                if (postOnPage) {
+                    quotePost(postOnPage);
+                    unwatch();
+                }
+            },
+            { immediate: true },
+        );
     }
 });
 watch(page, (p) => forum.fetchThread(threadId, p));

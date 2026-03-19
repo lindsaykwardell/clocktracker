@@ -290,17 +290,18 @@
       </div>
       <div
         class="app-nav md:hidden fixed bottom-0 left-0 flex p-2 bg-stone-50 border-t border-stone-400 dark:border-stone-700 dark:bg-stone-950 w-full"
+        :class="{ 'pb-6': isCapacitor }"
       >
         <button
           class="flex-1 flex flex-col items-center text-xs"
-          @click="selectedTab = 'updates'"
+          @click="selectedTab = 'updates'; selectionChanged()"
         >
           <ImageUI image="towncrier" class="w-9 m-auto" />
           Updates
         </button>
         <button
           class="flex-1 flex flex-col items-center text-xs"
-          @click="selectedTab = 'events'"
+          @click="selectedTab = 'events'; selectionChanged()"
         >
           <ImageUI image="clockmaker" class="w-9 m-auto" />
           Events
@@ -334,6 +335,8 @@ definePageMeta({
 const me = useMe();
 const games = useGames();
 const featureFlags = useFeatureFlags();
+const isCapacitor = useRuntimeConfig().public.isCapacitorBuild;
+const { selectionChanged } = useHaptics();
 const { data: initialPage } = await useFetch("/api/dashboard/recent");
 const roleOfTheDay = await useFetch("/api/role_of_the_day");
 const scriptsOfTheWeek = await useFetch("/api/scripts_of_the_week");
@@ -523,13 +526,13 @@ onMounted(async () => {
   @media (min-width: 768px) {
     display: grid;
     grid-template-columns: 1fr 300px;
-    height: calc(100vh - 50px);
+    height: calc(100vh - 50px - var(--cap-status-bar-height, 0px));
     overflow-y: hidden;
   }
 
   & .content {
     @media (min-width: 768px) {
-      height: calc(100vh - 50px);
+      height: calc(100vh - 50px - var(--cap-status-bar-height, 0px));
       overflow-y: scroll;
     }
   }

@@ -771,6 +771,7 @@ const me = useMe();
 const games = useGames();
 const friends = useFriends();
 const { isBaseScript, fetchScriptVersions, scriptBgClasses } = useScripts();
+const { pickImages } = useImagePicker();
 const allRoles = useRoles();
 const route = useRoute();
 
@@ -1133,20 +1134,9 @@ function removeFabled(i: number) {
   props.game.fabled.splice(i, 1);
 }
 
-function uploadFile() {
-  const input = document.createElement("input");
-  input.type = "file";
-  input.multiple = true;
-  input.accept = "image/jpg, image/jpeg, image/png";
-  input.onchange = selectFiles;
-  input.click();
-}
-
-async function selectFiles(event: Event) {
-  const uploadedFiles = (event.target as HTMLInputElement).files;
-  if (!uploadedFiles) return;
-
-  const files = Array.from(uploadedFiles);
+async function uploadFile() {
+  const files = await pickImages({ multiple: true });
+  if (files.length === 0) return;
 
   const formData = new FormData();
   files.forEach((file) => {

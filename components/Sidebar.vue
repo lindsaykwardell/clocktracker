@@ -267,6 +267,7 @@ const handleNavClick = (event: MouseEvent) => {
     block-size: 100dvh;
     inline-size: 250px;
     padding: 1rem 1em;
+    padding-top: calc(1rem + var(--cap-status-bar-height, 0px));
     position: sticky;
     inset-block-start: 0;
     align-self: start;
@@ -430,5 +431,7 @@ const handleNavClick = (event: MouseEvent) => {
     > li:last-child {
         margin-block-end: 0;
     }
+
+    padding-bottom: var(--cap-nav-bar-height, 0px);
 }
 </style>

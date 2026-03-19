@@ -86,6 +86,7 @@
 const user = useUser();
 const users = useUsers();
 const featureFlags = useFeatureFlags();
+const { pickImages } = useImagePicker();
 
 const avatar = computed(() => {
   const u = users.getUserById(user.value?.id);
@@ -103,23 +104,12 @@ const displayName = computed(() => {
   return u.data.display_name;
 });
 
-function selectAvatar() {
-  const input = document.createElement("input");
-  input.type = "file";
-  input.accept = "image/jpg, image/jpeg, image/png";
-  input.onchange = uploadAvatar;
-  input.click();
-}
-
-async function uploadAvatar(event: Event) {
-  const newlyUploadedAvatar = (event.target as HTMLInputElement).files?.[0];
-
-  if (!newlyUploadedAvatar) {
-    return;
-  }
+async function selectAvatar() {
+  const files = await pickImages();
+  if (files.length === 0) return;
 
   const formData = new FormData();
-  formData.append("file", newlyUploadedAvatar);
+  formData.append("file", files[0]);
 
   const url = (
     await $fetch(`/api/storage/avatars`, {
