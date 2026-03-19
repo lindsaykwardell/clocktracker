@@ -1,18 +1,15 @@
 <template>
-  <LandingPage v-if="me.status === Status.IDLE && !isCapacitor" />
-  <StandardTemplate v-else-if="me.status !== Status.IDLE">
-    <UserDashboard />
-  </StandardTemplate>
+    <template v-if="me.status === Status.IDLE">
+        <LoginForm v-if="isCapacitor" />
+        <LandingPage v-else />
+    </template>
+    <StandardTemplate v-else>
+        <UserDashboard />
+    </StandardTemplate>
 </template>
 
 <script setup lang="ts">
 import { Status } from "~/composables/useFetchStatus";
 const me = useMe();
-const config = useRuntimeConfig();
-const isCapacitor = config.public.isCapacitorBuild;
-
-// On Capacitor, redirect to login if not authenticated
-if (isCapacitor && me.value.status === Status.IDLE) {
-  navigateTo("/login", { replace: true });
-}
+const isCapacitor = useRuntimeConfig().public.isCapacitorBuild;
 </script>
