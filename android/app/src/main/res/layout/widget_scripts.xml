@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:background="#1C1917"
+    android:gravity="center_horizontal">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="8dp">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@mipmap/ic_launcher_round"
+            android:contentDescription="ClockTracker" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Top Scripts"
+            android:textColor="#E7E5E4"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginStart="8dp" />
+    </LinearLayout>
+
+    <!-- Script list (up to 5) -->
+    <TextView
+        android:id="@+id/widget_script_1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#D6D3D1"
+        android:textSize="13sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp" />
+
+    <TextView
+        android:id="@+id/widget_script_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#D6D3D1"
+        android:textSize="13sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp" />
+
+    <TextView
+        android:id="@+id/widget_script_3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#D6D3D1"
+        android:textSize="13sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp" />
+
+    <TextView
+        android:id="@+id/widget_script_4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#D6D3D1"
+        android:textSize="13sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp" />
+
+    <TextView
+        android:id="@+id/widget_script_5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#D6D3D1"
+        android:textSize="13sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp" />
+
+</LinearLayout>

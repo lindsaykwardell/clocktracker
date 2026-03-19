@@ -14,7 +14,7 @@ async function login() {
             provider: "discord",
             options: {
                 queryParams: { prompt: "none" },
-                redirectTo: "clocktracker://auth-callback",
+                redirectTo: `${config.public.apiBaseUrl}/auth/mobile-callback`,
                 skipBrowserRedirect: true,
             },
         });
