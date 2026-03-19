@@ -94,6 +94,6 @@
   "overrides": {
     "vue": "latest",
     "fast-xml-parser": ">=5.3.8",
-    "esbuild": "~0.24.0"
+    "@nuxt/cli": "3.22.5"
   }
 }

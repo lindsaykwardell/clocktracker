@@ -10,6 +10,10 @@ export default defineNuxtConfig({
 
   devtools: { enabled: false },
 
+  watch: {
+    ignore: ["android/**", "ios/**"],
+  },
+
   devServer: {
     port: 3001,
   },
