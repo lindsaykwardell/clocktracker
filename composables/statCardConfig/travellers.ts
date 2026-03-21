@@ -6,7 +6,7 @@ import {
   WinStatus_V2,
 } from "~/composables/useGames";
 import {
-  countEventsAffectingPlayer,
+  countMatchingEvents,
   countGrimoireEvents,
   getByRoleForEvent,
   getEventCurrentToken,
@@ -25,6 +25,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "gunslinger_kills",
     category: "role",
+    scope: "as_role",
     roleIds: ["gunslinger"],
     script: "tb",
     source: "grimoire_event",
@@ -41,6 +42,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "beggar_alms_received",
     category: "role",
+    scope: "as_role",
     roleIds: ["beggar"],
     script: "tb",
     source: "grimoire_event",
@@ -70,13 +72,13 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     id: "beggar_alms_given_received",
     category: "role",
     roleIds: ["beggar"],
+    scope: "affected_player",
     script: "tb",
     source: "grimoire_event",
     label: "Token Donation",
-    getCount: ({ games, username }) =>
-      countEventsAffectingPlayer(
+    getCount: ({ games }) =>
+      countMatchingEvents(
         games,
-        username,
         (_, event) =>
           event.by_role_id === "beggar" &&
           event.event_type === GrimoireEventType.OTHER &&
@@ -92,6 +94,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "bureaucrat_extra_votes_given",
     category: "role",
+    scope: "as_role",
     roleIds: ["bureaucrat"],
     script: "tb",
     source: "grimoire_event",
@@ -121,13 +124,13 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     id: "bureaucrat_extra_votes_received",
     category: "role",
     roleIds: ["bureaucrat"],
+    scope: "affected_player",
     script: "tb",
     source: "grimoire_event",
     label: "Backed by Bureaucracy",
-    getCount: ({ games, username }) =>
-      countEventsAffectingPlayer(
+    getCount: ({ games }) =>
+      countMatchingEvents(
         games,
-        username,
         (_, event) =>
           event.by_role_id === "bureaucrat" &&
           event.event_type === GrimoireEventType.OTHER &&
@@ -143,6 +146,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "thief_votes_stolen",
     category: "role",
+    scope: "as_role",
     roleIds: ["thief"],
     script: "tb",
     source: "grimoire_event",
@@ -172,13 +176,13 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     id: "thief_votes_stolen_received",
     category: "role",
     roleIds: ["thief"],
+    scope: "affected_player",
     script: "tb",
     source: "grimoire_event",
     label: "Pickpocketed",
-    getCount: ({ games, username }) =>
-      countEventsAffectingPlayer(
+    getCount: ({ games }) =>
+      countMatchingEvents(
         games,
-        username,
         (_, event) =>
           event.by_role_id === "thief" &&
           event.event_type === GrimoireEventType.OTHER &&
@@ -195,6 +199,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "butcher_additional_executions",
     category: "role",
+    scope: "as_role",
     roleIds: ["butcher"],
     script: "snv",
     source: "grimoire_event",
@@ -223,6 +228,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "bone_collector_restored_abilities",
     category: "role",
+    scope: "as_role",
     roleIds: ["bone_collector"],
     script: "snv",
     source: "grimoire_event",
@@ -251,6 +257,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "harlot_deaths",
     category: "role",
+    scope: "as_role",
     roleIds: ["harlot"],
     script:"snv",
     source: "grimoire_event",
@@ -268,6 +275,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "deviant_exiles_avoided",
     category: "role",
+    scope: "as_role",
     roleIds: ["deviant"],
     script: "snv",
     source: "grimoire_event",
@@ -298,6 +306,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "matron_seat_changes_caused",
     category: "role",
+    scope: "as_role",
     roleIds: ["matron"],
     script: "bmr",
     source: "grimoire_event",
@@ -326,6 +335,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "cacklejack_role_changes_caused",
     category: "role",
+    scope: "as_role",
     roleIds: ["cacklejack"],
     script: "experimental",
     source: "grimoire_event",
@@ -343,13 +353,13 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     id: "cacklejack_role_changes_received",
     category: "role",
     roleIds: ["cacklejack"],
+    scope: "affected_player",
     script: "experimental",
     source: "grimoire_event",
     label: "GAzOinks!",
-    getCount: ({ games, username }) =>
-      countEventsAffectingPlayer(
+    getCount: ({ games }) =>
+      countMatchingEvents(
         games,
-        username,
         (_, event) =>
           event.event_type === GrimoireEventType.ROLE_CHANGE &&
           event.by_role_id === "cacklejack"
@@ -364,6 +374,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "gangster_kills",
     category: "role",
+    scope: "as_role",
     roleIds: ["gangster"],
     script: "experimental",
     source: "grimoire_event",
@@ -380,6 +391,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "gnome_kills",
     category: "role",
+    scope: "as_role",
     roleIds: ["gnome"],
     script: "experimental",
     source: "grimoire_event",

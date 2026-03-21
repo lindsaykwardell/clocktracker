@@ -62,8 +62,18 @@ const trackingReminders = [
     type: ReminderType.TRACKING,
   },
   {
-    role_id: "devilsadvocate",
+    role_id: "devils_advocate",
     reminder: "Saved",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "ojo",
+    reminder: "Not in play",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "zombuul",
+    reminder: "Registers as dead",
     type: ReminderType.TRACKING,
   },
   {

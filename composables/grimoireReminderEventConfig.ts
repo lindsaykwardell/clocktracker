@@ -11,6 +11,7 @@ export type GrimoireReminderEventConfig = {
   eventType: GrimoireEventType;
   cadence: GrimoireReminderEventCadence;
   sourceRoleIds: string[];
+  targetRoleIds?: string[];
 };
 
 // Reminder-to-event mapping used for automated status-event inference.
@@ -94,6 +95,7 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     eventType: GrimoireEventType.OTHER,
     cadence: "once",
     sourceRoleIds: ["mayor"],
+    targetRoleIds: ["mayor"],
   },
   {
     reminder: "No Ability",
@@ -142,6 +144,7 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     eventType: GrimoireEventType.OTHER,
     cadence: "each_night",
     sourceRoleIds: ["soldier"],
+    targetRoleIds: ["soldier"],
   },
   {
     reminder: "Saved",
@@ -153,7 +156,7 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     reminder: "Saved",
     eventType: GrimoireEventType.OTHER,
     cadence: "each_night",
-    sourceRoleIds: ["devilsadvocate"],
+    sourceRoleIds: ["devils_advocate"],
   },
   {
     reminder: "Saved",
@@ -258,6 +261,18 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     sourceRoleIds: ["goblin"],
   },
   {
+    reminder: "Not in play",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "each_night",
+    sourceRoleIds: ["ojo"],
+  },
+  {
+    reminder: "Registers as dead",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "once",
+    sourceRoleIds: ["zombuul"],
+  },
+  {
     reminder: "Storyteller Ability",
     eventType: GrimoireEventType.OTHER,
     cadence: "once",
@@ -333,6 +348,6 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     reminder: "DEAD",
     eventType: GrimoireEventType.DEATH,
     cadence: "once",
-    sourceRoleIds: ["bigwig"],
+    sourceRoleIds: ["big_wig"],
   },
 ];

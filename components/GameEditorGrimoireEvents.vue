@@ -860,10 +860,13 @@ function isEventExpandedByDefault(event: GrimoireEventLike) {
     event.event_type === GrimoireEventType.POISONED ||
     event.event_type === GrimoireEventType.OTHER;
   const hasAutofilledFields =
-    !!event.event_type &&
+    event.event_type !== null &&
+    event.event_type !== GrimoireEventType.NOT_RECORDED &&
     event.cause === GrimoireEventCause.ABILITY &&
+    !!event.status_source &&
     !!event.by_participant_id &&
-    !!event.by_role_id;
+    !!event.by_role_id &&
+    !!grimoireEventStatusReminder(event);
 
   if (isReminderStatusEvent && hasAutofilledFields) {
     return false;
@@ -905,6 +908,9 @@ function grimoireEventAllowedRoleIds(
   eventType: GrimoireEventType | null
 ) {
   if (cause !== GrimoireEventCause.ABILITY || eventType === null) return null;
+  // "Other" events are intentionally free-form and should not restrict
+  // triggering-character choices to curated include lists.
+  if (eventType === GrimoireEventType.OTHER) return null;
   const config: RoleIncludeConfig = GRIMOIRE_EVENT_ROLE_INCLUDES[eventType];
   const includes = [
     ...(config.base ?? []),
@@ -1182,6 +1188,52 @@ function countReminderByName(
       ? count + 1
       : count;
   }, 0);
+}
+
+function addedRemindersByName(
+  currentReminders: ReminderLike[] | undefined,
+  previousReminders: ReminderLike[] | undefined,
+  reminderName: string
+) {
+  const normalizedReminderName = normalizeReminderName(reminderName);
+  const previousCounts = new Map<string, number>();
+
+  for (const reminder of previousReminders ?? []) {
+    if (normalizeReminderName(reminder.reminder) !== normalizedReminderName) continue;
+    const key = `${normalizedReminderName}|${reminder.token_url ?? ""}`;
+    previousCounts.set(key, (previousCounts.get(key) ?? 0) + 1);
+  }
+
+  const added: ReminderLike[] = [];
+  for (const reminder of currentReminders ?? []) {
+    if (normalizeReminderName(reminder.reminder) !== normalizedReminderName) continue;
+    const key = `${normalizedReminderName}|${reminder.token_url ?? ""}`;
+    const available = previousCounts.get(key) ?? 0;
+    if (available > 0) {
+      previousCounts.set(key, available - 1);
+      continue;
+    }
+    added.push(reminder);
+  }
+
+  return added;
+}
+
+function reminderMatchesAnyRoleHint(
+  reminder: ReminderLike,
+  roleIds: string[]
+) {
+  const reminderUrlHint = normalizeReminderRoleHint(reminder.token_url);
+  if (!reminderUrlHint) return false;
+
+  return roleIds.some((roleId) => {
+    const roleNameHint = normalizeReminderRoleHint(allRoles.getRole(roleId)?.name);
+    const roleIdHint = normalizeReminderRoleHint(roleId);
+    return (
+      (!!roleNameHint && reminderUrlHint.includes(roleNameHint)) ||
+      (!!roleIdHint && reminderUrlHint.includes(roleIdHint))
+    );
+  });
 }
 
 function reminderNameForStatusEvent(event: {
@@ -1505,6 +1557,27 @@ function syncGrimoireEventsFromGrimoire(options?: {
   }
 
   /**
+   * Builds a reconciliation kind, including status source for status-style events,
+   * so reminder-driven OTHER/MAD/DRUNK/POISONED rows do not cross-match.
+   */
+  function eventReconciliationKind(
+    eventType: GrimoireEventType | null,
+    statusSource: string | null | undefined
+  ) {
+    const baseKind = eventKindFromValues(eventType);
+    if (
+      (eventType === GrimoireEventType.MAD ||
+        eventType === GrimoireEventType.DRUNK ||
+        eventType === GrimoireEventType.POISONED ||
+        eventType === GrimoireEventType.OTHER) &&
+      statusSource
+    ) {
+      return `${baseKind}:${normalizeReminderName(statusSource)}`;
+    }
+    return baseKind;
+  }
+
+  /**
    * Builds the reconciliation key for an expected event entry.
    */
   function expectedKey(grimoirePage: number, participantId: string, kind: string) {
@@ -1677,6 +1750,30 @@ function syncGrimoireEventsFromGrimoire(options?: {
           : 0;
         const currentCount = countReminderByName(token.reminders, config.reminder);
         if (currentCount <= previousCount) continue;
+        const addedMatchingNameReminders = addedRemindersByName(
+          token.reminders,
+          previousToken?.reminders,
+          config.reminder
+        );
+        if (addedMatchingNameReminders.length === 0) continue;
+        const addedRemindersWithRoleHint = addedMatchingNameReminders.filter(
+          (reminder) => !!normalizeReminderRoleHint(reminder.token_url)
+        );
+        if (
+          config.sourceRoleIds.length > 0 &&
+          addedRemindersWithRoleHint.length > 0 &&
+          !addedRemindersWithRoleHint.some((reminder) =>
+            reminderMatchesAnyRoleHint(reminder, config.sourceRoleIds)
+          )
+        ) {
+          continue;
+        }
+        if (
+          config.targetRoleIds?.length &&
+          (!token.role_id || !config.targetRoleIds.includes(token.role_id))
+        ) {
+          continue;
+        }
 
         const source = detectReminderEventSource(orderedTokens, config.sourceRoleIds);
         let affectedParticipantId = participantId;
@@ -1816,11 +1913,14 @@ function syncGrimoireEventsFromGrimoire(options?: {
   function takeExpectedByIdentity(event: GrimoireEventLike) {
     let bestKey: string | null = null;
     let bestScore = -1;
-    const kind = eventKindFromValues(event.event_type);
+    const kind = eventReconciliationKind(event.event_type, event.status_source);
 
     expected.forEach((candidate, candidateKey) => {
       if (candidate.grimoire_page !== event.grimoire_page) return;
-      const candidateKind = eventKindFromValues(candidate.event_type);
+      const candidateKind = eventReconciliationKind(
+        candidate.event_type,
+        candidate.status_source
+      );
       if (candidateKind !== kind) return;
 
       let score = 0;
@@ -1855,15 +1955,7 @@ function syncGrimoireEventsFromGrimoire(options?: {
   for (let i = events.length - 1; i >= 0; i -= 1) {
     const event = events[i];
     const eventType = event.event_type;
-    const baseKind = eventKindFromValues(eventType);
-    const kind =
-      (eventType === GrimoireEventType.MAD ||
-        eventType === GrimoireEventType.DRUNK ||
-        eventType === GrimoireEventType.POISONED ||
-        eventType === GrimoireEventType.OTHER) &&
-      event.status_source
-        ? `${baseKind}:${normalizeReminderName(event.status_source)}`
-        : baseKind;
+    const kind = eventReconciliationKind(event.event_type, event.status_source);
     const key = expectedKey(event.grimoire_page, event.participant_id, kind);
     let expectation = expected.get(key);
     if (expectation) {

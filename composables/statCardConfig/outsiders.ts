@@ -6,7 +6,7 @@ import {
   WinStatus_V2,
 } from "~/composables/useGames";
 import {
-  countEventsAffectingPlayer,
+  countMatchingEvents,
   countGrimoireEvents,
   getByRoleForEvent,
   getEventCurrentToken,
@@ -27,8 +27,9 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     // @todo: these are pairs so halve this number?
     id: "barber_role_swaps",
     category: "role",
+    scope: "as_role",
     roleIds: ["barber"],
-    script: 'snv',
+    script: "snv",
     sao: 3,
     source: "grimoire_event",
     label: "Shear Chaos",
@@ -45,14 +46,14 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     id: "butler_master_received",
     category: "role",
     roleIds: ["butler"],
-    script: 'tb',
+    scope: "affected_player",
+    script: "tb",
     sao: 1,
     source: "grimoire_event",
     label: "At Your Service",
-    getCount: ({ games, username }) =>
-      countEventsAffectingPlayer(
+    getCount: ({ games }) =>
+      countMatchingEvents(
         games,
-        username,
         (_, event) =>
           event.by_role_id === "butler" &&
           event.event_type === GrimoireEventType.OTHER &&
@@ -68,6 +69,7 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "damsel_game_endings",
     category: "role",
+    scope: "as_role",
     roleIds: ["damsel"],
     script: "experimental",
     source: "end_trigger",
@@ -93,6 +95,7 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "golem_kills",
     category: "role",
+    scope: "as_role",
     roleIds: ["golem"],
     script: "experimental",
     source: "grimoire_event",
@@ -102,24 +105,22 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Golem, you've has killed ${count} player${pluralize(count)} with your nomination.`
+          ? `As the Golem, you've killed ${count} player${pluralize(count)} with your nomination.`
           : `As the Golem, this player has killed ${count} player${pluralize(count)} with their nomination.`)
         : `As the Golem, kill a player with your nomination.`,
   },
   {
     id: "golem_evil_kills",
     category: "role",
+    scope: "as_role",
     roleIds: ["golem"],
     script: "experimental",
     source: "grimoire_event",
     label: "Crushing Evil",
     getCount: ({ games, roleId }) =>
-      games.reduce((total, game) => {
-        if (!roleId || game.ignore_for_stats) return total;
-
-        return (
-          total +
-          game.grimoire_events.filter((event) => {
+      !roleId
+        ? 0
+        : countMatchingEvents(games, (game, event) => {
             if (
               event.by_role_id !== roleId ||
               event.event_type !== GrimoireEventType.DEATH
@@ -134,9 +135,7 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
               currentToken?.alignment === "EVIL" ||
               previousToken?.alignment === "EVIL"
             );
-          }).length
-        );
-      }, 0),
+          }),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
@@ -147,8 +146,9 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "goon_alignment_changes",
     category: "role",
+    scope: "as_role",
     roleIds: ["goon"],
-    script: 'bmr',
+    script: "bmr",
     sao: 1,
     source: "grimoire_event",
     label: "Shifting Loyalties",
@@ -165,14 +165,14 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     id: "goon_drunk_received",
     category: "role",
     roleIds: ["goon"],
-    script: 'bmr',
+    scope: "affected_player",
+    script: "bmr",
     sao: 1,
     source: "grimoire_event",
     label: "A Friendly Explanation",
-    getCount: ({ games, username }) =>
-      countEventsAffectingPlayer(
+    getCount: ({ games }) =>
+      countMatchingEvents(
         games,
-        username,
         (_, event) =>
           event.event_type === GrimoireEventType.DRUNK &&
           event.by_role_id === "goon"
@@ -187,6 +187,7 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "hatter_role_changes",
     category: "role",
+    scope: "as_role",
     roleIds: ["hatter"],
     script: "experimental",
     source: "grimoire_event",
@@ -205,8 +206,9 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "klutz_game_endings",
     category: "role",
+    scope: "as_role",
     roleIds: ["klutz"],
-    script: 'snv',
+    script: "snv",
     sao: 4,
     source: "end_trigger",
     label: "Fatal Fumble",
@@ -224,12 +226,13 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
       count > 0
         ? (isMe
           ? `As the Klutz, you've ended ${count} game${pluralize(count)} by making the wrong choice.`
-          : `As the Klutz, this player has ended a game ${count} time${pluralize(count)} by making the wrong choice.`)
+          : `As the Klutz, this player has ended ${count} game${pluralize(count)} by making the wrong choice.`)
         : `As the Klutz, end a game due to your ability.`,
   },
   {
     id: "lunatic_followed_picks",
     category: "role",
+    scope: "as_role",
     roleIds: ["lunatic"],
     script: "snv",
     sao: 2,
@@ -268,8 +271,9 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "moonchild_kills",
     category: "role",
+    scope: "as_role",
     roleIds: ["moonchild"],
-    script: 'bmr',
+    script: "bmr",
     sao: 4,
     source: "grimoire_event",
     label: "Star-Crossed",
@@ -285,17 +289,15 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "moonchild_spy_kills",
     category: "role",
+    scope: "as_role",
     roleIds: ["moonchild"],
     script: "experimental", // Not possible on their base script
     source: "grimoire_event",
     label: "A Crooked Constellation",
     getCount: ({ games, roleId }) =>
-      games.reduce((total, game) => {
-        if (!roleId || game.ignore_for_stats) return total;
-
-        return (
-          total +
-          game.grimoire_events.filter((event) => {
+      !roleId
+        ? 0
+        : countMatchingEvents(games, (game, event) => {
             if (
               event.by_role_id !== roleId ||
               event.event_type !== GrimoireEventType.DEATH
@@ -310,9 +312,7 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
               currentToken?.role_id === "spy" ||
               previousToken?.role_id === "spy"
             );
-          }).length
-        );
-      }, 0),
+          }),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
@@ -323,8 +323,9 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "mutant_executions",
     category: "role",
+    scope: "as_role",
     roleIds: ["mutant"],
-    script: 'snv',
+    script: "snv",
     sao: 1,
     source: "grimoire_event",
     label: "Slip of the Tongue",
@@ -340,6 +341,7 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "ogre_alignment_changes",
     category: "role",
+    scope: "as_role",
     roleIds: ["ogre"],
     script: "experimental",
     source: "grimoire_event",
@@ -356,24 +358,21 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "plague_doctor_storyteller_abilities",
     category: "role",
+    scope: "as_role",
     roleIds: ["plague_doctor"],
     script: "experimental",
     source: "grimoire_event",
     label: "Doctor's Orders",
     getCount: ({ games, roleId }) =>
-      games.reduce((total, game) => {
-        if (!roleId || game.ignore_for_stats) return total;
-
-        return (
-          total +
-          game.grimoire_events.filter(
-            (event) =>
+      !roleId
+        ? 0
+        : countMatchingEvents(
+            games,
+            (_, event) =>
               event.by_role_id === roleId &&
               event.event_type === GrimoireEventType.OTHER &&
               event.status_source === "Storyteller Ability"
-          ).length
-        );
-      }, 0),
+          ),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
@@ -384,6 +383,7 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "politician_alignment_changes",
     category: "role",
+    scope: "as_role",
     roleIds: ["politician"],
     script: "experimental",
     source: "grimoire_event",
@@ -400,25 +400,22 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "puzzlemaster_guesses_used",
     category: "role",
+    scope: "as_role",
     roleIds: ["puzzlemaster"],
     script: "snv",
     sao: 4,
     source: "grimoire_event",
     label: "Brain Teaser",
     getCount: ({ games, roleId }) =>
-      games.reduce((total, game) => {
-        if (!roleId || game.ignore_for_stats) return total;
-
-        return (
-          total +
-          game.grimoire_events.filter(
-            (event) =>
+      !roleId
+        ? 0
+        : countMatchingEvents(
+            games,
+            (_, event) =>
               event.by_role_id === roleId &&
               event.event_type === GrimoireEventType.OTHER &&
               event.status_source === "Guess Used"
-          ).length
-        );
-      }, 0),
+          ),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
@@ -429,18 +426,16 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "puzzlemaster_correct_guesses",
     category: "role",
+    scope: "as_role",
     roleIds: ["puzzlemaster"],
     script: "snv",
     sao: 4,
     source: "grimoire_event",
     label: "Solved",
     getCount: ({ games, roleId }) =>
-      games.reduce((total, game) => {
-        if (!roleId || game.ignore_for_stats) return total;
-
-        return (
-          total +
-          game.grimoire_events.filter((event) => {
+      !roleId
+        ? 0
+        : countMatchingEvents(games, (game, event) => {
             if (
               event.by_role_id !== roleId ||
               event.event_type !== GrimoireEventType.OTHER ||
@@ -456,9 +451,7 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
               currentToken?.role?.type === "DEMON" ||
               previousToken?.role?.type === "DEMON"
             );
-          }).length
-        );
-      }, 0),
+          }),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
@@ -470,14 +463,14 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     id: "puzzlemaster_drunk_received",
     category: "role",
     roleIds: ["puzzlemaster"],
+    scope: "affected_player",
     script: "snv",
     sao: 4,
     source: "grimoire_event",
     label: "Puzzledrunk",
-    getCount: ({ games, username }) =>
-      countEventsAffectingPlayer(
+    getCount: ({ games }) =>
+      countMatchingEvents(
         games,
-        username,
         (_, event) =>
           event.event_type === GrimoireEventType.DRUNK &&
           event.by_role_id === "puzzlemaster"
@@ -492,33 +485,40 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "recluse_fortune_teller_received",
     category: "role",
+    scope: "affected_player",
     script: "tb",
     roleIds: ["recluse"],
     sao: 3,
     source: "grimoire_event",
     label: "Unlucky Reading",
     getCount: ({ games, username }) =>
-      countEventsAffectingPlayer(
-        games,
-        username,
-        (game, event) => {
-          if (
-            event.event_type !== GrimoireEventType.OTHER ||
-            event.by_role_id !== "fortune_teller" ||
-            event.status_source !== "Yes"
-          ) {
-            return false;
-          }
+      !username
+        ? 0
+        : countMatchingEvents(
+            games,
+            (game, event) => {
+              if (
+                event.event_type !== GrimoireEventType.OTHER ||
+                event.by_role_id !== "fortune_teller" ||
+                event.status_source !== "Yes"
+              ) {
+                return false;
+              }
 
-          const currentToken = getEventCurrentToken(game, event);
-          const previousToken = getEventPreviousToken(game, event);
+              const currentToken = getEventCurrentToken(game, event);
+              const previousToken = getEventPreviousToken(game, event);
 
-          return (
-            currentToken?.role_id === "recluse" ||
-            previousToken?.role_id === "recluse"
-          );
-        }
-      ),
+              const isThisPlayerTarget =
+                currentToken?.player?.username === username ||
+                previousToken?.player?.username === username;
+              if (!isThisPlayerTarget) return false;
+
+              return (
+                currentToken?.role_id === "recluse" ||
+                previousToken?.role_id === "recluse"
+              );
+            }
+          ),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
@@ -529,15 +529,15 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "recluse_investigator_received",
     category: "role",
+    scope: "affected_player",
     script: "tb",
     roleIds: ["recluse"],
     sao: 3,
     source: "grimoire_event",
     label: "Framed Suspect",
-    getCount: ({ games, username }) =>
-      countEventsAffectingPlayer(
+    getCount: ({ games }) =>
+      countMatchingEvents(
         games,
-        username,
         (game, event) => {
           if (
             event.event_type !== GrimoireEventType.OTHER ||
@@ -567,14 +567,14 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     id: "recluse_imp_starpasses_received",
     category: "role",
     roleIds: ["recluse"],
+    scope: "affected_player",
     script: "tb",
     sao: 3,
     source: "grimoire_event",
     label: "Yes, But Don't",
-    getCount: ({ games, username }) =>
-      countEventsAffectingPlayer(
+    getCount: ({ games }) =>
+      countMatchingEvents(
         games,
-        username,
         (game, event) => {
           if (
             event.event_type !== GrimoireEventType.ROLE_CHANGE ||
@@ -602,8 +602,9 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "saint_game_endings",
     category: "role",
+    scope: "as_role",
     roleIds: ["saint"],
-    script: 'tb',
+    script: "tb",
     sao: 2,
     source: "end_trigger",
     label: "Holy Misfire",
@@ -628,54 +629,31 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     id: "saint_game_endings_caused",
     category: "role",
     roleIds: ["saint"],
-    script: 'tb',
+    scope: "triggering_player",
+    script: "tb",
     sao: 2,
     hidden: true,
     source: "end_trigger",
     label: "Condemned the Holy",
-    getCount: ({ games, username }) => {
-      if (!username) return 0;
-
-      return games.reduce((total, game) => {
-        if (game.ignore_for_stats) return total;
-
+    getCount: ({ games }) =>
+      countMatchingEvents(games, (game, event) => {
         const endedBySaintAbility =
           game.end_trigger === GameEndTrigger.CHARACTER_ABILITY &&
           game.end_trigger_type === GameEndTriggerType.EXTRA_WIN_CONDITION &&
           game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
           game.end_trigger_role_id === "saint";
-        if (!endedBySaintAbility) return total;
+        if (!endedBySaintAbility || event.event_type !== GrimoireEventType.EXECUTION) {
+          return false;
+        }
 
-        const participantIds = new Set(
-          game.grimoire
-            .flatMap((page) => page.tokens)
-            .filter((token) => token.player?.username === username)
-            .map((token) => token.grimoire_participant_id)
-            .filter((id): id is string => !!id)
+        const currentToken = getEventCurrentToken(game, event);
+        const previousToken = getEventPreviousToken(game, event);
+
+        return (
+          currentToken?.role_id === "saint" ||
+          previousToken?.role_id === "saint"
         );
-        if (!participantIds.size) return total;
-
-        const causedSaintExecution = game.grimoire_events.some((event) => {
-          if (
-            event.event_type !== GrimoireEventType.EXECUTION ||
-            !event.by_participant_id ||
-            !participantIds.has(event.by_participant_id)
-          ) {
-            return false;
-          }
-
-          const currentToken = getEventCurrentToken(game, event);
-          const previousToken = getEventPreviousToken(game, event);
-
-          return (
-            currentToken?.role_id === "saint" ||
-            previousToken?.role_id === "saint"
-          );
-        });
-
-        return total + (causedSaintExecution ? 1 : 0);
-      }, 0);
-    },
+      }),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
@@ -687,8 +665,9 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "sweetheart_drunk_on_death",
     category: "role",
+    scope: "as_role",
     roleIds: ["sweetheart"],
-    script: 'snv',
+    script: "snv",
     sao: 2,
     source: "grimoire_event",
     label: "Heartbreak Hangover",
@@ -705,14 +684,14 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     id: "sweetheart_drunk_received",
     category: "role",
     roleIds: ["sweetheart"],
-    script: 'snv',
+    scope: "affected_player",
+    script: "snv",
     sao: 2,
     source: "grimoire_event",
     label: "Grief-Struck",
-    getCount: ({ games, username }) =>
-      countEventsAffectingPlayer(
+    getCount: ({ games }) =>
+      countMatchingEvents(
         games,
-        username,
         (_, event) =>
           event.event_type === GrimoireEventType.DRUNK &&
           event.by_role_id === "sweetheart"
@@ -727,8 +706,9 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "tinker_deaths_self",
     category: "role",
+    scope: "as_role",
     roleIds: ["tinker"],
-    script: 'bmr',
+    script: "bmr",
     sao: 3,
     source: "grimoire_event",
     label: "Oops!",
