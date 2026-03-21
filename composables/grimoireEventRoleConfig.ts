@@ -26,7 +26,6 @@ export const GRIMOIRE_EVENT_ROLE_INCLUDES: Record<GrimoireEventType, RoleInclude
     "gossip",
     "grandmother",
     "lycanthrope",
-    "mayor", // Is this correct?
     "slayer",
     "golem",
     "moonchild",

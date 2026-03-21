@@ -71,6 +71,21 @@
       >
         {{ result.subtitle }}
       </p>
+
+      <p
+        v-if="result.debugGameLinks?.length"
+        class="text-xs text-stone-500 dark:text-stone-400"
+      >
+        Counted games:
+        <NuxtLink
+          v-for="(gameLink, index) in result.debugGameLinks"
+          :key="gameLink.id"
+          :to="gameLink.href"
+          class="underline"
+        >
+          {{ index === 0 ? "" : ", " }}link
+        </NuxtLink>
+      </p>
     </div>
 
     <div
@@ -94,6 +109,10 @@ const props = withDefaults(
         sentence: string;
         subtitle?: string | null;
         isHiddenLocked?: boolean;
+        debugGameLinks?: Array<{
+          id: number;
+          href: string;
+        }>;
         displayRole?: {
           id: string;
           name: string;

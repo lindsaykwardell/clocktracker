@@ -6,7 +6,7 @@ import {
   WinStatus_V2,
 } from "~/composables/useGames";
 import {
-  countEventsAffectingPlayer,
+  countMatchingEvents,
   countGrimoireEvents,
   getByRoleForEvent,
   getEventCurrentToken,
@@ -25,20 +25,23 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
     id: "angel_deaths",
     category: "role",
     roleIds: ["angel"],
+    scope: "affected_player",
     script: "npc",
     source: "grimoire_event",
     label: "Divine Retribution",
-    getCount: ({ games, username }) =>
-      countEventsAffectingPlayer(
+    hidden: true,
+    getCount: ({ games }) =>
+      countMatchingEvents(
         games,
-        username,
         (_, event) =>
           event.event_type === GrimoireEventType.DEATH &&
           event.by_role_id === "angel"
       ),
     getSentence: ({ count, isMe }) =>
       count > 0
-        ? `${isMe ? "You've" : "This player has"} been struck down by the Angel ${count} time${pluralize(count)}.`
+        ? (isMe
+          ? `You've been struck down by the Angel ${count} time${pluralize(count)}.`
+          : `This player has been struck down by the Angel ${count} time${pluralize(count)}.`)
         : `Be struck down by the Angel.`,
   },
   // Angel: @todo Protected?
@@ -47,46 +50,52 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
     id: "doomsayer_deaths",
     category: "role",
     roleIds: ["doomsayer"],
+    scope: "affected_player",
     script: "npc",
     source: "grimoire_event",
     label: "Woe Is Me",
-    getCount: ({ games, username }) =>
-      countEventsAffectingPlayer(
+    getCount: ({ games }) =>
+      countMatchingEvents(
         games,
-        username,
         (_, event) =>
           event.event_type === GrimoireEventType.DEATH &&
           event.by_role_id === "doomsayer"
       ),
     getSentence: ({ count, isMe }) =>
       count > 0
-        ? `${isMe ? "You've" : "This player has"} died to the Doomsayer ${count} time${pluralize(count)}.`
+        ? (isMe
+          ? `You've died to the Doomsayer ${count} time${pluralize(count)}.`
+          : `This player has died to the Doomsayer ${count} time${pluralize(count)}.`)
         : `Die to the Doomsayer.`,
   },
   {
     id: "hells_librarian_deaths",
     category: "role",
     roleIds: ["hells_librarian"],
+    scope: "affected_player",
     script: "npc",
     source: "grimoire_event",
     label: "Library Fine",
-    getCount: ({ games, username }) =>
-      countEventsAffectingPlayer(
+    hidden: true,
+    getCount: ({ games }) =>
+      countMatchingEvents(
         games,
-        username,
         (_, event) =>
           event.event_type === GrimoireEventType.DEATH &&
           event.by_role_id === "hells_librarian"
       ),
     getSentence: ({ count, isMe }) =>
       count > 0
-        ? `${isMe ? "Hell's Librarian has" : "Hell's Librarian has"} fined ${isMe ? "you" : "this player"} with death ${count} time${pluralize(count)}.`
+        ? (isMe
+          ? `You've been fined with death by the Hell's Librarian ${count} time${pluralize(count)}.`
+          : `This player has been fined with death by the Hell's Librarian ${count} time${pluralize(count)}.`)
         : `Die due to Hell's Librarian.`,
   },
   {
     id: "fiddler_game_end_trigger_received",
     category: "role",
     roleIds: ["fiddler"],
+    scope: "affected_player",
     script: "npc",
     source: "game",
     label: "Curtain Call",
@@ -101,8 +110,8 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `Your game has ended due to the Fiddler ${count} time${pluralize(count)}.`
-          : `This player's game has ended due to the Fiddler ${count} time${pluralize(count)}.`)
+          ? `You have had games end due to the Fiddler ${count} time${pluralize(count)}.`
+          : `This player has had games end due to the Fiddler ${count} time${pluralize(count)}.`)
         : `Have a game end due to the Fiddler.`,
   },
   // Revolutionary: Nothing to track really.
@@ -118,13 +127,13 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
     id: "big_wig_deaths_received",
     category: "role",
     roleIds: ["big_wig"],
+    scope: "affected_player",
     script: "npc",
     source: "grimoire_event",
     label: "Off With Their Head",
-    getCount: ({ games, username }) =>
-      countEventsAffectingPlayer(
+    getCount: ({ games }) =>
+      countMatchingEvents(
         games,
-        username,
         (_, event) =>
           event.by_role_id === "bigwig" &&
           event.event_type === GrimoireEventType.DEATH &&
@@ -143,13 +152,13 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
     id: "hindu_revives",
     category: "role",
     roleIds: ["hindu"],
+    scope: "affected_player",
     script: "npc",
     source: "grimoire_event",
     label: "Reincarnated",
-    getCount: ({ games, username }) =>
-      countEventsAffectingPlayer(
+    getCount: ({ games }) =>
+      countMatchingEvents(
         games,
-        username,
         (_, event) =>
           event.event_type === GrimoireEventType.REVIVE &&
           event.by_role_id === "hindu"
@@ -164,13 +173,13 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
     id: "storm_catcher_protected_received",
     category: "role",
     roleIds: ["storm_catcher"],
+    scope: "affected_player",
     script: "npc",
     source: "grimoire_event",
     label: "Eye of the Storm",
-    getCount: ({ games, username }) =>
-      countEventsAffectingPlayer(
+    getCount: ({ games }) =>
+      countMatchingEvents(
         games,
-        username,
         (_, event) =>
           event.by_role_id === "stormcatcher" &&
           event.event_type === GrimoireEventType.OTHER &&
@@ -189,13 +198,13 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
     id: "zenomancer_goals_assigned_received",
     category: "role",
     roleIds: ["zenomancer"],
+    scope: "affected_player",
     script: "npc",
     source: "grimoire_event",
     label: "Threads of Fate",
-    getCount: ({ games, username }) =>
-      countEventsAffectingPlayer(
+    getCount: ({ games }) =>
+      countMatchingEvents(
         games,
-        username,
         (_, event) =>
           event.by_role_id === "zenomancer" &&
           event.event_type === GrimoireEventType.OTHER &&
@@ -212,13 +221,13 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
     id: "zenomancer_goals_completed_received",
     category: "role",
     roleIds: ["zenomancer"],
+    scope: "affected_player",
     script: "npc",
     source: "grimoire_event",
     label: "Destiny Fulfilled",
-    getCount: ({ games, username }) =>
-      countEventsAffectingPlayer(
+    getCount: ({ games }) =>
+      countMatchingEvents(
         games,
-        username,
         (_, event) =>
           event.by_role_id === "zenomancer" &&
           event.event_type === GrimoireEventType.OTHER &&

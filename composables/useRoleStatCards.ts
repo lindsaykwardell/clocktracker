@@ -46,6 +46,7 @@ export type RoleStatCardResult = {
   subtitle?: string | null;
   displayRole?: RoleStatCardDisplayRole | null;
   isHiddenLocked?: boolean;
+  debugGameLinks?: Array<{ id: number; href: string }>;
 };
 
 type RoleStatCardContext = {
@@ -63,6 +64,7 @@ export type RoleStatCardDefinition = {
   script?: string | null;
   sao?: number;
   hidden?: boolean;
+  scope?: "as_role" | "affected_player" | "triggering_player";
   source: string;
   label: string;
   getCount: (context: RoleStatCardContext) => number;
@@ -135,16 +137,43 @@ export function buildRoleStatCardResult(
       metricLabel: "Unknown Stat Card",
       subtitle: null,
       displayRole: null,
+      debugGameLinks: [],
     };
   }
 
-  const count = definition.getCount({
+  const scopedGames = getScopedGamesForRole(
     games,
+    username,
+    card.role_id,
+    definition.category,
+    definition.scope ?? "as_role"
+  );
+
+  const count = definition.getCount({
+    games: scopedGames,
     roleId: card.role_id,
     roleName,
     isMe,
     username,
   });
+  const debugGameLinks = scopedGames
+    .filter((game) => {
+      if (game.ignore_for_stats) return false;
+
+      return (
+        definition.getCount({
+          games: [game],
+          roleId: card.role_id,
+          roleName,
+          isMe,
+          username,
+        }) > 0
+      );
+    })
+    .map((game) => ({
+      id: game.id,
+      href: `/game/${game.id}`,
+    }));
   const isHiddenLocked = !!definition.hidden && count === 0;
 
   return {
@@ -153,19 +182,20 @@ export function buildRoleStatCardResult(
     sentence: isHiddenLocked
       ? "Details for this stat will be shown when unlocked."
       : definition.getSentence({
-      games,
+      games: scopedGames,
       count,
         roleId: card.role_id,
         roleName,
         isMe,
         username,
       }),
+    debugGameLinks,
     isHiddenLocked,
     subtitle:
       isHiddenLocked
         ? null
         : definition.getSubtitle?.({
-        games,
+        games: scopedGames,
         count,
         roleId: card.role_id,
         roleName,
@@ -176,7 +206,7 @@ export function buildRoleStatCardResult(
       isHiddenLocked
         ? null
         : definition.getDisplayRole?.({
-        games,
+        games: scopedGames,
         count,
         roleId: card.role_id,
         roleName,
@@ -196,8 +226,16 @@ export function buildRoleStatCardPreview(
   const definition = getRoleStatCardDefinition(definitionId);
   if (!definition) return null;
 
-  const count = definition.getCount({
+  const scopedGames = getScopedGamesForRole(
     games,
+    username,
+    role?.id ?? null,
+    definition.category,
+    definition.scope ?? "as_role"
+  );
+
+  const count = definition.getCount({
+    games: scopedGames,
     roleId: role?.id ?? null,
     roleName: role?.name ?? null,
     isMe,
@@ -218,19 +256,37 @@ export function buildRoleStatCardPreview(
       sentence: isHiddenLocked
         ? "Details for this stat will be shown when unlocked."
         : definition.getSentence({
-        games,
+        games: scopedGames,
         count,
           roleId: role?.id ?? null,
           roleName: role?.name ?? null,
           isMe,
           username,
         }),
+      debugGameLinks: scopedGames
+        .filter((game) => {
+          if (game.ignore_for_stats) return false;
+
+          return (
+            definition.getCount({
+              games: [game],
+              roleId: role?.id ?? null,
+              roleName: role?.name ?? null,
+              isMe,
+              username,
+            }) > 0
+          );
+        })
+        .map((game) => ({
+          id: game.id,
+          href: `/game/${game.id}`,
+        })),
       isHiddenLocked,
       subtitle:
         isHiddenLocked
           ? null
           : definition.getSubtitle?.({
-          games,
+          games: scopedGames,
           count,
           roleId: role?.id ?? null,
           roleName: role?.name ?? null,
@@ -241,7 +297,7 @@ export function buildRoleStatCardPreview(
         isHiddenLocked
           ? null
           : definition.getDisplayRole?.({
-          games,
+          games: scopedGames,
           count,
           roleId: role?.id ?? null,
           roleName: role?.name ?? null,
@@ -252,34 +308,74 @@ export function buildRoleStatCardPreview(
   };
 }
 
-function countEventsAffectingPlayer(
+function getScopedGamesForRole(
   games: GameRecord[],
   username: string | undefined,
-  predicate: (game: GameRecord, event: GameRecord["grimoire_events"][number]) => boolean
+  roleId: string | null | undefined,
+  category: RoleStatCardCategory,
+  scope: "as_role" | "affected_player" | "triggering_player"
 ) {
-  if (!username) return 0;
-
-  let total = 0;
-
-  for (const game of games) {
-    if (game.ignore_for_stats) continue;
-
-    const participantIds = new Set(
-      game.grimoire
-        .flatMap((page) => page.tokens)
-        .filter((token) => token.player?.username === username)
-        .map((token) => token.grimoire_participant_id)
-        .filter((id): id is string => !!id)
-    );
-
-    if (!participantIds.size) continue;
-
-    total += game.grimoire_events.filter(
-      (event) => participantIds.has(event.participant_id) && predicate(game, event)
-    ).length;
+  if (category !== "role" || !username) {
+    return games;
   }
 
-  return total;
+  if (scope === "affected_player") {
+    return games.flatMap((game) => {
+      const participantIds = new Set(
+        game.grimoire
+          .flatMap((page) => page.tokens)
+          .filter((token) => token.player?.username === username)
+          .map((token) => token.grimoire_participant_id)
+          .filter((id): id is string => !!id)
+      );
+
+      if (!participantIds.size) return [];
+
+      return [
+        {
+          ...game,
+          grimoire_events: game.grimoire_events.filter((event) =>
+            participantIds.has(event.participant_id)
+          ),
+        },
+      ];
+    });
+  }
+
+  if (scope === "triggering_player") {
+    return games.flatMap((game) => {
+      const participantIds = new Set(
+        game.grimoire
+          .flatMap((page) => page.tokens)
+          .filter((token) => token.player?.username === username)
+          .map((token) => token.grimoire_participant_id)
+          .filter((id): id is string => !!id)
+      );
+
+      if (!participantIds.size) return [];
+
+      return [
+        {
+          ...game,
+          grimoire_events: game.grimoire_events.filter(
+            (event) =>
+              !!event.by_participant_id &&
+              participantIds.has(event.by_participant_id)
+          ),
+        },
+      ];
+    });
+  }
+
+  if (!roleId) return games;
+
+  return games.filter((game) =>
+    game.grimoire.some((page) =>
+      page.tokens.some(
+        (token) => token.player?.username === username && token.role_id === roleId
+      )
+    )
+  );
 }
 
 function countGrimoireEvents(

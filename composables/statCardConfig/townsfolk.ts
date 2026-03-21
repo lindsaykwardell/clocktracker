@@ -6,7 +6,7 @@ import {
   WinStatus_V2,
 } from "~/composables/useGames";
 import {
-  countEventsAffectingPlayer,
+  countMatchingEvents,
   countGrimoireEvents,
   getByRoleForEvent,
   getEventCurrentToken,
@@ -24,6 +24,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "acrobat_self_deaths",
     category: "role",
+    scope: "as_role",
     roleIds: ["acrobat"],
     script: "experimental",
     source: "grimoire_event",
@@ -41,6 +42,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "alsaahir_game_endings",
     category: "role",
+    scope: "as_role",
     roleIds: ["alsaahir"],
     script: "experimental",
     source: "end_trigger",
@@ -65,24 +67,21 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "amnesiac_ability_guesses",
     category: "role",
+    scope: "as_role",
     roleIds: ["amnesiac"],
     script: "experimental",
     source: "grimoire_event",
     label: "That's a Bingo!",
     getCount: ({ games, roleId }) =>
-      games.reduce((total, game) => {
-        if (!roleId || game.ignore_for_stats) return total;
-
-        return (
-          total +
-          game.grimoire_events.filter(
-            (event) =>
+      !roleId
+        ? 0
+        : countMatchingEvents(
+            games,
+            (_, event) =>
               event.by_role_id === roleId &&
               event.event_type === GrimoireEventType.OTHER &&
               event.status_source === "Bingo"
-          ).length
-        );
-      }, 0),
+          ),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
@@ -93,25 +92,22 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "artist_ability_uses",
     category: "role",
+    scope: "as_role",
     roleIds: ["artist"],
     script: "snv",
     sao: 11,
     source: "grimoire_event",
     label: "Single Stroke",
     getCount: ({ games, roleId }) =>
-      games.reduce((total, game) => {
-        if (!roleId || game.ignore_for_stats) return total;
-
-        return (
-          total +
-          game.grimoire_events.filter(
-            (event) =>
+      !roleId
+        ? 0
+        : countMatchingEvents(
+            games,
+            (_, event) =>
               event.by_role_id === roleId &&
               event.event_type === GrimoireEventType.OTHER &&
               event.status_source === "No Ability"
-          ).length
-        );
-      }, 0),
+          ),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
@@ -124,24 +120,21 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "banshee_awakenings",
     category: "role",
+    scope: "as_role",
     roleIds: ["banshee"],
     script: "experimental",
     source: "grimoire_event",
     label: "Awakened Fury",
     getCount: ({ games, roleId }) =>
-      games.reduce((total, game) => {
-        if (!roleId || game.ignore_for_stats) return total;
-
-        return (
-          total +
-          game.grimoire_events.filter(
-            (event) =>
+      !roleId
+        ? 0
+        : countMatchingEvents(
+            games,
+            (_, event) =>
               event.by_role_id === roleId &&
               event.event_type === GrimoireEventType.OTHER &&
               event.status_source === "Has Ability"
-          ).length
-        );
-      }, 0),
+          ),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
@@ -152,6 +145,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "bounty_hunter_townsfolk_turned_evil",
     category: "role",
+    scope: "as_role",
     roleIds: ["bounty_hunter"],
     script: "experimental",
     source: "grimoire_event",
@@ -192,6 +186,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "bounty_hunter_evil_executions",
     category: "role",
+    scope: "as_role",
     script: "experimental",
     roleIds: ["bounty_hunter"],
     source: "grimoire_event",
@@ -230,14 +225,14 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "bounty_hunter_alignment_changes_received",
     category: "role",
+    scope: "affected_player",
     script: "experimental",
     roleIds: ["bounty_hunter"],
     source: "grimoire_event",
     label: "I Was Framed",
-    getCount: ({ games, username }) =>
-      countEventsAffectingPlayer(
+    getCount: ({ games }) =>
+      countMatchingEvents(
         games,
-        username,
         (game, event) => {
           if (
             event.by_role_id !== "bounty_hunter" ||
@@ -260,6 +255,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "cannibal_good_lunches",
     category: "role",
+    scope: "as_role",
     script: "experimental",
     roleIds: ["cannibal"],
     source: "grimoire_event",
@@ -299,6 +295,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "cannibal_evil_lunches",
     category: "role",
+    scope: "as_role",
     script: "experimental",
     roleIds: ["cannibal"],
     source: "grimoire_event",
@@ -317,6 +314,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "choirboy_demon_reveals",
     category: "role",
+    scope: "as_role",
     roleIds: ["choirboy"],
     script: "experimental",
     source: "grimoire_event",
@@ -357,11 +355,12 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     id: "choirboy_demon_reveals_received",
     category: "role",
     roleIds: ["choirboy"],
+    scope: "affected_player",
     script: "experimental",
     source: "grimoire_event",
     label: "Royal Suspect",
-    getCount: ({ games, username }) =>
-      countEventsAffectingPlayer(games, username, (game, event) => {
+    getCount: ({ games }) =>
+      countMatchingEvents(games, (game, event) => {
         if (
           event.by_role_id !== "choirboy" ||
           event.event_type !== GrimoireEventType.OTHER ||
@@ -389,6 +388,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "courtier_drunk",
     category: "role",
+    scope: "as_role",
     roleIds: ["courtier"],
     script: "bmr",
     sao: 8,
@@ -407,14 +407,14 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     id: "courtier_drunk_received",
     category: "role",
     roleIds: ["courtier"],
+    scope: "affected_player",
     script: "bmr",
     sao: 8,
     source: "grimoire_event",
     label: "Three-Day Hangover",
-    getCount: ({ games, username }) =>
-      countEventsAffectingPlayer(
+    getCount: ({ games }) =>
+      countMatchingEvents(
         games,
-        username,
         (_, event) =>
           event.event_type === GrimoireEventType.DRUNK &&
           event.by_role_id === "courtier"
@@ -429,6 +429,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "cult_leader_alignment_changes",
     category: "role",
+    scope: "as_role",
     script: "experimental",
     roleIds: ["cult_leader"],
     source: "grimoire_event",
@@ -445,6 +446,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "cult_leader_evil_cults",
     category: "role",
+    scope: "as_role",
     script: "experimental",
     roleIds: ["cult_leader"],
     source: "end_trigger",
@@ -470,6 +472,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "cult_leader_good_cults",
     category: "role",
+    scope: "as_role",
     script: "experimental",
     roleIds: ["cult_leader"],
     source: "end_trigger",
@@ -495,6 +498,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "dreamer_demon_picks",
     category: "role",
+    scope: "as_role",
     roleIds: ["dreamer"],
     script: "snv",
     sao: 2,
@@ -536,6 +540,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "engineer_uses",
     category: "role",
+    scope: "as_role",
     script: "experimental",
     roleIds: ["engineer"],
     source: "grimoire_event",
@@ -574,6 +579,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "exorcist_demon_picks",
     category: "role",
+    scope: "as_role",
     roleIds: ["exorcist"],
     script: "bmr",
     sao: 4,
@@ -614,6 +620,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "farmer_role_changes",
     category: "role",
+    scope: "as_role",
     script: "experimental",
     roleIds: ["farmer"],
     source: "grimoire_event",
@@ -630,54 +637,48 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "fisherman_advice_used",
     category: "role",
+    scope: "as_role",
     script: "experimental",
     roleIds: ["fisherman"],
     source: "grimoire_event",
     label: "Gone Fishing",
     getCount: ({ games, roleId }) =>
-      games.reduce((total, game) => {
-        if (!roleId || game.ignore_for_stats) return total;
-
-        return (
-          total +
-          game.grimoire_events.filter(
-            (event) =>
+      !roleId
+        ? 0
+        : countMatchingEvents(
+            games,
+            (_, event) =>
               event.by_role_id === roleId &&
               event.event_type === GrimoireEventType.OTHER &&
               event.status_source === "No Ability"
-          ).length
-        );
-      }, 0),
+          ),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Fisherman, you've asked the storyteller for advice ${count} time${pluralize(count)}.`
-          : `As the Fisherman, this player has asked the storyteller for advice ${count} time${pluralize(count)}.`)
-        : `As the Fisherman, ask the storyteller for advice.`,
+          ? `As the Fisherman, you've asked the Storyteller for advice ${count} time${pluralize(count)}.`
+          : `As the Fisherman, this player has asked the Storyteller for advice ${count} time${pluralize(count)}.`)
+        : `As the Fisherman, ask the Storyteller for advice.`,
   },
   // Flowergirl [sao: 5]: Nothing relevant. Only option: How many times they got a yes?
   {
     id: "fool_saved_from_death",
     category: "role",
+    scope: "as_role",
     roleIds: ["fool"],
     script: "bmr",
     sao: 13,
     source: "grimoire_event",
     label: "Not Today",
     getCount: ({ games, roleId }) =>
-      games.reduce((total, game) => {
-        if (!roleId || game.ignore_for_stats) return total;
-
-        return (
-          total +
-          game.grimoire_events.filter(
-            (event) =>
+      !roleId
+        ? 0
+        : countMatchingEvents(
+            games,
+            (_, event) =>
               event.by_role_id === roleId &&
               event.event_type === GrimoireEventType.OTHER &&
               event.status_source === "No Ability"
-          ).length
-        );
-      }, 0),
+          ),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
@@ -688,6 +689,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "fortune_teller_demon",
     category: "role",
+    scope: "as_role",
     script: "tb",
     sao: 6,
     roleIds: ["fortune_teller"],
@@ -722,12 +724,13 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
       count > 0
         ? (isMe
           ? `As the Fortune Teller, you've got a "Yes" on the Demon ${count} time${pluralize(count)}.`
-          : `As the Fortune Teller, this player has got a "Yes" on the Demon ${count} time${pluralize(count)}.`)
+          : `As the Fortune Teller, this player has gotten a "Yes" on the Demon ${count} time${pluralize(count)}.`)
         : `As the Fortune Teller, get a "Yes" on the Demon.`,
   },
   {
     id: "fortune_teller_recluse",
     category: "role",
+    scope: "as_role",
     script: "tb",
     sao: 6,
     roleIds: ["fortune_teller"],
@@ -762,21 +765,21 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
       count > 0
         ? (isMe
           ? `As the Fortune Teller, you've got a "Yes" on the Recluse ${count} time${pluralize(count)}.`
-          : `As the Fortune Teller, this player has got a "Yes" on the Recluse ${count} time${pluralize(count)}.`)
+          : `As the Fortune Teller, this player has gotten a "Yes" on the Recluse ${count} time${pluralize(count)}.`)
         : `As the Fortune Teller, get a "Yes" on the Recluse.`,
   },
   {
     id: "fortune_teller_red_herring_received",
     category: "role",
+    scope: "affected_player",
     script: "tb",
     sao: 6,
     roleIds: ["fortune_teller"],
     source: "grimoire_event",
     label: "False Trail",
-    getCount: ({ games, username }) =>
-      countEventsAffectingPlayer(
+    getCount: ({ games }) =>
+      countMatchingEvents(
         games,
-        username,
         (_, event) =>
           event.event_type === GrimoireEventType.OTHER &&
           event.by_role_id === "fortune_teller" &&
@@ -792,6 +795,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "gambler_self_deaths",
     category: "role",
+    scope: "as_role",
     roleIds: ["gambler"],
     script: "bmr",
     sao: 6,
@@ -810,6 +814,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "gossip_kills",
     category: "role",
+    scope: "as_role",
     roleIds: ["gossip"],
     script: "bmr",
     sao: 7,
@@ -827,6 +832,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "grandmother_ability_deaths",
     category: "role",
+    scope: "as_role",
     roleIds: ["grandmother"],
     script: "bmr",
     sao: 1,
@@ -844,6 +850,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "high_priestess_evil_visits",
     category: "role",
+    scope: "as_role",
     roleIds: ["high_priestess"],
     script: "experimental",
     source: "grimoire_event",
@@ -883,6 +890,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "huntsman_damsel_saves",
     category: "role",
+    scope: "as_role",
     roleIds: ["huntsman"],
     script: "experimental",
     source: "grimoire_event",
@@ -899,24 +907,21 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "huntsman_ability_uses",
     category: "role",
+    scope: "as_role",
     script: "experimental",
     roleIds: ["huntsman"],
     source: "grimoire_event",
     label: "Rescue Attempt",
     getCount: ({ games, roleId }) =>
-      games.reduce((total, game) => {
-        if (!roleId || game.ignore_for_stats) return total;
-
-        return (
-          total +
-          game.grimoire_events.filter(
-            (event) =>
+      !roleId
+        ? 0
+        : countMatchingEvents(
+            games,
+            (_, event) =>
               event.by_role_id === roleId &&
               event.event_type === GrimoireEventType.OTHER &&
               event.status_source === "No Ability"
-          ).length
-        );
-      }, 0),
+          ),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
@@ -927,6 +932,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "huntsman_wrong_choices",
     category: "role",
+    scope: "as_role",
     script: "experimental",
     roleIds: ["huntsman"],
     source: "grimoire_event",
@@ -965,6 +971,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "innkeeper_drunk_caused",
     category: "role",
+    scope: "as_role",
     roleIds: ["innkeeper"],
     script: "bmr",
     sao: 5,
@@ -983,14 +990,14 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     id: "innkeeper_drunk_received",
     category: "role",
     roleIds: ["innkeeper"],
+    scope: "affected_player",
     script: "bmr",
     sao: 5,
     source: "grimoire_event",
     label: "Innkeeper's Pour",
-    getCount: ({ games, username }) =>
-      countEventsAffectingPlayer(
+    getCount: ({ games }) =>
+      countMatchingEvents(
         games,
-        username,
         (_, event) =>
           event.event_type === GrimoireEventType.DRUNK &&
           event.by_role_id === "innkeeper"
@@ -1005,6 +1012,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "investigator_recluse",
     category: "role",
+    scope: "as_role",
     script: "tb",
     sao: 3,
     roleIds: ["investigator"],
@@ -1045,25 +1053,22 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "juggler_correct",
     category: "role",
+    scope: "as_role",
     roleIds: ["juggler"],
     script: "snv",
     sao: 12,
     source: "grimoire_event",
     label: "On the Mark",
     getCount: ({ games, roleId }) =>
-      games.reduce((total, game) => {
-        if (!roleId || game.ignore_for_stats) return total;
-
-        return (
-          total +
-          game.grimoire_events.filter(
-            (event) =>
+      !roleId
+        ? 0
+        : countMatchingEvents(
+            games,
+            (_, event) =>
               event.by_role_id === roleId &&
               event.event_type === GrimoireEventType.OTHER &&
               event.status_source?.toLowerCase() === "correct"
-          ).length
-        );
-      }, 0),
+          ),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
@@ -1074,6 +1079,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "juggler_highest_correct_single_game",
     category: "role",
+    scope: "as_role",
     roleIds: ["juggler"],
     script: "snv",
     sao: 12,
@@ -1113,6 +1119,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "librarian_spy",
     category: "role",
+    scope: "as_role",
     script: "tb",
     sao: 2,
     roleIds: ["librarian"],
@@ -1153,6 +1160,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "lycanthrope_good_kills",
     category: "role",
+    scope: "as_role",
     script: "experimental",
     roleIds: ["lycanthrope"],
     source: "grimoire_event",
@@ -1191,6 +1199,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "lycanthrope_spy_kills",
     category: "role",
+    scope: "as_role",
     script: "experimental",
     roleIds: ["lycanthrope"],
     source: "grimoire_event",
@@ -1230,6 +1239,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "mathematician_highest_abnormal",
     category: "role",
+    scope: "as_role",
     script: "snv",
     sao: 4,
     roleIds: ["mathematician"],
@@ -1279,6 +1289,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "mayor_game_endings",
     category: "role",
+    scope: "as_role",
     script: "tb",
     sao: 13,
     roleIds: ["mayor"],
@@ -1304,24 +1315,21 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "mayor_bounces",
     category: "role",
+    scope: "as_role",
     script: "tb",
     roleIds: ["mayor"],
     source: "grimoire_event",
     label: "Mandate Extension",
     getCount: ({ games, roleId }) =>
-      games.reduce((total, game) => {
-        if (!roleId || game.ignore_for_stats) return total;
-
-        return (
-          total +
-          game.grimoire_events.filter(
-            (event) =>
+      !roleId
+        ? 0
+        : countMatchingEvents(
+            games,
+            (_, event) =>
               event.by_role_id === roleId &&
               event.event_type === GrimoireEventType.OTHER &&
               event.status_source === "Bounce"
-          ).length
-        );
-      }, 0),
+          ),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
@@ -1333,25 +1341,22 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "monk_saves",
     category: "role",
+    scope: "as_role",
     script: "tb",
     sao: 8,
     roleIds: ["monk"],
     source: "grimoire_event",
     label: "Divine Protection",
     getCount: ({ games, roleId }) =>
-      games.reduce((total, game) => {
-        if (!roleId || game.ignore_for_stats) return total;
-
-        return (
-          total +
-          game.grimoire_events.filter(
-            (event) =>
+      !roleId
+        ? 0
+        : countMatchingEvents(
+            games,
+            (_, event) =>
               event.by_role_id === roleId &&
               event.event_type === GrimoireEventType.OTHER &&
               event.status_source === "Saved"
-          ).length
-        );
-      }, 0),
+          ),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
@@ -1362,24 +1367,21 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "nightwatchman_ability_uses",
     category: "role",
+    scope: "as_role",
     script: "experimental",
     roleIds: ["nightwatchman"],
     source: "grimoire_event",
     label: "Nightly Patrol",
     getCount: ({ games, roleId }) =>
-      games.reduce((total, game) => {
-        if (!roleId || game.ignore_for_stats) return total;
-
-        return (
-          total +
-          game.grimoire_events.filter(
-            (event) =>
+      !roleId
+        ? 0
+        : countMatchingEvents(
+            games,
+            (_, event) =>
               event.by_role_id === roleId &&
               event.event_type === GrimoireEventType.OTHER &&
               event.status_source === "Chosen"
-          ).length
-        );
-      }, 0),
+          ),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
@@ -1390,14 +1392,14 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "nightwatchman_ability_received",
     category: "role",
+    scope: "affected_player",
     script: "experimental",
     roleIds: ["nightwatchman"],
     source: "grimoire_event",
     label: "Midnight Visit",
-    getCount: ({ games, username }) =>
-      countEventsAffectingPlayer(
+    getCount: ({ games }) =>
+      countMatchingEvents(
         games,
-        username,
         (_, event) =>
           event.by_role_id === "nightwatchman" &&
           event.event_type === GrimoireEventType.OTHER &&
@@ -1415,25 +1417,22 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "pacifist_saves",
     category: "role",
+    scope: "as_role",
     roleIds: ["pacifist"],
     script: "bmr",
     sao: 12,
     source: "grimoire_event",
     label: "Peacekeeper",
     getCount: ({ games, roleId }) =>
-      games.reduce((total, game) => {
-        if (!roleId || game.ignore_for_stats) return total;
-
-        return (
-          total +
-          game.grimoire_events.filter(
-            (event) =>
+      !roleId
+        ? 0
+        : countMatchingEvents(
+            games,
+            (_, event) =>
               event.by_role_id === roleId &&
               event.event_type === GrimoireEventType.OTHER &&
               event.status_source === "Saved"
-          ).length
-        );
-      }, 0),
+          ),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
@@ -1444,6 +1443,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "philosopher_drunk",
     category: "role",
+    scope: "as_role",
     roleIds: ["philosopher"],
     script: "snv",
     sao: 10,
@@ -1462,14 +1462,14 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     id: "philosopher_drunk_received",
     category: "role",
     roleIds: ["philosopher"],
+    scope: "affected_player",
     script: "snv",
     sao: 10,
     source: "grimoire_event",
     label: "Borrowed Identity",
-    getCount: ({ games, username }) =>
-      countEventsAffectingPlayer(
+    getCount: ({ games }) =>
+      countMatchingEvents(
         games,
-        username,
         (_, event) =>
           event.event_type === GrimoireEventType.DRUNK &&
           event.by_role_id === "philosopher"
@@ -1484,6 +1484,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "pixie_role_changes",
     category: "role",
+    scope: "as_role",
     script: "experimental",
     roleIds: ["pixie"],
     source: "grimoire_event",
@@ -1500,6 +1501,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "poppy_grower_deaths_before_wake",
     category: "role",
+    scope: "as_role",
     script: "experimental",
     roleIds: ["poppy_grower"],
     source: "grimoire_event",
@@ -1544,6 +1546,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "preacher_chosen",
     category: "role",
+    scope: "as_role",
     script: "experimental",
     roleIds: ["preacher"],
     source: "grimoire_event",
@@ -1583,6 +1586,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "preacher_highest_count",
     category: "role",
+    scope: "as_role",
     script: "experimental",
     roleIds: ["preacher"],
     source: "grimoire_event",
@@ -1630,12 +1634,13 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "preacher_chosen_received",
     category: "role",
+    scope: "affected_player",
     script: "experimental",
     roleIds: ["preacher"],
     source: "grimoire_event",
     label: "Chosen for the Sermon",
-    getCount: ({ games, username }) =>
-      countEventsAffectingPlayer(games, username, (game, event) => {
+    getCount: ({ games }) =>
+      countMatchingEvents(games, (game, event) => {
         if (
           event.by_role_id !== "preacher" ||
           event.event_type !== GrimoireEventType.OTHER ||
@@ -1662,6 +1667,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "princess_kills_prevented",
     category: "role",
+    scope: "as_role",
     roleIds: ["princess"],
     script: "experimental",
     source: "grimoire_event",
@@ -1702,11 +1708,12 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     id: "princess_kills_prevented_received",
     category: "role",
     roleIds: ["princess"],
+    scope: "affected_player",
     script: "experimental",
     source: "grimoire_event",
     label: "Silenced by Decree",
-    getCount: ({ games, username }) =>
-      countEventsAffectingPlayer(games, username, (_, event) => {
+    getCount: ({ games }) =>
+      countMatchingEvents(games, (_, event) => {
         if (
           event.by_role_id !== "princess" ||
           event.event_type !== GrimoireEventType.OTHER ||
@@ -1727,6 +1734,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "professor_revives",
     category: "role",
+    scope: "as_role",
     roleIds: ["professor"],
     script: "bmr",
     sao: 9,
@@ -1744,6 +1752,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "ravenkeeper_demon_choices",
     category: "role",
+    scope: "as_role",
     roleIds: ["ravenkeeper"],
     script: "tb",
     sao: 9,
@@ -1785,14 +1794,20 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     id: "sage_demon_kills_received",
     category: "role",
     roleIds: ["sage"],
+    scope: "affected_player",
     script: "snv",
     sao: 13,
     source: "grimoire_event",
     label: "Candle Extinguished",
-    getCount: ({ games, username }) =>
-      countEventsAffectingPlayer(games, username, (game, event) =>
-        isDemonKillEvent(game, event)
-      ),
+    getCount: ({ games }) =>
+      countMatchingEvents(games, (game, event) => {
+        if (!isDemonKillEvent(game, event)) return false;
+
+        const currentToken = getEventCurrentToken(game, event);
+        const previousToken = getEventPreviousToken(game, event);
+
+        return currentToken?.role_id === "sage" || previousToken?.role_id === "sage";
+      }),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
@@ -1803,6 +1818,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "sailor_drunk",
     category: "role",
+    scope: "as_role",
     roleIds: ["sailor"],
     script: "bmr",
     sao: 2,
@@ -1833,6 +1849,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "sailor_self_drunk",
     category: "role",
+    scope: "as_role",
     roleIds: ["sailor"],
     script: "bmr",
     sao: 2,
@@ -1866,6 +1883,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "slayer_kills",
     category: "role",
+    scope: "as_role",
     roleIds: ["slayer"],
     script: "tb",
     sao: 11,
@@ -1883,6 +1901,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "slayer_game_ending_kills",
     category: "role",
+    scope: "as_role",
     roleIds: ["slayer"],
     script: "tb",
     source: "end_trigger",
@@ -1906,6 +1925,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "slayer_recluse_kills",
     category: "role",
+    scope: "as_role",
     roleIds: ["slayer"],
     script: "tb",
     sao: 11,
@@ -1946,6 +1966,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "snake_charmer_demon_charms",
     category: "role",
+    scope: "as_role",
     roleIds: ["snake_charmer"],
     script: "snv",
     sao: 3,
@@ -1978,13 +1999,14 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Snake Charmer, you've successfully charmed the demon ${count} time${pluralize(count)}.`
-          : `As the Snake Charmer, this player has successfully charmed the demon ${count} time${pluralize(count)}.`)
-        : `As the Snake Charmer, successfully charm the demon using your ability.`,
+          ? `As the Snake Charmer, you've successfully charmed the Demon ${count} time${pluralize(count)}.`
+          : `As the Snake Charmer, this player has successfully charmed the Demon ${count} time${pluralize(count)}.`)
+        : `As the Snake Charmer, successfully charm the Demon using your ability.`,
   },
   {
     id: "snake_charmer_post_charm_win_rate",
     category: "role",
+    scope: "as_role",
     roleIds: ["snake_charmer"],
     script: "snv",
     sao: 3,
@@ -2023,25 +2045,51 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
       const wins = charmedGames.filter((game) => game.win_v2 === "EVIL_WINS").length;
       return Math.round((wins / charmedGames.length) * 100);
     },
-    getSentence: ({ count, isMe }) =>
-      count > 0
-        ? (isMe
-          ? `As the Snake Charmer, you've won ${count}% of games where you charmed the demon.`
-          : `As the Snake Charmer, this player has won ${count}% of games where they charmed the demon.`)
-        : `As the Snake Charmer, win a game after charming the demon.`,
+    getSentence: ({ games, count, isMe, roleId }) => {
+      const hasCharmedDemon =
+        !!roleId &&
+        games.some((game) => {
+          if (game.ignore_for_stats) return false;
+
+          return game.grimoire_events.some((event) => {
+            if (
+              event.by_role_id !== roleId ||
+              event.event_type !== GrimoireEventType.ROLE_CHANGE
+            ) {
+              return false;
+            }
+
+            const previousToken = getEventPreviousToken(game, event);
+            const currentToken = getEventCurrentToken(game, event);
+
+            return (
+              previousToken?.role?.type === "DEMON" &&
+              currentToken?.role_id === roleId
+            );
+          });
+        });
+
+      if (!hasCharmedDemon) {
+        return `As the Snake Charmer, win a game after charming the Demon.`;
+      }
+
+      return isMe
+        ? `As the Snake Charmer, you've won ${count}% of games where you charmed the Demon.`
+        : `As the Snake Charmer, this player has won ${count}% of games where they charmed the Demon.`;
+    },
   },
   {
     id: "snake_charmer_demon_charms_received",
     category: "role",
     roleIds: ["snake_charmer"],
+    scope: "affected_player",
     script: "snv",
     sao: 3,
     source: "grimoire_event",
     label: "Snakebit",
-    getCount: ({ games, username }) =>
-      countEventsAffectingPlayer(
+    getCount: ({ games }) =>
+      countMatchingEvents(
         games,
-        username,
         (_, event) =>
           event.event_type === GrimoireEventType.ROLE_CHANGE &&
           event.by_role_id === "snake_charmer"
@@ -2056,25 +2104,22 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "soldier_saved_from_demon_kill",
     category: "role",
+    scope: "as_role",
     roleIds: ["soldier"],
     script: "tb",
     sao: 12,
     source: "grimoire_event",
     label: "Battle-Hardened",
     getCount: ({ games, roleId }) =>
-      games.reduce((total, game) => {
-        if (!roleId || game.ignore_for_stats) return total;
-
-        return (
-          total +
-          game.grimoire_events.filter(
-            (event) =>
+      !roleId
+        ? 0
+        : countMatchingEvents(
+            games,
+            (_, event) =>
               event.by_role_id === roleId &&
               event.event_type === GrimoireEventType.OTHER &&
               event.status_source === "Saved"
-          ).length
-        );
-      }, 0),
+          ),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
@@ -2085,8 +2130,9 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "steward_spy",
     category: "role",
+    scope: "as_role",
     roleIds: ["steward"],
-    script: "tb",
+    script: "experimental",
     sao: 1,
     source: "grimoire_event",
     label: "Misplaced Trust",
@@ -2125,25 +2171,22 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "tea_lady_saved_players",
     category: "role",
+    scope: "as_role",
     roleIds: ["tea_lady"],
     script: "bmr",
     sao: 11,
     source: "grimoire_event",
     label: "Safe in Company",
     getCount: ({ games, roleId }) =>
-      games.reduce((total, game) => {
-        if (!roleId || game.ignore_for_stats) return total;
-
-        return (
-          total +
-          game.grimoire_events.filter(
-            (event) =>
+      !roleId
+        ? 0
+        : countMatchingEvents(
+            games,
+            (_, event) =>
               event.by_role_id === roleId &&
               event.event_type === GrimoireEventType.OTHER &&
               event.status_source === "Saved"
-          ).length
-        );
-      }, 0),
+          ),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
@@ -2155,6 +2198,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "undertaker_burials",
     category: "role",
+    scope: "as_role",
     roleIds: ["undertaker"],
     script: "tb",
     sao: 7,
@@ -2197,19 +2241,19 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         ? (isMe
           ? `As the Undertaker, you've buried ${count} player${pluralize(count)}.`
           : `As the Undertaker, this player has buried ${count} player${pluralize(count)}.`)
-        : `As the Undertaker, bury a player.`,
+        : `As the Undertaker, learn the character of an executed player.`,
   },
   {
     id: "village_idiot_drunk_received",
     category: "role",
     roleIds: ["village_idiot"],
+    scope: "affected_player",
     script: "experimental",
     source: "grimoire_event",
     label: "Biggest Idiot",
-    getCount: ({ games, username }) =>
-      countEventsAffectingPlayer(
+    getCount: ({ games }) =>
+      countMatchingEvents(
         games,
-        username,
         (_, event) =>
           event.event_type === GrimoireEventType.DRUNK &&
           event.by_role_id === "village_idiot"
@@ -2224,6 +2268,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "virgin_executions",
     category: "role",
+    scope: "as_role",
     roleIds: ["virgin"],
     script: "tb",
     sao: 10,
@@ -2241,6 +2286,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "washerwoman_spy",
     category: "role",
+    scope: "as_role",
     roleIds: ["washerwoman"],
     script: "tb",
     sao: 1,

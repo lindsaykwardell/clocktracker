@@ -1,16 +1,11 @@
 import {
   GameEndTrigger,
   GameEndTriggerCause,
-  GameEndTriggerType,
   GrimoireEventType,
-  WinStatus_V2,
 } from "~/composables/useGames";
 import {
-  countEventsAffectingPlayer,
-  countGrimoireEvents,
   getByRoleForEvent,
   getEventCurrentToken,
-  getEventPreviousToken,
   getMostCommonByRole,
   getMostCommonByRoleSubtitle,
   getMostCommonEndTriggerRole,

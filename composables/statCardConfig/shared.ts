@@ -26,6 +26,7 @@ export type RoleStatCardDefinition = {
   script?: string | null;
   sao?: number;
   hidden?: boolean;
+  scope?: "as_role" | "affected_player" | "triggering_player";
   source: string;
   label: string;
   getCount: (context: RoleStatCardContext) => number;
@@ -40,31 +41,16 @@ export type RoleStatCardDefinition = {
   getDisplayRole?: (context: RoleStatCardContext & { count: number }) => RoleStatCardDisplayRole | null;
 };
 
-export function countEventsAffectingPlayer(
+export function countMatchingEvents(
   games: GameRecord[],
-  username: string | undefined,
   predicate: (game: GameRecord, event: GameRecord["grimoire_events"][number]) => boolean
 ) {
-  if (!username) return 0;
-
   let total = 0;
 
   for (const game of games) {
     if (game.ignore_for_stats) continue;
 
-    const participantIds = new Set(
-      game.grimoire
-        .flatMap((page) => page.tokens)
-        .filter((token) => token.player?.username === username)
-        .map((token) => token.grimoire_participant_id)
-        .filter((id): id is string => !!id)
-    );
-
-    if (!participantIds.size) continue;
-
-    total += game.grimoire_events.filter(
-      (event) => participantIds.has(event.participant_id) && predicate(game, event)
-    ).length;
+    total += game.grimoire_events.filter((event) => predicate(game, event)).length;
   }
 
   return total;
