@@ -40,6 +40,7 @@ export default <Partial<Config>>{
         "bgstats-grey-content": "#ffffff",
         "bgstats-green": "#1c8e55",
         digital: "#00C2A8",
+        grimtitle: "#A59084",
         
         // Dark theme
         "dark-primary": colors.purple[600],

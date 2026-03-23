@@ -118,6 +118,8 @@ const game = reactive<{
   image_urls: string[];
   grimoire: {
     id: number;
+    title?: string;
+    page_type?: "NONE" | "NIGHT" | "DAY";
     tokens: {
       id: number;
       alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
@@ -212,6 +214,8 @@ const game = reactive<{
   grimoire: savedGame.data.value?.grimoire.length
     ? savedGame.data.value?.grimoire.map((grim) => ({
         id: grim.id,
+        title: grim.title ?? "",
+        page_type: grim.page_type ?? "NONE",
         tokens: grim.tokens?.map((token) => ({
           id: token.id,
           alignment: token.alignment,
@@ -237,6 +241,8 @@ const game = reactive<{
     : [
         {
           id: 0,
+          title: "Page 1",
+          page_type: "NONE",
           tokens: [],
         },
       ],
@@ -249,6 +255,12 @@ const formattedGame = computed(() => {
   const { end_trigger_role, ...rest } = game;
   return {
     ...rest,
+  grimoire: game.grimoire.map((page) => ({
+    id: page.id,
+    title: page.title || "",
+    page_type: page.page_type || "NONE",
+    tokens: page.tokens,
+  })),
   player_count: game.player_count || null,
   player_characters: game.player_characters.map((character) => ({
     name: character.name,

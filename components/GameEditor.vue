@@ -265,6 +265,8 @@
         class="grimoire pt-3 relative bg-center bg-cover w-full h-[200px] flex justify-center items-center script-bg"
         :class="{
           ...scriptBgClasses(game.script, !!customBackground),
+          'grimoire--night':
+            game.grimoire[grimPage]?.page_type === 'NIGHT',
         }"
       >
         <div
@@ -291,12 +293,77 @@
             : {}
         "
         class="grimoire grimoire-edit relative w-full flex flex-col gap-2"
+        :class="{
+          'grimoire--night':
+            game.grimoire[grimPage]?.page_type === 'NIGHT',
+        }"
       >
+        <div class="grimoire-title-wrapper">
+          <div class="grimoire-type">
+            <span class="sr-only">Grimoire page type</span>
+            <div class="flex items-center gap-2 px-[0.375rem] py-1">
+              <div>
+                <input
+                  type="radio"
+                  v-model="game.grimoire[grimPage].page_type"
+                  value="NIGHT"
+                  class="sr-only"
+                  id="radio-grim-type-night"
+                />
+                <label for="radio-grim-type-night" class="flex items-center gap-1 py-1 px-2">
+                  <IconUI id="moon" size="sm" /> Night
+                </label>
+              </div>
+              <div>
+                <input
+                  type="radio"
+                  v-model="game.grimoire[grimPage].page_type"
+                  value="NONE"
+                  class="sr-only"
+                  id="radio-grim-type-none"
+                />
+                <label for="radio-grim-type-none" class="flex items-center gap-1 py-1 px-2">
+                  <IconUI id="disabled" size="sm" /> None
+                </label>
+              </div>
+              <div>
+                <input
+                  type="radio"
+                  v-model="game.grimoire[grimPage].page_type"
+                  value="DAY"
+                  class="sr-only"
+                  id="radio-grim-type-day"
+                />
+                <label for="radio-grim-type-day" class="flex items-center gap-1 py-1 px-2">
+                  <IconUI id="sun" size="sm" /> Day
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="grimoire-title">
+            <label>
+              <span class="sr-only">Grimoire page title</span>
+              <Input
+                class="text-center"
+                type="text"
+                v-model="game.grimoire[grimPage].title"
+                maxlength="64"
+                @update:modelValue="onPageTitleInput"
+              />
+            </label>
+          </div>
+          <div class="grimoire-pager">
+            Page {{ grimPage + 1 }} of
+            {{ game.grimoire.length }}
+          </div>
+        </div>
         <div class="relative">
           <div 
             class="w-full max-w-[calc(100vw-4rem)] md:w-auto md:max-w-[966px] overflow-scroll bg-center bg-cover script-bg"
             :class="{
               ...scriptBgClasses(game.script, !!customBackground),
+              'grimoire--night':
+                game.grimoire[grimPage]?.page_type === 'NIGHT',
             }"
           >
             <Grimoire
@@ -308,11 +375,6 @@
               @deathToggled="recordGrimoireEvent"
               @selectedMe="applyMyRoleToGrimoire"
             />
-            <div
-              class="absolute bottom-0 w-full xl:w-[calc(100%-0.625rem)] text-center bg-gradient-to-b from-transparent via-stone-800 to-stone-800 text-white"
-            >
-              Page {{ grimPage + 1 }} of {{ game.grimoire.length }}
-            </div>
           </div>
         </div>
         
@@ -321,7 +383,7 @@
           @click="pageBackward"
           v-if="grimPage !== 0"
           icon="journal-prev"
-          class="md:absolute bottom-1 left-1"
+          class="md:absolute bottom-4 left-1 z-20"
         >
           Previous page
         </Button>
@@ -330,7 +392,7 @@
           @click.prevent="deletePage"
           color="negative"
           icon="journal-x"
-          class="md:absolute top-1 right-4 z-10"
+          class="md:absolute top-1 right-4 z-20"
           title="Delete this page"
         >
           Delete page
@@ -341,11 +403,11 @@
           :color="grimPage === game.grimoire.length - 1 ? 'positive' : 'neutral'"
           :icon="grimPage === game.grimoire.length - 1 ? 'journal-plus' : 'journal-next'"
           display="icon-after"
-          class="md:absolute bottom-1 right-4"
+          class="md:absolute bottom-4 right-4 z-20"
         >
           <span v-if="grimPage <= game.grimoire.length - 1">
             {{
-              grimPage === game.grimoire.length - 1 ? "Add page" : "Next page"
+              grimPage === game.grimoire.length - 1 ? `Add Page ${game.grimoire.length + 1}` : "Next page"
             }}
           </span>
         </Button>
@@ -753,6 +815,8 @@ const props = defineProps<{
     notes: string;
     image_urls: string[];
     grimoire: {
+      title?: string;
+      page_type?: "NONE" | "NIGHT" | "DAY";
       tokens: {
         id?: number;
         alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
@@ -877,6 +941,10 @@ const tagsInput = ref("");
 const bggIdInput = ref("");
 const bggIdIsValid = ref(true);
 const customBackground = ref<string | null>(null);
+const initializedPageTitles = new WeakSet<object>();
+const autoGeneratedPageTitles = new WeakSet<object>();
+
+type LocalGrimoirePageType = "NONE" | "NIGHT" | "DAY";
 
 const currentPageSeatRows = computed(() => {
   const page = props.game.grimoire[grimPage.value];
@@ -1609,7 +1677,16 @@ function copyGrimoire(game: GameRecord) {
     props.game.grimoire.pop();
   }
 
-  props.game.grimoire.push({ tokens });
+  const newPage = {
+    title: getAutoPageTitleForIndex(
+      [{ page_type: defaultGrimoirePageType() }],
+      0
+    ),
+    page_type: defaultGrimoirePageType(),
+    tokens,
+  };
+  props.game.grimoire.push(newPage);
+  autoGeneratedPageTitles.add(newPage as object);
 
   props.game.player_count = game.player_count;
   props.game.traveler_count = game.traveler_count;
@@ -1625,6 +1702,9 @@ function copyGrimoire(game: GameRecord) {
 }
 
 watchEffect(() => {
+  initializeUnsetPageTitles();
+  syncAutoGeneratedPageTitles();
+
   let normalizedAnyPage = false;
   props.game.grimoire.forEach((grimoire) => {
     if (normalizePageTokenOrders(grimoire.tokens as { order: number }[])) {
@@ -1678,12 +1758,114 @@ function pageForward() {
   if (nextPage < props.game.grimoire.length) {
     grimPage.value = nextPage;
   } else {
-    props.game.grimoire[nextPage] = {
+    const currentType = props.game.grimoire[grimPage.value]?.page_type ?? "NONE";
+    const nextType = getNextPageTypeFromCurrent(currentType);
+    const pagesForAutoTitle = [
+      ...props.game.grimoire,
+      { page_type: nextType },
+    ] as { page_type?: LocalGrimoirePageType }[];
+    const nextTitle = getAutoPageTitleForIndex(pagesForAutoTitle, nextPage);
+
+    const newPage = {
+      title: nextTitle,
+      page_type: nextType,
       tokens: JSON.parse(JSON.stringify(props.game.grimoire[grimPage.value]))
         .tokens,
     };
+    props.game.grimoire[nextPage] = newPage;
+    autoGeneratedPageTitles.add(newPage as object);
     grimPage.value = nextPage;
   }
+}
+
+function defaultGrimoirePageTitle(index: number) {
+  return `Page ${index + 1}`;
+}
+
+function defaultGrimoirePageType() {
+  return "NONE" as const;
+}
+
+function getNextPageTypeFromCurrent(currentType: "NONE" | "NIGHT" | "DAY") {
+  if (currentType === "NIGHT") return "DAY" as const;
+  if (currentType === "DAY") return "NIGHT" as const;
+  return "NONE" as const;
+}
+
+function normalizePageType(pageType?: LocalGrimoirePageType | null) {
+  return pageType ?? "NONE";
+}
+
+function getRunRepeatSuffix(runPosition: number) {
+  if (runPosition <= 1) return "";
+  return ` - Part ${runPosition}`;
+}
+
+function getAutoPageTitleForIndex(
+  pages: { page_type?: LocalGrimoirePageType | null }[],
+  pageIndex: number
+) {
+  const pageType = normalizePageType(pages[pageIndex]?.page_type);
+
+  if (pageType === "NONE") {
+    return defaultGrimoirePageTitle(pageIndex);
+  }
+
+  let runNumber = 0;
+  for (let i = 0; i <= pageIndex; i += 1) {
+    const current = normalizePageType(pages[i]?.page_type);
+    const previous = i > 0 ? normalizePageType(pages[i - 1]?.page_type) : "NONE";
+    if (current === pageType && previous !== pageType) {
+      runNumber += 1;
+    }
+  }
+
+  let runPosition = 1;
+  for (let i = pageIndex - 1; i >= 0; i -= 1) {
+    if (normalizePageType(pages[i]?.page_type) !== pageType) break;
+    runPosition += 1;
+  }
+
+  const label = pageType === "NIGHT" ? "Night" : "Day";
+  return `${label} ${Math.max(1, runNumber)}${getRunRepeatSuffix(runPosition)}`;
+}
+
+function initializeUnsetPageTitles() {
+  props.game.grimoire.forEach((grimoire, index) => {
+    const pageRef = grimoire as object;
+    if (initializedPageTitles.has(pageRef)) return;
+
+    if (!grimoire.page_type) {
+      grimoire.page_type = defaultGrimoirePageType();
+    }
+    const autoTitle = getAutoPageTitleForIndex(props.game.grimoire, index);
+    if (!grimoire.title?.trim()) {
+      grimoire.title = autoTitle;
+      autoGeneratedPageTitles.add(pageRef);
+    } else if (grimoire.title.trim() === autoTitle) {
+      autoGeneratedPageTitles.add(pageRef);
+    }
+
+    initializedPageTitles.add(pageRef);
+  });
+}
+
+function syncAutoGeneratedPageTitles() {
+  props.game.grimoire.forEach((grimoire, index) => {
+    const pageRef = grimoire as object;
+    if (!autoGeneratedPageTitles.has(pageRef)) return;
+
+    const autoTitle = getAutoPageTitleForIndex(props.game.grimoire, index);
+    if (grimoire.title !== autoTitle) {
+      grimoire.title = autoTitle;
+    }
+  });
+}
+
+function onPageTitleInput() {
+  const currentPage = props.game.grimoire[grimPage.value];
+  if (!currentPage) return;
+  autoGeneratedPageTitles.delete(currentPage as object);
 }
 
 function onSeatDragStart(order: number, event: DragEvent) {
@@ -2004,14 +2186,51 @@ onMounted(async () => {
   }
 }
 
-.grimoire {
+.grimoire-edit {
   .overflow-scroll {
-    /* Compensate scrollbars (and page count) so tokens are centered */
-    padding-block-start: 2.25rem;
-    padding-block-end: 2.5rem;
+    padding-inline-start: 0;
+    padding-block-start: 7rem;
+    padding-block-end: 7rem;
+  }
 
-    scrollbar-width: thin;
-    scrollbar-color: oklch(44.4% 0.011 73.639) transparent;
+  .grimoire-title-wrapper {
+    padding-inline-end: .75rem;
+  }
+
+  .grimoire-title {
+    padding: .25rem;
+  }
+  
+  .grimoire-type {
+    position: relative;
+    z-index: 1;
+    background: theme(colors.amber.50);
+    border: 1px solid theme(colors.grimtitle);
+    border-block-end: none;
+    border-start-start-radius: 0.375rem;
+    border-start-end-radius: 0.375rem;
+
+    label {
+      @apply text-xs text-black;
+
+      &:hover {
+        @apply cursor-pointer;
+      }
+    }
+
+    input[type="radio"]:checked + label {
+      @apply font-semibold bg-stone-300 rounded-md;
+    }
+  }
+
+  .grimoire--night {
+    &::before {
+      opacity: .15;
+    }
+
+    &::after {
+      opacity: .25;
+    }
   }
 }
 </style>
