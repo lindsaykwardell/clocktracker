@@ -147,6 +147,8 @@ const game = reactive<{
   notes: string;
   image_urls: string[];
   grimoire: {
+    title?: string;
+    page_type?: "NONE" | "NIGHT" | "DAY";
     tokens: {
       alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
       order: number;
@@ -235,6 +237,8 @@ const game = reactive<{
   image_urls: [],
   grimoire: [
     {
+      title: "Page 1",
+      page_type: "NONE",
       tokens: [],
     },
   ],
@@ -281,6 +285,8 @@ onMounted(async () => {
         demon_bluffs: { name: string; role_id: string | null }[];
         fabled: { name: string; role_id: string | null }[];
         grimoire: {
+          title?: string;
+          page_type?: "NONE" | "NIGHT" | "DAY";
           tokens: {
             create: {
               role_id: string | null;
@@ -300,6 +306,8 @@ onMounted(async () => {
 
       // Transform grimoire tokens with role data
       const transformedGrimoire = hydrated.grimoire.map((g) => ({
+        title: g.title ?? "",
+        page_type: g.page_type ?? "NONE",
         tokens: g.tokens.create.map((token) => {
           const role = token.role_id
             ? rolesStore.getRole(token.role_id)
@@ -391,6 +399,11 @@ const formattedGame = computed(() => {
   const { end_trigger_role, ...rest } = game;
   return {
     ...rest,
+  grimoire: game.grimoire.map((page) => ({
+    title: page.title || "",
+    page_type: page.page_type || "NONE",
+    tokens: page.tokens,
+  })),
   player_count: game.player_count || null,
   player_characters: game.player_characters.map((character) => ({
     name: character.name,
@@ -529,6 +542,8 @@ function resetGame() {
       image_urls: [],
       grimoire: [
         {
+          title: "Page 1",
+          page_type: "NONE",
           tokens: [],
         },
       ],

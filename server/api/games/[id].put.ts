@@ -13,6 +13,8 @@ import {
 } from "@prisma/client";
 import { prisma } from "~/server/utils/prisma";
 
+const MAX_GRIMOIRE_PAGE_TITLE_LENGTH = 64;
+
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
   const gameId = handler.context.params?.id;
@@ -53,6 +55,17 @@ export default defineEventHandler(async (handler) => {
     throw createError({
       status: 400,
       statusMessage: "Bad Request",
+    });
+  }
+
+  if (
+    body.grimoire.some(
+      (page) => (page.title?.length ?? 0) > MAX_GRIMOIRE_PAGE_TITLE_LENGTH
+    )
+  ) {
+    throw createError({
+      status: 400,
+      statusMessage: `Grimoire page title cannot exceed ${MAX_GRIMOIRE_PAGE_TITLE_LENGTH} characters.`,
     });
   }
 
@@ -144,6 +157,8 @@ export default defineEventHandler(async (handler) => {
           ...body.grimoire
             .filter((g) => !g.id)
             .map((g) => ({
+              title: g.title ?? "",
+              page_type: g.page_type ?? "NONE",
               tokens: {
                 create: g.tokens?.map((token, index) => ({
                   role_id: token.role_id,
@@ -175,7 +190,8 @@ export default defineEventHandler(async (handler) => {
                 id: g.id,
               },
               data: {
-                ...g,
+                title: g.title ?? "",
+                page_type: g.page_type ?? "NONE",
                 tokens: {
                   deleteMany: {
                     id: {

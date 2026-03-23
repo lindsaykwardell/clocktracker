@@ -1,0 +1,2 @@
+ALTER TABLE "Grimoire"
+ADD COLUMN "title" TEXT NOT NULL DEFAULT '';

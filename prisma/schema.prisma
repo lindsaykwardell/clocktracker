@@ -138,6 +138,12 @@ enum GrimoireEventType {
   OTHER
 }
 
+enum GrimoirePageType {
+  NONE
+  NIGHT
+  DAY
+}
+
 model GrimoireEvent {
   id                Int              @id @default(autoincrement())
   game              Game             @relation(fields: [game_id], references: [id])
@@ -163,6 +169,8 @@ model GrimoireEvent {
 model Grimoire {
   id         Int      @id @default(autoincrement())
   created_at DateTime @default(now()) @db.Timestamptz(6)
+  title      String   @default("")
+  page_type  GrimoirePageType @default(NONE)
   tokens     Token[]
   game       Game[]
 }

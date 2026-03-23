@@ -13,6 +13,8 @@ import {
 } from "@prisma/client";
 import { prisma } from "~/server/utils/prisma";
 
+const MAX_GRIMOIRE_PAGE_TITLE_LENGTH = 64;
+
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
   const body = await readBody<
@@ -45,6 +47,17 @@ export default defineEventHandler(async (handler) => {
     throw createError({
       status: 400,
       statusMessage: "Bad Request",
+    });
+  }
+
+  if (
+    body.grimoire.some(
+      (page) => (page.title?.length ?? 0) > MAX_GRIMOIRE_PAGE_TITLE_LENGTH
+    )
+  ) {
+    throw createError({
+      status: 400,
+      statusMessage: `Grimoire page title cannot exceed ${MAX_GRIMOIRE_PAGE_TITLE_LENGTH} characters.`,
     });
   }
 

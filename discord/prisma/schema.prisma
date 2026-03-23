@@ -67,6 +67,8 @@ model Game {
 model Grimoire {
   id         Int      @id @default(autoincrement())
   created_at DateTime @default(now()) @db.Timestamptz(6)
+  title      String   @default("")
+  page_type  GrimoirePageType @default(NONE)
   tokens     Token[]
   game       Game[]   @relation("GameToGrimoire")
 }
@@ -482,4 +484,10 @@ enum WinStatus_V2 {
   GOOD_WINS
   EVIL_WINS
   NOT_RECORDED
+}
+
+enum GrimoirePageType {
+  NONE
+  NIGHT
+  DAY
 }
