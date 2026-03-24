@@ -10,7 +10,7 @@ export default <Partial<Config>>{
         gothic: ["Trade Gothic", "sans-serif"],
       },
       colors: {
-        
+
         "primary-dark": colors.purple[900],
         "primary-darkest": colors.purple[950],
         secondary: colors.stone[600],
@@ -41,7 +41,7 @@ export default <Partial<Config>>{
         "bgstats-green": "#1c8e55",
         digital: "#00C2A8",
         grimtitle: "#A59084",
-        
+
         // Dark theme
         "dark-primary": colors.purple[600],
         "discord-dark": "#4752C4",

@@ -358,7 +358,7 @@
           </div>
         </div>
         <div class="relative">
-          <div 
+          <div
             class="w-full max-w-[calc(100vw-4rem)] md:w-auto md:max-w-[966px] overflow-scroll bg-center bg-cover script-bg"
             :class="{
               ...scriptBgClasses(game.script, !!customBackground),
@@ -377,7 +377,7 @@
             />
           </div>
         </div>
-        
+
         <Button
           type="button"
           @click="pageBackward"
@@ -677,7 +677,7 @@
         <template v-else>Save Game</template>
       </Button>
     </div>
-    
+
   </form>
   <TokenDialog
     v-model:visible="showRoleSelectionDialog"
@@ -701,7 +701,7 @@
       <h2 class="text-2xl font-bold">Copy Existing Grimoire</h2>
       <p class="text-lg text-stone-400 py-4">
         Click on a game to copy the grimoire data to this game.
-        (Grimoire data includes player count, player data, 
+        (Grimoire data includes player count, player data,
         location, community, ...)
       </p>
     </template>
@@ -2200,7 +2200,7 @@ onMounted(async () => {
   .grimoire-title {
     padding: .25rem;
   }
-  
+
   .grimoire-type {
     position: relative;
     z-index: 1;
