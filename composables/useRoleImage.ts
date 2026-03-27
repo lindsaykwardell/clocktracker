@@ -1,12 +1,12 @@
 type RoleLike = {
   id?: string;
-  token_url?: string;
+  token_url?: string | null;
   custom_role?: boolean;
-  type?: string;
-  initial_alignment?: AlignmentLike;
+  type?: string | null;
+  initial_alignment?: AlignmentLike | null;
 };
 
-type AlignmentLike = "GOOD" | "EVIL" | "NEUTRAL";
+type AlignmentLike = string;
 
 export const useRoleImage = () => {
   const {
@@ -41,7 +41,7 @@ export const useRoleImage = () => {
 
   // Resolve a role to its base URL. Custom roles keep their explicit URL.
   // Non-custom roles are always resolved by id to avoid stale token_url values.
-  const roleBaseUrlFromRole = (role?: RoleLike) => {
+  const roleBaseUrlFromRole = (role?: RoleLike | null) => {
     if (!role) {
       return undefined;
     }
@@ -57,8 +57,8 @@ export const useRoleImage = () => {
 
   // Alignment variants are encoded by suffix for local assets (_g/_e).
   const alignmentSuffix = (
-    role?: { initial_alignment?: AlignmentLike; type?: string },
-    alignment?: AlignmentLike
+    role?: { initial_alignment?: AlignmentLike | null; type?: string | null } | null,
+    alignment?: AlignmentLike | null
   ) => {
     if (!role || !alignment || alignment === "NEUTRAL") {
       return "";

@@ -1,7 +1,4 @@
-import { Alignment, WinStatus_V2 } from "@prisma/client";
-// @ts-ignore
-import dayjs from "dayjs";
-import { winRateByRole } from "~/server/utils/stats";
+import { Prisma } from "~/server/generated/prisma/client";
 import { prisma } from "~/server/utils/prisma";
 
 export default defineEventHandler(async (handler) => {
@@ -23,135 +20,174 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  const games = await prisma.game.findMany({
-    where: {
-      deleted: false,
-      AND: [
-        {
-          OR: [
-            {
-              script_id,
-            },
-            script_id === 134
-              ? {
-                  script: {
-                    equals: "Sects & Violets",
-                    mode: "insensitive",
-                  },
-                }
-              : {},
-          ],
-        },
-        {
-          parent_game_id: null,
-          ignore_for_stats: false,
-        },
-      ],
-    },
-    select: {
-      win_v2: true,
-      date: true,
-      is_storyteller: true,
-      grimoire: {
-        select: {
-          tokens: {
-            select: {
-              role_id: true,
-              alignment: true,
-            },
-          },
-        },
-      },
-      player_characters: {
-        select: {
-          role_id: true,
-          alignment: true,
-        },
-      },
-    },
-  });
+  // Build script filter: either matching script_id or (for S&V id=134) matching name
+  const scriptFilter =
+    script_id === 134
+      ? Prisma.sql`(g."script_id" = ${script_id} OR LOWER(g."script") = 'sects & violets')`
+      : Prisma.sql`g."script_id" = ${script_id}`;
 
-  const good_win_count = games.reduce(
-    (acc, game) => {
-      let win = acc.win;
+  // Overall count + good win count
+  const overallResult = await prisma.$queryRaw<
+    { total: bigint; good_wins: bigint }[]
+  >(Prisma.sql`
+    SELECT
+      COUNT(*)::bigint AS total,
+      COUNT(*) FILTER (WHERE g."win_v2" = 'GOOD_WINS')::bigint AS good_wins
+    FROM "Game" g
+    WHERE g."deleted" = false
+      AND g."parent_game_id" IS NULL
+      AND g."ignore_for_stats" = false
+      AND ${scriptFilter}
+  `);
 
-      if (game.win_v2 === WinStatus_V2.GOOD_WINS) {
-        win = acc.win + 1;
-      }
+  const total = Number(overallResult[0]?.total ?? 0);
+  const goodWins = Number(overallResult[0]?.good_wins ?? 0);
 
-      return { total: acc.total + 1, win };
-    },
-    { total: 0, win: 0 }
-  );
+  // Games by month (last 12 months)
+  const monthRows = await prisma.$queryRaw<
+    { month_name: string; count: bigint }[]
+  >(Prisma.sql`
+    SELECT
+      TO_CHAR(g."date", 'Month') AS month_name,
+      COUNT(*)::bigint AS count
+    FROM "Game" g
+    WHERE g."deleted" = false
+      AND g."parent_game_id" IS NULL
+      AND g."ignore_for_stats" = false
+      AND ${scriptFilter}
+      AND g."date" >= (CURRENT_DATE - INTERVAL '12 months')
+    GROUP BY TO_CHAR(g."date", 'Month')
+  `);
 
-  // Get the count of games played over the past 12 months
-  const months = Array.from(Array(12).keys())
-    .map((i) => dayjs().subtract(i, "month").format("MMMM"))
-    .reverse();
+  // Build last 12 months array
+  const monthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+  ];
+  const now = new Date();
+  const months: string[] = [];
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push(monthNames[d.getMonth()]);
+  }
 
-  const games_by_month = Object.fromEntries(months.map((month) => [month, 0]));
-
-  games.forEach((game) => {
-    // If the game is not in the past 12 months, skip it
-    if (dayjs(game.date).isBefore(dayjs().subtract(12, "month"))) {
-      return;
+  const games_by_month: Record<string, number> = {};
+  for (const m of months) {
+    games_by_month[m] = 0;
+  }
+  for (const row of monthRows) {
+    const name = row.month_name.trim();
+    if (name in games_by_month) {
+      games_by_month[name] = Number(row.count);
     }
-    const month = dayjs(game.date).format("MMMM");
-    games_by_month[month] = games_by_month[month] + 1;
-  });
+  }
 
-  // Ge the win rate for each role on the script.
-  const role_win_rates = script.roles.reduce((acc, role) => {
-    const win_count = games.reduce(
-      (acc, game) => {
-        let win = acc.win;
+  // Per-role win rates via SQL
+  // CTE: for each game, get the "last character" role_id + alignment
+  // For non-storyteller games: last Character row
+  // For storyteller games: tokens from last grimoire page matching the role
+  const roleIds = script.roles.map((r) => r.id);
 
-        const character = (() => {
-          if (game.is_storyteller) {
-            return game.grimoire[game.grimoire.length - 1]?.tokens.find(
-              (token) => token.role_id === role.id
-            );
-          } else {
-            return game.player_characters[game.player_characters.length - 1];
-          }
-        })();
+  let role_win_rates: Record<
+    string,
+    { total: number; win: number; loss: number }
+  > = {};
 
-        if (!character || character.role_id !== role.id) return acc;
+  if (roleIds.length > 0) {
+    const roleIdList = Prisma.join(roleIds);
 
-        if (
-          game.win_v2 === WinStatus_V2.GOOD_WINS &&
-          character.alignment === Alignment.GOOD
-        ) {
-          win++;
-        } else if (
-          game.win_v2 === WinStatus_V2.EVIL_WINS &&
-          character.alignment === Alignment.EVIL
-        ) {
-          win++;
-        }
+    const roleWinRows = await prisma.$queryRaw<
+      {
+        role_id: string;
+        total: bigint;
+        wins: bigint;
+      }[]
+    >(Prisma.sql`
+      WITH last_player_char AS (
+        -- For non-storyteller games: the last Character per game
+        SELECT DISTINCT ON (c."game_id")
+          c."game_id",
+          c."role_id",
+          c."alignment"
+        FROM "Character" c
+        JOIN "Game" g ON g."id" = c."game_id"
+        WHERE g."deleted" = false
+          AND g."parent_game_id" IS NULL
+          AND g."ignore_for_stats" = false
+          AND g."is_storyteller" = false
+          AND ${scriptFilter}
+          AND c."role_id" IN (${roleIdList})
+        ORDER BY c."game_id", c."id" DESC
+      ),
+      last_grimoire_page AS (
+        -- For storyteller games: find the last grimoire page per game
+        SELECT gg."A" AS game_id, MAX(gg."B") AS grimoire_id
+        FROM "_GameToGrimoire" gg
+        JOIN "Game" g ON g."id" = gg."A"
+        WHERE g."deleted" = false
+          AND g."parent_game_id" IS NULL
+          AND g."ignore_for_stats" = false
+          AND g."is_storyteller" = true
+          AND ${scriptFilter}
+        GROUP BY gg."A"
+      ),
+      st_tokens AS (
+        -- Storyteller game tokens from last grimoire page
+        SELECT
+          lgp.game_id,
+          t."role_id",
+          t."alignment"
+        FROM last_grimoire_page lgp
+        JOIN "Token" t ON t."grimoire_id" = lgp.grimoire_id
+        WHERE t."role_id" IN (${roleIdList})
+      ),
+      all_entries AS (
+        SELECT game_id, role_id, alignment FROM last_player_char
+        UNION ALL
+        SELECT game_id, role_id, alignment FROM st_tokens
+      ),
+      joined AS (
+        SELECT
+          ae.role_id,
+          ae.alignment,
+          g."win_v2"
+        FROM all_entries ae
+        JOIN "Game" g ON g."id" = ae.game_id
+      )
+      SELECT
+        j.role_id,
+        COUNT(*)::bigint AS total,
+        COUNT(*) FILTER (WHERE
+          (j."win_v2" = 'GOOD_WINS' AND j.alignment = 'GOOD')
+          OR (j."win_v2" = 'EVIL_WINS' AND j.alignment = 'EVIL')
+        )::bigint AS wins
+      FROM joined j
+      GROUP BY j.role_id
+    `);
 
-        return { total: acc.total + 1, win };
-      },
-      { total: 0, win: 0 }
-    );
+    for (const row of roleWinRows) {
+      const t = Number(row.total);
+      const w = Number(row.wins);
+      role_win_rates[row.role_id] = { total: t, win: w, loss: t - w };
+    }
+  }
 
-    return {
-      ...acc,
-      [role.id]: { ...win_count, loss: win_count.total - win_count.win },
-    };
-  }, {} as Record<string, { total: number; win: number; loss: number }>);
+  // Fill in roles with zero games
+  for (const role of script.roles) {
+    if (!role_win_rates[role.id]) {
+      role_win_rates[role.id] = { total: 0, win: 0, loss: 0 };
+    }
+  }
 
   return {
-    count: games.length,
+    count: total,
     win_loss: {
-      total: good_win_count.total,
-      win: good_win_count.win,
-      loss: good_win_count.total - good_win_count.win,
-      pct: +((good_win_count.win / good_win_count.total) * 100).toFixed(2),
+      total,
+      win: goodWins,
+      loss: total - goodWins,
+      pct: total > 0 ? +((goodWins / total) * 100).toFixed(2) : 0,
     },
     games_by_month,
     role_win_rates,
-    // scripts: most_common_scripts,
-    // most_common_scripts,
   };
 });

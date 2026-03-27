@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">ClockTracker</string>
+    <string name="title_activity_main">ClockTracker</string>
+    <string name="package_name">app.clocktracker.mobile</string>
+    <string name="custom_url_scheme">app.clocktracker.mobile</string>
+    <string name="widget_description">View your ClockTracker game stats</string>
+    <string name="widget_scripts_description">Your most played scripts</string>
+    <string name="widget_roles_description">Your most played roles</string>
+</resources>

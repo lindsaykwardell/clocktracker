@@ -4,12 +4,12 @@ export async function getRoleMap() {
   const storage = useStorage();
 
   // Check if the role map is already cached
-  const cachedRoleMap:
+  const cachedRoleMap = await storage.getItem("roleMap") as
     | {
         id: string;
         map_id: string;
       }[]
-    | null = await storage.getItem("roleMap");
+    | null;
   if (cachedRoleMap) {
     return cachedRoleMap;
   }

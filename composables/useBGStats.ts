@@ -5,7 +5,7 @@ import dayjs from "dayjs";
 import type { FetchStatus } from "./useFetchStatus";
 
 export const useBGStats = (g: ComputedRef<FetchStatus<GameRecord>>) => {
-  const user = useSupabaseUser();
+  const user = useUser();
   const users = useUsers();
 
   const canPostToBGStats = computed(() => {

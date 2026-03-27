@@ -60,7 +60,7 @@ const props = withDefaults(
     circular?: boolean;
     removableTag?: boolean;
     icon?: string;
-    iconSize?: string;
+    iconSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
     iconSpin?: boolean;
     iconColor?: "primary" | "neutral" | "positive" | "caution" | "negative" | "bgg";
     display?: "icon-before" | "icon-only" | "icon-after";
@@ -131,7 +131,7 @@ const iconId = computed(() =>
   props.removableTag ? "x" : props.icon
 );
 
-const iconSize = computed(() => {
+const iconSize = computed((): 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' => {
   if (props.removableTag) {
     return "md";
   }

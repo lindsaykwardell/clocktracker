@@ -75,7 +75,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import naturalOrder from "natural-order";
-import type { Alignment } from "@prisma/client";
+import type { Alignment } from "~/server/generated/prisma/client";
 import type { GameRecord } from "~/composables/useGames";
 import { filterStorytellerGames } from "~/composables/useGames";
 import type { RoleType } from "~/composables/useRoles";

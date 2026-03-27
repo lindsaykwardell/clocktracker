@@ -225,7 +225,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Script, Role, RoleType, Alignment } from "@prisma/client";
+import type { Script, Role, RoleType, Alignment } from "~/server/generated/prisma/client";
 import { chartColors } from "~/composables/useChartColors";
 import { Line, Pie } from "vue-chartjs";
 
@@ -276,7 +276,7 @@ useHead({
   title: script.value.name,
   meta: [
     {
-      hid: "description",
+      key: "description",
       name: "description",
       content: `View stats and recent games for ${script.value.name}.`,
     },

@@ -1,5 +1,5 @@
-import type { User } from "@supabase/supabase-js";
-import { PrivacySetting } from "@prisma/client";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
+import { PrivacySetting } from "~/server/generated/prisma/client";
 import { prisma } from "~/server/utils/prisma";
 
 export default defineEventHandler(async (handler) => {

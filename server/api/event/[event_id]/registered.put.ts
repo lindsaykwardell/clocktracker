@@ -1,6 +1,7 @@
-import { User } from "@supabase/supabase-js";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { fetchEventAndUpdateDiscord } from "~/server/utils/fetchEventAndUpdateDiscord";
 import { prisma } from "~/server/utils/prisma";
+import { sendPushNotifications } from "~/server/utils/sendPushNotifications";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
@@ -114,6 +115,27 @@ export default defineEventHandler(async (handler) => {
           id: player.id,
         },
       });
+
+      // Notify the promoted player
+      if (player.user_id) {
+        const eventDetails = await prisma.event.findUnique({
+          where: { id: event_id },
+          select: { title: true, short_link: true },
+        });
+
+        if (eventDetails) {
+          const eventUrl = eventDetails.short_link
+            ? `/event/${eventDetails.short_link}`
+            : `/event/${event_id}`;
+
+          void sendPushNotifications({
+            userIds: [player.user_id],
+            title: "You're off the waitlist!",
+            body: `You've been moved to the registered list for ${eventDetails.title}`,
+            url: eventUrl,
+          });
+        }
+      }
     } else {
       await prisma.eventWaitlistAttendee.update({
         where: {

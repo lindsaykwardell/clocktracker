@@ -1,7 +1,8 @@
-import type { User } from "@supabase/supabase-js";
-import { Alignment } from "@prisma/client";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
+import { Alignment } from "~/server/generated/prisma/client";
 import { fetchGame } from "~/server/utils/fetchGames";
 import { prisma } from "~/server/utils/prisma";
+import { findOrCreatePlayerChildGame } from "~/server/utils/childGame";
 
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
@@ -92,15 +93,6 @@ export default defineEventHandler(async (handler) => {
           },
         ],
       },
-      grimoire: {
-        some: {
-          tokens: {
-            none: {
-              player_id: user.id,
-            },
-          },
-        },
-      },
     },
     include: {
       ls_game: {
@@ -121,6 +113,7 @@ export default defineEventHandler(async (handler) => {
       player_characters: true,
       demon_bluffs: true,
       fabled: true,
+      grimoire_events: true,
       grimoire: {
         include: {
           tokens: {
@@ -249,51 +242,47 @@ export default defineEventHandler(async (handler) => {
       });
     }
 
-    if (
-      gameExists.grimoire.some((g) =>
-        g.tokens.some((t) => t.player_id === user.id)
-      )
-    ) {
-      throw createError({
-        status: 400,
-        statusMessage: "You already have a seat in this game.",
-      });
-    }
-
     throw createError({
       status: 400,
       statusMessage: "Bad Request",
     });
   }
 
-  // Update the grimoire to tag the user as the player in the correct seat
+  // Check if the user is already tagged on a token (recovery path for
+  // when child game creation previously failed).
+  const alreadyTagged = game.grimoire.some((g) =>
+    g.tokens.some((t) => t.player_id === user.id)
+  );
 
-  await prisma.token.updateMany({
-    where: {
-      order: body.order,
-      grimoire: {
-        game: {
-          some: {
-            id: gameId,
+  // Only update tokens if the user isn't already tagged
+  if (!alreadyTagged) {
+    await prisma.token.updateMany({
+      where: {
+        order: body.order,
+        grimoire: {
+          game: {
+            some: {
+              id: gameId,
+            },
           },
         },
       },
-    },
-    data: {
-      player_id: user.id,
-      player_name: userDetails.display_name,
-    },
-  });
-
-  // Mirror this change in the fetched game
-  game.grimoire.forEach((g) => {
-    g.tokens.forEach((t) => {
-      if (t.order === body.order) {
-        t.player_id = user.id;
-        t.player_name = userDetails.display_name;
-      }
+      data: {
+        player_id: user.id,
+        player_name: userDetails.display_name,
+      },
     });
-  });
+
+    // Mirror this change in the fetched game
+    game.grimoire.forEach((g) => {
+      g.tokens.forEach((t) => {
+        if (t.order === body.order) {
+          t.player_id = user.id;
+          t.player_name = userDetails.display_name;
+        }
+      });
+    });
+  }
 
   // Reduce grimoire to find all tokens that have this player_id
   const player_characters = game.grimoire.reduce(
@@ -334,51 +323,19 @@ export default defineEventHandler(async (handler) => {
   );
 
   if (game.user_id !== user.id) {
+    const related_games = [...game.child_games];
+    if (game.parent_game) {
+      related_games.push(game.parent_game);
+      related_games.push(...game.parent_game.child_games);
+    }
+
     try {
-      await prisma.game.create({
-        data: {
-          ...game,
-          ls_game: undefined,
-          id: undefined,
-          community: undefined,
-          associated_script: undefined,
-          user: undefined,
-          parent_game: undefined,
-          parent_game_id: game.parent_game_id || game.id,
-          child_games: undefined,
-          user_id: user.id,
-          player_characters: {
-            create: [...player_characters],
-          },
-          demon_bluffs: {
-            create: [
-              ...game.demon_bluffs.map((d) => ({
-                ...d,
-                id: undefined,
-                game_id: undefined,
-              })),
-            ],
-          },
-          fabled: {
-            create: [
-              ...game.fabled.map((f) => ({
-                ...f,
-                id: undefined,
-                game_id: undefined,
-              })),
-            ],
-          },
-          // map the already created grimoires to the new game
-          grimoire: {
-            connect: game.grimoire.map((g) => ({ id: g.id })),
-          },
-          waiting_for_confirmation: false,
-          is_storyteller: false,
-          storyteller:
-            game.is_storyteller && game.user
-              ? `@${game.user.username}`
-              : game.storyteller,
-        },
+      await findOrCreatePlayerChildGame({
+        game,
+        playerId: user.id,
+        playerCharacters: player_characters,
+        relatedGames: related_games,
+        waitingForConfirmation: false,
       });
     } catch (err: any) {
       const messageLines = err.message.split("\n");
@@ -386,7 +343,6 @@ export default defineEventHandler(async (handler) => {
         messageLines[messageLines.length - 1].length > 0
           ? messageLines[messageLines.length - 1]
           : err.message;
-      // get the name from the game.grimoire
       const taggedPlayer =
         game.grimoire
           .flatMap((g) => g.tokens)

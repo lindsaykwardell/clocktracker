@@ -89,7 +89,7 @@
                                     <template v-if="game.data.ls_game_id">
                                         Game
                                         {{
-                                            game.data.associated_script.version
+                                            game.data.associated_script?.version
                                         }}
                                         of
                                     </template>
@@ -401,13 +401,13 @@
                             <!-- Row -->
                             <div
                                 v-if="
-                                    game.data.demon_bluffs.length ||
-                                    game.data.fabled.length
+                                    game.data.demon_bluffs?.length ||
+                                    game.data.fabled?.length
                                 "
                                 class="metadata-row"
                             >
                                 <div
-                                    v-if="game.data.demon_bluffs.length"
+                                    v-if="game.data.demon_bluffs?.length"
                                     class="metadata-item"
                                 >
                                     <span class="metadata-label"
@@ -430,13 +430,13 @@
                                     </div>
                                 </div>
                                 <div
-                                    v-if="game.data.fabled.length"
+                                    v-if="game.data.fabled?.length"
                                     class="metadata-item"
                                 >
                                     <span class="metadata-label">
                                         <template
                                             v-if="
-                                                game.data.fabled.some(
+                                                game.data.fabled?.some(
                                                     (r) =>
                                                         r.role?.type ===
                                                         'FABLED',
@@ -447,12 +447,12 @@
                                         </template>
                                         <template
                                             v-if="
-                                                game.data.fabled.some(
+                                                game.data.fabled?.some(
                                                     (r) =>
                                                         r.role?.type ===
                                                         'FABLED',
                                                 ) &&
-                                                game.data.fabled.some(
+                                                game.data.fabled?.some(
                                                     (r) =>
                                                         r.role?.type ===
                                                         'LORIC',
@@ -463,7 +463,7 @@
                                         </template>
                                         <template
                                             v-if="
-                                                game.data.fabled.some(
+                                                game.data.fabled?.some(
                                                     (r) =>
                                                         r.role?.type ===
                                                         'LORIC',
@@ -582,6 +582,18 @@
                             >
                                 View Campaign
                             </Button>
+                            <Button
+                                v-if="shareIsSupported || copyIsSupported"
+                                @click="shareGame"
+                                v-tooltip="{
+                                    content: 'Link copied!',
+                                    shown: showShareTooltip,
+                                    triggers: [],
+                                }"
+                                wide
+                            >
+                                Share
+                            </Button>
                         </div>
                         <template v-if="game.data.bgg_id">
                             <Button
@@ -612,7 +624,7 @@
                             v-if="game.data.notes"
                             class="notes bg-stone-100 dark:bg-stone-900 p-4 shadow-lg mt-3"
                         >
-                            <VueMarkdown
+                            <MarkdownRenderer
                                 class="max-w-[80ch]"
                                 :source="game.data.notes"
                             />
@@ -700,7 +712,7 @@
                     </Button>
                     <div class="w-screen md:w-full overflow-scroll min-h-48">
                         <Grimoire
-                            :tokens="game.data.grimoire[grimPage].tokens"
+                            :tokens="game.data.grimoire[grimPage].tokens as any"
                             readonly
                             :canClaimSeat="canClaimSeat"
                             :deathTooltips="deathTooltipsForPage"
@@ -725,6 +737,21 @@
                             won!
                         </div>
                     </div>
+                </div>
+                <div
+                    v-if="isTaggedWithoutChildGame"
+                    class="flex items-center gap-3 p-3 rounded-lg border border-amber-500/50 bg-amber-500/10 text-sm"
+                >
+                    <span class="text-stone-600 dark:text-stone-300">
+                        You're tagged in this game but it hasn't been added to your profile yet.
+                    </span>
+                    <Button
+                        size="sm"
+                        color="primary"
+                        @click="claimTaggedSeat"
+                    >
+                        Add to my profile
+                    </Button>
                 </div>
                 <Dialog v-model:visible="showSimilarGamesDialog" size="lg">
                     <template #title>
@@ -942,15 +969,15 @@ import {
 import type { GameRecord } from "~/composables/useGames";
 import { displayWinIconSvg } from "~/composables/useGames";
 import dayjs from "dayjs";
-import VueMarkdown from "vue-markdown-render";
 import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
 import { Status } from "~/composables/useFetchStatus";
+import { useShare, useClipboard } from "@vueuse/core";
 
 const { scriptLogo, isBaseScript, scriptBgClasses } = useScripts();
 const config = useRuntimeConfig();
 const router = useRouter();
 const route = useRoute();
-const user = useSupabaseUser();
+const user = useUser();
 const users = useUsers();
 const communities = useCommunities();
 const games = useGames();
@@ -990,6 +1017,50 @@ const showSimilarGamesDialog = ref(false);
 
 const { canPostToBGStats, link: bgStatsLink } = useBGStats(game);
 
+// Share
+const isCapacitor = config.public.isCapacitorBuild;
+const shareDetails = ref({ title: "", text: "", url: "" });
+const copySource = computed(() => shareDetails.value.url);
+const { share, isSupported: shareIsSupported } = useShare(shareDetails);
+const { copy, copied, isSupported: copyIsSupported } = useClipboard({
+  source: copySource,
+  legacy: true,
+});
+const showShareTooltip = ref(false);
+
+async function shareGame() {
+  if (game.value.status !== Status.SUCCESS) return;
+
+  const g = game.value.data;
+  const baseUrl = config.public.apiBaseUrl || window.location.origin;
+  const title = `${g.script} - ClockTracker`;
+  const text = g.is_storyteller
+    ? `I storytold a game of ${g.script}!`
+    : `I played a game of ${g.script}!`;
+  const url = `${baseUrl}/game/${gameId}`;
+
+  if (isCapacitor) {
+    const { Share } = await import("@capacitor/share");
+    await Share.share({ title, text, url, dialogTitle: "Share game" });
+    return;
+  }
+
+  shareDetails.value = { title, text, url };
+
+  if (shareIsSupported.value) {
+    share().catch(() => {});
+  } else if (copyIsSupported.value) {
+    copy().then(() => {
+      if (copied.value) {
+        showShareTooltip.value = true;
+        setTimeout(() => {
+          showShareTooltip.value = false;
+        }, 2000);
+      }
+    });
+  }
+}
+
 const isMe = computed(() => {
     if (user.value && game.value.status === Status.SUCCESS) {
         return user.value.id === game.value.data.user_id;
@@ -1026,68 +1097,60 @@ if (gameMetadata.error.value) {
     throw gameMetadata.error.value;
 }
 
-useHead({
-    title: `${gameMetadata.data.value!.user!.display_name} - ${
-        gameMetadata.data.value!.script
-    }`,
-    meta: [
-        {
-            hid: "description",
-            name: "description",
-            content: `Game of ${gameMetadata.data.value!.script} played by ${
-                gameMetadata.data.value!.user!.display_name
-            } on ${dayjs(gameMetadata.data.value!.date).format("MMMM D, YYYY")}.`,
-        },
-        {
-            property: "og:title",
-            content: `${gameMetadata.data.value!.user!.display_name} - ${
-                gameMetadata.data.value!.script
-            }`,
-        },
-        {
-            property: "og:description",
-            content: `Game of ${gameMetadata.data.value!.script} played by ${
-                gameMetadata.data.value!.user!.display_name
-            } on ${dayjs(gameMetadata.data.value!.date).format("MMMM D, YYYY")}.`,
-        },
-        {
-            property: "og:image",
-            content:
-                gameMetadata.data.value?.associated_script?.logo ??
-                scriptLogo(gameMetadata.data.value!.script as string),
-        },
-        {
-            property: "og:url",
-            content: route.fullPath,
-        },
-        {
-            property: "twitter:card",
-            content: "summary_large_image",
-        },
-        {
-            property: "twitter:url",
-            content: route.fullPath,
-        },
-        {
-            property: "twitter:title",
-            content: `${gameMetadata.data.value!.user!.display_name} - ${
-                gameMetadata.data.value!.script
-            }`,
-        },
-        {
-            property: "twitter:description",
-            content: `Game of ${gameMetadata.data.value!.script} played by ${
-                gameMetadata.data.value!.user!.display_name
-            } on ${dayjs(gameMetadata.data.value!.date).format("MMMM D, YYYY")}.`,
-        },
-        {
-            property: "twitter:image",
-            content:
-                gameMetadata.data.value?.associated_script?.logo ??
-                scriptLogo(gameMetadata.data.value!.script as string),
-        },
-    ],
-});
+const meta = gameMetadata.data.value;
+if (meta?.user) {
+    const displayName = meta.user.display_name;
+    const script = meta.script;
+    const dateStr = dayjs(meta.date).format("MMMM D, YYYY");
+    const image = meta.associated_script?.logo ?? scriptLogo(script as string);
+
+    useHead({
+        title: `${displayName} - ${script}`,
+        meta: [
+            {
+                key: "description",
+                name: "description",
+                content: `Game of ${script} played by ${displayName} on ${dateStr}.`,
+            },
+            {
+                property: "og:title",
+                content: `${displayName} - ${script}`,
+            },
+            {
+                property: "og:description",
+                content: `Game of ${script} played by ${displayName} on ${dateStr}.`,
+            },
+            {
+                property: "og:image",
+                content: image,
+            },
+            {
+                property: "og:url",
+                content: route.fullPath,
+            },
+            {
+                property: "twitter:card",
+                content: "summary_large_image",
+            },
+            {
+                property: "twitter:url",
+                content: route.fullPath,
+            },
+            {
+                property: "twitter:title",
+                content: `${displayName} - ${script}`,
+            },
+            {
+                property: "twitter:description",
+                content: `Game of ${script} played by ${displayName} on ${dateStr}.`,
+            },
+            {
+                property: "twitter:image",
+                content: image,
+            },
+        ],
+    });
+}
 
 const last_character = computed(() => {
     return games.getLastCharater(gameId);
@@ -1318,16 +1381,39 @@ const storytellers = computed(() => {
     });
 });
 
+// Detect if the user is tagged on a token but has no child game (stuck state).
+// This happens when child game creation failed after the token was saved.
+const isTaggedWithoutChildGame = computed(() => {
+    if (game.value.status !== Status.SUCCESS) return false;
+    if (me.value.status !== Status.SUCCESS) return false;
+
+    const myUserId = me.value.data.user_id;
+    const isTagged = game.value.data.grimoire.some((page) =>
+        page.tokens.some(
+            (token) => token.player_id === myUserId,
+        ),
+    );
+
+    if (!isTagged) return false;
+
+    // Check if a child game exists for this user
+    const hasChildGame = game.value.data.child_games?.some(
+        (child) => child.user_id === myUserId,
+    );
+
+    return !hasChildGame;
+});
+
 const canClaimSeat = computed(() => {
     if (game.value.status !== Status.SUCCESS) return false;
 
-    /** Reasons to disallow claimining the seat:
+    /** Reasons to disallow claiming the seat:
      * 1. The user is not signed in
      * 2. The user is not a friend of the game creator
      * 3. The user is not in a community with the game creator
      * 4. The user is a storyteller
      * 5. The user is a co-storyteller
-     * 6. The user already has a seat in the grimoire
+     * 6. The user already has a seat in the grimoire (unless stuck without child game)
      */
 
     if (me.value.status !== Status.SUCCESS) return false;
@@ -1355,6 +1441,9 @@ const canClaimSeat = computed(() => {
     ) {
         return false;
     }
+
+    // Allow if the user is tagged but has no child game (recovery path)
+    if (isTaggedWithoutChildGame.value) return true;
 
     // Check if the user already has a seat in the grimoire
     if (
@@ -1447,6 +1536,39 @@ function isFavorite(game: GameRecord) {
     if (user.status !== Status.SUCCESS) return false;
 
     return user.data.favorites.some((f) => f.game_id === game.id);
+}
+
+async function claimTaggedSeat() {
+    if (
+        game.value.status !== Status.SUCCESS ||
+        me.value.status !== Status.SUCCESS
+    ) {
+        return;
+    }
+
+    // Find the token this user is already tagged on
+    const myUserId = me.value.data.user_id;
+    const taggedToken = game.value.data.grimoire
+        .flatMap((page) => page.tokens)
+        .find((token) => token.player_id === myUserId);
+
+    if (!taggedToken) return;
+
+    try {
+        const result = await $fetch<GameRecord>(
+            `/api/games/${gameId}/claim_seat`,
+            {
+                method: "PUT",
+                body: { order: taggedToken.order },
+            },
+        );
+
+        games.games.set(gameId, { status: Status.SUCCESS, data: result });
+    } catch (error: any) {
+        alert(
+            `There was a problem adding this game: ${error.statusMessage}`,
+        );
+    }
 }
 
 async function toggleFavorite() {

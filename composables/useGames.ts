@@ -1,6 +1,8 @@
 import { defineStore } from "pinia";
+import { markRaw } from "vue";
 import type { FetchStatus } from "./useFetchStatus";
 import type {
+  Alignment,
   Game,
   Character,
   Grimoire,
@@ -8,7 +10,7 @@ import type {
   DemonBluff,
   Fabled,
   ReminderToken,
-} from "@prisma/client";
+} from "~/server/generated/prisma/client";
 import naturalOrder from "natural-order";
 
 export enum WinStatus_V2 {
@@ -64,6 +66,7 @@ export type FullCharacter = Character & {
     token_url: string;
     type: string;
     initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+    alternate_token_urls?: string[] | null;
   };
   related_role?: { token_url: string };
 };
@@ -121,8 +124,8 @@ export type GameRecord = Omit<Game, "win_v2"> & {
     created_at: Date;
   }[];
   player_characters: FullCharacter[];
-  demon_bluffs: FullDemonBluff[];
-  fabled: FullFabled[];
+  demon_bluffs?: FullDemonBluff[];
+  fabled?: FullFabled[];
   user: {
     username: string;
   };
@@ -135,7 +138,7 @@ export type GameRecord = Omit<Game, "win_v2"> & {
         name: string;
       };
       related_role?: { token_url: string };
-      reminders: ReminderToken[];
+      reminders?: ReminderToken[];
       player?: {
         username: string;
         display_name: string;
@@ -375,7 +378,7 @@ export const useGames = defineStore("games", {
 
         const communities = new Set<string>();
         for (const game of games.data) {
-          if (game.community_name) {
+          if (game.community_name?.trim()) {
             communities.add(game.community_name);
           }
         }
@@ -459,7 +462,7 @@ export const useGames = defineStore("games", {
             related_role_id: last.related_role_id ?? lastChar.related_role_id,
             role: last.role ?? lastChar.role,
             related_role: last.related_role ?? lastChar.related_role,
-          };
+          } as FullCharacter;
         }
 
         return characters[characters.length - 1];
@@ -557,7 +560,7 @@ export const useGames = defineStore("games", {
 
         this.games.set(gameId, {
           status: Status.SUCCESS,
-          data: game,
+          data: markRaw(game),
         });
       } catch (err) {
         this.games.set(gameId, {
@@ -572,28 +575,39 @@ export const useGames = defineStore("games", {
 
       const games = await $fetch<GameRecord[]>(`/api/user/${username}/games`);
 
-      this.players.set(username, { status: Status.SUCCESS, data: 1 });
+      // Batch all reactive updates into a single notification.
+      // markRaw prevents Vue from creating deep Proxy wrappers for each game
+      // (characters, grimoire, tokens, roles, etc.) — game data is read-only.
+      const newGameIds = new Set(games.map((g) => g.id));
+      this.$patch((state) => {
+        state.players.set(username, { status: Status.SUCCESS, data: 1 });
 
-      for (const game of games) {
-        this.games.set(game.id, {
-          status: Status.SUCCESS,
-          data: game,
-        });
-      }
+        for (const game of games) {
+          state.games.set(game.id, {
+            status: Status.SUCCESS,
+            data: markRaw(game),
+          });
+        }
+      });
 
+      // Purge stale games outside the patch (needs getter access)
       const allGames = this.getByPlayer(username);
       if (allGames.status === Status.SUCCESS) {
-        for (const game of allGames.data) {
-          // If the game is in the new data, don't worry
-          if (games.map((g) => g.id).includes(game.id)) continue;
+        const toDelete = allGames.data
+          .filter((game) => !newGameIds.has(game.id))
+          .map((game) => game.id);
 
-          // Purge the game if it's not in the new data
-          this.games.delete(game.id);
+        if (toDelete.length) {
+          this.$patch((state) => {
+            for (const id of toDelete) {
+              state.games.delete(id);
+            }
+          });
         }
       }
     },
     async fetchSimilarGames(gameId: string) {
-      const user = useSupabaseUser();
+      const user = useUser();
 
       if (!user.value) return;
 
@@ -604,27 +618,31 @@ export const useGames = defineStore("games", {
         `/api/games/${gameId}/similar`
       );
 
-      this.similar.set(gameId, {
-        status: Status.SUCCESS,
-        data: similar.map((g) => g.id),
-      });
-
-      for (const game of similar) {
-        this.games.set(game.id, {
+      this.$patch((state) => {
+        state.similar.set(gameId, {
           status: Status.SUCCESS,
-          data: game,
+          data: similar.map((g) => g.id),
         });
-      }
+
+        for (const game of similar) {
+          state.games.set(game.id, {
+            status: Status.SUCCESS,
+            data: markRaw(game),
+          });
+        }
+      });
     },
     async fetchCommunityGames(slug: string) {
       const games = await $fetch<GameRecord[]>(`/api/games/community/${slug}`);
 
-      for (const game of games) {
-        this.games.set(game.id, {
-          status: Status.SUCCESS,
-          data: game,
-        });
-      }
+      this.$patch((state) => {
+        for (const game of games) {
+          state.games.set(game.id, {
+            status: Status.SUCCESS,
+            data: markRaw(game),
+          });
+        }
+      });
     },
     async importGames(showLoader: () => void) {
       const this_ = this;
@@ -656,12 +674,14 @@ export const useGames = defineStore("games", {
                 body: JSON.stringify({ csv }),
               });
 
-              for (const game of games) {
-                this_.games.set(game.id, {
-                  status: Status.SUCCESS,
-                  data: game,
-                });
-              }
+              this_.$patch((state) => {
+                for (const game of games) {
+                  state.games.set(game.id, {
+                    status: Status.SUCCESS,
+                    data: markRaw(game),
+                  });
+                }
+              });
 
               resolve(games);
             } catch (err) {
@@ -759,13 +779,16 @@ export function displayWinIconSvg(game: GameRecord, showTeamWin: boolean = false
       `
     ),
     loss: icon(
-      "currentColor",
+      "#9f543e",
       "Loss", 
       `
-        <path d="m13.3 15.1-1.8-1.4c-.2-.1-.3-.2-.5-.3L9.6 13v-2.2l-.8-.8c-.1 0-.2.2-.2.4V13c0 .5.3.9.8 1l1.4.4h.2l.6.5h-7l.6-.5h.2l1.4-.4c.4-.1.8-.5.8-1v-2.6c0-.3-.2-.5-.5-.5-.5 0-1.7-.5-2.6-2.9-.2-.5-.4-1.1-.5-1.8L2.8 4c.1 1.1.4 2.1.6 2.9-1.1.2-2.1-.5-2.3-1.6-.2-.8.2-1.6.9-2.1l-.7-.7c-1 .8-1.5 2-1.3 3.1.4 1.6 2 2.6 3.6 2.3.8 1.9 1.9 2.8 2.8 3v2.2l-1.4.4c-.2 0-.4.1-.5.3l-1.8 1.4c-.1 0-.2.2-.2.4 0 .3.2.5.5.5h10c.2 0 .3 0 .4-.2.2-.2.1-.5-.1-.7Z"/><path d="M13.5 2V.5c0-.5-.2-.5-.5-.5H2.9l1 1h8.6v1.5c-.1 2-.5 3.5-.9 4.7-.2.4-.3.8-.5 1.1l.7.7c.2-.3.4-.6.5-1h.2c1.6.3 3.2-.8 3.4-2.5s-.8-3.2-2.5-3.4ZM15 5.4c-.2 1.1-1.2 1.8-2.3 1.6.3-1 .6-2.3.7-3.9 1.1.2 1.8 1.2 1.6 2.3Z"/><path d="M1.036.877 1.743.17l12.02 12.021-.707.707z"/>
+        <path d="M2.5.5c0-.3.2-.5.5-.5h10c.3 0 .5.2.5.5V2c1.6.3 2.7 1.8 2.5 3.4-.3 1.6-1.8 2.7-3.4 2.5h-.2c-.8 1.9-1.9 2.8-2.8 3v2.2l1.4.4c.2 0 .4.1.5.3l1.8 1.4c.2.2.3.5 0 .7 0 .1-.2.2-.4.2H3c-.3 0-.5-.2-.5-.5s0-.3.2-.4l1.8-1.4c.2-.1.3-.2.5-.3l1.4-.4v-2.2c-1-.2-2-1.1-2.8-3C2 8.3.4 7.2 0 5.6S.7 2.4 2.3 2h.2z"/>
+        <path fill="currentColor"fill="currentColor" d="M2.5.5c0-.3.2-.5.5-.5h10c.3 0 .5.2.5.5V2c1.6.3 2.7 1.8 2.5 3.4-.3 1.6-1.8 2.7-3.4 2.5h-.2c-.8 1.9-1.9 2.8-2.8 3v2.2l1.4.4c.2 0 .4.1.5.3l1.8 1.4c.2.2.3.5 0 .7 0 .1-.2.2-.4.2H3c-.3 0-.5-.2-.5-.5 0-.2 0-.3.2-.4l1.8-1.4c.2-.1.3-.2.5-.3l1.4-.4v-2.2c-1-.2-2-1.1-2.8-3C2 8.3.4 7.2 0 5.6S.7 2.4 2.3 2h.2zM2.6 3C1.5 3.2.8 4.2 1 5.3s1.2 1.8 2.3 1.6c-.3-1-.6-2.3-.7-3.9m10.1 4c1.1.2 2.1-.5 2.3-1.6s-.5-2.1-1.6-2.3C13.3 4.7 13 6 12.7 7M3.5 1v1.5c.1 2 .5 3.5.9 4.7.9 2.3 2.1 2.9 2.6 2.9s.5.2.5.5v2.6c0 .5-.3.9-.8 1l-1.4.4h-.2l-.6.5h7l-.6-.5h-.2l-1.4-.4c-.4-.1-.8-.5-.8-1v-2.6c0-.3.2-.5.5-.5.5 0 1.7-.5 2.6-2.9.4-1.1.7-2.6.9-4.7V1z"/>
+        <path fill="currentColor" d="m5.023 2.716.707-.707 5.162 5.162-.708.707z"/>
+        <path fill="currentColor" d="m5.716 7.877-.707-.707 5.162-5.162.707.708z"/>
       `
     ),
-    none: icon("No result", "")
+    none: icon("currentColor", "No result", "")
   };
 
   // Storyteller or team win.
@@ -776,7 +799,7 @@ export function displayWinIconSvg(game: GameRecord, showTeamWin: boolean = false
   }
 
   // Player-specific outcome.
-  if (game.player_characters.length === 0) return icons.none;
+  if (game.player_characters.length === 0 || !lastChar) return icons.none;
   const alignment = lastChar.alignment;
 
   if (

@@ -29,9 +29,13 @@ import { Switch } from "@headlessui/vue";
 
 const props = defineProps<{ modelValue: boolean; size?: "sm" | "md" }>();
 const emit = defineEmits(["update:modelValue"]);
+const { impact } = useHaptics();
 
 const value = computed({
   get: () => props.modelValue,
-  set: (value) => emit("update:modelValue", value),
+  set: (val) => {
+    impact();
+    emit("update:modelValue", val);
+  },
 });
 </script>

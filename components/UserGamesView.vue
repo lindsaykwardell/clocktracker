@@ -265,6 +265,24 @@
                 </div>
                 <div class="relative w-full md:w-auto">
                   <Button
+                    @click="selectAllVisibleGames"
+                    :disabled="!sortedGames.length"
+                    variant="soft"
+                  >
+                    Select all
+                  </Button>
+                </div>
+                <div class="relative w-full md:w-auto">
+                  <Button
+                    @click="clearVisibleSelection"
+                    :disabled="selectMultipleGames.selectedGames.length <= 0"
+                    variant="soft"
+                  >
+                    Select none
+                  </Button>
+                </div>
+                <div class="relative w-full md:w-auto">
+                  <Button
                     :disabled="selectMultipleGames.selectedGames.length <= 0"
                     @click="deleteMultipleGames"
                     color="negative"
@@ -553,7 +571,7 @@ import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
 import type { WinStatus_V2 } from "~/composables/useGames";
 import { useLocalStorage } from "@vueuse/core";
 
-const user = useSupabaseUser();
+const user = useUser();
 const users = useUsers();
 const roles = useRoles();
 const allGames = useGames();
@@ -580,29 +598,22 @@ const myTags = computed(() => {
 });
 
 const mySelectedPlayers = computed(() => {
-  if (props.games.status === Status.SUCCESS) {
-    return [
-      ...new Set(
-        naturalOrder([
-          ...props.games.data.flatMap((game) =>
-            game.grimoire.flatMap((g) =>
-              g.tokens.map((t) => t.player?.display_name || t.player_name)
-            )
-          ),
-          ...props.games.data.map(
-            (game) =>
-              (game.is_storyteller ? game.user.username : game.storyteller) ??
-              ""
-          ),
-          ...props.games.data.flatMap((game) => game.co_storytellers),
-        ])
-          .sort()
-          .filter((n) => n !== "")
-      ),
-    ];
-  } else {
+  if (props.games.status !== Status.SUCCESS) {
     return [];
   }
+  const players = [
+    ...props.games.data.flatMap((game) =>
+      game.grimoire.flatMap((g) =>
+        g.tokens.map((t) => t.player?.display_name || t.player_name)
+      )
+    ),
+    ...props.games.data.map(
+      (game) =>
+        (game.is_storyteller ? game.user.username : game.storyteller) ?? ""
+    ),
+    ...props.games.data.flatMap((game) => game.co_storytellers),
+  ].filter((n) => !!n);
+  return naturalOrder([...new Set(players)]).sort();
 });
 
 const myRoles = computed(() => {
@@ -625,9 +636,8 @@ const myRoles = computed(() => {
 const myCommunities = computed(() => {
   if (!props.player) {
     return [];
-  } else {
-    return allGames.getCommunityNamesByPlayer(props.player.username);
   }
+  return allGames.getCommunityNamesByPlayer(props.player.username);
 });
 
 const myScripts = computed(() => {
@@ -648,8 +658,8 @@ const myLocations = computed(() => {
   return naturalOrder([
     ...new Set(
       props.games.data
-        .filter((game) => game.location)
         .map((game) => game.location)
+        .filter((loc) => !!loc)
     ),
   ]).sort();
   // if (props.communitySlug) {
@@ -736,14 +746,18 @@ watchEffect(() => {
 
 watchEffect(() => {
   if (selectedTag.value) {
-    selectedTags.value.push(selectedTag.value);
+    if (!selectedTags.value.includes(selectedTag.value)) {
+      selectedTags.value.push(selectedTag.value);
+    }
     selectedTag.value = null;
   }
 });
 
 watchEffect(() => {
   if (selectedPlayer.value) {
-    selectedPlayers.value.push(selectedPlayer.value);
+    if (!selectedPlayers.value.includes(selectedPlayer.value)) {
+      selectedPlayers.value.push(selectedPlayer.value);
+    }
     selectedPlayer.value = null;
   }
 });
@@ -911,6 +925,47 @@ async function deleteMultipleGames() {
 
     selectMultipleGames.toggleMode();
   }
+}
+
+function selectAllVisibleGames() {
+  if (!selectMultipleGames.enabled) {
+    return;
+  }
+
+  if (selectMultipleGames.selection.type !== "ON") {
+    return;
+  }
+
+  const visibleIds = sortedGames.value.map((game) => game.id);
+  const currentSelection = new Set(selectMultipleGames.selection.games);
+
+  for (const id of visibleIds) {
+    currentSelection.add(id);
+  }
+
+  selectMultipleGames.selection = {
+    type: "ON",
+    games: Array.from(currentSelection),
+  };
+}
+
+function clearVisibleSelection() {
+  if (!selectMultipleGames.enabled) {
+    return;
+  }
+
+  if (selectMultipleGames.selection.type !== "ON") {
+    return;
+  }
+
+  const visibleIds = new Set(sortedGames.value.map((game) => game.id));
+
+  selectMultipleGames.selection = {
+    type: "ON",
+    games: selectMultipleGames.selection.games.filter(
+      (id) => !visibleIds.has(id)
+    ),
+  };
 }
 
 function formatDate(date: Date) {

@@ -1,174 +1,116 @@
-import type { User } from "@supabase/supabase-js";
-import { PrivacySetting } from "@prisma/client";
-import { anonymizeGame, GameRecord } from "~/server/utils/anonymizeGame";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
+import { PrivacySetting } from "~/server/generated/prisma/client";
+import { anonymizeGame, type GameRecord } from "~/server/utils/anonymizeGame";
 import { prisma } from "./prisma";
+import { hasPermission } from "./permissions";
 
 export async function fetchGames(user_id: string, me: User | null) {
-  const games = await prisma.game.findMany({
+  const canViewPrivate = me ? await hasPermission(me.id, "VIEW_PRIVATE_GAMES") : false;
+
+  const privacyFilter = canViewPrivate
+    ? {}
+    : {
+        OR: [
+          // PUBLIC PROFILE
+          // PUBLIC GAME
+          {
+            user: {
+              privacy: PrivacySetting.PUBLIC,
+            },
+            privacy: PrivacySetting.PUBLIC,
+          },
+          // PRIVATE GAME
+          {
+            user: {
+              privacy: PrivacySetting.PUBLIC,
+              OR: [
+                { user_id: me?.id || "" },
+                { friends: { some: { user_id: me?.id || "" } } },
+              ],
+            },
+            privacy: PrivacySetting.PRIVATE,
+          },
+          // FRIENDS ONLY GAME
+          {
+            user: {
+              privacy: PrivacySetting.PUBLIC,
+              OR: [
+                { friends: { some: { user_id: me?.id || "" } } },
+                { user_id: me?.id || "" },
+              ],
+            },
+            privacy: PrivacySetting.FRIENDS_ONLY,
+          },
+          // PRIVATE PROFILE
+          // PUBLIC GAME
+          {
+            user: { privacy: PrivacySetting.PRIVATE },
+            privacy: PrivacySetting.PUBLIC,
+          },
+          // PRIVATE GAME
+          {
+            user: {
+              privacy: PrivacySetting.PRIVATE,
+              OR: [
+                { user_id: me?.id || "" },
+                { friends: { some: { user_id: me?.id || "" } } },
+              ],
+            },
+            privacy: PrivacySetting.PRIVATE,
+          },
+          // FRIENDS ONLY GAME
+          {
+            user: {
+              privacy: PrivacySetting.PRIVATE,
+              OR: [
+                { friends: { some: { user_id: me?.id || "" } } },
+                { user_id: me?.id || "" },
+              ],
+            },
+            privacy: PrivacySetting.FRIENDS_ONLY,
+          },
+          // FRIENDS ONLY PROFILE
+          // PUBLIC GAME
+          {
+            user: {
+              privacy: PrivacySetting.FRIENDS_ONLY,
+              OR: [
+                { user_id: me?.id || "" },
+                { friends: { some: { user_id: me?.id || "" } } },
+              ],
+            },
+            privacy: PrivacySetting.PUBLIC,
+          },
+          // PRIVATE GAME
+          {
+            user: {
+              privacy: PrivacySetting.FRIENDS_ONLY,
+              OR: [
+                { user_id: me?.id || "" },
+                { friends: { some: { user_id: me?.id || "" } } },
+              ],
+            },
+            privacy: PrivacySetting.PRIVATE,
+          },
+          // FRIENDS ONLY GAME
+          {
+            user: {
+              privacy: PrivacySetting.FRIENDS_ONLY,
+              OR: [
+                { friends: { some: { user_id: me?.id || "" } } },
+                { user_id: me?.id || "" },
+              ],
+            },
+            privacy: PrivacySetting.FRIENDS_ONLY,
+          },
+        ],
+      };
+
+  const [games, isFriend] = await Promise.all([prisma.game.findMany({
     where: {
       deleted: false,
       user_id,
-      OR: [
-        // PUBLIC PROFILE
-        // PUBLIC GAME
-        {
-          user: {
-            privacy: PrivacySetting.PUBLIC,
-          },
-          privacy: PrivacySetting.PUBLIC,
-        },
-        // PRIVATE GAME
-        // This is an indirect lookup for a given user, so we need
-        // to make sure that the user can see the games.
-        {
-          user: {
-            privacy: PrivacySetting.PUBLIC,
-            OR: [
-              {
-                user_id: me?.id || "",
-              },
-              {
-                friends: {
-                  some: {
-                    user_id: me?.id || "",
-                  },
-                },
-              },
-            ],
-          },
-          privacy: PrivacySetting.PRIVATE,
-        },
-        // FRIENDS ONLY GAME
-        {
-          user: {
-            privacy: PrivacySetting.PUBLIC,
-            OR: [
-              {
-                friends: {
-                  some: {
-                    user_id: me?.id || "",
-                  },
-                },
-              },
-              {
-                user_id: me?.id || "",
-              },
-            ],
-          },
-          privacy: PrivacySetting.FRIENDS_ONLY,
-        },
-        // PRIVATE PROFILE
-        // PUBLIC GAME
-        // No filtering done here, because the game is public.
-        // We'll need to anonymize the user's profile, though.
-        {
-          user: {
-            privacy: PrivacySetting.PRIVATE,
-          },
-          privacy: PrivacySetting.PUBLIC,
-        },
-        // PRIVATE GAME
-        // This is an indirect lookup for a given user, so we need
-        // to make sure that the user can see the games.
-        {
-          user: {
-            privacy: PrivacySetting.PRIVATE,
-            OR: [
-              {
-                user_id: me?.id || "",
-              },
-              {
-                friends: {
-                  some: {
-                    user_id: me?.id || "",
-                  },
-                },
-              },
-            ],
-          },
-          privacy: PrivacySetting.PRIVATE,
-        },
-        // FRIENDS ONLY GAME
-        {
-          user: {
-            privacy: PrivacySetting.PRIVATE,
-            OR: [
-              {
-                friends: {
-                  some: {
-                    user_id: me?.id || "",
-                  },
-                },
-              },
-              {
-                user_id: me?.id || "",
-              },
-            ],
-          },
-          privacy: PrivacySetting.FRIENDS_ONLY,
-        },
-        // FRIENDS ONLY PROFILE
-        // PUBLIC GAME
-        // We're just treating this as a friends only game, because
-        // we don't want to show the user's profile.
-        {
-          user: {
-            privacy: PrivacySetting.FRIENDS_ONLY,
-            OR: [
-              {
-                user_id: me?.id || "",
-              },
-              {
-                friends: {
-                  some: {
-                    user_id: me?.id || "",
-                  },
-                },
-              },
-            ],
-          },
-          privacy: PrivacySetting.PUBLIC,
-        },
-        // PRIVATE GAME
-        // Direct links are allowed, so we aren't performing any checks on the user
-        {
-          user: {
-            privacy: PrivacySetting.FRIENDS_ONLY,
-            OR: [
-              {
-                user_id: me?.id || "",
-              },
-              {
-                friends: {
-                  some: {
-                    user_id: me?.id || "",
-                  },
-                },
-              },
-            ],
-          },
-          privacy: PrivacySetting.PRIVATE,
-        },
-        // FRIENDS ONLY GAME
-        {
-          user: {
-            privacy: PrivacySetting.FRIENDS_ONLY,
-            OR: [
-              {
-                friends: {
-                  some: {
-                    user_id: me?.id || "",
-                  },
-                },
-              },
-              {
-                user_id: me?.id || "",
-              },
-            ],
-          },
-          privacy: PrivacySetting.FRIENDS_ONLY,
-        },
-      ],
+      ...privacyFilter,
     },
     include: {
       ls_game: {
@@ -205,7 +147,10 @@ export async function fetchGames(user_id: string, me: User | null) {
         },
       },
       demon_bluffs: {
-        include: {
+        select: {
+          id: true,
+          role_id: true,
+          game_id: true,
           role: {
             select: {
               token_url: true,
@@ -215,7 +160,10 @@ export async function fetchGames(user_id: string, me: User | null) {
         },
       },
       fabled: {
-        include: {
+        select: {
+          id: true,
+          role_id: true,
+          game_id: true,
           role: {
             select: {
               token_url: true,
@@ -240,10 +188,32 @@ export async function fetchGames(user_id: string, me: User | null) {
             orderBy: {
               order: "asc",
             },
-            include: {
-              role: true,
-              related_role: true,
-              reminders: true,
+            select: {
+              id: true,
+              role_id: true,
+              related_role_id: true,
+              alignment: true,
+              is_dead: true,
+              used_ghost_vote: true,
+              order: true,
+              grimoire_id: true,
+              grimoire_participant_id: true,
+              player_name: true,
+              player_id: true,
+              created_at: true,
+              role: {
+                select: {
+                  token_url: true,
+                  type: true,
+                  initial_alignment: true,
+                  name: true,
+                },
+              },
+              related_role: {
+                select: {
+                  token_url: true,
+                },
+              },
               player: {
                 select: {
                   display_name: true,
@@ -253,6 +223,9 @@ export async function fetchGames(user_id: string, me: User | null) {
               },
             },
           },
+        },
+        orderBy: {
+          id: "asc",
         },
       },
       parent_game: {
@@ -292,12 +265,9 @@ export async function fetchGames(user_id: string, me: User | null) {
         id: "desc",
       },
     ],
-  });
-
-  const anonymizedGames: GameRecord[] = [];
-
-  // We need to know if the user is a friend of the game creator
-  const isFriend = !!(await prisma.friend.findFirst({
+  }),
+  // Run friend check in parallel with games query
+  prisma.friend.findFirst({
     where: {
       OR: [
         {
@@ -310,10 +280,13 @@ export async function fetchGames(user_id: string, me: User | null) {
         },
       ],
     },
-  }));
+  }).then((r) => !!r),
+  ]);
+
+  const anonymizedGames: GameRecord[] = [];
 
   for (const game of games) {
-    anonymizedGames.push(await anonymizeGame(game as GameRecord, me, isFriend));
+    anonymizedGames.push(await anonymizeGame(game as GameRecord, me, isFriend || canViewPrivate));
   }
 
   return anonymizedGames;
@@ -324,122 +297,84 @@ export async function fetchGame(
   me: User | null,
   my_game: boolean = false
 ) {
+  const canViewPrivate = me ? await hasPermission(me.id, "VIEW_PRIVATE_GAMES") : false;
+
+  const privacyFilter = canViewPrivate
+    ? {}
+    : {
+        OR: [
+          // PUBLIC PROFILE, PUBLIC GAME
+          {
+            user: { privacy: PrivacySetting.PUBLIC },
+            privacy: PrivacySetting.PUBLIC,
+          },
+          // PUBLIC PROFILE, PRIVATE GAME (direct links allowed)
+          {
+            user: { privacy: PrivacySetting.PUBLIC },
+            privacy: PrivacySetting.PRIVATE,
+          },
+          // PUBLIC PROFILE, FRIENDS ONLY GAME
+          {
+            user: {
+              privacy: PrivacySetting.PUBLIC,
+              OR: [
+                { friends: { some: { user_id: me?.id || "" } } },
+                { user_id: me?.id || "" },
+              ],
+            },
+            privacy: PrivacySetting.FRIENDS_ONLY,
+          },
+          // PRIVATE PROFILE, PUBLIC GAME
+          {
+            user: { privacy: PrivacySetting.PRIVATE },
+            privacy: PrivacySetting.PUBLIC,
+          },
+          // PRIVATE PROFILE, PRIVATE GAME (direct links allowed)
+          {
+            user: { privacy: PrivacySetting.PRIVATE },
+            privacy: PrivacySetting.PRIVATE,
+          },
+          // PRIVATE PROFILE, FRIENDS ONLY GAME
+          {
+            user: {
+              privacy: PrivacySetting.PRIVATE,
+              OR: [
+                { friends: { some: { user_id: me?.id || "" } } },
+                { user_id: me?.id || "" },
+              ],
+            },
+            privacy: PrivacySetting.FRIENDS_ONLY,
+          },
+          // FRIENDS ONLY PROFILE, PUBLIC GAME
+          {
+            user: { privacy: PrivacySetting.FRIENDS_ONLY },
+            privacy: PrivacySetting.PUBLIC,
+          },
+          // FRIENDS ONLY PROFILE, PRIVATE GAME (direct links allowed)
+          {
+            user: { privacy: PrivacySetting.FRIENDS_ONLY },
+            privacy: PrivacySetting.PRIVATE,
+          },
+          // FRIENDS ONLY PROFILE, FRIENDS ONLY GAME
+          {
+            user: {
+              privacy: PrivacySetting.FRIENDS_ONLY,
+              OR: [
+                { friends: { some: { user_id: me?.id || "" } } },
+                { user_id: me?.id || "" },
+              ],
+            },
+            privacy: PrivacySetting.FRIENDS_ONLY,
+          },
+        ],
+      };
+
   const game = await prisma.game.findUnique({
     where: {
       id,
       user_id: my_game ? me?.id || "" : undefined,
       deleted: false,
-      OR: [
-        // PUBLIC PROFILE
-        // PUBLIC GAME
-        {
-          user: {
-            privacy: PrivacySetting.PUBLIC,
-          },
-          privacy: PrivacySetting.PUBLIC,
-        },
-        // PRIVATE GAME
-        // Direct links are allowed, so we aren't performing any checks on the user
-        {
-          user: {
-            privacy: PrivacySetting.PUBLIC,
-          },
-          privacy: PrivacySetting.PRIVATE,
-        },
-        // FRIENDS ONLY GAME
-        {
-          user: {
-            privacy: PrivacySetting.PUBLIC,
-            OR: [
-              {
-                friends: {
-                  some: {
-                    user_id: me?.id || "",
-                  },
-                },
-              },
-              {
-                user_id: me?.id || "",
-              },
-            ],
-          },
-          privacy: PrivacySetting.FRIENDS_ONLY,
-        },
-        // PRIVATE PROFILE
-        // PUBLIC GAME
-        // No filtering done here, because the game is public.
-        // We'll need to anonymize the user's profile, though.
-        {
-          user: {
-            privacy: PrivacySetting.PRIVATE,
-          },
-          privacy: PrivacySetting.PUBLIC,
-        },
-        // PRIVATE GAME
-        // Direct links are allowed, so we aren't performing any checks on the user
-        {
-          user: {
-            privacy: PrivacySetting.PRIVATE,
-          },
-          privacy: PrivacySetting.PRIVATE,
-        },
-        // FRIENDS ONLY GAME
-        {
-          user: {
-            privacy: PrivacySetting.PRIVATE,
-            OR: [
-              {
-                friends: {
-                  some: {
-                    user_id: me?.id || "",
-                  },
-                },
-              },
-              {
-                user_id: me?.id || "",
-              },
-            ],
-          },
-          privacy: PrivacySetting.FRIENDS_ONLY,
-        },
-        // FRIENDS ONLY PROFILE
-        // PUBLIC GAME
-        // No filtering done here, because the game is public.
-        // We'll need to anonymize the user's profile, though.
-        {
-          user: {
-            privacy: PrivacySetting.FRIENDS_ONLY,
-          },
-          privacy: PrivacySetting.PUBLIC,
-        },
-        // PRIVATE GAME
-        // Direct links are allowed, so we aren't performing any checks on the user
-        {
-          user: {
-            privacy: PrivacySetting.FRIENDS_ONLY,
-          },
-          privacy: PrivacySetting.PRIVATE,
-        },
-        // FRIENDS ONLY GAME
-        {
-          user: {
-            privacy: PrivacySetting.FRIENDS_ONLY,
-            OR: [
-              {
-                friends: {
-                  some: {
-                    user_id: me?.id || "",
-                  },
-                },
-              },
-              {
-                user_id: me?.id || "",
-              },
-            ],
-          },
-          privacy: PrivacySetting.FRIENDS_ONLY,
-        },
-      ],
+      ...privacyFilter,
     },
     include: {
       ls_game: {
@@ -529,6 +464,12 @@ export async function fetchGame(
           id: "asc",
         },
       },
+      child_games: {
+        select: {
+          id: true,
+          user_id: true,
+        },
+      },
       parent_game: {
         select: {
           user: {
@@ -579,5 +520,5 @@ export async function fetchGame(
     },
   }));
 
-  return anonymizeGame(game as GameRecord, me, isFriend);
+  return anonymizeGame(game as GameRecord, me, isFriend || canViewPrivate);
 }

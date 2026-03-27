@@ -131,7 +131,7 @@
 
 <script setup lang="ts">
 import { useRoleImage } from "~/composables/useRoleImage";
-const user = useSupabaseUser();
+const user = useUser();
 const games = useGames();
 const roles = useRoles();
 const { roleBaseUrlFromId, roleBaseUrlFromRole, sizeAdjustedUrl } =

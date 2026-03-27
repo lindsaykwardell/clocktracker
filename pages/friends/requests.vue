@@ -30,5 +30,5 @@
 </template>
 
 <script setup lang="ts">
-const user = useSupabaseUser();
+const user = useUser();
 </script>

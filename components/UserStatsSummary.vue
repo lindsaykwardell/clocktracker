@@ -180,19 +180,24 @@ const buildStats = (games: GameRecord[]): StatSummary => {
   };
 };
 
-const overallStats = computed(() => buildStats(props.games));
-
-const cutoffTime = computed(() => Date.now() - 30 * DAY_MS);
-
-const statsAtCutoff = computed(() => {
-  const cutoff = cutoffTime.value;
-  const gamesBeforeCutoff = props.games.filter((game) => {
+// Compute both overall and cutoff stats in a single pass over the games array.
+const bothStats = computed(() => {
+  const cutoff = Date.now() - 30 * DAY_MS;
+  const gamesBeforeCutoff: GameRecord[] = [];
+  for (const game of props.games) {
     const time = getGameTime(game);
-    return time !== null && time <= cutoff;
-  });
-
-  return buildStats(gamesBeforeCutoff);
+    if (time !== null && time <= cutoff) {
+      gamesBeforeCutoff.push(game);
+    }
+  }
+  return {
+    overall: buildStats(props.games),
+    atCutoff: buildStats(gamesBeforeCutoff),
+  };
 });
+
+const overallStats = computed(() => bothStats.value.overall);
+const statsAtCutoff = computed(() => bothStats.value.atCutoff);
 
 const trendLabel = (delta: number, suffix = "") => {
   if (delta > 0) {

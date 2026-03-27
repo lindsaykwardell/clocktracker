@@ -39,7 +39,7 @@ import type { Event } from "~/composables/useCommunities";
 import { Status } from "~/composables/useFetchStatus";
 
 const users = useUsers();
-const user = useSupabaseUser();
+const user = useUser();
 
 const me = computed(() => {
   return users.getUserById(user.value?.id);
@@ -56,7 +56,7 @@ function canModifyEvent(event: Event) {
   if (me.value.status !== Status.SUCCESS) return false;
 
   return me.value.data.community_admin?.some(
-    (c) => c.id === event.community.id
+    (c) => c.id === event.community?.id
   );
 }
 

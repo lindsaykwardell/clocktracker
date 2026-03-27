@@ -7,7 +7,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { Doughnut } from "vue-chartjs";
-import type { Game, Character } from "@prisma/client";
+import type { GameRecord } from "~/composables/useGames";
 import { chartColors } from "~/composables/useChartColors";
 
 type Alignment = "GOOD" | "EVIL" | null;
@@ -18,20 +18,8 @@ type SideStats = {
   wins: number;
 };
 
-type GameWithChars = Game & {
-  ignore_for_stats?: boolean | null;
-  win_v2?: string | null;
-  player_characters: (Character & {
-    name: string | null;
-    alignment?: Alignment;
-    role?: {
-      type?: string | null;
-    } | null;
-  })[];
-};
-
 const props = defineProps<{
-  games: GameWithChars[];
+  games: GameRecord[];
 }>();
 
 /**
@@ -43,7 +31,7 @@ const props = defineProps<{
  * Games flagged with `ignore_for_stats`, games without characters,
  * nameless characters, and Fabled roles are ignored.
  */
-function getStatsCharacter(game: GameWithChars) {
+function getStatsCharacter(game: GameRecord) {
   if (game.ignore_for_stats) return null;
   if (!game.player_characters.length) return null;
 
@@ -138,8 +126,8 @@ const chartOptions = computed(() => ({
     datalabels: {
       display: true,
       color: chartColors.labelColor,
-      anchor: "center",
-      align: "center",
+      anchor: "center" as const,
+      align: "center" as const,
       clamp: true,
       backgroundColor: chartColors.labelBackground,
       borderRadius: chartColors.labelRadius,

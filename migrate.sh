@@ -4,4 +4,4 @@
 npx prisma migrate deploy
 
 # Run the import-roles.js script
-node ./prisma/import-roles.js
+npx tsx ./prisma/import-roles.js

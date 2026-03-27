@@ -1,5 +1,5 @@
-import { PrivacySetting, Script } from "@prisma/client";
-import { User } from "@supabase/supabase-js";
+import { PrivacySetting, type Script } from "~/server/generated/prisma/client";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import axios from "axios";
 import * as cheerio from "cheerio";
 import { prisma } from "./prisma";

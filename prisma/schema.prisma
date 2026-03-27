@@ -1,12 +1,10 @@
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["fullTextSearch"]
+  provider = "prisma-client"
+  output   = "../server/generated/prisma"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_DATABASE_URL")
+  provider = "postgresql"
 }
 
 model FeatureFlag {
@@ -16,6 +14,7 @@ model FeatureFlag {
   active                 Boolean        @default(false)
   active_for             UserSettings[]
   enabled_for_supporters Boolean        @default(false)
+  rollout_percentage     Int?
   effective_date         DateTime?
   created_at             DateTime       @default(now()) @db.Timestamptz(6)
 }
@@ -70,6 +69,7 @@ model Game {
   grimoire_events             GrimoireEvent[]
   favorite                    FavoriteGame?
   favorite_id                 Int?           @unique
+  grimoire_snapshots          GrimoireSnapshot[]
 
   @@index([user_id])
 }
@@ -167,12 +167,22 @@ model GrimoireEvent {
 }
 
 model Grimoire {
-  id         Int      @id @default(autoincrement())
-  created_at DateTime @default(now()) @db.Timestamptz(6)
+  id         Int                 @id @default(autoincrement())
+  created_at DateTime            @default(now()) @db.Timestamptz(6)
   title      String   @default("")
   page_type  GrimoirePageType @default(NONE)
   tokens     Token[]
   game       Game[]
+}
+
+model GrimoireSnapshot {
+  id           Int      @id @default(autoincrement())
+  game_id      String
+  game         Game     @relation(fields: [game_id], references: [id])
+  snapshot     Json
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([game_id])
 }
 
 model Token {
@@ -370,8 +380,24 @@ model UserSettings {
   dids                    Did[]
   favorites               FavoriteGame[]
   created_events          Event[]
-  calendar                SharedCalendarLink?
   year_reviews            YearInReview[]
+  forum_group_memberships UserGroupMembership[]
+  forum_threads           ForumThread[]
+  forum_posts             ForumPost[]
+  forum_bans              ForumBan[]          @relation("BannedUser")
+  forum_bans_issued       ForumBan[]          @relation("BannedByUser")
+  forum_reactions         ForumPostReaction[]
+  forum_reports           ForumPostReport[]   @relation("ReportedBy")
+  forum_reports_resolved  ForumPostReport[]   @relation("ResolvedBy")
+  forum_edits             ForumPostEdit[]
+  forum_mod_logs          ForumModLog[]
+  forum_subscriptions     ForumThreadSubscription[]
+  forum_category_subscriptions ForumCategorySubscription[]
+  forum_reads             ForumThreadRead[]
+  forum_first_visit_at    DateTime?               @db.Timestamptz(6)
+  push_notifications_enabled Boolean              @default(false)
+  push_subscriptions      PushSubscription[]
+  fcm_tokens              FcmToken[]
 }
 
 model Did {
@@ -392,12 +418,6 @@ model KoFiPayment {
   expires_at              DateTime
   user                    UserSettings? @relation(fields: [user_id], references: [user_id])
   user_id                 String?
-}
-
-model SharedCalendarLink {
-  id      String       @id
-  user    UserSettings @relation(fields: [user_id], references: [user_id])
-  user_id String       @unique
 }
 
 enum PrivacySetting {
@@ -664,4 +684,235 @@ model LSGame {
   script_id      Int?         @unique
 
   @@unique([id, game_number])
+}
+
+// ---- Forum ----
+
+model UserGroup {
+  id           String                @id @default(uuid())
+  name         String                @unique
+  permissions  String[]
+  restrictions String[]              @default([])
+  is_default   Boolean               @default(false)
+  color        String?
+  created_at   DateTime              @default(now()) @db.Timestamptz(6)
+  members      UserGroupMembership[]
+  categories   CategoryAccess[]
+}
+
+model UserGroupMembership {
+  id          String       @id @default(uuid())
+  user_id     String
+  group_id    String
+  assigned_at DateTime     @default(now()) @db.Timestamptz(6)
+  user        UserSettings @relation(fields: [user_id], references: [user_id])
+  group       UserGroup    @relation(fields: [group_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, group_id])
+}
+
+model ForumCategoryGroup {
+  id         String          @id @default(uuid())
+  name       String
+  sort_order Int             @default(0)
+  created_at DateTime        @default(now()) @db.Timestamptz(6)
+  categories ForumCategory[]
+}
+
+model ForumCategory {
+  id          String              @id @default(uuid())
+  name        String
+  slug        String              @unique
+  description String?
+  sort_order  Int                 @default(0)
+  is_private       Boolean             @default(false)
+  mod_posting_only Boolean             @default(false)
+  is_announcement  Boolean             @default(false)
+  created_at       DateTime            @default(now()) @db.Timestamptz(6)
+  group_id         String?
+  group            ForumCategoryGroup? @relation(fields: [group_id], references: [id])
+  threads          ForumThread[]
+  access           CategoryAccess[]
+  bans             ForumBan[]
+  subscriptions    ForumCategorySubscription[]
+}
+
+model CategoryAccess {
+  id          String        @id @default(uuid())
+  category_id String
+  group_id    String
+  can_view    Boolean       @default(true)
+  can_post    Boolean       @default(true)
+  category    ForumCategory @relation(fields: [category_id], references: [id], onDelete: Cascade)
+  group       UserGroup     @relation(fields: [group_id], references: [id], onDelete: Cascade)
+
+  @@unique([category_id, group_id])
+}
+
+model ForumThread {
+  id           String        @id @default(uuid())
+  title        String
+  category_id  String
+  author_id    String
+  is_pinned    Boolean       @default(false)
+  is_locked    Boolean       @default(false)
+  created_at   DateTime      @default(now()) @db.Timestamptz(6)
+  last_post_at DateTime      @default(now()) @db.Timestamptz(6)
+  deleted_at       DateTime?     @db.Timestamptz(6)
+  github_issue_url String?
+  category      ForumCategory           @relation(fields: [category_id], references: [id])
+  author        UserSettings            @relation(fields: [author_id], references: [user_id])
+  posts         ForumPost[]
+  subscriptions ForumThreadSubscription[]
+  reads         ForumThreadRead[]
+
+  @@index([category_id, deleted_at])
+  @@index([last_post_at])
+}
+
+model ForumPost {
+  id         String              @id @default(uuid())
+  body       String
+  thread_id  String
+  author_id  String
+  created_at DateTime            @default(now()) @db.Timestamptz(6)
+  edited_at  DateTime?           @db.Timestamptz(6)
+  deleted_at DateTime?           @db.Timestamptz(6)
+  thread     ForumThread         @relation(fields: [thread_id], references: [id], onDelete: Cascade)
+  author     UserSettings        @relation(fields: [author_id], references: [user_id])
+  reactions  ForumPostReaction[]
+  reports    ForumPostReport[]
+  edits      ForumPostEdit[]
+
+  @@index([thread_id, deleted_at])
+}
+
+model ForumCategorySubscription {
+  id          String        @id @default(uuid())
+  category_id String
+  user_id     String
+  created_at  DateTime      @default(now()) @db.Timestamptz(6)
+  category    ForumCategory @relation(fields: [category_id], references: [id], onDelete: Cascade)
+  user        UserSettings  @relation(fields: [user_id], references: [user_id])
+
+  @@unique([category_id, user_id])
+  @@index([user_id])
+}
+
+model ForumThreadSubscription {
+  id            String       @id @default(uuid())
+  thread_id     String
+  user_id       String
+  last_read_at  DateTime     @default(now()) @db.Timestamptz(6)
+  created_at    DateTime     @default(now()) @db.Timestamptz(6)
+  thread        ForumThread  @relation(fields: [thread_id], references: [id], onDelete: Cascade)
+  user          UserSettings @relation(fields: [user_id], references: [user_id])
+
+  @@unique([thread_id, user_id])
+  @@index([user_id])
+}
+
+model ForumThreadRead {
+  id            String       @id @default(uuid())
+  thread_id     String
+  user_id       String
+  last_read_at  DateTime     @default(now()) @db.Timestamptz(6)
+  thread        ForumThread  @relation(fields: [thread_id], references: [id], onDelete: Cascade)
+  user          UserSettings @relation(fields: [user_id], references: [user_id])
+
+  @@unique([thread_id, user_id])
+  @@index([user_id])
+}
+
+model ForumPostEdit {
+  id            String       @id @default(uuid())
+  post_id       String
+  previous_body String
+  edited_by     String
+  created_at    DateTime     @default(now()) @db.Timestamptz(6)
+  post          ForumPost    @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  editor        UserSettings @relation(fields: [edited_by], references: [user_id])
+
+  @@index([post_id])
+}
+
+model ForumPostReaction {
+  id         String       @id @default(uuid())
+  post_id    String
+  user_id    String
+  emoji      String
+  created_at DateTime     @default(now()) @db.Timestamptz(6)
+  post       ForumPost    @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  user       UserSettings @relation(fields: [user_id], references: [user_id])
+
+  @@unique([post_id, user_id, emoji])
+  @@index([post_id])
+}
+
+model ForumPostReport {
+  id          String       @id @default(uuid())
+  post_id     String
+  reporter_id String
+  reason      String
+  resolved    Boolean      @default(false)
+  resolved_by String?
+  resolved_at DateTime?    @db.Timestamptz(6)
+  created_at  DateTime     @default(now()) @db.Timestamptz(6)
+  post        ForumPost    @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  reporter    UserSettings @relation("ReportedBy", fields: [reporter_id], references: [user_id])
+  resolver    UserSettings? @relation("ResolvedBy", fields: [resolved_by], references: [user_id])
+
+  @@index([post_id])
+  @@index([resolved])
+}
+
+model ForumModLog {
+  id          String       @id @default(uuid())
+  action      String
+  actor_id    String
+  target_type String
+  target_id   String
+  details     String?
+  created_at  DateTime     @default(now()) @db.Timestamptz(6)
+  actor       UserSettings @relation(fields: [actor_id], references: [user_id])
+
+  @@index([created_at])
+}
+
+model PushSubscription {
+  id         String       @id @default(uuid())
+  user_id    String
+  endpoint   String
+  p256dh     String
+  auth       String
+  created_at DateTime     @default(now()) @db.Timestamptz(6)
+  user       UserSettings @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@unique([user_id, endpoint])
+  @@index([user_id])
+}
+
+model FcmToken {
+  user_id    String
+  token      String
+  created_at DateTime     @default(now()) @db.Timestamptz(6)
+  user       UserSettings @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@id([user_id, token])
+  @@index([user_id])
+}
+
+model ForumBan {
+  id           String         @id @default(uuid())
+  user_id      String
+  category_id  String?
+  reason       String?
+  banned_by    String
+  expires_at   DateTime?      @db.Timestamptz(6)
+  created_at   DateTime       @default(now()) @db.Timestamptz(6)
+  user         UserSettings   @relation("BannedUser", fields: [user_id], references: [user_id])
+  category     ForumCategory? @relation(fields: [category_id], references: [id])
+  banned_by_user UserSettings @relation("BannedByUser", fields: [banned_by], references: [user_id])
+
+  @@index([user_id])
 }

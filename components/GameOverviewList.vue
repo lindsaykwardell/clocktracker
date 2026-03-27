@@ -262,7 +262,7 @@ const { isBaseScript, scriptBgClasses } = useScripts();
 const users = useUsers();
 const me = useMe();
 const friends = useFriends();
-const user = useSupabaseUser();
+const user = useUser();
 
 const props = withDefaults(
   defineProps<{

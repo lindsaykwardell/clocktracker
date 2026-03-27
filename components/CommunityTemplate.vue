@@ -29,7 +29,9 @@
                       v-for="link in community.data.links"
                       :href="link"
                     >
-                      {{ link.replace(/https?:\/\//, "").replace(/\/$/, "") }}
+                      <span class="max-w-[200px] truncate inline-block align-bottom">
+                        {{ link.replace(/https?:\/\//, "").replace(/\/$/, "") }}
+                      </span>
                     </SocialLink>
                   </div>
                 </div>
@@ -69,7 +71,7 @@
               </div>
             </div>
             <hr class="border-stone-100 w-full" />
-            <p class="whitespace-pre-wrap w-full text-center md:text-start text-balance">
+            <p class="whitespace-pre-wrap break-words w-full text-center md:text-start text-balance">
               {{ community.data.description }}
             </p>
             <nav
@@ -114,6 +116,13 @@
               </nuxt-link>
             </nav>
           </div>
+          <Alert
+            v-if="isModerator && community.data.discord_server_id && new Date() < new Date('2026-03-01T08:00:00.000Z')"
+            color="negative"
+            class="w-full"
+          >
+            The ClockTracker Discord bot will be shutting down on March 1st, 2026. After this date, Discord bot features (event creation, registration, and notifications) will no longer be available.
+          </Alert>
           <slot
             name="header"
             :community="community"
@@ -157,7 +166,7 @@
 const route = useRoute();
 const router = useRouter();
 const communities = useCommunities();
-const user = useSupabaseUser();
+const user = useUser();
 import { Status } from "@/composables/useFetchStatus";
 
 const props = defineProps<{

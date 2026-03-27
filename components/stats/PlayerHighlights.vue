@@ -177,7 +177,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import type { Game, Character } from "@prisma/client";
+import type { GameRecord } from "~/composables/useGames";
 import { chartColors } from "~/composables/useChartColors";
 
 // Minimum number of games required for a character to be considered in best/worst performance.
@@ -187,32 +187,8 @@ const MAX_WIN_RATE_FOR_WORST = 0.49;
 
 type Alignment = "GOOD" | "EVIL" | null;
 
-type GrimoireToken = {
-  alignment?: Alignment | null;
-  role?: {
-    type?: string | null;
-    token_url?: string | null;
-    initial_alignment?: Alignment;
-  } | null;
-  related_role?: {
-    token_url?: string | null;
-  } | null;
-};
-
-type GameWithChars = Game & {
-  ignore_for_stats?: boolean | null;
-  win_v2?: string | null; // "GOOD_WINS" | "EVIL_WINS" | etc.
-  player_characters: (Character & {
-    name: string | null;
-    alignment?: Alignment;
-    role_id?: string | null;
-    role?: GrimoireToken["role"];
-    related_role?: GrimoireToken["related_role"];
-  })[];
-};
-
 const props = defineProps<{
-  games: GameWithChars[];
+  games: GameRecord[];
   isMe?: boolean;
   username: string;
 }>();
@@ -469,7 +445,7 @@ const worstPerformingTooltip = computed(
  * Games flagged with `ignore_for_stats`, games without characters,
  * nameless characters, and Fabled roles are ignored.
  */
-function getStatsCharacter(game: GameWithChars) {
+function getStatsCharacter(game: GameRecord) {
   if (game.ignore_for_stats) return null;
   if (!game.player_characters.length) return null;
 

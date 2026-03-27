@@ -1,5 +1,5 @@
 export function useBGG() {
-  const user = useSupabaseUser();
+  const user = useUser();
   const users = useUsers();
   const games = useGames();
 

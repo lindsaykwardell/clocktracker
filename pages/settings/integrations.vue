@@ -83,7 +83,7 @@ definePageMeta({
 const supabase = useSupabaseClient();
 const settings = await useFetch("/api/settings");
 const users = useUsers();
-const user = useSupabaseUser();
+const user = useUser();
 const bgg_username = ref(settings.data?.value?.bgg_username);
 const enable_bgstats = ref(settings.data?.value?.enable_bgstats || false);
 
@@ -91,9 +91,16 @@ const username = ref("");
 const password = ref("");
 const inFlight = ref(false);
 
-// Discord integration
+// Discord integration — identities are on the full User object, not JWT claims
+const fullUser = ref<Awaited<ReturnType<typeof supabase.auth.getUser>>["data"]["user"]>(null);
+
+onMounted(async () => {
+  const { data } = await supabase.auth.getUser();
+  fullUser.value = data.user;
+});
+
 const discordIdentity = computed(() => {
-  return user.value?.identities?.find((identity) => identity.provider === "discord");
+  return fullUser.value?.identities?.find((identity) => identity.provider === "discord");
 });
 
 async function connectDiscord() {

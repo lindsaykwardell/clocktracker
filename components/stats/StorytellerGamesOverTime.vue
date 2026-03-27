@@ -10,8 +10,9 @@
       </p>
     </div>
 
-    <Line
+    <Chart
       id="storyteller-games-balance-over-time"
+      type="line"
       :data="chartData"
       :options="chartOptions"
       :plugins="[lineOnTop]"
@@ -22,7 +23,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { Line } from "vue-chartjs";
+import { Chart } from "vue-chartjs";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
@@ -149,7 +150,7 @@ const chartData = computed(() => ({
   labels: monthLabels,
   datasets: [
     {
-      type: "bar",
+      type: "bar" as const,
       label: "Trouble Brewing",
       data: monthKeys.map(
         (key) => monthlyCounts.value[key]?.troubleBrewing ?? 0
@@ -163,7 +164,7 @@ const chartData = computed(() => ({
       z: 1,
     },
     {
-      type: "bar",
+      type: "bar" as const,
       label: "Sects & Violets",
       data: monthKeys.map(
         (key) => monthlyCounts.value[key]?.sectsAndViolets ?? 0
@@ -177,7 +178,7 @@ const chartData = computed(() => ({
       z: 1,
     },
     {
-      type: "bar",
+      type: "bar" as const,
       label: "Bad Moon Rising",
       data: monthKeys.map(
         (key) => monthlyCounts.value[key]?.badMoonRising ?? 0
@@ -191,7 +192,7 @@ const chartData = computed(() => ({
       z: 1,
     },
     {
-      type: "bar",
+      type: "bar" as const,
       label: "Custom",
       data: monthKeys.map(
         (key) => monthlyCounts.value[key]?.customScript ?? 0
@@ -205,7 +206,7 @@ const chartData = computed(() => ({
       z: 1,
     },
     {
-      type: "bar",
+      type: "bar" as const,
       label: "Unknown",
       data: monthKeys.map((key) => monthlyCounts.value[key]?.unknownScript ?? 0),
       backgroundColor: chartColors.unknown,
@@ -217,7 +218,7 @@ const chartData = computed(() => ({
       z: 1,
     },
     {
-      type: "line",
+      type: "line" as const,
       label: "Game balance (Good wins %)",
       data: cumulativeBalance.value.map((entry) => entry.pct),
       backgroundColor: chartColors.good,
@@ -239,7 +240,7 @@ const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
   interaction: {
-    mode: "index",
+    mode: "index" as const,
     intersect: false,
   },
   scales: {
@@ -257,14 +258,14 @@ const chartOptions = computed(() => ({
       },
     },
     balance: {
-      position: "right",
+      position: "right" as const,
       min: 0,
       max: 100,
       grid: {
         drawOnChartArea: false,
       },
       ticks: {
-        callback: (value: number) => `${value}%`,
+        callback: (value: string | number) => `${value}%`,
       },
       title: {
         display: true,
@@ -283,7 +284,7 @@ const chartOptions = computed(() => ({
   plugins: {
     legend: {
       display: true,
-      position: "bottom",
+      position: "bottom" as const,
     },
     tooltip: {
       callbacks: {

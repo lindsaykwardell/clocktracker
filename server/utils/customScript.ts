@@ -1,5 +1,5 @@
-import { Alignment, ReminderType, RoleType } from "@prisma/client";
-import { User } from "@supabase/supabase-js";
+import { Alignment, ReminderType, RoleType } from "~/server/generated/prisma/client";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { nanoid } from "nanoid";
 import { prisma } from "./prisma";
 
@@ -24,7 +24,9 @@ export type UploadedScript = [
           | "minion"
           | "demon"
           | "traveler"
-          | "fabled";
+          | "traveller"
+          | "fabled"
+          | "loric";
         ability?: string;
       }
     | string
@@ -61,20 +63,21 @@ export async function saveCustomScript(
     },
   });
 
-  const scriptId = existingScripts.length
-    ? existingScripts[existingScripts.length - 1].script_id
-    : nanoid(8);
+  const lastScript = existingScripts.at(-1);
+  const scriptId = lastScript?.script_id ?? nanoid(8);
 
   const version = options?.version
     ? options.version
-    : existingScripts.length > 0
-    ? +existingScripts[existingScripts.length - 1].version + 1
+    : lastScript
+    ? +lastScript.version + 1
     : 1;
 
   const roleMap = await getRoleMap();
 
   for (const roleId in roles) {
     const role = roles[roleId];
+
+    if (!role) continue;
 
     if (typeof role === "string") {
       const existingRoleId = await mapOfficialIdToClocktrackerId(role);
@@ -110,8 +113,11 @@ export async function saveCustomScript(
         case "demon":
           return Alignment.EVIL;
         case "traveler":
+        case "traveller":
           return Alignment.NEUTRAL;
         case "fabled":
+          return Alignment.NEUTRAL;
+        case "loric":
           return Alignment.NEUTRAL;
         default:
           return Alignment.NEUTRAL;
@@ -129,9 +135,12 @@ export async function saveCustomScript(
         case "demon":
           return RoleType.DEMON;
         case "traveler":
+        case "traveller":
           return RoleType.TRAVELER;
         case "fabled":
           return RoleType.FABLED;
+        case "loric":
+          return RoleType.LORIC;
         default:
           return RoleType.TOWNSFOLK;
       }
@@ -142,7 +151,7 @@ export async function saveCustomScript(
         if (typeof role.image === "string") {
           return role.image;
         } else if (Array.isArray(role.image)) {
-          return role.image[0];
+          return role.image[0]!;
         }
       }
       if (initial_alignment === Alignment.GOOD) {
@@ -194,9 +203,7 @@ export async function saveCustomScript(
   return prisma.script.upsert({
     where: {
       script_id_version: {
-        script_id: existingScripts.length
-          ? existingScripts[existingScripts.length - 1].script_id
-          : nanoid(8),
+        script_id: scriptId,
         version: version.toString(),
       },
     },
@@ -209,10 +216,7 @@ export async function saveCustomScript(
       pdf_url: "",
       user_id: user.id,
       is_custom_script: true,
-      script_id:
-        existingScripts.length > 0
-          ? existingScripts[existingScripts.length - 1].script_id
-          : nanoid(8),
+      script_id: scriptId,
       json: JSON.stringify(body),
       logo: script.logo ?? null,
       website: script.almanac ?? null,

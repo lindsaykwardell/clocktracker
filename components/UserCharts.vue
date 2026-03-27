@@ -432,10 +432,10 @@ const router = useRouter();
 const users = useUsers();
 const roles = useRoles();
 const allGames = useGames();
-const me = useSupabaseUser();
+const me = useUser();
 const storytellerQuery = computed<string | undefined>(() => {
   const value = route.query.storyteller;
-  return Array.isArray(value) ? value[0] : value ?? undefined;
+  return (Array.isArray(value) ? value[0] : value) ?? undefined;
 });
 const mode = ref<"player" | "storyteller">(
   storytellerQueryToMode(storytellerQuery.value)
@@ -654,7 +654,7 @@ watchEffect(() => {
   }
 });
 
-const filteredGames = computed(() => {
+const filteredGames = computed<GameRecord[]>(() => {
   if (props.games.status !== Status.SUCCESS) {
     return [];
   }

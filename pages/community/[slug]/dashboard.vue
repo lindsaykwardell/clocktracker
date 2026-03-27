@@ -81,7 +81,7 @@
                 </div>
               </div>
             </label>
-            <label>
+            <label v-if="!isDiscordBotRetired">
               <span class="block">Discord Server ID</span>
               <div class="flex gap-2">
                 <Input v-model="updatedDiscordServerId" />
@@ -249,9 +249,8 @@
                           <MenuItems
                             class="ct-contextual-links right-0 top-full"
                           >
-                            <MenuItem>
+                            <MenuItem v-if="!isMe(member.user_id)">
                               <ButtonSubmenu
-                                v-if="!isMe(member.user_id)"
                                 @click="toggleAdmin(member.user_id)"
                               >
                                 <template
@@ -350,7 +349,8 @@ definePageMeta({
 
 const communities = useCommunities();
 const route = useRoute();
-const user = useSupabaseUser();
+const user = useUser();
+const { pickImages } = useImagePicker();
 
 const slug = route.params.slug as string;
 
@@ -379,29 +379,21 @@ const _location = computed({
   },
 });
 
+const DISCORD_BOT_KILL_DATE = new Date("2026-03-01T08:00:00.000Z");
+const isDiscordBotRetired = new Date() >= DISCORD_BOT_KILL_DATE;
+
 const inFlight = ref(false);
 
 function isMe(id: string) {
   return user.value?.id === id;
 }
 
-function selectCommunityAvatar() {
-  const input = document.createElement("input");
-  input.type = "file";
-  input.accept = "image/jpg, image/jpeg, image/png";
-  input.onchange = uploadAvatar;
-  input.click();
-}
-
-async function uploadAvatar(event: Event) {
-  const newlyUploadedAvatar = (event.target as HTMLInputElement).files?.[0];
-
-  if (!newlyUploadedAvatar) {
-    return;
-  }
+async function selectCommunityAvatar() {
+  const files = await pickImages();
+  if (files.length === 0) return;
 
   const formData = new FormData();
-  formData.append("file", newlyUploadedAvatar);
+  formData.append("file", files[0]);
 
   const url = (
     await $fetch(`/api/storage/avatars`, {

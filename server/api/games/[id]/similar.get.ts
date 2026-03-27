@@ -1,6 +1,4 @@
-import type { User } from "@supabase/supabase-js";
-import { PrivacySetting } from "@prisma/client";
-import { fetchGame } from "~/server/utils/fetchGames";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import dayjs from "dayjs";
 import { prisma } from "~/server/utils/prisma";
 
@@ -8,16 +6,38 @@ export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
   const gameId = handler.context.params?.id;
 
-  if (!gameId) {
+  if (!gameId || !me) {
     throw createError({
       status: 400,
       statusMessage: "Bad Request",
     });
   }
 
-  const game = await fetchGame(gameId, me);
+  // Lightweight query to get just the fields needed for similarity matching
+  const game = await prisma.game.findFirst({
+    where: {
+      id: gameId,
+      deleted: false,
+    },
+    select: {
+      date: true,
+      community_name: true,
+      location: true,
+      storyteller: true,
+      script: true,
+      player_count: true,
+      traveler_count: true,
+      grimoire: {
+        select: {
+          tokens: {
+            select: { player_name: true },
+          },
+        },
+      },
+    },
+  });
 
-  if (!game || !me) {
+  if (!game) {
     throw createError({
       status: 404,
       statusMessage: "Not Found",
@@ -34,9 +54,7 @@ export default defineEventHandler(async (handler) => {
 
   const similar_games = await prisma.game.findMany({
     where: {
-      id: {
-        not: gameId,
-      },
+      id: { not: gameId },
       deleted: false,
       user_id: me.id,
       date: {
@@ -86,29 +104,22 @@ export default defineEventHandler(async (handler) => {
         {
           AND: {
             OR: [
-              {
-                player_count: game.player_count,
-              },
-              {
-                player_count: null,
-              },
+              { player_count: game.player_count },
+              { player_count: null },
             ],
           },
         },
         {
           AND: {
             OR: [
-              {
-                traveler_count: game.traveler_count,
-              },
-              {
-                traveler_count: null,
-              },
+              { traveler_count: game.traveler_count },
+              { traveler_count: null },
             ],
           },
         },
       ],
     },
+    take: 20,
     include: {
       ls_game: {
         select: {
@@ -116,9 +127,9 @@ export default defineEventHandler(async (handler) => {
             select: {
               title: true,
               id: true,
-            }
-          }
-        }
+            },
+          },
+        },
       },
       user: {
         select: {
@@ -133,6 +144,7 @@ export default defineEventHandler(async (handler) => {
               alternate_token_urls: true,
               type: true,
               initial_alignment: true,
+              name: true,
             },
           },
           related_role: {
@@ -142,32 +154,25 @@ export default defineEventHandler(async (handler) => {
           },
         },
       },
-      demon_bluffs: {
-        include: {
-          role: {
-            select: {
-              token_url: true,
-              type: true,
-            },
-          },
-        },
-      },
-      fabled: {
-        include: {
-          role: {
-            select: {
-              token_url: true,
-            },
-          },
-        },
-      },
       grimoire: {
-        include: {
+        select: {
           tokens: {
-            include: {
-              role: true,
-              related_role: true,
-              reminders: true,
+            select: {
+              alignment: true,
+              player_name: true,
+              role: {
+                select: {
+                  token_url: true,
+                  type: true,
+                  initial_alignment: true,
+                  name: true,
+                },
+              },
+              related_role: {
+                select: {
+                  token_url: true,
+                },
+              },
               player: {
                 select: {
                   username: true,
@@ -194,6 +199,7 @@ export default defineEventHandler(async (handler) => {
       community: {
         select: {
           slug: true,
+          icon: true,
         },
       },
       associated_script: {

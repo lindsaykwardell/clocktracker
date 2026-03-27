@@ -42,7 +42,12 @@
           </li>
         </ol>
       </template>
-      <Loading v-else />
+      <template v-else>
+        <div class="flex min-h-[200px] flex-col items-center justify-center gap-4 py-8">
+          <Loading />
+          <p class="text-muted">Importing your games…</p>
+        </div>
+      </template>
     </div>
   </Dialog>
 </template>
