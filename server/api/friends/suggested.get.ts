@@ -1,5 +1,5 @@
-import { PrivacySetting, UserSettings } from "@prisma/client";
-import { User } from "@supabase/supabase-js";
+import { PrivacySetting, type UserSettings } from "~/server/generated/prisma/client";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import naturalOrder from "natural-order";
 import { prisma } from "~/server/utils/prisma";
 
@@ -47,6 +47,7 @@ export default defineEventHandler(async (handler) => {
   ]);
 
   const friendsWithFriends = await prisma.friend.findMany({
+    take: 100,
     where: {
       user_id: user.id,
     },
@@ -71,10 +72,10 @@ export default defineEventHandler(async (handler) => {
                   bio: true,
                   location: true,
                   privacy: true,
-                  charts: true,
                 },
               },
             },
+            take: 20,
           },
         },
       },
@@ -129,13 +130,13 @@ export default defineEventHandler(async (handler) => {
       bio: true,
       location: true,
       privacy: true,
-      charts: true,
     },
     orderBy: [
       {
         created_at: "desc",
       },
     ],
+    take: 50,
   });
 
   return naturalOrder([

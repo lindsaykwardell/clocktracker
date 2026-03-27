@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import type { FetchStatus } from "./useFetchStatus";
-import type { Chart } from "@prisma/client";
+import type { Chart } from "~/server/generated/prisma/client";
 import type { RoleStatCardRecord } from "~/composables/useRoleStatCards";
 
 export enum PrivacySetting {
@@ -19,6 +19,7 @@ export type User = {
   avatar: string | null;
   pronouns: string | null;
   bio: string;
+  is_admin: boolean;
   privacy: PrivacySetting;
   charts: Chart[];
   role_stat_cards: RoleStatCardRecord[];
@@ -116,11 +117,6 @@ export const useUsers = defineStore("users", {
           friends.fetchFriends();
           friends.fetchCommunityMembers();
           friends.fetchRequests();
-
-          setInterval(() => {
-            friends.fetchRequests();
-            // one minute
-          }, 1000 * 60);
 
           if (!me.finished_welcome) {
             router.push("/welcome");

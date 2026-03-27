@@ -1,6 +1,8 @@
-import { LocationType, WhoCanRegister } from "@prisma/client";
-import { User } from "@supabase/supabase-js";
+import { LocationType, WhoCanRegister } from "~/server/generated/prisma/client";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
+import { hasRestriction } from "~/server/utils/permissions";
+import { sendPushNotifications } from "~/server/utils/sendPushNotifications";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
@@ -38,6 +40,13 @@ export default defineEventHandler(async (handler) => {
     throw createError({
       status: 400,
       statusMessage: "Bad Request",
+    });
+  }
+
+  if (await hasRestriction(me.id, "CREATE_EVENT")) {
+    throw createError({
+      status: 403,
+      statusMessage: "Forbidden",
     });
   }
 
@@ -87,6 +96,32 @@ export default defineEventHandler(async (handler) => {
       },
     },
   });
+
+  // Notify community members about the new event
+  if (body.community_id) {
+    const members = await prisma.community.findUnique({
+      where: { id: body.community_id },
+      select: {
+        name: true,
+        members: { select: { user_id: true } },
+      },
+    });
+
+    if (members && members.members.length > 0) {
+      const startDate = new Intl.DateTimeFormat("en-US", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      }).format(new Date(body.start));
+
+      void sendPushNotifications({
+        userIds: members.members.map((m) => m.user_id),
+        excludeUserId: me.id,
+        title: `New event in ${members.name}`,
+        body: `${body.title} — ${startDate}`,
+        url: `/event/${event.id}`,
+      });
+    }
+  }
 
   return event;
 });

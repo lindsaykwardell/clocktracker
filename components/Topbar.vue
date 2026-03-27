@@ -128,9 +128,11 @@
   #topbar {
     @apply sticky top-0 left-0 z-40;
     @apply flex items-center gap-1;
-    @apply w-full h-[50px];
+    @apply w-full;
     @apply md:gap-6 px-1;
     @apply bg-white dark:bg-stone-950 border-b border-stone-200 dark:border-stone-800/50;
+    height: calc(50px + var(--cap-status-bar-height, 0px));
+    padding-top: var(--cap-status-bar-height, 0px);
   }
 
   #sidebar-toggle {

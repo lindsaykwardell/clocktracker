@@ -1,5 +1,5 @@
-import type { User } from "@supabase/supabase-js";
-import { UploadedScript, saveCustomScript } from "~/server/utils/customScript";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
+import { type UploadedScript, saveCustomScript } from "~/server/utils/customScript";
 
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;

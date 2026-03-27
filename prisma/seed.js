@@ -1,6 +1,7 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
-const { PrismaClient, WinStatus, WinStatus_V2 } = require("@prisma/client");
+const { PrismaClient, WinStatus, WinStatus_V2 } = require("../server/generated/prisma/client");
+const { PrismaPg } = require("@prisma/adapter-pg");
 const { faker } = require("@faker-js/faker");
 const { v4: uuidv4 } = require("uuid");
 const dayjs = require("dayjs");
@@ -8,7 +9,12 @@ const { roles, roleNames, reminders } = require("./roles");
 const citySeed = require("./city-seed.json");
 const scripts = require("./scripts.json");
 
-const prisma = new PrismaClient();
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+const prisma = new PrismaClient({ adapter });
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_KEY
+);
 
 const existingRoleIds = roles.map((role) => ({
   id: role.id,
@@ -146,7 +152,7 @@ async function main() {
       user_id: uuidv4(),
       username: "test",
       finished_welcome: true,
-      avatar: "/img/default.png",
+      avatar: "/img/role/160x160/investigator.webp",
       email: "me@me.me",
       display_name: "Test User",
       location: boring.name,
@@ -162,7 +168,7 @@ async function main() {
       user_id: uuidv4(),
       username: "test2",
       finished_welcome: true,
-      avatar: "/img/default.png",
+      avatar: "/img/role/160x160/empath.webp",
       email: "me2@me.me",
       display_name: "Test User 2",
       location: boring.name,
@@ -209,11 +215,11 @@ async function main() {
         username,
         display_name,
         finished_welcome: true,
-        avatar: `/img/role/${randomRole
+        avatar: `/img/role/160x160/${randomRole
           .toLowerCase()
           .replace(/ /g, "")
           .replace(/'/g, "")
-          .replace(/-/g, "")}.png`,
+          .replace(/-/g, "")}.webp`,
         email: faker.internet.email(),
         location: city.name,
         city_id: city.id,
@@ -423,7 +429,7 @@ async function main() {
     communities.push(community);
 
     for (const post of posts) {
-      const created_at = faker.date.past();
+      const created_at = faker.date.recent({ days: 30 });
       await prisma.communityPost.create({
         data: {
           user_id: post.user_id,
@@ -501,7 +507,7 @@ async function main() {
               user_id: player.user_id,
             })),
           },
-          created_at: event.start,
+          created_at: faker.date.recent({ days: 30 }),
           created_by_id: communityUsers[0].user_id,
         },
       });
@@ -534,7 +540,11 @@ async function main() {
       (w) => w.replace(/^\w/, (c) => c.toUpperCase())
     );
     const description = faker.lorem.paragraph();
-    const icon = "/img/default.png";
+    const icon = `/img/role/160x160/${randomRole
+      .toLowerCase()
+      .replace(/ /g, "")
+      .replace(/'/g, "")
+      .replace(/-/g, "")}.webp`;
     const isPrivate = Math.random() > 0.8;
 
     await seedCommunity(name, description, icon, isPrivate, []);
@@ -701,8 +711,525 @@ async function main() {
     }
   }
 
+  console.log("Seeding forum...");
+
+  // Create user groups
+  const moderatorGroup = await prisma.userGroup.create({
+    data: {
+      name: "Moderator",
+      color: "#e44d26",
+      permissions: [
+        "CREATE_THREAD",
+        "CREATE_POST",
+        "EDIT_OWN_POST",
+        "DELETE_OWN_POST",
+        "EDIT_ANY_POST",
+        "DELETE_ANY_POST",
+        "LOCK_THREAD",
+        "PIN_THREAD",
+        "BAN_USER",
+      ],
+    },
+  });
+
+  const contributorGroup = await prisma.userGroup.create({
+    data: {
+      name: "Contributor",
+      color: "#3b82f6",
+      permissions: [
+        "CREATE_THREAD",
+        "CREATE_POST",
+        "EDIT_OWN_POST",
+        "DELETE_OWN_POST",
+      ],
+    },
+  });
+
+  // Add the developer user to the Moderator group
+  await prisma.userGroupMembership.create({
+    data: {
+      user_id: me.user_id,
+      group_id: moderatorGroup.id,
+    },
+  });
+
+  // Add testUser to the Contributor group
+  await prisma.userGroupMembership.create({
+    data: {
+      user_id: testUser.user_id,
+      group_id: contributorGroup.id,
+    },
+  });
+
+  // Add a few random users as contributors
+  for (let i = 0; i < 5; i++) {
+    const user = users[Math.floor(Math.random() * users.length)];
+    try {
+      await prisma.userGroupMembership.create({
+        data: {
+          user_id: user.user_id,
+          group_id: contributorGroup.id,
+        },
+      });
+    } catch {}
+  }
+
+  // Create category groups
+  const officialGroup = await prisma.forumCategoryGroup.create({
+    data: { name: "Official", sort_order: 0 },
+  });
+
+  const communityGroup = await prisma.forumCategoryGroup.create({
+    data: { name: "Community", sort_order: 1 },
+  });
+
+  const staffGroup = await prisma.forumCategoryGroup.create({
+    data: { name: "Staff", sort_order: 2 },
+  });
+
+  // Create forum categories
+  const announcements = await prisma.forumCategory.create({
+    data: {
+      name: "Announcements",
+      slug: "announcements",
+      description: "Official announcements from the ClockTracker team",
+      sort_order: 0,
+      mod_posting_only: true,
+      is_announcement: true,
+      group_id: officialGroup.id,
+    },
+  });
+
+  const changelog = await prisma.forumCategory.create({
+    data: {
+      name: "Changelog",
+      slug: "changelog",
+      description: "Updates and changes to ClockTracker",
+      sort_order: 1,
+      group_id: officialGroup.id,
+    },
+  });
+
+  const appDiscussion = await prisma.forumCategory.create({
+    data: {
+      name: "App Discussion",
+      slug: "app-discussion",
+      description: "General discussion about ClockTracker",
+      sort_order: 0,
+      group_id: communityGroup.id,
+    },
+  });
+
+  const gameDiscussion = await prisma.forumCategory.create({
+    data: {
+      name: "Game Discussion",
+      slug: "game-discussion",
+      description: "Discuss Blood on the Clocktower strategy, stories, and tips",
+      sort_order: 1,
+      group_id: communityGroup.id,
+    },
+  });
+
+  const bugReports = await prisma.forumCategory.create({
+    data: {
+      name: "Bug Reports",
+      slug: "bug-reports",
+      description: "Report bugs and issues",
+      sort_order: 2,
+      group_id: communityGroup.id,
+    },
+  });
+
+  const featureRequests = await prisma.forumCategory.create({
+    data: {
+      name: "Feature Requests",
+      slug: "feature-requests",
+      description: "Suggest new features for ClockTracker",
+      sort_order: 3,
+      group_id: communityGroup.id,
+    },
+  });
+
+  const offTopic = await prisma.forumCategory.create({
+    data: {
+      name: "Off Topic",
+      slug: "off-topic",
+      description: "Chat about anything not related to BotC or ClockTracker",
+      sort_order: 4,
+      group_id: communityGroup.id,
+    },
+  });
+
+  const modDiscussion = await prisma.forumCategory.create({
+    data: {
+      name: "Moderator Discussion",
+      slug: "moderator-discussion",
+      description: "Private discussion for moderators",
+      sort_order: 0,
+      is_private: true,
+      group_id: staffGroup.id,
+      access: {
+        create: {
+          group_id: moderatorGroup.id,
+          can_view: true,
+          can_post: true,
+        },
+      },
+    },
+  });
+
+  // Helper to pick a random user
+  const randomUser = () => users[Math.floor(Math.random() * users.length)];
+
+  // Emoji options for reactions
+  const EMOJI_OPTIONS = ["👍", "👎", "❤️", "😂", "😮", "😢", "🎉", "🤔", "👏", "🔥", "😈", "💀", "👹", "🩸", "👻", "⚰️"];
+
+  // Helper: create a thread with N faker posts and optional reactions/edits
+  async function seedThread(categoryId, title, postCount, options = {}) {
+    const { pinned = false, locked = false, addReactions = false, addEdits = false } = options;
+    const threadAuthor = randomUser();
+    // Thread starts 1-3 months ago so replies scatter into recent weeks
+    const created_at = faker.date.between({
+      from: dayjs().subtract(3, "months").toDate(),
+      to: dayjs().subtract(1, "months").toDate(),
+    });
+
+    // Replies are scattered between thread creation and now, but never in the future
+    const now = new Date();
+    const timeSpan = now.getTime() - created_at.getTime();
+
+    const thread = await prisma.forumThread.create({
+      data: {
+        title,
+        category_id: categoryId,
+        author_id: threadAuthor.user_id,
+        created_at,
+        last_post_at: created_at,
+        is_pinned: pinned,
+        is_locked: locked,
+        posts: {
+          create: {
+            body: faker.lorem.paragraphs({ min: 1, max: 4 }),
+            author_id: threadAuthor.user_id,
+            created_at,
+          },
+        },
+      },
+    });
+
+    // Create a subscription for the thread author
+    await prisma.forumThreadSubscription.create({
+      data: {
+        thread_id: thread.id,
+        user_id: threadAuthor.user_id,
+        last_read_at: created_at,
+      },
+    });
+
+    const allPostIds = [];
+    const firstPost = await prisma.forumPost.findFirst({
+      where: { thread_id: thread.id },
+    });
+    if (firstPost) allPostIds.push(firstPost.id);
+
+    // Generate staggered reply times scattered across the full timespan
+    const replyOffsets = [];
+    for (let i = 1; i < postCount; i++) {
+      replyOffsets.push(Math.random());
+    }
+    replyOffsets.sort();
+
+    let lastPostAt = created_at;
+    for (let i = 1; i < postCount; i++) {
+      const replyAuthor = randomUser();
+      const replyDate = new Date(
+        created_at.getTime() + timeSpan * replyOffsets[i - 1]
+      );
+      lastPostAt = replyDate;
+
+      const post = await prisma.forumPost.create({
+        data: {
+          body: faker.lorem.paragraphs({ min: 1, max: 3 }),
+          thread_id: thread.id,
+          author_id: replyAuthor.user_id,
+          created_at: replyDate,
+        },
+      });
+      allPostIds.push(post.id);
+
+      // Randomly subscribe some repliers
+      if (Math.random() > 0.5) {
+        try {
+          await prisma.forumThreadSubscription.create({
+            data: {
+              thread_id: thread.id,
+              user_id: replyAuthor.user_id,
+              last_read_at: replyDate,
+            },
+          });
+        } catch {}
+      }
+    }
+
+    await prisma.forumThread.update({
+      where: { id: thread.id },
+      data: { last_post_at: lastPostAt },
+    });
+
+    // Add reactions to random posts
+    if (addReactions) {
+      for (const postId of allPostIds) {
+        const reactionCount = Math.floor(Math.random() * 8);
+        for (let r = 0; r < reactionCount; r++) {
+          const reactor = randomUser();
+          const emoji = EMOJI_OPTIONS[Math.floor(Math.random() * EMOJI_OPTIONS.length)];
+          try {
+            await prisma.forumPostReaction.create({
+              data: { post_id: postId, user_id: reactor.user_id, emoji },
+            });
+          } catch {}
+        }
+      }
+    }
+
+    // Add edit history to some posts
+    if (addEdits && allPostIds.length > 2) {
+      const editCount = Math.floor(Math.random() * 3) + 1;
+      for (let e = 0; e < editCount; e++) {
+        const postId = allPostIds[Math.floor(Math.random() * allPostIds.length)];
+        const post = await prisma.forumPost.findUnique({ where: { id: postId } });
+        if (post && !post.deleted_at) {
+          await prisma.forumPostEdit.create({
+            data: {
+              post_id: postId,
+              previous_body: post.body,
+              edited_by: post.author_id,
+            },
+          });
+          await prisma.forumPost.update({
+            where: { id: postId },
+            data: {
+              body: post.body + "\n\n**Edit:** " + faker.lorem.sentence(),
+              edited_at: new Date(post.created_at.getTime() + 1000 * 60 * 30),
+            },
+          });
+        }
+      }
+    }
+
+    return { thread, allPostIds };
+  }
+
+  // --- Announcements ---
+  await seedThread(announcements.id, "Welcome to ClockTracker Discussions!", 1, { pinned: true });
+  await seedThread(announcements.id, "Community Guidelines - Please Read", 1, { pinned: true });
+
+  // --- Changelog ---
+  await seedThread(changelog.id, "v2.5.0 - Forum Feature Added!", 8, { pinned: true, addReactions: true });
+  await seedThread(changelog.id, "v2.4.0 - Improved Game Statistics", 5, { addReactions: true });
+  await seedThread(changelog.id, "v2.3.0 - Community Events Overhaul", 4);
+  await seedThread(changelog.id, "v2.2.0 - Dark Mode Improvements", 6, { addReactions: true });
+  await seedThread(changelog.id, "v2.1.0 - Mobile Responsive Redesign", 3);
+
+  // --- App Discussion (including some large threads) ---
+  console.log("  Creating large discussion threads...");
+  await seedThread(appDiscussion.id, "Introduce yourself!", 60, { pinned: true, addReactions: true, addEdits: true });
+  await seedThread(appDiscussion.id, "What features would you like to see next?", 35, { addReactions: true, addEdits: true });
+  await seedThread(appDiscussion.id, "How do you use ClockTracker at your table?", 15, { addReactions: true });
+  await seedThread(appDiscussion.id, "Feedback on the new UI changes", 12, { addReactions: true, addEdits: true });
+  await seedThread(appDiscussion.id, "Best practices for tracking games", 8);
+  await seedThread(appDiscussion.id, "ClockTracker vs other tracking tools", 22, { addReactions: true });
+
+  // --- Game Discussion (with large threads) ---
+  console.log("  Creating game discussion threads...");
+  await seedThread(gameDiscussion.id, "The ULTIMATE Trouble Brewing strategy guide", 55, { addReactions: true, addEdits: true });
+  await seedThread(gameDiscussion.id, "Most memorable game moments - share yours!", 45, { addReactions: true });
+  await seedThread(gameDiscussion.id, "How to play the Drunk effectively", 18, { addReactions: true });
+  await seedThread(gameDiscussion.id, "Sects & Violets: Underrated characters", 14, { addReactions: true });
+  await seedThread(gameDiscussion.id, "Tips for new Storytellers", 28, { addReactions: true, addEdits: true });
+  await seedThread(gameDiscussion.id, "What's your favorite script to play?", 20, { addReactions: true });
+  await seedThread(gameDiscussion.id, "Hot take: The Recluse is the best Outsider", 32, { addReactions: true });
+  await seedThread(gameDiscussion.id, "Custom scripts - share your creations!", 16, { addReactions: true });
+  await seedThread(gameDiscussion.id, "Bad Moon Rising: A love letter", 11);
+  await seedThread(gameDiscussion.id, "How do you organize your local group?", 9);
+  await seedThread(gameDiscussion.id, "Snake Charmer appreciation thread", 7, { addReactions: true });
+  await seedThread(gameDiscussion.id, "Dealing with cheating players - advice needed", 24, { addReactions: true, addEdits: true });
+
+  // --- Bug Reports ---
+  await seedThread(bugReports.id, "Game notes not saving on mobile", 6, { addReactions: true });
+  await seedThread(bugReports.id, "Grimoire display issue with large player counts", 4);
+  await seedThread(bugReports.id, "Login loop on Firefox 120+", 8, { addEdits: true });
+  await seedThread(bugReports.id, "Stats page shows wrong win rate", 5, { addReactions: true });
+  await seedThread(bugReports.id, "Community events not appearing in calendar", 3);
+  await seedThread(bugReports.id, "Search results include deleted games", 7);
+  await seedThread(bugReports.id, "Profile picture upload fails on slow connections", 4);
+
+  // --- Feature Requests ---
+  await seedThread(featureRequests.id, "Dark mode for the Grimoire", 12, { addReactions: true });
+  await seedThread(featureRequests.id, "Export game history to PDF", 8, { addReactions: true });
+  await seedThread(featureRequests.id, "Integration with online BotC platforms", 6);
+  await seedThread(featureRequests.id, "Ability to tag games with custom labels", 10, { addReactions: true });
+  await seedThread(featureRequests.id, "Tournament bracket support", 15, { addReactions: true, addEdits: true });
+  await seedThread(featureRequests.id, "Year-in-review improvements", 9, { addReactions: true });
+  await seedThread(featureRequests.id, "Multi-language support", 7);
+  await seedThread(featureRequests.id, "Push notifications for forum replies", 5, { addReactions: true });
+
+  // --- Off Topic ---
+  await seedThread(offTopic.id, "What board games are you playing besides BotC?", 30, { addReactions: true });
+  await seedThread(offTopic.id, "Share your BotC-themed snacks!", 18, { addReactions: true });
+  await seedThread(offTopic.id, "The music thread - what are you listening to?", 25, { addReactions: true });
+  await seedThread(offTopic.id, "Pet photos! Show us your familiars", 22, { addReactions: true });
+  await seedThread(offTopic.id, "Movie recommendations for BotC fans", 14);
+
+  // --- Moderator Discussion ---
+  await seedThread(modDiscussion.id, "Forum moderation guidelines", 6, { addEdits: true });
+  await seedThread(modDiscussion.id, "Handling rule violations - process", 4);
+  await seedThread(modDiscussion.id, "Spam accounts to watch out for", 3);
+
+  // Auto-add anyone who posted in Moderator Discussion to the Moderator group
+  const modPosts = await prisma.forumPost.findMany({
+    where: {
+      thread: { category_id: modDiscussion.id },
+      deleted_at: null,
+    },
+    select: { author_id: true },
+    distinct: ["author_id"],
+  });
+  for (const post of modPosts) {
+    if (post.author_id === me.user_id) continue; // already a moderator
+    try {
+      await prisma.userGroupMembership.create({
+        data: {
+          user_id: post.author_id,
+          group_id: moderatorGroup.id,
+        },
+      });
+    } catch {} // ignore duplicate membership
+  }
+
+  // --- Locked thread example ---
+  await seedThread(appDiscussion.id, "[RESOLVED] Server downtime 2025-12-15", 10, { locked: true });
+
+  // --- Deleted post example ---
+  const deletedThread = await seedThread(offTopic.id, "Thread with some deleted content", 8);
+  if (deletedThread.allPostIds.length > 3) {
+    await prisma.forumPost.update({
+      where: { id: deletedThread.allPostIds[2] },
+      data: { deleted_at: new Date() },
+    });
+  }
+
+  // --- Reports ---
+  console.log("  Seeding forum reports...");
+  const allPosts = await prisma.forumPost.findMany({
+    where: { deleted_at: null },
+    take: 200,
+    select: { id: true, author_id: true },
+  });
+
+  for (let i = 0; i < 8; i++) {
+    const post = allPosts[Math.floor(Math.random() * allPosts.length)];
+    let reporter = randomUser();
+    while (reporter.user_id === post.author_id) {
+      reporter = randomUser();
+    }
+    try {
+      await prisma.forumPostReport.create({
+        data: {
+          post_id: post.id,
+          reporter_id: reporter.user_id,
+          reason: faker.helpers.arrayElement([
+            "Spam or advertising",
+            "Offensive language",
+            "Off-topic / derailing the thread",
+            "Contains spoilers without proper tags",
+            "Harassment or personal attacks",
+            "Misinformation about game rules",
+          ]),
+          resolved: i < 3,
+          resolved_by: i < 3 ? me.user_id : null,
+          resolved_at: i < 3 ? faker.date.recent() : null,
+        },
+      });
+    } catch {}
+  }
+
+  // --- Mod log entries ---
+  console.log("  Seeding mod log...");
+
+  // Define banned users early so mod log can reference them
+  const bannedUser1 = users[users.length - 1];
+  const bannedUser2 = users[users.length - 2];
+
+  // Gather real IDs for mod log entries
+  const someThreads2 = await prisma.forumThread.findMany({ take: 10 });
+  const somePosts = await prisma.forumPost.findMany({ where: { deleted_at: null }, take: 10 });
+  const someReports = await prisma.forumPostReport.findMany({ take: 5 });
+  const pickThread = () => someThreads2[Math.floor(Math.random() * someThreads2.length)];
+  const pickPost = () => somePosts[Math.floor(Math.random() * somePosts.length)];
+
+  const modActions = [
+    { action: "PIN_THREAD", target_type: "thread", target_id: pickThread().id, details: null },
+    { action: "LOCK_THREAD", target_type: "thread", target_id: pickThread().id, details: "Resolved issue" },
+    { action: "DELETE_POST", target_type: "post", target_id: pickPost().id, details: "Spam content" },
+    { action: "DELETE_POST", target_type: "post", target_id: pickPost().id, details: "Violated community guidelines" },
+    { action: "BAN_USER", target_type: "user", target_id: bannedUser1.user_id, details: "Repeated spam" },
+    { action: "RESOLVE_REPORT", target_type: "report", target_id: someReports.length > 0 ? someReports[0].id : uuidv4(), details: null },
+    { action: "UNPIN_THREAD", target_type: "thread", target_id: pickThread().id, details: null },
+    { action: "UNLOCK_THREAD", target_type: "thread", target_id: pickThread().id, details: "User requested reopen" },
+  ];
+
+  for (const action of modActions) {
+    await prisma.forumModLog.create({
+      data: {
+        actor_id: me.user_id,
+        action: action.action,
+        target_type: action.target_type,
+        target_id: action.target_id,
+        details: action.details,
+        created_at: faker.date.recent({ days: 30 }),
+      },
+    });
+  }
+
+  // --- Bans ---
+  console.log("  Seeding forum bans...");
+
+  await prisma.forumBan.create({
+    data: {
+      user_id: bannedUser1.user_id,
+      banned_by: me.user_id,
+      reason: "Repeated spam and advertising",
+      expires_at: null,
+    },
+  });
+
+  await prisma.forumBan.create({
+    data: {
+      user_id: bannedUser2.user_id,
+      banned_by: me.user_id,
+      reason: "Temporary ban for off-topic posting",
+      category_id: appDiscussion.id,
+      expires_at: dayjs().add(7, "day").toDate(),
+    },
+  });
+
+  // --- Subscribe the dev user to a few threads ---
+  const someThreads = await prisma.forumThread.findMany({ take: 10 });
+  for (const t of someThreads) {
+    try {
+      await prisma.forumThreadSubscription.create({
+        data: {
+          thread_id: t.id,
+          user_id: me.user_id,
+          last_read_at: faker.date.recent({ days: 7 }),
+        },
+      });
+    } catch {}
+  }
+
   console.log("Done!");
-  console.log(`Seeded local dev user:
+  console.log(`Login details:
 
 Email: ${email}
 User ID: ${localUserId}

@@ -1,17 +1,22 @@
 import type { User } from "@supabase/supabase-js";
 import {
-  Game,
-  Character,
-  Token,
-  Grimoire,
+  type Game,
+  type Character,
+  type Token,
+  type Grimoire,
   Alignment,
-  DemonBluff,
-  Fabled,
-  GrimoireEvent,
+  type DemonBluff,
+  type Fabled,
+  type GrimoireEvent,
   GrimoireEventType,
-  ReminderToken,
-} from "@prisma/client";
+  type ReminderToken,
+} from "~/server/generated/prisma/client";
 import { prisma } from "~/server/utils/prisma";
+import {
+  findOrCreatePlayerChildGame,
+  findOrCreateStorytellerChildGame,
+} from "~/server/utils/childGame";
+import { sendPushNotifications } from "~/server/utils/sendPushNotifications";
 
 const MAX_GRIMOIRE_PAGE_TITLE_LENGTH = 64;
 
@@ -138,6 +143,8 @@ export default defineEventHandler(async (handler) => {
         },
       },
       player_characters: true,
+      demon_bluffs: true,
+      fabled: true,
       grimoire_events: true,
       end_trigger_role: {
         select: {
@@ -220,54 +227,29 @@ export default defineEventHandler(async (handler) => {
       }[],
     );
 
-    await prisma.game.create({
-      data: {
-        ...gameData,
-        is_storyteller: false,
-        storyteller:
-          newGame.is_storyteller && newGame.user
-            ? `@${newGame.user.username}`
-            : newGame.storyteller,
-        date: new Date(body.date),
-        user_id: id,
-        player_characters: {
-          create: [...player_characters],
-        },
-        demon_bluffs: {
-          create: [...body.demon_bluffs],
-        },
-        fabled: {
-          create: [...body.fabled],
-        },
-        grimoire_events: {
-          create:
-            incomingGrimoireEvents.map((grimoireEvent) => ({
-              grimoire_page: grimoireEvent.grimoire_page,
-              participant_id: grimoireEvent.participant_id,
-            event_type:
-              grimoireEvent.event_type ??
-              GrimoireEventType.NOT_RECORDED,
-            cause: grimoireEvent.cause ?? null,
-            by_participant_id: grimoireEvent.by_participant_id ?? null,
-            player_name: grimoireEvent.player_name ?? "",
-            role_id: grimoireEvent.role_id ?? null,
-            by_role_id: grimoireEvent.by_role_id ?? null,
-            old_role_id: (grimoireEvent as any).old_role_id ?? null,
-            new_role_id: (grimoireEvent as any).new_role_id ?? null,
-            old_alignment: (grimoireEvent as any).old_alignment ?? null,
-            new_alignment: (grimoireEvent as any).new_alignment ?? null,
-            status_source: (grimoireEvent as any).status_source ?? null,
-          })) || [],
-        },
-        notes: "",
-        // map the already created grimoires to the new game
-        grimoire: {
-          connect: newGame.grimoire.map((g) => ({ id: g.id })),
-        },
-        parent_game_id: newGame.id,
-        waiting_for_confirmation: true,
-        tags: [],
-      },
+    try {
+      await findOrCreatePlayerChildGame({
+        game: newGame,
+        playerId: id,
+        playerCharacters: player_characters,
+        relatedGames: [], // new game has no children yet
+      });
+    } catch (err: any) {
+      const taggedPlayer =
+        newGame.grimoire.flatMap((g) => g.tokens).find((t) => t.player_id === id)
+          ?.player_name || "Unknown";
+      console.error(`Error creating child game for ${taggedPlayer}: ${err.message}`);
+    }
+  }
+
+  // Notify tagged players
+  const playerIdsToNotify = [...taggedPlayers].filter((id): id is string => !!id && id !== user.id);
+  if (playerIdsToNotify.length > 0) {
+    void sendPushNotifications({
+      userIds: playerIdsToNotify,
+      title: "You've been tagged in a game",
+      body: `${newGame.user.username} tagged you in a game of ${newGame.script}`,
+      url: `/@${newGame.user.username}`,
     });
   }
 
@@ -288,47 +270,21 @@ export default defineEventHandler(async (handler) => {
       });
 
       if (friend !== null) {
-        await prisma.game.create({
-          data: {
-            ...gameData,
-            is_storyteller: true,
-            date: new Date(body.date),
-            user_id: friend.user_id,
-            player_characters: {},
-            demon_bluffs: {
-              create: [...body.demon_bluffs],
-            },
-        fabled: {
-          create: [...body.fabled],
-        },
-        grimoire_events: {
-          create:
-            incomingGrimoireEvents.map((grimoireEvent) => ({
-              grimoire_page: grimoireEvent.grimoire_page,
-              participant_id: grimoireEvent.participant_id,
-            event_type:
-              grimoireEvent.event_type ??
-              GrimoireEventType.NOT_RECORDED,
-            cause: grimoireEvent.cause ?? null,
-            by_participant_id: grimoireEvent.by_participant_id ?? null,
-            player_name: grimoireEvent.player_name ?? "",
-            role_id: grimoireEvent.role_id ?? null,
-            by_role_id: grimoireEvent.by_role_id ?? null,
-            old_role_id: (grimoireEvent as any).old_role_id ?? null,
-            new_role_id: (grimoireEvent as any).new_role_id ?? null,
-            old_alignment: (grimoireEvent as any).old_alignment ?? null,
-            new_alignment: (grimoireEvent as any).new_alignment ?? null,
-            status_source: (grimoireEvent as any).status_source ?? null,
-          })) || [],
-        },
-        notes: "",
-        grimoire: {
-              connect: newGame.grimoire.map((g) => ({ id: g.id })),
-            },
-            parent_game_id: newGame.id,
-            waiting_for_confirmation: true,
-            tags: [],
-          },
+        try {
+          await findOrCreateStorytellerChildGame({
+            game: newGame,
+            storytellerUserId: friend.user_id,
+            childGames: [], // new game has no children yet
+          });
+        } catch (err: any) {
+          console.error(`Error creating storyteller child game for ${storyteller}: ${err.message}`);
+        }
+
+        void sendPushNotifications({
+          userIds: [friend.user_id],
+          title: "You've been tagged as storyteller",
+          body: `${newGame.user.username} tagged you as storyteller in a game of ${newGame.script}`,
+          url: `/@${newGame.user.username}`,
         });
       }
     }

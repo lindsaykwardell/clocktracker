@@ -1,5 +1,7 @@
-import type { User } from "@supabase/supabase-js";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
+import { hasRestriction } from "~/server/utils/permissions";
+import { sendPushNotifications } from "~/server/utils/sendPushNotifications";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
@@ -9,6 +11,13 @@ export default defineEventHandler(async (handler) => {
     throw createError({
       status: 401,
       statusMessage: "Unauthorized",
+    });
+  }
+
+  if (await hasRestriction(me.id, "JOIN_COMMUNITY")) {
+    throw createError({
+      status: 403,
+      statusMessage: "Forbidden",
     });
   }
 
@@ -27,7 +36,9 @@ export default defineEventHandler(async (handler) => {
       },
     },
     select: {
+      name: true,
       is_private: true,
+      admins: { select: { user_id: true } },
     },
   });
 
@@ -53,6 +64,22 @@ export default defineEventHandler(async (handler) => {
         },
       },
     });
+
+    // Notify community admins about the join request
+    const adminIds = community.admins.map((a) => a.user_id);
+    if (adminIds.length > 0) {
+      const requester = await prisma.userSettings.findUnique({
+        where: { user_id: me.id },
+        select: { display_name: true },
+      });
+
+      void sendPushNotifications({
+        userIds: adminIds,
+        title: `Join Request: ${community.name}`,
+        body: `${requester?.display_name ?? "Someone"} wants to join your community`,
+        url: `/community/${community_slug}`,
+      });
+    }
 
     return true;
   }

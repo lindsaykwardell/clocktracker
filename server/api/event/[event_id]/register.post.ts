@@ -1,10 +1,28 @@
-import { WhoCanRegister } from "@prisma/client";
-import { User } from "@supabase/supabase-js";
+import { WhoCanRegister } from "~/server/generated/prisma/client";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { fetchEventAndUpdateDiscord } from "~/server/utils/fetchEventAndUpdateDiscord";
 import { prisma } from "~/server/utils/prisma";
+import { hasRestriction } from "~/server/utils/permissions";
+
+// In-memory rate limit cache with TTL-based eviction
+const rateLimitCache = new Map<string, { last: string; requests: number }>();
+const RATE_LIMIT_TTL_MS = 60 * 60 * 1000; // 1 hour
+let lastCleanup = Date.now();
+
+function cleanupRateLimitCache() {
+  const now = Date.now();
+  // Only run cleanup at most once per 5 minutes
+  if (now - lastCleanup < 5 * 60 * 1000) return;
+  lastCleanup = now;
+
+  for (const [key, value] of rateLimitCache) {
+    if (now - new Date(value.last).getTime() > RATE_LIMIT_TTL_MS) {
+      rateLimitCache.delete(key);
+    }
+  }
+}
 
 export default defineEventHandler(async (handler) => {
-  const storage = useStorage();
   const ip_address = getRequestIP(handler, { xForwardedFor: true });
   const event_id = handler.context.params!.event_id;
   const me: User | null = handler.context.user;
@@ -34,77 +52,69 @@ export default defineEventHandler(async (handler) => {
   // This is _specifically_ for the case where a user is not logged in and is spamming the registration
   // endpoint.
   if (ip_address && !me) {
-    if (await storage.hasItem(ip_address)) {
-      const registered_at = await storage.getItem<{
-        last: string;
-        requests: number;
-      }>(ip_address);
+    cleanupRateLimitCache();
 
-      if (registered_at) {
-        const registered_at_date = new Date(registered_at.last);
-        const now = new Date();
+    const registered_at = rateLimitCache.get(ip_address);
 
-        const diff = now.getTime() - registered_at_date.getTime();
-        const diffMinutes = Math.floor(diff / 60000);
+    if (registered_at) {
+      const registered_at_date = new Date(registered_at.last);
+      const now = new Date();
 
-        const required_cooldown =
-          5 * (registered_at.requests <= 5 ? 1 : registered_at.requests - 5);
+      const diff = now.getTime() - registered_at_date.getTime();
+      const diffMinutes = Math.floor(diff / 60000);
 
-        // If the user has registered too many times in the last n minutes, throw a 429.
-        // The number of minutes is based on the number of requests made, with a minimum of 5 minutes.
-        // For example, if the user has made 6 requests, they must wait 30 minutes before trying again.
-        if (diffMinutes < required_cooldown && registered_at.requests >= 5) {
-          // Reject the user
-          // Log who they are
+      const required_cooldown =
+        5 * (registered_at.requests <= 5 ? 1 : registered_at.requests - 5);
 
-          const existing_record = await prisma.eventRegistrationSpam.findUnique(
-            {
-              where: {
-                ip_address_event_id: {
-                  event_id,
-                  ip_address,
-                },
-              },
-            }
-          );
+      // If the user has registered too many times in the last n minutes, throw a 429.
+      // The number of minutes is based on the number of requests made, with a minimum of 5 minutes.
+      // For example, if the user has made 6 requests, they must wait 30 minutes before trying again.
+      if (diffMinutes < required_cooldown && registered_at.requests >= 5) {
+        // Reject the user
+        // Log who they are
 
-          if (!existing_record) {
-            await prisma.eventRegistrationSpam.create({
-              data: {
-                ip_address,
+        const existing_record = await prisma.eventRegistrationSpam.findUnique(
+          {
+            where: {
+              ip_address_event_id: {
                 event_id,
-                name: body?.name || "",
+                ip_address,
               },
-            });
+            },
           }
+        );
 
-          throw createError({
-            status: 429,
-            statusMessage:
-              "You have attempted to register too many times. Please wait a few minutes and try again.",
+        if (!existing_record) {
+          await prisma.eventRegistrationSpam.create({
+            data: {
+              ip_address,
+              event_id,
+              name: body?.name || "",
+            },
           });
         }
-        // If the user has registered more than 5 times, but it's been more than 5 times the number
-        // of requests since the last registration times 2, reset the count.
-        else if (diffMinutes >= required_cooldown * 2) {
-          storage.setItem(ip_address, {
-            last: new Date().toISOString(),
-            requests: 1,
-          });
-        } else {
-          storage.setItem(ip_address, {
-            last: registered_at.last,
-            requests: registered_at.requests + 1,
-          });
-        }
-      } else {
-        storage.setItem(ip_address, {
+
+        throw createError({
+          status: 429,
+          statusMessage:
+            "You have attempted to register too many times. Please wait a few minutes and try again.",
+        });
+      }
+      // If the user has registered more than 5 times, but it's been more than 5 times the number
+      // of requests since the last registration times 2, reset the count.
+      else if (diffMinutes >= required_cooldown * 2) {
+        rateLimitCache.set(ip_address, {
           last: new Date().toISOString(),
           requests: 1,
         });
+      } else {
+        rateLimitCache.set(ip_address, {
+          last: registered_at.last,
+          requests: registered_at.requests + 1,
+        });
       }
     } else {
-      storage.setItem(ip_address, {
+      rateLimitCache.set(ip_address, {
         last: new Date().toISOString(),
         requests: 1,
       });
@@ -115,6 +125,13 @@ export default defineEventHandler(async (handler) => {
     throw createError({
       status: 400,
       statusMessage: "Bad Request",
+    });
+  }
+
+  if (me && await hasRestriction(me.id, "REGISTER_FOR_EVENT")) {
+    throw createError({
+      status: 403,
+      statusMessage: "Forbidden",
     });
   }
 

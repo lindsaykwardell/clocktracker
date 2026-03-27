@@ -1,6 +1,12 @@
-import { CommunityPost, Event } from "@prisma/client";
-import { User } from "@supabase/supabase-js";
+import type { CommunityPost, Event } from "~/server/generated/prisma/client";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
+import { useFeatureFlags } from "~/server/utils/featureFlags";
+import {
+  getForumNameColors,
+  getForumBadges,
+  forumUserSelect,
+} from "~/server/utils/forum";
 
 type Update =
   | {
@@ -131,7 +137,37 @@ type Update =
           } | null;
         } | null;
       };
+    }
+  | {
+      kind: "forum_post";
+      date: Date;
+      forumPost: {
+        id: string;
+        body: string;
+        created_at: Date;
+        edited_at: Date | null;
+        author: {
+          user_id: string;
+          username: string;
+          display_name: string;
+          avatar: string | null;
+          name_color: string | null;
+          badge: string | null;
+        };
+        reactions: { emoji: string; user_id: string }[];
+        thread: {
+          id: string;
+          title: string;
+          is_locked: boolean;
+          category: {
+            slug: string;
+            name: string;
+          };
+        };
+      };
     };
+
+const PAGE_SIZE = 20;
 
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
@@ -143,16 +179,13 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  /**
-   * We need to find all the recent stuff that has happened.
-   * This is a computed property that will return the events
-   *
-   * Things we need to fetch:
-   * - Newly scheduled events
-   * - New community posts
-   * - New friend requests?
-   * - Recently tagged games?
-   */
+  const query = getQuery(handler);
+  const cursorParam = query.cursor as string | undefined;
+  const cursor = cursorParam ? new Date(cursorParam) : undefined;
+
+  // Each sub-query fetches PAGE_SIZE items so we have enough to fill a page
+  // after merging and sorting across all sources.
+  const dateFilter = cursor ? { lt: cursor } : undefined;
 
   const recentEvents = await prisma.event.findMany({
     where: {
@@ -181,7 +214,8 @@ export default defineEventHandler(async (handler) => {
       ],
       who_can_register: {
         in: ["ANYONE", "COMMUNITY_MEMBERS"],
-      }
+      },
+      ...(dateFilter && { created_at: dateFilter }),
     },
     select: {
       created_at: true,
@@ -265,13 +299,14 @@ export default defineEventHandler(async (handler) => {
     orderBy: {
       created_at: "desc",
     },
-    take: 20,
+    take: PAGE_SIZE,
   });
 
   const recentPosts = await prisma.communityPost.findMany({
     where: {
       deleted: false,
       reply_to_id: null,
+      ...(dateFilter && { created_at: dateFilter }),
       community: {
         members: {
           some: {
@@ -334,11 +369,12 @@ export default defineEventHandler(async (handler) => {
     orderBy: {
       created_at: "desc",
     },
-    take: 20,
+    take: PAGE_SIZE,
   });
 
   const friendRequests = await prisma.friendRequest.findMany({
     where: {
+      ...(dateFilter && { created_at: dateFilter }),
       OR: [
         {
           from_user_id: user.id,
@@ -369,11 +405,13 @@ export default defineEventHandler(async (handler) => {
     orderBy: {
       created_at: "desc",
     },
+    take: PAGE_SIZE,
   });
 
   const taggedGames = await prisma.game.findMany({
     where: {
       user_id: user.id,
+      ...(dateFilter && { created_at: dateFilter }),
       parent_game_id: {
         not: null,
       },
@@ -393,7 +431,62 @@ export default defineEventHandler(async (handler) => {
         },
       },
     },
+    orderBy: {
+      created_at: "desc",
+    },
+    take: PAGE_SIZE,
   });
+
+  // Forum posts from subscribed threads (gated by feature flag)
+  const featureFlags = await useFeatureFlags(user);
+  const recentForumPosts = featureFlags.isEnabled("forum")
+    ? await prisma.forumPost.findMany({
+        where: {
+          deleted_at: null,
+          author_id: { not: user.id },
+          ...(dateFilter && { created_at: dateFilter }),
+          thread: {
+            deleted_at: null,
+            subscriptions: {
+              some: { user_id: user.id },
+            },
+          },
+        },
+        select: {
+          id: true,
+          body: true,
+          created_at: true,
+          edited_at: true,
+          author: {
+            select: forumUserSelect,
+          },
+          reactions: {
+            select: { emoji: true, user_id: true },
+          },
+          thread: {
+            select: {
+              id: true,
+              title: true,
+              is_locked: true,
+              category: {
+                select: { slug: true, name: true },
+              },
+            },
+          },
+        },
+        orderBy: { created_at: "desc" },
+        take: PAGE_SIZE,
+      })
+    : [];
+
+  // Enrich forum post authors with name_color and badge
+  const forumAuthorIds = recentForumPosts.map((p) => p.author.user_id);
+  const [nameColors, badges] = forumAuthorIds.length
+    ? await Promise.all([
+        getForumNameColors(forumAuthorIds),
+        getForumBadges(forumAuthorIds),
+      ])
+    : [{}, {}];
 
   const updates: Update[] = [];
 
@@ -429,7 +522,27 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  return updates
-    .toSorted((a, b) => b.date.getTime() - a.date.getTime())
-    .slice(0, 20);
+  for (const post of recentForumPosts) {
+    updates.push({
+      kind: "forum_post",
+      date: post.created_at,
+      forumPost: {
+        ...post,
+        author: {
+          ...post.author,
+          name_color: nameColors[post.author.user_id] ?? null,
+          badge: badges[post.author.user_id] ?? null,
+        },
+      },
+    });
+  }
+
+  const sorted = updates.toSorted((a, b) => b.date.getTime() - a.date.getTime());
+  const page = sorted.slice(0, PAGE_SIZE);
+  const nextCursor = page.length === PAGE_SIZE ? page[page.length - 1].date.toISOString() : null;
+
+  return {
+    updates: page,
+    nextCursor,
+  };
 });

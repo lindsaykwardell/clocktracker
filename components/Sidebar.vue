@@ -8,7 +8,7 @@
             'bg-transparent pointer-events-none': showMenu,
         }"
     ></div>
-    <nav id="sidebar" :class="showMenu ? 'closed' : 'open'">
+    <nav id="sidebar" :class="showMenu ? 'closed' : 'open'" @click="handleNavClick">
         <ul>
             <li>
                 <div class="logo">
@@ -114,6 +114,17 @@
           Scripts
         </NavLink>
       </li> -->
+            <li v-if="featureFlags.isEnabled('forum')">
+                <NavLink
+                    id="forum"
+                    to="/forum"
+                    icon="snitch"
+                    title="Discussions"
+                    :notificationCount="forumUnreadCount"
+                >
+                    Discussions
+                </NavLink>
+            </li>
             <li>
                 <NavLink
                     id="search"
@@ -122,6 +133,16 @@
                     title="Search"
                 >
                     Search
+                </NavLink>
+            </li>
+            <li v-if="canAccessAdmin">
+                <NavLink
+                    id="admin"
+                    to="/admin"
+                    icon="tor"
+                    title="Admin"
+                >
+                    Admin
                 </NavLink>
             </li>
         </ul>
@@ -180,9 +201,53 @@
 </template>
 
 <script setup lang="ts">
-const { showMenu, toggleSidebar } = useSidebarState();
+import { Status } from "~/composables/useFetchStatus";
+
+const ADMIN_PAGE_PERMISSIONS = [
+  "MANAGE_CATEGORIES", "MANAGE_GROUPS", "BAN_USER",
+  "MANAGE_FEATURE_FLAGS", "VIEW_REPORTS", "VIEW_MOD_LOG",
+];
+
+const { showMenu, toggleSidebar, closeSidebar, isMobile } = useSidebarState();
 const me = useMe();
 const friends = useFriends();
+const featureFlags = useFeatureFlags();
+const forumUnreadCount = ref(0);
+const canAccessAdmin = ref(false);
+
+onMounted(async () => {
+  if (featureFlags.isEnabled('forum')) {
+    try {
+      const data = await $fetch<{ count: number }>("/api/forum/subscriptions/unread-count");
+      forumUnreadCount.value = data.count;
+    } catch {}
+  }
+
+  if (me.value.status === Status.SUCCESS && me.value.data.is_admin) {
+    canAccessAdmin.value = true;
+  } else {
+    try {
+      const forumMe = await $fetch<{ permissions: string[] }>("/api/forum/me");
+      canAccessAdmin.value = forumMe.permissions.some((p) => ADMIN_PAGE_PERMISSIONS.includes(p));
+    } catch {}
+  }
+});
+
+const handleNavClick = (event: MouseEvent) => {
+    if (!isMobile.value) {
+        return;
+    }
+
+    const target = event.target;
+
+    if (!(target instanceof HTMLElement)) {
+        return;
+    }
+
+    if (target.closest("a")) {
+        closeSidebar();
+    }
+};
 </script>
 
 <style scoped>
@@ -202,6 +267,7 @@ const friends = useFriends();
     block-size: 100dvh;
     inline-size: 250px;
     padding: 1rem 1em;
+    padding-top: calc(1rem + var(--cap-status-bar-height, 0px));
     position: sticky;
     inset-block-start: 0;
     align-self: start;
@@ -246,6 +312,17 @@ const friends = useFriends();
     }
 }
 
+@media (min-width: 801px) {
+    #sidebar > ul > li {
+        margin-block-end: 0.5rem;
+    }
+
+    #sidebar li > a {
+        padding: 0.5rem;
+        font-size: 1rem;
+    }
+}
+
 @media (max-width: 800px) {
     #sidebar {
         position: fixed;
@@ -279,7 +356,7 @@ const friends = useFriends();
 }
 
 #sidebar > ul > li {
-    margin-block-end: 0.5rem;
+    margin-block-end: 0.375rem;
 
     &:has(#sidebar-toggle) {
         display: flex;
@@ -316,8 +393,9 @@ const friends = useFriends();
 #sidebar li > a {
     position: relative;
     border-radius: 0.5em;
-    padding: 0.5rem;
+    padding: 0.375rem 0.5rem;
     text-decoration: none;
+    font-size: 0.9rem;
 
     > span {
         flex-grow: 1;
@@ -353,5 +431,7 @@ const friends = useFriends();
     > li:last-child {
         margin-block-end: 0;
     }
+
+    padding-bottom: var(--cap-nav-bar-height, 0px);
 }
 </style>

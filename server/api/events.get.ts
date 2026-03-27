@@ -1,4 +1,4 @@
-import { User } from "@supabase/supabase-js";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
 
 export default defineEventHandler(async (handler) => {
@@ -9,6 +9,7 @@ export default defineEventHandler(async (handler) => {
   }
 
   return prisma.event.findMany({
+    take: 200,
     where: {
       OR: [
         {

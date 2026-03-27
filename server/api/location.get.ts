@@ -1,4 +1,4 @@
-import { User } from "@supabase/supabase-js";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import getLocation from "../utils/getLocation";
 
 export default defineEventHandler(async (handler) => {

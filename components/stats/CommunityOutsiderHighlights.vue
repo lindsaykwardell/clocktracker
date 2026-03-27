@@ -108,7 +108,7 @@ function pickTop(role: string, field: keyof PlayerSummary) {
   if (!props.players?.length) return null;
   return (
     props.players
-      .filter((p) => ((p[field] as number) ?? 0) > 0 && role in p.role_games)
+      .filter((p) => ((p[field] as number) ?? 0) > 0 && p.role_games && role in p.role_games)
       .sort((a, b) => {
         const diff = (b[field] as number) - (a[field] as number);
         if (diff !== 0) return diff;

@@ -1,5 +1,6 @@
-import { User } from "@supabase/supabase-js";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
+import { sendPushNotifications } from "~/server/utils/sendPushNotifications";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
@@ -80,6 +81,28 @@ export default defineEventHandler(async (handler) => {
       },
     },
   });
+
+  // Notify community members
+  const members = await prisma.community.findUnique({
+    where: { slug },
+    select: { members: { select: { user_id: true } } },
+  });
+
+  if (members) {
+    const snippet = body.content
+      .replace(/[#*_~`>\[\]()!|\\-]/g, "")
+      .replace(/\n+/g, " ")
+      .trim()
+      .slice(0, 200);
+
+    void sendPushNotifications({
+      userIds: members.members.map((m) => m.user_id),
+      excludeUserId: me.id,
+      title: `New post in ${community.name}`,
+      body: `${post.user.display_name}: ${snippet}`,
+      url: `/community/${slug}`,
+    });
+  }
 
   return post;
 });

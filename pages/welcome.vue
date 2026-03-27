@@ -6,7 +6,7 @@
     <img class="w-[300px] bg-stone-900 rounded-full" src="/logo.png" alt="ClockTracker" />
     <h1 class="text-2xl font-sorts">
       <!-- @todo This full_name doen't work on the welcome page -->
-      Welcome, {{ user?.user_metadata.full_name }}
+      Welcome, {{ user?.user_metadata?.full_name }}
     </h1>
     <form
       class="flex flex-col gap-4 items-center"
@@ -89,7 +89,7 @@ const router = useRouter();
 const inFlight = ref(false);
 const errorMessage = ref<string>();
 
-const user = useSupabaseUser();
+const user = useUser();
 const settings = await useFetch("/api/settings");
 
 if (settings.data.value?.finished_welcome) {

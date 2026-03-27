@@ -1,43 +1,46 @@
-import { WhoCanRegister } from "@prisma/client";
-import { User } from "@supabase/supabase-js";
+import { WhoCanRegister } from "~/server/generated/prisma/client";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
+import { hasPermission } from "~/server/utils/permissions";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
   const slug = handler.context.params!.slug;
 
-  const isModerator = !!(await prisma.community.findFirst({
-    where: {
-      slug,
-      admins: {
-        some: {
-          user_id: me?.id || "",
-        },
-      },
-    },
-  }));
+  const canViewPrivate = me ? await hasPermission(me.id, "VIEW_PRIVATE_COMMUNITIES") : false;
 
-  const isPendingMember = !!(await prisma.community.findFirst({
-    where: {
-      slug,
-      join_requests: {
-        some: {
-          user_id: me?.id || "",
+  const [isModerator, isPendingMember, isBanned] = await Promise.all([
+    prisma.community.findFirst({
+      where: {
+        slug,
+        admins: {
+          some: {
+            user_id: me?.id || "",
+          },
         },
       },
-    },
-  }));
-
-  const isBanned = !!(await prisma.community.findFirst({
-    where: {
-      slug,
-      banned_users: {
-        some: {
-          user_id: me?.id || "",
+    }).then((r) => !!r),
+    prisma.community.findFirst({
+      where: {
+        slug,
+        join_requests: {
+          some: {
+            user_id: me?.id || "",
+          },
         },
       },
-    },
-  }));
+    }).then((r) => !!r),
+    prisma.community.findFirst({
+      where: {
+        slug,
+        banned_users: {
+          some: {
+            user_id: me?.id || "",
+          },
+        },
+      },
+    }).then((r) => !!r),
+  ]);
 
   const community = await prisma.community.findUnique({
     where: {
@@ -297,7 +300,7 @@ export default defineEventHandler(async (handler) => {
     (member) => member.user_id === (me?.id || "")
   );
 
-  if (isBanned || (community.is_private && !isMember)) {
+  if (isBanned || (community.is_private && !isMember && !canViewPrivate)) {
     community.members = [];
     community.admins = [];
     community.posts = [];

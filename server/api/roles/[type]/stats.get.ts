@@ -1,5 +1,4 @@
-import { Alignment, WinStatus_V2 } from "@prisma/client";
-import { winRateByRole } from "~/server/utils/stats";
+import { Prisma } from "~/server/generated/prisma/client";
 import { prisma } from "~/server/utils/prisma";
 
 export default defineEventHandler(async (handler) => {
@@ -9,41 +8,6 @@ export default defineEventHandler(async (handler) => {
     compared_to_role?: string | string[];
     game_size?: "teensy" | "small" | "medium" | "large";
   };
-
-  let game_size_query = {};
-
-  switch (game_size) {
-    case "teensy":
-      game_size_query = {
-        player_count: {
-          lte: 6,
-        },
-      };
-      break;
-    case "small":
-      game_size_query = {
-        player_count: {
-          gt: 6,
-          lte: 9,
-        },
-      };
-      break;
-    case "medium":
-      game_size_query = {
-        player_count: {
-          gt: 9,
-          lte: 12,
-        },
-      };
-      break;
-    case "large":
-      game_size_query = {
-        player_count: {
-          gt: 12,
-        },
-      };
-      break;
-  }
 
   if (typeof compared_to_role === "string") {
     compared_to_role = [compared_to_role];
@@ -68,141 +32,135 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
-  const games = await prisma.game.findMany({
-    where: {
-      deleted: false,
-      AND: [
-        {
-          parent_game_id: null,
-          script: {
-            equals: script,
-            mode: "insensitive",
-          },
-        },
-        {
-          OR: [
-            {
-              player_characters: {
-                some: {
-                  role_id: {
-                    equals: role?.id,
-                  },
-                },
-              },
-            },
-            {
-              grimoire: {
-                some: {
-                  tokens: {
-                    some: {
-                      role_id: {
-                        equals: role?.id,
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          ],
-        },
-        ...compared_to_role.map((role) => ({
-          OR: [
-            {
-              player_characters: {
-                some: {
-                  name: {
-                    equals: role,
-                  },
-                },
-              },
-            },
-            {
-              grimoire: {
-                some: {
-                  tokens: {
-                    some: {
-                      role: {
-                        name: {
-                          equals: role,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          ],
-        })),
-        game_size_query,
-      ],
-    },
-    include: {
-      player_characters: {
-        include: {
-          role: {
-            select: {
-              token_url: true,
-              type: true,
-              initial_alignment: true,
-              name: true,
-            },
-          },
-          related_role: {
-            select: {
-              token_url: true,
-            },
-          },
-        },
-      },
-      demon_bluffs: {
-        include: {
-          role: {
-            select: {
-              token_url: true,
-              type: true,
-            },
-          },
-        },
-      },
-      fabled: {
-        include: {
-          role: {
-            select: {
-              token_url: true,
-              type: true,
-            },
-          },
-        },
-      },
-      grimoire: {
-        include: {
-          tokens: {
-            include: {
-              role: true,
-              related_role: true,
-              reminders: true,
-            },
-          },
-        },
-        orderBy: {
-          id: "asc",
-        },
-      },
-    },
-  });
+  // Build dynamic WHERE clauses for SQL
+  const conditions: Prisma.Sql[] = [
+    Prisma.sql`g."deleted" = false`,
+    Prisma.sql`g."parent_game_id" IS NULL`,
+  ];
 
-  const win_count = winRateByRole(games as unknown as GameRecord[], role);
+  if (script) {
+    conditions.push(Prisma.sql`LOWER(g."script") = LOWER(${script})`);
+  }
 
-  const scripts = [...new Set(games.map((game) => game.script))];
+  // Game size filter
+  switch (game_size) {
+    case "teensy":
+      conditions.push(Prisma.sql`g."player_count" <= 6`);
+      break;
+    case "small":
+      conditions.push(
+        Prisma.sql`g."player_count" > 6 AND g."player_count" <= 9`
+      );
+      break;
+    case "medium":
+      conditions.push(
+        Prisma.sql`g."player_count" > 9 AND g."player_count" <= 12`
+      );
+      break;
+    case "large":
+      conditions.push(Prisma.sql`g."player_count" > 12`);
+      break;
+  }
+
+  // compared_to_role filters: each role must appear in the game
+  for (const compRole of compared_to_role) {
+    conditions.push(Prisma.sql`(
+      EXISTS (
+        SELECT 1 FROM "Character" cc
+        WHERE cc."game_id" = g."id"
+        AND LOWER(cc."name") = LOWER(${compRole})
+      )
+      OR EXISTS (
+        SELECT 1 FROM "_GameToGrimoire" cgg
+        JOIN "Token" ct ON ct."grimoire_id" = cgg."B"
+        JOIN "Role" cr ON cr."id" = ct."role_id"
+        WHERE cgg."A" = g."id"
+        AND LOWER(cr."name") = LOWER(${compRole})
+      )
+    )`);
+  }
+
+  const whereClause = Prisma.join(conditions, " AND ");
+
+  // Win rate query: find games where this role appears, get last character/token
+  const winRateRows = await prisma.$queryRaw<
+    { total: bigint; wins: bigint }[]
+  >(Prisma.sql`
+    WITH player_games AS (
+      -- Non-storyteller games: last Character per game with this role
+      SELECT DISTINCT ON (c."game_id")
+        c."game_id",
+        c."alignment"
+      FROM "Character" c
+      JOIN "Game" g ON g."id" = c."game_id"
+      WHERE ${whereClause}
+        AND g."is_storyteller" = false
+        AND c."role_id" = ${role.id}
+      ORDER BY c."game_id", c."id" DESC
+    ),
+    st_games AS (
+      -- Storyteller games: tokens from last grimoire page with this role
+      SELECT DISTINCT ON (lgp.game_id)
+        lgp.game_id,
+        t."alignment"
+      FROM (
+        SELECT gg."A" AS game_id, MAX(gg."B") AS grimoire_id
+        FROM "_GameToGrimoire" gg
+        JOIN "Game" g ON g."id" = gg."A"
+        WHERE ${whereClause}
+          AND g."is_storyteller" = true
+        GROUP BY gg."A"
+      ) lgp
+      JOIN "Token" t ON t."grimoire_id" = lgp.grimoire_id
+      WHERE t."role_id" = ${role.id}
+      ORDER BY lgp.game_id, t."id" DESC
+    ),
+    all_games AS (
+      SELECT game_id, alignment FROM player_games
+      UNION ALL
+      SELECT game_id, alignment FROM st_games
+    )
+    SELECT
+      COUNT(*)::bigint AS total,
+      COUNT(*) FILTER (WHERE
+        (g."win_v2" = 'GOOD_WINS' AND ag.alignment = 'GOOD')
+        OR (g."win_v2" = 'EVIL_WINS' AND ag.alignment = 'EVIL')
+      )::bigint AS wins
+    FROM all_games ag
+    JOIN "Game" g ON g."id" = ag.game_id
+  `);
+
+  const totalGames = Number(winRateRows[0]?.total ?? 0);
+  const wins = Number(winRateRows[0]?.wins ?? 0);
+
+  // Get distinct scripts for these games
+  const scriptRows = await prisma.$queryRaw<{ script: string }[]>(Prisma.sql`
+    SELECT DISTINCT g."script"
+    FROM "Game" g
+    WHERE ${whereClause}
+      AND (
+        EXISTS (
+          SELECT 1 FROM "Character" c
+          WHERE c."game_id" = g."id" AND c."role_id" = ${role.id}
+        )
+        OR EXISTS (
+          SELECT 1 FROM "_GameToGrimoire" gg
+          JOIN "Token" t ON t."grimoire_id" = gg."B"
+          WHERE gg."A" = g."id" AND t."role_id" = ${role.id}
+        )
+      )
+  `);
+
+  const scripts = scriptRows.map((r) => r.script);
 
   return {
     role,
     compared_to_role,
     win_loss: {
-      total: win_count.total,
-      win: win_count.win,
-      loss: win_count.total - win_count.win,
-      pct: +((win_count.win / win_count.total) * 100).toFixed(2) || 0,
+      total: totalGames,
+      win: wins,
+      loss: totalGames - wins,
+      pct: totalGames > 0 ? +((wins / totalGames) * 100).toFixed(2) : 0,
     },
     scripts,
   };

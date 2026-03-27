@@ -5,9 +5,9 @@ import type {
   Token,
   ReminderToken,
   GrimoireEvent,
-} from "@prisma/client";
-import { PrivacySetting } from "@prisma/client";
-import { User } from "@supabase/supabase-js";
+} from "~/server/generated/prisma/client";
+import { PrivacySetting } from "~/server/generated/prisma/client";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 
 export type FullCharacter = Character & {
   role?: {
@@ -40,7 +40,7 @@ export type GameRecord = Game & {
         name: string;
       };
       related_role?: { token_url: string };
-      reminders: ReminderToken[];
+      reminders?: ReminderToken[];
       player?: {
         username: string;
         display_name: string;

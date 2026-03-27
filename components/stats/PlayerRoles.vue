@@ -165,20 +165,22 @@ const roleStats = computed<Map<string, RoleStats>>(() => {
     }
 
     for (const character of lastRolePerGame.values()) {
+      const roleId = character.role_id;
+      if (!roleId) continue;
 
       const alignment = character.alignment ?? character.role?.initial_alignment;
       const isGood = alignment === "GOOD";
       const isEvil = alignment === "EVIL";
 
-      if (!stats.has(character.role_id)) {
-        stats.set(character.role_id, {
+      if (!stats.has(roleId)) {
+        stats.set(roleId, {
           plays: 0,
           wins: 0,
           losses: 0,
         });
       }
 
-      const roleStat = stats.get(character.role_id)!;
+      const roleStat = stats.get(roleId)!;
       roleStat.plays += 1;
 
       if (alignment && (goodWins || evilWins)) {

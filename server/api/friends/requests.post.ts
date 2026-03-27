@@ -1,5 +1,7 @@
-import { User } from "@supabase/supabase-js";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
+import { hasRestriction } from "~/server/utils/permissions";
+import { sendPushNotifications } from "~/server/utils/sendPushNotifications";
 
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
@@ -16,6 +18,13 @@ export default defineEventHandler(async (handler) => {
     throw createError({
       status: 400,
       statusMessage: "Bad Request",
+    });
+  }
+
+  if (await hasRestriction(user.id, "SEND_FRIEND_REQUEST")) {
+    throw createError({
+      status: 403,
+      statusMessage: "Forbidden",
     });
   }
 
@@ -57,6 +66,13 @@ export default defineEventHandler(async (handler) => {
           },
         },
       },
+    });
+
+    void sendPushNotifications({
+      userIds: [body.user_id],
+      title: "New Friend Request",
+      body: `${request.from_user.username} sent you a friend request`,
+      url: "/",
     });
 
     return request;

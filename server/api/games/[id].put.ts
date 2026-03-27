@@ -1,17 +1,22 @@
 import type { User } from "@supabase/supabase-js";
 import {
-  Game,
-  Character,
-  Grimoire,
-  Token,
+  type Game,
+  type Character,
+  type Grimoire,
+  type Token,
   Alignment,
-  DemonBluff,
-  Fabled,
-  ReminderToken,
-  GrimoireEvent,
+  type DemonBluff,
+  type Fabled,
+  type ReminderToken,
+  type GrimoireEvent,
   GrimoireEventType,
-} from "@prisma/client";
+} from "~/server/generated/prisma/client";
 import { prisma } from "~/server/utils/prisma";
+import {
+  findOrCreatePlayerChildGame,
+  findOrCreateStorytellerChildGame,
+} from "~/server/utils/childGame";
+import { sendPushNotifications } from "~/server/utils/sendPushNotifications";
 
 const MAX_GRIMOIRE_PAGE_TITLE_LENGTH = 64;
 
@@ -84,6 +89,7 @@ export default defineEventHandler(async (handler) => {
       player_characters: true,
       demon_bluffs: true,
       fabled: true,
+      grimoire_events: true,
     },
   });
 
@@ -91,6 +97,84 @@ export default defineEventHandler(async (handler) => {
     throw createError({
       status: 404,
       statusMessage: "Not Found",
+    });
+  }
+
+  // Snapshot existing grimoire state before any modifications
+  const existingGrimoires = await prisma.grimoire.findMany({
+    where: {
+      game: { some: { id: gameId } },
+    },
+    orderBy: {
+      id: "asc",
+    },
+    include: {
+      tokens: {
+        orderBy: {
+          order: "asc",
+        },
+        include: {
+          role: true,
+          related_role: true,
+          reminders: true,
+        },
+      },
+    },
+  });
+
+  if (existingGrimoires.length > 0) {
+    await prisma.grimoireSnapshot.create({
+      data: {
+        game_id: gameId,
+        snapshot: JSON.parse(JSON.stringify({
+          pages: existingGrimoires.map((grimoire) => ({
+            id: grimoire.id,
+            title: grimoire.title,
+            page_type: grimoire.page_type,
+            tokens: grimoire.tokens.map((token) => ({
+              id: token.id,
+              role_id: token.role_id,
+              role_name: token.role?.name ?? null,
+              related_role_id: token.related_role_id,
+              related_role_name: token.related_role?.name ?? null,
+              alignment: token.alignment,
+              is_dead: token.is_dead,
+              used_ghost_vote: token.used_ghost_vote,
+              order: token.order,
+              grimoire_participant_id: token.grimoire_participant_id,
+              player_name: token.player_name,
+              player_id: token.player_id,
+              reminders: token.reminders.map((r) => ({
+                id: r.id,
+                reminder: r.reminder,
+                token_url: r.token_url,
+                type: r.type,
+              })),
+            })),
+          })),
+          end_trigger: existingGame.end_trigger,
+          end_trigger_type: existingGame.end_trigger_type,
+          end_trigger_cause: existingGame.end_trigger_cause,
+          end_trigger_role_id: existingGame.end_trigger_role_id,
+          end_trigger_note: existingGame.end_trigger_note,
+          end_trigger_participant_id: existingGame.end_trigger_participant_id,
+          grimoire_events: existingGame.grimoire_events.map((event) => ({
+            grimoire_page: event.grimoire_page,
+            participant_id: event.participant_id,
+            event_type: event.event_type,
+            cause: event.cause,
+            by_participant_id: event.by_participant_id,
+            player_name: event.player_name,
+            role_id: event.role_id,
+            by_role_id: event.by_role_id,
+            old_role_id: event.old_role_id,
+            new_role_id: event.new_role_id,
+            old_alignment: event.old_alignment,
+            new_alignment: event.new_alignment,
+            status_source: event.status_source,
+          })),
+        })),
+      },
     });
   }
 
@@ -398,129 +482,30 @@ export default defineEventHandler(async (handler) => {
       }[]
     );
 
-    const relatedGame = related_games?.find((g) => g!.user_id === id);
-
     try {
-      if (!relatedGame) {
-        await prisma.game.create({
-          data: {
-            ...gameData,
-            date: new Date(body.date),
-            user_id: id,
-            player_characters: {
-              create: [...player_characters],
-            },
-            demon_bluffs: {
-              create: [...body.demon_bluffs],
-            },
-            fabled: {
-              create: [...body.fabled],
-            },
-            // map the already created grimoires to the new game
-            grimoire: {
-              connect: game.grimoire.map((g) => ({ id: g.id })),
-            },
-            parent_game_id: game.parent_game_id || game.id,
-            waiting_for_confirmation: true,
-            is_storyteller: false,
-            storyteller:
-              game.is_storyteller && game.user
-                ? `@${game.user.username}`
-                : game.storyteller,
-          },
-        });
-      } else {
-        await prisma.game.update({
-          where: {
-            id: relatedGame.id,
-          },
-          data: {
-            date: new Date(body.date),
-            script: body.script,
-            script_id: body.script_id,
-            location_type: body.location_type,
-            location: body.location,
-            community_name: body.community_name,
-            community_id: body.community_id,
-            player_count: body.player_count,
-            traveler_count: body.traveler_count,
-            storyteller: body.storyteller,
-            co_storytellers: body.co_storytellers,
-            win_v2: body.win_v2,
-            end_trigger: body.end_trigger,
-            end_trigger_type: body.end_trigger_type,
-            end_trigger_cause: body.end_trigger_cause,
-            end_trigger_role_id: body.end_trigger_role_id,
-            end_trigger_note: body.end_trigger_note,
-            end_trigger_participant_id: body.end_trigger_participant_id,
-            ls_game_id: body.ls_game_id,
-            grimoire_events: {
-              deleteMany: {},
-              create:
-                incomingGrimoireEvents.map((grimoireEvent) => ({
-                  grimoire_page: grimoireEvent.grimoire_page,
-                  participant_id: grimoireEvent.participant_id,
-                  event_type:
-                    grimoireEvent.event_type ??
-                    GrimoireEventType.NOT_RECORDED,
-                  cause: grimoireEvent.cause ?? null,
-                  by_participant_id: grimoireEvent.by_participant_id ?? null,
-                  player_name: grimoireEvent.player_name ?? "",
-                  role_id: grimoireEvent.role_id ?? null,
-                  by_role_id: grimoireEvent.by_role_id ?? null,
-                  old_role_id: (grimoireEvent as any).old_role_id ?? null,
-                  new_role_id: (grimoireEvent as any).new_role_id ?? null,
-                  old_alignment: (grimoireEvent as any).old_alignment ?? null,
-                  new_alignment: (grimoireEvent as any).new_alignment ?? null,
-                  status_source: (grimoireEvent as any).status_source ?? null,
-                })) || [],
-            },
-            demon_bluffs: {
-              deleteMany: relatedGame.demon_bluffs.map((g) => ({ id: g.id })),
-              create: game.demon_bluffs.map((g) => ({
-                ...g,
-                id: undefined,
-                game_id: undefined,
-              })),
-            },
-            fabled: {
-              deleteMany: relatedGame.fabled.map((g) => ({ id: g.id })),
-              create: game.fabled.map((g) => ({
-                ...g,
-                id: undefined,
-                game_id: undefined,
-              })),
-            },
-            player_characters: {
-              deleteMany: relatedGame.player_characters.map((g) => ({
-                id: g.id,
-              })),
-              create: player_characters,
-            },
-            grimoire: {
-              connect: game.grimoire.map((g) => ({ id: g.id })),
-            },
-          },
-        });
-      }
+      await findOrCreatePlayerChildGame({
+        game,
+        playerId: id,
+        playerCharacters: player_characters,
+        relatedGames: related_games,
+      });
     } catch (err: any) {
-      const messageLines = err.message.split("\n");
-      const message =
-        messageLines[messageLines.length - 1].length > 0
-          ? messageLines[messageLines.length - 1]
-          : err.message;
-      // get the name from the game.grimoire
       const taggedPlayer =
         game.grimoire.flatMap((g) => g.tokens).find((t) => t.player_id === id)
           ?.player_name || "Unknown";
-
-      console.error(`Error saving for ${taggedPlayer}: ${message}`);
-
-      throw createError({
-        status: 500,
-        statusMessage: `Error saving for ${taggedPlayer}: ${message}`,
-      });
+      console.error(`Error creating child game for ${taggedPlayer}: ${err.message}`);
     }
+  }
+
+  // Notify tagged players
+  const playerIdsToNotify = [...taggedPlayers].filter((id): id is string => !!id && id !== user.id);
+  if (playerIdsToNotify.length > 0) {
+    void sendPushNotifications({
+      userIds: playerIdsToNotify,
+      title: "You've been tagged in a game",
+      body: `${game.user.username} tagged you in a game of ${game.script}`,
+      url: `/@${game.user.username}`,
+    });
   }
 
   const storytellers = [game.storyteller, ...game.co_storytellers];
@@ -540,101 +525,22 @@ export default defineEventHandler(async (handler) => {
       });
 
       if (friend !== null) {
-        const childGame = game.child_games?.find(
-          (g) => g.user_id === friend.user_id
-        );
-
-        if (!childGame) {
-          await prisma.game.create({
-            data: {
-              ...gameData,
-              is_storyteller: true,
-              date: new Date(body.date),
-              user_id: friend.user_id,
-              player_characters: {},
-              demon_bluffs: {
-                create: [...body.demon_bluffs],
-              },
-              fabled: {
-                create: [...body.fabled],
-              },
-              notes: "",
-              grimoire: {
-                connect: game.grimoire.map((g) => ({ id: g.id })),
-              },
-              parent_game_id: game.id,
-              waiting_for_confirmation: true,
-              tags: [],
-            },
+        try {
+          await findOrCreateStorytellerChildGame({
+            game,
+            storytellerUserId: friend.user_id,
+            childGames: game.child_games,
           });
-        } else {
-          await prisma.game.update({
-            where: {
-              id: childGame.id,
-            },
-            data: {
-              date: new Date(body.date),
-              script: body.script,
-              script_id: body.script_id,
-              location_type: body.location_type,
-              location: body.location,
-              community_name: body.community_name,
-              community_id: body.community_id,
-              player_count: body.player_count,
-              traveler_count: body.traveler_count,
-              storyteller: body.storyteller,
-              co_storytellers: body.co_storytellers,
-              win_v2: body.win_v2,
-              end_trigger: body.end_trigger,
-              end_trigger_type: body.end_trigger_type,
-              end_trigger_cause: body.end_trigger_cause,
-              end_trigger_role_id: body.end_trigger_role_id,
-              end_trigger_note: body.end_trigger_note,
-              end_trigger_participant_id: body.end_trigger_participant_id,
-              ls_game_id: body.ls_game_id,
-              grimoire_events: {
-                deleteMany: {},
-                create:
-                  incomingGrimoireEvents.map((grimoireEvent) => ({
-                    grimoire_page: grimoireEvent.grimoire_page,
-                    participant_id: grimoireEvent.participant_id,
-                    event_type:
-                      grimoireEvent.event_type ??
-                      GrimoireEventType.NOT_RECORDED,
-                    cause: grimoireEvent.cause ?? null,
-                    by_participant_id: grimoireEvent.by_participant_id ?? null,
-                    player_name: grimoireEvent.player_name ?? "",
-                    role_id: grimoireEvent.role_id ?? null,
-                    by_role_id: grimoireEvent.by_role_id ?? null,
-                    old_role_id: (grimoireEvent as any).old_role_id ?? null,
-                    new_role_id: (grimoireEvent as any).new_role_id ?? null,
-                    old_alignment: (grimoireEvent as any).old_alignment ?? null,
-                    new_alignment: (grimoireEvent as any).new_alignment ?? null,
-                    status_source: (grimoireEvent as any).status_source ?? null,
-                  })) || [],
-              },
-              demon_bluffs: {
-                deleteMany: childGame.demon_bluffs.map((g) => ({ id: g.id })),
-                create: game.demon_bluffs.map((g) => ({
-                  ...g,
-                  id: undefined,
-                  game_id: undefined,
-                })),
-              },
-              fabled: {
-                deleteMany: childGame.fabled.map((g) => ({ id: g.id })),
-                create: game.fabled.map((g) => ({
-                  ...g,
-                  id: undefined,
-                  game_id: undefined,
-                })),
-              },
-              grimoire: {
-                connect: game.grimoire.map((g) => ({ id: g.id })),
-              },
-            },
-          });
+        } catch (err: any) {
+          console.error(`Error creating storyteller child game for ${storyteller}: ${err.message}`);
         }
+
+        void sendPushNotifications({
+          userIds: [friend.user_id],
+          title: "You've been tagged as storyteller",
+          body: `${game.user.username} tagged you as storyteller in a game of ${game.script}`,
+          url: `/@${game.user.username}`,
+        });
       }
     }
   }
