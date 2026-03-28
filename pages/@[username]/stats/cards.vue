@@ -195,7 +195,7 @@ const users = useUsers();
 const gamesStore = useGames();
 const roles = useRoles();
 const friends = useFriends();
-const meUser = useSupabaseUser();
+const meUser = useUser();
 
 const tab = ref<"role" | "general">("role");
 

@@ -2,6 +2,7 @@ const axios = require("axios");
 const cheerio = require("cheerio");
 const { PrismaClient, WinStatus, WinStatus_V2 } = require("../server/generated/prisma/client");
 const { PrismaPg } = require("@prisma/adapter-pg");
+const { createClient } = require("@supabase/supabase-js");
 const { faker } = require("@faker-js/faker");
 const { v4: uuidv4 } = require("uuid");
 const dayjs = require("dayjs");
@@ -180,13 +181,34 @@ async function main() {
   });
 
   const myUsername = process.env.LOCAL_USERNAME || "ClockTrackerDeveloper";
+  const myPassword = process.env.LOCAL_PASSWORD || "password123";
   const email = process.env.LOCAL_EMAIL || "dev@clocktracker.app";
   const localUserId =
     process.env.LOCAL_USER_ID || "00000000-0000-4000-8000-000000000001";
+  let resolvedUserId = localUserId;
+
+  // Try to create a local auth account so the printed login details actually work.
+  // If this fails (e.g. auth not reachable), we still seed UserSettings with LOCAL_USER_ID.
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password: myPassword,
+    });
+
+    if (error) {
+      console.warn(`[seed] auth signup warning: ${error.message}`);
+    } else if (data?.user?.id) {
+      resolvedUserId = data.user.id;
+    }
+  } catch (error) {
+    console.warn(
+      `[seed] auth signup skipped, continuing with LOCAL_USER_ID (${localUserId})`
+    );
+  }
 
   const me = await prisma.userSettings.create({
     data: {
-      user_id: localUserId,
+      user_id: resolvedUserId,
       username: myUsername,
       finished_welcome: true,
       avatar:
@@ -1232,7 +1254,8 @@ async function main() {
   console.log(`Login details:
 
 Email: ${email}
-User ID: ${localUserId}
+Password: ${myPassword}
+User ID: ${resolvedUserId}
 
 Run "npm run dev" and go to http://localhost:3000/`);
 }

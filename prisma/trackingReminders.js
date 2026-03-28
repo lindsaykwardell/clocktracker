@@ -1,4 +1,4 @@
-const { ReminderType } = require("@prisma/client");
+const { ReminderType } = require("../server/generated/prisma/client");
 
 const trackingReminders = [
   {
