@@ -862,7 +862,7 @@ type Character = {
   related_role?: { token_url: string };
 };
 
-const user = useSupabaseUser();
+const user = useUser();
 const me = useMe();
 const games = useGames();
 const friends = useFriends();
