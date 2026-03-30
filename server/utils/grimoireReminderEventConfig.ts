@@ -1,4 +1,4 @@
-import { GrimoireEventType } from "~/composables/useGames";
+import { GrimoireEventType } from "~/server/generated/prisma/client";
 
 export type GrimoireReminderEventCadence =
   | "once"

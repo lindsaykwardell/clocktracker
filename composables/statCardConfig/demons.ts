@@ -556,7 +556,7 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `As the Po, this player has unleashed a triple kill ${count} time${pluralize(count)}.`)
         : `As the Po, unleash a triple kill.`,
   },
-  // Pukka [sao: 2]: Nothing relevant. Only option: If they got a yes?
+  // Pukka [sao: 2]: Nothing relevant. Only option: If they were pukka poisoned?
   // Riot: @todo
   {
     id: "shabaloth_revives",

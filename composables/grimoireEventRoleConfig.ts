@@ -52,7 +52,9 @@ export const GRIMOIRE_EVENT_ROLE_INCLUDES: Record<GrimoireEventType, RoleInclude
     "cerenovus",
     "vizier", // Edge case: Could force execution, which is specific player agency.
     "riot", // @todo: Not sure?
-    // "scapegoat",
+    "scapegoat", // Causes self execution
+    "butcher", // Causes additional execution
+    "judge", // Edge case: Could force execution, which is specific player agency.
   ], conditional: [] },
   [GrimoireEventType.REVIVE]: { base: [
     ...WILDCARD_ROLE_IDS,
@@ -91,6 +93,8 @@ export const GRIMOIRE_EVENT_ROLE_INCLUDES: Record<GrimoireEventType, RoleInclude
     "mezepheles",
     "summoner", // Edge case? Need to test.
     "fang_gu", // Edge case? Need to test.
+    "kazali", // Setup?
+    "lord_of_typhon", // Setup?
     ],
     conditional: [
       { role: 'imp', requires: ['recluse'] }, // Recluse registering as minion catching star pass.

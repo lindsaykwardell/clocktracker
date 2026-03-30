@@ -106,6 +106,56 @@ const trackingReminders = [
     reminder: "Demon",
     type: ReminderType.TRACKING,
   },
+  {
+    role_id: "fang_gu",
+    reminder: "Changed",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "summoner",
+    reminder: "Changed",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "pit-hag",
+    reminder: "Changed",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "virgin",
+    reminder: "Executed",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "cerenovus",
+    reminder: "Executed",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "psychopath",
+    reminder: "Dead",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "harpy",
+    reminder: "Dead",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "godfather",
+    reminder: "Dead",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "boomdandy",
+    reminder: "Dead",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "al-hadikhia",
+    reminder: "Dead",
+    type: ReminderType.TRACKING,
+  },
 ];
 
 module.exports = {

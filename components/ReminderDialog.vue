@@ -21,7 +21,7 @@
           </div>
           
           <hr class="border-stone-700">
-          <div class="flex flex-wrap justify-center gap-3 p-4">
+          <div class="flex flex-wrap justify-center gap-3 py-4 px-2">
             <button
               v-for="reminder in group.reminders"
               :key="reminder.id"

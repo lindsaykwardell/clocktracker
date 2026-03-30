@@ -1,7 +1,16 @@
 require("dotenv/config");
-const { PrismaClient } = require("../server/generated/prisma/client");
+const { PrismaClient } = require("../server/generated/prisma/client.ts");
 const { PrismaPg } = require("@prisma/adapter-pg");
 const { roles, reminders } = require("./roles");
+
+if (!process.env.DATABASE_URL) {
+  process.env.DATABASE_URL =
+    "postgresql://postgres:postgres@127.0.0.1:54322/postgres";
+  console.log(
+    "[import-roles] DATABASE_URL not set, using fallback",
+    process.env.DATABASE_URL
+  );
+}
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });

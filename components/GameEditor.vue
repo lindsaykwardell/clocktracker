@@ -929,6 +929,13 @@ const focusedGrimoireEvent = ref<{
   old_alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
   new_alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
 } | null>(null);
+const grimoireEventSyncReady = ref(false);
+const grimoireInitialState = ref<string | null>(null);
+const grimoireChangedSinceOpen = ref(false);
+
+function serializeGrimoireState() {
+  return JSON.stringify(props.game.grimoire);
+}
 
 // Grimoire
 const showCopyGrimoireDialog = ref(false);
@@ -1746,11 +1753,8 @@ watchEffect(() => {
 
   recomputeGrimoireParticipantIds();
 
-  if (props.game.grimoire.length > 0) {
-    syncGrimoireEventsFromGrimoire(
-      normalizedAnyPage ? { force: true, silent: true } : undefined
-    );
-  }
+  // Initial open should not mutate grimoire events; syncing is handled
+  // after the first real grimoire change.
 });
 
 function pageForward() {
@@ -2060,6 +2064,15 @@ watch(
       props.game.player_characters = myCharacters;
     }
 
+    if (!grimoireEventSyncReady.value) return;
+
+    if (!grimoireChangedSinceOpen.value) {
+      const baseline = grimoireInitialState.value;
+      const current = serializeGrimoireState();
+      if (baseline && current === baseline) return;
+      grimoireChangedSinceOpen.value = true;
+    }
+
     syncGrimoireEventsFromGrimoire({ force: true, silent: true });
   },
   { deep: true }
@@ -2156,7 +2169,9 @@ onMounted(async () => {
   }
 
   recomputeGrimoireParticipantIds();
-  syncGrimoireEventsFromGrimoire();
+  await nextTick();
+  grimoireInitialState.value = serializeGrimoireState();
+  grimoireEventSyncReady.value = true;
 });
 </script>
 
