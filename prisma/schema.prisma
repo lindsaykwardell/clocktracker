@@ -650,6 +650,21 @@ model CronLock {
   created_at DateTime @default(now()) @db.Timestamptz(6)
 }
 
+model AppUpdate {
+  id          String   @id
+  description String?
+  status      String   @default("PENDING")
+  cursor      String?
+  stats       Json?
+  error       String?
+  started_at  DateTime? @db.Timestamptz(6)
+  finished_at DateTime? @db.Timestamptz(6)
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime @updatedAt @db.Timestamptz(6)
+
+  @@index([status])
+}
+
 model LSCampaign {
   id                    String   @id
   title                 String

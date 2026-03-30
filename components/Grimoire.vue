@@ -600,6 +600,26 @@ function openReminderDialog(token: Token) {
   showReminderDialog.value = true;
 }
 
+function shouldApplyShroudFromReminder(value?: string | null) {
+  const normalized = (value ?? "").trim().toLowerCase();
+  return normalized === "dead" || normalized === "executed";
+}
+
+function emitDeathToggled(token: Token, isDead: boolean) {
+  if (props.readonly) return;
+  emit("deathToggled", {
+    token: {
+      order: token.order,
+      player_name: token.player_name,
+      role_id: token.role_id,
+      player_id: token.player_id,
+      grimoire_participant_id: token.grimoire_participant_id,
+    },
+    isDead,
+    pageIndex: props.pageIndex ?? 0,
+  });
+}
+
 function selectReminder(reminder: {
   reminder: string;
   token_url: string;
@@ -614,6 +634,17 @@ function selectReminder(reminder: {
       token_url: reminder.token_url,
       type: reminder.type ?? "CUSTOM",
     });
+
+    // Adding a "Dead" or "Executed" reminder should apply shroud if it is not already active.
+    // Removing the reminder must not auto-revive.
+    if (
+      shouldApplyShroudFromReminder(reminder.reminder) &&
+      !focusedToken.value.is_dead
+    ) {
+      focusedToken.value.is_dead = true;
+      focusedToken.value.used_ghost_vote = false;
+      emitDeathToggled(focusedToken.value, true);
+    }
   }
   showReminderDialog.value = false;
 }
@@ -628,7 +659,9 @@ function removeReminder(
 ) {
   token.reminders = (token.reminders ?? []).filter(
     (r) =>
-      r.reminder !== reminder.reminder && r.token_url !== reminder.token_url
+      !(
+        r.reminder === reminder.reminder && r.token_url === reminder.token_url
+      )
   );
 }
 
@@ -636,20 +669,7 @@ function toggleIsDead(token: Token) {
   const nextIsDead = !token.is_dead;
   token.is_dead = nextIsDead;
   token.used_ghost_vote = false;
-
-  if (!props.readonly) {
-    emit("deathToggled", {
-      token: {
-        order: token.order,
-        player_name: token.player_name,
-        role_id: token.role_id,
-        player_id: token.player_id,
-        grimoire_participant_id: token.grimoire_participant_id,
-      },
-      isDead: nextIsDead,
-      pageIndex: props.pageIndex ?? 0,
-    });
-  }
+  emitDeathToggled(token, nextIsDead);
 }
 
 function toggleUsedGhostVote(token: Token) {

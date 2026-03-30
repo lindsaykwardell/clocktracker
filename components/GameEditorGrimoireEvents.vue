@@ -1281,13 +1281,26 @@ function grimoireEventStatusReminder(event: {
 
 function detectReminderEventSource(
   pageTokens: GrimoireTokenLike[],
-  sourceRoleIds: string[]
+  sourceRoleIds: string[],
+  remindersWithRoleHint: ReminderLike[] = []
 ) {
   if (!sourceRoleIds.length) return null;
   const allowed = new Set(sourceRoleIds);
-  const candidates = pageTokens.filter(
+  const baseCandidates = pageTokens.filter(
     (candidate) => !!candidate.role_id && allowed.has(candidate.role_id)
   );
+  const hintedCandidates = remindersWithRoleHint.length
+    ? baseCandidates.filter(
+        (candidate) =>
+          !!candidate.role_id &&
+          remindersWithRoleHint.some((reminder) =>
+            reminderMatchesAnyRoleHint(reminder, [candidate.role_id as string])
+          )
+      )
+    : [];
+
+  const candidates =
+    hintedCandidates.length > 0 ? hintedCandidates : baseCandidates;
 
   const aliveCandidates = candidates.filter((candidate) => !candidate.is_dead);
   if (aliveCandidates.length === 1 && aliveCandidates[0].grimoire_participant_id) {
@@ -1359,6 +1372,75 @@ function detectDeadReminderSource(
     by_participant_id: source.grimoire_participant_id,
     by_role_id: source.role_id,
   };
+}
+
+function detectSourceFromReminderHint(
+  sourceTokens: GrimoireTokenLike[],
+  reminder: ReminderLike
+) {
+  const reminderUrlHint = normalizeReminderRoleHint(reminder.token_url);
+  if (!reminderUrlHint) return null;
+
+  const matchingCharacters = sourceTokens.filter((candidate) => {
+    if (!candidate.role_id) return false;
+
+    const roleNameHint = normalizeReminderRoleHint(candidate.role?.name);
+    const roleIdHint = normalizeReminderRoleHint(candidate.role_id);
+
+    return (
+      (!!roleNameHint && reminderUrlHint.includes(roleNameHint)) ||
+      (!!roleIdHint && reminderUrlHint.includes(roleIdHint))
+    );
+  });
+
+  const matchingAliveCharacters = matchingCharacters.filter(
+    (candidate) => !candidate.is_dead
+  );
+  const matchingDeadCharacters = matchingCharacters.filter(
+    (candidate) => candidate.is_dead
+  );
+
+  const matchedCharacters =
+    matchingAliveCharacters.length === 1
+      ? matchingAliveCharacters
+      : matchingDeadCharacters.length === 1
+        ? matchingDeadCharacters
+        : matchingCharacters.length === 1
+          ? matchingCharacters
+          : [];
+
+  if (matchedCharacters.length !== 1) return null;
+  const [source] = matchedCharacters;
+  if (!source.grimoire_participant_id || !source.role_id) return null;
+
+  return {
+    by_participant_id: source.grimoire_participant_id,
+    by_role_id: source.role_id,
+  };
+}
+
+function findReminderByName(
+  reminders: ReminderLike[] | undefined,
+  reminderName: string
+) {
+  const normalizedReminderName = normalizeReminderName(reminderName);
+  return (
+    reminders?.find(
+      (reminder) =>
+        normalizeReminderName(reminder.reminder) === normalizedReminderName
+    ) ?? null
+  );
+}
+
+function findReminderByNames(
+  reminders: ReminderLike[] | undefined,
+  reminderNames: string[]
+) {
+  for (const reminderName of reminderNames) {
+    const found = findReminderByName(reminders, reminderName);
+    if (found) return found;
+  }
+  return null;
 }
 
 /**
@@ -1687,6 +1769,29 @@ function syncGrimoireEventsFromGrimoire(options?: {
       }
 
       if (previousToken) {
+        const changedReminder =
+          findReminderByNames(token.reminders, ["Changed"]) ??
+          findReminderByNames(previousToken.reminders, ["Changed"]);
+        const alignmentChangedReminder =
+          findReminderByNames(token.reminders, ["Changed", "Turns Evil"]) ??
+          findReminderByNames(previousToken.reminders, ["Changed", "Turns Evil"]);
+        const changedSource = changedReminder
+          ? detectSourceFromReminderHint(
+              pageIndex > 0
+                ? props.game.grimoire[pageIndex - 1].tokens
+                : orderedTokens,
+              changedReminder
+            )
+          : null;
+        const alignmentChangedSource = alignmentChangedReminder
+          ? detectSourceFromReminderHint(
+              pageIndex > 0
+                ? props.game.grimoire[pageIndex - 1].tokens
+                : orderedTokens,
+              alignmentChangedReminder
+            )
+          : null;
+
         const roleChanged =
           !!token.role_id &&
           !!previousToken.role_id &&
@@ -1698,10 +1803,10 @@ function syncGrimoireEventsFromGrimoire(options?: {
             participant_id: participantId,
             event_type: GrimoireEventType.ROLE_CHANGE,
             status_source: null,
-            by_participant_id: null,
+            by_participant_id: changedSource?.by_participant_id ?? null,
             player_name: token.player_name || "",
             role_id: token.role_id ?? null,
-            by_role_id: null,
+            by_role_id: changedSource?.by_role_id ?? null,
             old_role_id: oldRoleId,
             new_role_id: newRoleId,
             old_alignment: oldAlignment,
@@ -1732,10 +1837,10 @@ function syncGrimoireEventsFromGrimoire(options?: {
             participant_id: participantId,
             event_type: GrimoireEventType.ALIGNMENT_CHANGE,
             status_source: null,
-            by_participant_id: null,
+            by_participant_id: alignmentChangedSource?.by_participant_id ?? null,
             player_name: token.player_name || "",
             role_id: token.role_id ?? null,
-            by_role_id: null,
+            by_role_id: alignmentChangedSource?.by_role_id ?? null,
             old_role_id: oldRoleId,
             new_role_id: newRoleId,
             old_alignment: oldAlignment,
@@ -1775,7 +1880,31 @@ function syncGrimoireEventsFromGrimoire(options?: {
           continue;
         }
 
-        const source = detectReminderEventSource(orderedTokens, config.sourceRoleIds);
+        let source = detectReminderEventSource(
+          orderedTokens,
+          config.sourceRoleIds,
+          addedRemindersWithRoleHint
+        );
+        if (!source && config.sourceRoleIds.length === 0 && addedRemindersWithRoleHint.length > 0) {
+          const hintSources = addedRemindersWithRoleHint
+            .map((reminder) => detectSourceFromReminderHint(orderedTokens, reminder))
+            .filter(
+              (
+                candidate
+              ): candidate is { by_participant_id: string; by_role_id: string } =>
+                !!candidate
+            );
+          const unique = new Map<string, { by_participant_id: string; by_role_id: string }>();
+          for (const candidate of hintSources) {
+            unique.set(
+              `${candidate.by_participant_id}:${candidate.by_role_id}`,
+              candidate
+            );
+          }
+          if (unique.size === 1) {
+            source = Array.from(unique.values())[0];
+          }
+        }
         let affectedParticipantId = participantId;
         let affectedToken = token;
         let affectedPreviousToken = previousToken;
@@ -1825,10 +1954,23 @@ function syncGrimoireEventsFromGrimoire(options?: {
           continue;
         }
 
+        let mergedEventType = existingExpectation?.event_type ?? config.eventType;
+        if (
+          config.eventType === GrimoireEventType.EXECUTION &&
+          existingExpectation &&
+          (existingExpectation.event_type === null ||
+            existingExpectation.event_type === GrimoireEventType.NOT_RECORDED ||
+            existingExpectation.event_type === GrimoireEventType.DEATH)
+        ) {
+          // Butcher-style reminders should upgrade the lifecycle row
+          // from death/not-recorded to execution, not create a separate row.
+          mergedEventType = GrimoireEventType.EXECUTION;
+        }
+
         expected.set(reminderExpectedKey, {
           grimoire_page: pageIndex,
           participant_id: affectedParticipantId,
-          event_type: existingExpectation?.event_type ?? config.eventType,
+          event_type: mergedEventType,
           status_source: config.reminder,
           by_participant_id:
             isLifecycleEventType
@@ -2007,6 +2149,21 @@ function syncGrimoireEventsFromGrimoire(options?: {
     ) {
       event.cause = GrimoireEventCause.ABILITY;
     }
+    if (
+      event.event_type === GrimoireEventType.EXECUTION &&
+      event.status_source &&
+      event.cause === null
+    ) {
+      event.cause = GrimoireEventCause.ABILITY;
+    }
+    if (
+      (event.event_type === GrimoireEventType.ROLE_CHANGE ||
+        event.event_type === GrimoireEventType.ALIGNMENT_CHANGE) &&
+      !!event.by_role_id &&
+      event.cause === null
+    ) {
+      event.cause = GrimoireEventCause.ABILITY;
+    }
 
     if (!event.player_name) {
       event.player_name = expectation.player_name;
@@ -2014,11 +2171,33 @@ function syncGrimoireEventsFromGrimoire(options?: {
     if (!event.role_id) {
       event.role_id = expectation.role_id;
     }
-    if (!event.by_participant_id && expectation.by_participant_id) {
+    const isReminderDrivenRow =
+      !!event.status_source ||
+      !!expectation.status_source ||
+      (event.event_type === GrimoireEventType.DEATH &&
+        !!expectation.by_participant_id) ||
+      (event.event_type === GrimoireEventType.EXECUTION &&
+        !!expectation.status_source);
+    const isChangedRoleEvent =
+      (event.event_type === GrimoireEventType.ROLE_CHANGE ||
+        event.event_type === GrimoireEventType.ALIGNMENT_CHANGE) &&
+      !!expectation.by_role_id;
+
+    if (
+      (!event.by_participant_id && expectation.by_participant_id) ||
+      ((isReminderDrivenRow || isChangedRoleEvent) &&
+        event.by_participant_id !== expectation.by_participant_id)
+    ) {
       event.by_participant_id = expectation.by_participant_id;
+      updated += 1;
     }
-    if (!event.by_role_id && expectation.by_role_id) {
+    if (
+      (!event.by_role_id && expectation.by_role_id) ||
+      ((isReminderDrivenRow || isChangedRoleEvent) &&
+        event.by_role_id !== expectation.by_role_id)
+    ) {
       event.by_role_id = expectation.by_role_id;
+      updated += 1;
     }
     if (event.old_role_id !== expectation.old_role_id) {
       event.old_role_id = expectation.old_role_id;
@@ -2035,6 +2214,14 @@ function syncGrimoireEventsFromGrimoire(options?: {
     if (event.status_source !== expectation.status_source) {
       event.status_source = expectation.status_source;
     }
+    if (
+      (event.event_type === GrimoireEventType.ROLE_CHANGE ||
+        event.event_type === GrimoireEventType.ALIGNMENT_CHANGE) &&
+      !!event.by_role_id &&
+      event.cause === null
+    ) {
+      event.cause = GrimoireEventCause.ABILITY;
+    }
   }
 
   expected.forEach((expectation) => {
@@ -2049,6 +2236,8 @@ function syncGrimoireEventsFromGrimoire(options?: {
         expectation.event_type === GrimoireEventType.DRUNK ||
         expectation.event_type === GrimoireEventType.POISONED ||
         expectation.event_type === GrimoireEventType.OTHER ||
+        ((expectation.event_type === GrimoireEventType.ROLE_CHANGE ||
+          expectation.event_type === GrimoireEventType.ALIGNMENT_CHANGE) && !!expectation.by_role_id) ||
         (expectation.event_type === GrimoireEventType.DEATH &&
           expectation.by_participant_id)
           ? GrimoireEventCause.ABILITY

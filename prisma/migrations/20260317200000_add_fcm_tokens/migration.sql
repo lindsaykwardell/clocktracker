@@ -8,7 +8,7 @@ CREATE TABLE "FcmToken" (
 );
 
 -- CreateIndex
-CREATE INDEX CONCURRENTLY "FcmToken_user_id_idx" ON "FcmToken"("user_id");
+CREATE INDEX "FcmToken_user_id_idx" ON "FcmToken"("user_id");
 
 -- AddForeignKey
 ALTER TABLE "FcmToken" ADD CONSTRAINT "FcmToken_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "UserSettings"("user_id") ON DELETE CASCADE ON UPDATE CASCADE;

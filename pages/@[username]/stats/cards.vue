@@ -347,9 +347,8 @@ function definitionOrderValue(card: (typeof rolePreviewCards.value)[number]) {
   return definitionOrderById.get(card.metric_key) ?? Number.MAX_SAFE_INTEGER;
 }
 
-function isHiddenCard(card: (typeof rolePreviewCards.value)[number]) {
-  const definition = getRoleStatCardDefinition(card.metric_key);
-  return !!definition?.hidden;
+function isHiddenLockedCard(card: (typeof rolePreviewCards.value)[number]) {
+  return !!card.preview?.isHiddenLocked;
 }
 
 const rolePreviewCardGroups = computed(() => {
@@ -360,7 +359,8 @@ const rolePreviewCardGroups = computed(() => {
       scriptOrderValue(getScriptFromCard(a)) - scriptOrderValue(getScriptFromCard(b));
     if (scriptCompare !== 0) return scriptCompare;
 
-    const hiddenCompare = Number(isHiddenCard(a)) - Number(isHiddenCard(b));
+    const hiddenCompare =
+      Number(isHiddenLockedCard(a)) - Number(isHiddenLockedCard(b));
     if (hiddenCompare !== 0) return hiddenCompare;
 
     const typeCompare =

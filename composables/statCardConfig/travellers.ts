@@ -21,7 +21,41 @@ import {
 import type { RoleStatCardDefinition } from "./shared";
 
 export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
-  // Scapegoat: @todo
+  {
+    id: "scapegoat_ability_executions",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["scapegoat"],
+    script: "tb",
+    source: "grimoire_event",
+    label: "Taking the Fall",
+    getCount: ({ games, roleId }) =>
+      !roleId
+        ? 0
+        : countMatchingEvents(games, (game, event) => {
+            if (
+              event.event_type !== GrimoireEventType.EXECUTION ||
+              event.by_role_id !== roleId
+            ) {
+              return false;
+            }
+
+            const currentToken = getEventCurrentToken(game, event);
+            const previousToken = getEventPreviousToken(game, event);
+
+            return (
+              currentToken?.role_id === roleId ||
+              previousToken?.role_id === roleId ||
+              event.role_id === roleId
+            );
+          }),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Scapegoat, you've been executed due to your ability ${count} time${pluralize(count)}.`
+          : `As the Scapegoat, this player has been executed due to their ability ${count} time${pluralize(count)}.`)
+        : `As the Scapegoat, be executed due to your ability.`,
+  },
   {
     id: "gunslinger_kills",
     category: "role",
@@ -116,9 +150,9 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Bureaucrat, you've given players extra votes ${count} time${pluralize(count)}.`
-          : `As the Bureaucrat, this player has given players extra votes ${count} time${pluralize(count)}.`)
-        : `As the Bureaucrat, give players extra votes.`,
+          ? `As the Bureaucrat, you've given ${count} player${pluralize(count)} extra votes.`
+          : `As the Bureaucrat, this player has given ${count} player${pluralize(count)} extra votes.`)
+        : `As the Bureaucrat, give a player extra votes.`,
   },
   {
     id: "bureaucrat_extra_votes_received",
@@ -271,7 +305,56 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `As the Harlot, this player has died alongside another player ${count} time${pluralize(count)} due to their ability.`)
         : `As the Harlot, die alongside another player due to your ability.`,
   },
-  // Barista: Too complex, (@todo: or not?)
+  {
+    id: "barista_acts_twice_given",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["barista"],
+    script: "snv",
+    source: "grimoire_event",
+    label: "Double Shot",
+    getCount: ({ games, roleId }) =>
+      !roleId
+        ? 0
+        : countMatchingEvents(
+            games,
+            (_, event) =>
+              event.by_role_id === roleId &&
+              event.event_type === GrimoireEventType.OTHER &&
+              event.status_source === "Acts Twice"
+          ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Barista, you've made a player act twice ${count} time${pluralize(count)}.`
+          : `As the Barista, this player has made a player act twice ${count} time${pluralize(count)}.`)
+        : `As the Barista, make a player act twice.`,
+  },
+  {
+    id: "barista_sober_healthy_given",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["barista"],
+    script: "snv",
+    source: "grimoire_event",
+    label: "Straight Espresso",
+    getCount: ({ games, roleId }) =>
+      !roleId
+        ? 0
+        : countMatchingEvents(
+            games,
+            (_, event) =>
+              event.by_role_id === roleId &&
+              event.event_type === GrimoireEventType.OTHER &&
+              event.status_source === "Sober and Healthy"
+          ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Barista, you've made a player sober and healthy ${count} time${pluralize(count)}.`
+          : `As the Barista, this player has made a player sober and healthy ${count} time${pluralize(count)}.`)
+        : `As the Barista, make a player sober and healthy.`,
+  },
   {
     id: "deviant_exiles_avoided",
     category: "role",
@@ -331,7 +414,6 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   // Voudon: Nothing to track really.
   // Judge: @todo
   // Bishop: @todo
-
   {
     id: "cacklejack_role_changes_caused",
     category: "role",

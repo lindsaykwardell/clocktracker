@@ -303,10 +303,28 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     sourceRoleIds: ["thief"],
   },
   {
+    reminder: "Acts Twice",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "each_night",
+    sourceRoleIds: ["barista"],
+  },
+  {
+    reminder: "Sober and Healthy",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "each_night",
+    sourceRoleIds: ["barista"],
+  },
+  {
     reminder: "Butchered",
     eventType: GrimoireEventType.EXECUTION,
     cadence: "once",
     sourceRoleIds: ["butcher"],
+  },
+  {
+    reminder: "Executed",
+    eventType: GrimoireEventType.EXECUTION,
+    cadence: "once",
+    sourceRoleIds: [],
   },
   {
     reminder: "Stormcaught",

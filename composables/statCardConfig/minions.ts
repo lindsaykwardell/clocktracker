@@ -544,7 +544,7 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     id: "pit_hag_role_changes_caused",
     category: "role",
     scope: "as_role",
-    roleIds: ["pit_hag"],
+    roleIds: ["pit-hag"],
     script: "snv",
     sao: 4,
     source: "grimoire_event",
@@ -836,7 +836,7 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     id: "spy_steward_received",
     category: "role",
     scope: "affected_player",
-    script: "tb",
+    script: "experimental",
     roleIds: ["spy"],
     sao: 2,
     source: "grimoire_event",
@@ -881,8 +881,9 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         ? 0
         : countMatchingEvents(games, (game, event) => {
             if (
-              event.by_role_id !== roleId ||
-              event.event_type !== GrimoireEventType.EXECUTION
+              event.event_type !== GrimoireEventType.EXECUTION ||
+              (event.by_role_id !== "virgin" &&
+                event.status_source !== "Executed")
             ) {
               return false;
             }
@@ -1152,6 +1153,55 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Witch, you've caused ${count} player${pluralize(count)} to die due to your curse.`
           : `As the Witch, this player has caused ${count} player${pluralize(count)} to die due to their curse.`)
         : `As the Witch, have a player die due to your ability.`,
+  },
+  {
+    id: "witch_demon_kill_game_endings",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["witch"],
+    script: "snv",
+    sao: 2,
+    hidden: true,
+    source: "end_trigger",
+    label: "Curse Recoiled",
+    getCount: ({ games, roleId }) =>
+      !roleId
+        ? 0
+        : games.filter((game) => {
+            if (
+              game.ignore_for_stats ||
+              game.end_trigger_cause !== GameEndTriggerCause.ABILITY ||
+              game.end_trigger_role_id !== roleId ||
+              !game.end_trigger_participant_id
+            ) {
+              return false;
+            }
+
+            const isWitchAbilityDemonDeathEnding =
+              (game.end_trigger === GameEndTrigger.CHARACTER_ABILITY &&
+                game.end_trigger_type === GameEndTriggerType.DEATH) ||
+              game.end_trigger === GameEndTrigger.NO_LIVING_DEMON;
+
+            if (!isWitchAbilityDemonDeathEnding) return false;
+            if (game.end_trigger === GameEndTrigger.NO_LIVING_DEMON) return true;
+
+            for (let pageIndex = game.grimoire.length - 1; pageIndex >= 0; pageIndex -= 1) {
+              const token = game.grimoire[pageIndex]?.tokens.find(
+                (candidate) =>
+                  candidate.grimoire_participant_id === game.end_trigger_participant_id
+              );
+              if (!token) continue;
+              return token.role?.type === "DEMON";
+            }
+
+            return false;
+          }).length,
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Witch, you've ended ${count} game${pluralize(count)} by killing a Demon with your ability.`
+          : `As the Witch, this player has ended ${count} game${pluralize(count)} by killing a Demon with their ability.`)
+        : `As the Witch, end a game by killing a Demon with your ability.`,
   },
   // Wizard: Too complex.
   // Wraith: Nothing relevant. Only option: If they were spotted or not?
