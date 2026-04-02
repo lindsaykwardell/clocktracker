@@ -32,6 +32,11 @@ const trackingReminders = [
     type: ReminderType.TRACKING,
   },
   {
+    role_id: "nightwatchman",
+    reminder: "Chosen",
+    type: ReminderType.TRACKING,
+  },
+  {
     role_id: "high_priestess",
     reminder: "Visit",
     type: ReminderType.TRACKING,
@@ -48,6 +53,16 @@ const trackingReminders = [
   },
   {
     role_id: "soldier",
+    reminder: "Saved",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "sailor",
+    reminder: "Saved",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "innkeeper",
     reminder: "Saved",
     type: ReminderType.TRACKING,
   },
@@ -122,12 +137,67 @@ const trackingReminders = [
     type: ReminderType.TRACKING,
   },
   {
+    role_id: "politician",
+    reminder: "Changed",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "ogre",
+    reminder: "Changed",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "hatter",
+    reminder: "Changed",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "goon",
+    reminder: "Changed",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "barber",
+    reminder: "Changed",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "snake_charmer",
+    reminder: "Changed",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "huntsman",
+    reminder: "Changed",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "farmer",
+    reminder: "Changed",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "engineer",
+    reminder: "Changed",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "cult_leader",
+    reminder: "Changed",
+    type: ReminderType.TRACKING,
+  },
+  {
     role_id: "virgin",
     reminder: "Executed",
     type: ReminderType.TRACKING,
   },
   {
     role_id: "cerenovus",
+    reminder: "Executed",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "mutant",
     reminder: "Executed",
     type: ReminderType.TRACKING,
   },
@@ -143,6 +213,16 @@ const trackingReminders = [
   },
   {
     role_id: "godfather",
+    reminder: "Dead",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "golem",
+    reminder: "Dead",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "slayer",
     reminder: "Dead",
     type: ReminderType.TRACKING,
   },

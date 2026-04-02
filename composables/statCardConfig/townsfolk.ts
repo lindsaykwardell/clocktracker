@@ -626,7 +626,36 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     source: "grimoire_event",
     label: "Passing The Plough",
     getCount: ({ games, roleId }) =>
-      countGrimoireEvents(games, roleId, GrimoireEventType.ROLE_CHANGE),
+      games.reduce((total, game) => {
+        if (!roleId || game.ignore_for_stats) return total;
+
+        return (
+          total +
+          game.grimoire_events.filter((event) => {
+            if (
+              event.by_role_id !== roleId ||
+              event.event_type !== GrimoireEventType.ROLE_CHANGE ||
+              !event.by_participant_id
+            ) {
+              return false;
+            }
+
+            const sourceToken =
+              game.grimoire[event.grimoire_page]?.tokens.find(
+                (token) =>
+                  token.grimoire_participant_id === event.by_participant_id
+              ) ??
+              (event.grimoire_page > 0
+                ? game.grimoire[event.grimoire_page - 1]?.tokens.find(
+                    (token) =>
+                      token.grimoire_participant_id === event.by_participant_id
+                  )
+                : null);
+
+            return sourceToken?.player_id === game.user_id;
+          }).length
+        );
+      }, 0),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
@@ -1010,6 +1039,36 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `Become drunk due to the Innkeeper.`,
   },
   {
+    id: "innkeeper_saves",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["innkeeper"],
+    script: "bmr",
+    sao: 5,
+    source: "grimoire_event",
+    label: "Harbor In The Dark",
+    getCount: ({ games, roleId }) =>
+      games.reduce((total, game) => {
+        if (!roleId || game.ignore_for_stats) return total;
+
+        return (
+          total +
+          game.grimoire_events.filter(
+            (event) =>
+              event.by_role_id === roleId &&
+              event.event_type === GrimoireEventType.OTHER &&
+              event.status_source === "Saved"
+          ).length
+        );
+      }, 0),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Innkeeper, you've saved ${count} player${pluralize(count)} from death due to your ability.`
+          : `As the Innkeeper, this player has saved ${count} player${pluralize(count)} from death due to their ability.`)
+        : `As the Innkeeper, save a player from death due to your ability.`,
+  },
+  {
     id: "investigator_recluse",
     category: "role",
     scope: "as_role",
@@ -1308,9 +1367,9 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Mayor, you've won ${count} game${pluralize(count)} with your ability.`
-          : `As the Mayor, this player has won ${count} game${pluralize(count)} with their ability.`)
-        : `As the Mayor, win a game due to your ability.`,
+          ? `As the Mayor, you've ended the game ${count} time${pluralize(count)} due to your ability.`
+          : `As the Mayor, this player has ended the game ${count} time${pluralize(count)} due to their ability.`)
+        : `As the Mayor, end the game due to your ability.`,
   },
   {
     id: "mayor_bounces",
@@ -1525,7 +1584,9 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         const wakePage = Math.min(...wakeEvents.map((event) => event.grimoire_page));
         const deathsBeforeWake = game.grimoire_events.filter(
           (event) =>
-            event.event_type === GrimoireEventType.DEATH &&
+            (event.event_type === GrimoireEventType.DEATH ||
+              event.event_type === GrimoireEventType.EXECUTION ||
+              event.event_type === GrimoireEventType.NOT_RECORDED) &&
             event.grimoire_page < wakePage
         ).length;
 
@@ -1876,6 +1937,39 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Sailor, you've made yourself drunk ${count} time${pluralize(count)}.`
           : `As the Sailor, this player has made themselves drunk ${count} time${pluralize(count)}.`)
         : `As the Sailor, make yourself drunk.`,
+  },
+  {
+    id: "sailor_saved_self",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["sailor"],
+    script: "bmr",
+    sao: 2,
+    source: "grimoire_event",
+    label: "Unsinkable",
+    getCount: ({ games, roleId }) =>
+      games.reduce((total, game) => {
+        if (!roleId || game.ignore_for_stats) return total;
+
+        return (
+          total +
+          game.grimoire_events.filter(
+            (event) =>
+              event.event_type === GrimoireEventType.OTHER &&
+              (event.status_source ?? "").trim().toLowerCase() === "saved" &&
+              event.by_role_id === roleId &&
+              ((!!event.by_participant_id &&
+                event.participant_id === event.by_participant_id) ||
+                event.role_id === roleId)
+          ).length
+        );
+      }, 0),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Sailor, you've survived death ${count} time${pluralize(count)} due to your ability.`
+          : `As the Sailor, this player has survived death ${count} time${pluralize(count)} due to their ability.`)
+        : `As the Sailor, survive death due to your ability.`,
   },
   // Savant [sao: 8]: Nothing relevant. Only option: Can't think of anything..
   // Seamstress [sao: 9]: Nothing relevant. Only option: If they picked two different aligments?
@@ -2256,7 +2350,8 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         games,
         (_, event) =>
           event.event_type === GrimoireEventType.DRUNK &&
-          event.by_role_id === "village_idiot"
+          (event.by_role_id === "village_idiot" ||
+            (!event.by_role_id && event.role_id === "village_idiot"))
       ),
     getSentence: ({ count, isMe }) =>
       count > 0
