@@ -189,6 +189,8 @@
 import { useRoleImage } from "~/composables/useRoleImage";
 import { RoleType } from "~/composables/useRoles";
 import { Status } from "~/composables/useFetchStatus";
+import { GrimoireEventType } from "~/composables/useGames";
+import { GRIMOIRE_REMINDER_EVENT_CONFIG } from "~/composables/grimoireReminderEventConfig";
 
 type Token = {
   alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
@@ -600,9 +602,67 @@ function openReminderDialog(token: Token) {
   showReminderDialog.value = true;
 }
 
-function shouldApplyShroudFromReminder(value?: string | null) {
-  const normalized = (value ?? "").trim().toLowerCase();
-  return normalized === "dead" || normalized === "executed";
+function normalizeReminderRoleHint(value?: string | null) {
+  return (value ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+function normalizeReminderName(value?: string | null) {
+  return (value ?? "").trim().toLowerCase();
+}
+
+function reminderRoleHintMatchesToken(
+  reminderTokenUrl: string | null | undefined,
+  token: Token
+) {
+  const reminderUrlHint = normalizeReminderRoleHint(reminderTokenUrl);
+  if (!reminderUrlHint) return true;
+
+  const tokenRoleIdHint = normalizeReminderRoleHint(token.role_id);
+  const tokenRoleNameHint = normalizeReminderRoleHint(token.role?.name);
+
+  if (tokenRoleIdHint && reminderUrlHint.includes(tokenRoleIdHint)) return true;
+  if (tokenRoleNameHint && reminderUrlHint.includes(tokenRoleNameHint)) return true;
+  return false;
+}
+
+function isSelfOnlyDeathReminder(reminder: {
+  reminder: string;
+  token_url: string;
+}) {
+  const normalizedReminder = normalizeReminderName(reminder.reminder);
+  const reminderUrlHint = normalizeReminderRoleHint(reminder.token_url);
+  if (!reminderUrlHint) return false;
+  return GRIMOIRE_REMINDER_EVENT_CONFIG.some((config) => {
+    if (normalizeReminderName(config.reminder) !== normalizedReminder) return false;
+    if (config.targetScope !== "self") return false;
+    if (
+      config.eventType !== GrimoireEventType.DEATH &&
+      config.eventType !== GrimoireEventType.EXECUTION
+    ) {
+      return false;
+    }
+    return config.sourceRoleIds.some((roleId) =>
+      reminderUrlHint.includes(normalizeReminderRoleHint(roleId))
+    );
+  });
+}
+
+function shouldApplyShroudFromReminder(
+  reminder: {
+    reminder: string;
+    token_url: string;
+  },
+  token: Token
+) {
+  const normalized = (reminder.reminder ?? "").trim().toLowerCase();
+  const isDeathStyleReminder = normalized === "dead" || normalized === "executed";
+  if (!isDeathStyleReminder) return false;
+  if (!isSelfOnlyDeathReminder(reminder)) return true;
+  return reminderRoleHintMatchesToken(reminder.token_url, token);
+}
+
+function shouldRemoveShroudFromReminder(reminderName?: string | null) {
+  return (reminderName ?? "").trim().toLowerCase() === "alive";
 }
 
 function emitDeathToggled(token: Token, isDead: boolean) {
@@ -638,12 +698,20 @@ function selectReminder(reminder: {
     // Adding a "Dead" or "Executed" reminder should apply shroud if it is not already active.
     // Removing the reminder must not auto-revive.
     if (
-      shouldApplyShroudFromReminder(reminder.reminder) &&
+      shouldApplyShroudFromReminder(reminder, focusedToken.value) &&
       !focusedToken.value.is_dead
     ) {
       focusedToken.value.is_dead = true;
       focusedToken.value.used_ghost_vote = false;
       emitDeathToggled(focusedToken.value, true);
+    }
+    if (
+      shouldRemoveShroudFromReminder(reminder.reminder) &&
+      focusedToken.value.is_dead
+    ) {
+      focusedToken.value.is_dead = false;
+      focusedToken.value.used_ghost_vote = false;
+      emitDeathToggled(focusedToken.value, false);
     }
   }
   showReminderDialog.value = false;

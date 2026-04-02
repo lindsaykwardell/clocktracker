@@ -6,11 +6,14 @@ export type GrimoireReminderEventCadence =
   | "may_each_night"
   | "persistent";
 
+export type GrimoireReminderTargetScope = "self" | "others" | "all";
+
 export type GrimoireReminderEventConfig = {
   reminder: string;
   eventType: GrimoireEventType;
   cadence: GrimoireReminderEventCadence;
   sourceRoleIds: string[];
+  targetScope?: GrimoireReminderTargetScope;
   targetRoleIds?: string[];
 };
 
@@ -95,6 +98,7 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     eventType: GrimoireEventType.OTHER,
     cadence: "once",
     sourceRoleIds: ["mayor"],
+    targetScope: "self",
     targetRoleIds: ["mayor"],
   },
   {
@@ -144,7 +148,22 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     eventType: GrimoireEventType.OTHER,
     cadence: "each_night",
     sourceRoleIds: ["soldier"],
+    targetScope: "self",
     targetRoleIds: ["soldier"],
+  },
+  {
+    reminder: "Saved",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "each_night",
+    sourceRoleIds: ["sailor"],
+    targetScope: "self",
+    targetRoleIds: ["sailor"],
+  },
+  {
+    reminder: "Saved",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "each_night",
+    sourceRoleIds: ["innkeeper"],
   },
   {
     reminder: "Saved",
@@ -181,12 +200,15 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     eventType: GrimoireEventType.OTHER,
     cadence: "once",
     sourceRoleIds: ["puzzlemaster"],
+    targetScope: "self",
   },
   {
     reminder: "Evil Wakes",
     eventType: GrimoireEventType.OTHER,
     cadence: "once",
-    sourceRoleIds: ["poppygrower"],
+    sourceRoleIds: ["poppy_grower"],
+    targetScope: "self",
+    targetRoleIds: ["poppy_grower"],
   },
   {
     reminder: "Red Herring",
@@ -285,6 +307,14 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     sourceRoleIds: ["gunslinger"],
   },
   {
+    reminder: "Dead",
+    eventType: GrimoireEventType.DEATH,
+    cadence: "once",
+    sourceRoleIds: ["tinker"],
+    targetScope: "self",
+    targetRoleIds: ["tinker"],
+  },
+  {
     reminder: "Alm",
     eventType: GrimoireEventType.OTHER,
     cadence: "persistent",
@@ -324,7 +354,21 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     reminder: "Executed",
     eventType: GrimoireEventType.EXECUTION,
     cadence: "once",
+    sourceRoleIds: ["mutant"],
+    targetScope: "self",
+    targetRoleIds: ["mutant"],
+  },
+  {
+    reminder: "Executed",
+    eventType: GrimoireEventType.EXECUTION,
+    cadence: "once",
     sourceRoleIds: [],
+  },
+  {
+    reminder: "Alive",
+    eventType: GrimoireEventType.REVIVE,
+    cadence: "once",
+    sourceRoleIds: ["professor"],
   },
   {
     reminder: "Stormcaught",
@@ -337,6 +381,12 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     eventType: GrimoireEventType.OTHER,
     cadence: "once",
     sourceRoleIds: ["bone_collector"],
+  },
+  {
+    reminder: "Has Ability",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "once",
+    sourceRoleIds: ["pixie"],
   },
   {
     reminder: "Has Ability",
