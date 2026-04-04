@@ -41,7 +41,7 @@
     dark?: boolean;
     size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'xl5';
     spin?: boolean;
-    color?: "primary" | "neutral" | "positive" | "caution" | "negative" | "bgg" | "yellow";
+    color?: "primary" | "neutral" | "muted" | "positive" | "caution" | "negative" | "bgg" | "yellow";
     noHover?: boolean;
   }>();
 
@@ -109,6 +109,7 @@
   const Pin = resolveComponent("IconPin");
   const Lock = resolveComponent("IconLock");
   const Unlock = resolveComponent("IconUnlock");
+  const Crosshair = resolveComponent("IconCrosshair");
 
   // Socials
   const Website = resolveComponent("IconGlobe");
@@ -265,6 +266,8 @@
         return Lock;
       case "unlock":
         return Unlock;
+      case "crosshair":
+        return Crosshair;  
       default:
         return EyeSlash;
     }
@@ -273,7 +276,9 @@
   const primary = 
     "text-purple-700";
   const neutral = 
-    "text-stone-700";    
+    "text-stone-700";
+  const muted = 
+    "text-stone-500";     
   const positive = 
     "text-green-700";
   const caution = 
@@ -291,6 +296,9 @@
     }
     else if (props.color === "neutral") {
       return `${neutral}`;
+    }
+    else if (props.color === "muted") {
+      return `${muted}`;
     }
     else if (props.color === "positive") {
       return `${positive}`;

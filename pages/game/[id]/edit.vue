@@ -3,7 +3,7 @@
     <section class="py-6">
       <h2 class="font-sorts text-4xl text-center">Edit Game</h2>
       <ClientOnly>
-        <GameEditor :game="game" :gameId="(route.params.id as string)" @submit="submitGame" :inFlight="inFlight" />
+        <GameEditor :game="game" @submit="submitGame" :inFlight="inFlight" />
       </ClientOnly>
     </section>
   </StandardTemplate>

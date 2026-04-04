@@ -91,15 +91,15 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
             (event) =>
               event.by_role_id === roleId &&
               event.event_type === GrimoireEventType.OTHER &&
-              event.status_source === "Alm"
+              event.status_source === "Vote Given"
           ).length
         );
       }, 0),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Beggar, you've received ${count} alm${pluralize(count)}.`
-          : `As the Beggar, this player has received ${count} alm${pluralize(count)}.`)
+          ? `As the Beggar, you've received ${count} vote token${pluralize(count)}.`
+          : `As the Beggar, this player has received ${count} vote token${pluralize(count)}.`)
         : `As the Beggar, receive someone's vote token.`,
   },
   {
@@ -116,7 +116,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         (_, event) =>
           event.by_role_id === "beggar" &&
           event.event_type === GrimoireEventType.OTHER &&
-          event.status_source === "Alm"
+          event.status_source === "Vote Given"
       ),
     getSentence: ({ count, isMe }) =>
       count > 0
@@ -248,7 +248,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
             (event) =>
               event.by_role_id === roleId &&
               event.event_type === GrimoireEventType.EXECUTION &&
-              event.status_source === "Butchered"
+              event.status_source === "Executed"
           ).length
         );
       }, 0),
@@ -297,7 +297,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     source: "grimoire_event",
     label: "Dangerous Liaison",
     getCount: ({ games, roleId }) =>
-      countGrimoireEvents(games, roleId, GrimoireEventType.DEATH),
+      Math.floor(countGrimoireEvents(games, roleId, GrimoireEventType.DEATH) / 2),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
@@ -412,7 +412,55 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `As the Matron, swap two players' seating positions with your ability.`,
   },
   // Voudon: Nothing to track really.
-  // Judge: @todo
+  {
+    id: "judge_executions_caused",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["judge"],
+    script: "bmr",
+    source: "grimoire_event",
+    label: "Final Verdict",
+    getCount: ({ games, roleId }) =>
+      !roleId
+        ? 0
+        : countMatchingEvents(
+            games,
+            (_, event) =>
+              event.by_role_id === roleId &&
+              event.event_type === GrimoireEventType.EXECUTION
+          ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Judge, you've executed ${count} player${pluralize(count)} due to your ability.`
+          : `As the Judge, this player has executed ${count} player${pluralize(count)} due to their ability.`)
+        : `As the Judge, execute a player due to your ability.`,
+  },
+  {
+    id: "judge_failed_executions_caused",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["judge"],
+    script: "bmr",
+    source: "grimoire_event",
+    label: "Stayed Sentence",
+    getCount: ({ games, roleId }) =>
+      !roleId
+        ? 0
+        : countMatchingEvents(
+            games,
+            (_, event) =>
+              event.by_role_id === roleId &&
+              event.event_type === GrimoireEventType.OTHER &&
+              event.status_source === "Execution Failed"
+          ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Judge, you've caused ${count} execution${pluralize(count)} to fail due to your ability.`
+          : `As the Judge, this player has caused ${count} execution${pluralize(count)} to fail due to their ability.`)
+        : `As the Judge, cause an execution to fail due to your ability.`,
+  },
   // Bishop: @todo
   {
     id: "cacklejack_role_changes_caused",
@@ -486,6 +534,29 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Gnome, you've killed ${count} player${pluralize(count)} for nominating your amigo.`
           : `As the Gnome, this player has killed ${count} player${pluralize(count)} for nominating their amigo.`)
         : `As the Gnome, kill a player for nominating your amigo.`,
+  },
+  {
+    id: "gnome_amigo_marked",
+    category: "role",
+    roleIds: ["gnome"],
+    scope: "affected_player",
+    script: "experimental",
+    source: "grimoire_event",
+    label: "Untouchable Amigo",
+    getCount: ({ games }) =>
+      countMatchingEvents(
+        games,
+        (_, event) =>
+          event.by_role_id === "gnome" &&
+          event.event_type === GrimoireEventType.OTHER &&
+          event.status_source === "Amigo"
+      ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `You've been marked as the Gnome's amigo ${count} time${pluralize(count)}.`
+          : `This player has been marked as the Gnome's amigo ${count} time${pluralize(count)}.`)
+        : `Be marked as the Gnome's amigo.`,
   },
 
 ];

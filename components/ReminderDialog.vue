@@ -9,6 +9,12 @@
     </template>
     <template v-if="show">
       <div class="flex flex-col gap-4 p-4">
+        <div class="text-sm text-stone-300 space-y-2">
+          <p>ClockTracker keeps track of certain events in the game (deaths, character changes, ...).
+          Certain reminder tokens can prefill these events; they are marked with
+          <IconUI id="crosshair" /> in the list below.</p>
+          <p>Additional reminders were also added to support this functionality; you can recognize them by their slightly brighter purple background.</p>
+        </div>
         <div
           v-for="group in reminderGroups"
           :key="group.key"
@@ -21,7 +27,7 @@
           </div>
           
           <hr class="border-stone-700">
-          <div class="flex flex-wrap justify-center gap-3 py-4 px-2">
+          <div class="flex flex-wrap justify-center gap-x-2 gap-y-4 py-4 px-2">
             <button
               v-for="reminder in group.reminders"
               :key="reminder.id"
@@ -29,7 +35,10 @@
               class="flex flex-col items-center"
               @click="emit('selectReminder', reminder)"
             >
-              <ReminderToken :reminder="reminder" />
+              <ReminderToken
+                :reminder="reminder"
+                :isTrackingRelevant="isTrackingRelevantReminder(reminder)"
+              />
             </button>
           </div>
         </div>
@@ -102,6 +111,8 @@
 <script setup lang="ts">
 import type { RoleReminder } from "~/server/generated/prisma/client";
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/vue";
+import { RoleType, useRoles } from "~/composables/useRoles";
+import { GRIMOIRE_REMINDER_EVENT_CONFIG } from "~/composables/grimoireReminderEventConfig";
 
 const props = defineProps<{
   visible: boolean;
@@ -111,6 +122,7 @@ const props = defineProps<{
 const emit = defineEmits(["update:visible", "selectReminder"]);
 const customReminder = ref("");
 const tokenUrl = ref<string | undefined>(undefined);
+const roles = useRoles();
 
 function setTokenUrlAndClose(url: string, close: () => void) {
   tokenUrl.value = url;
@@ -121,25 +133,92 @@ const availableTokenUrls = computed(() => {
   return [...new Set(props.reminders.map((reminder) => reminder.token_url))];
 });
 
-const reminderGroups = computed(() => {
-  const grouped = {
-    OFFICIAL: props.reminders.filter((reminder) => reminder.type === "OFFICIAL"),
-    TRACKING: props.reminders.filter((reminder) => reminder.type === "TRACKING"),
-    CUSTOM: props.reminders.filter((reminder) => reminder.type === "CUSTOM"),
-    OTHER: props.reminders.filter(
-      (reminder) =>
-        reminder.type !== "OFFICIAL" &&
-        reminder.type !== "TRACKING" &&
-        reminder.type !== "CUSTOM"
-    ),
-  };
+function normalizeReminderName(value?: string | null) {
+  return (value ?? "").trim().toLowerCase();
+}
 
-  return [
-    { key: "OFFICIAL", label: "Official Reminders", reminders: grouped.OFFICIAL },
-    { key: "TRACKING", label: "Clocktracker Reminders", description: "These are additional reminders used by Clocktracker to auto-populate the grimoire events.", reminders: grouped.TRACKING },
-    { key: "CUSTOM", label: "Custom Reminders", description: "These reminders were imported from the uploaded script.", reminders: grouped.CUSTOM },
-    { key: "OTHER", label: "Other Reminders", reminders: grouped.OTHER },
-  ].filter((group) => group.reminders.length > 0);
+const DEFAULT_TRACKING_REMINDERS = new Set(["dead", "executed", "alive"]);
+
+function reminderMatchesTrackingConfig(
+  reminder: RoleReminder & { token_url: string }
+) {
+  const reminderName = normalizeReminderName(reminder.reminder);
+  const roleId = (reminder.role_id ?? "").toLowerCase();
+  if (!reminderName || !roleId) return false;
+
+  return GRIMOIRE_REMINDER_EVENT_CONFIG.some(
+    (config) =>
+      normalizeReminderName(config.reminder) === reminderName &&
+      config.sourceRoleIds.some((sourceRoleId) => sourceRoleId === roleId)
+  );
+}
+
+function isTrackingRelevantReminder(
+  reminder: RoleReminder & { token_url: string }
+) {
+  const normalizedReminder = normalizeReminderName(reminder.reminder);
+  return (
+    reminder.type === "TRACKING" ||
+    DEFAULT_TRACKING_REMINDERS.has(normalizedReminder) ||
+    reminderMatchesTrackingConfig(reminder)
+  );
+}
+
+const reminderGroups = computed(() => {
+  const groups = [
+    {
+      key: RoleType.TOWNSFOLK,
+      label: "Townsfolk",
+      reminders: [] as (RoleReminder & { token_url: string })[],
+    },
+    {
+      key: RoleType.OUTSIDER,
+      label: "Outsiders",
+      reminders: [] as (RoleReminder & { token_url: string })[],
+    },
+    {
+      key: RoleType.MINION,
+      label: "Minions",
+      reminders: [] as (RoleReminder & { token_url: string })[],
+    },
+    {
+      key: RoleType.DEMON,
+      label: "Demons",
+      reminders: [] as (RoleReminder & { token_url: string })[],
+    },
+    {
+      key: RoleType.TRAVELER,
+      label: "Travelers",
+      reminders: [] as (RoleReminder & { token_url: string })[],
+    },
+    {
+      key: RoleType.FABLED,
+      label: "Fabled",
+      reminders: [] as (RoleReminder & { token_url: string })[],
+    },
+    {
+      key: RoleType.LORIC,
+      label: "Loric",
+      reminders: [] as (RoleReminder & { token_url: string })[],
+    },
+    {
+      key: "OTHER",
+      label: "Other",
+      reminders: [] as (RoleReminder & { token_url: string })[],
+    },
+  ];
+
+  const byType = new Map(groups.map((group) => [group.key, group]));
+
+  for (const reminder of props.reminders) {
+    const role = roles.getRole(reminder.role_id);
+    const roleType = role?.type;
+    const targetGroup = byType.get(roleType ?? "OTHER") ?? byType.get("OTHER");
+    if (!targetGroup) continue;
+    targetGroup.reminders.push(reminder);
+  }
+
+  return groups.filter((group) => group.reminders.length > 0);
 });
 
 const show = computed({
