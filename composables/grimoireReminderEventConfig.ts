@@ -82,6 +82,12 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     sourceRoleIds: ["high_priestess"],
   },
   {
+    reminder: "Amigo",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "persistent",
+    sourceRoleIds: ["gnome"],
+  },
+  {
     reminder: "Chosen",
     eventType: GrimoireEventType.OTHER,
     cadence: "once",
@@ -112,6 +118,16 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     eventType: GrimoireEventType.OTHER,
     cadence: "once",
     sourceRoleIds: ["artist"],
+    targetScope: "self",
+    targetRoleIds: ["artist"],
+  },
+  {
+    reminder: "No Ability",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "once",
+    sourceRoleIds: ["seamstress"],
+    targetScope: "self",
+    targetRoleIds: ["seamstress"],
   },
   {
     reminder: "Bingo",
@@ -229,7 +245,7 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     sourceRoleIds: ["choirboy"],
   },
   {
-    reminder: "Demon",
+    reminder: "Know",
     eventType: GrimoireEventType.OTHER,
     cadence: "once",
     sourceRoleIds: ["puzzlemaster"],
@@ -256,7 +272,7 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     reminder: "Know",
     eventType: GrimoireEventType.OTHER,
     cadence: "once",
-    sourceRoleIds: ["steward"],
+    sourceRoleIds: ["steward", "balloonist", "noble"],
   },
   {
     reminder: "Died Today",
@@ -301,10 +317,24 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     sourceRoleIds: ["plague_doctor"],
   },
   {
+    reminder: "Swapped",
+    eventType: GrimoireEventType.SEAT_CHANGE,
+    cadence: "once",
+    sourceRoleIds: ["matron"],
+  },
+  {
     reminder: "Dead",
     eventType: GrimoireEventType.DEATH,
     cadence: "once",
     sourceRoleIds: ["gunslinger"],
+  },
+  {
+    reminder: "Dead",
+    eventType: GrimoireEventType.DEATH,
+    cadence: "once",
+    sourceRoleIds: ["alchemist"],
+    targetScope: "self",
+    targetRoleIds: ["alchemist"],
   },
   {
     reminder: "Dead",
@@ -315,7 +345,7 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     targetRoleIds: ["tinker"],
   },
   {
-    reminder: "Alm",
+    reminder: "Vote Given",
     eventType: GrimoireEventType.OTHER,
     cadence: "persistent",
     sourceRoleIds: ["beggar"],
@@ -345,10 +375,16 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     sourceRoleIds: ["barista"],
   },
   {
-    reminder: "Butchered",
+    reminder: "Executed",
     eventType: GrimoireEventType.EXECUTION,
     cadence: "once",
     sourceRoleIds: ["butcher"],
+  },
+  {
+    reminder: "Execution Failed",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "once",
+    sourceRoleIds: ["judge"],
   },
   {
     reminder: "Executed",
@@ -362,13 +398,41 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     reminder: "Executed",
     eventType: GrimoireEventType.EXECUTION,
     cadence: "once",
+    sourceRoleIds: ["scapegoat"],
+    targetScope: "self",
+    targetRoleIds: ["scapegoat"],
+  },
+  {
+    reminder: "Executed",
+    eventType: GrimoireEventType.EXECUTION,
+    cadence: "once",
     sourceRoleIds: [],
+  },
+  {
+    reminder: "Has Jumped",
+    eventType: GrimoireEventType.DEATH,
+    cadence: "once",
+    sourceRoleIds: ["fang_gu"],
+    targetScope: "self",
+    targetRoleIds: ["fang_gu"],
   },
   {
     reminder: "Alive",
     eventType: GrimoireEventType.REVIVE,
     cadence: "once",
     sourceRoleIds: ["professor"],
+  },
+  {
+    reminder: "Alive",
+    eventType: GrimoireEventType.REVIVE,
+    cadence: "once",
+    sourceRoleIds: ["al-hadikhia"],
+  },
+  {
+    reminder: "Alive",
+    eventType: GrimoireEventType.REVIVE,
+    cadence: "once",
+    sourceRoleIds: ["shabaloth"],
   },
   {
     reminder: "Stormcaught",
@@ -393,6 +457,8 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     eventType: GrimoireEventType.OTHER,
     cadence: "once",
     sourceRoleIds: ["banshee"],
+    targetScope: "self",
+    targetRoleIds: ["banshee"],
   },
   {
     reminder: "Goal",
@@ -411,6 +477,14 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     eventType: GrimoireEventType.OTHER,
     cadence: "each_night",
     sourceRoleIds: ["lil_monsta"],
+  },
+  {
+    reminder: "Is The Demon",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "each_night",
+    sourceRoleIds: ["scarlet_woman"],
+    targetScope: "self",
+    targetRoleIds: ["scarlet_woman"],
   },
   {
     reminder: "DEAD",

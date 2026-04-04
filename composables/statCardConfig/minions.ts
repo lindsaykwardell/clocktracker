@@ -238,6 +238,7 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `As the Devil's Advocate, this player has saved the Demon from execution ${count} time${pluralize(count)}.`)
         : `As the Devil's Advocate, save the Demon from execution.`,
   },
+  // Devil's Advocate: Maybe how many times they protected a good player?
   // Evil Twin sao: 1,: @todo
   {
     id: "fearmonger_game_endings",
@@ -756,7 +757,16 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     source: "grimoire_event",
     label: "The New Master",
     getCount: ({ games, roleId }) =>
-      countGrimoireEvents(games, roleId, GrimoireEventType.ROLE_CHANGE),
+      !roleId
+        ? 0
+        : countMatchingEvents(
+            games,
+            (_, event) =>
+              event.by_role_id === roleId &&
+              (event.event_type === GrimoireEventType.ROLE_CHANGE ||
+                (event.event_type === GrimoireEventType.OTHER &&
+                  event.status_source === "Is The Demon"))
+          ),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe

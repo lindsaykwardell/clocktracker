@@ -116,7 +116,82 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `As the Artist, ask the Storyteller a question.`,
   },
   // Atheist: @todo (game end)
-  // Balloonist: Nothing relevant. Only option: How many times they spotted the demon?
+  {
+    id: "balloonist_demon_learns",
+    category: "role",
+    scope: "as_role",
+    script: "experimental",
+    roleIds: ["balloonist"],
+    source: "grimoire_event",
+    label: "Hell Below",
+    getCount: ({ games, roleId }) =>
+      !roleId
+        ? 0
+        : countMatchingEvents(games, (game, event) => {
+            if (
+              event.by_role_id !== roleId ||
+              event.event_type !== GrimoireEventType.OTHER ||
+              event.status_source !== "Know"
+            ) {
+              return false;
+            }
+
+            const currentToken = getEventCurrentToken(game, event);
+            const previousToken = getEventPreviousToken(game, event);
+            return (
+              currentToken?.role?.type === "DEMON" ||
+              previousToken?.role?.type === "DEMON"
+            );
+          }),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Balloonist, you've learned the Demon ${count} time${pluralize(count)} due to your ability.`
+          : `As the Balloonist, this player has learned the Demon ${count} time${pluralize(count)} due to their ability.`)
+        : `As the Balloonist, learn the Demon due to your ability.`,
+  },
+  {
+    id: "balloonist_full_type_sweeps",
+    category: "role",
+    scope: "as_role",
+    script: "experimental",
+    roleIds: ["balloonist"],
+    source: "grimoire_event",
+    label: "High Vantage",
+    getCount: ({ games, roleId }) =>
+      games.reduce((total, game) => {
+        if (!roleId || game.ignore_for_stats) return total;
+
+        const learnedTypes = new Set<string>();
+        for (const event of game.grimoire_events) {
+          if (
+            event.by_role_id !== roleId ||
+            event.event_type !== GrimoireEventType.OTHER ||
+            event.status_source !== "Know"
+          ) {
+            continue;
+          }
+
+          const currentToken = getEventCurrentToken(game, event);
+          const previousToken = getEventPreviousToken(game, event);
+          const learnedType = currentToken?.role?.type ?? previousToken?.role?.type;
+          if (learnedType) learnedTypes.add(learnedType);
+        }
+
+        return learnedTypes.has("TOWNSFOLK") &&
+          learnedTypes.has("OUTSIDER") &&
+          learnedTypes.has("MINION") &&
+          learnedTypes.has("DEMON")
+          ? total + 1
+          : total;
+      }, 0),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Balloonist, you've learned all 4 character types in ${count} game${pluralize(count)}.`
+          : `As the Balloonist, this player has learned all 4 character types in ${count} game${pluralize(count)}.`)
+        : `As the Balloonist, learn Townsfolk, Outsider, Minion, and Demon due to your ability.`,
+  },
   {
     id: "banshee_awakenings",
     category: "role",
@@ -453,14 +528,33 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     label: "Dark Congregation",
     getCount: ({ games, roleId }) =>
       games.filter(
-        (game) =>
-          !game.ignore_for_stats &&
-          !!roleId &&
-          game.end_trigger === GameEndTrigger.CHARACTER_ABILITY &&
-          game.end_trigger_type === GameEndTriggerType.EXTRA_WIN_CONDITION &&
-          game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
-          game.end_trigger_role_id === roleId &&
-          game.win_v2 === WinStatus_V2.EVIL_WINS
+        (game) => {
+          if (
+            game.ignore_for_stats ||
+            !roleId ||
+            game.end_trigger !== GameEndTrigger.CHARACTER_ABILITY ||
+            game.end_trigger_type !== GameEndTriggerType.EXTRA_WIN_CONDITION ||
+            game.end_trigger_cause !== GameEndTriggerCause.ABILITY ||
+            game.end_trigger_role_id !== roleId
+          ) {
+            return false;
+          }
+
+          const lastPage = game.grimoire[game.grimoire.length - 1];
+          const leaderToken = game.end_trigger_participant_id
+            ? lastPage?.tokens.find(
+                (token) =>
+                  token.grimoire_participant_id === game.end_trigger_participant_id
+              ) ?? null
+            : null;
+
+          if (leaderToken?.alignment) {
+            return leaderToken.alignment === "EVIL";
+          }
+
+          // Fallback for legacy games without reliable end-trigger participant alignment.
+          return game.win_v2 === WinStatus_V2.EVIL_WINS;
+        }
       ).length,
     getSentence: ({ count, isMe }) =>
       count > 0
@@ -479,14 +573,33 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     label: "Holy Congregation",
     getCount: ({ games, roleId }) =>
       games.filter(
-        (game) =>
-          !game.ignore_for_stats &&
-          !!roleId &&
-          game.end_trigger === GameEndTrigger.CHARACTER_ABILITY &&
-          game.end_trigger_type === GameEndTriggerType.EXTRA_WIN_CONDITION &&
-          game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
-          game.end_trigger_role_id === roleId &&
-          game.win_v2 === WinStatus_V2.GOOD_WINS
+        (game) => {
+          if (
+            game.ignore_for_stats ||
+            !roleId ||
+            game.end_trigger !== GameEndTrigger.CHARACTER_ABILITY ||
+            game.end_trigger_type !== GameEndTriggerType.EXTRA_WIN_CONDITION ||
+            game.end_trigger_cause !== GameEndTriggerCause.ABILITY ||
+            game.end_trigger_role_id !== roleId
+          ) {
+            return false;
+          }
+
+          const lastPage = game.grimoire[game.grimoire.length - 1];
+          const leaderToken = game.end_trigger_participant_id
+            ? lastPage?.tokens.find(
+                (token) =>
+                  token.grimoire_participant_id === game.end_trigger_participant_id
+              ) ?? null
+            : null;
+
+          if (leaderToken?.alignment) {
+            return leaderToken.alignment === "GOOD";
+          }
+
+          // Fallback for legacy games without reliable end-trigger participant alignment.
+          return game.win_v2 === WinStatus_V2.GOOD_WINS;
+        }
       ).length,
     getSentence: ({ count, isMe }) =>
       count > 0
@@ -1471,7 +1584,41 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `This player has been visited by the Nightwatchman ${count} time${pluralize(count)}.`)
         : `Be visited by the Nightwatchman at night.`,
   },
-  // Noble: Nothing relevant. Only option: Track how many times demon was in three shown?
+  {
+    id: "noble_know_demon",
+    category: "role",
+    scope: "as_role",
+    script: "experimental",
+    sao: 1,
+    roleIds: ["noble"],
+    source: "grimoire_event",
+    label: "Court Of The Damned",
+    getCount: ({ games, roleId }) =>
+      !roleId
+        ? 0
+        : countMatchingEvents(games, (game, event) => {
+            if (
+              event.by_role_id !== roleId ||
+              event.event_type !== GrimoireEventType.OTHER ||
+              event.status_source !== "Know"
+            ) {
+              return false;
+            }
+
+            const currentToken = getEventCurrentToken(game, event);
+            const previousToken = getEventPreviousToken(game, event);
+            return (
+              currentToken?.role?.type === "DEMON" ||
+              previousToken?.role?.type === "DEMON"
+            );
+          }),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Noble, you've seen the Demon among your learned players ${count} time${pluralize(count)}.`
+          : `As the Noble, this player has seen the Demon among their learned players ${count} time${pluralize(count)}.`)
+        : `As the Noble, have the Demon among the 3 players you learn.`,
+  },
   // Oracle [sao: 7]: Nothing relevant. Only option: Highest number learned in one game?
   {
     id: "pacifist_saves",
@@ -1972,7 +2119,32 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `As the Sailor, survive death due to your ability.`,
   },
   // Savant [sao: 8]: Nothing relevant. Only option: Can't think of anything..
-  // Seamstress [sao: 9]: Nothing relevant. Only option: If they picked two different aligments?
+  {
+    id: "seamstress_ability_uses",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["seamstress"],
+    script: "snv",
+    sao: 9,
+    source: "grimoire_event",
+    label: "Stitched Insight",
+    getCount: ({ games, roleId }) =>
+      !roleId
+        ? 0
+        : countMatchingEvents(
+            games,
+            (_, event) =>
+              event.by_role_id === roleId &&
+              event.event_type === GrimoireEventType.OTHER &&
+              event.status_source === "No Ability"
+          ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Seamstress, you've used your ability ${count} time${pluralize(count)}.`
+          : `As the Seamstress, this player has used their ability ${count} time${pluralize(count)}.`)
+        : `As the Seamstress, use your ability.`,
+  },
   // Shugenja: Nothing relevant. Only option: If they had more clockwise or counterclockwise?
   {
     id: "slayer_kills",

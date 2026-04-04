@@ -98,12 +98,12 @@ const trackingReminders = [
   },
   {
     role_id: "beggar",
-    reminder: "Alm",
+    reminder: "Vote Given",
     type: ReminderType.TRACKING,
   },
   {
     role_id: "butcher",
-    reminder: "Butchered",
+    reminder: "Executed",
     type: ReminderType.TRACKING,
   },
   {
@@ -118,12 +118,17 @@ const trackingReminders = [
   },
   {
     role_id: "puzzlemaster",
-    reminder: "Demon",
+    reminder: "Know",
     type: ReminderType.TRACKING,
   },
   {
     role_id: "fang_gu",
     reminder: "Changed",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "fang_gu",
+    reminder: "Has Jumped",
     type: ReminderType.TRACKING,
   },
   {
@@ -187,6 +192,36 @@ const trackingReminders = [
     type: ReminderType.TRACKING,
   },
   {
+    role_id: "bounty_hunter",
+    reminder: "Changed",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "matron",
+    reminder: "Swapped",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "imp",
+    reminder: "Changed",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "lord_of_typhon",
+    reminder: "Changed",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "cacklejack",
+    reminder: "Changed",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "scarlet_woman",
+    reminder: "Changed",
+    type: ReminderType.TRACKING,
+  },
+  {
     role_id: "virgin",
     reminder: "Executed",
     type: ReminderType.TRACKING,
@@ -199,6 +234,26 @@ const trackingReminders = [
   {
     role_id: "mutant",
     reminder: "Executed",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "scapegoat",
+    reminder: "Executed",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "vizier",
+    reminder: "Executed",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "judge",
+    reminder: "Executed",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "judge",
+    reminder: "Execution Failed",
     type: ReminderType.TRACKING,
   },
   {
@@ -222,6 +277,16 @@ const trackingReminders = [
     type: ReminderType.TRACKING,
   },
   {
+    role_id: "gangster",
+    reminder: "Dead",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "gnome",
+    reminder: "Dead",
+    type: ReminderType.TRACKING,
+  },
+  {
     role_id: "slayer",
     reminder: "Dead",
     type: ReminderType.TRACKING,
@@ -234,6 +299,11 @@ const trackingReminders = [
   {
     role_id: "al-hadikhia",
     reminder: "Dead",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "al-hadikhia",
+    reminder: "Alive",
     type: ReminderType.TRACKING,
   },
 ];

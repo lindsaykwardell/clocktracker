@@ -24,7 +24,11 @@ type TokenLike = {
   is_dead: boolean;
   grimoire_participant_id: string | null;
   reminders: ReminderLike[];
-  role?: { name: string } | null;
+  role?: {
+    name: string;
+    type?: string | null;
+    initial_alignment?: "GOOD" | "EVIL" | "NEUTRAL" | null;
+  } | null;
 };
 
 type PageLike = {
@@ -53,7 +57,9 @@ function normalizeReminderRoleHint(value: string | null | undefined) {
 }
 
 function normalizeReminderName(value: string | null | undefined) {
-  return (value ?? "").trim().toLowerCase();
+  const normalized = (value ?? "").trim().toLowerCase();
+  if (/^drunk\s+\d+$/.test(normalized)) return "drunk";
+  return normalized;
 }
 
 function countReminderByName(
@@ -186,6 +192,25 @@ function matchesTargetScope(
   return true;
 }
 
+function matchesTargetStateRestrictions(
+  config: {
+    reminder: string;
+    sourceRoleIds: string[];
+  },
+  token: { is_dead: boolean }
+) {
+  const normalizedReminder = normalizeReminderName(config.reminder);
+  const isBoneCollectorHasAbility =
+    normalizedReminder === "has ability" &&
+    config.sourceRoleIds.includes("bone_collector");
+
+  if (isBoneCollectorHasAbility) {
+    return token.is_dead;
+  }
+
+  return true;
+}
+
 function blockedBySelfScopedRoleHintOverride(
   config: {
     reminder: string;
@@ -301,6 +326,7 @@ const SELF_ONLY_CHANGED_SOURCE_ROLE_IDS = new Set([
   "ogre",
   "goon",
   "farmer",
+  "scarlet_woman",
 ]);
 
 function isFarmerChangedReminder(reminder: ReminderLike) {
@@ -370,12 +396,16 @@ function resolveChangedReminderSource(
 
 function enforceSelfScopedChangedSource(
   source: { by_participant_id: string; by_role_id: string } | null,
-  targetRoleId: string | null | undefined
+  targetRoleId: string | null | undefined,
+  previousRoleId?: string | null | undefined
 ) {
   if (!source) return null;
+  const effectiveRoleIds = [targetRoleId, previousRoleId].filter(
+    (roleId): roleId is string => !!roleId
+  );
   if (
     SELF_ONLY_CHANGED_SOURCE_ROLE_IDS.has(source.by_role_id) &&
-    targetRoleId !== source.by_role_id
+    !effectiveRoleIds.includes(source.by_role_id)
   ) {
     return null;
   }
@@ -492,6 +522,33 @@ export function generateEventsForMissingGames(grimoire: PageLike[]) {
         });
       }
 
+      if (!previousToken && pageIndex === 0) {
+        const initialAlignment = token.role?.initial_alignment ?? null;
+        const isTraveler = token.role?.type === "TRAVELER";
+        if (
+          !isTraveler &&
+          initialAlignment &&
+          token.alignment &&
+          token.alignment !== initialAlignment
+        ) {
+          events.push({
+            grimoire_page: pageIndex,
+            participant_id: participantId,
+            event_type: GrimoireEventType.ALIGNMENT_CHANGE,
+            status_source: null,
+            cause: null,
+            by_participant_id: null,
+            player_name: token.player_name || "",
+            role_id: token.role_id ?? null,
+            by_role_id: null,
+            old_role_id: oldRoleId,
+            new_role_id: newRoleId,
+            old_alignment: initialAlignment,
+            new_alignment: newAlignment,
+          });
+        }
+      }
+
       if (previousToken) {
         const changedReminder =
           findReminderByNames(token.reminders, ["Changed"]) ??
@@ -508,7 +565,8 @@ export function generateEventsForMissingGames(grimoire: PageLike[]) {
                 grimoire
               )
             : null,
-          token.role_id
+          token.role_id,
+          previousToken.role_id
         );
         const alignmentChangedSource = enforceSelfScopedChangedSource(
           alignmentChangedReminder
@@ -519,7 +577,8 @@ export function generateEventsForMissingGames(grimoire: PageLike[]) {
                 grimoire
               )
             : null,
-          token.role_id
+          token.role_id,
+          previousToken.role_id
         );
 
         const roleChanged =
@@ -615,6 +674,9 @@ export function generateEventsForMissingGames(grimoire: PageLike[]) {
         if (!matchesTargetScope(config, token.role_id)) {
           continue;
         }
+        if (!matchesTargetStateRestrictions(config, token)) {
+          continue;
+        }
         if (
           blockedBySelfScopedRoleHintOverride(
             config,
@@ -626,11 +688,46 @@ export function generateEventsForMissingGames(grimoire: PageLike[]) {
           continue;
         }
 
-        let source = detectReminderEventSource(
-          orderedTokens,
-          config.sourceRoleIds,
-          remindersWithRoleHint
-        );
+        let source: { by_participant_id: string; by_role_id: string } | null = null;
+        const shouldPreferPreviousPageHintSource =
+          normalizeReminderName(config.reminder) === "has jumped" &&
+          config.sourceRoleIds.includes("fang_gu") &&
+          pageIndex > 0 &&
+          remindersWithRoleHint.length > 0;
+        if (shouldPreferPreviousPageHintSource) {
+          const previousPageTokens = grimoire[pageIndex - 1].tokens;
+          const previousHintSources = remindersWithRoleHint
+            .map((reminder) =>
+              detectSourceFromReminderHint(previousPageTokens, reminder)
+            )
+            .filter(
+              (
+                candidate
+              ): candidate is { by_participant_id: string; by_role_id: string } =>
+                !!candidate
+            );
+          const uniquePrevious = new Map<
+            string,
+            { by_participant_id: string; by_role_id: string }
+          >();
+          for (const candidate of previousHintSources) {
+            uniquePrevious.set(
+              `${candidate.by_participant_id}:${candidate.by_role_id}`,
+              candidate
+            );
+          }
+          if (uniquePrevious.size === 1) {
+            source = Array.from(uniquePrevious.values())[0];
+          }
+        }
+
+        if (!source) {
+          source = detectReminderEventSource(
+            orderedTokens,
+            config.sourceRoleIds,
+            remindersWithRoleHint
+          );
+        }
         if (!source && config.sourceRoleIds.length === 0 && remindersWithRoleHint.length > 0) {
           const hintSources = remindersWithRoleHint
             .map((reminder) => detectSourceFromReminderHint(orderedTokens, reminder))

@@ -268,6 +268,7 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `As the Lunatic, this player's chosen player was killed by the Demon ${count} time${pluralize(count)}.`)
         : `As the Lunatic, have your chosen player killed by the Demon.`,
   },
+  // Lunatic not followed would be cool, but too hard/too legacy to track?
   {
     id: "moonchild_kills",
     category: "role",
@@ -439,7 +440,7 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
             if (
               event.by_role_id !== roleId ||
               event.event_type !== GrimoireEventType.OTHER ||
-              event.status_source !== "Demon"
+              event.status_source !== "Know"
             ) {
               return false;
             }

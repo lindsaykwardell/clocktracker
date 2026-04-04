@@ -655,7 +655,10 @@ function shouldApplyShroudFromReminder(
   token: Token
 ) {
   const normalized = (reminder.reminder ?? "").trim().toLowerCase();
-  const isDeathStyleReminder = normalized === "dead" || normalized === "executed";
+  const isDeathStyleReminder =
+    normalized === "dead" ||
+    normalized === "executed" ||
+    normalized === "has jumped";
   if (!isDeathStyleReminder) return false;
   if (!isSelfOnlyDeathReminder(reminder)) return true;
   return reminderRoleHintMatchesToken(reminder.token_url, token);
@@ -695,7 +698,7 @@ function selectReminder(reminder: {
       type: reminder.type ?? "CUSTOM",
     });
 
-    // Adding a "Dead" or "Executed" reminder should apply shroud if it is not already active.
+    // Adding a death-style reminder (e.g. Dead/Executed/Has Jumped) should apply shroud if not already active.
     // Removing the reminder must not auto-revive.
     if (
       shouldApplyShroudFromReminder(reminder, focusedToken.value) &&
