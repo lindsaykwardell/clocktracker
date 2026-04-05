@@ -156,6 +156,22 @@
             <span v-else-if="shouldShowEndTriggerFieldsAfterType" class="block">
               Select triggering character
             </span>
+            <label
+              v-if="shouldShowEndTriggerSubtype"
+              class="block col-span-2"
+            >
+              <span class="block text-xs mb-[0.125rem]">End Trigger Ability Detail</span>
+              <Input mode="select" v-model="endTriggerSubtypeSelection">
+                <option :value="null">Not recorded</option>
+                <option
+                  v-for="option in endTriggerSubtypeOptions"
+                  :key="option.value"
+                  :value="option.value"
+                >
+                  {{ option.label }}
+                </option>
+              </Input>
+            </label>
           </div>
           <div
             v-if="shouldShowEndTriggerFieldsAfterType"
@@ -229,6 +245,10 @@ import {
   WinStatus_V2,
 } from "~/composables/useGames";
 import { END_TRIGGER_ROLE_INCLUDES } from "~/composables/gameEndTriggerConfig";
+import {
+  getEndTriggerSubtypeOptions,
+  parseEndTriggerSubtype,
+} from "~/composables/endTriggerSubtypeConfig";
 
 type EndTriggerSeatToken = {
   order: number;
@@ -258,6 +278,7 @@ const props = defineProps<{
     end_trigger_type: GameEndTriggerType | null;
     end_trigger_cause: GameEndTriggerCause | null;
     end_trigger_role_id: string | null;
+    end_trigger_subtype: string;
     end_trigger_note: string;
     end_trigger_participant_id: string | null;
     end_trigger_role?: {
@@ -333,6 +354,43 @@ const shouldShowEndTriggerFieldsAfterType = computed(() => {
   if (!shouldShowEndTriggerCharacterSection.value) return false;
   if (!shouldShowEndTriggerType.value) return true;
   return props.game.end_trigger_type !== null;
+});
+
+const endTriggerSubtypeOptions = computed(() => {
+  if (
+    props.game.end_trigger !== GameEndTrigger.CHARACTER_ABILITY ||
+    props.game.end_trigger_type !== GameEndTriggerType.EXTRA_WIN_CONDITION ||
+    props.game.end_trigger_cause !== GameEndTriggerCause.ABILITY
+  ) {
+    return [];
+  }
+
+  return getEndTriggerSubtypeOptions(props.game.end_trigger_role_id);
+});
+
+const shouldShowEndTriggerSubtype = computed(
+  () =>
+    shouldShowEndTriggerFieldsAfterType.value &&
+    endTriggerSubtypeOptions.value.length > 0
+);
+
+const endTriggerSubtypeSelection = computed<string | null>({
+  get() {
+    if (!shouldShowEndTriggerSubtype.value) return null;
+    const parsedSubtype =
+      parseEndTriggerSubtype(props.game.end_trigger_subtype) ??
+      parseEndTriggerSubtype(props.game.end_trigger_note);
+    if (!parsedSubtype) return null;
+
+    return endTriggerSubtypeOptions.value.some(
+      (option) => option.value === parsedSubtype
+    )
+      ? parsedSubtype
+      : null;
+  },
+  set(value) {
+    props.game.end_trigger_subtype = value ?? "";
+  },
 });
 
 const endTriggerTypeOptions = computed(() => {
@@ -531,6 +589,7 @@ watch(
     props.game.end_trigger_role_id = null;
     props.game.end_trigger_role = null;
     props.game.end_trigger_participant_id = null;
+    props.game.end_trigger_subtype = "";
 
     if (
       value !== GameEndTrigger.NO_LIVING_DEMON &&
@@ -574,6 +633,7 @@ watch(
     props.game.end_trigger_role = null;
     props.game.end_trigger_participant_id = null;
     props.game.end_trigger_cause = null;
+    props.game.end_trigger_subtype = "";
 
     if (value === null) return;
 
@@ -613,7 +673,31 @@ watch(
     props.game.end_trigger_role_id = null;
     props.game.end_trigger_role = null;
     props.game.end_trigger_participant_id = null;
+    props.game.end_trigger_subtype = "";
   }
+);
+
+watch(
+  () => [
+    shouldShowEndTriggerSubtype.value,
+    endTriggerSubtypeOptions.value.map((option) => option.value).join("|"),
+    props.game.end_trigger_subtype,
+  ],
+  () => {
+    if (!shouldShowEndTriggerSubtype.value) {
+      props.game.end_trigger_subtype = "";
+      return;
+    }
+
+    const subtype = parseEndTriggerSubtype(props.game.end_trigger_subtype);
+    if (!subtype) return;
+
+    const isValidSubtype = endTriggerSubtypeOptions.value.some(
+      (option) => option.value === subtype
+    );
+    if (!isValidSubtype) props.game.end_trigger_subtype = "";
+  },
+  { immediate: true }
 );
 
 defineExpose({

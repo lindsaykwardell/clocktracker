@@ -30,28 +30,28 @@ export const END_TRIGGER_ROLE_INCLUDES: Partial<
         base: [
           ...WILDCARD_ROLE_IDS,
           // Townsfolk
-          "alsaahir",
-          "atheist",
-          "cult_leader",
-          "mayor",
+          "alsaahir", // Used their ability
+          "atheist", // Storyteller executed.
+          "cult_leader", // Ability used
+          "mayor", // Ability triggered
 
           // Outsider
-          "damsel",
-          "klutz",
-          "saint",
+          "damsel", // Guessed by minion
+          "klutz", // Wrong choice with ability
+          "saint", // Executed
 
           // Minion
-          "evil_twin",
-          "fearmonger",
-          "goblin",
-          "mastermind",
+          "evil_twin", // Wrong twin executed.
+          "fearmonger", // Executed their target
+          "goblin", // Executed when claimed
+          "mastermind", // No
 
           // Demon
-          "leviathan",
-          "vortox",
+          "leviathan", // Two endings
+          "vortox", // Nobody executed
 
           // Fabled
-          "fiddler",
+          "fiddler", // Ability used
         ],
         conditional: [],
       },
@@ -96,9 +96,9 @@ export const END_TRIGGER_ROLE_INCLUDES: Partial<
           ...WILDCARD_ROLE_IDS,
           "butcher", // Edge case: Could execute demon with extra nomination, which is specific player agency.
           "judge", // Edge case: Could force execute demon, which is specific player agency.
+          "vizier", // Edge case: Could force execute demon, which is specific player agency.
 
           // Storyteller choice/"yes-but-don't"
-          "vizier", // Edge case: Could force execute demon, which is specific player agency.
           "cerenovus", // Mad demon could be executed.
           "harpy", // // Mad demon could be executed.
         ],
@@ -113,9 +113,9 @@ export const END_TRIGGER_ROLE_INCLUDES: Partial<
           // (Unintended) swaps
           "barber", // Swap demon to dead player?
           "pit-hag", // Could change the demon into non-demon.
-          "cacklejack", // Could change the demon into non-demon.
-
+          
           // Storyteller choice/"yes-but-don't"
+          "cacklejack", // Could change the demon into non-demon.
           "farmer", // A good demon could be the last demon alive and become the farmer I guess?
         ],
         conditional: [],
@@ -145,7 +145,7 @@ export const END_TRIGGER_ROLE_INCLUDES: Partial<
           ...WILDCARD_ROLE_IDS,
           ...KILLING_DEMON_ROLE_IDS,
           // Straight-up kills/deaths
-          "riot", // Nominee "dies" (not "is executed")
+          // "riot", // Nominee "dies" (not "is executed")
           "psychopath", // Could kill during final 3.
           "gnome", // Could kill during final 3.
           "gangster", // Could kill during final 3.

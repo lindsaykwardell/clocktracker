@@ -5,6 +5,7 @@ import {
   GrimoireEventType,
   WinStatus_V2,
 } from "~/composables/useGames";
+import { parseEndTriggerSubtype } from "~/composables/endTriggerSubtypeConfig";
 import {
   countMatchingEvents,
   countGrimoireEvents,
@@ -115,7 +116,47 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `As the Artist, this player has asked the Storyteller a question ${count} time${pluralize(count)}.`)
         : `As the Artist, ask the Storyteller a question.`,
   },
-  // Atheist: @todo (game end)
+  {
+    id: "atheist_storyteller_executions",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["atheist"],
+    script: "experimental",
+    source: "end_trigger",
+    label: "No Gods, No Masters",
+    getCount: ({ games, roleId }) =>
+      games.filter((game) => {
+        if (
+          game.ignore_for_stats ||
+          !roleId ||
+          game.end_trigger !== GameEndTrigger.CHARACTER_ABILITY ||
+          game.end_trigger_type !== GameEndTriggerType.EXTRA_WIN_CONDITION ||
+          game.end_trigger_cause !== GameEndTriggerCause.ABILITY ||
+          game.end_trigger_role_id !== roleId
+        ) {
+          return false;
+        }
+
+        const subtype =
+          parseEndTriggerSubtype(game.end_trigger_subtype) ??
+          parseEndTriggerSubtype(game.end_trigger_note);
+        if (subtype === "ATHEIST_STORYTELLER_EXECUTED_ATHEIST_IN_PLAY") return true;
+        if (subtype === "ATHEIST_STORYTELLER_EXECUTED_NO_ATHEIST_IN_PLAY") return false;
+
+        // Backward compatibility for older subtype values.
+        if (subtype === "ATHEIST_STORYTELLER_EXECUTED_GOOD_WINS") return true;
+        if (subtype === "ATHEIST_STORYTELLER_EXECUTED_GOOD_LOSES") return false;
+
+        // Legacy records without subtype: keep counting as unknown Storyteller execution.
+        return true;
+      }).length,
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Atheist, you've ended the game ${count} time${pluralize(count)} by having the Storyteller executed due to your ability.`
+          : `As the Atheist, this player has ended the game ${count} time${pluralize(count)} by having the Storyteller executed due to their ability.`)
+        : `As the Atheist, end the game due to your ability when the Storyteller is executed.`,
+  },
   {
     id: "balloonist_demon_learns",
     category: "role",
@@ -1591,7 +1632,6 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     scope: "as_role",
     script: "experimental",
-    sao: 1,
     roleIds: ["noble"],
     source: "grimoire_event",
     label: "Court Of The Damned",
@@ -2432,7 +2472,6 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     scope: "as_role",
     roleIds: ["steward"],
     script: "experimental",
-    sao: 1,
     source: "grimoire_event",
     label: "Misplaced Trust",
     getCount: ({ games, roleId }) =>

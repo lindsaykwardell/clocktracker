@@ -156,6 +156,7 @@ export default defineEventHandler(async (handler) => {
           end_trigger_type: existingGame.end_trigger_type,
           end_trigger_cause: existingGame.end_trigger_cause,
           end_trigger_role_id: existingGame.end_trigger_role_id,
+          end_trigger_subtype: existingGame.end_trigger_subtype,
           end_trigger_note: existingGame.end_trigger_note,
           end_trigger_participant_id: existingGame.end_trigger_participant_id,
           grimoire_events: existingGame.grimoire_events.map((event) => ({

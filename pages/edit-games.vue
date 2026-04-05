@@ -97,6 +97,7 @@ const game = reactive<{
   end_trigger_type: GameEndTriggerType | null | undefined;
   end_trigger_cause: GameEndTriggerCause | null | undefined;
   end_trigger_role_id: string | null;
+  end_trigger_subtype: string;
   end_trigger_note: string;
   end_trigger_participant_id: string | null;
   end_trigger_role?: {
@@ -165,6 +166,7 @@ const game = reactive<{
   end_trigger_type: undefined,
   end_trigger_cause: undefined,
   end_trigger_role_id: null,
+  end_trigger_subtype: "",
   end_trigger_note: "",
   end_trigger_participant_id: null,
   end_trigger_role: null,
@@ -202,6 +204,8 @@ const formattedGame = computed(() => ({
     game.end_trigger === undefined ? undefined : game.end_trigger_cause,
   end_trigger_role_id:
     game.end_trigger === undefined ? undefined : game.end_trigger_role_id,
+  end_trigger_subtype:
+    game.end_trigger === undefined ? undefined : game.end_trigger_subtype,
   end_trigger_note:
     game.end_trigger === undefined ? undefined : game.end_trigger_note,
   end_trigger_participant_id:

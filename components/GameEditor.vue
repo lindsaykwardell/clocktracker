@@ -789,6 +789,7 @@ const props = defineProps<{
     end_trigger_type: GameEndTriggerType | null;
     end_trigger_cause: GameEndTriggerCause | null;
     end_trigger_role_id: string | null;
+    end_trigger_subtype: string;
     end_trigger_note: string;
     end_trigger_participant_id: string | null;
     end_trigger_role?: {

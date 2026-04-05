@@ -340,6 +340,33 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `As the Mutant, be executed due to your ability.`,
   },
   {
+    id: "mutant_execution_game_endings",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["mutant"],
+    script: "snv",
+    sao: 1,
+    hidden: true,
+    source: "end_trigger",
+    label: "Public Mistake",
+    getCount: ({ games, roleId }) =>
+      games.filter(
+        (game) =>
+          !game.ignore_for_stats &&
+          !!roleId &&
+          game.end_trigger === GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE &&
+          game.end_trigger_type === GameEndTriggerType.EXECUTION &&
+          game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
+          game.end_trigger_role_id === roleId
+      ).length,
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Mutant, you've ended the game ${count} time${pluralize(count)} by being executed due to your ability.`
+          : `As the Mutant, this player has ended the game ${count} time${pluralize(count)} by being executed due to their ability.`)
+        : `As the Mutant, end the game by being executed due to your ability.`,
+  },
+  {
     id: "ogre_alignment_changes",
     category: "role",
     scope: "as_role",

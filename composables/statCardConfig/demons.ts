@@ -3,8 +3,10 @@ import {
   GameEndTriggerCause,
   GameEndTriggerType,
   GrimoireEventType,
+  type GameRecord,
   WinStatus_V2,
 } from "~/composables/useGames";
+import { parseEndTriggerSubtype } from "~/composables/endTriggerSubtypeConfig";
 import {
   countMatchingEvents,
   countGrimoireEvents,
@@ -19,6 +21,25 @@ import {
   pluralize,
 } from "./shared";
 import type { RoleStatCardDefinition } from "./shared";
+
+function countLeviathanGoodExecutions(game: GameRecord) {
+  const executedGoodParticipants = new Set(
+    game.grimoire_events
+      .filter((event) => event.event_type === GrimoireEventType.EXECUTION)
+      .filter((event) => {
+        const currentToken = getEventCurrentToken(game, event);
+        const previousToken = getEventPreviousToken(game, event);
+        return (
+          currentToken?.alignment === "GOOD" ||
+          previousToken?.alignment === "GOOD"
+        );
+      })
+      .map((event) => event.participant_id)
+      .filter((participantId) => !!participantId)
+  );
+
+  return executedGoodParticipants.size;
+}
 
 export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
@@ -349,7 +370,42 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `Be turned into a Minion by the Kazali.`,
   },
   // Legion: Nothing to track really.
-  // @todo: We need to check leviathan again, because there are 2 different endings and I don't think we can track that at the moment.
+  {
+    id: "leviathan_second_good_execution_wins",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["leviathan"],
+    script: "experimental",
+    source: "end_trigger",
+    label: "Drowned in Judgement",
+    getCount: ({ games, roleId }) =>
+      games.filter((game) => {
+        if (
+          game.ignore_for_stats ||
+          !roleId ||
+          game.end_trigger !== GameEndTrigger.CHARACTER_ABILITY ||
+          game.end_trigger_type !== GameEndTriggerType.EXTRA_WIN_CONDITION ||
+          game.end_trigger_cause !== GameEndTriggerCause.ABILITY ||
+          game.end_trigger_role_id !== roleId
+        ) {
+          return false;
+        }
+
+        const subtype =
+          parseEndTriggerSubtype(game.end_trigger_subtype) ??
+          parseEndTriggerSubtype(game.end_trigger_note);
+        if (subtype === "LEVIATHAN_SECOND_GOOD_EXECUTION") return true;
+        if (subtype === "LEVIATHAN_DAY_FIVE") return false;
+
+        return countLeviathanGoodExecutions(game) >= 2;
+      }).length,
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Leviathan, you've won after a second good player was executed ${count} time${pluralize(count)}.`
+          : `As the Leviathan, this player has won after a second good player was executed ${count} time${pluralize(count)}.`)
+        : `As the Leviathan, win when a second good player is executed.`,
+  },
   {
     id: "leviathan_game_endings",
     category: "role",
@@ -359,15 +415,26 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     source: "end_trigger",
     label: "Crushed by Time",
     getCount: ({ games, roleId }) =>
-      games.filter(
-        (game) =>
-          !game.ignore_for_stats &&
-          !!roleId &&
-          game.end_trigger === GameEndTrigger.CHARACTER_ABILITY &&
-          game.end_trigger_type === GameEndTriggerType.EXTRA_WIN_CONDITION &&
-          game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
-          game.end_trigger_role_id === roleId
-      ).length,
+      games.filter((game) => {
+        if (
+          game.ignore_for_stats ||
+          !roleId ||
+          game.end_trigger !== GameEndTrigger.CHARACTER_ABILITY ||
+          game.end_trigger_type !== GameEndTriggerType.EXTRA_WIN_CONDITION ||
+          game.end_trigger_cause !== GameEndTriggerCause.ABILITY ||
+          game.end_trigger_role_id !== roleId
+        ) {
+          return false;
+        }
+
+        const subtype =
+          parseEndTriggerSubtype(game.end_trigger_subtype) ??
+          parseEndTriggerSubtype(game.end_trigger_note);
+        if (subtype === "LEVIATHAN_DAY_FIVE") return true;
+        if (subtype === "LEVIATHAN_SECOND_GOOD_EXECUTION") return false;
+
+        return countLeviathanGoodExecutions(game) < 2;
+      }).length,
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
