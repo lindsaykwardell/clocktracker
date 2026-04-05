@@ -147,6 +147,10 @@ function detectReminderEventSource(
       )
     : [];
 
+  if (remindersWithRoleHint.length > 0 && hintedCandidates.length === 0) {
+    return null;
+  }
+
   const candidates =
     hintedCandidates.length > 0 ? hintedCandidates : baseCandidates;
 
@@ -169,11 +173,58 @@ function detectReminderEventSource(
   return null;
 }
 
+function resolveHintSourceRoleIds(
+  sourceRoleIds: string[],
+  remindersWithRoleHint: ReminderLike[],
+  pageTokens: TokenLike[]
+) {
+  const roleIds = new Set<string>();
+  for (const roleId of sourceRoleIds) {
+    if (
+      remindersWithRoleHint.some((reminder) =>
+        reminderMatchesAnyRoleHint(reminder, [roleId], pageTokens)
+      )
+    ) {
+      roleIds.add(roleId);
+    }
+  }
+  return Array.from(roleIds);
+}
+
+function detectNpcReminderEventSource(
+  sourceRoleIds: string[],
+  remindersWithRoleHint: ReminderLike[] = [],
+  pageTokens: TokenLike[]
+) {
+  if (!sourceRoleIds.length) return null;
+  if (sourceRoleIds.length === 1) {
+    return {
+      by_participant_id: null,
+      by_role_id: sourceRoleIds[0],
+    };
+  }
+
+  const hintedRoleIds = sourceRoleIds.filter((roleId) =>
+    remindersWithRoleHint.some((reminder) =>
+      reminderMatchesAnyRoleHint(reminder, [roleId], pageTokens)
+    )
+  );
+  if (hintedRoleIds.length === 1) {
+    return {
+      by_participant_id: null,
+      by_role_id: hintedRoleIds[0],
+    };
+  }
+
+  return null;
+}
+
 function matchesTargetScope(
   config: {
     reminder: string;
     eventType: GrimoireEventType;
     sourceRoleIds: string[];
+    sourceMode?: "participant" | "npc";
     targetScope?: "self" | "others" | "all";
     targetRoleIds?: string[];
   },
@@ -196,6 +247,7 @@ function matchesTargetStateRestrictions(
   config: {
     reminder: string;
     sourceRoleIds: string[];
+    sourceMode?: "participant" | "npc";
   },
   token: { is_dead: boolean }
 ) {
@@ -216,6 +268,7 @@ function blockedBySelfScopedRoleHintOverride(
     reminder: string;
     eventType: GrimoireEventType;
     sourceRoleIds: string[];
+    sourceMode?: "participant" | "npc";
     targetScope?: "self" | "others" | "all";
     targetRoleIds?: string[];
   },
@@ -379,6 +432,7 @@ function resolveChangedReminderSource(
   currentPageTokens: TokenLike[],
   grimoire: PageLike[]
 ) {
+  const normalizedReminder = normalizeReminderName(reminder.reminder);
   const previousPageTokens = pageIndex > 0 ? grimoire[pageIndex - 1].tokens : [];
   if (isFarmerChangedReminder(reminder)) {
     const farmerSource = detectMostRecentlyDiedFarmerSource(
@@ -388,6 +442,10 @@ function resolveChangedReminderSource(
     if (farmerSource) return farmerSource;
   }
 
+  if (normalizedReminder === "reincarnated") {
+    return detectNpcReminderEventSource(["hindu"], [reminder], currentPageTokens);
+  }
+
   return detectSourceFromReminderHint(
     pageIndex > 0 ? previousPageTokens : currentPageTokens,
     reminder
@@ -395,7 +453,7 @@ function resolveChangedReminderSource(
 }
 
 function enforceSelfScopedChangedSource(
-  source: { by_participant_id: string; by_role_id: string } | null,
+  source: { by_participant_id: string | null; by_role_id: string } | null,
   targetRoleId: string | null | undefined,
   previousRoleId?: string | null | undefined
 ) {
@@ -551,8 +609,11 @@ export function generateEventsForMissingGames(grimoire: PageLike[]) {
 
       if (previousToken) {
         const changedReminder =
-          findReminderByNames(token.reminders, ["Changed"]) ??
-          findReminderByNames(previousToken.reminders, ["Changed"]);
+          findReminderByNames(token.reminders, ["Changed", "Reincarnated"]) ??
+          findReminderByNames(previousToken.reminders, [
+            "Changed",
+            "Reincarnated",
+          ]);
         const alignmentChangedReminder =
           findReminderByNames(token.reminders, ["Changed", "Turns Evil"]) ??
           findReminderByNames(previousToken.reminders, ["Changed", "Turns Evil"]);
@@ -688,7 +749,8 @@ export function generateEventsForMissingGames(grimoire: PageLike[]) {
           continue;
         }
 
-        let source: { by_participant_id: string; by_role_id: string } | null = null;
+        let source: { by_participant_id: string | null; by_role_id: string } | null =
+          null;
         const shouldPreferPreviousPageHintSource =
           normalizeReminderName(config.reminder) === "has jumped" &&
           config.sourceRoleIds.includes("fang_gu") &&
@@ -722,11 +784,19 @@ export function generateEventsForMissingGames(grimoire: PageLike[]) {
         }
 
         if (!source) {
-          source = detectReminderEventSource(
-            orderedTokens,
-            config.sourceRoleIds,
-            remindersWithRoleHint
-          );
+          if (config.sourceMode === "npc") {
+            source = detectNpcReminderEventSource(
+              config.sourceRoleIds,
+              remindersWithRoleHint,
+              orderedTokens
+            );
+          } else {
+            source = detectReminderEventSource(
+              orderedTokens,
+              config.sourceRoleIds,
+              remindersWithRoleHint
+            );
+          }
         }
         if (!source && config.sourceRoleIds.length === 0 && remindersWithRoleHint.length > 0) {
           const hintSources = remindersWithRoleHint
@@ -748,22 +818,44 @@ export function generateEventsForMissingGames(grimoire: PageLike[]) {
             source = Array.from(unique.values())[0];
           }
         }
+        const hintedSourceRoleIds =
+          remindersWithRoleHint.length > 0 && config.sourceRoleIds.length > 0
+            ? resolveHintSourceRoleIds(
+                config.sourceRoleIds,
+                remindersWithRoleHint,
+                orderedTokens
+              )
+            : [];
+        const sourceVariants: Array<{
+          by_participant_id: string | null;
+          by_role_id: string;
+        } | null> =
+          source
+            ? [source]
+            : hintedSourceRoleIds.length > 0
+              ? hintedSourceRoleIds.map((roleId) => ({
+                  by_participant_id: null,
+                  by_role_id: roleId,
+                }))
+              : [null];
 
-        events.push({
-          grimoire_page: pageIndex,
-          participant_id: participantId,
-          event_type: config.eventType,
-          status_source: config.reminder,
-          cause: GrimoireEventCause.ABILITY,
-          by_participant_id: source?.by_participant_id ?? null,
-          player_name: token.player_name || "",
-          role_id: token.role_id ?? null,
-          by_role_id: source?.by_role_id ?? null,
-          old_role_id: oldRoleId,
-          new_role_id: newRoleId,
-          old_alignment: oldAlignment,
-          new_alignment: newAlignment,
-        });
+        for (const sourceVariant of sourceVariants) {
+          events.push({
+            grimoire_page: pageIndex,
+            participant_id: participantId,
+            event_type: config.eventType,
+            status_source: config.reminder,
+            cause: GrimoireEventCause.ABILITY,
+            by_participant_id: sourceVariant?.by_participant_id ?? null,
+            player_name: token.player_name || "",
+            role_id: token.role_id ?? null,
+            by_role_id: sourceVariant?.by_role_id ?? null,
+            old_role_id: oldRoleId,
+            new_role_id: newRoleId,
+            old_alignment: oldAlignment,
+            new_alignment: newAlignment,
+          });
+        }
       }
     }
   });

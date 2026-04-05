@@ -363,9 +363,9 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've nominated and executed a claimed Goblin ${count} time${pluralize(count)}.`
-          : `This player has nominated and executed a claimed Goblin ${count} time${pluralize(count)}.`)
-        : `Nominate and execute a claimed Goblin.`,
+          ? `You've executed a claimed Goblin ${count} time${pluralize(count)}.`
+          : `This player has executed a claimed Goblin ${count} time${pluralize(count)}.`)
+        : `Execute a claimed Goblin.`,
   },
   {
     id: "godfather_kills",
@@ -703,7 +703,7 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         games,
         (_, event) =>
           event.event_type === GrimoireEventType.ROLE_CHANGE &&
-          event.by_role_id === "pit_hag"
+          (event.by_role_id === "pit-hag" || event.by_role_id === "pit_hag")
       ),
     getSentence: ({ count, isMe }) =>
       count > 0

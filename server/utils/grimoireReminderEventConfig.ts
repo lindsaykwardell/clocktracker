@@ -7,12 +7,14 @@ export type GrimoireReminderEventCadence =
   | "persistent";
 
 export type GrimoireReminderTargetScope = "self" | "others" | "all";
+export type GrimoireReminderSourceMode = "participant" | "npc";
 
 export type GrimoireReminderEventConfig = {
   reminder: string;
   eventType: GrimoireEventType;
   cadence: GrimoireReminderEventCadence;
   sourceRoleIds: string[];
+  sourceMode?: GrimoireReminderSourceMode;
   targetScope?: GrimoireReminderTargetScope;
   targetRoleIds?: string[];
 };
@@ -239,7 +241,7 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     sourceRoleIds: ["fortune_teller"],
   },
   {
-    reminder: "Demon",
+    reminder: "Know",
     eventType: GrimoireEventType.OTHER,
     cadence: "once",
     sourceRoleIds: ["choirboy"],
@@ -345,6 +347,13 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     targetRoleIds: ["tinker"],
   },
   {
+    reminder: "Dead",
+    eventType: GrimoireEventType.DEATH,
+    cadence: "once",
+    sourceRoleIds: ["angel"],
+    sourceMode: "npc",
+  },
+  {
     reminder: "Vote Given",
     eventType: GrimoireEventType.OTHER,
     cadence: "persistent",
@@ -435,10 +444,25 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     sourceRoleIds: ["shabaloth"],
   },
   {
+    reminder: "Reincarnated",
+    eventType: GrimoireEventType.REVIVE,
+    cadence: "once",
+    sourceRoleIds: ["hindu"],
+    sourceMode: "npc",
+  },
+  {
     reminder: "Stormcaught",
     eventType: GrimoireEventType.OTHER,
     cadence: "once",
-    sourceRoleIds: ["stormcatcher"],
+    sourceRoleIds: ["storm_catcher"],
+    sourceMode: "npc",
+  },
+  {
+    reminder: "Safe",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "once",
+    sourceRoleIds: ["storm_catcher"],
+    sourceMode: "npc",
   },
   {
     reminder: "Has Ability",
@@ -465,12 +489,14 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     eventType: GrimoireEventType.OTHER,
     cadence: "persistent",
     sourceRoleIds: ["zenomancer"],
+    sourceMode: "npc",
   },
   {
     reminder: "Goal Completed",
     eventType: GrimoireEventType.OTHER,
     cadence: "once",
     sourceRoleIds: ["zenomancer"],
+    sourceMode: "npc",
   },
   {
     reminder: "Is The Demon",
@@ -491,5 +517,20 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     eventType: GrimoireEventType.DEATH,
     cadence: "once",
     sourceRoleIds: ["big_wig"],
+    sourceMode: "npc",
+  },
+  {
+    reminder: "Dead",
+    eventType: GrimoireEventType.DEATH,
+    cadence: "once",
+    sourceRoleIds: ["doomsayer"],
+    sourceMode: "npc",
+  },
+  {
+    reminder: "Dead",
+    eventType: GrimoireEventType.DEATH,
+    cadence: "once",
+    sourceRoleIds: ["hells_librarian"],
+    sourceMode: "npc",
   },
 ];

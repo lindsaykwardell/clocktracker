@@ -1715,6 +1715,7 @@ onMounted(() => {
     display: block;
     inset: 0;
     transition: opacity 0.3s;
+    pointer-events: none;
   }
 
   &::before {

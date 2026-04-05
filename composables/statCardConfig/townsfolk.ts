@@ -404,7 +404,8 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
             if (
               event.by_role_id !== roleId ||
               event.event_type !== GrimoireEventType.OTHER ||
-              event.status_source !== "Demon"
+              (event.status_source !== "Know" &&
+                event.status_source !== "Demon")
             ) {
               return false;
             }
@@ -439,7 +440,8 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         if (
           event.by_role_id !== "choirboy" ||
           event.event_type !== GrimoireEventType.OTHER ||
-          event.status_source !== "Demon"
+          (event.status_source !== "Know" &&
+            event.status_source !== "Demon")
         ) {
           return false;
         }
@@ -1030,23 +1032,6 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `As the High Priestess, be directed to an evil player.`,
   },
   {
-    id: "huntsman_damsel_saves",
-    category: "role",
-    scope: "as_role",
-    roleIds: ["huntsman"],
-    script: "experimental",
-    source: "grimoire_event",
-    label: "Just In Time",
-    getCount: ({ games, roleId }) =>
-      countGrimoireEvents(games, roleId, GrimoireEventType.ROLE_CHANGE),
-    getSentence: ({ count, isMe }) =>
-      count > 0
-        ? (isMe
-          ? `As the Huntsman, you've saved the Damsel ${count} time${pluralize(count)}.`
-          : `As the Huntsman, this player has saved the Damsel ${count} time${pluralize(count)}.`)
-        : `As the Huntsman, save the Damsel.`,
-  },
-  {
     id: "huntsman_ability_uses",
     category: "role",
     scope: "as_role",
@@ -1072,44 +1057,61 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `As the Huntsman, use your ability to choose a player.`,
   },
   {
-    id: "huntsman_wrong_choices",
+    id: "huntsman_damsel_saves",
     category: "role",
     scope: "as_role",
-    script: "experimental",
     roleIds: ["huntsman"],
+    script: "experimental",
     source: "grimoire_event",
-    label: "Off the Trail",
+    label: "Just In Time",
     getCount: ({ games, roleId }) =>
-      games.reduce((total, game) => {
-        if (!roleId || game.ignore_for_stats) return total;
-
-        const abilityUses = game.grimoire_events.filter(
-          (event) =>
-            event.by_role_id === roleId &&
-            event.event_type === GrimoireEventType.OTHER &&
-            event.status_source === "No Ability"
-        );
-
-        const wrongChoices = abilityUses.filter((abilityUse) => {
-          const successfulChoiceInSamePage = game.grimoire_events.some(
-            (event) =>
-              event.by_role_id === roleId &&
-              event.event_type === GrimoireEventType.ROLE_CHANGE &&
-              event.grimoire_page === abilityUse.grimoire_page
-          );
-
-          return !successfulChoiceInSamePage;
-        }).length;
-
-        return total + wrongChoices;
-      }, 0),
+      countGrimoireEvents(games, roleId, GrimoireEventType.ROLE_CHANGE),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Huntsman, you've chosen the wrong player ${count} time${pluralize(count)}.`
-          : `As the Huntsman, this player has chosen the wrong player ${count} time${pluralize(count)}.`)
-        : `As the Huntsman, choose the wrong player.`,
+          ? `As the Huntsman, you've saved the Damsel ${count} time${pluralize(count)}.`
+          : `As the Huntsman, this player has saved the Damsel ${count} time${pluralize(count)}.`)
+        : `As the Huntsman, save the Damsel.`,
   },
+  // {
+  //   id: "huntsman_wrong_choices",
+  //   category: "role",
+  //   scope: "as_role",
+  //   script: "experimental",
+  //   roleIds: ["huntsman"],
+  //   source: "grimoire_event",
+  //   label: "Off the Trail",
+  //   getCount: ({ games, roleId }) =>
+  //     games.reduce((total, game) => {
+  //       if (!roleId || game.ignore_for_stats) return total;
+
+  //       const abilityUses = game.grimoire_events.filter(
+  //         (event) =>
+  //           event.by_role_id === roleId &&
+  //           event.event_type === GrimoireEventType.OTHER &&
+  //           event.status_source === "No Ability"
+  //       );
+
+  //       const wrongChoices = abilityUses.filter((abilityUse) => {
+  //         const successfulChoiceInSamePage = game.grimoire_events.some(
+  //           (event) =>
+  //             event.by_role_id === roleId &&
+  //             event.event_type === GrimoireEventType.ROLE_CHANGE &&
+  //             event.grimoire_page === abilityUse.grimoire_page
+  //         );
+
+  //         return !successfulChoiceInSamePage;
+  //       }).length;
+
+  //       return total + wrongChoices;
+  //     }, 0),
+  //   getSentence: ({ count, isMe }) =>
+  //     count > 0
+  //       ? (isMe
+  //         ? `As the Huntsman, you've chosen the wrong player ${count} time${pluralize(count)}.`
+  //         : `As the Huntsman, this player has chosen the wrong player ${count} time${pluralize(count)}.`)
+  //       : `As the Huntsman, choose the wrong player.`,
+  // },
   {
     id: "innkeeper_drunk_caused",
     category: "role",
@@ -1688,7 +1690,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `Become drunk due to the Philosopher selecting your character.`,
   },
   {
-    id: "pixie_role_changes",
+    id: "pixie_has_ability_uses",
     category: "role",
     scope: "as_role",
     script: "experimental",
@@ -1696,13 +1698,44 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     source: "grimoire_event",
     label: "Fae Inheritance",
     getCount: ({ games, roleId }) =>
-      countGrimoireEvents(games, roleId, GrimoireEventType.ROLE_CHANGE),
+      !roleId
+        ? 0
+        : countMatchingEvents(
+            games,
+            (_, event) =>
+              event.by_role_id === roleId &&
+              event.event_type === GrimoireEventType.OTHER &&
+              event.status_source === "Has Ability"
+          ),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Pixie, you've transformed into another character you were mad as ${count} time${pluralize(count)}.`
-          : `As the Pixie, this player has transformed into another character they were mad as ${count} time${pluralize(count)}.`)
-        : `As the Pixie, change into the character you were mad as.`,
+          ? `As the Pixie, you've gained another character's ability ${count} time${pluralize(count)}.`
+          : `As the Pixie, this player has gained another character's ability ${count} time${pluralize(count)}.`)
+        : `As the Pixie, gain another character's ability due to your ability.`,
+  },
+  {
+    id: "pixie_madness_received",
+    category: "role",
+    scope: "affected_player",
+    script: "experimental",
+    roleIds: ["pixie"],
+    source: "grimoire_event",
+    label: "Borrowed Spotlight",
+    getCount: ({ games }) =>
+      countMatchingEvents(
+        games,
+        (_, event) =>
+          event.by_role_id === "pixie" &&
+          event.event_type === GrimoireEventType.MAD &&
+          event.status_source === "Mad"
+      ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `A Pixie has been mad as your character ${count} time${pluralize(count)}.`
+          : `A Pixie has been mad as this player's character ${count} time${pluralize(count)}.`)
+        : `Have a Pixie be mad as your character.`,
   },
   {
     id: "poppy_grower_deaths_before_wake",
@@ -2269,81 +2302,81 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `As the Snake Charmer, this player has successfully charmed the Demon ${count} time${pluralize(count)}.`)
         : `As the Snake Charmer, successfully charm the Demon using your ability.`,
   },
-  {
-    id: "snake_charmer_post_charm_win_rate",
-    category: "role",
-    scope: "as_role",
-    roleIds: ["snake_charmer"],
-    script: "snv",
-    sao: 3,
-    source: "grimoire_event",
-    label: "Calculated Risk",
-    getCount: ({ games, roleId }) => {
-      if (!roleId) return 0;
+  // {
+  //   id: "snake_charmer_post_charm_win_rate",
+  //   category: "role",
+  //   scope: "as_role",
+  //   roleIds: ["snake_charmer"],
+  //   script: "snv",
+  //   sao: 3,
+  //   source: "grimoire_event",
+  //   label: "Calculated Risk",
+  //   getCount: ({ games, roleId }) => {
+  //     if (!roleId) return 0;
 
-      const charmedGames = games.filter((game) => {
-        if (game.ignore_for_stats) return false;
+  //     const charmedGames = games.filter((game) => {
+  //       if (game.ignore_for_stats) return false;
 
-        return game.grimoire_events.some((event) => {
-          if (
-            event.by_role_id !== roleId ||
-            event.event_type !== GrimoireEventType.ROLE_CHANGE
-          ) {
-            return false;
-          }
+  //       return game.grimoire_events.some((event) => {
+  //         if (
+  //           event.by_role_id !== roleId ||
+  //           event.event_type !== GrimoireEventType.ROLE_CHANGE
+  //         ) {
+  //           return false;
+  //         }
 
-          const previousToken = getEventPreviousToken(game, event);
-          const currentToken = getEventCurrentToken(game, event);
+  //         const previousToken = getEventPreviousToken(game, event);
+  //         const currentToken = getEventCurrentToken(game, event);
 
-          return (
-            previousToken?.role?.type === "DEMON" &&
-            currentToken?.role_id === roleId
-          );
-        });
-      });
+  //         return (
+  //           previousToken?.role?.type === "DEMON" &&
+  //           currentToken?.role_id === roleId
+  //         );
+  //       });
+  //     });
 
-      if (!charmedGames.length) return 0;
+  //     if (!charmedGames.length) return 0;
 
-      // After a successful charm, the Snake Charmer usually becomes the demon and
-      // therefore wants EVIL_WINS. This intentionally ignores rare edge cases like
-      // a good demon being charmed, because the normal evil-demon case is by far
-      // the most common interpretation of this stat.
-      const wins = charmedGames.filter((game) => game.win_v2 === "EVIL_WINS").length;
-      return Math.round((wins / charmedGames.length) * 100);
-    },
-    getSentence: ({ games, count, isMe, roleId }) => {
-      const hasCharmedDemon =
-        !!roleId &&
-        games.some((game) => {
-          if (game.ignore_for_stats) return false;
+  //     // After a successful charm, the Snake Charmer usually becomes the demon and
+  //     // therefore wants EVIL_WINS. This intentionally ignores rare edge cases like
+  //     // a good demon being charmed, because the normal evil-demon case is by far
+  //     // the most common interpretation of this stat.
+  //     const wins = charmedGames.filter((game) => game.win_v2 === "EVIL_WINS").length;
+  //     return Math.round((wins / charmedGames.length) * 100);
+  //   },
+  //   getSentence: ({ games, count, isMe, roleId }) => {
+  //     const hasCharmedDemon =
+  //       !!roleId &&
+  //       games.some((game) => {
+  //         if (game.ignore_for_stats) return false;
 
-          return game.grimoire_events.some((event) => {
-            if (
-              event.by_role_id !== roleId ||
-              event.event_type !== GrimoireEventType.ROLE_CHANGE
-            ) {
-              return false;
-            }
+  //         return game.grimoire_events.some((event) => {
+  //           if (
+  //             event.by_role_id !== roleId ||
+  //             event.event_type !== GrimoireEventType.ROLE_CHANGE
+  //           ) {
+  //             return false;
+  //           }
 
-            const previousToken = getEventPreviousToken(game, event);
-            const currentToken = getEventCurrentToken(game, event);
+  //           const previousToken = getEventPreviousToken(game, event);
+  //           const currentToken = getEventCurrentToken(game, event);
 
-            return (
-              previousToken?.role?.type === "DEMON" &&
-              currentToken?.role_id === roleId
-            );
-          });
-        });
+  //           return (
+  //             previousToken?.role?.type === "DEMON" &&
+  //             currentToken?.role_id === roleId
+  //           );
+  //         });
+  //       });
 
-      if (!hasCharmedDemon) {
-        return `As the Snake Charmer, win a game after charming the Demon.`;
-      }
+  //     if (!hasCharmedDemon) {
+  //       return `As the Snake Charmer, win a game after charming the Demon.`;
+  //     }
 
-      return isMe
-        ? `As the Snake Charmer, you've won ${count}% of games where you charmed the Demon.`
-        : `As the Snake Charmer, this player has won ${count}% of games where they charmed the Demon.`;
-    },
-  },
+  //     return isMe
+  //       ? `As the Snake Charmer, you've won ${count}% of games where you charmed the Demon.`
+  //       : `As the Snake Charmer, this player has won ${count}% of games where they charmed the Demon.`;
+  //   },
+  // },
   {
     id: "snake_charmer_demon_charms_received",
     category: "role",

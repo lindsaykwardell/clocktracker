@@ -44,7 +44,6 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
           : `This player has been struck down by the Angel ${count} time${pluralize(count)}.`)
         : `Be struck down by the Angel.`,
   },
-  // Angel: @todo Protected?
   // Buddhist: OK.
   {
     id: "doomsayer_deaths",
@@ -135,7 +134,7 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
       countMatchingEvents(
         games,
         (_, event) =>
-          event.by_role_id === "bigwig" &&
+          event.by_role_id === "big_wig" &&
           event.event_type === GrimoireEventType.DEATH &&
           event.status_source === "DEAD"
       ),
@@ -181,9 +180,9 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
       countMatchingEvents(
         games,
         (_, event) =>
-          event.by_role_id === "stormcatcher" &&
+          event.by_role_id === "storm_catcher" &&
           event.event_type === GrimoireEventType.OTHER &&
-          event.status_source === "Stormcaught"
+          (event.status_source === "Stormcaught" || event.status_source === "Safe")
       ),
     getSentence: ({ count, isMe }) =>
       count > 0
