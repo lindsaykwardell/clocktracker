@@ -32,6 +32,7 @@ type SnapshotData = {
   end_trigger_type?: string | null;
   end_trigger_cause?: string | null;
   end_trigger_role_id?: string | null;
+  end_trigger_subtype?: string | null;
   end_trigger_note?: string | null;
   end_trigger_participant_id?: string | null;
   grimoire_events?: {
@@ -145,6 +146,8 @@ export default defineEventHandler(async (handler) => {
     gameUpdateData.end_trigger_cause = data.end_trigger_cause as any;
   if ("end_trigger_role_id" in data)
     gameUpdateData.end_trigger_role_id = data.end_trigger_role_id ?? null;
+  if ("end_trigger_subtype" in data)
+    gameUpdateData.end_trigger_subtype = data.end_trigger_subtype ?? "";
   if ("end_trigger_note" in data)
     gameUpdateData.end_trigger_note = data.end_trigger_note ?? "";
   if ("end_trigger_participant_id" in data) {

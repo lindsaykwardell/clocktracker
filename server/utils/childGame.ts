@@ -87,6 +87,7 @@ export async function findOrCreatePlayerChildGame(opts: {
     end_trigger_type?: string | null;
     end_trigger_cause?: string | null;
     end_trigger_role_id?: string | null;
+    end_trigger_subtype?: string | null;
     end_trigger_note?: string | null;
     end_trigger_participant_id?: string | null;
     is_storyteller: boolean;
@@ -144,6 +145,7 @@ export async function findOrCreatePlayerChildGame(opts: {
         end_trigger_type: game.end_trigger_type as any,
         end_trigger_cause: game.end_trigger_cause as any,
         end_trigger_role_id: game.end_trigger_role_id ?? null,
+        end_trigger_subtype: game.end_trigger_subtype ?? "",
         end_trigger_note: game.end_trigger_note ?? "",
         end_trigger_participant_id: game.end_trigger_participant_id ?? null,
         demon_bluffs: {
@@ -236,6 +238,7 @@ export async function findOrCreatePlayerChildGame(opts: {
       end_trigger_type: game.end_trigger_type as any,
       end_trigger_cause: game.end_trigger_cause as any,
       end_trigger_role_id: game.end_trigger_role_id ?? null,
+      end_trigger_subtype: game.end_trigger_subtype ?? "",
       end_trigger_note: game.end_trigger_note ?? "",
       end_trigger_participant_id: game.end_trigger_participant_id ?? null,
       user_id: playerId,
@@ -312,6 +315,7 @@ export async function findOrCreateStorytellerChildGame(opts: {
     end_trigger_type?: string | null;
     end_trigger_cause?: string | null;
     end_trigger_role_id?: string | null;
+    end_trigger_subtype?: string | null;
     end_trigger_note?: string | null;
     end_trigger_participant_id?: string | null;
     grimoire_events?: {
@@ -364,6 +368,7 @@ export async function findOrCreateStorytellerChildGame(opts: {
         end_trigger_type: game.end_trigger_type as any,
         end_trigger_cause: game.end_trigger_cause as any,
         end_trigger_role_id: game.end_trigger_role_id ?? null,
+        end_trigger_subtype: game.end_trigger_subtype ?? "",
         end_trigger_note: game.end_trigger_note ?? "",
         end_trigger_participant_id: game.end_trigger_participant_id ?? null,
         demon_bluffs: {
@@ -442,6 +447,7 @@ export async function findOrCreateStorytellerChildGame(opts: {
       end_trigger_type: game.end_trigger_type as any,
       end_trigger_cause: game.end_trigger_cause as any,
       end_trigger_role_id: game.end_trigger_role_id ?? null,
+      end_trigger_subtype: game.end_trigger_subtype ?? "",
       end_trigger_note: game.end_trigger_note ?? "",
       end_trigger_participant_id: game.end_trigger_participant_id ?? null,
       is_storyteller: true,

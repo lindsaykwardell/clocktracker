@@ -34,6 +34,7 @@ export default defineEventHandler(async (handler) => {
     end_trigger_type: GameEndTriggerType | null | undefined;
     end_trigger_cause: GameEndTriggerCause | null | undefined;
     end_trigger_role_id: string | null | undefined;
+    end_trigger_subtype: string | undefined;
     end_trigger_note: string | undefined;
     end_trigger_participant_id: string | null | undefined;
     tags: string[];
@@ -97,6 +98,10 @@ export default defineEventHandler(async (handler) => {
           body.end_trigger_role_id === undefined
             ? payload.end_trigger_role_id
             : body.end_trigger_role_id,
+        end_trigger_subtype:
+          body.end_trigger_subtype === undefined
+            ? payload.end_trigger_subtype
+            : body.end_trigger_subtype,
         end_trigger_note:
           body.end_trigger_note === undefined
             ? payload.end_trigger_note
@@ -189,6 +194,7 @@ export default defineEventHandler(async (handler) => {
       win_v2: game.win_v2,
       end_trigger: game.end_trigger,
       end_trigger_role_id: game.end_trigger_role_id,
+      end_trigger_subtype: game.end_trigger_subtype,
       end_trigger_note: game.end_trigger_note,
       end_trigger_participant_id: game.end_trigger_participant_id,
       tags: game.tags,

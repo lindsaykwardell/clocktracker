@@ -75,6 +75,32 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `As the Assassin, this player has turned their blade on an evil player ${count} time${pluralize(count)}.`)
         : `As the Assassin, kill an evil player with your ability.`,
   },
+  {
+    id: "assassin_demon_kills_game_endings",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["assassin"],
+    script: "bmr",
+    sao: 3,
+    hidden: true,
+    source: "end_trigger",
+    label: "Friendly Fire",
+    getCount: ({ games, roleId }) =>
+      games.filter(
+        (game) =>
+          !game.ignore_for_stats &&
+          !!roleId &&
+          game.end_trigger === GameEndTrigger.NO_LIVING_DEMON &&
+          game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
+          game.end_trigger_role_id === roleId
+      ).length,
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Assassin, you've ended the game ${count} time${pluralize(count)} by killing the Demon due to your ability.`
+          : `As the Assassin, this player has ended the game ${count} time${pluralize(count)} by killing the Demon due to their ability.`)
+        : `As the Assassin, end the game by killing the Demon due to your ability.`,
+  },
   // Baron sao: 3,: Nothing to track really.
   // Boffin: @todo Some end triggers?
   {
@@ -177,6 +203,32 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `As the Cerenovus, cause an execution due to your ability.`,
   },
   {
+    id: "cerenovus_execution_game_endings",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["cerenovus"],
+    script: "snv",
+    sao: 3,
+    source: "end_trigger",
+    label: "Mad Finale",
+    getCount: ({ games, roleId }) =>
+      games.filter(
+        (game) =>
+          !game.ignore_for_stats &&
+          !!roleId &&
+          game.end_trigger === GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE &&
+          game.end_trigger_type === GameEndTriggerType.EXECUTION &&
+          game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
+          game.end_trigger_role_id === roleId
+      ).length,
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Cerenovus, you've ended the game ${count} time${pluralize(count)} through an execution due to your ability.`
+          : `As the Cerenovus, this player has ended the game ${count} time${pluralize(count)} through an execution due to their ability.`)
+        : `As the Cerenovus, end the game through an execution due to your ability.`,
+  },
+  {
     id: "devils_advocate_saves",
     category: "role",
     scope: "as_role",
@@ -239,7 +291,32 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `As the Devil's Advocate, save the Demon from execution.`,
   },
   // Devil's Advocate: Maybe how many times they protected a good player?
-  // Evil Twin sao: 1,: @todo
+  {
+    id: "evil_twin_game_endings",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["evil_twin"],
+    script: "snv",
+    sao: 1,
+    source: "end_trigger",
+    label: "Twin Verdict",
+    getCount: ({ games, roleId }) =>
+      games.filter(
+        (game) =>
+          !game.ignore_for_stats &&
+          !!roleId &&
+          game.end_trigger === GameEndTrigger.CHARACTER_ABILITY &&
+          game.end_trigger_type === GameEndTriggerType.EXTRA_WIN_CONDITION &&
+          game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
+          game.end_trigger_role_id === roleId
+      ).length,
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Evil Twin, you've ended the game ${count} time${pluralize(count)} due to your ability.`
+          : `As the Evil Twin, this player has ended the game ${count} time${pluralize(count)} due to their ability.`)
+        : `As the Evil Twin, end the game due to your ability.`,
+  },
   {
     id: "fearmonger_game_endings",
     category: "role",
@@ -323,15 +400,14 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           game.end_trigger === GameEndTrigger.CHARACTER_ABILITY &&
           game.end_trigger_type === GameEndTriggerType.EXTRA_WIN_CONDITION &&
           game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
-          game.end_trigger_role_id === roleId &&
-          game.win_v2 === WinStatus_V2.EVIL_WINS
+          game.end_trigger_role_id === roleId
       ).length,
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Goblin, you've won ${count} game${pluralize(count)} by being executed after claiming Goblin.`
-          : `As the Goblin, this player has won ${count} game${pluralize(count)} by being executed after claiming Goblin.`)
-        : `As the Goblin, win a game due to your ability.`,
+          ? `As the Goblin, you've ended ${count} game${pluralize(count)} by being executed after claiming Goblin.`
+          : `As the Goblin, this player has ended ${count} game${pluralize(count)} by being executed after claiming Goblin.`)
+        : `As the Goblin, end a game due to your ability.`,
   },
   {
     id: "goblin_claimed_executions_caused",
@@ -386,6 +462,31 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `As the Godfather, kill a player with your ability.`,
   },
   {
+    id: "godfather_demon_kill_game_endings",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["godfather"],
+    script: "bmr",
+    hidden: true,
+    source: "end_trigger",
+    label: "A Hit Too Far",
+    getCount: ({ games, roleId }) =>
+      games.filter(
+        (game) =>
+          !game.ignore_for_stats &&
+          !!roleId &&
+          game.end_trigger === GameEndTrigger.NO_LIVING_DEMON &&
+          game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
+          game.end_trigger_role_id === roleId
+      ).length,
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Godfather, you've ended the game ${count} time${pluralize(count)} by killing the Demon due to your ability.`
+          : `As the Godfather, this player has ended the game ${count} time${pluralize(count)} by killing the Demon due to their ability.`)
+        : `As the Godfather, end the game by killing the Demon due to your ability.`,
+  },
+  {
     id: "harpy_kills",
     category: "role",
     scope: "as_role",
@@ -418,6 +519,31 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Harpy, you've made ${count} player${pluralize(count)} mad.`
           : `As the Harpy, this player has made ${count} player${pluralize(count)} mad.`)
         : `As the Harpy, make a player mad.`,
+  },
+  {
+    id: "harpy_execution_game_endings",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["harpy"],
+    script: "experimental",
+    source: "end_trigger",
+    label: "Shrieking End",
+    getCount: ({ games, roleId }) =>
+      games.filter(
+        (game) =>
+          !game.ignore_for_stats &&
+          !!roleId &&
+          game.end_trigger === GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE &&
+          game.end_trigger_type === GameEndTriggerType.EXECUTION &&
+          game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
+          game.end_trigger_role_id === roleId
+      ).length,
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Harpy, you've ended the game ${count} time${pluralize(count)} through an execution due to your ability.`
+          : `As the Harpy, this player has ended the game ${count} time${pluralize(count)} through an execution due to their ability.`)
+        : `As the Harpy, end the game through an execution due to your ability.`,
   },
   // Marionette: Nothing relevant. Only option: None?
   {
@@ -748,6 +874,56 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `As the Psychopath, kill a player with your ability.`,
   },
   {
+    id: "psychopath_demon_kill_game_endings",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["psychopath"],
+    script: "experimental",
+    hidden: true,
+    source: "end_trigger",
+    label: "Axe Misjudgment",
+    getCount: ({ games, roleId }) =>
+      games.filter(
+        (game) =>
+          !game.ignore_for_stats &&
+          !!roleId &&
+          game.end_trigger === GameEndTrigger.NO_LIVING_DEMON &&
+          game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
+          game.end_trigger_role_id === roleId
+      ).length,
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Psychopath, you've ended the game ${count} time${pluralize(count)} by killing the Demon due to your ability.`
+          : `As the Psychopath, this player has ended the game ${count} time${pluralize(count)} by killing the Demon due to their ability.`)
+        : `As the Psychopath, end the game by killing the Demon due to your ability.`,
+  },
+  {
+    id: "psychopath_death_game_endings",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["psychopath"],
+    script: "experimental",
+    source: "end_trigger",
+    label: "Final Swing",
+    getCount: ({ games, roleId }) =>
+      games.filter(
+        (game) =>
+          !game.ignore_for_stats &&
+          !!roleId &&
+          game.end_trigger === GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE &&
+          game.end_trigger_type === GameEndTriggerType.DEATH &&
+          game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
+          game.end_trigger_role_id === roleId
+      ).length,
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Psychopath, you've ended the game ${count} time${pluralize(count)} through a death due to your ability.`
+          : `As the Psychopath, this player has ended the game ${count} time${pluralize(count)} through a death due to their ability.`)
+        : `As the Psychopath, end the game through a death due to your ability.`,
+  },
+  {
     id: "scarlet_woman_demon_changes",
     category: "role",
     scope: "as_role",
@@ -848,7 +1024,6 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     scope: "affected_player",
     script: "experimental",
     roleIds: ["spy"],
-    sao: 2,
     source: "grimoire_event",
     label: "A Good-Looking Cover",
     getCount: ({ games }) =>
@@ -1102,6 +1277,57 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `You've been forced to be executed by the Vizier ${count} time${pluralize(count)}.`
           : `This player has been forced to be executed by the Vizier ${count} time${pluralize(count)}.`)
         : `Be forced to be executed by the Vizier.`,
+  },
+  {
+    id: "vizier_demon_execution_game_endings",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["vizier"],
+    script: "experimental",
+    hidden: true,
+    source: "end_trigger",
+    label: "Edict Backfired",
+    getCount: ({ games, roleId }) =>
+      games.filter(
+        (game) =>
+          !game.ignore_for_stats &&
+          !!roleId &&
+          game.end_trigger === GameEndTrigger.NO_LIVING_DEMON &&
+          game.end_trigger_type === GameEndTriggerType.EXECUTION &&
+          game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
+          game.end_trigger_role_id === roleId
+      ).length,
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Vizier, you've ended the game ${count} time${pluralize(count)} by executing the Demon due to your ability.`
+          : `As the Vizier, this player has ended the game ${count} time${pluralize(count)} by executing the Demon due to their ability.`)
+        : `As the Vizier, end the game by executing the Demon due to your ability.`,
+  },
+  {
+    id: "vizier_execution_game_endings",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["vizier"],
+    script: "experimental",
+    source: "end_trigger",
+    label: "Final Decree",
+    getCount: ({ games, roleId }) =>
+      games.filter(
+        (game) =>
+          !game.ignore_for_stats &&
+          !!roleId &&
+          game.end_trigger === GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE &&
+          game.end_trigger_type === GameEndTriggerType.EXECUTION &&
+          game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
+          game.end_trigger_role_id === roleId
+      ).length,
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Vizier, you've ended the game ${count} time${pluralize(count)} through an execution due to your ability.`
+          : `As the Vizier, this player has ended the game ${count} time${pluralize(count)} through an execution due to their ability.`)
+        : `As the Vizier, end the game through an execution due to your ability.`,
   },
   {
     id: "widow_poisoned",

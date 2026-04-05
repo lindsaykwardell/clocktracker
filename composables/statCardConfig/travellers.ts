@@ -74,6 +74,55 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `As the Gunslinger, kill a player with your ability.`,
   },
   {
+    id: "gunslinger_demon_kill_endings",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["gunslinger"],
+    script: "tb",
+    source: "end_trigger",
+    label: "Final Shot",
+    getCount: ({ games, roleId }) =>
+      games.filter(
+        (game) =>
+          !game.ignore_for_stats &&
+          !!roleId &&
+          game.end_trigger === GameEndTrigger.NO_LIVING_DEMON &&
+          game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
+          game.end_trigger_role_id === roleId
+      ).length,
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Gunslinger, you've ended the game ${count} time${pluralize(count)} by killing the Demon with your ability.`
+          : `As the Gunslinger, this player has ended the game ${count} time${pluralize(count)} by killing the Demon with their ability.`)
+        : `As the Gunslinger, end the game by killing the Demon with your ability.`,
+  },
+  {
+    id: "gunslinger_final3_game_endings",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["gunslinger"],
+    script: "tb",
+    source: "end_trigger",
+    label: "This Ain't No Mexican Standoff",
+    getCount: ({ games, roleId }) =>
+      games.filter(
+        (game) =>
+          !game.ignore_for_stats &&
+          !!roleId &&
+          game.end_trigger === GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE &&
+          game.end_trigger_type === GameEndTriggerType.DEATH &&
+          game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
+          game.end_trigger_role_id === roleId
+      ).length,
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Gunslinger, you've ended the game ${count} time${pluralize(count)} by killing a player with your ability during final 3.`
+          : `As the Gunslinger, this player has ended the game ${count} time${pluralize(count)} by killing a player with their ability during final 3.`)
+        : `As the Gunslinger, end the game by killing a player with your ability during final 3.`,
+  },
+  {
     id: "beggar_alms_received",
     category: "role",
     scope: "as_role",
@@ -258,6 +307,56 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Butcher, you've executed ${count} extra player${pluralize(count)} due to your ability.`
           : `As the Butcher, this player has executed ${count} extra player${pluralize(count)} due to their ability.`)
         : `As the Butcher, execute an extra player due to your ability.`,
+  },
+  {
+    id: "butcher_demon_execution_game_endings",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["butcher"],
+    script: "snv",
+    source: "end_trigger",
+    label: "One Cut Too Many",
+    getCount: ({ games, roleId }) =>
+      games.filter(
+        (game) =>
+          !game.ignore_for_stats &&
+          !!roleId &&
+          game.end_trigger === GameEndTrigger.NO_LIVING_DEMON &&
+          game.end_trigger_type === GameEndTriggerType.EXECUTION &&
+          game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
+          game.end_trigger_role_id === roleId
+      ).length,
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Butcher, you've ended the game ${count} time${pluralize(count)} by executing the Demon due to your ability.`
+          : `As the Butcher, this player has ended the game ${count} time${pluralize(count)} by executing the Demon due to their ability.`)
+        : `As the Butcher, end the game by executing the Demon due to your ability.`,
+  },
+  {
+    id: "butcher_execution_game_endings",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["butcher"],
+    script: "snv",
+    source: "end_trigger",
+    label: "Execution Spiral",
+    getCount: ({ games, roleId }) =>
+      games.filter(
+        (game) =>
+          !game.ignore_for_stats &&
+          !!roleId &&
+          game.end_trigger === GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE &&
+          game.end_trigger_type === GameEndTriggerType.EXECUTION &&
+          game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
+          game.end_trigger_role_id === roleId
+      ).length,
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Butcher, you've ended the game ${count} time${pluralize(count)} through an execution due to your ability.`
+          : `As the Butcher, this player has ended the game ${count} time${pluralize(count)} through an execution due to their ability.`)
+        : `As the Butcher, end the game through an execution due to your ability.`,
   },
   {
     id: "bone_collector_restored_abilities",
@@ -461,6 +560,56 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `As the Judge, this player has caused ${count} execution${pluralize(count)} to fail due to their ability.`)
         : `As the Judge, cause an execution to fail due to your ability.`,
   },
+  {
+    id: "judge_demon_execution_game_endings",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["judge"],
+    script: "bmr",
+    source: "end_trigger",
+    label: "Sentence Too Final",
+    getCount: ({ games, roleId }) =>
+      games.filter(
+        (game) =>
+          !game.ignore_for_stats &&
+          !!roleId &&
+          game.end_trigger === GameEndTrigger.NO_LIVING_DEMON &&
+          game.end_trigger_type === GameEndTriggerType.EXECUTION &&
+          game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
+          game.end_trigger_role_id === roleId
+      ).length,
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Judge, you've ended the game ${count} time${pluralize(count)} by executing the Demon due to your ability.`
+          : `As the Judge, this player has ended the game ${count} time${pluralize(count)} by executing the Demon due to their ability.`)
+        : `As the Judge, end the game by executing the Demon due to your ability.`,
+  },
+  {
+    id: "judge_execution_game_endings",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["judge"],
+    script: "bmr",
+    source: "end_trigger",
+    label: "Judgment Day",
+    getCount: ({ games, roleId }) =>
+      games.filter(
+        (game) =>
+          !game.ignore_for_stats &&
+          !!roleId &&
+          game.end_trigger === GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE &&
+          game.end_trigger_type === GameEndTriggerType.EXECUTION &&
+          game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
+          game.end_trigger_role_id === roleId
+      ).length,
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Judge, you've ended the game ${count} time${pluralize(count)} through an execution due to your ability.`
+          : `As the Judge, this player has ended the game ${count} time${pluralize(count)} through an execution due to their ability.`)
+        : `As the Judge, end the game through an execution due to your ability.`,
+  },
   // Bishop: @todo
   {
     id: "cacklejack_role_changes_caused",
@@ -519,6 +668,55 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `As the Gangster, kill one of your neighbors with your ability.`,
   },
   {
+    id: "gangster_demon_kill_game_endings",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["gangster"],
+    script: "experimental",
+    source: "end_trigger",
+    label: "Contract Gone Wrong",
+    getCount: ({ games, roleId }) =>
+      games.filter(
+        (game) =>
+          !game.ignore_for_stats &&
+          !!roleId &&
+          game.end_trigger === GameEndTrigger.NO_LIVING_DEMON &&
+          game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
+          game.end_trigger_role_id === roleId
+      ).length,
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Gangster, you've ended the game ${count} time${pluralize(count)} by killing the Demon due to your ability.`
+          : `As the Gangster, this player has ended the game ${count} time${pluralize(count)} by killing the Demon due to their ability.`)
+        : `As the Gangster, end the game by killing the Demon due to your ability.`,
+  },
+  {
+    id: "gangster_death_game_endings",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["gangster"],
+    script: "experimental",
+    source: "end_trigger",
+    label: "Last Contract",
+    getCount: ({ games, roleId }) =>
+      games.filter(
+        (game) =>
+          !game.ignore_for_stats &&
+          !!roleId &&
+          game.end_trigger === GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE &&
+          game.end_trigger_type === GameEndTriggerType.DEATH &&
+          game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
+          game.end_trigger_role_id === roleId
+      ).length,
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Gangster, you've ended the game ${count} time${pluralize(count)} through a death due to your ability.`
+          : `As the Gangster, this player has ended the game ${count} time${pluralize(count)} through a death due to their ability.`)
+        : `As the Gangster, end the game through a death due to your ability.`,
+  },
+  {
     id: "gnome_kills",
     category: "role",
     scope: "as_role",
@@ -534,6 +732,55 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Gnome, you've killed ${count} player${pluralize(count)} for nominating your amigo.`
           : `As the Gnome, this player has killed ${count} player${pluralize(count)} for nominating their amigo.`)
         : `As the Gnome, kill a player for nominating your amigo.`,
+  },
+  {
+    id: "gnome_demon_kill_game_endings",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["gnome"],
+    script: "experimental",
+    source: "end_trigger",
+    label: "Amigo’s Revenge",
+    getCount: ({ games, roleId }) =>
+      games.filter(
+        (game) =>
+          !game.ignore_for_stats &&
+          !!roleId &&
+          game.end_trigger === GameEndTrigger.NO_LIVING_DEMON &&
+          game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
+          game.end_trigger_role_id === roleId
+      ).length,
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Gnome, you've ended the game ${count} time${pluralize(count)} by killing the Demon due to your ability.`
+          : `As the Gnome, this player has ended the game ${count} time${pluralize(count)} by killing the Demon due to their ability.`)
+        : `As the Gnome, end the game by killing the Demon due to your ability.`,
+  },
+  {
+    id: "gnome_death_game_endings",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["gnome"],
+    script: "experimental",
+    source: "end_trigger",
+    label: "Final Warning",
+    getCount: ({ games, roleId }) =>
+      games.filter(
+        (game) =>
+          !game.ignore_for_stats &&
+          !!roleId &&
+          game.end_trigger === GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE &&
+          game.end_trigger_type === GameEndTriggerType.DEATH &&
+          game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
+          game.end_trigger_role_id === roleId
+      ).length,
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Gnome, you've ended the game ${count} time${pluralize(count)} through a death due to your ability.`
+          : `As the Gnome, this player has ended the game ${count} time${pluralize(count)} through a death due to their ability.`)
+        : `As the Gnome, end the game through a death due to your ability.`,
   },
   {
     id: "gnome_amigo_marked",
