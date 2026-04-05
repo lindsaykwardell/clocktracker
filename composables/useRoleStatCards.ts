@@ -354,14 +354,30 @@ function getScopedGamesForRole(
 
       if (!participantIds.size) return [];
 
+      const triggeringEvents = game.grimoire_events.filter(
+        (event) =>
+          !!event.by_participant_id &&
+          participantIds.has(event.by_participant_id)
+      );
+
+      // Keep companion Claimed markers for executions triggered by this player,
+      // so role cards can correlate execution + claim without loading all events.
+      const executionKeys = new Set(
+        triggeringEvents
+          .filter((event) => event.event_type === GrimoireEventType.EXECUTION)
+          .map((event) => `${event.grimoire_page}:${event.participant_id}`)
+      );
+      const claimedCompanionEvents = game.grimoire_events.filter(
+        (event) =>
+          event.event_type === GrimoireEventType.OTHER &&
+          event.status_source === "Claimed" &&
+          executionKeys.has(`${event.grimoire_page}:${event.participant_id}`)
+      );
+
       return [
         {
           ...game,
-          grimoire_events: game.grimoire_events.filter(
-            (event) =>
-              !!event.by_participant_id &&
-              participantIds.has(event.by_participant_id)
-          ),
+          grimoire_events: [...triggeringEvents, ...claimedCompanionEvents],
         },
       ];
     });

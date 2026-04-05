@@ -13,7 +13,7 @@ const trackingReminders = [
   },
   {
     role_id: "choirboy",
-    reminder: "Demon",
+    reminder: "Know",
     type: ReminderType.TRACKING,
   },
   {
@@ -117,6 +117,16 @@ const trackingReminders = [
     type: ReminderType.TRACKING,
   },
   {
+    role_id: "doomsayer",
+    reminder: "Dead",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "hells_librarian",
+    reminder: "Dead",
+    type: ReminderType.TRACKING,
+  },
+  {
     role_id: "puzzlemaster",
     reminder: "Know",
     type: ReminderType.TRACKING,
@@ -203,6 +213,11 @@ const trackingReminders = [
   },
   {
     role_id: "imp",
+    reminder: "Changed",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "kazali",
     reminder: "Changed",
     type: ReminderType.TRACKING,
   },
@@ -302,8 +317,18 @@ const trackingReminders = [
     type: ReminderType.TRACKING,
   },
   {
+    role_id: "angel",
+    reminder: "Dead",
+    type: ReminderType.TRACKING,
+  },
+  {
     role_id: "al-hadikhia",
     reminder: "Alive",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "hindu",
+    reminder: "Reincarnated",
     type: ReminderType.TRACKING,
   },
 ];

@@ -665,7 +665,8 @@ function shouldApplyShroudFromReminder(
 }
 
 function shouldRemoveShroudFromReminder(reminderName?: string | null) {
-  return (reminderName ?? "").trim().toLowerCase() === "alive";
+  const normalized = (reminderName ?? "").trim().toLowerCase();
+  return normalized === "alive" || normalized === "reincarnated";
 }
 
 function emitDeathToggled(token: Token, isDead: boolean) {
