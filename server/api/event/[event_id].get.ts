@@ -35,6 +35,18 @@ export default defineEventHandler(async (handler) => {
           ],
         },
         {
+          who_can_register: {
+            in: [WhoCanRegister.ANYONE, WhoCanRegister.PRIVATE],
+          },
+          community: {
+            banned_users: {
+              none: {
+                user_id: me?.id || "",
+              },
+            },
+          },
+        },
+        {
           community: {
             banned_users: {
               none: {

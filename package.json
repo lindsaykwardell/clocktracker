@@ -7,7 +7,7 @@
     "db:reset": "supabase db reset && prisma migrate reset --force && prisma db seed",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare && prisma generate",
+    "postinstall": "nuxt prepare && prisma generate && node scripts/patch-prisma.js",
     "test": "playwright test",
     "build:capacitor": "CAPACITOR_BUILD=true nuxt generate",
     "cap:sync": "npx cap sync",
