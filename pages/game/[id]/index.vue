@@ -966,6 +966,10 @@ import {
     GrimoireEventType,
     GrimoireEventCause,
 } from "~/composables/useGames";
+import {
+    getEndTriggerSubtypeOptions,
+    parseEndTriggerSubtype,
+} from "~/composables/endTriggerSubtypeConfig";
 import type { GameRecord } from "~/composables/useGames";
 import { displayWinIconSvg } from "~/composables/useGames";
 import dayjs from "dayjs";
@@ -1162,23 +1166,6 @@ const endTriggerSummary = computed(() => {
     if (!data.end_trigger || data.end_trigger === GameEndTrigger.NOT_RECORDED)
         return "";
 
-    const triggerLabel = (() => {
-        switch (data.end_trigger) {
-            case GameEndTrigger.NO_LIVING_DEMON:
-                return "No living demon";
-            case GameEndTrigger.CHARACTER_ABILITY:
-                return "Character ability ended the game";
-            case GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE:
-                return "Only two players left alive";
-            case GameEndTrigger.GAME_ENDED_EARLY:
-                return "Game ended early";
-            case GameEndTrigger.OTHER:
-                return "Other";
-            default:
-                return "Not recorded";
-        }
-    })();
-
     const triggerTypeLabel = (() => {
         switch (data.end_trigger_type) {
             case GameEndTriggerType.DEATH:
@@ -1186,11 +1173,11 @@ const endTriggerSummary = computed(() => {
             case GameEndTriggerType.EXECUTION:
                 return "execution";
             case GameEndTriggerType.CHARACTER_CHANGE:
-                return "a character change";
+                return "character change";
             case GameEndTriggerType.EXTRA_WIN_CONDITION:
-                return "an extra win condition";
+                return "extra win condition";
             case GameEndTriggerType.OTHER:
-                return "other means";
+                return "other";
             default:
                 return "";
         }
@@ -1199,11 +1186,11 @@ const endTriggerSummary = computed(() => {
     const triggerCauseLabel = (() => {
         switch (data.end_trigger_cause) {
             case GameEndTriggerCause.ABILITY:
-                return "the ability";
+                return "ability";
             case GameEndTriggerCause.NOMINATION:
-                return "the nomination";
+                return "nomination";
             case GameEndTriggerCause.FAILED_ABILITY:
-                return "a failed ability";
+                return "failed ability";
             default:
                 return "";
         }
@@ -1224,25 +1211,48 @@ const endTriggerSummary = computed(() => {
     }
 
     const actorLabel = character
-        ? `${roleArticle(character)}${character}${player ? ` (${player})` : ""}`
+        ? player
+            ? `${player} ${roleArticle(character)}${character}`
+            : `${roleArticle(character)}${character}`
         : player;
 
-    if (triggerTypeLabel && triggerCauseLabel && actorLabel) {
-        return `${triggerLabel} due to ${triggerTypeLabel} by ${triggerCauseLabel} of ${actorLabel}`;
+    const subtype = parseEndTriggerSubtype(
+        data.end_trigger_subtype || data.end_trigger_note,
+    );
+    const subtypeLabel = subtype
+        ? getEndTriggerSubtypeOptions(data.end_trigger_role_id).find(
+              (option) => option.value === subtype,
+          )?.label || ""
+        : "";
+
+    const details = [subtypeLabel].filter(Boolean).join(" - ");
+    const noteText = (data.end_trigger_note || "").trim();
+
+    switch (data.end_trigger) {
+        case GameEndTrigger.NO_LIVING_DEMON:
+            return "Ended because no living demon remained.";
+        case GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE:
+            return "Ended with two players left alive.";
+        case GameEndTrigger.GAME_ENDED_EARLY:
+            return noteText
+                ? `Ended early - ${noteText}`
+                : "Ended early.";
+        case GameEndTrigger.OTHER:
+            return noteText ? `Ended - ${noteText}` : "Ended for another reason.";
+        case GameEndTrigger.CHARACTER_ABILITY: {
+            const parts: string[] = [];
+            if (actorLabel) parts.push(`Ended by ${actorLabel}`);
+            else parts.push("Ended by character ability");
+
+            const viaParts = [triggerCauseLabel, triggerTypeLabel].filter(Boolean);
+            if (viaParts.length) parts.push(`via ${viaParts.join(" - ")}`);
+            if (details) parts.push(`(${details})`);
+
+            return `${parts.join(" ")}.`;
+        }
+        default:
+            return "End trigger recorded.";
     }
-    if (triggerTypeLabel && triggerCauseLabel) {
-        return `${triggerLabel} due to ${triggerTypeLabel} by ${triggerCauseLabel}`;
-    }
-    if (triggerTypeLabel && actorLabel) {
-        return `${triggerLabel} due to ${triggerTypeLabel} of ${actorLabel}`;
-    }
-    if (triggerTypeLabel) {
-        return `${triggerLabel} due to ${triggerTypeLabel}`;
-    }
-    if (actorLabel) {
-        return `${triggerLabel} due to ${actorLabel}`;
-    }
-    return triggerLabel;
 });
 
 const deathTooltipsForPage = computed(() => {

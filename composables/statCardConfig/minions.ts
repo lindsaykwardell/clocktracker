@@ -37,7 +37,7 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         ? (isMe
           ? `As the Assassin, you've killed ${count} player${pluralize(count)}.`
           : `As the Assassin, this player has killed ${count} player${pluralize(count)}.`)
-        : `As the Assassin, kill a player with your ability.`,
+        : `As the Assassin, kill a player.`,
   },
   {
     id: "assassin_evil_kills",
@@ -48,7 +48,7 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     sao: 3,
     hidden: true,
     source: "grimoire_event",
-    label: "Et Tu, Brute?",
+    label: "Friendly Fire",
     getCount: ({ games, roleId }) =>
       !roleId
         ? 0
@@ -71,9 +71,9 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Assassin, you've turned your blade on an evil player ${count} time${pluralize(count)}.`
-          : `As the Assassin, this player has turned their blade on an evil player ${count} time${pluralize(count)}.`)
-        : `As the Assassin, kill an evil player with your ability.`,
+          ? `As the Assassin, you've killed ${count} evil player${pluralize(count)}.`
+          : `As the Assassin, this player has killed ${count} evil player${pluralize(count)}.`)
+        : `As the Assassin, kill an evil player.`,
   },
   {
     id: "assassin_demon_kills_game_endings",
@@ -84,7 +84,7 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     sao: 3,
     hidden: true,
     source: "end_trigger",
-    label: "Friendly Fire",
+    label: "Et Tu, Brute?",
     getCount: ({ games, roleId }) =>
       games.filter(
         (game) =>
@@ -97,9 +97,9 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Assassin, you've ended the game ${count} time${pluralize(count)} by killing the Demon due to your ability.`
-          : `As the Assassin, this player has ended the game ${count} time${pluralize(count)} by killing the Demon due to their ability.`)
-        : `As the Assassin, end the game by killing the Demon due to your ability.`,
+          ? `As the Assassin, you've ended ${count} game${pluralize(count)} by killing the Demon.`
+          : `As the Assassin, this player has ended ${count} game${pluralize(count)} by killing the Demon.`)
+        : `As the Assassin, end a game by killing the Demon.`,
   },
   // Baron sao: 3,: Nothing to track really.
   // Boffin: @todo Some end triggers?
@@ -116,9 +116,9 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Boomdandy, you've blown up ${count} player${pluralize(count)}.`
-          : `As the Boomdandy, this player has blown up ${count} player${pluralize(count)}.`)
-        : `As the Boomdandy, kill a player with your ability.`,
+          ? `As the Boomdandy, you've killed ${count} player${pluralize(count)}.`
+          : `As the Boomdandy, this player has killed ${count} player${pluralize(count)}.`)
+        : `As the Boomdandy, kill a player.`,
   },
   {
     id: "boomdandy_max_page_kills",
@@ -162,9 +162,9 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Boomdandy, your largest explosion took out ${count} player${pluralize(count)} at once.`
-          : `As the Boomdandy, this player's largest explosion took out ${count} player${pluralize(count)} at once.`)
-        : `As the Boomdandy, kill multiple players at once with your ability.`,
+          ? `As the Boomdandy, your largest explosion killed ${count} player${pluralize(count)} at once.`
+          : `As the Boomdandy, this player's largest explosion killed ${count} player${pluralize(count)} at once.`)
+        : `As the Boomdandy, kill multiple players at once.`,
   },
   {
     id: "cerenovus_madness_applied",
@@ -198,9 +198,9 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Cerenovus, you've caused ${count} execution${pluralize(count)} from broken madness.`
-          : `As the Cerenovus, this player has caused ${count} execution${pluralize(count)} from broken madness.`)
-        : `As the Cerenovus, cause an execution due to your ability.`,
+          ? `As the Cerenovus, you've caused ${count} execution${pluralize(count)} for breaking madness.`
+          : `As the Cerenovus, this player has caused ${count} execution${pluralize(count)} for breaking madness.`)
+        : `As the Cerenovus, cause an execution for breaking madness.`,
   },
   {
     id: "cerenovus_execution_game_endings",
@@ -224,9 +224,9 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Cerenovus, you've ended the game ${count} time${pluralize(count)} through an execution due to your ability.`
-          : `As the Cerenovus, this player has ended the game ${count} time${pluralize(count)} through an execution due to their ability.`)
-        : `As the Cerenovus, end the game through an execution due to your ability.`,
+          ? `As the Cerenovus, you've caused ${count} game${pluralize(count)} to end by an execution for breaking madness, leaving only two players alive.`
+          : `As the Cerenovus, this player has caused ${count} game${pluralize(count)} to end by an execution for breaking madness, leaving only two players alive.`)
+        : `As the Cerenovus, cause a game to end by an execution for breaking madness, leaving only two players alive.`,
   },
   {
     id: "devils_advocate_saves",
@@ -299,7 +299,7 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     script: "snv",
     sao: 1,
     source: "end_trigger",
-    label: "Twin Verdict",
+    label: "Family Feud",
     getCount: ({ games, roleId }) =>
       games.filter(
         (game) =>
@@ -313,9 +313,9 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Evil Twin, you've ended the game ${count} time${pluralize(count)} due to your ability.`
-          : `As the Evil Twin, this player has ended the game ${count} time${pluralize(count)} due to their ability.`)
-        : `As the Evil Twin, end the game due to your ability.`,
+          ? `As the Evil Twin, you've caused ${count} game${pluralize(count)} to end when your twin was killed.`
+          : `As the Evil Twin, this player has caused ${count} game${pluralize(count)} to end when their twin was killed.`)
+        : `As the Evil Twin, cause a game to end when your twin is killed.`,
   },
   {
     id: "fearmonger_game_endings",
@@ -338,9 +338,9 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Fearmonger, you've ended ${count} game${pluralize(count)} by nominating and executing your target.`
-          : `As the Fearmonger, this player has ended ${count} game${pluralize(count)} by nominating and executing their target.`)
-        : `As the Fearmonger, end a game due to your ability.`,
+          ? `As the Fearmonger, you've ended ${count} game${pluralize(count)} by nominating and executing your chosen player.`
+          : `As the Fearmonger, this player has ended ${count} game${pluralize(count)} by nominating and executing their chosen player.`)
+        : `As the Fearmonger, end a game by nominating and executing your chosen player.`,
   },
   // {
   //   id: "goblin_claimed_executions",
@@ -405,16 +405,17 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Goblin, you've ended ${count} game${pluralize(count)} by being executed after claiming Goblin.`
-          : `As the Goblin, this player has ended ${count} game${pluralize(count)} by being executed after claiming Goblin.`)
-        : `As the Goblin, end a game due to your ability.`,
+          ? `As the Goblin, you've caused ${count} game${pluralize(count)} to end by being executed after claiming Goblin.`
+          : `As the Goblin, this player has caused ${count} game${pluralize(count)} to end by being executed after claiming Goblin.`)
+        : `As the Goblin, cause a game to end by being executed after claiming Goblin.`,
   },
   {
-    id: "goblin_claimed_executions_caused",
+    id: "goblin_executions_caused",
     category: "role",
     roleIds: ["goblin"],
     scope: "triggering_player",
     script: "experimental",
+    hidden: true,
     source: "grimoire_event",
     label: "Called the Bluff",
     getCount: ({ games }) =>
@@ -451,15 +452,15 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     script: "bmr",
     sao: 1,
     source: "grimoire_event",
-    label: "Just Business",
+    label: "Sleeping with the Fishes",
     getCount: ({ games, roleId }) =>
       countGrimoireEvents(games, roleId, GrimoireEventType.DEATH),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Godfather, you've settled ${count} score${pluralize(count)}.`
-          : `As the Godfather, this player has settled ${count} score${pluralize(count)}.`)
-        : `As the Godfather, kill a player with your ability.`,
+          ? `As the Godfather, you've killed ${count} player${pluralize(count)}.`
+          : `As the Godfather, this player has killed ${count} player${pluralize(count)}.`)
+        : `As the Godfather, kill a player.`,
   },
   {
     id: "godfather_demon_kill_game_endings",
@@ -469,7 +470,7 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     script: "bmr",
     hidden: true,
     source: "end_trigger",
-    label: "A Hit Too Far",
+    label: "Betrayal in the Family",
     getCount: ({ games, roleId }) =>
       games.filter(
         (game) =>
@@ -482,29 +483,12 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Godfather, you've ended the game ${count} time${pluralize(count)} by killing the Demon due to your ability.`
-          : `As the Godfather, this player has ended the game ${count} time${pluralize(count)} by killing the Demon due to their ability.`)
-        : `As the Godfather, end the game by killing the Demon due to your ability.`,
+          ? `As the Godfather, you've ended ${count} game${pluralize(count)} by killing the Demon.`
+          : `As the Godfather, this player has ended ${count} game${pluralize(count)} by killing the Demon.`)
+        : `As the Godfather, end a game by killing the Demon.`,
   },
   {
-    id: "harpy_kills",
-    category: "role",
-    scope: "as_role",
-    roleIds: ["harpy"],
-    script: "experimental",
-    source: "grimoire_event",
-    label: "Maddening Carnage",
-    getCount: ({ games, roleId }) =>
-      countGrimoireEvents(games, roleId, GrimoireEventType.DEATH),
-    getSentence: ({ count, isMe }) =>
-      count > 0
-        ? (isMe
-          ? `As the Harpy, you've caused ${count} death${pluralize(count)} through your madness.`
-          : `As the Harpy, this player has caused ${count} death${pluralize(count)} through their madness.`)
-        : `As the Harpy, kill a player due to your ability.`,
-  },
-  {
-    id: "harpy_madness_applied",
+    id: "harpy_madness",
     category: "role",
     scope: "as_role",
     roleIds: ["harpy"],
@@ -521,7 +505,24 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `As the Harpy, make a player mad.`,
   },
   {
-    id: "harpy_execution_game_endings",
+    id: "harpy_kills",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["harpy"],
+    script: "experimental",
+    source: "grimoire_event",
+    label: "Maddening Carnage",
+    getCount: ({ games, roleId }) =>
+      countGrimoireEvents(games, roleId, GrimoireEventType.DEATH),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Harpy, you've caused ${count} death${pluralize(count)} for breaking madness.`
+          : `As the Harpy, this player has caused ${count} death${pluralize(count)} for breaking madness.`)
+        : `As the Harpy, cause a player to die for breaking madness.`,
+  },
+  {
+    id: "harpy_game_ending",
     category: "role",
     scope: "as_role",
     roleIds: ["harpy"],
@@ -541,13 +542,13 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Harpy, you've ended the game ${count} time${pluralize(count)} through an execution due to your ability.`
-          : `As the Harpy, this player has ended the game ${count} time${pluralize(count)} through an execution due to their ability.`)
-        : `As the Harpy, end the game through an execution due to your ability.`,
+          ? `As the Harpy, you've caused ${count} game${pluralize(count)} to end by causing an execution for breaking madness, leaving only two players alive.`
+          : `As the Harpy, this player has caused ${count} game${pluralize(count)} to end by causing an execution for breaking madness, leaving only two players alive.`)
+        : `As the Harpy, cause a game to end by causing an execution for breaking madness, leaving only two players alive.`,
   },
   // Marionette: Nothing relevant. Only option: None?
   {
-    id: "mastermind_game_endings",
+    id: "mastermind_game_ending",
     category: "role",
     scope: "as_role",
     roleIds: ["mastermind"],
@@ -568,42 +569,42 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Mastermind, you've ended the game ${count} time${pluralize(count)} due to your ability.`
-          : `As the Mastermind, this player has ended the game ${count} time${pluralize(count)} due to their ability.`)
-        : `As the Mastermind, end the game due to your ability.`,
+          ? `As the Mastermind, you've caused ${count} game${pluralize(count)} to end when an execution occured on the final day.`
+          : `As the Mastermind, this player has caused ${count} game${pluralize(count)} to end when an execution occured on the final day.`)
+        : `As the Mastermind, cause a game to end when an execution occured on the final day.`,
   },
+  // {
+  //   id: "mastermind_ability_wins",
+  //   category: "role",
+  //   scope: "as_role",
+  //   roleIds: ["mastermind"],
+  //   script: "bmr",
+  //   sao: 4,
+  //   source: "end_trigger",
+  //   label: "Perfect Scheme",
+  //   getCount: ({ games, roleId }) =>
+  //     // After a Mastermind-triggered ending, this tracks EVIL_WINS as the
+  //     // typical case. It intentionally ignores rare edge cases where alignment
+  //     // could differ, to keep this stat simple and consistent.
+  //     games.filter(
+  //       (game) =>
+  //         !game.ignore_for_stats &&
+  //         !!roleId &&
+  //         game.end_trigger === GameEndTrigger.CHARACTER_ABILITY &&
+  //         game.end_trigger_type === GameEndTriggerType.EXTRA_WIN_CONDITION &&
+  //         game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
+  //         game.end_trigger_role_id === roleId &&
+  //         game.win_v2 === WinStatus_V2.EVIL_WINS
+  //     ).length,
+  //   getSentence: ({ count, isMe }) =>
+  //     count > 0
+  //       ? (isMe
+  //         ? `As the Mastermind, you've won ${count} game${pluralize(count)} where your ability ended the game.`
+  //         : `As the Mastermind, this player has won ${count} game${pluralize(count)} where their ability ended the game.`)
+  //       : `As the Mastermind, win a game where your ability ends the game.`,
+  // },
   {
-    id: "mastermind_ability_wins",
-    category: "role",
-    scope: "as_role",
-    roleIds: ["mastermind"],
-    script: "bmr",
-    sao: 4,
-    source: "end_trigger",
-    label: "Perfect Scheme",
-    getCount: ({ games, roleId }) =>
-      // After a Mastermind-triggered ending, this tracks EVIL_WINS as the
-      // typical case. It intentionally ignores rare edge cases where alignment
-      // could differ, to keep this stat simple and consistent.
-      games.filter(
-        (game) =>
-          !game.ignore_for_stats &&
-          !!roleId &&
-          game.end_trigger === GameEndTrigger.CHARACTER_ABILITY &&
-          game.end_trigger_type === GameEndTriggerType.EXTRA_WIN_CONDITION &&
-          game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
-          game.end_trigger_role_id === roleId &&
-          game.win_v2 === WinStatus_V2.EVIL_WINS
-      ).length,
-    getSentence: ({ count, isMe }) =>
-      count > 0
-        ? (isMe
-          ? `As the Mastermind, you've won ${count} game${pluralize(count)} when your ability ended the game.`
-          : `As the Mastermind, this player has won ${count} game${pluralize(count)} when their ability ended the game.`)
-        : `As the Mastermind, win when your ability ends the game.`,
-  },
-  {
-    id: "mezepheles_ability_changes_caused",
+    id: "mezepheles_changes",
     category: "role",
     scope: "as_role",
     roleIds: ["mezepheles"],
@@ -615,12 +616,12 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Mezepheles, you've changed the alignment of ${count} player${pluralize(count)} with your secret word.`
-          : `As the Mezepheles, this player has changed the alignment of ${count} player${pluralize(count)} with their secret word.`)
-        : `As the Mezepheles, change the alignment of a player due to your ability.`,
+          ? `As the Mezepheles, you've changed the alignment of ${count} player${pluralize(count)}.`
+          : `As the Mezepheles, this player has changed the alignment of ${count} player${pluralize(count)}.`)
+        : `As the Mezepheles, change the alignment of a player.`,
   },
   {
-    id: "mezepheles_ability_changes_received",
+    id: "mezepheles_changes_received",
     category: "role",
     roleIds: ["mezepheles"],
     scope: "affected_player",
@@ -637,12 +638,12 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've switched alignment due to the Mezepheles ${count} time${pluralize(count)}.`
-          : `This player switched alignment due to the Mezepheles ${count} time${pluralize(count)}.`)
+          ? `You've changed alignment due to the Mezepheles ${count} time${pluralize(count)}.`
+          : `This player changed alignment due to the Mezepheles ${count} time${pluralize(count)}.`)
         : `Switch alignment due to the Mezepheles.`,
   },
   {
-    id: "organ_grinder_self_drunk",
+    id: "organ_grinder_drunk",
     category: "role",
     scope: "as_role",
     roleIds: ["organ_grinder"],
@@ -665,10 +666,10 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         ? (isMe
           ? `As the Organ Grinder, you've chosen to become drunk ${count} time${pluralize(count)}.`
           : `As the Organ Grinder, this player has chosen to become drunk ${count} time${pluralize(count)}.`)
-        : `As the Organ Grinder, choose to become drunk due to your ability.`,
+        : `As the Organ Grinder, choose to become drunk.`,
   },
   {
-    id: "pit_hag_role_changes_caused",
+    id: "pit_hag_role_changes",
     category: "role",
     scope: "as_role",
     roleIds: ["pit-hag"],
@@ -681,12 +682,12 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Pit-Hag, you've changed at least ${count} player${pluralize(count)} into a different character.`
-          : `As the Pit-Hag, this player has changed at least ${count} player${pluralize(count)} into a different character.`)
+          ? `As the Pit-Hag, you've changed ${count} player${pluralize(count)} into a different character.`
+          : `As the Pit-Hag, this player has changed ${count} player${pluralize(count)} into a different character.`)
         : `As the Pit-Hag, change a player into a different character.`,
   },
   {
-    id: "pit_hag_demon_to_demon_changes",
+    id: "pit_hag_demon_changes",
     category: "role",
     scope: "as_role",
     roleIds: ["pit-hag"],
@@ -757,7 +758,7 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `As the Pit-Hag, change yourself into a different character.`,
   },
   {
-    id: "pit_hag_good_demons_created",
+    id: "pit_hag_good_demons",
     category: "role",
     scope: "as_role",
     roleIds: ["pit-hag"],
@@ -791,7 +792,7 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `As the Pit-Hag, create a good Demon.`,
   },
   {
-    id: "pit_hag_accidental_game_endings",
+    id: "pit_hag_accidental_game_ending",
     category: "role",
     scope: "as_role",
     roleIds: ["pit-hag"],
@@ -811,12 +812,12 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Pit-Hag, you've ended the game ${count} time${pluralize(count)} by removing the last living Demon.`
-          : `As the Pit-Hag, this player has ended the game ${count} time${pluralize(count)} by removing the last living Demon.`)
-        : `As the Pit-Hag, end the game by removing the last living Demon.`,
+          ? `As the Pit-Hag, you've caused ${count} game${pluralize(count)} to end by removing the last living Demon.`
+          : `As the Pit-Hag, this player has caused ${count} games${pluralize(count)} to end by removing the last living Demon.`)
+        : `As the Pit-Hag, end a game by removing the last living Demon.`,
   },
   {
-    id: "pit_hag_role_changes_received",
+    id: "pit_hag_changes_received",
     category: "role",
     roleIds: ["pit-hag"],
     scope: "affected_player",
@@ -834,12 +835,12 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Pit-Hag, you've been changed into a different character by the Pit-Hag ${count} time${pluralize(count)}.`
-          : `As the Pit-Hag, this player has been changed into a different character by the Pit-Hag ${count} time${pluralize(count)}.`)
+          ? `You've been changed into a different character by the Pit-Hag ${count} time${pluralize(count)}.`
+          : `This player has been changed into a different character by the Pit-Hag ${count} time${pluralize(count)}.`)
         : `Be changed into a different character by the Pit-Hag.`,
   },
   {
-    id: "poisoner_poisoned_caused",
+    id: "poisoner_poisons",
     category: "role",
     scope: "as_role",
     roleIds: ["poisoner"],
@@ -869,37 +870,12 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Psychopath, you've axed ${count} player${pluralize(count)} in broad daylight.`
-          : `As the Psychopath, this player has axed ${count} player${pluralize(count)} in broad daylight.`)
-        : `As the Psychopath, kill a player with your ability.`,
+          ? `As the Psychopath, you've killed ${count} player${pluralize(count)}.`
+          : `As the Psychopath, this player has killed ${count} player${pluralize(count)}.`)
+        : `As the Psychopath, kill a player.`,
   },
   {
-    id: "psychopath_demon_kill_game_endings",
-    category: "role",
-    scope: "as_role",
-    roleIds: ["psychopath"],
-    script: "experimental",
-    hidden: true,
-    source: "end_trigger",
-    label: "Axe Misjudgment",
-    getCount: ({ games, roleId }) =>
-      games.filter(
-        (game) =>
-          !game.ignore_for_stats &&
-          !!roleId &&
-          game.end_trigger === GameEndTrigger.NO_LIVING_DEMON &&
-          game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
-          game.end_trigger_role_id === roleId
-      ).length,
-    getSentence: ({ count, isMe }) =>
-      count > 0
-        ? (isMe
-          ? `As the Psychopath, you've ended the game ${count} time${pluralize(count)} by killing the Demon due to your ability.`
-          : `As the Psychopath, this player has ended the game ${count} time${pluralize(count)} by killing the Demon due to their ability.`)
-        : `As the Psychopath, end the game by killing the Demon due to your ability.`,
-  },
-  {
-    id: "psychopath_death_game_endings",
+    id: "psychopath_kill_game_endings",
     category: "role",
     scope: "as_role",
     roleIds: ["psychopath"],
@@ -919,12 +895,37 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Psychopath, you've ended the game ${count} time${pluralize(count)} through a death due to your ability.`
-          : `As the Psychopath, this player has ended the game ${count} time${pluralize(count)} through a death due to their ability.`)
-        : `As the Psychopath, end the game through a death due to your ability.`,
+          ? `As the Psychopath, you've caused ${count} game${pluralize(count)} to end by killing a player, leaving only two players alive.`
+          : `As the Psychopath, this player has caused ${count} game${pluralize(count)} to end by killing a player, leaving only two players alive.`)
+        : `As the Psychopath, end a game by killing a player, leaving only two players alive.`,
   },
   {
-    id: "scarlet_woman_demon_changes",
+    id: "psychopath_demon_kill_game_endings",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["psychopath"],
+    script: "experimental",
+    hidden: true,
+    source: "end_trigger",
+    label: "Hell-Fire Axe",
+    getCount: ({ games, roleId }) =>
+      games.filter(
+        (game) =>
+          !game.ignore_for_stats &&
+          !!roleId &&
+          game.end_trigger === GameEndTrigger.NO_LIVING_DEMON &&
+          game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
+          game.end_trigger_role_id === roleId
+      ).length,
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Psychopath, you've caused ${count} game${pluralize(count)} to end by killing the Demon.`
+          : `As the Psychopath, this player has caused ${count} game${pluralize(count)} to end by killing the Demon.`)
+        : `As the Psychopath, end a game by killing the Demon.`,
+  },
+  {
+    id: "scarlet_woman_changes",
     category: "role",
     scope: "as_role",
     roleIds: ["scarlet_woman"],
@@ -946,9 +947,9 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Scarlet Woman, you've inherited the demon's mantle ${count} time${pluralize(count)}.`
-          : `As the Scarlet Woman, this player has inherited the demon's mantle ${count} time${pluralize(count)}.`)
-        : `As the Scarlet Woman, become a demon due to your ability.`,
+          ? `As the Scarlet Woman, you've become a Demon ${count} time${pluralize(count)}.`
+          : `As the Scarlet Woman, this player has become a Demon ${count} time${pluralize(count)}.`)
+        : `As the Scarlet Woman, become a demon.`,
   },
   {
     id: "spy_washerwoman_received",
@@ -980,9 +981,9 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Spy, you've been seen as a Townsfolk by the Washerwoman ${count} time${pluralize(count)}.`
-          : `As the Spy, this player has been seen as a Townsfolk by the Washerwoman ${count} time${pluralize(count)}.`)
-        : `As the Spy, be seen as a Townsfolk by the Washerwoman.`,
+          ? `As the Spy, you've been seen as Townsfolk by the Washerwoman ${count} time${pluralize(count)}.`
+          : `As the Spy, this player has been seen as Townsfolk by the Washerwoman ${count} time${pluralize(count)}.`)
+        : `As the Spy, be seen as Townsfolk by the Washerwoman.`,
   },
   {
     id: "spy_librarian_received",
@@ -1014,9 +1015,9 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Spy, you've been seen as an Outsider by the Librarian ${count} time${pluralize(count)}.`
-          : `As the Spy, this player has been seen as an Outsider by the Librarian ${count} time${pluralize(count)}.`)
-        : `As the Spy, be seen as an Outsider by the Librarian.`,
+          ? `As the Spy, you've been seen as Outsider by the Librarian ${count} time${pluralize(count)}.`
+          : `As the Spy, this player has been seen as Outsider by the Librarian ${count} time${pluralize(count)}.`)
+        : `As the Spy, be seen as Outsider by the Librarian.`,
   },
   {
     id: "spy_steward_received",
@@ -1047,12 +1048,12 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Spy, you've been seen as good by the Steward ${count} time${pluralize(count)}.`
-          : `As the Spy, this player has been seen as good by the Steward ${count} time${pluralize(count)}.`)
-        : `As the Spy, be seen as good by the Steward.`,
+          ? `As the Spy, you've been seen as Good by the Steward ${count} time${pluralize(count)}.`
+          : `As the Spy, this player has been seen as Good by the Steward ${count} time${pluralize(count)}.`)
+        : `As the Spy, be seen as Good by the Steward.`,
   },
   {
-    id: "spy_virgin_executions",
+    id: "spy_virgin_received",
     category: "role",
     scope: "as_role",
     script: "tb",
@@ -1060,7 +1061,7 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     roleIds: ["spy"],
     hidden: true,
     source: "grimoire_event",
-    label: "False Witness",
+    label: "Maiden Fooled",
     getCount: ({ games, roleId }) =>
       !roleId
         ? 0
@@ -1089,7 +1090,7 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `As the Spy, be executed when nominating the Virgin.`,
   },
   {
-    id: "spy_moonchild_deaths_received",
+    id: "spy_moonchild_received",
     category: "role",
     scope: "affected_player",
     script: "experimental",
@@ -1119,18 +1120,18 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Spy, you've been killed by the Moonchild ${count} time${pluralize(count)} due to misregistering as good.`
-          : `As the Spy, this player has been killed by the Moonchild ${count} time${pluralize(count)} due to misregistering as good.`)
-        : `As the Spy, be killed by the Moonchild due to misregistering as good.`,
+          ? `As the Spy, you've been killed by the Moonchild ${count} time${pluralize(count)} due to misregistering as Good.`
+          : `As the Spy, this player has been killed by the Moonchild ${count} time${pluralize(count)} due to misregistering as Good.`)
+        : `As the Spy, be killed by the Moonchild due to misregistering as Good.`,
   },
   {
-    id: "spy_lycanthrope_deaths_received",
+    id: "spy_lycanthrope_received",
     category: "role",
     scope: "affected_player",
     script: "experimental",
     roleIds: ["spy"],
     source: "grimoire_event",
-    label: "Moonlight Mishap",
+    label: "Full Moon Mishap",
     getCount: ({ games }) =>
       countMatchingEvents(
         games,
@@ -1154,12 +1155,12 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Spy, you've been killed by the Lycanthrope ${count} time${pluralize(count)} due to misregistering as good.`
-          : `As the Spy, this player has been killed by the Lycanthrope ${count} time${pluralize(count)} due to misregistering as good.`)
-        : `As the Spy, be killed by the Lycanthrope due to misregistering as good.`,
+          ? `As the Spy, you've been killed by the Lycanthrope ${count} time${pluralize(count)} due to misregistering as Good.`
+          : `As the Spy, this player has been killed by the Lycanthrope ${count} time${pluralize(count)} due to misregistering as Good.`)
+        : `As the Spy, be killed by the Lycanthrope due to misregistering as Good.`,
   },
   {
-    id: "summoner_demon_changes",
+    id: "summoner_changes",
     category: "role",
     scope: "as_role",
     roleIds: ["summoner"],
@@ -1171,12 +1172,12 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Summoner, you've successfully summoned a Demon ${count} time${pluralize(count)}.`
-          : `As the Summoner, this player has successfully summoned a Demon ${count} time${pluralize(count)}.`)
-        : `As the Summoner, successfully summon a Demon with your ability.`,
+          ? `As the Summoner, you've successfully summoned ${count} Demon${pluralize(count)}.`
+          : `As the Summoner, this player has successfully summoned ${count} Demon${pluralize(count)}.`)
+        : `As the Summoner, successfully summon a Demon.`,
   },
   {
-    id: "summoner_demon_changes_received",
+    id: "summoner_changes_received",
     category: "role",
     roleIds: ["summoner"],
     scope: "affected_player",
@@ -1205,9 +1206,9 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `This player has been turned into a Demon by the Summoner ${count} time${pluralize(count)}.`)
         : `Be turned into a Demon by the Summoner.`,
   },
-  // Summonner: @todo Game ends
+  // Summoner: @todo Game ends
   {
-    id: "vizier_forced_executions",
+    id: "vizier_executions",
     category: "role",
     scope: "as_role",
     roleIds: ["vizier"],
@@ -1257,7 +1258,7 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `As the Vizier, be killed by the Demon.`,
   },
   {
-    id: "vizier_forced_executions_received",
+    id: "vizier_executions_received",
     category: "role",
     roleIds: ["vizier"],
     scope: "affected_player",
@@ -1274,9 +1275,9 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've been forced to be executed by the Vizier ${count} time${pluralize(count)}.`
-          : `This player has been forced to be executed by the Vizier ${count} time${pluralize(count)}.`)
-        : `Be forced to be executed by the Vizier.`,
+          ? `The Vizier forced your execution ${count} time${pluralize(count)}.`
+          : `The Vizier forced this player's execution ${count} time${pluralize(count)}.`)
+        : `Have the Vizier force your execution.`,
   },
   {
     id: "vizier_demon_execution_game_endings",
@@ -1286,7 +1287,7 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     script: "experimental",
     hidden: true,
     source: "end_trigger",
-    label: "Edict Backfired",
+    label: "Edict Backfired", // @todo Revisit
     getCount: ({ games, roleId }) =>
       games.filter(
         (game) =>
@@ -1300,9 +1301,9 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Vizier, you've ended the game ${count} time${pluralize(count)} by executing the Demon due to your ability.`
-          : `As the Vizier, this player has ended the game ${count} time${pluralize(count)} by executing the Demon due to their ability.`)
-        : `As the Vizier, end the game by executing the Demon due to your ability.`,
+          ? `As the Vizier, you've ended ${count} game${pluralize(count)} by forcing the Demon's execution.`
+          : `As the Vizier, this player has ended ${count} game${pluralize(count)} by forcing the Demon's execution.`)
+        : `As the Vizier, end a game by forcing the the Demon's execution.`,
   },
   {
     id: "vizier_execution_game_endings",
@@ -1325,9 +1326,9 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Vizier, you've ended the game ${count} time${pluralize(count)} through an execution due to your ability.`
-          : `As the Vizier, this player has ended the game ${count} time${pluralize(count)} through an execution due to their ability.`)
-        : `As the Vizier, end the game through an execution due to your ability.`,
+          ? `As the Vizier, you've ended ${count} game${pluralize(count)} by forcing an execution, leaving only two players alive.`
+          : `As the Vizier, this player has ended ${count} game${pluralize(count)} by forcing an execution, leaving only two players alive.`)
+        : `As the Vizier, end a game by forcing an execution, leaving only two players alive.`,
   },
   {
     id: "widow_poisoned",
@@ -1353,7 +1354,7 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     roleIds: ["widow"],
     script: "experimental",
     source: "grimoire_event",
-    label: "Keep it Secret, Keep it Safe",
+    label: "Keep It Secret, Keep It Safe",
     getCount: ({ games, roleId }) =>
       !roleId
         ? 0
@@ -1380,15 +1381,15 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     script: "snv",
     sao: 2,
     source: "grimoire_event",
-    label: "Curses!",
+    label: "Death Curse",
     getCount: ({ games, roleId }) =>
       countGrimoireEvents(games, roleId, GrimoireEventType.DEATH),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Witch, you've caused ${count} player${pluralize(count)} to die due to your curse.`
-          : `As the Witch, this player has caused ${count} player${pluralize(count)} to die due to their curse.`)
-        : `As the Witch, have a player die due to your ability.`,
+          ? `As the Witch, you've caused ${count} player${pluralize(count)} to die.`
+          : `As the Witch, this player has caused ${count} player${pluralize(count)} to die.`)
+        : `As the Witch, cause a player to die.`,
   },
   {
     id: "witch_demon_kill_game_endings",
@@ -1435,9 +1436,9 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Witch, you've ended ${count} game${pluralize(count)} by killing a Demon with your ability.`
-          : `As the Witch, this player has ended ${count} game${pluralize(count)} by killing a Demon with their ability.`)
-        : `As the Witch, end a game by killing a Demon with your ability.`,
+          ? `As the Witch, you've caused ${count} game${pluralize(count)} to end by causing the Demon to die.`
+          : `As the Witch, this player has caused ${count} game${pluralize(count)} to end by causing the Demon to die.`)
+        : `As the Witch, cause a game to end by causing the Demon to die.`,
   },
   // Wizard: Too complex.
   // Wraith: Nothing relevant. Only option: If they were spotted or not?

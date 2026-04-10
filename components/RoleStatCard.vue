@@ -6,6 +6,7 @@
       'items-center p-3 pr-8' : variant == 'horizontal',
       'border dark:border-stone-700/50' : !isFavorite,
       'border border-primary' : isFavorite,
+      'is-hidden-card': isConfiguredAsHidden,
     }"
     >
     <Button
@@ -31,7 +32,7 @@
       <h3 
         class="font-sorts text-center text-balance text-lg lg:text-xl"
       >
-        {{ titleCase(result.metricLabel) }}
+        {{ result.metricLabel }}
       </h3>
     </template>
 
@@ -53,7 +54,7 @@
         <h3 
           class="font-sorts text-balance lg:text-lg"
         >
-          {{ titleCase(result.metricLabel) }}
+          {{ result.metricLabel }}
         </h3>
       </template>
 
@@ -98,7 +99,10 @@
 <script setup lang="ts">
 import type { GameRecord } from "~/composables/useGames";
 import type { RoleStatCardRecord } from "~/composables/useRoleStatCards";
-import { buildRoleStatCardResult } from "~/composables/useRoleStatCards";
+import {
+  buildRoleStatCardResult,
+  getRoleStatCardDefinition,
+} from "~/composables/useRoleStatCards";
 
 const props = withDefaults(
   defineProps<{
@@ -148,6 +152,11 @@ const result = computed(() => {
   );
 });
 
+const isConfiguredAsHidden = computed(() => {
+  const definition = getRoleStatCardDefinition(props.card.metric_key);
+  return !!definition?.hidden;
+});
+
 const character = computed(() => {
   if (result.value.isHiddenLocked) {
     return {
@@ -184,49 +193,21 @@ const roleLink = computed(() => {
   return `/roles/${role.name.toLowerCase().replace(/ /g, "_")}`;
 });
 
-function titleCase(value: string) {
-  const lowerWords = new Set([
-    "a",
-    "an",
-    "and",
-    "as",
-    "at",
-    "but",
-    "by",
-    "for",
-    "in",
-    "nor",
-    "of",
-    "on",
-    "or",
-    "per",
-    "the",
-    "to",
-    "via",
-  ]);
-
-  const words = value.split(/\s+/);
-
-  return words
-    .map((word, index) => {
-      const cleaned = word.toLowerCase();
-      const isEdgeWord = index === 0 || index === words.length - 1;
-
-      if (!isEdgeWord && lowerWords.has(cleaned)) {
-        return cleaned;
-      }
-
-      return cleaned.replace(/(^|[\-\/])([a-z])/g, (_, prefix, char) => {
-        return `${prefix}${char.toUpperCase()}`;
-      });
-    })
-    .join(" ");
-}
 </script>
 
 <style>
   .card-token > .token {
     inline-size: 5.5rem;
     block-size: 5.5rem;
+  }
+
+  .is-hidden-card {
+    background: repeating-linear-gradient(
+      -55deg,
+      theme(colors.stone.50),
+      theme(colors.stone.50) 10px,
+      theme(colors.stone.100) 10px,
+      theme(colors.stone.100) 20px
+    );
   }
 </style>
