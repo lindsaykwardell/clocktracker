@@ -52,9 +52,9 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Scapegoat, you've been executed due to your ability ${count} time${pluralize(count)}.`
-          : `As the Scapegoat, this player has been executed due to their ability ${count} time${pluralize(count)}.`)
-        : `As the Scapegoat, be executed due to your ability.`,
+          ? `As the Scapegoat, you've been executed in someone else's place ${count} time${pluralize(count)}.`
+          : `As the Scapegoat, this player has been executed in someone else's place ${count} time${pluralize(count)}.`)
+        : `As the Scapegoat, be executed in someone else's place.`,
   },
   {
     id: "gunslinger_kills",
@@ -69,9 +69,9 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Gunslinger, you've killed ${count} player${pluralize(count)} with your ability.`
-          : `As the Gunslinger, this player has killed ${count} player${pluralize(count)} with their ability.`)
-        : `As the Gunslinger, kill a player with your ability.`,
+          ? `As the Gunslinger, you've killed ${count} player${pluralize(count)}.`
+          : `As the Gunslinger, this player has killed ${count} player${pluralize(count)}.`)
+        : `As the Gunslinger, kill a player.`,
   },
   {
     id: "gunslinger_demon_kill_endings",
@@ -80,7 +80,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     roleIds: ["gunslinger"],
     script: "tb",
     source: "end_trigger",
-    label: "Final Shot",
+    label: "Silver Bullet",
     getCount: ({ games, roleId }) =>
       games.filter(
         (game) =>
@@ -93,9 +93,9 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Gunslinger, you've ended the game ${count} time${pluralize(count)} by killing the Demon with your ability.`
-          : `As the Gunslinger, this player has ended the game ${count} time${pluralize(count)} by killing the Demon with their ability.`)
-        : `As the Gunslinger, end the game by killing the Demon with your ability.`,
+          ? `As the Gunslinger, you've ended ${count} game${pluralize(count)} by killing the Demon.`
+          : `As the Gunslinger, this player has ended ${count} game${pluralize(count)} by killing the Demon.`)
+        : `As the Gunslinger, end a game by killing the Demon.`,
   },
   {
     id: "gunslinger_final3_game_endings",
@@ -104,7 +104,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     roleIds: ["gunslinger"],
     script: "tb",
     source: "end_trigger",
-    label: "This Ain't No Mexican Standoff",
+    label: "Ain't No Mexican Standoff",
     getCount: ({ games, roleId }) =>
       games.filter(
         (game) =>
@@ -118,18 +118,18 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Gunslinger, you've ended the game ${count} time${pluralize(count)} by killing a player with your ability during final 3.`
-          : `As the Gunslinger, this player has ended the game ${count} time${pluralize(count)} by killing a player with their ability during final 3.`)
-        : `As the Gunslinger, end the game by killing a player with your ability during final 3.`,
+          ? `As the Gunslinger, you've ended ${count} game${pluralize(count)} by killing a player, leaving only two players alive.`
+          : `As the Gunslinger, this player has ended ${count} game${pluralize(count)} by killing a player, leaving only two players alive.`)
+        : `As the Gunslinger, end a game by killing a player, leaving only two players alive.`,
   },
   {
-    id: "beggar_alms_received",
+    id: "beggar_votes_received",
     category: "role",
     scope: "as_role",
     roleIds: ["beggar"],
     script: "tb",
     source: "grimoire_event",
-    label: "Charity",
+    label: "Open Palm",
     getCount: ({ games, roleId }) =>
       games.reduce((total, game) => {
         if (!roleId || game.ignore_for_stats) return total;
@@ -152,13 +152,13 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `As the Beggar, receive someone's vote token.`,
   },
   {
-    id: "beggar_alms_given_received",
+    id: "beggar_votes_given_received",
     category: "role",
     roleIds: ["beggar"],
     scope: "affected_player",
     script: "tb",
     source: "grimoire_event",
-    label: "Token Donation",
+    label: "Charity Given",
     getCount: ({ games }) =>
       countMatchingEvents(
         games,
@@ -170,8 +170,8 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've given your vote token to the Beggar ${count} time${pluralize(count)}.`
-          : `This player has given their vote token to the Beggar ${count} time${pluralize(count)}.`)
+          ? `You've given ${count} vote token${pluralize(count)} to the Beggar.`
+          : `This player has given ${count} token${pluralize(count)} to the Beggar.`)
         : `Give your vote token to the Beggar.`,
   },
   {
@@ -304,9 +304,9 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Butcher, you've executed ${count} extra player${pluralize(count)} due to your ability.`
-          : `As the Butcher, this player has executed ${count} extra player${pluralize(count)} due to their ability.`)
-        : `As the Butcher, execute an extra player due to your ability.`,
+          ? `As the Butcher, you've executed ${count} additional player${pluralize(count)}.`
+          : `As the Butcher, this player has executed ${count} additional player${pluralize(count)}.`)
+        : `As the Butcher, execute an additional player.`,
   },
   {
     id: "butcher_demon_execution_game_endings",
@@ -315,7 +315,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     roleIds: ["butcher"],
     script: "snv",
     source: "end_trigger",
-    label: "One Cut Too Many",
+    label: "Prime Cut",
     getCount: ({ games, roleId }) =>
       games.filter(
         (game) =>
@@ -329,9 +329,9 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Butcher, you've ended the game ${count} time${pluralize(count)} by executing the Demon due to your ability.`
-          : `As the Butcher, this player has ended the game ${count} time${pluralize(count)} by executing the Demon due to their ability.`)
-        : `As the Butcher, end the game by executing the Demon due to your ability.`,
+          ? `As the Butcher, you've ended ${count} game${pluralize(count)} by executing the Demon.`
+          : `As the Butcher, this player has ended ${count} game${pluralize(count)} by executing the Demon.`)
+        : `As the Butcher, end a game by executing the Demon.`,
   },
   {
     id: "butcher_execution_game_endings",
@@ -340,7 +340,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     roleIds: ["butcher"],
     script: "snv",
     source: "end_trigger",
-    label: "Execution Spiral",
+    label: "Cut to the Bone",
     getCount: ({ games, roleId }) =>
       games.filter(
         (game) =>
@@ -354,9 +354,9 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Butcher, you've ended the game ${count} time${pluralize(count)} through an execution due to your ability.`
-          : `As the Butcher, this player has ended the game ${count} time${pluralize(count)} through an execution due to their ability.`)
-        : `As the Butcher, end the game through an execution due to your ability.`,
+          ? `As the Butcher, you've ended ${count} game${pluralize(count)} by executing an additional player, leaving only two players alive.`
+          : `As the Butcher, this player has ended ${count} game${pluralize(count)} by executing an additional player, leaving only two players alive.`)
+        : `As the Butcher, end a game by executing an additional player, leaving only two players alive.`,
   },
   {
     id: "bone_collector_restored_abilities",
@@ -400,9 +400,9 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Harlot, you've died alongside another player ${count} time${pluralize(count)} due to your ability.`
-          : `As the Harlot, this player has died alongside another player ${count} time${pluralize(count)} due to their ability.`)
-        : `As the Harlot, die alongside another player due to your ability.`,
+          ? `As the Harlot, you've died alongside ${count} other player${pluralize(count)}.`
+          : `As the Harlot, this player has died alongside ${count} other player${pluralize(count)}.`)
+        : `As the Harlot, die alongside another player.`,
   },
   {
     id: "barista_acts_twice_given",
@@ -425,8 +425,8 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Barista, you've made a player act twice ${count} time${pluralize(count)}.`
-          : `As the Barista, this player has made a player act twice ${count} time${pluralize(count)}.`)
+          ? `As the Barista, you've made ${count} player${pluralize(count)} act twice.`
+          : `As the Barista, this player has made ${count} player${pluralize(count)} act twice.`)
         : `As the Barista, make a player act twice.`,
   },
   {
@@ -450,8 +450,8 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Barista, you've made a player sober and healthy ${count} time${pluralize(count)}.`
-          : `As the Barista, this player has made a player sober and healthy ${count} time${pluralize(count)}.`)
+          ? `As the Barista, you've made ${count} player${pluralize(count)} sober and healthy.`
+          : `As the Barista, this player has made ${count} player${pluralize(count)} sober and healthy.`)
         : `As the Barista, make a player sober and healthy.`,
   },
   {
@@ -479,9 +479,9 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Deviant, you've saved yourself from exile ${count} time${pluralize(count)} due to your ability.`
-          : `As the Deviant, this player has saved themselves from exile ${count} time${pluralize(count)} due to their ability.`)
-        : `As the Deviant, save yourself from exile due to your ability.`,
+          ? `As the Deviant, you've saved yourself from exile ${count} time${pluralize(count)}.`
+          : `As the Deviant, this player has saved themselves from exile ${count} time${pluralize(count)}.`)
+        : `As the Deviant, save yourself from exile.`,
   },
 
   // Apprentice: Too complex
@@ -506,9 +506,9 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Matron, you've caused ${count} seat swap${pluralize(count)} with your ability.`
-          : `As the Matron, this player has caused ${count} seat swaps${pluralize(count)} with their ability.`)
-        : `As the Matron, swap two players' seating positions with your ability.`,
+          ? `As the Matron, you've caused ${count} seat swap${pluralize(count)}.`
+          : `As the Matron, this player has caused ${count} seat swap${pluralize(count)}.`)
+        : `As the Matron, swap two players' seating positions.`,
   },
   // Voudon: Nothing to track really.
   {
@@ -518,7 +518,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     roleIds: ["judge"],
     script: "bmr",
     source: "grimoire_event",
-    label: "Final Verdict",
+    label: "Death Sentence",
     getCount: ({ games, roleId }) =>
       !roleId
         ? 0
@@ -531,9 +531,9 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Judge, you've executed ${count} player${pluralize(count)} due to your ability.`
-          : `As the Judge, this player has executed ${count} player${pluralize(count)} due to their ability.`)
-        : `As the Judge, execute a player due to your ability.`,
+          ? `As the Judge, you've forced the execution of ${count} player${pluralize(count)}.`
+          : `As the Judge, this player has forced the execution of ${count} player${pluralize(count)}.`)
+        : `As the Judge, force the execution of a player.`,
   },
   {
     id: "judge_failed_executions_caused",
@@ -556,9 +556,9 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Judge, you've caused ${count} execution${pluralize(count)} to fail due to your ability.`
-          : `As the Judge, this player has caused ${count} execution${pluralize(count)} to fail due to their ability.`)
-        : `As the Judge, cause an execution to fail due to your ability.`,
+          ? `As the Judge, you've caused ${count} execution${pluralize(count)} to fail.`
+          : `As the Judge, this player has caused ${count} execution${pluralize(count)} to fail.`)
+        : `As the Judge, cause an execution to fail.`,
   },
   {
     id: "judge_demon_execution_game_endings",
@@ -567,7 +567,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     roleIds: ["judge"],
     script: "bmr",
     source: "end_trigger",
-    label: "Sentence Too Final",
+    label: "Final Verdict",
     getCount: ({ games, roleId }) =>
       games.filter(
         (game) =>
@@ -581,9 +581,9 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Judge, you've ended the game ${count} time${pluralize(count)} by executing the Demon due to your ability.`
-          : `As the Judge, this player has ended the game ${count} time${pluralize(count)} by executing the Demon due to their ability.`)
-        : `As the Judge, end the game by executing the Demon due to your ability.`,
+          ? `As the Judge, you've ended ${count} game${pluralize(count)} by forcing the execution of the Demon.`
+          : `As the Judge, this player has ended ${count} game${pluralize(count)} by forcing the execution of the Demon.`)
+        : `As the Judge, end a game by forcing the execution of the Demon.`,
   },
   {
     id: "judge_execution_game_endings",
@@ -606,9 +606,9 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Judge, you've ended the game ${count} time${pluralize(count)} through an execution due to your ability.`
-          : `As the Judge, this player has ended the game ${count} time${pluralize(count)} through an execution due to their ability.`)
-        : `As the Judge, end the game through an execution due to your ability.`,
+          ? `As the Judge, you've ended ${count} game${pluralize(count)} by forcing the execution of a player, leaving only two players alive.`
+          : `As the Judge, this player has ended ${count} game${pluralize(count)} by forcing the execution of a player, leaving only two players alive.`)
+        : `As the Judge, end a game by forcing the execution of a player, leaving only two players alive.`,
   },
   // Bishop: @todo
   {
@@ -663,9 +663,9 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Gangster, you've arranged ${count} hit${pluralize(count)} on your neighbors.`
-          : `As the Gangster, this player has arranged ${count} hit${pluralize(count)} on their neighbors.`)
-        : `As the Gangster, kill one of your neighbors with your ability.`,
+          ? `As the Gangster, you've killed ${count} neighbor${pluralize(count)}.`
+          : `As the Gangster, this player has killed ${count} neighbor${pluralize(count)}.`)
+        : `As the Gangster, kill one of your neighbors.`,
   },
   {
     id: "gangster_demon_kill_game_endings",
@@ -673,6 +673,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     scope: "as_role",
     roleIds: ["gangster"],
     script: "experimental",
+    hidden: true,
     source: "end_trigger",
     label: "Contract Gone Wrong",
     getCount: ({ games, roleId }) =>
@@ -687,9 +688,9 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Gangster, you've ended the game ${count} time${pluralize(count)} by killing the Demon due to your ability.`
-          : `As the Gangster, this player has ended the game ${count} time${pluralize(count)} by killing the Demon due to their ability.`)
-        : `As the Gangster, end the game by killing the Demon due to your ability.`,
+          ? `As the Gangster, you've ended ${count} game${pluralize(count)} by killing the Demon.`
+          : `As the Gangster, this player has ended ${count} game${pluralize(count)} by killing the Demon.`)
+        : `As the Gangster, end a game by killing the Demon.`,
   },
   {
     id: "gangster_death_game_endings",
@@ -712,9 +713,9 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Gangster, you've ended the game ${count} time${pluralize(count)} through a death due to your ability.`
-          : `As the Gangster, this player has ended the game ${count} time${pluralize(count)} through a death due to their ability.`)
-        : `As the Gangster, end the game through a death due to your ability.`,
+          ? `As the Gangster, you've ended ${count} game${pluralize(count)} by killing one of your neighbors, leaving only two players alive.`
+          : `As the Gangster, this player has ended ${count} game${pluralize(count)} by killing one of their neighbors, leaving only two players alive.`)
+        : `As the Gangster, end a game by killing one of your neighbors, leaving only two players alive.`,
   },
   {
     id: "gnome_kills",
@@ -729,9 +730,9 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Gnome, you've killed ${count} player${pluralize(count)} for nominating your amigo.`
-          : `As the Gnome, this player has killed ${count} player${pluralize(count)} for nominating their amigo.`)
-        : `As the Gnome, kill a player for nominating your amigo.`,
+          ? `As the Gnome, you've killed ${count} player${pluralize(count)}.`
+          : `As the Gnome, this player has killed ${count} player${pluralize(count)}.`)
+        : `As the Gnome, kill a player.`,
   },
   {
     id: "gnome_demon_kill_game_endings",
@@ -740,7 +741,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     roleIds: ["gnome"],
     script: "experimental",
     source: "end_trigger",
-    label: "Amigo’s Revenge",
+    label: "Fiery Revenge",
     getCount: ({ games, roleId }) =>
       games.filter(
         (game) =>
@@ -753,9 +754,9 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Gnome, you've ended the game ${count} time${pluralize(count)} by killing the Demon due to your ability.`
-          : `As the Gnome, this player has ended the game ${count} time${pluralize(count)} by killing the Demon due to their ability.`)
-        : `As the Gnome, end the game by killing the Demon due to your ability.`,
+          ? `As the Gnome, you've ended ${count} game${pluralize(count)} by killing the Demon for nominating your amigo.`
+          : `As the Gnome, this player has ended ${count} game${pluralize(count)} by killing the Demon for nominating your amigo.`)
+        : `As the Gnome, end a game by killing the Demon for nominating your amigo.`,
   },
   {
     id: "gnome_death_game_endings",
@@ -778,9 +779,9 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Gnome, you've ended the game ${count} time${pluralize(count)} through a death due to your ability.`
-          : `As the Gnome, this player has ended the game ${count} time${pluralize(count)} through a death due to their ability.`)
-        : `As the Gnome, end the game through a death due to your ability.`,
+          ? `As the Gnome, you've ended ${count} game${pluralize(count)} by killing a player for nominating your amigo, leaving only two players alive.`
+          : `As the Gnome, this player has ended ${count} game${pluralize(count)} by killing a player for nominating their amigo, leaving only two players alive.`)
+        : `As the Gnome, end a game by killing a player for nominating your amigo, leaving only two players alive.`,
   },
   {
     id: "gnome_amigo_marked",
@@ -801,9 +802,9 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've been marked as the Gnome's amigo ${count} time${pluralize(count)}.`
-          : `This player has been marked as the Gnome's amigo ${count} time${pluralize(count)}.`)
-        : `Be marked as the Gnome's amigo.`,
+          ? `You've been the Gnome's amigo ${count} time${pluralize(count)}.`
+          : `This player has been the Gnome's amigo ${count} time${pluralize(count)}.`)
+        : `Be the Gnome's amigo.`,
   },
 
 ];

@@ -40,9 +40,9 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've been struck down by the Angel ${count} time${pluralize(count)}.`
-          : `This player has been struck down by the Angel ${count} time${pluralize(count)}.`)
-        : `Be struck down by the Angel.`,
+          ? `You've been punished with death by the Angel ${count} time${pluralize(count)}.`
+          : `This player has been punished with death by the Angel ${count} time${pluralize(count)}.`)
+        : `Be punished with death by the Angel.`,
   },
   // Buddhist: OK.
   {
@@ -86,9 +86,9 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've been fined with death by the Hell's Librarian ${count} time${pluralize(count)}.`
-          : `This player has been fined with death by the Hell's Librarian ${count} time${pluralize(count)}.`)
-        : `Die due to Hell's Librarian.`,
+          ? `You've been punished with death by the Hell's Librarian ${count} time${pluralize(count)}.`
+          : `This player has been punished with death by the Hell's Librarian ${count} time${pluralize(count)}.`)
+        : `Be been punished with death by the Hell's Librarian.`,
   },
   {
     id: "fiddler_game_end_trigger_received",
@@ -109,8 +109,8 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You have had games end due to the Fiddler ${count} time${pluralize(count)}.`
-          : `This player has had games end due to the Fiddler ${count} time${pluralize(count)}.`)
+          ? `You've had ${count} game${pluralize(count)} end due to the Fiddler.`
+          : `This player has had ${count} game${pluralize(count)} end due to the Fiddler`)
         : `Have a game end due to the Fiddler.`,
   },
   // Revolutionary: Nothing to track really.
@@ -129,7 +129,7 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
     scope: "affected_player",
     script: "npc",
     source: "grimoire_event",
-    label: "Off With Their Head",
+    label: "Off with Their Head",
     getCount: ({ games }) =>
       countMatchingEvents(
         games,
@@ -164,7 +164,9 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
       ),
     getSentence: ({ count, isMe }) =>
       count > 0
-        ? `${isMe ? "You've" : "This player has"} been brought back as a Traveller by the Hindu ${count} time${pluralize(count)}.`
+        ? (isMe
+          ? `You've been brought back as a Traveller by the Hindu ${count} time${pluralize(count)}.`
+          : `This player has been brought back as a Traveller by the Hindu ${count} time${pluralize(count)}.`)
         : `Be brought back as a Traveller by the Hindu.`,
   },
   // Pope: Nothing to track really.

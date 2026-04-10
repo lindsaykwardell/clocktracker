@@ -103,9 +103,9 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Al-Hadikhia, you've killed all 3 chosen players ${count} time${pluralize(count)} when they all lived.`
-          : `As the Al-Hadikhia, this player has killed all 3 chosen players ${count} time${pluralize(count)} when they all lived.`)
-        : `As the Al-Hadikhia, kill 3 players due to your ability when they all live.`,
+          ? `As the Al-Hadikhia, you've killed all three chosen players ${count} time${pluralize(count)} when they all lived.`
+          : `As the Al-Hadikhia, this player has killed all three chosen players ${count} time${pluralize(count)} when they all lived.`)
+        : `As the Al-Hadikhia, kill all three chosen players when they all live.`,
   },
   {
     id: "al_hadikhia_self_deaths",
@@ -113,6 +113,7 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     scope: "as_role",
     roleIds: ["al-hadikhia"],
     script: "experimental",
+    hidden: true,
     source: "grimoire_event",
     label: "Chose Poorly",
     getCount: ({ games, roleId }) =>
@@ -137,9 +138,9 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Al-Hadikhia, you've included yourself and ended up dying ${count} time${pluralize(count)}.`
-          : `As the Al-Hadikhia, this player has included themselves and ended up dying ${count} time${pluralize(count)}.`)
-        : `As the Al-Hadikhia, choose yourself and end up dying.`,
+          ? `As the Al-Hadikhia, you've included yourself in your choices and ended up dying ${count} time${pluralize(count)}.`
+          : `As the Al-Hadikhia, this player has included themselves in their choices and ended up dying ${count} time${pluralize(count)}.`)
+        : `As the Al-Hadikhia, include yourself in your choices and end up dying.`,
   },
   {
     id: "al_hadikhia_evil_revives",
@@ -148,7 +149,7 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     roleIds: ["al-hadikhia"],
     script: "experimental",
     source: "grimoire_event",
-    label: "Back In Service",
+    label: "Back in Service",
     getCount: ({ games, roleId }) =>
       !roleId
         ? 0
@@ -207,9 +208,9 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Fang Gu, you've possessed an Outsider ${count} time${pluralize(count)}.`
-          : `As the Fang Gu, this player has possessed an Outsider ${count} time${pluralize(count)}.`)
-        : `As the Fang Gu, jump to an Outsider by killing them.`,
+          ? `As the Fang Gu, you've jumped to ${count} Outsider${pluralize(count)} when choosing them in the night.`
+          : `As the Fang Gu, this player has jumped to ${count} Outsider${pluralize(count)} when choosing them in the night.`)
+        : `As the Fang Gu, jump to an Outsider by choosing them in the night.`,
   },
   {
     id: "fang_gu_possessions_received",
@@ -219,7 +220,7 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     script: "snv",
     sao: 1,
     source: "grimoire_event",
-    label: "Jumped in the Night",
+    label: "Jumped in the Night", // @todo Revisit title.
     getCount: ({ games }) =>
       countMatchingEvents(
         games,
@@ -238,9 +239,27 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've been possessed by the Fang Gu ${count} time${pluralize(count)}.`
-          : `This player has been possessed by the Fang Gu ${count} time${pluralize(count)}.`)
-        : `As an Outsider, be possessed by the Fang Gu.`,
+          ? `You've been chosen in the night by the Fang Gu ${count} time${pluralize(count)}.`
+          : `This player has been chosen in the night by the Fang Gu ${count} time${pluralize(count)}.`)
+        : `As an Outsider, be chosen in the night by the Fang Gu.`,
+  },
+  {
+    id: "imp_kills",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["imp"],
+    script: "tb",
+    sao: 1,
+    source: "grimoire_event",
+    label: "Pitchfork Harvest",
+    getCount: ({ games, roleId }) =>
+      countGrimoireEvents(games, roleId, GrimoireEventType.DEATH),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Imp, you've killed ${count} player${pluralize(count)}.`
+          : `As the Imp, this player has killed ${count} player${pluralize(count)}.`)
+        : `As the Imp, kill a player.`,
   },
   {
     id: "imp_starpasses",
@@ -275,9 +294,9 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Imp, you've starpassed to a Minion ${count} time${pluralize(count)}.`
-          : `As the Imp, this player has starpassed to a Minion ${count} time${pluralize(count)}.`)
-        : `As the Imp, starpass to a Minion`,
+          ? `As the Imp, you've targeted yourself and passed the Demon role to a Minion ${count} time${pluralize(count)}.`
+          : `As the Imp, this player has targeted themselves and passed the Demon role to a Minion ${count} time${pluralize(count)}.`)
+        : `As the Imp, target yourself and pass the Demon role to a Minion.`,
   },
   {
     id: "imp_starpasses_received",
@@ -287,7 +306,7 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     script: "tb",
     sao: 1,
     source: "grimoire_event",
-    label: "Pass Received",
+    label: "Your Problem Now",
     getCount: ({ games }) =>
       countMatchingEvents(
         games,
@@ -306,9 +325,9 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've received the Starpass ${count} time${pluralize(count)}.`
-          : `This player has received the Starpass ${count} time${pluralize(count)}.`)
-        : `Receive a Starpass from the Imp.`,
+          ? `You've become the Imp ${count} time${pluralize(count)} after they targeted themselves.`
+          : `This player has become the Imp ${count} time${pluralize(count)} after the Imp targeted themselves.`)
+        : `Become the Imp after they target themselves.`,
   },
   {
     id: "kazali_minion_role_changes_caused",
@@ -317,7 +336,7 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     roleIds: ["kazali"],
     script: "experimental",
     source: "grimoire_event",
-    label: "Set Up To Win",
+    label: "Set Up to Win",
     getCount: ({ games, roleId }) =>
       !roleId
         ? 0
@@ -346,7 +365,7 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     scope: "affected_player",
     script: "experimental",
     source: "grimoire_event",
-    label: "Set Up By Evil",
+    label: "Set Up by Evil",
     getCount: ({ games }) =>
       countMatchingEvents(
         games,
@@ -371,13 +390,13 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   },
   // Legion: Nothing to track really.
   {
-    id: "leviathan_second_good_execution_wins",
+    id: "leviathan_second_good_execution",
     category: "role",
     scope: "as_role",
     roleIds: ["leviathan"],
     script: "experimental",
     source: "end_trigger",
-    label: "Drowned in Judgement",
+    label: "Tide of Condemnation",
     getCount: ({ games, roleId }) =>
       games.filter((game) => {
         if (
@@ -402,9 +421,9 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Leviathan, you've won after a second good player was executed ${count} time${pluralize(count)}.`
-          : `As the Leviathan, this player has won after a second good player was executed ${count} time${pluralize(count)}.`)
-        : `As the Leviathan, win when a second good player is executed.`,
+          ? `As the Leviathan, you've caused ${count} game${pluralize(count)} to end after a second good player was executed.`
+          : `As the Leviathan, this player has caused ${count} game${pluralize(count)} to end after a second good player was executed.`)
+        : `As the Leviathan, cause a game to end when a second good player is executed.`,
   },
   {
     id: "leviathan_game_endings",
@@ -438,9 +457,9 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Leviathan, you've won by reaching the final day ${count} time${pluralize(count)}.`
-          : `As the Leviathan, this player has won by reaching the final day ${count} time${pluralize(count)}.`)
-        : `As the Leviathan, win by reaching the final day.`,
+          ? `As the Leviathan, you've caused ${count} game${pluralize(count)} to end when it reached the sixth day.`
+          : `As the Leviathan, this player has caused ${count} game${pluralize(count)} to end when it reached the sixth day.`)
+        : `As the Leviathan, cause a game to end when it reaches the sixth day.`,
   },
   {
     id: "lil_monsta_babysat_received",
@@ -572,7 +591,7 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         ? (isMe
           ? `As the Ojo, you've chosen a not-in-play character ${count} time${pluralize(count)}, leaving the kill to the Storyteller.`
           : `As the Ojo, this player has chosen a not-in-play character ${count} time${pluralize(count)}, leaving the kill to the Storyteller.`)
-        : `As the Ojo, choose a not-in-play character so the Storyteller decides.`,
+        : `As the Ojo, choose a not-in-play character, leaving the kill to the Storyteller.`,
   },
   {
     id: "po_triple_kills",
@@ -619,9 +638,9 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Po, you've unleashed a triple kill ${count} time${pluralize(count)}.`
-          : `As the Po, this player has unleashed a triple kill ${count} time${pluralize(count)}.`)
-        : `As the Po, unleash a triple kill.`,
+          ? `As the Po, you've succesfully killed three players in a single night ${count} time${pluralize(count)}.`
+          : `As the Po, this player has succesfully killed three players in a single night ${count} time${pluralize(count)}.`)
+        : `As the Po, succesfully kill three players in a single night.`,
   },
   // Pukka [sao: 2]: Nothing relevant. Only option: If they were pukka poisoned?
   // Riot: @todo
@@ -633,15 +652,15 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     script: "bmr",
     sao: 3,
     source: "grimoire_event",
-    label: "Returned From The Maw",
+    label: "Returned from the Maw",
     getCount: ({ games, roleId }) =>
       countGrimoireEvents(games, roleId, GrimoireEventType.REVIVE),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Shabaloth, you've regurgitated ${count} player${pluralize(count)} back to life.`
-          : `As the Shabaloth, this player has regurgitated ${count} player${pluralize(count)} back to life.`)
-        : `Regurgitate a player back to life.`,
+          ? `As the Shabaloth, you've brought ${count} player${pluralize(count)} back to life.`
+          : `As the Shabaloth, this player has brought ${count} player${pluralize(count)} back to life.`)
+        : `As the Shabaloth, bring a player back to life.`,
   },
   {
     id: "vigormortis_minion_kills",
@@ -674,9 +693,9 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Vigormortis, you've killed your own minions ${count} time${pluralize(count)}.`
-          : `As the Vigormortis, this player has killed their own minions ${count} time${pluralize(count)}.`)
-        : `As the Vigormortis, kill one of your own minions`,
+          ? `As the Vigormortis, you've killed ${count} of your own minions.`
+          : `As the Vigormortis, this player has killed ${count} of their own minions.`)
+        : `As the Vigormortis, kill one of your own minions.`,
   },
   {
     id: "vigormortis_poisoned_received",
@@ -686,7 +705,7 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     script: "snv",
     sao: 2,
     source: "grimoire_event",
-    label: "Parting gift",
+    label: "Parting Gift",
     getCount: ({ games }) =>
       countMatchingEvents(
         games,
@@ -697,9 +716,9 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `The Vigormortis poisoned you by killing a minion ${count} time${pluralize(count)}.`
-          : `The Vigormortis poisoned this player by killing a minion ${count} time${pluralize(count)}.`)
-        : `Have the Vigormortis poison you by killing one of their minions.`,
+          ? `You've been poisoned by the Vigormortis killing a minion ${count} time${pluralize(count)}.`
+          : `This player has been poisoned by the Vigormortis killing a minion ${count} time${pluralize(count)}.`)
+        : `Have the Vigormortis poison you when they kill one of their minions.`,
   },
   {
     id: "vortox_game_endings",
@@ -709,7 +728,7 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     script: "snv",
     sao: 4,
     source: "end_trigger",
-    label: "Lies Win",
+    label: "Disinformation Reigns",
     getCount: ({ games, roleId }) =>
       games.filter(
         (game) =>
@@ -723,9 +742,9 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Vortox, you've ended the game when no execution occurred ${count} time${pluralize(count)}.`
-          : `As the Vortox, this player has ended the game after no execution occurred ${count} time${pluralize(count)}.`)
-        : `As the Vortox, end the game due to your ability.`,
+          ? `As the Vortox, you've caused ${count} game${pluralize(count)} to end when no execution occurred.`
+          : `As the Vortox, this player has caused ${count} game${pluralize(count)} to end when no execution occurred.`)
+        : `As the Vortox, cause a game to end when no execution occurs.`,
   },
   {
     id: "yaggababble_max_kills",
@@ -781,7 +800,7 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     script: "bmr",
     sao: 1,
     source: "grimoire_event",
-    label: "Buried Alive",
+    label: "From Beyond the Grave",
     getCount: ({ games, roleId }) =>
       !roleId
         ? 0
@@ -805,8 +824,8 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Zombuul, you've faked your death ${count} time${pluralize(count)} and stayed alive.`
-          : `As the Zombuul, this player has faked their death ${count} time${pluralize(count)} and stayed alive.`)
-        : `As the Zombuul, fake your death and stay alive.`,
+          ? `As the Zombuul, you've feigned death ${count} time${pluralize(count)}.`
+          : `As the Zombuul, this player has feigned death ${count} time${pluralize(count)}.`)
+        : `As the Zombuul, feign your death.`,
   },
 ];

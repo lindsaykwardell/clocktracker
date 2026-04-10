@@ -61,9 +61,9 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Alsaahir, you've ended the game ${count} time${pluralize(count)} by guessing correctly.`
-          : `As the Alsaahir, this player has ended the game ${count} time${pluralize(count)} by guessing correctly.`)
-        : `As the Alsaahir, end the game by guessing correctly.`,
+          ? `As the Alsaahir, you've ended ${count} game${pluralize(count)} by guessing correctly.`
+          : `As the Alsaahir, this player has ended ${count} game${pluralize(count)} by guessing correctly.`)
+        : `As the Alsaahir, end a game by guessing correctly.`,
   },
   {
     id: "amnesiac_ability_guesses",
@@ -153,9 +153,43 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Atheist, you've ended the game ${count} time${pluralize(count)} by having the Storyteller executed due to your ability.`
-          : `As the Atheist, this player has ended the game ${count} time${pluralize(count)} by having the Storyteller executed due to their ability.`)
-        : `As the Atheist, end the game due to your ability when the Storyteller is executed.`,
+          ? `As the Atheist, you've caused ${count} game${pluralize(count)} to end when the Storyteller was executed.`
+          : `As the Atheist, this player has caused ${count} game${pluralize(count)} to end when the Storyteller was executed.`)
+        : `As the Atheist, cause a game to end when the Storyteller is executed.`,
+  },
+  {
+    id: "atheist_storyteller_executions_no_atheist_received",
+    category: "role",
+    scope: "affected_player",
+    roleIds: ["atheist"],
+    script: "experimental",
+    source: "end_trigger",
+    label: "Faith Misplaced",
+    getCount: ({ games }) =>
+      games.filter((game) => {
+        if (
+          game.ignore_for_stats ||
+          game.end_trigger !== GameEndTrigger.CHARACTER_ABILITY ||
+          game.end_trigger_type !== GameEndTriggerType.EXTRA_WIN_CONDITION ||
+          game.end_trigger_cause !== GameEndTriggerCause.ABILITY
+        ) {
+          return false;
+        }
+
+        const subtype =
+          parseEndTriggerSubtype(game.end_trigger_subtype) ??
+          parseEndTriggerSubtype(game.end_trigger_note);
+        if (subtype === "ATHEIST_STORYTELLER_EXECUTED_NO_ATHEIST_IN_PLAY") return true;
+
+        // Backward compatibility for older subtype values.
+        return subtype === "ATHEIST_STORYTELLER_EXECUTED_GOOD_LOSES";
+      }).length,
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `You've had ${count} game${pluralize(count)} end when the Storyteller was executed while no Atheist was in play.`
+          : `This player has had ${count} game${pluralize(count)} end when the Storyteller was executed while no Atheist was in play.`)
+        : `Have a game end when the Storyteller is executed while no Atheist is in play.`,
   },
   {
     id: "balloonist_demon_learns",
@@ -187,9 +221,9 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Balloonist, you've learned the Demon ${count} time${pluralize(count)} due to your ability.`
-          : `As the Balloonist, this player has learned the Demon ${count} time${pluralize(count)} due to their ability.`)
-        : `As the Balloonist, learn the Demon due to your ability.`,
+          ? `As the Balloonist, you've learned the Demon ${count} time${pluralize(count)}.`
+          : `As the Balloonist, this player has learned the Demon ${count} time${pluralize(count)}.`)
+        : `As the Balloonist, learn the Demon.`,
   },
   {
     id: "balloonist_full_type_sweeps",
@@ -231,7 +265,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         ? (isMe
           ? `As the Balloonist, you've learned all 4 character types in ${count} game${pluralize(count)}.`
           : `As the Balloonist, this player has learned all 4 character types in ${count} game${pluralize(count)}.`)
-        : `As the Balloonist, learn Townsfolk, Outsider, Minion, and Demon due to your ability.`,
+        : `As the Balloonist, learn all 4 character types in a single game.`,
   },
   {
     id: "banshee_awakenings",
@@ -254,9 +288,9 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Banshee, you've been awakened ${count} time${pluralize(count)} due to your ability.`
-          : `As the Banshee, this player has been awakened ${count} time${pluralize(count)} due to their ability.`)
-        : `As the Banshee, be awakened due to your ability.`,
+          ? `As the Banshee, you've been awakened ${count} time${pluralize(count)}.`
+          : `As the Banshee, this player has been awakened ${count} time${pluralize(count)}.`)
+        : `As the Banshee, be awakened.`,
   },
   {
     id: "bounty_hunter_townsfolk_turned_evil",
@@ -464,9 +498,9 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Choirboy, you've learned the Demon ${count} time${pluralize(count)} due to your ability when the King was killed.`
-          : `As the Choirboy, this player has learned the Demon ${count} time${pluralize(count)} due to their ability when the King was killed.`)
-        : `As the Choirboy, learn the Demon due to your ability when the King is killed.`,
+          ? `As the Choirboy, you've learned the Demon when the King was killed ${count} time${pluralize(count)}.`
+          : `As the Choirboy, this player has learned the Demon when the King was killed ${count} time${pluralize(count)}.`)
+        : `As the Choirboy, learn the Demon when the King is killed.`,
   },
   {
     id: "choirboy_demon_reveals_received",
@@ -498,9 +532,9 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've been revealed to the Choirboy as the Demon ${count} time${pluralize(count)}.`
-          : `This player has been revealed to the Choirboy as the Demon ${count} time${pluralize(count)}.`)
-        : `As the Demon, be shown to the Choirboy after you kill the King.`,
+          ? `You've been shown correctly as the Demon to the Choirboy ${count} time${pluralize(count)}.`
+          : `This player has been shown correctly as the Demon to the Choirboy ${count} time${pluralize(count)}.`)
+        : `Be shown correctly as the Demon to the Choirboy after you kill the King.`,
   },
   // Clockmaker [sao: 1]: Nothing relevant. Only option: Highest number received?
   {
@@ -511,14 +545,14 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     script: "bmr",
     sao: 8,
     source: "grimoire_event",
-    label: "Menu Selection",
+    label: "Sommelier's Choice",
     getCount: ({ games, roleId }) =>
       countGrimoireEvents(games, roleId, GrimoireEventType.DRUNK),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Courtier, you've successfully chosen an in-play character and made them drunk ${count} time${pluralize(count)}.`
-          : `As the Courtier, this player has successfully chosen an in-play character and made them drunk ${count} time${pluralize(count)}.`)
+          ? `As the Courtier, you've successfully chosen ${count} in-play character${pluralize(count)} and made them drunk.`
+          : `As the Courtier, this player has successfully chosen ${count} in-play character${pluralize(count)} and made them drunk.`)
         : `As the Courtier, successfully choose an in-play character and make them drunk.`,
   },
   {
@@ -559,7 +593,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         ? (isMe
           ? `As the Cult Leader, you've changed alignment ${count} time${pluralize(count)}.`
           : `As the Cult Leader, this player has changed alignment ${count} time${pluralize(count)}.`)
-        : `As the Cult Leader, change alignment due to your ability.`,
+        : `As the Cult Leader, change alignment.`,
   },
   {
     id: "cult_leader_evil_cults",
@@ -604,7 +638,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         ? (isMe
           ? `As the Cult Leader, you've ended ${count} game${pluralize(count)} by forming an evil cult.`
           : `As the Cult Leader, this player has ended ${count} game${pluralize(count)} by forming an evil cult.`)
-        : `As the Cult Leader, end the game by forming an evil cult.`,
+        : `As the Cult Leader, end a game by forming an evil cult.`,
   },
   {
     id: "cult_leader_good_cults",
@@ -649,7 +683,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         ? (isMe
           ? `As the Cult Leader, you've ended ${count} game${pluralize(count)} by forming a good cult.`
           : `As the Cult Leader, this player has ended ${count} game${pluralize(count)} by forming a good cult.`)
-        : `As the Cult Leader, end the game by forming a good cult.`,
+        : `As the Cult Leader, end a game by forming a good cult.`,
   },
   {
     id: "dreamer_demon_picks",
@@ -688,9 +722,9 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Dreamer, you've dreamed the Demon ${count} time${pluralize(count)}.`
-          : `As the Dreamer, this player has dreamed the Demon ${count} time${pluralize(count)}.`)
-        : `As the Dreamer, dream the Demon.`,
+          ? `As the Dreamer, you've chosen the Demon ${count} time${pluralize(count)}.`
+          : `As the Dreamer, this player has chosen the Demon ${count} time${pluralize(count)}.`)
+        : `As the Dreamer, choose the Demon.`,
   },
   // Empath [sao: 5]: @todo: Load grim and check first page for sitting next to two evils? Performance impact?
   {
@@ -728,8 +762,8 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Engineer, you've reassembled ${count} evil team${pluralize(count)} with your ability.`
-          : `As the Engineer, this player has reassembled ${count} evil team${pluralize(count)} with their ability.`)
+          ? `As the Engineer, you've reassembled ${count} evil team${pluralize(count)}.`
+          : `As the Engineer, this player has reassembled ${count} evil team${pluralize(count)}.`)
         : `As the Engineer, assemble a new evil team.`,
   },
   {
@@ -740,7 +774,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     script: "bmr",
     sao: 4,
     source: "grimoire_event",
-    label: "The Power of Christ Compels You",
+    label: "Evil Driven Out",
     getCount: ({ games, roleId }) =>
       games.reduce((total, game) => {
         if (!roleId || game.ignore_for_stats) return total;
@@ -780,7 +814,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     script: "experimental",
     roleIds: ["farmer"],
     source: "grimoire_event",
-    label: "Passing The Plough",
+    label: "Passing the Plough",
     getCount: ({ games, roleId }) =>
       games.reduce((total, game) => {
         if (!roleId || game.ignore_for_stats) return total;
@@ -867,9 +901,9 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Fool, you've survived death due to your ability ${count} time${pluralize(count)}.`
-          : `As the Fool, this player has survived death due to their ability ${count} time${pluralize(count)}.`)
-        : `As the Fool, survive death due to your ability.`,
+          ? `As the Fool, you've avoided ${count} death${pluralize(count)}.`
+          : `As the Fool, this player has avoided ${count} death${pluralize(count)}.`)
+        : `As the Fool, survive death.`,
   },
   {
     id: "fortune_teller_demon",
@@ -908,7 +942,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Fortune Teller, you've got a "Yes" on the Demon ${count} time${pluralize(count)}.`
+          ? `As the Fortune Teller, you've gotten a "Yes" on the Demon ${count} time${pluralize(count)}.`
           : `As the Fortune Teller, this player has gotten a "Yes" on the Demon ${count} time${pluralize(count)}.`)
         : `As the Fortune Teller, get a "Yes" on the Demon.`,
   },
@@ -949,7 +983,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Fortune Teller, you've got a "Yes" on the Recluse ${count} time${pluralize(count)}.`
+          ? `As the Fortune Teller, you've gotten a "Yes" on the Recluse ${count} time${pluralize(count)}.`
           : `As the Fortune Teller, this player has gotten a "Yes" on the Recluse ${count} time${pluralize(count)}.`)
         : `As the Fortune Teller, get a "Yes" on the Recluse.`,
   },
@@ -1010,8 +1044,8 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Gossip, you've made ${count} statement${pluralize(count)} that proved deadly.`
-          : `As the Gossip, this player has made ${count} statement${pluralize(count)} that proved deadly.`)
+          ? `As the Gossip, you've killed ${count} player${pluralize(count)}.`
+          : `As the Gossip, this player has killed ${count} player${pluralize(count)}.`)
         : `As the Gossip, make a statement that kills a player.`,
   },
   {
@@ -1028,8 +1062,8 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Grandmother, you've died ${count} time${pluralize(count)} when your grandchild was killed by the Demon.`
-          : `As the Grandmother, this player has died ${count} time${pluralize(count)} when their grandchild was killed by the Demon.`)
+          ? `As the Grandmother, you've died ${count} time${pluralize(count)} after your grandchild was killed by the Demon.`
+          : `As the Grandmother, this player has died ${count} time${pluralize(count)} after their grandchild was killed by the Demon.`)
         : `As the Grandmother, die when your grandchild is killed by the Demon.`,
   },
   {
@@ -1093,9 +1127,9 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Huntsman, you've used your ability to choose a player ${count} time${pluralize(count)}.`
-          : `As the Huntsman, this player has used their ability to choose a player ${count} time${pluralize(count)}.`)
-        : `As the Huntsman, use your ability to choose a player.`,
+          ? `As the Huntsman, you've guessed ${count} player${pluralize(count)} as the Damsel.`
+          : `As the Huntsman, this player has guessed ${count} player${pluralize(count)} as the Damsel.`)
+        : `As the Huntsman, guess a player as .`,
   },
   {
     id: "huntsman_damsel_saves",
@@ -1104,7 +1138,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     roleIds: ["huntsman"],
     script: "experimental",
     source: "grimoire_event",
-    label: "Just In Time",
+    label: "Just in Time",
     getCount: ({ games, roleId }) =>
       countGrimoireEvents(games, roleId, GrimoireEventType.ROLE_CHANGE),
     getSentence: ({ count, isMe }) =>
@@ -1169,7 +1203,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         ? (isMe
           ? `As the Innkeeper, you've made ${count} player${pluralize(count)} drunk.`
           : `As the Innkeeper, this player has made ${count} player${pluralize(count)} drunk.`)
-        : `As the Innkeeper, make a player drunk due to your ability.`,
+        : `As the Innkeeper, make a player drunk.`,
   },
   {
     id: "innkeeper_drunk_received",
@@ -1202,7 +1236,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     script: "bmr",
     sao: 5,
     source: "grimoire_event",
-    label: "Harbor In The Dark",
+    label: "Harbor in the Dark",
     getCount: ({ games, roleId }) =>
       games.reduce((total, game) => {
         if (!roleId || game.ignore_for_stats) return total;
@@ -1220,9 +1254,9 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Innkeeper, you've saved ${count} player${pluralize(count)} from death due to your ability.`
-          : `As the Innkeeper, this player has saved ${count} player${pluralize(count)} from death due to their ability.`)
-        : `As the Innkeeper, save a player from death due to your ability.`,
+          ? `As the Innkeeper, you've saved ${count} player${pluralize(count)} from death.`
+          : `As the Innkeeper, this player has saved ${count} player${pluralize(count)} from death.`)
+        : `As the Innkeeper, save a player from death.`,
   },
   {
     id: "investigator_recluse",
@@ -1368,8 +1402,8 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Librarian, you've been shown the Spy as an Outsider ${count} time${pluralize(count)}.`
-          : `As the Librarian, this player has been shown the Spy as an Outsider ${count} time${pluralize(count)}.`)
+          ? `As the Librarian, you've seen the Spy as an Outsider ${count} time${pluralize(count)}.`
+          : `As the Librarian, this player has seen the Spy as an Outsider ${count} time${pluralize(count)}.`)
         : `As the Librarian, see the Spy as an Outsider.`,
   },
   {
@@ -1407,8 +1441,8 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Lycanthrope, you've mauled ${count} good player${pluralize(count)}.`
-          : `As the Lycanthrope, this player has mauled ${count} good player${pluralize(count)}.`)
+          ? `As the Lycanthrope, you've killed ${count} good player${pluralize(count)}.`
+          : `As the Lycanthrope, this player has killed ${count} good player${pluralize(count)}.`)
         : `As the Lycanthrope, kill a good player.`,
   },
   {
@@ -1523,9 +1557,9 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Mayor, you've ended the game ${count} time${pluralize(count)} due to your ability.`
-          : `As the Mayor, this player has ended the game ${count} time${pluralize(count)} due to their ability.`)
-        : `As the Mayor, end the game due to your ability.`,
+          ? `As the Mayor, you've caused ${count} game${pluralize(count)} to end when no executions happened on the final day.`
+          : `As the Mayor, this player has caused ${count} game${pluralize(count)} to end when no executions happened on the final day.`)
+        : `As the Mayor, cause a game to end when no executions happen on the final day.`,
   },
   {
     id: "mayor_bounces",
@@ -1575,8 +1609,8 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Monk, you've protected a player from the Demon ${count} time${pluralize(count)}.`
-          : `As the Monk, this player has protected a player from the Demon ${count} time${pluralize(count)}.`)
+          ? `As the Monk, you've protected ${count} player${pluralize(count)} from the Demon.`
+          : `As the Monk, this player has protected ${count} player${pluralize(count)} from the Demon.`)
         : `As the Monk, protect a player from the Demon.`,
   },
   {
@@ -1600,9 +1634,9 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Nightwatchman, you've chosen a player with your ability ${count} time${pluralize(count)}.`
-          : `As the Nightwatchman, this player has chosen a player with their ability ${count} time${pluralize(count)}.`)
-        : `As the Nightwatchman, choose a player with your ability.`,
+          ? `As the Nightwatchman, you've chosen ${count} player${pluralize(count)}.`
+          : `As the Nightwatchman, this player has chosen ${count} player${pluralize(count)}.`)
+        : `As the Nightwatchman, choose a player.`,
   },
   {
     id: "nightwatchman_ability_received",
@@ -1634,7 +1668,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     script: "experimental",
     roleIds: ["noble"],
     source: "grimoire_event",
-    label: "Court Of The Damned",
+    label: "Court of the Damned",
     getCount: ({ games, roleId }) =>
       !roleId
         ? 0
@@ -1684,8 +1718,8 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Pacifist, you've saved a player from execution ${count} time${pluralize(count)}.`
-          : `As the Pacifist, this player has saved a player from execution ${count} time${pluralize(count)}.`)
+          ? `As the Pacifist, you've saved ${count} player${pluralize(count)} from execution.`
+          : `As the Pacifist, this player has saved ${count} player${pluralize(count)} from execution.`)
         : `As the Pacifist, save a player from execution.`,
   },
   {
@@ -1725,8 +1759,8 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've become drunk ${count} time${pluralize(count)} when the Philosopher selected your character.`
-          : `This player has become drunk ${count} time${pluralize(count)} when the Philosopher selected their character.`)
+          ? `You've been made drunk by the Philosopher ${count} time${pluralize(count)} when they selected your character.`
+          : `This player has been made drunk by the Philosopher ${count} time${pluralize(count)} when they selected their character.`)
         : `Become drunk due to the Philosopher selecting your character.`,
   },
   {
@@ -1736,7 +1770,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     script: "experimental",
     roleIds: ["pixie"],
     source: "grimoire_event",
-    label: "Fae Inheritance",
+    label: "Fae Legacy",
     getCount: ({ games, roleId }) =>
       !roleId
         ? 0
@@ -1752,7 +1786,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         ? (isMe
           ? `As the Pixie, you've gained another character's ability ${count} time${pluralize(count)}.`
           : `As the Pixie, this player has gained another character's ability ${count} time${pluralize(count)}.`)
-        : `As the Pixie, gain another character's ability due to your ability.`,
+        : `As the Pixie, gain another character's ability.`,
   },
   {
     id: "pixie_madness_received",
@@ -1761,7 +1795,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     script: "experimental",
     roleIds: ["pixie"],
     source: "grimoire_event",
-    label: "Borrowed Spotlight",
+    label: "Stolen Spotlight",
     getCount: ({ games }) =>
       countMatchingEvents(
         games,
@@ -1773,8 +1807,8 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `A Pixie has been mad as your character ${count} time${pluralize(count)}.`
-          : `A Pixie has been mad as this player's character ${count} time${pluralize(count)}.`)
+          ? `You've had a Pixie be mad as your character ${count} time${pluralize(count)}.`
+          : `This player has had a Pixie be mad as their character ${count} time${pluralize(count)}.`)
         : `Have a Pixie be mad as your character.`,
   },
   {
@@ -1820,8 +1854,8 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Poppy Grower, you've reached ${count} deaths before dying and waking evil.`
-          : `As the Poppy Grower, this player has reached ${count} deaths before dying and waking evil.`)
+          ? `As the Poppy Grower, the highest number of players in a single game who died before you did is ${count}.`
+          : `As the Poppy Grower, the highest number of players in a single game who died before this player did is ${count}.`)
         : `As the Poppy Grower, die after deaths so evil wakes.`,
   },
   {
@@ -1860,12 +1894,12 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Preacher, you've chosen ${count} minion${pluralize(count)} with your ability.`
-          : `As the Preacher, this player has chosen ${count} minion${pluralize(count)} with their ability.`)
-        : `As the Preacher, choose a minion with your ability.`,
+          ? `As the Preacher, you've chosen ${count} minion${pluralize(count)}.`
+          : `As the Preacher, this player has chosen ${count} minion${pluralize(count)}.`)
+        : `As the Preacher, choose a minion.`,
   },
   {
-    id: "preacher_highest_count",
+    id: "preacher_chosen_highest",
     category: "role",
     scope: "as_role",
     script: "experimental",
@@ -1908,9 +1942,9 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Preacher, you've reached a total of ${count} chosen minion${pluralize(count)} in a single game.`
-          : `As the Preacher, this player has reached a total of ${count} chosen minion${pluralize(count)} in a single game.`)
-        : `As the Preacher, choose multiple minions with your ability in a single game.`,
+          ? `As the Preacher, your highest number of minions chosen in a single game is ${count}.`
+          : `As the Preacher, this player's highest number of minions chosen in a single game is ${count}.`)
+        : `As the Preacher, choose multiple minions in a single game.`,
   },
   {
     id: "preacher_chosen_received",
@@ -1919,7 +1953,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     script: "experimental",
     roleIds: ["preacher"],
     source: "grimoire_event",
-    label: "Chosen for the Sermon",
+    label: "Singled Out in Sermon",
     getCount: ({ games }) =>
       countMatchingEvents(games, (game, event) => {
         if (
@@ -1941,9 +1975,9 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've been chosen as a minion by the Preacher ${count} time${pluralize(count)}.`
-          : `This player has been chosen as a minion by the Preacher ${count} time${pluralize(count)}.`)
-        : `Be chosen as a minion by the Preacher due to their ability.`,
+          ? `You've been chosen by the Preacher ${count} time${pluralize(count)} as a minion.`
+          : `This player has been chosen by the Preacher ${count} time${pluralize(count)} as a minion.`)
+        : `Be chosen by the Preacher as a minion.`,
   },
   {
     id: "princess_kills_prevented",
@@ -1981,9 +2015,9 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Princess, you've prevented a Demon from killing ${count} time${pluralize(count)} due to your ability.`
-          : `As the Princess, this player has prevented a Demon from killing ${count} time${pluralize(count)} due to their ability.`)
-        : `As the Princess, prevent a Demon from killing due to your ability.`,
+          ? `As the Princess, you've prevented a Demon from killing ${count} time${pluralize(count)}.`
+          : `As the Princess, this player has prevented a Demon from killing ${count} time${pluralize(count)}.`)
+        : `As the Princess, prevent a Demon from killing.`,
   },
   {
     id: "princess_kills_prevented_received",
@@ -2067,9 +2101,9 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Ravenkeeper, you've chosen the Demon ${count} time${pluralize(count)} due to your ability.`
-          : `As the Ravenkeeper, this player has chosen the Demon ${count} time${pluralize(count)} due to their ability.`)
-        : `As the Ravenkeeper, choose the Demon due to your ability.`,
+          ? `As the Ravenkeeper, you've chosen the Demon ${count} time${pluralize(count)} after dying.`
+          : `As the Ravenkeeper, this player has chosen the Demon ${count} time${pluralize(count)} after dying.`)
+        : `As the Ravenkeeper, choose the Demon after dying.`,
   },
   {
     id: "sage_demon_kills_received",
@@ -2104,7 +2138,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     script: "bmr",
     sao: 2,
     source: "grimoire_event",
-    label: "Shared Bottle",
+    label: "Passed the Bottle",
     getCount: ({ games, roleId }) =>
       games.reduce((total, game) => {
         if (!roleId || game.ignore_for_stats) return total;
@@ -2123,8 +2157,8 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Sailor, you've made another player drunk ${count} time${pluralize(count)}.`
-          : `As the Sailor, this player has made another player drunk ${count} time${pluralize(count)}.`)
+          ? `As the Sailor, you've made ${count} player${pluralize(count)} drunk.`
+          : `As the Sailor, this player has made ${count} player${pluralize(count)} drunk.`)
         : `As the Sailor, make another player drunk.`,
   },
   {
@@ -2187,9 +2221,9 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Sailor, you've survived death ${count} time${pluralize(count)} due to your ability.`
-          : `As the Sailor, this player has survived death ${count} time${pluralize(count)} due to their ability.`)
-        : `As the Sailor, survive death due to your ability.`,
+          ? `As the Sailor, you've avoided ${count} death${pluralize(count)}.`
+          : `As the Sailor, this player has avoided ${count} death${pluralize(count)}.`)
+        : `As the Sailor, survive death.`,
   },
   // Savant [sao: 8]: Nothing relevant. Only option: Can't think of anything..
   {
@@ -2200,7 +2234,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     script: "snv",
     sao: 9,
     source: "grimoire_event",
-    label: "Stitched Insight",
+    label: "Threaded Clue",
     getCount: ({ games, roleId }) =>
       !roleId
         ? 0
@@ -2229,13 +2263,35 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     source: "grimoire_event",
     label: "Bullseye",
     getCount: ({ games, roleId }) =>
-      countGrimoireEvents(games, roleId, GrimoireEventType.DEATH),
+      games.reduce((total, game) => {
+        if (!roleId || game.ignore_for_stats) return total;
+
+        return (
+          total +
+          game.grimoire_events.filter((event) => {
+            if (
+              event.by_role_id !== roleId ||
+              event.event_type !== GrimoireEventType.DEATH
+            ) {
+              return false;
+            }
+
+            const currentToken = getEventCurrentToken(game, event);
+            const previousToken = getEventPreviousToken(game, event);
+
+            return (
+              currentToken?.role?.type === "DEMON" ||
+              previousToken?.role?.type === "DEMON"
+            );
+          }).length
+        );
+      }, 0),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Slayer, you've killed ${count} player${pluralize(count)} with your shot.`
-          : `As the Slayer, this player has killed ${count} player${pluralize(count)} with their shot.`)
-        : `As the Slayer, kill a player with your ability.`,
+          ? `As the Slayer, you've killed ${count} Demon${pluralize(count)}.`
+          : `As the Slayer, this player has killed ${count} Demon${pluralize(count)}.`)
+        : `As the Slayer, kill the Demon.`,
   },
   {
     id: "slayer_game_ending_kills",
@@ -2257,9 +2313,9 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Slayer, you've ended the game with your shot ${count} time${pluralize(count)}.`
-          : `As the Slayer, this player has ended the game with their shot ${count} time${pluralize(count)}.`)
-        : `As the Slayer, end a game with your ability.`,
+          ? `As the Slayer, you've ended ${count} game${pluralize(count)} by killing the demon.`
+          : `As the Slayer, this player has ended ${count} game${pluralize(count)} by killing the demon.`)
+        : `As the Slayer, end a game by killing the demon.`,
   },
   {
     id: "slayer_recluse_kills",
@@ -2298,9 +2354,9 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Slayer, you've killed the Recluse with your shot ${count} time${pluralize(count)}.`
-          : `As the Slayer, this player has killed the Recluse with their shot ${count} time${pluralize(count)}.`)
-        : `As the Slayer, kill the Recluse with your ability.`,
+          ? `As the Slayer, you've killed the Recluse ${count} time${pluralize(count)}.`
+          : `As the Slayer, this player has killed the Recluse ${count} time${pluralize(count)}.`)
+        : `As the Slayer, kill the Recluse.`,
   },
   {
     id: "snake_charmer_demon_charms",
@@ -2338,9 +2394,9 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Snake Charmer, you've successfully charmed the Demon ${count} time${pluralize(count)}.`
-          : `As the Snake Charmer, this player has successfully charmed the Demon ${count} time${pluralize(count)}.`)
-        : `As the Snake Charmer, successfully charm the Demon using your ability.`,
+          ? `As the Snake Charmer, you've charmed ${count} Demon${pluralize(count)}.`
+          : `As the Snake Charmer, this player has charmed ${count} Demon${pluralize(count)}.`)
+        : `As the Snake Charmer, successfully charm the Demon.`,
   },
   // {
   //   id: "snake_charmer_post_charm_win_rate",
@@ -2436,8 +2492,8 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As a Demon, you've been charmed by the Snake Charmer ${count} time${pluralize(count)}.`
-          : `As a Demon, this player has been charmed by the Snake Charmer ${count} time${pluralize(count)}.`)
+          ? `You've been charmed by the Snake Charmer ${count} time${pluralize(count)}.`
+          : `This player has been charmed by the Snake Charmer ${count} time${pluralize(count)}.`)
         : `As a Demon, be charmed by the Snake Charmer.`,
   },
   {
@@ -2462,9 +2518,9 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Soldier, you've survived a Demon attack ${count} time${pluralize(count)} due to your ability.`
-          : `As the Soldier, this player has survived a Demon attack ${count} time${pluralize(count)} due to their ability.`)
-        : `As the Soldier, survive a Demon attack due to your ability.`,
+          ? `As the Soldier, you've survived ${count} Demon attack${pluralize(count)}.`
+          : `As the Soldier, this player has survived ${count} Demon attack${pluralize(count)}.`)
+        : `As the Soldier, survive a Demon attack.`,
   },
   {
     id: "steward_spy",
@@ -2528,9 +2584,9 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Tea Lady, you've saved ${count} player${pluralize(count)}.`
-          : `As the Tea Lady, this player has saved ${count} player${pluralize(count)}.`)
-        : `As the Tea Lady, save a player.`,
+          ? `As the Tea Lady, you've saved ${count} player${pluralize(count)} from death.`
+          : `As the Tea Lady, this player has saved ${count} player${pluralize(count)} from death.`)
+        : `As the Tea Lady, save a player from death.`,
   },
   // Town Crier [sao: 6]: Nothing relevant. Only option: If they got a yes?
   {
@@ -2577,8 +2633,8 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Undertaker, you've buried ${count} player${pluralize(count)}.`
-          : `As the Undertaker, this player has buried ${count} player${pluralize(count)}.`)
+          ? `As the Undertaker, you've learned the character of ${count} executed player${pluralize(count)}.`
+          : `As the Undertaker, this player has learned the character of ${count} executed player${pluralize(count)}.`)
         : `As the Undertaker, learn the character of an executed player.`,
   },
   {
@@ -2620,7 +2676,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         ? (isMe
           ? `As the Virgin, you've caused ${count} immediate execution${pluralize(count)} by being nominated.`
           : `As the Virgin, this player has caused ${count} immediate execution${pluralize(count)} by being nominated.`)
-        : `As the Virgin, cause an immediate execution due to your ability.`,
+        : `As the Virgin, cause an immediate execution by being nominated.`,
   },
   {
     id: "washerwoman_spy",
@@ -2659,8 +2715,8 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Washerwoman, you've seen the Spy as a Townsfolk ${count} time${pluralize(count)}.`
-          : `As the Washerwoman, this player has seen the Spy as a Townsfolk ${count} time${pluralize(count)}.`)
-        : `As the Washerwoman, see the Spy as a Townsfolk.`,
+          ? `As the Washerwoman, you've seen the Spy as Townsfolk ${count} time${pluralize(count)}.`
+          : `As the Washerwoman, this player has seen the Spy as Townsfolk ${count} time${pluralize(count)}.`)
+        : `As the Washerwoman, see the Spy as Townsfolk.`,
   },
 ];

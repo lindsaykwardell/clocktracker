@@ -105,6 +105,12 @@
               </div>
               <template v-else-if="tab === 'role'">
                 <div class="space-y-12">
+                  <div class="text-center max-w-[80ch] mx-auto mb-16 space-y-8">
+                    <p class="text-sm">
+                      All card counts are attributed to the character's ability based on recorded game data. These cards show minimum tracked values. 
+                      Older games and partially tracked games may be missing events, so treat all counts as "at least".
+                    </p>
+                  </div>
                   <section
                     v-for="scriptGroup in rolePreviewCardGroups"
                     :key="scriptGroup.script"
