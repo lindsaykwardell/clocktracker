@@ -505,11 +505,19 @@
       </details>
     </fieldset>
     <GameEditorGrimoireEvents
+      v-if="advancedModeEnabled"
       ref="grimoireEventsRef"
       :game="game"
       :editingMultipleGames="editingMultipleGames"
       :scriptRoleIds="scriptRoleIds"
       @open-by-role-dialog="openGrimoireEventByRoleDialog"
+    />
+    <GameEditorRoleEvents
+      v-else
+      :game="game"
+      :editingMultipleGames="editingMultipleGames"
+      :scriptRoleIds="scriptRoleIds"
+      @open-role-dialog="openManualGrimoireEventRoleDialog"
     />
     <fieldset
       v-if="!editingMultipleGames"
@@ -724,9 +732,14 @@
     :hideTravelers="
       tokenSet !== 'player_characters' &&
       tokenSet !== 'end_trigger' &&
-      tokenSet !== 'event_by_role'
+      tokenSet !== 'event_by_role' &&
+      tokenSet !== 'event_role'
     "
-    :hideBlankRole="tokenSet === 'end_trigger' || tokenSet === 'event_by_role'"
+    :hideBlankRole="
+      tokenSet === 'end_trigger' ||
+      tokenSet === 'event_by_role' ||
+      tokenSet === 'event_role'
+    "
   />
   <Dialog v-model:visible="showCopyGrimoireDialog" size="xl">
     <template #title>
@@ -835,6 +848,7 @@ const props = defineProps<{
       grimoire_page: number;
       participant_id: string;
       event_type: GrimoireEventType | null;
+      status_source?: string | null;
       cause: GrimoireEventCause | null;
       by_participant_id: string | null;
       player_name: string;
@@ -920,10 +934,15 @@ const roles = ref<
 const scriptVersions = ref<{ id: number; version: string }[]>([]);
 const fetchingScriptVersions = ref(false);
 const tokenMode = ref<
-  "role" | "related_role" | "end_trigger_role" | "event_by_role"
+  "role" | "related_role" | "end_trigger_role" | "event_role" | "event_by_role"
 >("role");
 const tokenSet = ref<
-  "player_characters" | "demon_bluffs" | "fabled" | "end_trigger" | "event_by_role"
+  | "player_characters"
+  | "demon_bluffs"
+  | "fabled"
+  | "end_trigger"
+  | "event_role"
+  | "event_by_role"
 >("player_characters");
 const excludeIrrelevantEndTriggerRoles = ref(true);
 const excludeIrrelevantGrimoireEventRoles = ref(true);
@@ -957,6 +976,7 @@ const focusedGrimoireEvent = ref<{
   player_name: string;
   role_id: string | null;
   by_role_id: string | null;
+  status_source?: string | null;
   old_role_id: string | null;
   new_role_id: string | null;
   old_alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
@@ -1167,6 +1187,9 @@ const visibleRoles = computed(() => {
     return roles.value.length > 0 ? roles.value : allRoles.getAllRoles();
   }
   if (tokenSet.value === "event_by_role") {
+    return roles.value.length > 0 ? roles.value : allRoles.getAllRoles();
+  }
+  if (tokenSet.value === "event_role") {
     return roles.value.length > 0 ? roles.value : allRoles.getAllRoles();
   }
 
@@ -1553,12 +1576,13 @@ watchEffect(async () => {
 
 function openRoleSelectionDialog(
   token: Partial<Character> | null,
-  mode: "role" | "related_role" | "end_trigger_role" | "event_by_role",
+  mode: "role" | "related_role" | "end_trigger_role" | "event_role" | "event_by_role",
   set:
     | "player_characters"
     | "demon_bluffs"
     | "fabled"
     | "end_trigger"
+    | "event_role"
     | "event_by_role" = "player_characters"
 ) {
   focusedToken = token;
@@ -1581,6 +1605,7 @@ function openGrimoireEventByRoleDialog(event: {
   player_name: string;
   role_id: string | null;
   by_role_id: string | null;
+  status_source?: string | null;
   old_role_id: string | null;
   new_role_id: string | null;
   old_alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
@@ -1589,6 +1614,34 @@ function openGrimoireEventByRoleDialog(event: {
   focusedGrimoireEvent.value = event;
   excludeIrrelevantGrimoireEventRoles.value = true;
   openRoleSelectionDialog(null, "event_by_role", "event_by_role");
+}
+
+function openManualGrimoireEventRoleDialog(
+  event: {
+    grimoire_page: number;
+    participant_id: string;
+    event_type: GrimoireEventType | null;
+    cause: GrimoireEventCause | null;
+    by_participant_id: string | null;
+    player_name: string;
+    role_id: string | null;
+    by_role_id: string | null;
+    status_source?: string | null;
+    old_role_id: string | null;
+    new_role_id: string | null;
+    old_alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
+    new_alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
+  },
+  field: "target" | "source"
+) {
+  focusedGrimoireEvent.value = event;
+  if (field === "source") {
+    excludeIrrelevantGrimoireEventRoles.value = true;
+    openRoleSelectionDialog(null, "event_by_role", "event_by_role");
+    return;
+  }
+
+  openRoleSelectionDialog(null, "event_role", "event_role");
 }
 
 
@@ -1645,6 +1698,16 @@ function selectRoleForToken(role: {
     const event = focusedGrimoireEvent.value;
     if (event) {
       event.by_role_id = role.id || null;
+      event.by_participant_id = null;
+    }
+    showRoleSelectionDialog.value = false;
+    return;
+  }
+  if (tokenMode.value === "event_role") {
+    const event = focusedGrimoireEvent.value;
+    if (event) {
+      event.role_id = role.id || null;
+      event.player_name = "";
     }
     showRoleSelectionDialog.value = false;
     return;

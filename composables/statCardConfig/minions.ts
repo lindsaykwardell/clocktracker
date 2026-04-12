@@ -11,6 +11,7 @@ import {
   getByRoleForEvent,
   getEventCurrentToken,
   getEventPreviousToken,
+  getEventTargetRole,
   getMostCommonByRole,
   getMostCommonByRoleSubtitle,
   getMostCommonEndTriggerRole,
@@ -1074,13 +1075,7 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
               return false;
             }
 
-            const currentToken = getEventCurrentToken(game, event);
-            const previousToken = getEventPreviousToken(game, event);
-
-            return (
-              currentToken?.role_id === "spy" ||
-              previousToken?.role_id === "spy"
-            );
+            return getEventTargetRole(game, event)?.id === "spy";
           }),
     getSentence: ({ count, isMe }) =>
       count > 0

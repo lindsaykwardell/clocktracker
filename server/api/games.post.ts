@@ -145,7 +145,28 @@ export default defineEventHandler(async (handler) => {
       player_characters: true,
       demon_bluffs: true,
       fabled: true,
-      grimoire_events: true,
+      grimoire_events: {
+        include: {
+          role: {
+            select: {
+              id: true,
+              name: true,
+              token_url: true,
+              type: true,
+              initial_alignment: true,
+            },
+          },
+          by_role: {
+            select: {
+              id: true,
+              name: true,
+              token_url: true,
+              type: true,
+              initial_alignment: true,
+            },
+          },
+        },
+      },
       end_trigger_role: {
         select: {
           token_url: true,

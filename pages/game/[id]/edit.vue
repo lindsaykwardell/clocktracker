@@ -18,6 +18,7 @@ import {
   GrimoireEventCause,
   GrimoireEventType,
 } from "~/composables/useGames";
+import { isBlankManualGrimoireEvent } from "~/composables/manualGrimoireEvents";
 
 definePageMeta({
   middleware: ["auth"],
@@ -279,21 +280,23 @@ const formattedGame = computed(() => {
     name: fabled.name,
     role_id: fabled.role_id,
   })),
-  grimoire_events: game.grimoire_events.map((event) => ({
-    grimoire_page: event.grimoire_page,
-    participant_id: event.participant_id,
-    event_type: event.event_type,
-    status_source: event.status_source,
-    cause: event.cause,
-    by_participant_id: event.by_participant_id,
-    player_name: event.player_name,
-    role_id: event.role_id,
-    by_role_id: event.by_role_id,
-    old_role_id: event.old_role_id,
-    new_role_id: event.new_role_id,
-    old_alignment: event.old_alignment,
-    new_alignment: event.new_alignment,
-  })),
+  grimoire_events: game.grimoire_events
+    .filter((event) => !isBlankManualGrimoireEvent(event))
+    .map((event) => ({
+      grimoire_page: event.grimoire_page,
+      participant_id: event.participant_id,
+      event_type: event.event_type,
+      status_source: event.status_source,
+      cause: event.cause,
+      by_participant_id: event.by_participant_id,
+      player_name: event.player_name,
+      role_id: event.role_id,
+      by_role_id: event.by_role_id,
+      old_role_id: event.old_role_id,
+      new_role_id: event.new_role_id,
+      old_alignment: event.old_alignment,
+      new_alignment: event.new_alignment,
+    })),
   // If the game was waiting for confirmation, mark it as confirmed when saving
   waiting_for_confirmation: savedGame.data.value?.waiting_for_confirmation
     ? false

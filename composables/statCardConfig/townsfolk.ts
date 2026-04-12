@@ -12,6 +12,7 @@ import {
   getByRoleForEvent,
   getEventCurrentToken,
   getEventPreviousToken,
+  getEventTargetRole,
   getMostCommonByRole,
   getMostCommonByRoleSubtitle,
   getMostCommonEndTriggerRole,
@@ -485,13 +486,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
               return false;
             }
 
-            const currentToken = getEventCurrentToken(game, event);
-            const previousToken = getEventPreviousToken(game, event);
-
-            return (
-              currentToken?.role?.type === "DEMON" ||
-              previousToken?.role?.type === "DEMON"
-            );
+            return getEventTargetRole(game, event)?.type === "DEMON";
           }).length
         );
       }, 0),
@@ -709,13 +704,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
               return false;
             }
 
-            const currentToken = getEventCurrentToken(game, event);
-            const previousToken = getEventPreviousToken(game, event);
-
-            return (
-              currentToken?.role?.type === "DEMON" ||
-              previousToken?.role?.type === "DEMON"
-            );
+            return getEventTargetRole(game, event)?.type === "DEMON";
           }).length
         );
       }, 0),
@@ -790,13 +779,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
               return false;
             }
 
-            const currentToken = getEventCurrentToken(game, event);
-            const previousToken = getEventPreviousToken(game, event);
-
-            return (
-              currentToken?.role?.type === "DEMON" ||
-              previousToken?.role?.type === "DEMON"
-            );
+            return getEventTargetRole(game, event)?.type === "DEMON";
           }).length
         );
       }, 0),
@@ -2276,13 +2259,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
               return false;
             }
 
-            const currentToken = getEventCurrentToken(game, event);
-            const previousToken = getEventPreviousToken(game, event);
-
-            return (
-              currentToken?.role?.type === "DEMON" ||
-              previousToken?.role?.type === "DEMON"
-            );
+            return getEventTargetRole(game, event)?.type === "DEMON";
           }).length
         );
       }, 0),

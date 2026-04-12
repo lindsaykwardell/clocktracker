@@ -172,7 +172,28 @@ export async function fetchGames(user_id: string, me: User | null) {
           },
         },
       },
-      grimoire_events: true,
+      grimoire_events: {
+        include: {
+          role: {
+            select: {
+              id: true,
+              name: true,
+              token_url: true,
+              type: true,
+              initial_alignment: true,
+            },
+          },
+          by_role: {
+            select: {
+              id: true,
+              name: true,
+              token_url: true,
+              type: true,
+              initial_alignment: true,
+            },
+          },
+        },
+      },
       end_trigger_role: {
         select: {
           id: true,
@@ -430,7 +451,28 @@ export async function fetchGame(
           },
         },
       },
-      grimoire_events: true,
+      grimoire_events: {
+        include: {
+          role: {
+            select: {
+              id: true,
+              name: true,
+              token_url: true,
+              type: true,
+              initial_alignment: true,
+            },
+          },
+          by_role: {
+            select: {
+              id: true,
+              name: true,
+              token_url: true,
+              type: true,
+              initial_alignment: true,
+            },
+          },
+        },
+      },
       end_trigger_role: {
         select: {
           id: true,

@@ -1,7 +1,7 @@
 <template>
   <fieldset v-if="!editingMultipleGames" class="block border rounded border-stone-500 p-4 my-3 bg-center bg-cover">
     <legend>Grimoire Events</legend>
-    <p v-if="game.grimoire_events.length === 0" class="text-sm text-stone-400">
+    <p v-if="grimoireEventsByPage.length === 0" class="text-sm text-stone-400">
       No events recorded yet.
     </p>
     <Alert v-if="grimoireEventSyncSummary" :color="grimoireEventSyncAlertColor">
@@ -303,6 +303,7 @@ import {
   findMatchingTokenOnPreviousPage,
   normalizePlayerName,
 } from "~/composables/grimoireParticipantMatching";
+import { isManualGrimoireEventParticipant } from "~/composables/manualGrimoireEvents";
 
 const wildcardRoleIds = new Set(WILDCARD_ROLE_IDS);
 
@@ -431,10 +432,12 @@ function grimoireEventDisplayName(event: {
   grimoire_page: number;
   participant_id: string;
   player_name: string;
+  role_id?: string | null;
 }) {
   if (event.player_name) return event.player_name;
   const token = getTokenForParticipant(event.grimoire_page, event.participant_id);
-  return token?.player_name || token?.role?.name || "Unknown player";
+  const eventRole = event.role_id ? allRoles.getRole(event.role_id)?.name : "";
+  return token?.player_name || token?.role?.name || eventRole || "Unknown player";
 }
 
 /**
@@ -443,9 +446,26 @@ function grimoireEventDisplayName(event: {
 function grimoireEventSeatCharacter(event: {
   grimoire_page: number;
   participant_id: string;
+  role_id?: string | null;
 }) {
   const token = getTokenForParticipant(event.grimoire_page, event.participant_id);
-  if (!token || !token.role) return blankCharacter();
+  if (!token || !token.role) {
+    if (event.role_id) {
+      const role = allRoles.getRole(event.role_id);
+      if (role) {
+        return {
+          name: role.name,
+          alignment: role.initial_alignment,
+          role: {
+            token_url: role.token_url,
+            type: role.type,
+            initial_alignment: role.initial_alignment,
+          },
+        };
+      }
+    }
+    return blankCharacter();
+  }
 
   return {
     name: token.role?.name ?? "",
@@ -1801,6 +1821,7 @@ function grimoireEventSortPriority(eventType: GrimoireEventType | null) {
 const grimoireEventsByPage = computed(() => {
   const groups = new Map<number, typeof props.game.grimoire_events>();
   for (const event of props.game.grimoire_events || []) {
+    if (isManualGrimoireEventParticipant(event.participant_id)) continue;
     if (!groups.has(event.grimoire_page)) {
       groups.set(event.grimoire_page, []);
     }
@@ -2538,6 +2559,9 @@ function syncGrimoireEventsFromGrimoire(options?: {
 
   for (let i = events.length - 1; i >= 0; i -= 1) {
     const event = events[i];
+    if (isManualGrimoireEventParticipant(event.participant_id)) {
+      continue;
+    }
     const eventType = event.event_type;
     const kind = eventReconciliationKind(event.event_type, event.status_source);
     const key = expectedKey(event.grimoire_page, event.participant_id, kind);

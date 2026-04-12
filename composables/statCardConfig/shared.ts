@@ -99,6 +99,23 @@ export function getEventPreviousToken(
   );
 }
 
+export function getEventTargetRole(
+  game: GameRecord,
+  event: GameRecord["grimoire_events"][number]
+) {
+  const currentToken = getEventCurrentToken(game, event);
+  if (currentToken?.role) return currentToken.role;
+
+  const previousToken = getEventPreviousToken(game, event);
+  if (previousToken?.role) return previousToken.role;
+
+  if (event.role) return event.role;
+
+  if (!event.role_id) return null;
+  return game.player_characters.find((character) => character.role_id === event.role_id)
+    ?.role ?? null;
+}
+
 export function getByRoleForEvent(
   game: GameRecord,
   event: GameRecord["grimoire_events"][number]
@@ -128,6 +145,8 @@ export function getByRoleForEvent(
           (token) => token.role_id === event.by_role_id
         )
       : null);
+
+  if (event.by_role) return event.by_role;
 
   return anyMatch?.role ?? null;
 }

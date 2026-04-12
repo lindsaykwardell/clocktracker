@@ -5,6 +5,7 @@ import {
   GameEndTriggerType,
   GrimoireEventType,
 } from "~/composables/useGames";
+import { isManualGrimoireEventParticipant } from "~/composables/manualGrimoireEvents";
 import { TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS } from "~/composables/statCardConfig/townsfolk";
 import { OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS } from "~/composables/statCardConfig/outsiders";
 import { MINIONS_ROLE_STAT_CARD_DEFINITIONS } from "~/composables/statCardConfig/minions";
@@ -385,13 +386,25 @@ function getScopedGamesForRole(
 
   if (!roleId) return games;
 
-  return games.filter((game) =>
-    game.grimoire.some((page) =>
+  return games.filter((game) => {
+    const hasGrimoireRole = game.grimoire.some((page) =>
       page.tokens.some(
         (token) => token.player?.username === username && token.role_id === roleId
       )
-    )
-  );
+    );
+    if (hasGrimoireRole) return true;
+
+    return game.grimoire_events.some(
+      (event) =>
+        isManualGrimoireEventParticipant(event.participant_id) &&
+        [
+          event.role_id,
+          event.by_role_id,
+          event.old_role_id,
+          event.new_role_id,
+        ].includes(roleId)
+    );
+  });
 }
 
 function countGrimoireEvents(
@@ -466,6 +479,8 @@ function getByRoleForEvent(
           (token) => token.role_id === event.by_role_id
         )
       : null);
+
+  if (event.by_role) return event.by_role;
 
   return anyMatch?.role ?? null;
 }

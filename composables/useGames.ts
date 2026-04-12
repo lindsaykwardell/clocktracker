@@ -123,6 +123,20 @@ export type GameRecord = Omit<Game, "win_v2"> & {
     old_alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
     new_alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
     created_at: Date;
+    role?: {
+      id: string;
+      name: string;
+      token_url: string;
+      type: string;
+      initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+    } | null;
+    by_role?: {
+      id: string;
+      name: string;
+      token_url: string;
+      type: string;
+      initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+    } | null;
   }[];
   player_characters: FullCharacter[];
   demon_bluffs?: FullDemonBluff[];
