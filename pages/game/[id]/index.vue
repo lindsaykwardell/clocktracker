@@ -268,6 +268,8 @@
                                     >
                                     {{ endTriggerSummary }}
                                 </div>
+                            </div>     
+                            <div class="metadata-row">   
                                 <div
                                     v-if="storytellers.length"
                                     class="metadata-item"
@@ -1166,23 +1168,6 @@ const endTriggerSummary = computed(() => {
     if (!data.end_trigger || data.end_trigger === GameEndTrigger.NOT_RECORDED)
         return "";
 
-    const triggerTypeLabel = (() => {
-        switch (data.end_trigger_type) {
-            case GameEndTriggerType.DEATH:
-                return "death";
-            case GameEndTriggerType.EXECUTION:
-                return "execution";
-            case GameEndTriggerType.CHARACTER_CHANGE:
-                return "character change";
-            case GameEndTriggerType.EXTRA_WIN_CONDITION:
-                return "extra win condition";
-            case GameEndTriggerType.OTHER:
-                return "other";
-            default:
-                return "";
-        }
-    })();
-
     const triggerCauseLabel = (() => {
         switch (data.end_trigger_cause) {
             case GameEndTriggerCause.ABILITY:
@@ -1227,28 +1212,82 @@ const endTriggerSummary = computed(() => {
 
     const details = [subtypeLabel].filter(Boolean).join(" - ");
     const noteText = (data.end_trigger_note || "").trim();
+    const actorPossessiveLabel = actorLabel
+        ? `${actorLabel}${actorLabel.endsWith("s") ? "'" : "'s"}`
+        : "";
+    const actorAbilityLabel = character
+        ? `Ability of ${roleArticle(character)}${character}${player ? ` (${player})` : ""}`
+        : "Character ability";
+    const actorAbilityCauseLabel = character
+        ? `the ability of ${roleArticle(character)}${character}${player ? ` (${player})` : ""}`
+        : "a character ability";
+
+    const triggerEventLabel = (() => {
+        switch (data.end_trigger_type) {
+            case GameEndTriggerType.DEATH:
+                return "a death";
+            case GameEndTriggerType.EXECUTION:
+                return "an execution";
+            case GameEndTriggerType.CHARACTER_CHANGE:
+                return "a character change";
+            case GameEndTriggerType.EXTRA_WIN_CONDITION:
+                return "an extra win condition";
+            case GameEndTriggerType.OTHER:
+                return "another trigger";
+            default:
+                return "";
+        }
+    })();
+
+    const triggerCauseText = (() => {
+        if (!triggerEventLabel) return "";
+        if (actorPossessiveLabel) {
+            switch (data.end_trigger_cause) {
+                case GameEndTriggerCause.ABILITY:
+                    return `${triggerEventLabel} caused by ${actorAbilityCauseLabel}`;
+                case GameEndTriggerCause.FAILED_ABILITY:
+                    return `${triggerEventLabel} caused by ${actorPossessiveLabel} failed ability`;
+                case GameEndTriggerCause.NOMINATION:
+                    return data.end_trigger_type ===
+                        GameEndTriggerType.EXECUTION
+                        ? `${actorPossessiveLabel} nomination led to an execution`
+                        : `${triggerEventLabel} by nomination from ${actorLabel}`;
+                default:
+                    return triggerEventLabel;
+            }
+        }
+
+        if (triggerCauseLabel) {
+            return `${triggerEventLabel} caused by ${triggerCauseLabel}`;
+        }
+        return triggerEventLabel;
+    })();
 
     switch (data.end_trigger) {
         case GameEndTrigger.NO_LIVING_DEMON:
-            return "Ended because no living demon remained.";
+            if (data.end_trigger_cause === GameEndTriggerCause.ABILITY) {
+                return `No living Demon remained due to ${actorAbilityCauseLabel}`;
+            }
+            return triggerCauseText
+                ? `No living Demon remained after ${triggerCauseText}`
+                : "No living Demon remained";
         case GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE:
-            return "Ended with two players left alive.";
+            if (data.end_trigger_cause === GameEndTriggerCause.ABILITY) {
+                return `Two players left alive due to ${actorAbilityCauseLabel}`;
+            }
+            return triggerCauseText
+                ? `Two players left alive after ${triggerCauseText}`
+                : "Two players left alive";
         case GameEndTrigger.GAME_ENDED_EARLY:
             return noteText
-                ? `Ended early - ${noteText}`
-                : "Ended early.";
+                ? `Game ended early - ${noteText}`
+                : "Game ended early";
         case GameEndTrigger.OTHER:
-            return noteText ? `Ended - ${noteText}` : "Ended for another reason.";
+            return noteText ? noteText : "Another reason";
         case GameEndTrigger.CHARACTER_ABILITY: {
-            const parts: string[] = [];
-            if (actorLabel) parts.push(`Ended by ${actorLabel}`);
-            else parts.push("Ended by character ability");
-
-            const viaParts = [triggerCauseLabel, triggerTypeLabel].filter(Boolean);
-            if (viaParts.length) parts.push(`via ${viaParts.join(" - ")}`);
-            if (details) parts.push(`(${details})`);
-
-            return `${parts.join(" ")}.`;
+            return details
+                ? `${actorAbilityLabel} (${details})`
+                : actorAbilityLabel;
         }
         default:
             return "End trigger recorded.";

@@ -123,17 +123,25 @@
               mode="select"
               v-model="endTriggerSeatSelection"
               @change="selectEndTriggerSeat"
-              :disabled="!shouldShowEndTriggerCharacter || endTriggerSeatOptions.length === 0"
+              :disabled="!shouldShowEndTriggerCharacter"
             >
               <option :value="null">No character selected</option>
-              <option
-                v-for="seat in endTriggerSeatOptions"
-                :key="seat.participant_id"
-                :value="seat.participant_id"
+              <optgroup
+                v-for="group in endTriggerSeatOptionGroups"
+                :key="group.label"
+                :label="group.label"
               >
-                {{ seat.label }}
-              </option>
-              <option value="custom">Set custom character</option>
+                <option
+                  v-for="seat in group.options"
+                  :key="seat.participant_id"
+                  :value="seat.participant_id"
+                >
+                  {{ seat.label }}
+                </option>
+              </optgroup>
+              <optgroup label="Custom">
+                <option value="custom">Set custom character</option>
+              </optgroup>
             </Input>
             <Alert
               v-if="shouldShowEndTriggerCharacter && endTriggerSeatOptions.length === 0"
@@ -247,6 +255,9 @@ import {
   getEndTriggerSubtypeOptions,
   parseEndTriggerSubtype,
 } from "~/composables/endTriggerSubtypeConfig";
+import { WILDCARD_ROLE_IDS } from "~/composables/grimoireRoleGroups";
+
+const wildcardRoleIds = new Set(WILDCARD_ROLE_IDS);
 
 type EndTriggerSeatToken = {
   order: number;
@@ -487,9 +498,23 @@ const endTriggerSeatOptions = computed(() => {
   return tokens.map((token) => ({
     order: token.order,
     participant_id: token.grimoire_participant_id || `seat-${token.order}`,
-    label: `[Seat ${token.order + 1}] ${token.role?.name || "Unknown role"} - ${token.player_name || "Unknown player"}`,
+    label: `${token.role?.name || "Unknown role"} - ${token.player_name?.trim() || `Seat ${token.order + 1}`}`,
     token,
   }));
+});
+
+const endTriggerSeatOptionGroups = computed(() => {
+  const eligibleOptions = endTriggerSeatOptions.value.filter(
+    (option) => !option.token.role_id || !wildcardRoleIds.has(option.token.role_id)
+  );
+  const wildcardOptions = endTriggerSeatOptions.value.filter(
+    (option) => !!option.token.role_id && wildcardRoleIds.has(option.token.role_id)
+  );
+
+  return [
+    { label: "Eligible Characters", options: eligibleOptions },
+    { label: "Wildcard Characters", options: wildcardOptions },
+  ].filter((group) => group.options.length > 0);
 });
 
 const endTriggerSeatSelection = ref<string | "custom" | null>(
@@ -547,7 +572,7 @@ function selectEndTriggerSeat() {
 
   props.game.end_trigger_participant_id = selection;
   const seat = endTriggerSeatOptions.value.find(
-    (option) => option.token.grimoire_participant_id === selection
+    (option) => option.participant_id === selection
   );
   if (!seat?.token) return;
 
@@ -702,4 +727,3 @@ defineExpose({
   getRestrictRoleIds,
 });
 </script>
-

@@ -214,6 +214,25 @@
                         <MenuItem>
                           <label class="w-full">
                             <select
+                              v-model="selectedEndTrigger"
+                              @click.stop
+                              class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
+                              aria-label="End trigger"
+                            >
+                              <option :value="null">Filter by end trigger</option>
+                              <option
+                                v-for="trigger in endTriggerOptions"
+                                :key="trigger"
+                                :value="trigger"
+                              >
+                                {{ endTriggerLabel(trigger) }}
+                              </option>
+                            </select>
+                          </label>
+                        </MenuItem>
+                        <MenuItem>
+                          <label class="w-full">
+                            <select
                               v-model="selectedTag"
                               @click.stop
                               class="w-full rounded p-1 text-lg bg-stone-200 dark:bg-stone-600"
@@ -489,6 +508,15 @@
                 >
               </Button>
               <Button
+                v-if="selectedEndTrigger"
+                @click.prevent="selectedEndTrigger = null"
+                :title="`Remove ${endTriggerLabel(selectedEndTrigger)} end trigger filter`"
+                size="sm"
+                removableTag
+              >
+                End Trigger: {{ endTriggerLabel(selectedEndTrigger) }}
+              </Button>
+              <Button
                 v-for="(player, index) in selectedPlayers"
                 @click.prevent="selectedPlayers.splice(index, 1)"
                 :title="`Remove ${player} player filter`"
@@ -568,7 +596,7 @@
 <script setup lang="ts">
 import naturalOrder from "natural-order";
 import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
-import type { WinStatus_V2 } from "~/composables/useGames";
+import { GameEndTrigger, WinStatus_V2 } from "~/composables/useGames";
 import { useLocalStorage } from "@vueuse/core";
 
 const user = useUser();
@@ -701,6 +729,10 @@ const selectedWinState = useLocalStorage<WinStatus_V2 | null>(
   "games__selectedWinState",
   null
 );
+const selectedEndTrigger = useLocalStorage<GameEndTrigger | null>(
+  "games__selectedEndTrigger",
+  null
+);
 const minPlayers = useLocalStorage<string | null>("games__minPlayers", null);
 const maxPlayers = useLocalStorage<string | null>("games__maxPlayers", null);
 const startDateRange = useLocalStorage<string | null>(
@@ -719,6 +751,32 @@ const selectedLocation = useLocalStorage<string | null>(
   "games__selectedLocation",
   null
 );
+
+const endTriggerOptions = [
+  GameEndTrigger.NOT_RECORDED,
+  GameEndTrigger.NO_LIVING_DEMON,
+  GameEndTrigger.CHARACTER_ABILITY,
+  GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE,
+  GameEndTrigger.GAME_ENDED_EARLY,
+  GameEndTrigger.OTHER,
+] as const;
+
+function endTriggerLabel(trigger: GameEndTrigger) {
+  switch (trigger) {
+    case GameEndTrigger.NOT_RECORDED:
+      return "Not recorded";
+    case GameEndTrigger.NO_LIVING_DEMON:
+      return "No living demon";
+    case GameEndTrigger.CHARACTER_ABILITY:
+      return "Character ability";
+    case GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE:
+      return "Two players left alive";
+    case GameEndTrigger.GAME_ENDED_EARLY:
+      return "Game ended early";
+    case GameEndTrigger.OTHER:
+      return "Other";
+  }
+}
 
 watchEffect(() => {
   if (minPlayers.value === "") {
@@ -795,6 +853,9 @@ const activeFilters = computed(() => {
       : []),
     ...(selectedWinState.value
       ? [{ type: "win_state", value: selectedWinState.value }]
+      : []),
+    ...(selectedEndTrigger.value
+      ? [{ type: "end_trigger", value: selectedEndTrigger.value }]
       : []),
     ...(minPlayers.value
       ? [{ type: "min_players", value: minPlayers.value }]
@@ -899,6 +960,8 @@ const sortedGames = computed(() => {
             (c) => c.alignment === selectedAlignment.value
           )) &&
         (!selectedWinState.value || game.win_v2 === selectedWinState.value) &&
+        (!selectedEndTrigger.value ||
+          game.end_trigger === selectedEndTrigger.value) &&
         (minPlayers.value === null ||
           (game.player_count ?? 0) >= +minPlayers.value) &&
         (maxPlayers.value === null ||
