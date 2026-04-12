@@ -115,7 +115,7 @@
             </Input>
           </label>
           <label
-            v-if="advancedModeEnabled && shouldShowEndTriggerFieldsAfterType"
+            v-if="shouldShowEndTriggerFieldsAfterType"
             class="block col-span-2"
           >
             <span class="block text-xs mb-[0.125rem]">Select triggering character</span>
@@ -148,13 +148,18 @@
               color="info"
               class="mt-1"
             >
-              No eligible characters for this trigger found in grimoire, but you can add a custom character.
+              No eligible characters for this trigger found, but you can add a custom character.
             </Alert>
             <p
               v-else-if="shouldShowEndTriggerCharacter"
               class="text-xs text-stone-600 mt-1"
             >
-              Select a character from the grimoire, or add custom character.
+              <template v-if="advancedModeEnabled">
+                Select a character from the last grimoire page or add custom character.
+              </template>
+              <template v-else>
+                Select the last character from your roles or add custom character.
+              </template>
             </p>
             <p v-else class="text-xs text-stone-400 mt-1">
               Choose the trigger type and cause first.
@@ -276,6 +281,31 @@ type EndTriggerPage = {
   tokens: EndTriggerSeatToken[];
 };
 
+type EndTriggerPlayerCharacter = {
+  name: string;
+  role_id: string | null;
+  role?: {
+    token_url: string;
+    type: string;
+    initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+  };
+};
+
+type EndTriggerSeatOption = {
+  source: "grimoire" | "player_character";
+  order: number;
+  participant_id: string;
+  role_id: string | null;
+  label: string;
+  role: {
+    name: string;
+    token_url: string;
+    type: string;
+    initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+  } | null;
+  token?: EndTriggerSeatToken;
+};
+
 const props = defineProps<{
   editingMultipleGames?: boolean;
   advancedModeEnabled: boolean;
@@ -296,6 +326,7 @@ const props = defineProps<{
       initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
       name: string;
     } | null;
+    player_characters: EndTriggerPlayerCharacter[];
     grimoire: EndTriggerPage[];
   };
 }>();
@@ -489,30 +520,73 @@ const endTriggerIncludeRoleIds = computed(() => {
 });
 
 const endTriggerSeatOptions = computed(() => {
+  const allowed = endTriggerRoleConfig.value
+    ? new Set(endTriggerIncludeRoleIds.value)
+    : null;
+
+  if (!props.advancedModeEnabled) {
+    const lastCharacter = props.game.player_characters.at(-1);
+    if (
+      !lastCharacter?.role_id ||
+      !lastCharacter.role ||
+      (allowed && !allowed.has(lastCharacter.role_id))
+    ) {
+      return [];
+    }
+
+    return [
+      {
+        source: "player_character",
+        order: props.game.player_characters.length - 1,
+        participant_id: "player-character-last",
+        role_id: lastCharacter.role_id,
+        label: `${lastCharacter.name || "Unknown role"}`,
+        role: {
+          name: lastCharacter.name,
+          token_url: lastCharacter.role.token_url,
+          type: lastCharacter.role.type,
+          initial_alignment: lastCharacter.role.initial_alignment,
+        },
+      },
+    ] satisfies EndTriggerSeatOption[];
+  }
+
   let tokens = endTriggerSeatTokens.value;
-  if (endTriggerRoleConfig.value) {
-    const allowed = new Set(endTriggerIncludeRoleIds.value);
+  if (allowed) {
     tokens = tokens.filter((token) => token.role_id && allowed.has(token.role_id));
   }
 
   return tokens.map((token) => ({
+    source: "grimoire",
     order: token.order,
     participant_id: token.grimoire_participant_id || `seat-${token.order}`,
+    role_id: token.role_id,
     label: `${token.role?.name || "Unknown role"} - ${token.player_name?.trim() || `Seat ${token.order + 1}`}`,
+    role: token.role
+      ? {
+          name: token.role.name ?? "",
+          token_url: token.role.token_url,
+          type: token.role.type,
+          initial_alignment: token.role.initial_alignment,
+        }
+      : null,
     token,
-  }));
+  })) satisfies EndTriggerSeatOption[];
 });
 
 const endTriggerSeatOptionGroups = computed(() => {
   const eligibleOptions = endTriggerSeatOptions.value.filter(
-    (option) => !option.token.role_id || !wildcardRoleIds.has(option.token.role_id)
+    (option) => !option.role_id || !wildcardRoleIds.has(option.role_id)
   );
   const wildcardOptions = endTriggerSeatOptions.value.filter(
-    (option) => !!option.token.role_id && wildcardRoleIds.has(option.token.role_id)
+    (option) => !!option.role_id && wildcardRoleIds.has(option.role_id)
   );
 
   return [
-    { label: "Eligible Characters", options: eligibleOptions },
+    {
+      label: props.advancedModeEnabled ? "Eligible Characters" : "Your Roles",
+      options: eligibleOptions,
+    },
     { label: "Wildcard Characters", options: wildcardOptions },
   ].filter((group) => group.options.length > 0);
 });
@@ -547,7 +621,6 @@ watch(
 );
 
 const allowManualEndTriggerRole = computed(() => {
-  if (!props.advancedModeEnabled) return true;
   if (endTriggerSeatOptions.value.length === 0) return true;
   return endTriggerSeatSelection.value === "custom";
 });
@@ -574,16 +647,19 @@ function selectEndTriggerSeat() {
   const seat = endTriggerSeatOptions.value.find(
     (option) => option.participant_id === selection
   );
-  if (!seat?.token) return;
+  if (!seat) return;
 
-  if (seat.token.role_id) {
-    props.game.end_trigger_role_id = seat.token.role_id;
-    if (seat.token.role) {
+  props.game.end_trigger_participant_id =
+    seat.source === "grimoire" ? selection : null;
+
+  if (seat.role_id) {
+    props.game.end_trigger_role_id = seat.role_id;
+    if (seat.role) {
       props.game.end_trigger_role = {
-        token_url: seat.token.role.token_url,
-        type: seat.token.role.type,
-        initial_alignment: seat.token.role.initial_alignment,
-        name: seat.token.role.name ?? "",
+        token_url: seat.role.token_url,
+        type: seat.role.type,
+        initial_alignment: seat.role.initial_alignment,
+        name: seat.role.name,
       };
     } else {
       props.game.end_trigger_role = null;
@@ -598,6 +674,7 @@ function clearEndTriggerRole() {
   props.game.end_trigger_role_id = null;
   props.game.end_trigger_role = null;
   props.game.end_trigger_participant_id = null;
+  endTriggerSeatSelection.value = null;
 }
 
 function getRestrictRoleIds() {
