@@ -46,7 +46,10 @@
   }>();
 
   const Arrow90degDown = resolveComponent("IconArrow90degDown");
+  const ArrowUpShort = resolveComponent("IconArrowUpShort");
   const ArrowRightShort = resolveComponent("IconArrowRightShort");
+  const ArrowDownShort = resolveComponent("IconArrowDownShort");
+  const ArrowLeftShort = resolveComponent("IconArrowLeftShort");
   const ArrowClockwise = resolveComponent("IconArrowClockwise");
   const ArrowCounterClockwise = resolveComponent("IconArrowCounterClockwise");
   const ArrowsMove = resolveComponent("IconArrowsMove");
@@ -169,8 +172,14 @@
         return Location;
       case "arrow-90deg-down":
         return Arrow90degDown;
+      case "arrow-up-short":
+        return ArrowUpShort;
       case "arrow-right-short":
         return ArrowRightShort;
+      case "arrow-down-short":
+        return ArrowDownShort;
+      case "arrow-left-short":
+        return ArrowLeftShort;      
       case "arrow-clockwise":
         return ArrowClockwise;
       case "arrow-counterclockwise":
