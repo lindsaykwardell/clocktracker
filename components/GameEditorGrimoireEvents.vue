@@ -223,14 +223,22 @@
                         :disabled="event.event_type !== GrimoireEventType.REVIVE && event.cause === null"
                       >
                         <option :value="null">No character selected</option>
-                        <option
-                          v-for="seat in grimoireEventSeatOptionsForPage(pageGroup.page, event.cause, event.event_type)"
-                          :key="seat.participant_id"
-                          :value="seat.participant_id"
+                        <optgroup
+                          v-for="group in grimoireEventSeatOptionGroupsForPage(pageGroup.page, event.cause, event.event_type)"
+                          :key="group.label"
+                          :label="group.label"
                         >
-                          {{ seat.label }}
-                        </option>
-                        <option value="custom">Set custom character</option>
+                          <option
+                            v-for="seat in group.options"
+                            :key="seat.participant_id"
+                            :value="seat.participant_id"
+                          >
+                            {{ seat.label }}
+                          </option>
+                        </optgroup>
+                        <optgroup label="Custom">
+                          <option value="custom">Set custom character</option>
+                        </optgroup>
                       </Input>
                     </label>
                   </template>
@@ -289,11 +297,14 @@ import {
   type RoleIncludeConfig,
 } from "~/composables/grimoireEventRoleConfig";
 import { GRIMOIRE_REMINDER_EVENT_CONFIG } from "~/composables/grimoireReminderEventConfig";
+import { WILDCARD_ROLE_IDS } from "~/composables/grimoireRoleGroups";
 import {
   createParticipantId,
   findMatchingTokenOnPreviousPage,
   normalizePlayerName,
 } from "~/composables/grimoireParticipantMatching";
+
+const wildcardRoleIds = new Set(WILDCARD_ROLE_IDS);
 
 type ReminderLike = {
   reminder: string;
@@ -1021,6 +1032,7 @@ function grimoireEventSeatOptionsForPage(
       const sourcePageIndex = sourceToken === previousToken ? pageIndex - 1 : pageIndex;
       return {
         participant_id: participantId,
+        role_id: sourceToken.role_id ?? null,
         label: grimoireEventSourceLabel(sourceToken, {
           fromPreviousPage: sourcePageIndex !== pageIndex,
         }),
@@ -1047,10 +1059,30 @@ function grimoireEventSeatOptionsForPage(
     })
     .map((token) => ({
       participant_id: token.grimoire_participant_id || `seat-${token.order}`,
+      role_id: token.role_id ?? null,
       label: grimoireEventSourceLabel(token, { fromPreviousPage: true }),
     }));
 
   return [...currentOptions, ...previousOptions];
+}
+
+function grimoireEventSeatOptionGroupsForPage(
+  pageIndex: number,
+  cause: GrimoireEventCause | null,
+  eventType: GrimoireEventType | null
+) {
+  const options = grimoireEventSeatOptionsForPage(pageIndex, cause, eventType);
+  const eligibleOptions = options.filter(
+    (option) => !option.role_id || !wildcardRoleIds.has(option.role_id)
+  );
+  const wildcardOptions = options.filter(
+    (option) => !!option.role_id && wildcardRoleIds.has(option.role_id)
+  );
+
+  return [
+    { label: "Eligible Characters", options: eligibleOptions },
+    { label: "Wildcard Characters", options: wildcardOptions },
+  ].filter((group) => group.options.length > 0);
 }
 
 /**
