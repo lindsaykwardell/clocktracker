@@ -415,8 +415,8 @@
       <details class="w-full">
         <summary class="cursor-pointer">Seating order</summary>
         <template v-if="hasCurrentPageSeating">
-          <p class="text-xs text-stone-300 mt-1">
-            Use drag and drop in the list below to move a player to a different seat (this page only).
+          <p class="text-xs text-stone-500 mt-1">
+            Use buttons or drag and drop in the list below to move a player to a different seat (on this page only).
           </p>
           <ul
             class="mt-2 space-y-1"
@@ -437,14 +437,46 @@
                 'border-b-4 border-b-primary': dragTargetOrder === row.order && dragTargetAfter,
               }"
             >
-              <span class="flex items-center gap-2">
+              <span class="flex items-center gap-3">
                 <IconUI id="arrows-move" size="xs" />
+                <span class="flex items-center gap-1 shrink-0">  
+                  <Button
+                    type="button"
+                    size="xs"
+                    variant="soft"
+                    color="neutral"
+                    :disabled="!canMoveSeat(row.order, 'up')"
+                    @click.stop="moveSeatByDirection(row.order, 'up')"
+                    title="Move seat up"
+                    icon="arrow-up-short"
+                    display="icon-only"
+                    circular
+                  >
+                    Up
+                  </Button>
+                  <Button
+                    type="button"
+                    size="xs"
+                    variant="soft"
+                    color="neutral"
+                    :disabled="!canMoveSeat(row.order, 'down')"
+                    @click.stop="moveSeatByDirection(row.order, 'down')"
+                    title="Move seat down"
+                    icon="arrow-down-short"
+                    display="icon-only"
+                    circular
+                  >
+                    Down
+                  </Button>
+                </span>
                 <span class="text-sm truncate">
                   {{ row.token.role?.name || "No Role" }} - {{ row.token.player_name || "No Player" }}
                 </span>
               </span>
-              <span class="text-xs text-stone-500 shrink-0">
-                Seat {{ row.order + 1 }}
+              <span class="flex items-center gap-2 shrink-0">
+                <span class="text-xs text-stone-500">
+                  Seat {{ row.order + 1 }}
+                </span>
               </span>
             </li>
           </ul>
@@ -1933,7 +1965,12 @@ function onSeatDrop() {
   dragTargetAfter.value = false;
 
   if (!page || sourceOrder === null || insertIndex === null) return;
+  reorderCurrentPageSeats(sourceOrder, insertIndex);
+}
 
+function reorderCurrentPageSeats(sourceOrder: number, insertIndex: number) {
+  const page = props.game.grimoire[grimPage.value];
+  if (!page) return;
   const sorted = page.tokens.slice().sort((a, b) => a.order - b.order);
   const fromIndex = sorted.findIndex((token) => token.order === sourceOrder);
   if (fromIndex < 0) return;
@@ -1946,6 +1983,26 @@ function onSeatDrop() {
   });
 
   syncGrimoireEventsFromGrimoire({ force: true, silent: true });
+}
+
+function canMoveSeat(order: number, direction: "up" | "down") {
+  const rows = currentPageSeatRows.value;
+  const index = rows.findIndex((row) => row.order === order);
+  if (index < 0) return false;
+  if (direction === "up") return index > 0;
+  return index < rows.length - 1;
+}
+
+function moveSeatByDirection(order: number, direction: "up" | "down") {
+  const rows = currentPageSeatRows.value;
+  const fromIndex = rows.findIndex((row) => row.order === order);
+  if (fromIndex < 0) return;
+
+  const toIndex = direction === "up" ? fromIndex - 1 : fromIndex + 1;
+  if (toIndex < 0 || toIndex >= rows.length) return;
+
+  onSeatDragEnd();
+  reorderCurrentPageSeats(order, toIndex);
 }
 
 function onSeatDragEnd() {

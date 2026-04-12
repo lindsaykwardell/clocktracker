@@ -13,7 +13,7 @@
         :key="pageGroup.page"
         :open="pageGroup.events.some((event) => event.event_type !== null)"
       >
-        <summary class="cursor-pointer">Grimoire Page {{ pageGroup.page + 1 }}</summary>
+        <summary class="cursor-pointer">{{ grimoirePageSummaryLabel(pageGroup.page) }}</summary>
         <ul class="py-2 space-y-2">
           <li
             v-for="event in pageGroup.events"
@@ -114,7 +114,7 @@
                       </div>
                     </div>
                     <span
-                      class="absolute text-white top-1 left-[calc(50%+1rem)]"
+                      class="absolute text-black dark:text-white top-1 left-[calc(50%+1rem)]"
                       title="Alignment switch"
                     >
                       <IconUI id="arrow-90deg-down" size="sm" class="-scale-x-100" />
@@ -323,6 +323,7 @@ type GrimoireTokenLike = {
 };
 
 type GrimoirePageLike = {
+  title?: string | null;
   tokens: GrimoireTokenLike[];
 };
 
@@ -813,9 +814,10 @@ function grimoireEventSummaryParts(event: GrimoireEventLike): GrimoireEventSumma
     };
   }
   if (event.event_type === GrimoireEventType.OTHER) {
+    const reminderLabel = event.status_source?.trim();
     return {
       before: `${targetName} was `,
-      action: "marked",
+      action: reminderLabel ? `marked with "${reminderLabel}"` : "marked",
       after: sourceActor ? ` by ${sourceActor}` : "",
     };
   }
@@ -881,21 +883,38 @@ function grimoireEventSummaryParts(event: GrimoireEventLike): GrimoireEventSumma
 }
 
 function isEventExpandedByDefault(event: GrimoireEventLike) {
-  const isReminderStatusEvent =
-    event.event_type === GrimoireEventType.MAD ||
-    event.event_type === GrimoireEventType.DRUNK ||
-    event.event_type === GrimoireEventType.POISONED ||
-    event.event_type === GrimoireEventType.OTHER;
-  const hasAutofilledFields =
-    event.event_type !== null &&
-    event.event_type !== GrimoireEventType.NOT_RECORDED &&
-    event.cause === GrimoireEventCause.ABILITY &&
-    !!event.status_source &&
-    !!event.by_participant_id &&
-    !!event.by_role_id &&
-    !!grimoireEventStatusReminder(event);
+  if (!event.event_type || event.event_type === GrimoireEventType.NOT_RECORDED) {
+    return true;
+  }
 
-  if (isReminderStatusEvent && hasAutofilledFields) {
+  const hasAbilitySource =
+    event.cause === GrimoireEventCause.ABILITY &&
+    !!event.by_participant_id &&
+    !!event.by_role_id;
+
+  // Status rows are reminder-driven when the reminder source is present and mapped.
+  if (
+    (event.event_type === GrimoireEventType.MAD ||
+      event.event_type === GrimoireEventType.DRUNK ||
+      event.event_type === GrimoireEventType.POISONED ||
+      event.event_type === GrimoireEventType.OTHER) &&
+    hasAbilitySource &&
+    !!event.status_source &&
+    !!grimoireEventStatusReminder(event)
+  ) {
+    return false;
+  }
+
+  // Non-status rows can also be fully prefilled from reminder tokens/sync sources.
+  // Collapse those once all essential fields are present.
+  if (
+    (event.event_type === GrimoireEventType.DEATH ||
+      event.event_type === GrimoireEventType.EXECUTION ||
+      event.event_type === GrimoireEventType.REVIVE ||
+      event.event_type === GrimoireEventType.ROLE_CHANGE ||
+      event.event_type === GrimoireEventType.ALIGNMENT_CHANGE) &&
+    hasAbilitySource
+  ) {
     return false;
   }
 
@@ -1779,6 +1798,16 @@ const grimoireEventsByPage = computed(() => {
       }),
     }));
 });
+
+function grimoirePageSummaryLabel(pageIndex: number) {
+  const page = props.game.grimoire?.[pageIndex];
+  const pageNumber = pageIndex + 1;
+  const title = page?.title?.trim();
+  if (title) {
+    return `${title} (Page ${pageNumber})`;
+  }
+  return `Grimoire Page ${pageNumber}`;
+}
 
 /**
  * Records a direct dead/alive toggle from the grimoire and immediately resyncs events,
