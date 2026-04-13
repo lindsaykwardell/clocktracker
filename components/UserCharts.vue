@@ -418,7 +418,9 @@
 import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
 import {
   buildRoleStatCardPreview,
+  buildRoleStatCardResult,
   getGeneralCardDefinitions,
+  getRoleStatCardDefinition,
   getRoleCardDefinitions,
 } from "~/composables/useRoleStatCards";
 
@@ -499,14 +501,19 @@ const addChartLink = computed(() => {
 const roleStatCardsForMode = computed(() => {
   if (!allRoleStatCards.value.length) return [];
 
+  const visibleCards = allRoleStatCards.value.filter(
+    (card) => !getRoleStatCardDefinition(card.metric_key)?.hidden
+  );
+
   if (mode.value === "storyteller") {
-    return allRoleStatCards.value.filter((card) => card.storyteller_only);
+    return visibleCards.filter((card) => card.storyteller_only);
   }
 
-  return allRoleStatCards.value.filter((card) => !card.storyteller_only);
+  return visibleCards.filter((card) => !card.storyteller_only);
 });
 
-const favoriteHighlightOrder = ref<number[]>([]);
+const favoriteHighlightOrder = ref<string[]>([]);
+const fallbackHighlightOrder = ref<string[]>([]);
 
 const pickerRoles = computed(() => {
   return roles
@@ -553,23 +560,65 @@ const allCardsPageLink = computed(() => {
   return `/@${props.username}/stats/cards`;
 });
 
-const selectedHighlightCards = computed(() => {
-  if (roleStatCardsForMode.value.length > 0) {
-    if (roleStatCardsForMode.value.length <= 4) {
-      return roleStatCardsForMode.value;
-    }
+function statCardKey(card: {
+  metric_key: string;
+  role_id: string | null;
+  source: string;
+}) {
+  return `${card.source}::${card.metric_key}::${card.role_id ?? "general"}`;
+}
 
-    const order = new Map(
-      favoriteHighlightOrder.value.map((id, index) => [id, index])
+function isHiddenStatCard(card: { metric_key: string }) {
+  return !!getRoleStatCardDefinition(card.metric_key)?.hidden;
+}
+
+function shuffledByOrder<T>(cards: T[], order: string[], getKey: (card: T) => string) {
+  const orderMap = new Map(order.map((key, index) => [key, index]));
+  return [...cards].sort(
+    (a, b) => (orderMap.get(getKey(a)) ?? 9999) - (orderMap.get(getKey(b)) ?? 9999)
+  );
+}
+
+const eligibleFavoriteHighlightCards = computed(() =>
+  roleStatCardsForMode.value.filter((card) => {
+    if (isHiddenStatCard(card)) return false;
+    return (
+      buildRoleStatCardResult(
+        card,
+        filteredGames.value,
+        !!isMe.value,
+        props.username
+      ).count > 0
     );
-    return [...roleStatCardsForMode.value]
-      .sort((a, b) => (order.get(a.id) ?? 9999) - (order.get(b.id) ?? 9999))
-      .slice(0, 4);
-  }
+  })
+);
 
-  return allPickerPreviewCards.value
-    .filter((card) => card.preview.count > 0)
-    .slice(0, 4);
+const eligibleFallbackHighlightCards = computed(() => {
+  const favoriteKeys = new Set(
+    eligibleFavoriteHighlightCards.value.map((card) => statCardKey(card))
+  );
+
+  return allPickerPreviewCards.value.filter(
+    (card) =>
+      card.preview.count > 0 &&
+      !isHiddenStatCard(card) &&
+      !favoriteKeys.has(statCardKey(card))
+  );
+});
+
+const selectedHighlightCards = computed(() => {
+  const favorites = shuffledByOrder(
+    eligibleFavoriteHighlightCards.value,
+    favoriteHighlightOrder.value,
+    statCardKey
+  );
+  const fallback = shuffledByOrder(
+    eligibleFallbackHighlightCards.value,
+    fallbackHighlightOrder.value,
+    statCardKey
+  );
+
+  return [...favorites, ...fallback].slice(0, 4);
 });
 
 const selectedTag = ref<string | null>(null);
@@ -779,10 +828,25 @@ watch(mode, (value) => {
   router.replace({ query: nextQuery });
 });
 
-watch(roleStatCardsForMode, (cards) => {
-  const ids = cards.map((card) => card.id);
-  favoriteHighlightOrder.value = [...ids].sort(() => Math.random() - 0.5);
-}, { immediate: true });
+watch(
+  () => eligibleFavoriteHighlightCards.value.map((card) => statCardKey(card)).join("|"),
+  () => {
+    favoriteHighlightOrder.value = eligibleFavoriteHighlightCards.value
+      .map((card) => statCardKey(card))
+      .sort(() => Math.random() - 0.5);
+  },
+  { immediate: true }
+);
+
+watch(
+  () => eligibleFallbackHighlightCards.value.map((card) => statCardKey(card)).join("|"),
+  () => {
+    fallbackHighlightOrder.value = eligibleFallbackHighlightCards.value
+      .map((card) => statCardKey(card))
+      .sort(() => Math.random() - 0.5);
+  },
+  { immediate: true }
+);
 
 function storytellerQueryToMode(
   value: string | undefined

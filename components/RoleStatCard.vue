@@ -13,12 +13,12 @@
       v-if="showFavoriteControl"
       @click="emit('toggleFavorite')"
       :title="isFavorite ? 'Remove from favorites' : 'Add to favorites'"
-      variant="link"
-      color="contrast"
+      variant="filled"
+      :color="isFavorite ? 'primary' : 'contrast'"
       icon="star"
-      :iconColor="isFavorite ? 'primary' : ''"
       display="icon-only"
-      size="md"
+      circular
+      size="xs"
       class="absolute"
       :class="{
         'top-1 right-1' : variant == 'vertical',
@@ -73,20 +73,6 @@
         {{ result.subtitle }}
       </p>
 
-      <p
-        v-if="result.debugGameLinks?.length"
-        class="text-xs text-stone-500 dark:text-stone-400"
-      >
-        Counted games:
-        <NuxtLink
-          v-for="(gameLink, index) in result.debugGameLinks"
-          :key="gameLink.id"
-          :to="gameLink.href"
-          class="underline"
-        >
-          {{ index === 0 ? "" : ", " }}link
-        </NuxtLink>
-      </p>
     </div>
 
     <div
@@ -113,10 +99,6 @@ const props = withDefaults(
         sentence: string;
         subtitle?: string | null;
         isHiddenLocked?: boolean;
-        debugGameLinks?: Array<{
-          id: number;
-          href: string;
-        }>;
         displayRole?: {
           id: string;
           name: string;

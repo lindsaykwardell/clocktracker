@@ -65,7 +65,7 @@
                 :to="`/@${username}?view=stats`"
                 color="neutral"
                 variant="soft"
-                icon="arrow-left"
+                icon="arrow-left-short"
               >
                 Back to Stats
               </Button>
@@ -94,23 +94,32 @@
           <section>
             <div class="w-full px-4">
               <h2 class="font-sorts text-center text-xl lg:text-2xl mb-2 lg:mb-4">
-                Achievements
+                Statistic Cards
               </h2>
+
+              <div class="text-center max-w-[80ch] mx-auto mb-16 space-y-4">
+                <p>
+                  Statistic cards are ClockTracker's take on achievements for Blood on the Clocktower.<br>
+                  They highlight moments that should happen naturally during play, not goals to chase during each game.
+                </p>
+                <p class="text-sm">
+                  A few edge-case cards are included because they are interesting or funny, even though they might encourage suboptimal play. 
+                  Those cards are hidden by default: other players cannot see them, you only see them once they are unlocked, and they cannot be favorited. 
+                </p>
+                <p class="text-sm">
+                  Counts are attributed to each character's ability based on recorded game data.<br>
+                  Older games and partially tracked games may be missing events, so treat every count as "at least".
+                </p>
+              </div>
 
               <div
                 v-if="tab === 'role' && rolePreviewCardGroups.length === 0"
                 class="text-sm text-center text-stone-500 dark:text-stone-400 py-8"
               >
-                No achievements available.
+                No cards available.
               </div>
               <template v-else-if="tab === 'role'">
                 <div class="space-y-12">
-                  <div class="text-center max-w-[80ch] mx-auto mb-16 space-y-8">
-                    <p class="text-sm">
-                      All card counts are attributed to the character's ability based on recorded game data. These cards show minimum tracked values. 
-                      Older games and partially tracked games may be missing events, so treat all counts as "at least".
-                    </p>
-                  </div>
                   <section
                     v-for="scriptGroup in rolePreviewCardGroups"
                     :key="scriptGroup.script"
@@ -129,6 +138,12 @@
                       <p class="font-sorts text-2xl">
                         <span class="sr-only">Completion: </span>
                         {{ scriptGroup.achievedCount }}/{{ scriptGroup.totalCount }}
+                        <span
+                          v-if="scriptGroup.hiddenUnlockedCount"
+                          class="text-stone-500 dark:text-stone-400 text-lg"
+                        >
+                          +{{ scriptGroup.hiddenUnlockedCount }}
+                        </span>
                       </p>
                     </div>
                     <ul class="grid gap-2 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
@@ -139,7 +154,7 @@
                         :games="games.status === Status.SUCCESS ? games.data : []"
                         :is-me="isMe"
                         :username="username"
-                        :show-favorite-control="isMe"
+                        :show-favorite-control="shouldShowFavoriteControl(previewCard)"
                         :is-favorite="isFavoriteCard(previewCard)"
                         class="transition-opacity"
                         :class="previewCard.preview.count === 0 ? 'opacity-40' : ''"
@@ -169,7 +184,7 @@
                   :games="games.status === Status.SUCCESS ? games.data : []"
                   :is-me="isMe"
                   :username="username"
-                  :show-favorite-control="isMe"
+                  :show-favorite-control="shouldShowFavoriteControl(previewCard)"
                   :is-favorite="isFavoriteCard(previewCard)"
                   class="transition-opacity"
                   :class="previewCard.preview.count === 0 ? 'opacity-40' : ''"
@@ -357,6 +372,10 @@ function isHiddenLockedCard(card: (typeof rolePreviewCards.value)[number]) {
   return !!card.preview?.isHiddenLocked;
 }
 
+function isHiddenConfiguredCard(card: { metric_key: string }) {
+  return !!getRoleStatCardDefinition(card.metric_key)?.hidden;
+}
+
 const rolePreviewCardGroups = computed(() => {
   const sorted = rolePreviewCards.value
     .slice()
@@ -399,8 +418,20 @@ const rolePreviewCardGroups = computed(() => {
   return Array.from(scriptGroups.entries())
     .sort(([scriptA], [scriptB]) => scriptOrderValue(scriptA) - scriptOrderValue(scriptB))
     .map(([script, cards]) => {
-      const achievedCount = cards.filter((card) => card.preview.count > 0).length;
-      const totalCount = cards.length;
+      const hiddenUnlockedCount = isMe.value
+        ? cards.filter(
+          (card) =>
+            isHiddenConfiguredCard(card) &&
+            !isHiddenLockedCard(card) &&
+            card.preview.count > 0
+        ).length
+        : 0;
+      const visibleCards = isMe.value
+        ? cards
+        : cards.filter((card) => !isHiddenConfiguredCard(card));
+      const countableCards = cards.filter((card) => !isHiddenConfiguredCard(card));
+      const achievedCount = countableCards.filter((card) => card.preview.count > 0).length;
+      const totalCount = countableCards.length;
 
       return {
         script,
@@ -408,10 +439,11 @@ const rolePreviewCardGroups = computed(() => {
         image: scriptImage(script),
         achievedCount,
         totalCount,
-        cards,
+        hiddenUnlockedCount,
+        cards: visibleCards,
       };
     })
-    .filter((group) => group.cards.length > 0);
+    .filter((group) => group.cards.length > 0 || group.hiddenUnlockedCount > 0);
 });
 
 const generalPreviewCards = computed(() => {
@@ -427,7 +459,10 @@ const generalPreviewCards = computed(() => {
         username
       )
     )
-    .filter((card): card is NonNullable<typeof card> => !!card);
+    .filter((card): card is NonNullable<typeof card> => {
+      if (!card) return false;
+      return isMe.value || !isHiddenConfiguredCard(card);
+    });
 });
 
 const previewCards = computed(() => {
@@ -463,6 +498,15 @@ function isFavoriteCard(
   );
 }
 
+function shouldShowFavoriteControl(card: {
+  metric_key: string;
+  role_id: string | null;
+  source: string;
+}) {
+  if (!isMe.value) return false;
+  return !isHiddenConfiguredCard(card) || isFavoriteCard(card);
+}
+
 async function toggleFavoriteCard(
   card: {
     metric_key: string;
@@ -481,6 +525,8 @@ async function toggleFavoriteCard(
       method: "DELETE",
     });
   } else {
+    if (isHiddenConfiguredCard(card)) return;
+
     await $fetch("/api/role_stat_cards", {
       method: "POST",
       body: JSON.stringify({

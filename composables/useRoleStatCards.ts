@@ -46,7 +46,6 @@ export type RoleStatCardResult = {
   subtitle?: string | null;
   displayRole?: RoleStatCardDisplayRole | null;
   isHiddenLocked?: boolean;
-  debugGameLinks?: Array<{ id: number; href: string }>;
 };
 
 type RoleStatCardContext = {
@@ -137,7 +136,6 @@ export function buildRoleStatCardResult(
       metricLabel: "Unknown Stat Card",
       subtitle: null,
       displayRole: null,
-      debugGameLinks: [],
     };
   }
 
@@ -156,24 +154,6 @@ export function buildRoleStatCardResult(
     isMe,
     username,
   });
-  const debugGameLinks = scopedGames
-    .filter((game) => {
-      if (game.ignore_for_stats) return false;
-
-      return (
-        definition.getCount({
-          games: [game],
-          roleId: card.role_id,
-          roleName,
-          isMe,
-          username,
-        }) > 0
-      );
-    })
-    .map((game) => ({
-      id: game.id,
-      href: `/game/${game.id}`,
-    }));
   const isHiddenLocked = !!definition.hidden && count === 0;
 
   return {
@@ -189,7 +169,6 @@ export function buildRoleStatCardResult(
         isMe,
         username,
       }),
-    debugGameLinks,
     isHiddenLocked,
     subtitle:
       isHiddenLocked
@@ -263,24 +242,6 @@ export function buildRoleStatCardPreview(
           isMe,
           username,
         }),
-      debugGameLinks: scopedGames
-        .filter((game) => {
-          if (game.ignore_for_stats) return false;
-
-          return (
-            definition.getCount({
-              games: [game],
-              roleId: role?.id ?? null,
-              roleName: role?.name ?? null,
-              isMe,
-              username,
-            }) > 0
-          );
-        })
-        .map((game) => ({
-          id: game.id,
-          href: `/game/${game.id}`,
-        })),
       isHiddenLocked,
       subtitle:
         isHiddenLocked

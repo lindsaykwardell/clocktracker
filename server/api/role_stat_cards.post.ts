@@ -1,5 +1,6 @@
 import type { User } from "@supabase/supabase-js";
 import { prisma } from "~/server/utils/prisma";
+import { getRoleStatCardDefinition } from "~/composables/useRoleStatCards";
 
 type RoleStatCardBody = {
   role_id: string | null;
@@ -23,6 +24,14 @@ export default defineEventHandler(async (handler) => {
     throw createError({
       status: 400,
       statusMessage: "Bad Request",
+    });
+  }
+
+  const definition = getRoleStatCardDefinition(body.metric_key);
+  if (definition?.hidden) {
+    throw createError({
+      status: 400,
+      statusMessage: "Hidden stat cards cannot be favorited.",
     });
   }
 
