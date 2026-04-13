@@ -640,7 +640,7 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         ? (isMe
           ? `You've changed alignment due to the Mezepheles ${count} time${pluralize(count)}.`
           : `This player changed alignment due to the Mezepheles ${count} time${pluralize(count)}.`)
-        : `Switch alignment due to the Mezepheles.`,
+        : `Change alignment due to the Mezepheles.`,
   },
   {
     id: "organ_grinder_drunk",
@@ -718,9 +718,9 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Pit-Hag, you've turned the Demon into another Demon ${count} time${pluralize(count)}.`
-          : `As the Pit-Hag, this player has turned the Demon into another Demon ${count} time${pluralize(count)}.`)
-        : `As the Pit-Hag, turn the Demon into another Demon.`,
+          ? `As the Pit-Hag, you've changed the Demon into another Demon ${count} time${pluralize(count)}.`
+          : `As the Pit-Hag, this player has changed the Demon into another Demon ${count} time${pluralize(count)}.`)
+        : `As the Pit-Hag, change the Demon into another Demon.`,
   },
   {
     id: "pit_hag_self_changes",
@@ -1202,9 +1202,9 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've been turned into a Demon by the Summoner ${count} time${pluralize(count)}.`
-          : `This player has been turned into a Demon by the Summoner ${count} time${pluralize(count)}.`)
-        : `Be turned into a Demon by the Summoner.`,
+          ? `You've been changed into a Demon by the Summoner ${count} time${pluralize(count)}.`
+          : `This player has been changed into a Demon by the Summoner ${count} time${pluralize(count)}.`)
+        : `Be changed into a Demon by the Summoner.`,
   },
   // Summoner: @todo Game ends
   {

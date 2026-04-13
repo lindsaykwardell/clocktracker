@@ -868,14 +868,14 @@ function grimoireEventSummaryParts(event: GrimoireEventLike): GrimoireEventSumma
     return {
       before: `${targetName} `,
       action: "changed character",
-      after: "",
+      after: sourceActor ? ` due to ${sourceActor}` : "",
     };
   }
   if (event.event_type === GrimoireEventType.ALIGNMENT_CHANGE) {
     return {
       before: `${targetName} `,
       action: "changed alignment",
-      after: "",
+      after: sourceActor ? ` due to ${sourceActor}` : "",
     };
   }
   if (event.event_type === GrimoireEventType.SEAT_CHANGE) {

@@ -354,6 +354,13 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     sourceMode: "npc",
   },
   {
+    reminder: "Dead",
+    eventType: GrimoireEventType.DEATH,
+    cadence: "once",
+    sourceRoleIds: ["riot"],
+    sourceMode: "npc",
+  },
+  {
     reminder: "Vote Given",
     eventType: GrimoireEventType.OTHER,
     cadence: "persistent",
