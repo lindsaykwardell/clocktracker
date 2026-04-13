@@ -1413,7 +1413,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     script: "experimental",
     roleIds: ["lycanthrope"],
     source: "grimoire_event",
-    label: "Howling Madness",
+    label: "Moonlit Mauling",
     getCount: ({ games, roleId }) =>
       games.reduce((total, game) => {
         if (!roleId || game.ignore_for_stats) return total;

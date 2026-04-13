@@ -36,7 +36,9 @@ export const GENERAL_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
       }, 0),
     getSentence: ({ count, isMe }) =>
       count > 0
-        ? `As the demon, you've killed ${count} player${pluralize(count)} in total.`
+        ? (isMe
+          ? `As a demon, you've killed ${count} player${pluralize(count)}.`
+          : `As a demon, this player has killed ${count} player${pluralize(count)}.`)
         : `As the demon, kill a player.`,
     getSubtitle: ({ games }) => getMostCommonByRoleSubtitle(games, isDemonKillEvent),
     getDisplayRole: ({ games }) => getMostCommonByRole(games, isDemonKillEvent),
@@ -117,7 +119,7 @@ export const GENERAL_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     id: "game_ending_abilities",
     category: "general",
     source: "end_trigger",
-    label: "Ability Game Endings",
+    label: "Look What I Can Do!",
     getCount: ({ games }) =>
       games.filter(
         (game) =>
