@@ -406,9 +406,9 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Kazali, you've turned ${count} player${pluralize(count)} into Minions.`
-          : `As the Kazali, this player has turned ${count} player${pluralize(count)} into Minions.`)
-        : `As the Kazali, turn a player into a Minion.`,
+          ? `As the Kazali, you've changed ${count} player${pluralize(count)} into Minions.`
+          : `As the Kazali, this player has changed ${count} player${pluralize(count)} into Minions.`)
+        : `As the Kazali, change a player into a Minion.`,
   },
   {
     id: "kazali_minion_role_changes_received",
@@ -436,9 +436,9 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've been turned into a Minion by the Kazali ${count} time${pluralize(count)}.`
-          : `This player has been turned into a Minion by the Kazali ${count} time${pluralize(count)}.`)
-        : `Be turned into a Minion by the Kazali.`,
+          ? `You've been changed into a Minion by the Kazali ${count} time${pluralize(count)}.`
+          : `This player has been changed into a Minion by the Kazali ${count} time${pluralize(count)}.`)
+        : `Be changed into a Minion by the Kazali.`,
   },
   // Legion: Nothing to track really.
   {
@@ -629,7 +629,7 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         ? (isMe
           ? `You've been changed into a minion by sitting next to the Lord of Typhon ${count} time${pluralize(count)}.`
           : `This player has been changed into a minion by sitting next to the Lord of Typhon ${count} time${pluralize(count)}.`)
-        : `Be turned into a Minion by sitting next to the Lord of Typhon.`,
+        : `Be changed into a Minion by sitting next to the Lord of Typhon.`,
   },
   {
     id: "no_dashii_kills",
@@ -798,25 +798,89 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `As the Pukka, this player has killed ${count} player${pluralize(count)}.`)
         : `As the Pukka, kill a player.`,
   },
-  // Riot doesn't really kill themselves, and if we count it like that, there are multiple Riot players, so who to attribute it to?
-  // {
-  //   id: "riot_kills",
-  //   category: "role",
-  //   scope: "as_role",
-  //   roleIds: ["riot"],
-  //   script: "experimental",
-  //   source: "grimoire_event",
-  //   label: "Viva la Muerte",
-  //   getCount: ({ games, roleId }) =>
-  //     countGrimoireEvents(games, roleId, GrimoireEventType.DEATH),
-  //   getSentence: ({ count, isMe }) =>
-  //     count > 0
-  //       ? (isMe
-  //         ? `As Riot, you've killed ${count} player${pluralize(count)}.`
-  //         : `As Riot, this player has killed ${count} player${pluralize(count)}.`)
-  //       : `As Riot, kill a player.`,
-  // },
-  // @todo Riot character change
+  {
+    id: "riot_kills",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["riot"],
+    script: "experimental",
+    source: "grimoire_event",
+    label: "Viva la Muerte",
+    getCount: ({ games, roleId }) =>
+      countGrimoireEvents(games, roleId, GrimoireEventType.DEATH),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As Riot, you've had ${count} player${pluralize(count)} killed due to Riot.`
+          : `As Riot, this player had had ${count} player${pluralize(count)} killed due to Riot.`)
+        : `As Riot, have a player killed due to Riot.`,
+  },
+  {
+    id: "riot_minion_role_changes_caused",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["riot"],
+    script: "experimental",
+    source: "grimoire_event",
+    label: "Revolution Spreads",
+    getCount: ({ games, roleId }) =>
+      !roleId
+        ? 0
+        : countMatchingEvents(games, (game, event) => {
+            if (
+              event.by_role_id !== roleId ||
+              event.event_type !== GrimoireEventType.ROLE_CHANGE
+            ) {
+              return false;
+            }
+
+            const currentToken = getEventCurrentToken(game, event);
+            const previousToken = getEventPreviousToken(game, event);
+
+            return (
+              previousToken?.role?.type === "MINION" &&
+              currentToken?.role_id === roleId
+            );
+          }),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As Riot, you've changed ${count} Minion${pluralize(count)} into another Riot.`
+          : `As Riot, this player has changed ${count} Minion${pluralize(count)} into another Riot.`)
+        : `As Riot, change a Minion into another Riot.`,
+  },
+  {
+    id: "riot_minion_role_changes_received",
+    category: "role",
+    roleIds: ["riot"],
+    scope: "affected_player",
+    script: "experimental",
+    source: "grimoire_event",
+    label: "Joined the Revolution",
+    getCount: ({ games }) =>
+      countMatchingEvents(games, (game, event) => {
+        if (
+          event.by_role_id !== "riot" ||
+          event.event_type !== GrimoireEventType.ROLE_CHANGE
+        ) {
+          return false;
+        }
+
+        const currentToken = getEventCurrentToken(game, event);
+        const previousToken = getEventPreviousToken(game, event);
+
+        return (
+          previousToken?.role?.type === "MINION" &&
+          currentToken?.role_id === "riot"
+        );
+      }),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `You've been changed into Riot ${count} time${pluralize(count)}.`
+          : `This player has been changed into Riot ${count} time${pluralize(count)}.`)
+        : `Be changed into Riot.`,
+  },
   {
     id: "shabaloth_kills",
     category: "role",

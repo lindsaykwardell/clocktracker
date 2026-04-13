@@ -227,6 +227,11 @@ const trackingReminders = [
     type: ReminderType.TRACKING,
   },
   {
+    role_id: "riot",
+    reminder: "Changed",
+    type: ReminderType.TRACKING,
+  },
+  {
     role_id: "cacklejack",
     reminder: "Changed",
     type: ReminderType.TRACKING,
@@ -308,6 +313,11 @@ const trackingReminders = [
   },
   {
     role_id: "boomdandy",
+    reminder: "Dead",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "riot",
     reminder: "Dead",
     type: ReminderType.TRACKING,
   },
