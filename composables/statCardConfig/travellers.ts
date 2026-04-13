@@ -699,7 +699,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     roleIds: ["gangster"],
     script: "experimental",
     source: "end_trigger",
-    label: "Last Contract",
+    label: "No Witnesses",
     getCount: ({ games, roleId }) =>
       games.filter(
         (game) =>
@@ -754,9 +754,9 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Gnome, you've ended ${count} game${pluralize(count)} by killing the Demon for nominating your amigo.`
-          : `As the Gnome, this player has ended ${count} game${pluralize(count)} by killing the Demon for nominating your amigo.`)
-        : `As the Gnome, end a game by killing the Demon for nominating your amigo.`,
+          ? `As the Gnome, you've ended ${count} game${pluralize(count)} by killing the Demon.`
+          : `As the Gnome, this player has ended ${count} game${pluralize(count)} by killing the Demon.`)
+        : `As the Gnome, end a game by killing the Demon.`,
   },
   {
     id: "gnome_death_game_endings",
@@ -779,9 +779,9 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Gnome, you've ended ${count} game${pluralize(count)} by killing a player for nominating your amigo, leaving only two players alive.`
-          : `As the Gnome, this player has ended ${count} game${pluralize(count)} by killing a player for nominating their amigo, leaving only two players alive.`)
-        : `As the Gnome, end a game by killing a player for nominating your amigo, leaving only two players alive.`,
+          ? `As the Gnome, you've ended ${count} game${pluralize(count)} by killing a player, leaving only two players alive.`
+          : `As the Gnome, this player has ended ${count} game${pluralize(count)} by killing a player, leaving only two players alive.`)
+        : `As the Gnome, end a game by killing a player, leaving only two players alive.`,
   },
   {
     id: "gnome_amigo_marked",
@@ -790,7 +790,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     scope: "affected_player",
     script: "experimental",
     source: "grimoire_event",
-    label: "Untouchable Amigo",
+    label: "Best Friends Forever",
     getCount: ({ games }) =>
       countMatchingEvents(
         games,

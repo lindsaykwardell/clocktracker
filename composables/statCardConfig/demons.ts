@@ -43,6 +43,23 @@ function countLeviathanGoodExecutions(game: GameRecord) {
 
 export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
+    id: "al_hadikhia_kills",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["al-hadikhia"],
+    script: "experimental",
+    source: "grimoire_event",
+    label: "Permanent Silence",
+    getCount: ({ games, roleId }) =>
+      countGrimoireEvents(games, roleId, GrimoireEventType.DEATH),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Al-Hadikhia, you've killed ${count} player${pluralize(count)}.`
+          : `As the Al-Hadikhia, this player has killed ${count} player${pluralize(count)}.`)
+        : `As the Al-Hadikhia, kill a player.`,
+  },
+  {
     id: "al_hadikhia_revives",
     category: "role",
     scope: "as_role",
@@ -175,6 +192,24 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Al-Hadikhia, you've brought ${count} evil player${pluralize(count)} back to life.`
           : `As the Al-Hadikhia, this player has brought ${count} evil player${pluralize(count)} back to life.`)
         : `As the Al-Hadikhia, bring an evil player back to life.`,
+  },
+  {
+    id: "fang_gu_kills",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["fang_gu"],
+    script: "snv",
+    sao: 1,
+    source: "grimoire_event",
+    label: "Fang Goodbye",
+    getCount: ({ games, roleId }) =>
+      countGrimoireEvents(games, roleId, GrimoireEventType.DEATH),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Fang Gu, you've killed ${count} player${pluralize(count)}.`
+          : `As the Fang Gu, this player has killed ${count} player${pluralize(count)}.`)
+        : `As the Fang Gu, kill a player.`,
   },
   {
     id: "fang_gu_outsider_possessions",
@@ -330,6 +365,23 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `Become the Imp after they target themselves.`,
   },
   {
+    id: "kazali_kills",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["kazali"],
+    script: "experimental",
+    source: "grimoire_event",
+    label: "Death by Design",
+    getCount: ({ games, roleId }) =>
+      countGrimoireEvents(games, roleId, GrimoireEventType.DEATH),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Kazali, you've killed ${count} player${pluralize(count)}.`
+          : `As the Kazali, this player has killed ${count} player${pluralize(count)}.`)
+        : `As the Kazali, kill a player.`,
+  },
+  {
     id: "kazali_minion_role_changes_caused",
     category: "role",
     scope: "as_role",
@@ -365,7 +417,7 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     scope: "affected_player",
     script: "experimental",
     source: "grimoire_event",
-    label: "Set Up by Evil",
+    label: "Why Me?",
     getCount: ({ games }) =>
       countMatchingEvents(
         games,
@@ -485,13 +537,30 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `Babysit Lil' Monsta.`,
   },
   {
+    id: "lleech_kills",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["lleech"],
+    script: "experimental",
+    source: "grimoire_event",
+    label: "A Taste for Pie",
+    getCount: ({ games, roleId }) =>
+      countGrimoireEvents(games, roleId, GrimoireEventType.DEATH),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Lleech, you've killed ${count} player${pluralize(count)}.`
+          : `As the Lleech, this player has killed ${count} player${pluralize(count)}.`)
+        : `As the Lleech, kill a player.`,
+  },
+  {
     id: "lleech_hosts_received",
     category: "role",
     roleIds: ["lleech"],
     scope: "affected_player",
     script: "experimental",
     source: "grimoire_event",
-    label: "Chosen Host",
+    label: "Spoiled Slice",
     getCount: ({ games }) =>
       countMatchingEvents(
         games,
@@ -505,6 +574,23 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `You've served as the Lleech's host ${count} time${pluralize(count)}.`
           : `This player has served as the Lleech's host ${count} time${pluralize(count)}.`)
         : `Serve as the Lleech's host.`,
+  },
+  {
+    id: "lord_of_typhon_kills",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["lord_of_typhon"],
+    script: "experimental",
+    source: "grimoire_event",
+    label: "Mortal Unravelling",
+    getCount: ({ games, roleId }) =>
+      countGrimoireEvents(games, roleId, GrimoireEventType.DEATH),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Lord of Typhon, you've killed ${count} player${pluralize(count)}.`
+          : `As the Lord of Typhon, this player has killed ${count} player${pluralize(count)}.`)
+        : `As the Lord of Typhon, kill a player.`,
   },
   {
     id: "lord_of_typhon_alignment_changes_caused",
@@ -546,9 +632,27 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `Be turned into a Minion by sitting next to the Lord of Typhon.`,
   },
   {
+    id: "no_dashii_kills",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["no_dashii"],
+    script: "snv",
+    sao: 3,
+    source: "grimoire_event",
+    label: "Dragged Below",
+    getCount: ({ games, roleId }) =>
+      countGrimoireEvents(games, roleId, GrimoireEventType.DEATH),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the No Dashii, you've killed ${count} player${pluralize(count)}.`
+          : `As the No Dashii, this player has killed ${count} player${pluralize(count)}.`)
+        : `As the No Dashii, kill a player.`,
+  },
+  {
     id: "no_dashii_poisoned_received",
     category: "role",
-    roleIds: ["no_dashii", "nodashii"],
+    roleIds: ["no_dashii"],
     scope: "affected_player",
     script: "snv",
     sao: 3,
@@ -559,7 +663,7 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         games,
         (_, event) =>
           event.event_type === GrimoireEventType.POISONED &&
-          (event.by_role_id === "no_dashii" || event.by_role_id === "nodashii")
+          event.by_role_id === "no_dashii"
       ),
     getSentence: ({ count, isMe }) =>
       count > 0
@@ -567,6 +671,23 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `You've been poisoned by the No Dashii ${count} time${pluralize(count)}.`
           : `This player has been poisoned by the No Dashii ${count} time${pluralize(count)}.`)
         : `Be poisoned by the No Dashii.`,
+  },
+  {
+    id: "ojo_kills",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["ojo"],
+    script: "experimental",
+    source: "grimoire_event",
+    label: "I See You",
+    getCount: ({ games, roleId }) =>
+      countGrimoireEvents(games, roleId, GrimoireEventType.DEATH),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Ojo, you've killed ${count} player${pluralize(count)}.`
+          : `As the Ojo, this player has killed ${count} player${pluralize(count)}.`)
+        : `As the Ojo, kill a player.`,
   },
   {
     id: "ojo_not_in_play_picks",
@@ -594,13 +715,30 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `As the Ojo, choose a not-in-play character, leaving the kill to the Storyteller.`,
   },
   {
+    id: "po_kills",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["po"],
+    script: "bmr",
+    source: "grimoire_event",
+    label: "Flowers for the Dead",
+    getCount: ({ games, roleId }) =>
+      countGrimoireEvents(games, roleId, GrimoireEventType.DEATH),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Po, you've killed ${count} player${pluralize(count)}.`
+          : `As the Po, this player has killed ${count} player${pluralize(count)}.`)
+        : `As the Po, kill a player.`,
+  },
+  {
     id: "po_triple_kills",
     category: "role",
     scope: "as_role",
     roleIds: ["po"],
     script: "bmr",
     source: "grimoire_event",
-    label: "Triple Feast",
+    label: "Funeral Bouquet",
     getCount: ({ games, roleId }) => {
       if (!roleId) return 0;
 
@@ -642,8 +780,61 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           : `As the Po, this player has succesfully killed three players in a single night ${count} time${pluralize(count)}.`)
         : `As the Po, succesfully kill three players in a single night.`,
   },
-  // Pukka [sao: 2]: Nothing relevant. Only option: If they were pukka poisoned?
-  // Riot: @todo
+  {
+    id: "pukka_kills",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["pukka"],
+    script: "bmr",
+    sao: 2,
+    source: "grimoire_event",
+    label: "Only a Scratch",
+    getCount: ({ games, roleId }) =>
+      countGrimoireEvents(games, roleId, GrimoireEventType.DEATH),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Pukka, you've killed ${count} player${pluralize(count)}.`
+          : `As the Pukka, this player has killed ${count} player${pluralize(count)}.`)
+        : `As the Pukka, kill a player.`,
+  },
+  // Riot doesn't really kill themselves, and if we count it like that, there are multiple Riot players, so who to attribute it to?
+  // {
+  //   id: "riot_kills",
+  //   category: "role",
+  //   scope: "as_role",
+  //   roleIds: ["riot"],
+  //   script: "experimental",
+  //   source: "grimoire_event",
+  //   label: "Viva la Muerte",
+  //   getCount: ({ games, roleId }) =>
+  //     countGrimoireEvents(games, roleId, GrimoireEventType.DEATH),
+  //   getSentence: ({ count, isMe }) =>
+  //     count > 0
+  //       ? (isMe
+  //         ? `As Riot, you've killed ${count} player${pluralize(count)}.`
+  //         : `As Riot, this player has killed ${count} player${pluralize(count)}.`)
+  //       : `As Riot, kill a player.`,
+  // },
+  // @todo Riot character change
+  {
+    id: "shabaloth_kills",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["shabaloth"],
+    script: "bmr",
+    sao: 3,
+    source: "grimoire_event",
+    label: "Swallowed by the Maw",
+    getCount: ({ games, roleId }) =>
+      countGrimoireEvents(games, roleId, GrimoireEventType.DEATH),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Shabaloth, you've killed ${count} player${pluralize(count)}.`
+          : `As the Shabaloth, this player has killed ${count} player${pluralize(count)}.`)
+        : `As the Shabaloth, kill a player.`,
+  },
   {
     id: "shabaloth_revives",
     category: "role",
@@ -661,6 +852,24 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Shabaloth, you've brought ${count} player${pluralize(count)} back to life.`
           : `As the Shabaloth, this player has brought ${count} player${pluralize(count)} back to life.`)
         : `As the Shabaloth, bring a player back to life.`,
+  },
+  {
+    id: "vigormortis_kills",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["vigormortis"],
+    script: "snv",
+    sao: 2,
+    source: "grimoire_event",
+    label: "Everlasting Death",
+    getCount: ({ games, roleId }) =>
+      countGrimoireEvents(games, roleId, GrimoireEventType.DEATH),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Vigormortis, you've killed ${count} player${pluralize(count)}.`
+          : `As the Vigormortis, this player has killed ${count} player${pluralize(count)}.`)
+        : `As the Vigormortis, kill a player.`,
   },
   {
     id: "vigormortis_minion_kills",
@@ -721,6 +930,24 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `Have the Vigormortis poison you when they kill one of their minions.`,
   },
   {
+    id: "vortox_kills",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["vortox"],
+    script: "snv",
+    sao: 4,
+    source: "grimoire_event",
+    label: "Death Spiral",
+    getCount: ({ games, roleId }) =>
+      countGrimoireEvents(games, roleId, GrimoireEventType.DEATH),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Vortox, you've killed ${count} player${pluralize(count)}.`
+          : `As the Vortox, this player has killed ${count} player${pluralize(count)}.`)
+        : `As the Vortox, kill a player.`,
+  },
+  {
     id: "vortox_game_endings",
     category: "role",
     scope: "as_role",
@@ -745,6 +972,23 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Vortox, you've caused ${count} game${pluralize(count)} to end when no execution occurred.`
           : `As the Vortox, this player has caused ${count} game${pluralize(count)} to end when no execution occurred.`)
         : `As the Vortox, cause a game to end when no execution occurs.`,
+  },
+  {
+    id: "yaggababble_kills",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["yaggababble"],
+    script: "experimental",
+    source: "grimoire_event",
+    label: "Sticks and Stones",
+    getCount: ({ games, roleId }) =>
+      countGrimoireEvents(games, roleId, GrimoireEventType.DEATH),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Yaggababble, you've killed ${count} player${pluralize(count)}.`
+          : `As the Yaggababble, this player has killed ${count} player${pluralize(count)}.`)
+        : `As the Yaggababble, kill a player.`,
   },
   {
     id: "yaggababble_max_kills",
@@ -791,6 +1035,24 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Yaggababble, your highest number of kills at once is ${count}.`
           : `As the Yaggababble, this player's highest number of kills at once is ${count}.`)
         : `As the Yaggababble, kill multiple players at once.`,
+  },
+  {
+    id: "zombuul_kills",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["zombuul"],
+    script: "bmr",
+    sao: 1,
+    source: "grimoire_event",
+    label: "Sleeping in the Dirt",
+    getCount: ({ games, roleId }) =>
+      countGrimoireEvents(games, roleId, GrimoireEventType.DEATH),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Zombuul, you've killed ${count} player${pluralize(count)}.`
+          : `As the Zombuul, this player has killed ${count} player${pluralize(count)}.`)
+        : `As the Zombuul, kill a player.`,
   },
   {
     id: "zombuul_false_deaths",
