@@ -37,6 +37,7 @@ export const GRIMOIRE_EVENT_ROLE_INCLUDES: Record<GrimoireEventType, RoleInclude
     "pit-hag", // Extra deaths from demon switch
     "psychopath",
     "witch",
+    "riot", // @todo: Not sure?
     "gunslinger",
     'harlot',
     'gangster',
@@ -51,7 +52,6 @@ export const GRIMOIRE_EVENT_ROLE_INCLUDES: Record<GrimoireEventType, RoleInclude
     "mutant",
     "cerenovus",
     "vizier", // Edge case: Could force execution, which is specific player agency.
-    "riot", // @todo: Not sure?
     "scapegoat", // Causes self execution
     "butcher", // Causes additional execution
     "judge", // Edge case: Could force execution, which is specific player agency.
@@ -78,6 +78,7 @@ export const GRIMOIRE_EVENT_ROLE_INCLUDES: Record<GrimoireEventType, RoleInclude
     "imp", // Self kill
     "kazali", // Setup?
     "lord_of_typhon", // Setup?
+    "riot", // Changes minions
     "cacklejack",
     "hindu",
   ], conditional: [] },
