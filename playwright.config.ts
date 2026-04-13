@@ -1,6 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
-import { fileURLToPath } from "node:url";
 import type { ConfigOptions } from "@nuxt/test-utils/playwright";
+import 'dotenv/config';
 
 export default defineConfig<ConfigOptions>({
   globalSetup: require.resolve("./tests/e2e/global.setup.ts"),
