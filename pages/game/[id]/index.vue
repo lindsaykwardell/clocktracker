@@ -1217,10 +1217,10 @@ const endTriggerSummary = computed(() => {
         : "";
     const actorAbilityLabel = character
         ? `Ability of ${roleArticle(character)}${character}${player ? ` (${player})` : ""}`
-        : "Character ability";
+        : "Additional win condition";
     const actorAbilityCauseLabel = character
         ? `the ability of ${roleArticle(character)}${character}${player ? ` (${player})` : ""}`
-        : "a character ability";
+        : "an additional win condition";
 
     const triggerEventLabel = (() => {
         switch (data.end_trigger_type) {
@@ -1231,7 +1231,7 @@ const endTriggerSummary = computed(() => {
             case GameEndTriggerType.CHARACTER_CHANGE:
                 return "a character change";
             case GameEndTriggerType.EXTRA_WIN_CONDITION:
-                return "an extra win condition";
+                return "an additional win condition";
             case GameEndTriggerType.OTHER:
                 return "another trigger";
             default:
@@ -1284,7 +1284,7 @@ const endTriggerSummary = computed(() => {
                 : "Game ended early";
         case GameEndTrigger.OTHER:
             return noteText ? noteText : "Another reason";
-        case GameEndTrigger.CHARACTER_ABILITY: {
+        case GameEndTrigger.ADDITIONAL_WIN_CONDITION: {
             return details
                 ? `${actorAbilityLabel} (${details})`
                 : actorAbilityLabel;

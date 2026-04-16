@@ -14,6 +14,7 @@ import { FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS } from "~/composables/statCardCo
 import { GENERAL_ROLE_STAT_CARD_DEFINITIONS } from "~/composables/statCardConfig/general";
 
 export type RoleStatCardCategory = "role" | "general";
+export type RoleStatCardVisibility = "personal" | "global" | "both";
 
 export type RoleStatCardRecord = {
   id: number;
@@ -63,6 +64,7 @@ export type RoleStatCardDefinition = {
   script?: string | null;
   sao?: number;
   hidden?: boolean;
+  visibility?: RoleStatCardVisibility;
   scope?: "as_role" | "affected_player" | "triggering_player";
   source: string;
   label: string;
@@ -73,6 +75,11 @@ export type RoleStatCardDefinition = {
     roleName?: string | null;
     isMe: boolean;
     username?: string;
+  }) => string;
+  getGlobalSentence?: (context: Required<Pick<RoleStatCardContext, "games">> & {
+    count: number;
+    roleId?: string | null;
+    roleName?: string | null;
   }) => string;
   getSubtitle?: (context: RoleStatCardContext & { count: number }) => string | null;
   getDisplayRole?: (context: RoleStatCardContext & { count: number }) => RoleStatCardDisplayRole | null;
@@ -88,6 +95,14 @@ export const ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   ...GENERAL_ROLE_STAT_CARD_DEFINITIONS,
 ];
 
+function includesPersonalVisibility(definition: RoleStatCardDefinition) {
+  return definition.visibility !== "global";
+}
+
+function includesGlobalVisibility(definition: RoleStatCardDefinition) {
+  return definition.visibility !== "personal";
+}
+
 export function getRoleStatCardDefinition(metricKey: string) {
   return ROLE_STAT_CARD_DEFINITIONS.find((definition) => definition.id === metricKey) ?? null;
 }
@@ -96,6 +111,7 @@ export function getAvailableRoleCardDefinitions(games: GameRecord[], roleId: str
   return ROLE_STAT_CARD_DEFINITIONS.filter((definition) => {
     if (definition.category !== "role") return false;
     if (!definition.roleIds?.includes(roleId)) return false;
+    if (!includesPersonalVisibility(definition)) return false;
     return definition.getCount({ games, roleId }) > 0;
   });
 }
@@ -103,20 +119,35 @@ export function getAvailableRoleCardDefinitions(games: GameRecord[], roleId: str
 export function getAvailableGeneralCardDefinitions(games: GameRecord[]) {
   return ROLE_STAT_CARD_DEFINITIONS.filter((definition) => {
     if (definition.category !== "general") return false;
+    if (!includesPersonalVisibility(definition)) return false;
     return definition.getCount({ games }) > 0;
   });
 }
 
-export function getRoleCardDefinitions(roleId: string) {
+export function getRoleCardDefinitions(
+  roleId: string,
+  visibility: RoleStatCardVisibility = "personal"
+) {
   return ROLE_STAT_CARD_DEFINITIONS.filter((definition) => {
     if (definition.category !== "role") return false;
-    return definition.roleIds?.includes(roleId) ?? false;
+    if (!(definition.roleIds?.includes(roleId) ?? false)) return false;
+
+    if (visibility === "personal") return includesPersonalVisibility(definition);
+    if (visibility === "global") {
+      return includesGlobalVisibility(definition) && !!definition.getGlobalSentence;
+    }
+    return true;
   });
 }
 
-export function getGeneralCardDefinitions() {
+export function getGeneralCardDefinitions(
+  visibility: RoleStatCardVisibility = "personal"
+) {
   return ROLE_STAT_CARD_DEFINITIONS.filter((definition) => {
-    return definition.category === "general";
+    if (definition.category !== "general") return false;
+    if (visibility === "personal") return includesPersonalVisibility(definition);
+    if (visibility === "global") return includesGlobalVisibility(definition);
+    return true;
   });
 }
 
@@ -134,6 +165,15 @@ export function buildRoleStatCardResult(
       count: 0,
       sentence: "This stat card is no longer configured.",
       metricLabel: "Unknown Stat Card",
+      subtitle: null,
+      displayRole: null,
+    };
+  }
+  if (!includesPersonalVisibility(definition)) {
+    return {
+      count: 0,
+      sentence: "This stat card is only available in global role stats.",
+      metricLabel: definition.label,
       subtitle: null,
       displayRole: null,
     };
@@ -204,6 +244,7 @@ export function buildRoleStatCardPreview(
 ) {
   const definition = getRoleStatCardDefinition(definitionId);
   if (!definition) return null;
+  if (!includesPersonalVisibility(definition)) return null;
 
   const scopedGames = getScopedGamesForRole(
     games,
@@ -264,6 +305,56 @@ export function buildRoleStatCardPreview(
           roleName: role?.name ?? null,
           isMe,
           username,
+        }) ?? null,
+    },
+  };
+}
+
+export function buildGlobalRoleStatCardPreview(
+  definitionId: string,
+  games: GameRecord[],
+  role: NonNullable<RoleStatCardRecord["role"]>
+) {
+  const definition = getRoleStatCardDefinition(definitionId);
+  if (!definition || !includesGlobalVisibility(definition)) return null;
+  if (!definition.getGlobalSentence) return null;
+
+  const count = definition.getCount({
+    games,
+    roleId: role.id,
+    roleName: role.name,
+  });
+
+  return {
+    id: 0,
+    role_id: role.id,
+    source: definition.source,
+    metric_key: definition.id,
+    storyteller_only: false,
+    role,
+    preview: {
+      count,
+      metricLabel: definition.label,
+      sentence: definition.getGlobalSentence({
+        games,
+        count,
+        roleId: role.id,
+        roleName: role.name,
+      }),
+      isHiddenLocked: false,
+      subtitle:
+        definition.getSubtitle?.({
+          games,
+          count,
+          roleId: role.id,
+          roleName: role.name,
+        }) ?? null,
+      displayRole:
+        definition.getDisplayRole?.({
+          games,
+          count,
+          roleId: role.id,
+          roleName: role.name,
         }) ?? null,
     },
   };

@@ -129,8 +129,8 @@ export const GENERAL_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
       ).length,
     getSentence: ({ count, isMe }) =>
       count > 0
-        ? `${isMe ? "You have" : "This player has"} ended ${count} game${pluralize(count)} with a character ability.`
-        : `End a game with a character ability.`,
+        ? `${isMe ? "You have" : "This player has"} ended ${count} game${pluralize(count)} through an additional win condition.`
+        : `End a game through an additional win condition.`,
     getSubtitle: ({ games }) =>
       getMostCommonEndTriggerRoleSubtitle(games, (game) =>
         game.end_trigger !== GameEndTrigger.NOT_RECORDED &&

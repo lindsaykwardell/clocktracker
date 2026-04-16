@@ -755,7 +755,7 @@ const selectedLocation = useLocalStorage<string | null>(
 const endTriggerOptions = [
   GameEndTrigger.NOT_RECORDED,
   GameEndTrigger.NO_LIVING_DEMON,
-  GameEndTrigger.CHARACTER_ABILITY,
+  GameEndTrigger.ADDITIONAL_WIN_CONDITION,
   GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE,
   GameEndTrigger.GAME_ENDED_EARLY,
   GameEndTrigger.OTHER,
@@ -767,8 +767,8 @@ function endTriggerLabel(trigger: GameEndTrigger) {
       return "Not recorded";
     case GameEndTrigger.NO_LIVING_DEMON:
       return "No living demon";
-    case GameEndTrigger.CHARACTER_ABILITY:
-      return "Character ability";
+    case GameEndTrigger.ADDITIONAL_WIN_CONDITION:
+      return "Additional win condition";
     case GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE:
       return "Two players left alive";
     case GameEndTrigger.GAME_ENDED_EARLY:

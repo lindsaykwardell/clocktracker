@@ -1,0 +1,6 @@
+ALTER TYPE "GameEndTrigger" RENAME VALUE 'CHARACTER_ABILITY' TO 'ADDITIONAL_WIN_CONDITION';
+
+UPDATE "Game"
+SET "end_trigger_type" = NULL
+WHERE "end_trigger" = 'ADDITIONAL_WIN_CONDITION'
+  AND "end_trigger_type" = 'EXTRA_WIN_CONDITION';

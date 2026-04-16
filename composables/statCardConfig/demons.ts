@@ -1,7 +1,6 @@
 import {
   GameEndTrigger,
   GameEndTriggerCause,
-  GameEndTriggerType,
   GrimoireEventType,
   type GameRecord,
   WinStatus_V2,
@@ -19,6 +18,7 @@ import {
   getMostCommonEndTriggerRoleSubtitle,
   isDemonKillEvent,
   pluralize,
+  wasWere,
 } from "./shared";
 import type { RoleStatCardDefinition } from "./shared";
 
@@ -58,6 +58,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Al-Hadikhia, you've killed ${count} player${pluralize(count)}.`
           : `As the Al-Hadikhia, this player has killed ${count} player${pluralize(count)}.`)
         : `As the Al-Hadikhia, kill a player.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} player${pluralize(count)} ${wasWere(count)} killed by an Al-Hadikhia.`
+        : `No Al-Hadikhia has killed a player yet.`,
   },
   {
     id: "al_hadikhia_revives",
@@ -75,6 +79,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Al-Hadikhia, you've brought ${count} player${pluralize(count)} back from death after they chose to live.`
           : `As the Al-Hadikhia, this player has brought ${count} player${pluralize(count)} back from death after they chose to live.`)
         : `As the Al-Hadikhia, bring a player back from death by having them choose to live.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} player${pluralize(count)} ${wasWere(count)} brought back from death by an Al-Hadikhia.`
+        : `No Al-Hadikhia has brought a player back from death yet.`,
   },
   {
     id: "al_hadikhia_all_die",
@@ -123,6 +131,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Al-Hadikhia, you've killed all three chosen players ${count} time${pluralize(count)} when they all lived.`
           : `As the Al-Hadikhia, this player has killed all three chosen players ${count} time${pluralize(count)} when they all lived.`)
         : `As the Al-Hadikhia, kill all three chosen players when they all live.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} time${pluralize(count)}, all three chosen players were killed by an Al-Hadikhia.`
+        : `No Al-Hadikhia has killed all three chosen players yet.`,
   },
   {
     id: "al_hadikhia_self_deaths",
@@ -158,6 +170,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Al-Hadikhia, you've included yourself in your choices and ended up dying ${count} time${pluralize(count)}.`
           : `As the Al-Hadikhia, this player has included themselves in their choices and ended up dying ${count} time${pluralize(count)}.`)
         : `As the Al-Hadikhia, include yourself in your choices and end up dying.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `An Al-Hadikhia has included themselves in their choices and ended up dying at least ${count} time${pluralize(count)}.`
+        : `No Al-Hadikhia has included themselves in their choices and ended up dying yet.`,
   },
   {
     id: "al_hadikhia_evil_revives",
@@ -192,6 +208,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Al-Hadikhia, you've brought ${count} evil player${pluralize(count)} back to life.`
           : `As the Al-Hadikhia, this player has brought ${count} evil player${pluralize(count)} back to life.`)
         : `As the Al-Hadikhia, bring an evil player back to life.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} evil player${pluralize(count)} ${wasWere(count)} brought back to life by an Al-Hadikhia.`
+        : `No Al-Hadikhia has brought an evil player back to life yet.`,
   },
   {
     id: "fang_gu_kills",
@@ -210,6 +230,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Fang Gu, you've killed ${count} player${pluralize(count)}.`
           : `As the Fang Gu, this player has killed ${count} player${pluralize(count)}.`)
         : `As the Fang Gu, kill a player.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} player${pluralize(count)} ${wasWere(count)} killed by a Fang Gu.`
+        : `No Fang Gu has killed a player yet.`,
   },
   {
     id: "fang_gu_outsider_possessions",
@@ -246,6 +270,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Fang Gu, you've jumped to ${count} Outsider${pluralize(count)} when choosing them in the night.`
           : `As the Fang Gu, this player has jumped to ${count} Outsider${pluralize(count)} when choosing them in the night.`)
         : `As the Fang Gu, jump to an Outsider by choosing them in the night.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} Outsider${pluralize(count)} ${wasWere(count)} changed into a Fang Gu.`
+        : `No Fang Gu has changed an Outsider into a Fang Gu yet.`,
   },
   {
     id: "fang_gu_possessions_received",
@@ -295,6 +323,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Imp, you've killed ${count} player${pluralize(count)}.`
           : `As the Imp, this player has killed ${count} player${pluralize(count)}.`)
         : `As the Imp, kill a player.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} player${pluralize(count)} ${wasWere(count)} killed by an Imp.`
+        : `No Imp has killed a player yet.`,
   },
   {
     id: "imp_starpasses",
@@ -332,6 +364,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Imp, you've targeted yourself and passed the Demon role to a Minion ${count} time${pluralize(count)}.`
           : `As the Imp, this player has targeted themselves and passed the Demon role to a Minion ${count} time${pluralize(count)}.`)
         : `As the Imp, target yourself and pass the Demon role to a Minion.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} Minion${pluralize(count)} became the Imp after an Imp targeted themselves.`
+        : `No Imp has passed the Demon role to a Minion yet.`,
   },
   {
     id: "imp_starpasses_received",
@@ -380,6 +416,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Kazali, you've killed ${count} player${pluralize(count)}.`
           : `As the Kazali, this player has killed ${count} player${pluralize(count)}.`)
         : `As the Kazali, kill a player.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} player${pluralize(count)} ${wasWere(count)} killed by a Kazali.`
+        : `No Kazali has killed a player yet.`,
   },
   {
     id: "kazali_minion_role_changes_caused",
@@ -409,6 +449,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Kazali, you've changed ${count} player${pluralize(count)} into Minions.`
           : `As the Kazali, this player has changed ${count} player${pluralize(count)} into Minions.`)
         : `As the Kazali, change a player into a Minion.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} player${pluralize(count)} ${wasWere(count)} changed into Minions by a Kazali.`
+        : `No Kazali has changed a player into a Minion yet.`,
   },
   {
     id: "kazali_minion_role_changes_received",
@@ -454,8 +498,7 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         if (
           game.ignore_for_stats ||
           !roleId ||
-          game.end_trigger !== GameEndTrigger.CHARACTER_ABILITY ||
-          game.end_trigger_type !== GameEndTriggerType.EXTRA_WIN_CONDITION ||
+          game.end_trigger !== GameEndTrigger.ADDITIONAL_WIN_CONDITION ||
           game.end_trigger_cause !== GameEndTriggerCause.ABILITY ||
           game.end_trigger_role_id !== roleId
         ) {
@@ -476,6 +519,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Leviathan, you've caused ${count} game${pluralize(count)} to end after a second good player was executed.`
           : `As the Leviathan, this player has caused ${count} game${pluralize(count)} to end after a second good player was executed.`)
         : `As the Leviathan, cause a game to end when a second good player is executed.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} game${pluralize(count)} ${wasWere(count)} ended by a Leviathan after a second good player was executed.`
+        : `No Leviathan has ended a game after a second good player was executed yet.`,
   },
   {
     id: "leviathan_game_endings",
@@ -490,8 +537,7 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         if (
           game.ignore_for_stats ||
           !roleId ||
-          game.end_trigger !== GameEndTrigger.CHARACTER_ABILITY ||
-          game.end_trigger_type !== GameEndTriggerType.EXTRA_WIN_CONDITION ||
+          game.end_trigger !== GameEndTrigger.ADDITIONAL_WIN_CONDITION ||
           game.end_trigger_cause !== GameEndTriggerCause.ABILITY ||
           game.end_trigger_role_id !== roleId
         ) {
@@ -512,6 +558,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Leviathan, you've caused ${count} game${pluralize(count)} to end when it reached the sixth day.`
           : `As the Leviathan, this player has caused ${count} game${pluralize(count)} to end when it reached the sixth day.`)
         : `As the Leviathan, cause a game to end when it reaches the sixth day.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} game${pluralize(count)} ${wasWere(count)} ended by a Leviathan after five days passed.`
+        : `No Leviathan has ended a game after five days passed yet.`,
   },
   {
     id: "lil_monsta_babysat_received",
@@ -552,6 +602,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Lleech, you've killed ${count} player${pluralize(count)}.`
           : `As the Lleech, this player has killed ${count} player${pluralize(count)}.`)
         : `As the Lleech, kill a player.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} player${pluralize(count)} ${wasWere(count)} killed by a Lleech.`
+        : `No Lleech has killed a player yet.`,
   },
   {
     id: "lleech_hosts_received",
@@ -591,6 +645,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Lord of Typhon, you've killed ${count} player${pluralize(count)}.`
           : `As the Lord of Typhon, this player has killed ${count} player${pluralize(count)}.`)
         : `As the Lord of Typhon, kill a player.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} player${pluralize(count)} ${wasWere(count)} killed by a Lord of Typhon.`
+        : `No Lord of Typhon has killed a player yet.`,
   },
   {
     id: "lord_of_typhon_alignment_changes_caused",
@@ -608,6 +666,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Lord of Typhon, you've changed ${count} player${pluralize(count)} by starting next to them.`
           : `As the Lord of Typhon, this player has changed ${count} player${pluralize(count)} by starting next to them.`)
         : `As the Lord of Typhon, change a player by starting next to them.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} player${pluralize(count)} ${wasWere(count)} changed by a Lord of Typhon starting next to them.`
+        : `No Lord of Typhon has changed a player by starting next to them yet.`,
   },
   {
     id: "lord_of_typhon_alignment_changes_received",
@@ -648,6 +710,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the No Dashii, you've killed ${count} player${pluralize(count)}.`
           : `As the No Dashii, this player has killed ${count} player${pluralize(count)}.`)
         : `As the No Dashii, kill a player.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} player${pluralize(count)} ${wasWere(count)} killed by a No Dashii.`
+        : `No player has been killed by a No Dashii yet.`,
   },
   {
     id: "no_dashii_poisoned_received",
@@ -688,6 +754,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Ojo, you've killed ${count} player${pluralize(count)}.`
           : `As the Ojo, this player has killed ${count} player${pluralize(count)}.`)
         : `As the Ojo, kill a player.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} player${pluralize(count)} ${wasWere(count)} killed by an Ojo.`
+        : `No Ojo has killed a player yet.`,
   },
   {
     id: "ojo_not_in_play_picks",
@@ -713,6 +783,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Ojo, you've chosen a not-in-play character ${count} time${pluralize(count)}, leaving the kill to the Storyteller.`
           : `As the Ojo, this player has chosen a not-in-play character ${count} time${pluralize(count)}, leaving the kill to the Storyteller.`)
         : `As the Ojo, choose a not-in-play character, leaving the kill to the Storyteller.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `An Ojo has chosen a not-in-play character at least ${count} time${pluralize(count)}.`
+        : `No Ojo has chosen a not-in-play character yet.`,
   },
   {
     id: "po_kills",
@@ -730,6 +804,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Po, you've killed ${count} player${pluralize(count)}.`
           : `As the Po, this player has killed ${count} player${pluralize(count)}.`)
         : `As the Po, kill a player.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} player${pluralize(count)} ${wasWere(count)} killed by a Po.`
+        : `No Po has killed a player yet.`,
   },
   {
     id: "po_triple_kills",
@@ -776,9 +854,13 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Po, you've succesfully killed three players in a single night ${count} time${pluralize(count)}.`
-          : `As the Po, this player has succesfully killed three players in a single night ${count} time${pluralize(count)}.`)
-        : `As the Po, succesfully kill three players in a single night.`,
+          ? `As the Po, you've successfully killed three players in a single night ${count} time${pluralize(count)}.`
+          : `As the Po, this player has successfully killed three players in a single night ${count} time${pluralize(count)}.`)
+        : `As the Po, successfully kill three players in a single night.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} night${pluralize(count)} had three players killed by a Po.`
+        : `No Po has killed three players in a single night yet.`,
   },
   {
     id: "pukka_kills",
@@ -797,6 +879,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Pukka, you've killed ${count} player${pluralize(count)}.`
           : `As the Pukka, this player has killed ${count} player${pluralize(count)}.`)
         : `As the Pukka, kill a player.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} player${pluralize(count)} ${wasWere(count)} killed by a Pukka.`
+        : `No Pukka has killed a player yet.`,
   },
   {
     id: "riot_kills",
@@ -812,8 +898,12 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
       count > 0
         ? (isMe
           ? `As Riot, you've had ${count} player${pluralize(count)} killed due to Riot.`
-          : `As Riot, this player had had ${count} player${pluralize(count)} killed due to Riot.`)
+          : `As Riot, this player has had ${count} player${pluralize(count)} killed due to Riot.`)
         : `As Riot, have a player killed due to Riot.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} player${pluralize(count)} ${wasWere(count)} killed by Riot.`
+        : `No Riot has killed a player yet.`,
   },
   {
     id: "riot_minion_role_changes_caused",
@@ -848,6 +938,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As Riot, you've changed ${count} Minion${pluralize(count)} into another Riot.`
           : `As Riot, this player has changed ${count} Minion${pluralize(count)} into another Riot.`)
         : `As Riot, change a Minion into another Riot.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} Minion${pluralize(count)} ${wasWere(count)} changed into Riot.`
+        : `No Riot has changed a Minion into Riot yet.`,
   },
   {
     id: "riot_minion_role_changes_received",
@@ -898,6 +992,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Shabaloth, you've killed ${count} player${pluralize(count)}.`
           : `As the Shabaloth, this player has killed ${count} player${pluralize(count)}.`)
         : `As the Shabaloth, kill a player.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} player${pluralize(count)} ${wasWere(count)} killed by a Shabaloth.`
+        : `No Shabaloth has killed a player yet.`,
   },
   {
     id: "shabaloth_revives",
@@ -916,6 +1014,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Shabaloth, you've brought ${count} player${pluralize(count)} back to life.`
           : `As the Shabaloth, this player has brought ${count} player${pluralize(count)} back to life.`)
         : `As the Shabaloth, bring a player back to life.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} player${pluralize(count)} ${wasWere(count)} brought back to life by a Shabaloth.`
+        : `No Shabaloth has brought a player back to life yet.`,
   },
   {
     id: "vigormortis_kills",
@@ -934,6 +1036,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Vigormortis, you've killed ${count} player${pluralize(count)}.`
           : `As the Vigormortis, this player has killed ${count} player${pluralize(count)}.`)
         : `As the Vigormortis, kill a player.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} player${pluralize(count)} ${wasWere(count)} killed by a Vigormortis.`
+        : `No Vigormortis has killed a player yet.`,
   },
   {
     id: "vigormortis_minion_kills",
@@ -969,6 +1075,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Vigormortis, you've killed ${count} of your own minions.`
           : `As the Vigormortis, this player has killed ${count} of their own minions.`)
         : `As the Vigormortis, kill one of your own minions.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} Minion${pluralize(count)} ${wasWere(count)} killed by a Vigormortis.`
+        : `No Vigormortis has killed a Minion yet.`,
   },
   {
     id: "vigormortis_poisoned_received",
@@ -1010,6 +1120,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Vortox, you've killed ${count} player${pluralize(count)}.`
           : `As the Vortox, this player has killed ${count} player${pluralize(count)}.`)
         : `As the Vortox, kill a player.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} player${pluralize(count)} ${wasWere(count)} killed by a Vortox.`
+        : `No Vortox has killed a player yet.`,
   },
   {
     id: "vortox_game_endings",
@@ -1025,8 +1139,7 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         (game) =>
           !game.ignore_for_stats &&
           !!roleId &&
-          game.end_trigger === GameEndTrigger.CHARACTER_ABILITY &&
-          game.end_trigger_type === GameEndTriggerType.EXTRA_WIN_CONDITION &&
+          game.end_trigger === GameEndTrigger.ADDITIONAL_WIN_CONDITION &&
           game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
           game.end_trigger_role_id === roleId
       ).length,
@@ -1036,6 +1149,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Vortox, you've caused ${count} game${pluralize(count)} to end when no execution occurred.`
           : `As the Vortox, this player has caused ${count} game${pluralize(count)} to end when no execution occurred.`)
         : `As the Vortox, cause a game to end when no execution occurs.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} game${pluralize(count)} ${wasWere(count)} ended by a Vortox when no execution occurred.`
+        : `No Vortox has ended a game when no execution occurred yet.`,
   },
   {
     id: "yaggababble_kills",
@@ -1053,6 +1170,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Yaggababble, you've killed ${count} player${pluralize(count)}.`
           : `As the Yaggababble, this player has killed ${count} player${pluralize(count)}.`)
         : `As the Yaggababble, kill a player.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} player${pluralize(count)} ${wasWere(count)} killed by a Yaggababble.`
+        : `No Yaggababble has killed a player yet.`,
   },
   {
     id: "yaggababble_max_kills",
@@ -1099,6 +1220,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Yaggababble, your highest number of kills at once is ${count}.`
           : `As the Yaggababble, this player's highest number of kills at once is ${count}.`)
         : `As the Yaggababble, kill multiple players at once.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `The highest number of players killed at once by a Yaggababble is ${count}.`
+        : `No Yaggababble has killed multiple players at once yet.`,
   },
   {
     id: "zombuul_kills",
@@ -1117,6 +1242,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Zombuul, you've killed ${count} player${pluralize(count)}.`
           : `As the Zombuul, this player has killed ${count} player${pluralize(count)}.`)
         : `As the Zombuul, kill a player.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} player${pluralize(count)} ${wasWere(count)} killed by a Zombuul.`
+        : `No Zombuul has killed a player yet.`,
   },
   {
     id: "zombuul_false_deaths",
@@ -1153,5 +1282,9 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Zombuul, you've feigned death ${count} time${pluralize(count)}.`
           : `As the Zombuul, this player has feigned death ${count} time${pluralize(count)}.`)
         : `As the Zombuul, feign your death.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `A Zombuul has feigned death at least ${count} time${pluralize(count)}.`
+        : `No Zombuul has feigned death yet.`,
   },
 ];

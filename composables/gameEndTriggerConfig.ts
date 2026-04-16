@@ -13,6 +13,37 @@ export type EndTriggerRoleIncludeConfig = {
   conditional: { role: string; requires: string[] }[];
 };
 
+export const ADDITIONAL_WIN_CONDITION_ROLE_INCLUDES: EndTriggerRoleIncludeConfig =
+  {
+    base: [
+      ...WILDCARD_ROLE_IDS,
+      // Townsfolk
+      "alsaahir", // Used their ability
+      "atheist", // Storyteller executed.
+      "cult_leader", // Ability used
+      "mayor", // Ability triggered
+
+      // Outsider
+      "damsel", // Guessed by minion
+      "klutz", // Wrong choice with ability
+      "saint", // Executed
+
+      // Minion
+      "evil_twin", // Wrong twin executed.
+      "fearmonger", // Executed their target
+      "goblin", // Executed when claimed
+      "mastermind", // No
+
+      // Demon
+      "leviathan", // Two endings
+      "vortox", // Nobody executed
+
+      // Fabled
+      "fiddler", // Ability used
+    ],
+    conditional: [],
+  };
+
 export const END_TRIGGER_ROLE_INCLUDES: Partial<
   Record<
     GameEndTrigger,
@@ -24,39 +55,6 @@ export const END_TRIGGER_ROLE_INCLUDES: Partial<
     >
   >
 > = {
-  CHARACTER_ABILITY: {
-    EXTRA_WIN_CONDITION: {
-      ABILITY: {
-        base: [
-          ...WILDCARD_ROLE_IDS,
-          // Townsfolk
-          "alsaahir", // Used their ability
-          "atheist", // Storyteller executed.
-          "cult_leader", // Ability used
-          "mayor", // Ability triggered
-
-          // Outsider
-          "damsel", // Guessed by minion
-          "klutz", // Wrong choice with ability
-          "saint", // Executed
-
-          // Minion
-          "evil_twin", // Wrong twin executed.
-          "fearmonger", // Executed their target
-          "goblin", // Executed when claimed
-          "mastermind", // No
-
-          // Demon
-          "leviathan", // Two endings
-          "vortox", // Nobody executed
-
-          // Fabled
-          "fiddler", // Ability used
-        ],
-        conditional: [],
-      },
-    },
-  },
   NO_LIVING_DEMON: {
     DEATH: {
       ABILITY: {

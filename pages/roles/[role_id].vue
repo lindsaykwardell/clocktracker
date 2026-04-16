@@ -1,10 +1,10 @@
 <template>
   <StandardTemplate>
     <section
-      class="flex flex-col gap-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 w-full lg:w-4/5 m-auto md:my-8 shadow-lg"
+      class="flex flex-col gap-4 w-full"
     >
-      <div class="flex flex-col md:flex-row items-center md:items-start gap-8">
-        <div class="flex-grow flex flex-col p-4 gap-4">
+      <div class="flex flex-col md:flex-row items-center md:items-stretch">
+        <div class="flex-grow flex flex-col p-4 gap-6">
           <div>
             <Token :character="character" size="lg" class="md:hidden m-auto" />
             <div class="flex flex-col md:flex-row gap-4 items-center">
@@ -24,42 +24,91 @@
             </div>
           </div>
 
-          <hr class="border-stone-400 dark:border-stone-700/50 w-full" />
+          <template v-if="role_data.role_stat_cards.length">
+            <hr class="border-stone-200 dark:border-stone-700/50 w-full" />
+            <div>
+              <h2 class="font-sorts text-xl lg:text-2xl">
+                Statistic Cards
+              </h2>
+              <ul class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 py-4">
+                <RoleStatCard
+                  v-for="card in role_data.role_stat_cards"
+                  variant="horizontal"
+                  :key="card.metric_key"
+                  :card="card"
+                  :games="[]"
+                  :isMe="false"
+                  :showFavoriteControl="false"
+                  :showHiddenStyling="false"
+                  :showRoleImage="false"
+                  showZeroOverlay
+                />
+              </ul>
+            </div>
+          </template>
 
-          <h2 class="font-sorts text-center text-xl lg:text-2xl">
-            Scripts
-          </h2>
-          <div class="flex flex-wrap py-6 justify-center">
-            <a
-              v-for="script in role_data.popular_scripts"
-              :href="`/scripts/${script.script.replaceAll(' ', '_')}?version=${
-                script.version
-              }${
-                script.custom_script_id ? `&id=${script.custom_script_id}` : ''
-              }`"
-              target="_blank"
-              class="script-wrapper hover:underline flex flex-col items-center gap-2 w-[150px] md:w-[200px] lg:w-1/2 xl:w-1/3 text-center p-2"
-            >
-              <div class="relative flex justify-center items-center">
-                <div
-                  class="script-chart absolute w-32 h-32 md:w-44 md:h-44 -left-2 -top-2 transition duration-200 ease-in-out print:hidden"
-                >
-                  <Pie
-                    :data="perScriptChartData[script.script]"
-                    :options="scriptWinRatioOptions"
+          <hr class="border-stone-200 dark:border-stone-700/50 w-full" />
+          <div>
+            <h2 class="font-sorts text-xl lg:text-2xl">
+              Scripts
+            </h2>
+            <div class="script-list grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2 py-4">
+              <a
+                v-for="script in role_data.popular_scripts"
+                :key="`${script.script}-${script.version ?? 'unknown'}`"
+                class="script-wrapper relative flex items-center gap-4 rounded-lg border dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 p-4"
+              >
+                <div class="flex-none relative flex justify-center items-center">
+                  <div
+                    class="script-chart absolute -left-2 -top-2 transition duration-200 ease-in-out print:hidden"
+                  >
+                    <Pie
+                      :data="perScriptChartData[script.script]"
+                      :options="scriptWinRatioOptions"
+                    />
+                  </div>
+                  <img
+                    class="token relative z-20 transition duration-200 rounded-full overflow-visible aspect-square"
+                    :src="script.logo ?? scripts.scriptLogo(script.script)"
                   />
                 </div>
-                <img
-                  class="token relative z-20 w-28 h-28 md:w-40 md:h-40 transition duration-200 rounded-full overflow-visible aspect-square"
-                  :src="script.logo ?? scripts.scriptLogo(script.script)"
-                />
-              </div>
-              <span>{{ script.script }}</span>
-            </a>
+                <div>
+                  <h3 class="font-sorts text-balance lg:text-lg">
+                    <a
+                      :href="`/scripts/${script.script.replaceAll(' ', '_')}?version=${
+                        script.version
+                      }${
+                        script.custom_script_id ? `&id=${script.custom_script_id}` : ''
+                      }`"
+                      target="_blank"
+                      class="role-link"
+                    >
+                      {{ script.script }}
+                    </a>
+                  </h3>
+                  <div class="text-sm text-stone-600 dark:text-stone-400 space-y-[0.125rem]">
+                    <div>
+                      {{ script.count }} game{{ script.count === 1 ? "" : "s" }}
+                    </div>
+                    <div>
+                      {{ script.pct }}% win rate
+                    </div>
+                    <div v-if="script.ability_endings">
+                      Ended {{ script.ability_endings }} game{{
+                        script.ability_endings === 1 ? "" : "s"
+                      }}
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </div>
           </div>
+          
+          <div class="text-xs text-center text-stone-500 mb-4">* Only includes games with a recorded end trigger.</div>
         </div>
 
-        <div class="flex flex-col gap-4 print:w-full p-4 border-l dark:border-stone-700/50">
+        <!-- Sidebar -->
+        <div class="flex flex-col gap-4 print:w-full md:w-[22rem] p-4 border-l dark:border-stone-700/50">
           <div class="flex flex-col gap-1">
             <Token
               :character="character"
@@ -67,7 +116,7 @@
               class="hidden md:flex m-auto"
             />
             <p
-              class="hidden md:block text-center text-stone-700 dark:text-stone-400 italic max-w-[300px] py-4"
+              class="hidden md:block text-center text-stone-700 dark:text-stone-400 italic m-auto max-w-[300px] py-4"
             >
               {{ role_data.role.ability }}
             </p>
@@ -83,70 +132,37 @@
             </div>
           </div>
           
-          <hr class="border-stone-400 dark:border-stone-700/50 w-full" />
+          <hr class="border-stone-200 dark:border-stone-700/50 w-full" />
 
           <div class="flex flex-col gap-1">
             <h3 class="font-sorts text-xl text-center">Activity</h3>
             <div class="m-auto h-[75px]">
               <Line :data="past12MonthsData" :options="past12MonthsOptions" />
             </div>
-            <div class="text-right">{{ role_data.count }} games played</div>
-            <div class="text-right">{{ averageGamesPlayed }} games per week</div>
+            <div class="chart-description mx-auto">{{ role_data.count }} games played</div>
+            <div class="chart-description mx-auto">{{ averageGamesPlayed }} games per week</div>
           </div>
           
-          <hr class="border-stone-400 dark:border-stone-700/50 w-full" />
+          <hr class="border-stone-200 dark:border-stone-700/50 w-full" />
 
           <div class="flex flex-col gap-1">
             <h3 class="font-sorts text-xl text-center">Win Rate</h3>
             <div class="m-auto w-1/2">
               <Pie :data="winRatioData" :options="winRatioOptions" />
             </div>
-            <div class="text-center">
+            <div class="chart-description mx-auto">
               Wins {{ role_data.win_loss.pct }}% of games
             </div>
-          </div>
-          
-          <hr class="border-stone-400 dark:border-stone-700/50 w-full" />
-
-          <div class="break-inside-avoid">
-            <h3 class="font-sorts text-xl text-center">Popular Scripts</h3>
-            <table class="w-full">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Total</th>
-                  <th>Wins</th>
-                  <th>Win %</th>
-                </tr>
-              </thead>
-              <tr v-for="script in topTenScripts">
-                <td>
-                  <Button
-                    component="a"
-                    :href="`/scripts/${script.script.replaceAll(
-                      ' ',
-                      '_'
-                    )}?version=${script.version}${
-                      script.custom_script_id
-                        ? `&id=${script.custom_script_id}`
-                        : ''
-                    }`"
-                    target="_blank"
-                    variant="link"
-                  >
-                    {{ script.script }}
-                  </Button>
-                </td>
-                <td class="text-right">{{ script.count }}</td>
-                <td class="text-right">{{ script.wins }}</td>
-                <td class="text-right">{{ script.pct }}%</td>
-              </tr>
-            </table>
           </div>
         </div>
       </div>
     </section>
-    <GameOverviewGrid :games="myGamesWithRole" />
+    <section class="border-t dark:border-stone-700/50">
+      <h2 class="font-sorts text-xl lg:text-2xl p-4 pt-6">
+        Your Games
+      </h2>
+      <GameOverviewGrid :games="myGamesWithRole" />
+    </section>
   </StandardTemplate>
 </template>
 
@@ -175,10 +191,6 @@ const myGamesWithRole = computed(() => {
     game.player_characters.some((character) => character.role_id === role_id)
   );
 });
-
-const topTenScripts = computed(() =>
-  [...role_data.popular_scripts].slice(0, 10)
-);
 
 const role_data = await $fetch(`/api/role/${role_id}`);
 
@@ -333,5 +345,27 @@ useHead({
   /* cover and fit the bg */
   background-size: cover;
   background-position: center;
+}
+
+.script-list {
+  .token {
+    block-size: 7rem;
+    inline-size: 7rem;
+  }
+
+  .script-chart {
+    inset: -0.5rem;
+  }
+}
+
+.chart-description {
+  @apply text-sm text-center text-balance text-stone-800 dark:text-stone-300 max-w-44;
+}
+
+.role-link::after {
+  content: "";
+  inset: 0;
+  position: absolute;
+  z-index: 99;
 }
 </style>
