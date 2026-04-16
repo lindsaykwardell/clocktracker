@@ -17,6 +17,7 @@ import {
   getMostCommonEndTriggerRoleSubtitle,
   isDemonKillEvent,
   pluralize,
+  wasWere,
 } from "./shared";
 import type { RoleStatCardDefinition } from "./shared";
 
@@ -41,6 +42,10 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Barber, you've caused ${count} player${pluralize(count)} to swap characters when you died.`
           : `As the Barber, this player has caused ${count} player${pluralize(count)} to swap characters when they died.`)
         : `As the Barber, cause players to swap characters when you die.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} player${pluralize(count)} ${wasWere(count)} swapped by a Barber dying.`
+        : `No Barber has caused players to swap characters yet.`,
   },
   {
     id: "butler_master_received",
@@ -65,6 +70,10 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `You've been chosen as the Butler's master ${count} time${pluralize(count)}.`
           : `This player has been chosen as the Butler's master ${count} time${pluralize(count)}.`)
         : `Be chosen as the Butler's master.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `A Butler has chosen a master at least ${count} time${pluralize(count)}.`
+        : `No Butler has chosen a master yet.`,
   },
   {
     id: "damsel_game_endings",
@@ -79,8 +88,7 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         (game) =>
           !game.ignore_for_stats &&
           !!roleId &&
-          game.end_trigger === GameEndTrigger.CHARACTER_ABILITY &&
-          game.end_trigger_type === GameEndTriggerType.EXTRA_WIN_CONDITION &&
+          game.end_trigger === GameEndTrigger.ADDITIONAL_WIN_CONDITION &&
           game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
           game.end_trigger_role_id === roleId
       ).length,
@@ -90,6 +98,10 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Damsel, you've caused ${count} game${pluralize(count)} to end.`
           : `As the Damsel, this player has caused ${count} game${pluralize(count)} to end.`)
         : `As the Damsel, cause a game to end.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} game${pluralize(count)} ${wasWere(count)} ended by a Damsel being guessed.`
+        : `No Damsel has ended a game by being guessed yet.`,
   },
   // Drunk [sao: 4]: Too complex.
   {
@@ -108,6 +120,10 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Golem, you've killed ${count} player${pluralize(count)}.`
           : `As the Golem, this player has killed ${count} player${pluralize(count)}.`)
         : `As the Golem, kill a player.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} player${pluralize(count)} ${wasWere(count)} killed by a Golem.`
+        : `No Golem has killed a player yet.`,
   },
   {
     id: "golem_evil_kills",
@@ -142,6 +158,10 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Golem, you've killed ${count} evil player${pluralize(count)}.`
           : `As the Golem, this player has killed ${count} evil player${pluralize(count)}.`)
         : `As the Golem, kill an evil player.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} evil player${pluralize(count)} ${wasWere(count)} killed by a Golem.`
+        : `No Golem has killed an evil player yet.`,
   },
   {
     id: "goon_alignment_changes",
@@ -160,6 +180,10 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Goon, you've changed alignment ${count} time${pluralize(count)}.`
           : `As the Goon, this player has changed alignment ${count} time${pluralize(count)}.`)
         : `As the Goon, change alignment.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `A Goon has changed alignment at least ${count} time${pluralize(count)}.`
+        : `No Goon has changed alignment yet.`,
   },
   {
     id: "goon_drunk_received",
@@ -183,6 +207,10 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `You've ended up drunk ${count} time${pluralize(count)} after picking the Goon.`
           : `This player has ended up drunk ${count} time${pluralize(count)} after picking the Goon.`)
         : `Become drunk after picking the Goon.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `A player has become drunk after picking the Goon at least ${count} time${pluralize(count)}.`
+        : `No player has become drunk after picking the Goon yet.`,
   },
   {
     id: "hatter_role_changes",
@@ -200,6 +228,10 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Hatter, you've caused ${count} evil character change${pluralize(count)} when you died.`
           : `As the Hatter, this player has caused ${count} evil character change${pluralize(count)} when they died.`)
         : `As the Hatter, cause evil players to change characters when you die.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} evil character change${pluralize(count)} ${wasWere(count)} caused by a Hatter dying.`
+        : `No Hatter has caused evil players to change characters yet.`,
   },
   // Heretic: Nothing to track really.
   // Hermit: Too complex?
@@ -217,17 +249,20 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         (game) =>
           !game.ignore_for_stats &&
           !!roleId &&
-          game.end_trigger === GameEndTrigger.CHARACTER_ABILITY &&
-          game.end_trigger_type === GameEndTriggerType.EXTRA_WIN_CONDITION &&
+          game.end_trigger === GameEndTrigger.ADDITIONAL_WIN_CONDITION &&
           game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
           game.end_trigger_role_id === roleId
       ).length,
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Klutz, you've ended ${count} game${pluralize(count)} to end by making the wrong choice.`
+          ? `As the Klutz, you've caused ${count} game${pluralize(count)} to end by making the wrong choice.`
           : `As the Klutz, this player has caused ${count} game${pluralize(count)} to end by making the wrong choice.`)
         : `As the Klutz, cause a game to end by making the wrong choice.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} game${pluralize(count)} ${wasWere(count)} ended by a Klutz making the wrong choice.`
+        : `No Klutz has ended a game by making the wrong choice yet.`,
   },
   {
     id: "lunatic_followed_picks",
@@ -267,6 +302,10 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Lunatic, you've had the Demon follow and kill ${count} of your choice${pluralize(count)}.`
           : `As the Lunatic, this player has had the Demon follow and kill ${count} of their choice${pluralize(count)}.`)
         : `As the Lunatic, have the Demon follow and kill a player you chose.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} Lunatic choice${pluralize(count)} ${wasWere(count)} followed and killed by the Demon.`
+        : `No Demon has followed and killed a Lunatic choice yet.`,
   },
   // Lunatic not followed would be cool, but too hard/too legacy to track?
   {
@@ -286,6 +325,10 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Moonchild, you've killed ${count} player${pluralize(count)}.`
           : `As the Moonchild, this player has killed ${count} player${pluralize(count)}.`)
         : `As the Moonchild, kill a player.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} player${pluralize(count)} ${wasWere(count)} killed by a Moonchild.`
+        : `No Moonchild has killed a player yet.`,
   },
   {
     id: "moonchild_spy_kills",
@@ -320,6 +363,10 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Moonchild, you've killed the Spy ${count} time${pluralize(count)}.`
           : `As the Moonchild, this player has killed the Spy ${count} time${pluralize(count)}.`)
         : `As the Moonchild, kill the Spy.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `A Spy has been killed by a Moonchild due to misregistering as Good at least ${count} time${pluralize(count)}.`
+        : `No Spy has been killed by a Moonchild due to misregistering as Good yet.`,
   },
   {
     id: "mutant_executions",
@@ -338,6 +385,10 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Mutant, you've been executed ${count} time${pluralize(count)} for breaking madness.`
           : `As the Mutant, this player has been executed ${count} time${pluralize(count)} for breaking madness.`)
         : `As the Mutant, be executed for breaking madness.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `A Mutant has been executed for breaking madness at least ${count} time${pluralize(count)}.`
+        : `No Mutant has been executed for breaking madness yet.`,
   },
   {
     id: "mutant_execution_game_endings",
@@ -365,6 +416,10 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Mutant, you've caused ${count} game${pluralize(count)} to end by being executed for breaking madness, leaving only two players alive.`
           : `As the Mutant, this player has caused ${count} game${pluralize(count)} to end by being executed for breaking madness, leaving only two players alive.`)
         : `As the Mutant, cause a game to end by being executed for breaking madness, leaving only two players alive.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} game${pluralize(count)} ${wasWere(count)} ended by a Mutant being executed for breaking madness, leaving only two players alive.`
+        : `No Mutant has ended a game by being executed for breaking madness yet.`,
   },
   {
     id: "ogre_alignment_changes",
@@ -382,6 +437,10 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Ogre, you've changed alignment ${count} time${pluralize(count)}.`
           : `As the Ogre, this player has changed alignment ${count} time${pluralize(count)}.`)
         : `As the Ogre, change alignment.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `An Ogre has changed alignment at least ${count} time${pluralize(count)}.`
+        : `No Ogre has changed alignment yet.`,
   },
   {
     id: "plague_doctor_storyteller_abilities",
@@ -407,6 +466,10 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Plague Doctor, you've given the Storyteller an ability ${count} time${pluralize(count)}.`
           : `As the Plague Doctor, this player has given the Storyteller an ability ${count} time${pluralize(count)}.`)
         : `As the Plague Doctor, give the Storyteller an ability.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `A Plague Doctor has given the Storyteller an ability at least ${count} time${pluralize(count)}.`
+        : `No Plague Doctor has given the Storyteller an ability yet.`,
   },
   {
     id: "politician_alignment_changes",
@@ -424,6 +487,10 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Politician, you've changed alignment at the end of ${count} game${pluralize(count)}.`
           : `As the Politician, this player has changed alignment at the end of ${count} game${pluralize(count)}.`)
         : `As the Politician, change alignment at the end of a game.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `A Politician has changed alignment at the end of at least ${count} game${pluralize(count)}.`
+        : `No Politician has changed alignment at the end of a game yet.`,
   },
   {
     id: "puzzlemaster_guesses_used",
@@ -450,6 +517,10 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Puzzlemaster, you've used your guess ${count} time${pluralize(count)}.`
           : `As the Puzzlemaster, this player has used their guess ${count} time${pluralize(count)}.`)
         : `As the Puzzlemaster, use your guess.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `A Puzzlemaster has used their guess at least ${count} time${pluralize(count)}.`
+        : `No Puzzlemaster has used their guess yet.`,
   },
   {
     id: "puzzlemaster_correct_guesses",
@@ -486,6 +557,10 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Puzzlemaster, you've guessed correctly and seen the Demon ${count} time${pluralize(count)}.`
           : `As the Puzzlemaster, this player has guessed correctly and seen the Demon ${count} time${pluralize(count)}.`)
         : `As the Puzzlemaster, guess correctly and see the Demon.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `A Puzzlemaster has guessed correctly and seen the Demon at least ${count} time${pluralize(count)}.`
+        : `No Puzzlemaster has guessed correctly and seen the Demon yet.`,
   },
   {
     id: "puzzlemaster_drunk_received",
@@ -509,6 +584,10 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `You've been made drunk by the Puzzlemaster ${count} time${pluralize(count)}.`
           : `This player has been made drunk by the Puzzlemaster ${count} time${pluralize(count)}.`)
         : `Be made drunk by the Puzzlemaster.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `A player has been made drunk by a Puzzlemaster at least ${count} time${pluralize(count)}.`
+        : `No player has been made drunk by a Puzzlemaster yet.`,
   },
   {
     id: "recluse_fortune_teller_received",
@@ -519,40 +598,37 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     sao: 3,
     source: "grimoire_event",
     label: "Unlucky Reading",
-    getCount: ({ games, username }) =>
-      !username
-        ? 0
-        : countMatchingEvents(
-            games,
-            (game, event) => {
-              if (
-                event.event_type !== GrimoireEventType.OTHER ||
-                event.by_role_id !== "fortune_teller" ||
-                event.status_source !== "Yes"
-              ) {
-                return false;
-              }
+    getCount: ({ games }) =>
+      countMatchingEvents(
+        games,
+        (game, event) => {
+          if (
+            event.event_type !== GrimoireEventType.OTHER ||
+            event.by_role_id !== "fortune_teller" ||
+            event.status_source !== "Yes"
+          ) {
+            return false;
+          }
 
-              const currentToken = getEventCurrentToken(game, event);
-              const previousToken = getEventPreviousToken(game, event);
+          const currentToken = getEventCurrentToken(game, event);
+          const previousToken = getEventPreviousToken(game, event);
 
-              const isThisPlayerTarget =
-                currentToken?.player?.username === username ||
-                previousToken?.player?.username === username;
-              if (!isThisPlayerTarget) return false;
-
-              return (
-                currentToken?.role_id === "recluse" ||
-                previousToken?.role_id === "recluse"
-              );
-            }
-          ),
+          return (
+            currentToken?.role_id === "recluse" ||
+            previousToken?.role_id === "recluse"
+          );
+        }
+      ),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
           ? `As the Recluse, you've been seen as a Demon by the Fortune Teller ${count} time${pluralize(count)}.`
           : `As the Recluse, this player has been seen as a Demon by the Fortune Teller ${count} time${pluralize(count)}.`)
         : `As the Recluse, be seen as a Demon by the Fortune Teller.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `A Recluse has been seen as a Demon by a Fortune Teller at least ${count} time${pluralize(count)}.`
+        : `No Recluse has been seen as a Demon by a Fortune Teller yet.`,
   },
   {
     id: "recluse_investigator_received",
@@ -590,6 +666,10 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Recluse, you've been seen as a Minion by the Investigator ${count} time${pluralize(count)}.`
           : `As the Recluse, this player has been seen as a Minion by the Investigator ${count} time${pluralize(count)}.`)
         : `As the Recluse, be seen as a Minion by the Investigator.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `A Recluse has been seen as a Minion by an Investigator at least ${count} time${pluralize(count)}.`
+        : `No Recluse has been seen as a Minion by an Investigator yet.`,
   },
   {
     id: "recluse_imp_starpasses_received",
@@ -627,6 +707,10 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Recluse, you've become the Imp ${count} time${pluralize(count)} after the Imp targeted themselves with their ability.`
           : `As the Recluse, this player has become the Imp ${count} time${pluralize(count)} after the Imp targeted themselves with their ability.`)
         : `As the Recluse, become the Imp after the Imp targets themselves with their ability.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `A Recluse has become the Imp after the Imp targeted themselves at least ${count} time${pluralize(count)}.`
+        : `No Recluse has become the Imp after the Imp targeted themselves yet.`,
   },
   {
     id: "saint_game_endings",
@@ -642,8 +726,7 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         (game) =>
           !game.ignore_for_stats &&
           !!roleId &&
-          game.end_trigger === GameEndTrigger.CHARACTER_ABILITY &&
-          game.end_trigger_type === GameEndTriggerType.EXTRA_WIN_CONDITION &&
+          game.end_trigger === GameEndTrigger.ADDITIONAL_WIN_CONDITION &&
           game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
           game.end_trigger_role_id === roleId
       ).length,
@@ -651,8 +734,12 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
       count > 0
         ? (isMe
           ? `As the Saint, you've caused ${count} game${pluralize(count)} to end by being executed.`
-          : `As the Saint, this player has caused ${count} game${pluralize(count)} by being executed.`)
+          : `As the Saint, this player has caused ${count} game${pluralize(count)} to end by being executed.`)
         : `As the Saint, cause a game to end by being executed.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} game${pluralize(count)} ${wasWere(count)} ended by a Saint being executed.`
+        : `No Saint has ended a game by being executed yet.`,
   },
   {
     id: "saint_game_endings_caused",
@@ -667,8 +754,7 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getCount: ({ games }) =>
       countMatchingEvents(games, (game, event) => {
         const endedBySaintAbility =
-          game.end_trigger === GameEndTrigger.CHARACTER_ABILITY &&
-          game.end_trigger_type === GameEndTriggerType.EXTRA_WIN_CONDITION &&
+          game.end_trigger === GameEndTrigger.ADDITIONAL_WIN_CONDITION &&
           game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
           game.end_trigger_role_id === "saint";
         if (!endedBySaintAbility || event.event_type !== GrimoireEventType.EXECUTION) {
@@ -708,6 +794,10 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Sweetheart, you've made ${count} player${pluralize(count)} drunk when you died.`
           : `As the Sweetheart, this player has made ${count} player${pluralize(count)} drunk when they died.`)
         : `As the Sweetheart, make a player drunk when you die.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} player${pluralize(count)} ${wasWere(count)} made drunk by a Sweetheart dying.`
+        : `No Sweetheart has made a player drunk by dying yet.`,
   },
   {
     id: "sweetheart_drunk_received",
@@ -749,6 +839,10 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `As the Tinker, you've died ${count} time${pluralize(count)}.`
           : `As the Tinker, this player has died ${count} time${pluralize(count)}.`)
         : `As the Tinker, die.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `A Tinker has died at least ${count} time${pluralize(count)}.`
+        : `No Tinker has died yet.`,
   },
   // Zealot: Nothing relevant. Only option: None?
 ];

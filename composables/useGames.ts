@@ -23,7 +23,7 @@ export enum GameEndTrigger {
   NOT_RECORDED = "NOT_RECORDED",
   TWO_PLAYERS_LEFT_ALIVE = "TWO_PLAYERS_LEFT_ALIVE",
   NO_LIVING_DEMON = "NO_LIVING_DEMON",
-  CHARACTER_ABILITY = "CHARACTER_ABILITY",
+  ADDITIONAL_WIN_CONDITION = "ADDITIONAL_WIN_CONDITION",
   GAME_ENDED_EARLY = "GAME_ENDED_EARLY",
   OTHER = "OTHER",
 }
@@ -85,7 +85,17 @@ export type FullFabled = Fabled & {
   };
 };
 
-export type GameRecord = Omit<Game, "win_v2"> & {
+export type GameRecord = Omit<
+  Game,
+  | "win_v2"
+  | "end_trigger"
+  | "end_trigger_type"
+  | "end_trigger_cause"
+  | "end_trigger_role_id"
+  | "end_trigger_subtype"
+  | "end_trigger_note"
+  | "end_trigger_participant_id"
+> & {
   ls_game?: {
     campaign?: {
       title: string;
@@ -133,6 +143,7 @@ export type GameRecord = Omit<Game, "win_v2"> & {
   grimoire: (Grimoire & {
     tokens: (Token & {
       role?: {
+        id: string;
         token_url: string;
         type: string;
         initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";

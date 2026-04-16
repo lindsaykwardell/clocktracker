@@ -181,7 +181,7 @@
                           Ability
                         </option>
                         <template v-else>
-                          <option :value="null">Select cause</option>
+                          <option :value="null">Not recorded</option>
                           <option :value="GrimoireEventCause.ABILITY">Ability</option>
                           <option
                             v-if="event.event_type === GrimoireEventType.EXECUTION"

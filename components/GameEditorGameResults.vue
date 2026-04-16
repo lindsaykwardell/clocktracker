@@ -60,8 +60,8 @@
           <option :value="GameEndTrigger.NO_LIVING_DEMON">
             No living demon remained (Execution, Slayer, Pit-Hag, etc.)
           </option>
-          <option :value="GameEndTrigger.CHARACTER_ABILITY">
-            A character ability ended the game (Saint, Alsaahir, etc.)
+          <option :value="GameEndTrigger.ADDITIONAL_WIN_CONDITION">
+            Additional win condition (Saint, Goblin, etc.)
           </option>
           <option :value="GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE">
             Two players left alive (Execution, Imp, Mutant, etc.)
@@ -94,17 +94,14 @@
               </option>
             </Input>
           </label>
-          <label
-            v-if="shouldShowEndTriggerCause && shouldShowEndTriggerFieldsAfterType"
-            class="block"
-          >
+          <label v-if="shouldShowEndTriggerCause" class="block">
             <span class="block text-xs mb-[0.125rem]">Cause</span>
             <Input
               mode="select"
               v-model="game.end_trigger_cause"
               :disabled="hasSingleEndTriggerCauseOption"
             >
-              <option :value="null">Choose cause</option>
+              <option :value="null">{{ endTriggerCausePlaceholder }}</option>
               <option
                 v-for="option in endTriggerCauseOptions"
                 :key="option.value"
@@ -115,7 +112,7 @@
             </Input>
           </label>
           <label
-            v-if="shouldShowEndTriggerFieldsAfterType"
+            v-if="shouldShowEndTriggerCharacter"
             class="block col-span-2"
           >
             <span class="block text-xs mb-[0.125rem]">Select triggering character</span>
@@ -165,9 +162,6 @@
               Choose the trigger type and cause first.
             </p>
           </label>
-          <span v-else-if="shouldShowEndTriggerFieldsAfterType" class="block">
-            Select triggering character
-          </span>
           <label
             v-if="shouldShowEndTriggerSubtype"
             class="block col-span-2"
@@ -186,7 +180,7 @@
           </label>
         </div>
         <div
-          v-if="shouldShowEndTriggerFieldsAfterType"
+          v-if="shouldShowEndTriggerCharacter"
           class="flex gap-3 flex-wrap items-center"
         >
           <div class="relative flex justify-center items-center aspect-square">
@@ -255,7 +249,10 @@ import {
   GameEndTriggerType,
   WinStatus_V2,
 } from "~/composables/useGames";
-import { END_TRIGGER_ROLE_INCLUDES } from "~/composables/gameEndTriggerConfig";
+import {
+  ADDITIONAL_WIN_CONDITION_ROLE_INCLUDES,
+  END_TRIGGER_ROLE_INCLUDES,
+} from "~/composables/gameEndTriggerConfig";
 import {
   getEndTriggerSubtypeOptions,
   parseEndTriggerSubtype,
@@ -367,17 +364,19 @@ const endTriggerSeatTokens = computed(() => {
 
 const shouldShowEndTriggerCharacterSection = computed(
   () =>
-    props.game.end_trigger === GameEndTrigger.CHARACTER_ABILITY ||
+    props.game.end_trigger === GameEndTrigger.ADDITIONAL_WIN_CONDITION ||
     props.game.end_trigger === GameEndTrigger.NO_LIVING_DEMON ||
     props.game.end_trigger === GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE
 );
 
 const shouldShowEndTriggerType = computed(
-  () => shouldShowEndTriggerCharacterSection.value
+  () =>
+    shouldShowEndTriggerCharacterSection.value &&
+    props.game.end_trigger !== GameEndTrigger.ADDITIONAL_WIN_CONDITION
 );
 
 const shouldShowEndTriggerCause = computed(() => {
-  if (props.game.end_trigger === GameEndTrigger.CHARACTER_ABILITY) return true;
+  if (props.game.end_trigger === GameEndTrigger.ADDITIONAL_WIN_CONDITION) return true;
   if (!shouldShowEndTriggerType.value) return false;
   return props.game.end_trigger_type !== null;
 });
@@ -392,14 +391,18 @@ const shouldShowEndTriggerCharacter = computed(() => {
 
 const shouldShowEndTriggerFieldsAfterType = computed(() => {
   if (!shouldShowEndTriggerCharacterSection.value) return false;
+  if (props.game.end_trigger === GameEndTrigger.ADDITIONAL_WIN_CONDITION) {
+    return props.game.end_trigger_cause !== null;
+  }
   if (!shouldShowEndTriggerType.value) return true;
   return props.game.end_trigger_type !== null;
 });
 
+const endTriggerCausePlaceholder = "Not recorded";
+
 const endTriggerSubtypeOptions = computed(() => {
   if (
-    props.game.end_trigger !== GameEndTrigger.CHARACTER_ABILITY ||
-    props.game.end_trigger_type !== GameEndTriggerType.EXTRA_WIN_CONDITION ||
+    props.game.end_trigger !== GameEndTrigger.ADDITIONAL_WIN_CONDITION ||
     props.game.end_trigger_cause !== GameEndTriggerCause.ABILITY
   ) {
     return [];
@@ -435,14 +438,6 @@ const endTriggerSubtypeSelection = computed<string | null>({
 
 const endTriggerTypeOptions = computed(() => {
   if (!shouldShowEndTriggerType.value) return [];
-  if (props.game.end_trigger === GameEndTrigger.CHARACTER_ABILITY) {
-    return [
-      {
-        value: GameEndTriggerType.EXTRA_WIN_CONDITION,
-        label: "Extra win condition",
-      },
-    ];
-  }
   return [
     { value: GameEndTriggerType.DEATH, label: "Death" },
     { value: GameEndTriggerType.EXECUTION, label: "Execution" },
@@ -454,11 +449,11 @@ const endTriggerTypeOptions = computed(() => {
 const hasSingleEndTriggerTypeOption = computed(
   () =>
     endTriggerTypeOptions.value.length === 1 &&
-    props.game.end_trigger !== GameEndTrigger.CHARACTER_ABILITY
+    props.game.end_trigger !== GameEndTrigger.ADDITIONAL_WIN_CONDITION
 );
 
 const endTriggerCauseOptions = computed(() => {
-  if (props.game.end_trigger === GameEndTrigger.CHARACTER_ABILITY) {
+  if (props.game.end_trigger === GameEndTrigger.ADDITIONAL_WIN_CONDITION) {
     return [{ value: GameEndTriggerCause.ABILITY, label: "Ability" }];
   }
 
@@ -485,10 +480,19 @@ const endTriggerCauseOptions = computed(() => {
 });
 
 const hasSingleEndTriggerCauseOption = computed(
-  () => endTriggerCauseOptions.value.length === 1
+  () =>
+    endTriggerCauseOptions.value.length === 1 &&
+    props.game.end_trigger !== GameEndTrigger.ADDITIONAL_WIN_CONDITION
 );
 
 const endTriggerRoleConfig = computed(() => {
+  if (
+    props.game.end_trigger === GameEndTrigger.ADDITIONAL_WIN_CONDITION &&
+    props.game.end_trigger_cause === GameEndTriggerCause.ABILITY
+  ) {
+    return ADDITIONAL_WIN_CONDITION_ROLE_INCLUDES;
+  }
+
   if (
     !props.game.end_trigger ||
     !props.game.end_trigger_type ||
@@ -693,19 +697,14 @@ watch(
 
     if (
       value !== GameEndTrigger.NO_LIVING_DEMON &&
-      value !== GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE &&
-      value !== GameEndTrigger.CHARACTER_ABILITY
+      value !== GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE
     ) {
       props.game.end_trigger_type = null;
     }
 
-    if (value === GameEndTrigger.CHARACTER_ABILITY) {
-      if (props.game.end_trigger_type === GameEndTriggerType.EXTRA_WIN_CONDITION) {
-        props.game.end_trigger_cause = GameEndTriggerCause.ABILITY;
-      } else {
-        props.game.end_trigger_type = null;
-        props.game.end_trigger_cause = null;
-      }
+    if (value === GameEndTrigger.ADDITIONAL_WIN_CONDITION) {
+      props.game.end_trigger_type = null;
+      props.game.end_trigger_cause = null;
     } else if (
       props.game.end_trigger_type === GameEndTriggerType.EXTRA_WIN_CONDITION
     ) {
@@ -746,7 +745,7 @@ watch(
 watch(
   () => endTriggerTypeOptions.value,
   (options) => {
-    if (props.game.end_trigger === GameEndTrigger.CHARACTER_ABILITY) return;
+    if (props.game.end_trigger === GameEndTrigger.ADDITIONAL_WIN_CONDITION) return;
     if (options.length !== 1) return;
     const [onlyOption] = options;
     if (props.game.end_trigger_type === onlyOption.value) return;
@@ -758,6 +757,7 @@ watch(
 watch(
   () => endTriggerCauseOptions.value,
   (options) => {
+    if (props.game.end_trigger === GameEndTrigger.ADDITIONAL_WIN_CONDITION) return;
     if (options.length !== 1) return;
     const [onlyOption] = options;
     if (props.game.end_trigger_cause === onlyOption.value) return;

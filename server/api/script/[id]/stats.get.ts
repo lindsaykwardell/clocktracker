@@ -43,6 +43,111 @@ export default defineEventHandler(async (handler) => {
   const total = Number(overallResult[0]?.total ?? 0);
   const goodWins = Number(overallResult[0]?.good_wins ?? 0);
 
+  const endTriggerRecordedResult = await prisma.$queryRaw<
+    { total: bigint }[]
+  >(Prisma.sql`
+    SELECT
+      COUNT(*)::bigint AS total
+    FROM "Game" g
+    WHERE g."deleted" = false
+      AND g."parent_game_id" IS NULL
+      AND g."ignore_for_stats" = false
+      AND ${scriptFilter}
+      AND g."end_trigger"::text <> 'NOT_RECORDED'
+  `);
+
+  const endTriggerRecordedCount = Number(
+    endTriggerRecordedResult[0]?.total ?? 0
+  );
+
+  const endTriggerRows = await prisma.$queryRaw<
+    { end_trigger: string; total: bigint }[]
+  >(Prisma.sql`
+    SELECT
+      g."end_trigger"::text AS end_trigger,
+      COUNT(*)::bigint AS total
+    FROM "Game" g
+    WHERE g."deleted" = false
+      AND g."parent_game_id" IS NULL
+      AND g."ignore_for_stats" = false
+      AND ${scriptFilter}
+      AND g."end_trigger"::text <> 'NOT_RECORDED'
+    GROUP BY g."end_trigger"::text
+  `);
+
+  const end_trigger_counts = Object.fromEntries(
+    endTriggerRows.map((row) => [row.end_trigger, Number(row.total)])
+  );
+
+  const endTriggerDetailRows = await prisma.$queryRaw<
+    { end_trigger: string; detail: string; total: bigint }[]
+  >(Prisma.sql`
+    SELECT
+      g."end_trigger"::text AS end_trigger,
+      CASE
+        WHEN g."end_trigger_cause"::text = 'ABILITY'
+          AND g."end_trigger_role_id" IS NOT NULL
+          THEN 'ABILITY:' || g."end_trigger_role_id"
+        WHEN g."end_trigger_cause"::text = 'ABILITY' THEN 'Ability'
+        WHEN g."end_trigger_cause"::text = 'NOMINATION'
+          AND g."end_trigger_type"::text = 'EXECUTION'
+          AND g."end_trigger"::text = 'NO_LIVING_DEMON'
+          THEN 'Demon Executed'
+        WHEN g."end_trigger_cause"::text = 'NOMINATION'
+          AND g."end_trigger_type"::text = 'EXECUTION'
+          AND g."end_trigger"::text = 'TWO_PLAYERS_LEFT_ALIVE'
+          THEN 'Demon Alive'
+        WHEN g."end_trigger_cause"::text = 'NOMINATION'
+          AND g."end_trigger_type"::text = 'EXECUTION'
+          THEN 'NOMINATION_EXECUTION'
+        WHEN g."end_trigger_cause"::text = 'NOMINATION' THEN 'NOMINATION'
+        WHEN g."end_trigger_cause"::text = 'FAILED_ABILITY' THEN 'FAILED_ABILITY'
+        WHEN g."end_trigger_type" IS NOT NULL THEN 'TYPE_ONLY'
+        ELSE 'UNKNOWN'
+      END AS detail,
+      COUNT(*)::bigint AS total
+    FROM "Game" g
+    WHERE g."deleted" = false
+      AND g."parent_game_id" IS NULL
+      AND g."ignore_for_stats" = false
+      AND ${scriptFilter}
+      AND g."end_trigger"::text <> 'NOT_RECORDED'
+    GROUP BY 1, 2
+  `);
+
+  const end_trigger_detail_counts: Record<string, Record<string, number>> = {};
+  for (const row of endTriggerDetailRows) {
+    end_trigger_detail_counts[row.end_trigger] ??= {};
+    end_trigger_detail_counts[row.end_trigger][row.detail] = Number(row.total);
+  }
+
+  const endTriggerRoleIds = [
+    ...new Set(
+      endTriggerDetailRows
+        .map((row) => row.detail)
+        .filter((detail) => detail.startsWith("ABILITY:"))
+        .map((detail) => detail.replace("ABILITY:", ""))
+    ),
+  ];
+
+  const end_trigger_roles = endTriggerRoleIds.length
+    ? Object.fromEntries(
+        (
+          await prisma.role.findMany({
+            where: {
+              id: {
+                in: endTriggerRoleIds,
+              },
+            },
+            select: {
+              id: true,
+              name: true,
+            },
+          })
+        ).map((role) => [role.id, role])
+      )
+    : {};
+
   // Games by month (last 12 months)
   const monthRows = await prisma.$queryRaw<
     { month_name: string; count: bigint }[]
@@ -92,6 +197,7 @@ export default defineEventHandler(async (handler) => {
     string,
     { total: number; win: number; loss: number }
   > = {};
+  const role_ability_endings: Record<string, number> = {};
 
   if (roleIds.length > 0) {
     const roleIdList = Prisma.join(roleIds);
@@ -170,12 +276,39 @@ export default defineEventHandler(async (handler) => {
       const w = Number(row.wins);
       role_win_rates[row.role_id] = { total: t, win: w, loss: t - w };
     }
+
+    const roleAbilityEndingRows = await prisma.$queryRaw<
+      {
+        role_id: string;
+        total: bigint;
+      }[]
+    >(Prisma.sql`
+      SELECT
+        g."end_trigger_role_id" AS role_id,
+        COUNT(*)::bigint AS total
+      FROM "Game" g
+      WHERE g."deleted" = false
+        AND g."parent_game_id" IS NULL
+        AND g."ignore_for_stats" = false
+        AND ${scriptFilter}
+        AND g."end_trigger"::text <> 'NOT_RECORDED'
+        AND g."end_trigger_cause"::text = 'ABILITY'
+        AND g."end_trigger_role_id" IN (${roleIdList})
+      GROUP BY g."end_trigger_role_id"
+    `);
+
+    for (const row of roleAbilityEndingRows) {
+      role_ability_endings[row.role_id] = Number(row.total);
+    }
   }
 
   // Fill in roles with zero games
   for (const role of script.roles) {
     if (!role_win_rates[role.id]) {
       role_win_rates[role.id] = { total: 0, win: 0, loss: 0 };
+    }
+    if (!role_ability_endings[role.id]) {
+      role_ability_endings[role.id] = 0;
     }
   }
 
@@ -187,7 +320,12 @@ export default defineEventHandler(async (handler) => {
       loss: total - goodWins,
       pct: total > 0 ? +((goodWins / total) * 100).toFixed(2) : 0,
     },
+    end_trigger_recorded_count: endTriggerRecordedCount,
+    end_trigger_counts,
+    end_trigger_detail_counts,
+    end_trigger_roles,
     games_by_month,
     role_win_rates,
+    role_ability_endings,
   };
 });

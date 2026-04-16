@@ -6,7 +6,7 @@
       'items-center p-3 pr-8' : variant == 'horizontal',
       'border dark:border-stone-700/50' : !isFavorite,
       'border border-primary' : isFavorite,
-      'is-hidden-card': isConfiguredAsHidden,
+      'is-hidden-card': isConfiguredAsHidden && showHiddenStyling,
     }"
     >
     <Button
@@ -37,6 +37,7 @@
     </template>
 
     <div 
+      v-if="showRoleImage"
       class="flex flex-col items-center gap-3"
       :class="variant == 'horizontal' ? 'card-token' : ''"
     >
@@ -114,11 +115,15 @@ const props = withDefaults(
     showFavoriteControl?: boolean;
     isFavorite?: boolean;
     showZeroOverlay?: boolean;
+    showHiddenStyling?: boolean;
+    showRoleImage?: boolean;
     tokenSize?: "md" | "lg";
     variant?: "vertical" | "horizontal";
 }>(),
   { 
     variant:"vertical",
+    showHiddenStyling: true,
+    showRoleImage: true,
   }
 );
 

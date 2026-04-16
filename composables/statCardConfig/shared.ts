@@ -2,6 +2,7 @@ import type { GameRecord } from "~/composables/useGames";
 import { GrimoireEventType } from "~/composables/useGames";
 
 export type RoleStatCardCategory = "role" | "general";
+export type RoleStatCardVisibility = "personal" | "global" | "both";
 
 export type RoleStatCardDisplayRole = {
   id: string;
@@ -26,6 +27,7 @@ export type RoleStatCardDefinition = {
   script?: string | null;
   sao?: number;
   hidden?: boolean;
+  visibility?: RoleStatCardVisibility;
   scope?: "as_role" | "affected_player" | "triggering_player";
   source: string;
   label: string;
@@ -36,6 +38,11 @@ export type RoleStatCardDefinition = {
     roleName?: string | null;
     isMe: boolean;
     username?: string;
+  }) => string;
+  getGlobalSentence?: (context: Required<Pick<RoleStatCardContext, "games">> & {
+    count: number;
+    roleId?: string | null;
+    roleName?: string | null;
   }) => string;
   getSubtitle?: (context: RoleStatCardContext & { count: number }) => string | null;
   getDisplayRole?: (context: RoleStatCardContext & { count: number }) => RoleStatCardDisplayRole | null;
@@ -226,6 +233,10 @@ export function isDemonKillEvent(
 
 export function pluralize(count: number) {
   return count === 1 ? "" : "s";
+}
+
+export function wasWere(count: number) {
+  return count === 1 ? "was" : "were";
 }
 
 export function subject(isMe: boolean) {
