@@ -4,6 +4,7 @@ import {
   GameEndTriggerCause,
   GameEndTriggerType,
   GrimoireEventType,
+  WinStatus_V2,
 } from "~/composables/useGames";
 import { TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS } from "~/composables/statCardConfig/townsfolk";
 import { OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS } from "~/composables/statCardConfig/outsiders";
@@ -94,6 +95,58 @@ export const ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   ...FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS,
   ...GENERAL_ROLE_STAT_CARD_DEFINITIONS,
 ];
+
+function didEndTriggerParticipantWin(game: GameRecord) {
+  if (game.win_v2 === WinStatus_V2.NOT_RECORDED) return false;
+
+  const alignment =
+    game.end_trigger_participant_alignment ??
+    game.player_characters.at(-1)?.alignment ??
+    null;
+
+  if (alignment === "GOOD") {
+    return game.win_v2 === WinStatus_V2.GOOD_WINS;
+  }
+  if (alignment === "EVIL") {
+    return game.win_v2 === WinStatus_V2.EVIL_WINS;
+  }
+  return false;
+}
+
+function getDefaultEndTriggerWinsSubtitle(params: {
+  definition: RoleStatCardDefinition;
+  games: GameRecord[];
+  roleId?: string | null;
+  roleName?: string | null;
+  isMe: boolean;
+  username?: string;
+  count: number;
+}) {
+  const { definition, games, roleId, roleName, isMe, username, count } = params;
+  if (definition.source !== "end_trigger" || count <= 0) return null;
+
+  const recordedGames = games.filter(
+    (game) => game.win_v2 !== WinStatus_V2.NOT_RECORDED
+  );
+  const recorded = definition.getCount({
+    games: recordedGames,
+    roleId,
+    roleName,
+    isMe,
+    username,
+  });
+
+  const winningAlignmentGames = games.filter(didEndTriggerParticipantWin);
+  const wins = definition.getCount({
+    games: winningAlignmentGames,
+    roleId,
+    roleName,
+    isMe,
+    username,
+  });
+
+  return `${isMe ? "You've" : "This player has"} won ${wins} of ${recorded} recorded results.`;
+}
 
 function includesPersonalVisibility(definition: RoleStatCardDefinition) {
   return definition.visibility !== "global";
@@ -195,6 +248,24 @@ export function buildRoleStatCardResult(
     username,
   });
   const isHiddenLocked = !!definition.hidden && count === 0;
+  const computedSubtitle =
+    definition.getSubtitle?.({
+      games: scopedGames,
+      count,
+      roleId: card.role_id,
+      roleName,
+      isMe,
+      username,
+    }) ??
+    getDefaultEndTriggerWinsSubtitle({
+      definition,
+      games: scopedGames,
+      count,
+      roleId: card.role_id,
+      roleName,
+      isMe,
+      username,
+    });
 
   return {
     count,
@@ -213,14 +284,7 @@ export function buildRoleStatCardResult(
     subtitle:
       isHiddenLocked
         ? null
-        : definition.getSubtitle?.({
-        games: scopedGames,
-        count,
-        roleId: card.role_id,
-        roleName,
-        isMe,
-        username,
-      }) ?? null,
+        : computedSubtitle ?? null,
     displayRole:
       isHiddenLocked
         ? null
@@ -262,6 +326,24 @@ export function buildRoleStatCardPreview(
     username,
   });
   const isHiddenLocked = !!definition.hidden && count === 0;
+  const computedSubtitle =
+    definition.getSubtitle?.({
+      games: scopedGames,
+      count,
+      roleId: role?.id ?? null,
+      roleName: role?.name ?? null,
+      isMe,
+      username,
+    }) ??
+    getDefaultEndTriggerWinsSubtitle({
+      definition,
+      games: scopedGames,
+      count,
+      roleId: role?.id ?? null,
+      roleName: role?.name ?? null,
+      isMe,
+      username,
+    });
 
   return {
     id: 0,
@@ -287,14 +369,7 @@ export function buildRoleStatCardPreview(
       subtitle:
         isHiddenLocked
           ? null
-          : definition.getSubtitle?.({
-          games: scopedGames,
-          count,
-          roleId: role?.id ?? null,
-          roleName: role?.name ?? null,
-          isMe,
-          username,
-        }) ?? null,
+          : computedSubtitle ?? null,
       displayRole:
         isHiddenLocked
           ? null

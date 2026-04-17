@@ -110,6 +110,12 @@ export default defineEventHandler(async (handler) => {
           body.end_trigger_participant_id === undefined
             ? payload.end_trigger_participant_id
             : body.end_trigger_participant_id,
+        end_trigger_participant_alignment:
+          body.end_trigger_participant_id === undefined
+            ? ((payload as any).end_trigger_participant_alignment ?? null)
+            : body.end_trigger_participant_id === payload.end_trigger_participant_id
+              ? ((payload as any).end_trigger_participant_alignment ?? null)
+              : null,
         tags: [...payload.tags, ...body.tags],
         privacy: body.privacy || payload.privacy,
       },
@@ -197,6 +203,8 @@ export default defineEventHandler(async (handler) => {
       end_trigger_subtype: game.end_trigger_subtype,
       end_trigger_note: game.end_trigger_note,
       end_trigger_participant_id: game.end_trigger_participant_id,
+      end_trigger_participant_alignment:
+        (game as any).end_trigger_participant_alignment ?? null,
       tags: game.tags,
       privacy: game.privacy,
     });

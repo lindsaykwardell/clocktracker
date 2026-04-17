@@ -20,6 +20,27 @@ import { sendPushNotifications } from "~/server/utils/sendPushNotifications";
 
 const MAX_GRIMOIRE_PAGE_TITLE_LENGTH = 64;
 
+function resolveEndTriggerParticipantAlignment(
+  grimoire: {
+    tokens?: {
+      grimoire_participant_id?: string | null;
+      alignment?: Alignment | null;
+    }[];
+  }[],
+  participantId?: string | null
+): Alignment | null {
+  if (!participantId || !grimoire.length) return null;
+
+  for (let i = grimoire.length - 1; i >= 0; i--) {
+    const token = grimoire[i]?.tokens?.find(
+      (t) => t.grimoire_participant_id === participantId
+    );
+    if (token?.alignment) return token.alignment;
+  }
+
+  return null;
+}
+
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
   const gameId = handler.context.params?.id;
@@ -159,6 +180,8 @@ export default defineEventHandler(async (handler) => {
           end_trigger_subtype: existingGame.end_trigger_subtype,
           end_trigger_note: existingGame.end_trigger_note,
           end_trigger_participant_id: existingGame.end_trigger_participant_id,
+          end_trigger_participant_alignment:
+            (existingGame as any).end_trigger_participant_alignment ?? null,
           grimoire_events: existingGame.grimoire_events.map((event) => ({
             grimoire_page: event.grimoire_page,
             participant_id: event.participant_id,
@@ -185,6 +208,10 @@ export default defineEventHandler(async (handler) => {
     },
     data: {
       ...gameData,
+      end_trigger_participant_alignment: resolveEndTriggerParticipantAlignment(
+        body.grimoire,
+        body.end_trigger_participant_id
+      ),
       date: new Date(body.date),
       user_id: user.id,
       player_characters: {

@@ -389,48 +389,6 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         ? `At least ${count} game${pluralize(count)} ${wasWere(count)} ended by a Fearmonger nominating and executing their chosen player.`
         : `No Fearmonger has ended a game by nominating and executing their chosen player yet.`,
   },
-  // {
-  //   id: "goblin_claimed_executions",
-  //   category: "role",
-  //   roleIds: ["goblin"],
-  //   script: "experimental",
-  //   source: "grimoire_event",
-  //   label: "Dare Accepted",
-  //   getCount: ({ games, roleId }) =>
-  //     games.reduce((total, game) => {
-  //       if (!roleId || game.ignore_for_stats) return total;
-
-  //       return (
-  //         total +
-  //         game.grimoire_events.filter((event) => {
-  //           if (event.event_type !== GrimoireEventType.EXECUTION) {
-  //             return false;
-  //           }
-
-  //           const currentToken = getEventCurrentToken(game, event);
-  //           const previousToken = getEventPreviousToken(game, event);
-  //           const isGoblinExecution =
-  //             currentToken?.role_id === roleId || previousToken?.role_id === roleId;
-  //           if (!isGoblinExecution) return false;
-
-  //           return game.grimoire_events.some(
-  //             (marker) =>
-  //               marker.by_role_id === roleId &&
-  //               marker.event_type === GrimoireEventType.OTHER &&
-  //               marker.status_source === "Claimed" &&
-  //               marker.grimoire_page === event.grimoire_page &&
-  //               marker.participant_id === event.participant_id
-  //           );
-  //         }).length
-  //       );
-  //     }, 0),
-  //   getSentence: ({ count, isMe }) =>
-  //     count > 0
-  //       ? (isMe
-  //         ? `As the Goblin, you've been executed after claiming Goblin ${count} time${pluralize(count)}.`
-  //         : `As the Goblin, this player has been executed after claiming Goblin ${count} time${pluralize(count)}.`)
-  //       : `As the Goblin, be executed after claiming Goblin.`,
-  // },
   {
     id: "goblin_ability_wins",
     category: "role",
@@ -493,6 +451,47 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `You've executed a claimed Goblin ${count} time${pluralize(count)}.`
           : `This player has executed a claimed Goblin ${count} time${pluralize(count)}.`)
         : `Execute a claimed Goblin.`,
+    getSubtitle: ({ games, isMe }) => {
+      let total = 0;
+      let wins = 0;
+
+      for (const game of games) {
+        if (game.ignore_for_stats || game.win_v2 === WinStatus_V2.NOT_RECORDED) continue;
+        const alignment = game.player_characters.at(-1)?.alignment ?? null;
+
+        for (const event of game.grimoire_events) {
+          if (event.event_type !== GrimoireEventType.EXECUTION) continue;
+
+          const currentToken = getEventCurrentToken(game, event);
+          const previousToken = getEventPreviousToken(game, event);
+          const isGoblinExecution =
+            currentToken?.role_id === "goblin" || previousToken?.role_id === "goblin";
+          if (!isGoblinExecution) continue;
+
+          const hasClaimedMarker = game.grimoire_events.some(
+            (marker) =>
+              marker.by_role_id === "goblin" &&
+              marker.event_type === GrimoireEventType.OTHER &&
+              marker.status_source === "Claimed" &&
+              marker.grimoire_page === event.grimoire_page &&
+              marker.participant_id === event.participant_id
+          );
+          if (!hasClaimedMarker) continue;
+
+          total += 1;
+
+          if (
+            (alignment === "GOOD" && game.win_v2 === WinStatus_V2.GOOD_WINS) ||
+            (alignment === "EVIL" && game.win_v2 === WinStatus_V2.EVIL_WINS)
+          ) {
+            wins += 1;
+          }
+        }
+      }
+
+      if (total === 0) return null;
+      return `${isMe ? "You've" : "This player has"} won ${wins} of ${total} recorded results.`;
+    },
   },
   {
     id: "godfather_kills",
