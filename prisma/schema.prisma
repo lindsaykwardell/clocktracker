@@ -46,6 +46,7 @@ model Game {
   end_trigger_subtype         String         @default("")
   end_trigger_note            String         @default("")
   end_trigger_participant_id String?
+  end_trigger_participant_alignment Alignment?
   notes                       String
   image_urls                  String[]
   old_image_urls              String[]

@@ -118,6 +118,33 @@ function getMostShownRoleByStatusSource(
   return top ? { role: top.role, count: top.count } : { role: null, count: 0 };
 }
 
+function getFinalAlignmentForUsername(
+  game: Parameters<RoleStatCardDefinition["getCount"]>[0]["games"][number],
+  username: string | undefined
+) {
+  // Match game-card behavior first: use the final "player_characters" state.
+  // This is the canonical source for non-grimoire games.
+  const lastCharacter = game.player_characters.at(-1);
+  if (lastCharacter?.alignment) return lastCharacter.alignment;
+
+  if (!username || game.grimoire.length === 0) return null;
+
+  const lastPage = game.grimoire[game.grimoire.length - 1];
+  const tokenOnLastPage = lastPage?.tokens.find(
+    (token) => token.player?.username === username && !!token.alignment
+  );
+  if (tokenOnLastPage?.alignment) return tokenOnLastPage.alignment;
+
+  for (let pageIndex = game.grimoire.length - 1; pageIndex >= 0; pageIndex--) {
+    const token = game.grimoire[pageIndex]?.tokens.find(
+      (candidate) => candidate.player?.username === username && !!candidate.alignment
+    );
+    if (token?.alignment) return token.alignment;
+  }
+
+  return null;
+}
+
 export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "acrobat_self_deaths",
@@ -308,6 +335,41 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
       count > 0
         ? `At least ${count} game${pluralize(count)} ${wasWere(count)} ended when the Storyteller was executed with no Atheist in play.`
         : `No game has ended when the Storyteller was executed with no Atheist in play yet.`,
+    getSubtitle: ({ games, isMe, username }) => {
+      const matchingGames = games.filter((game) => {
+        if (
+          game.ignore_for_stats ||
+          game.end_trigger !== GameEndTrigger.ADDITIONAL_WIN_CONDITION ||
+          game.end_trigger_cause !== GameEndTriggerCause.ABILITY
+        ) {
+          return false;
+        }
+
+        const subtype =
+          parseEndTriggerSubtype(game.end_trigger_subtype) ??
+          parseEndTriggerSubtype(game.end_trigger_note);
+        if (subtype === "ATHEIST_STORYTELLER_EXECUTED_NO_ATHEIST_IN_PLAY") return true;
+
+        return subtype === "ATHEIST_STORYTELLER_EXECUTED_GOOD_LOSES";
+      });
+
+      if (matchingGames.length === 0) return null;
+
+      const recordedGames = matchingGames.filter(
+        (game) => game.win_v2 !== WinStatus_V2.NOT_RECORDED
+      );
+
+      const wins = recordedGames.filter((game) => {
+        if (game.win_v2 === WinStatus_V2.NOT_RECORDED) return false;
+
+        const alignment = getFinalAlignmentForUsername(game, username);
+        if (alignment === "GOOD") return game.win_v2 === WinStatus_V2.GOOD_WINS;
+        if (alignment === "EVIL") return game.win_v2 === WinStatus_V2.EVIL_WINS;
+        return false;
+      }).length;
+
+      return `${isMe ? "You've" : "This player has"} won ${wins} of ${recordedGames.length} recorded results.`;
+    },
   },
   {
     id: "balloonist_demon_learns",

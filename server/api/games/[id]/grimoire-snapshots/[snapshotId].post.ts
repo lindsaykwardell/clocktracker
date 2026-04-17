@@ -35,6 +35,7 @@ type SnapshotData = {
   end_trigger_subtype?: string | null;
   end_trigger_note?: string | null;
   end_trigger_participant_id?: string | null;
+  end_trigger_participant_alignment?: Alignment | null;
   grimoire_events?: {
     grimoire_page: number;
     participant_id: string;
@@ -51,6 +52,22 @@ type SnapshotData = {
     status_source?: string | null;
   }[];
 };
+
+function resolveEndTriggerParticipantAlignment(
+  pages: SnapshotPage[],
+  participantId?: string | null
+): Alignment | null {
+  if (!participantId || !pages.length) return null;
+
+  for (let i = pages.length - 1; i >= 0; i--) {
+    const token = pages[i]?.tokens?.find(
+      (t) => t.grimoire_participant_id === participantId
+    );
+    if (token?.alignment) return token.alignment;
+  }
+
+  return null;
+}
 
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
@@ -154,6 +171,15 @@ export default defineEventHandler(async (handler) => {
     gameUpdateData.end_trigger_participant_id =
       data.end_trigger_participant_id ?? null;
   }
+  gameUpdateData.end_trigger_participant_alignment =
+    "end_trigger_participant_alignment" in data
+      ? data.end_trigger_participant_alignment ?? null
+      : resolveEndTriggerParticipantAlignment(
+          data.pages,
+          ("end_trigger_participant_id" in data
+            ? data.end_trigger_participant_id
+            : null) ?? null
+        );
   if (Array.isArray(data.grimoire_events)) {
     gameUpdateData.grimoire_events = {
       deleteMany: {},

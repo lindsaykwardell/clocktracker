@@ -90,6 +90,7 @@ export async function findOrCreatePlayerChildGame(opts: {
     end_trigger_subtype?: string | null;
     end_trigger_note?: string | null;
     end_trigger_participant_id?: string | null;
+    end_trigger_participant_alignment?: Alignment | null;
     is_storyteller: boolean;
     grimoire_events?: {
       grimoire_page: number;
@@ -148,6 +149,8 @@ export async function findOrCreatePlayerChildGame(opts: {
         end_trigger_subtype: game.end_trigger_subtype ?? "",
         end_trigger_note: game.end_trigger_note ?? "",
         end_trigger_participant_id: game.end_trigger_participant_id ?? null,
+        end_trigger_participant_alignment:
+          game.end_trigger_participant_alignment ?? null,
         demon_bluffs: {
           deleteMany: existingGame.demon_bluffs.map((g) => ({ id: g.id })),
           create: game.demon_bluffs.map((g) => ({
@@ -241,6 +244,8 @@ export async function findOrCreatePlayerChildGame(opts: {
       end_trigger_subtype: game.end_trigger_subtype ?? "",
       end_trigger_note: game.end_trigger_note ?? "",
       end_trigger_participant_id: game.end_trigger_participant_id ?? null,
+      end_trigger_participant_alignment:
+        game.end_trigger_participant_alignment ?? null,
       user_id: playerId,
       player_characters: {
         create: [...playerCharacters],
@@ -318,6 +323,7 @@ export async function findOrCreateStorytellerChildGame(opts: {
     end_trigger_subtype?: string | null;
     end_trigger_note?: string | null;
     end_trigger_participant_id?: string | null;
+    end_trigger_participant_alignment?: Alignment | null;
     grimoire_events?: {
       grimoire_page: number;
       participant_id: string;
@@ -371,6 +377,8 @@ export async function findOrCreateStorytellerChildGame(opts: {
         end_trigger_subtype: game.end_trigger_subtype ?? "",
         end_trigger_note: game.end_trigger_note ?? "",
         end_trigger_participant_id: game.end_trigger_participant_id ?? null,
+        end_trigger_participant_alignment:
+          game.end_trigger_participant_alignment ?? null,
         demon_bluffs: {
           deleteMany: existingGame.demon_bluffs.map((g) => ({ id: g.id })),
           create: game.demon_bluffs.map((g) => ({
@@ -450,6 +458,8 @@ export async function findOrCreateStorytellerChildGame(opts: {
       end_trigger_subtype: game.end_trigger_subtype ?? "",
       end_trigger_note: game.end_trigger_note ?? "",
       end_trigger_participant_id: game.end_trigger_participant_id ?? null,
+      end_trigger_participant_alignment:
+        game.end_trigger_participant_alignment ?? null,
       is_storyteller: true,
       user_id: storytellerUserId,
       player_characters: {},

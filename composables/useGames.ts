@@ -95,6 +95,7 @@ export type GameRecord = Omit<
   | "end_trigger_subtype"
   | "end_trigger_note"
   | "end_trigger_participant_id"
+  | "end_trigger_participant_alignment"
 > & {
   ls_game?: {
     campaign?: {
@@ -110,6 +111,7 @@ export type GameRecord = Omit<
   end_trigger_subtype: string;
   end_trigger_note: string;
   end_trigger_participant_id: string | null;
+  end_trigger_participant_alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
   end_trigger_role?: {
     id: string;
     token_url: string;
