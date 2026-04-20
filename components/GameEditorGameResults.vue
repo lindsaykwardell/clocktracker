@@ -530,11 +530,7 @@ const endTriggerSeatOptions = computed(() => {
 
   if (!props.advancedModeEnabled) {
     const lastCharacter = props.game.player_characters.at(-1);
-    if (
-      !lastCharacter?.role_id ||
-      !lastCharacter.role ||
-      (allowed && !allowed.has(lastCharacter.role_id))
-    ) {
+    if (!lastCharacter?.role_id || !lastCharacter.role) {
       return [];
     }
 
@@ -555,12 +551,7 @@ const endTriggerSeatOptions = computed(() => {
     ] satisfies EndTriggerSeatOption[];
   }
 
-  let tokens = endTriggerSeatTokens.value;
-  if (allowed) {
-    tokens = tokens.filter((token) => token.role_id && allowed.has(token.role_id));
-  }
-
-  return tokens.map((token) => ({
+  return endTriggerSeatTokens.value.map((token) => ({
     source: "grimoire",
     order: token.order,
     participant_id: token.grimoire_participant_id || `seat-${token.order}`,
@@ -579,12 +570,23 @@ const endTriggerSeatOptions = computed(() => {
 });
 
 const endTriggerSeatOptionGroups = computed(() => {
-  const eligibleOptions = endTriggerSeatOptions.value.filter(
-    (option) => !option.role_id || !wildcardRoleIds.has(option.role_id)
-  );
-  const wildcardOptions = endTriggerSeatOptions.value.filter(
-    (option) => !!option.role_id && wildcardRoleIds.has(option.role_id)
-  );
+  const allowed = endTriggerRoleConfig.value
+    ? new Set(endTriggerIncludeRoleIds.value)
+    : null;
+  const eligibleOptions = endTriggerSeatOptions.value.filter((option) => {
+    if (allowed && (!option.role_id || !allowed.has(option.role_id))) return false;
+    return !option.role_id || !wildcardRoleIds.has(option.role_id);
+  });
+  const wildcardOptions = endTriggerSeatOptions.value.filter((option) => {
+    if (!option.role_id) return false;
+    if (allowed && !allowed.has(option.role_id)) return false;
+    return wildcardRoleIds.has(option.role_id);
+  });
+  const otherOptions = endTriggerSeatOptions.value.filter((option) => {
+    if (!allowed) return false;
+    if (!option.role_id) return true;
+    return !allowed.has(option.role_id);
+  });
 
   return [
     {
@@ -592,6 +594,7 @@ const endTriggerSeatOptionGroups = computed(() => {
       options: eligibleOptions,
     },
     { label: "Wildcard Characters", options: wildcardOptions },
+    { label: "Other Characters", options: otherOptions },
   ].filter((group) => group.options.length > 0);
 });
 
