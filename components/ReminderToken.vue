@@ -23,7 +23,7 @@ const props = defineProps<{
   reminder: {
     token_url: string;
     reminder: string;
-    type?: "OFFICIAL" | "TRACKING" | "CUSTOM" | null;
+    type?: "OFFICIAL" | "TRACKING" | "IMPORTED" | "LEGACY" | "CUSTOM" | null;
   };
   size?: "sm-reminder" | "reminder";
   isTrackingRelevant?: boolean;

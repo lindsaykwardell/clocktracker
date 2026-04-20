@@ -315,6 +315,8 @@ model RoleReminder {
 enum ReminderType {
   OFFICIAL
   TRACKING
+  IMPORTED
+  LEGACY
   CUSTOM
 }
 

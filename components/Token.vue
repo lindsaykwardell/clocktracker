@@ -416,6 +416,14 @@ const sizedAlignmentImage = computed(() =>
     background-image: url("/img/reminder-token-custom.webp");
   }
 
+  &.reminder--imported {
+    background-image: url("/img/reminder-token-custom.webp");
+  }
+
+  &.reminder--legacy {
+    background-image: url("/img/reminder-token-custom.webp");
+  }
+
   .token-image {
     &.neutral {
       filter: sepia(1) brightness(1.5) contrast(1.6);
