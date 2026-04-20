@@ -193,7 +193,7 @@ export async function saveCustomScript(
             )
             .map((reminder) => ({
               reminder,
-              type: ReminderType.CUSTOM,
+              type: "IMPORTED" as ReminderType,
             })),
         },
       },

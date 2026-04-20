@@ -116,6 +116,7 @@ const groupItems = computed<Record<GroupKey, NavItem[]>>(() => ({
   tools: [
     canExportUserData.value ? { label: "User Data", to: "/admin/user-data" } : null,
     canExportUserData.value ? { label: "Updates", to: "/admin/updates" } : null,
+    canExportUserData.value ? { label: "Reminders", to: "/admin/reminders" } : null,
     isAdminUser.value ? { label: "Circular Games", to: "/admin/circular-games" } : null,
   ].filter((item): item is NavItem => !!item),
 }));
@@ -134,6 +135,7 @@ const activeGroupKey = computed<GroupKey>(() => {
   if (
     path.startsWith("/admin/user-data") ||
     path.startsWith("/admin/updates") ||
+    path.startsWith("/admin/reminders") ||
     path.startsWith("/admin/circular-games")
   ) {
     return "tools";

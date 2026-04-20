@@ -212,7 +212,7 @@ type Token = {
   reminders?: {
     reminder: string;
     token_url: string;
-    type?: "OFFICIAL" | "TRACKING" | "CUSTOM" | null;
+    type?: "OFFICIAL" | "TRACKING" | "IMPORTED" | "LEGACY" | "CUSTOM" | null;
     [key: string]: unknown;
   }[];
   player_name: string;
@@ -306,7 +306,7 @@ const props = defineProps<{
       id: number;
       reminder: string;
       role_id: string;
-      type: "OFFICIAL" | "TRACKING" | "CUSTOM";
+      type: "OFFICIAL" | "TRACKING" | "IMPORTED" | "LEGACY" | "CUSTOM";
     }[];
   }[];
   readonly?: boolean;
@@ -376,19 +376,42 @@ const reminders = computed(() => {
 
   const travelers = roles.getRoleByType(RoleType.TRAVELER);
 
+  const fabledTypeByRoleId = new Map(fabled.map((role) => [role.id, role.type]));
+  const travelerTypeByRoleId = new Map(
+    travelers.map((role) => [role.id, role.type])
+  );
+
   const fabledReminders =
-    roles.getRemindersForRoles(fabled.map((r) => r.id)) ?? [];
+    (roles.getRemindersForRoles(fabled.map((r) => r.id)) ?? []).map(
+      (reminder) => ({
+        ...reminder,
+        role_type: fabledTypeByRoleId.get(reminder.role_id) ?? null,
+      })
+    );
   const travelersReminders =
-    roles.getRemindersForRoles(travelers.map((r) => r.id)) ?? [];
+    (roles.getRemindersForRoles(travelers.map((r) => r.id)) ?? []).map(
+      (reminder) => ({
+        ...reminder,
+        role_type: travelerTypeByRoleId.get(reminder.role_id) ?? null,
+      })
+    );
 
   for (const role of props.availableRoles ?? []) {
     if (role.type === RoleType.FABLED || role.type === RoleType.LORIC) {
       fabledReminders.push(
-        ...role.reminders.map((m) => ({ ...m, token_url: role.token_url }))
+        ...role.reminders.map((m) => ({
+          ...m,
+          token_url: role.token_url,
+          role_type: role.type,
+        }))
       );
     } else if (role.type === RoleType.TRAVELER) {
       travelersReminders.push(
-        ...role.reminders.map((m) => ({ ...m, token_url: role.token_url }))
+        ...role.reminders.map((m) => ({
+          ...m,
+          token_url: role.token_url,
+          role_type: role.type,
+        }))
       );
     }
   }
@@ -430,7 +453,11 @@ const reminders = computed(() => {
         return a.name.localeCompare(b.name);
       })
       .flatMap((r) =>
-        r.reminders.map((m) => ({ ...m, token_url: r.token_url }))
+        r.reminders.map((m) => ({
+          ...m,
+          token_url: r.token_url,
+          role_type: r.type,
+        }))
       ) ?? [];
 
   return [
@@ -687,7 +714,7 @@ function emitDeathToggled(token: Token, isDead: boolean) {
 function selectReminder(reminder: {
   reminder: string;
   token_url: string;
-  type?: "OFFICIAL" | "TRACKING" | "CUSTOM" | null;
+  type?: "OFFICIAL" | "TRACKING" | "IMPORTED" | "LEGACY" | "CUSTOM" | null;
 }) {
   if (focusedToken.value) {
     if (!focusedToken.value.reminders) {
@@ -726,7 +753,7 @@ function removeReminder(
   reminder: {
     reminder: string;
     token_url: string;
-    type?: "OFFICIAL" | "TRACKING" | "CUSTOM" | null;
+    type?: "OFFICIAL" | "TRACKING" | "IMPORTED" | "LEGACY" | "CUSTOM" | null;
   }
 ) {
   token.reminders = (token.reminders ?? []).filter(

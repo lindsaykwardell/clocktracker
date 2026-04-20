@@ -6,6 +6,12 @@
           Select a Reminder
         </h2>
       </div>
+      <div class="flex justify-between gap-8">
+        <label class="inline-flex items-center gap-2 self-start">
+          <input v-model="showLegacyReminders" type="checkbox" />
+          <span class="text-sm">Show legacy reminders</span>
+        </label>
+      </div>
     </template>
     <template v-if="show">
       <div class="flex flex-col gap-4 p-4">
@@ -116,12 +122,13 @@ import { GRIMOIRE_REMINDER_EVENT_CONFIG } from "~/composables/grimoireReminderEv
 
 const props = defineProps<{
   visible: boolean;
-  reminders: (RoleReminder & { token_url: string })[];
+  reminders: (RoleReminder & { token_url: string; role_type?: RoleType | null })[];
 }>();
 
 const emit = defineEmits(["update:visible", "selectReminder"]);
 const customReminder = ref("");
 const tokenUrl = ref<string | undefined>(undefined);
+const showLegacyReminders = ref(false);
 const roles = useRoles();
 
 function setTokenUrlAndClose(url: string, close: () => void) {
@@ -137,10 +144,14 @@ function normalizeReminderName(value?: string | null) {
   return (value ?? "").trim().toLowerCase();
 }
 
+function isLegacyReminder(reminder: { type?: string | null }) {
+  return (reminder.type ?? "").toUpperCase() === "LEGACY";
+}
+
 const DEFAULT_TRACKING_REMINDERS = new Set(["dead", "executed", "alive"]);
 
 function reminderMatchesTrackingConfig(
-  reminder: RoleReminder & { token_url: string }
+  reminder: RoleReminder & { token_url: string; role_type?: RoleType | null }
 ) {
   const reminderName = normalizeReminderName(reminder.reminder);
   const roleId = (reminder.role_id ?? "").toLowerCase();
@@ -154,7 +165,7 @@ function reminderMatchesTrackingConfig(
 }
 
 function isTrackingRelevantReminder(
-  reminder: RoleReminder & { token_url: string }
+  reminder: RoleReminder & { token_url: string; role_type?: RoleType | null }
 ) {
   const normalizedReminder = normalizeReminderName(reminder.reminder);
   return (
@@ -169,50 +180,52 @@ const reminderGroups = computed(() => {
     {
       key: RoleType.TOWNSFOLK,
       label: "Townsfolk",
-      reminders: [] as (RoleReminder & { token_url: string })[],
+      reminders: [] as (RoleReminder & { token_url: string; role_type?: RoleType | null })[],
     },
     {
       key: RoleType.OUTSIDER,
       label: "Outsiders",
-      reminders: [] as (RoleReminder & { token_url: string })[],
+      reminders: [] as (RoleReminder & { token_url: string; role_type?: RoleType | null })[],
     },
     {
       key: RoleType.MINION,
       label: "Minions",
-      reminders: [] as (RoleReminder & { token_url: string })[],
+      reminders: [] as (RoleReminder & { token_url: string; role_type?: RoleType | null })[],
     },
     {
       key: RoleType.DEMON,
       label: "Demons",
-      reminders: [] as (RoleReminder & { token_url: string })[],
+      reminders: [] as (RoleReminder & { token_url: string; role_type?: RoleType | null })[],
     },
     {
       key: RoleType.TRAVELER,
       label: "Travelers",
-      reminders: [] as (RoleReminder & { token_url: string })[],
+      reminders: [] as (RoleReminder & { token_url: string; role_type?: RoleType | null })[],
     },
     {
       key: RoleType.FABLED,
       label: "Fabled",
-      reminders: [] as (RoleReminder & { token_url: string })[],
+      reminders: [] as (RoleReminder & { token_url: string; role_type?: RoleType | null })[],
     },
     {
       key: RoleType.LORIC,
       label: "Loric",
-      reminders: [] as (RoleReminder & { token_url: string })[],
+      reminders: [] as (RoleReminder & { token_url: string; role_type?: RoleType | null })[],
     },
     {
       key: "OTHER",
       label: "Other",
-      reminders: [] as (RoleReminder & { token_url: string })[],
+      reminders: [] as (RoleReminder & { token_url: string; role_type?: RoleType | null })[],
     },
   ];
 
   const byType = new Map(groups.map((group) => [group.key, group]));
 
   for (const reminder of props.reminders) {
+    if (!showLegacyReminders.value && isLegacyReminder(reminder)) continue;
+
     const role = roles.getRole(reminder.role_id);
-    const roleType = role?.type;
+    const roleType = reminder.role_type ?? role?.type;
     const targetGroup = byType.get(roleType ?? "OTHER") ?? byType.get("OTHER");
     if (!targetGroup) continue;
     targetGroup.reminders.push(reminder);
@@ -229,6 +242,7 @@ const show = computed({
 watchEffect(() => {
   if (show.value) {
     customReminder.value = "";
+    showLegacyReminders.value = false;
   }
 });
 </script>
