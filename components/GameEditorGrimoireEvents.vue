@@ -742,6 +742,30 @@ function roleNameWithArticle(roleName: string) {
   return `the ${roleName}`;
 }
 
+function resolveRoleById(roleId: string | null | undefined) {
+  if (!roleId) return null;
+
+  const storeRole = allRoles.getRole(roleId);
+  if (storeRole) return storeRole;
+
+  for (const page of props.game.grimoire) {
+    const token = page.tokens.find(
+      (candidate) => candidate.role_id === roleId && candidate.role
+    );
+    if (token?.role) {
+      return {
+        id: roleId,
+        name: token.role.name ?? "",
+        token_url: token.role.token_url,
+        type: token.role.type,
+        initial_alignment: token.role.initial_alignment,
+      };
+    }
+  }
+
+  return null;
+}
+
 function grimoireEventSourceActorLabel(event: {
   grimoire_page: number;
   by_participant_id: string | null;
@@ -757,7 +781,7 @@ function grimoireEventSourceActorLabel(event: {
     sourcePlayer = sourceToken?.player_name?.trim() || "";
   }
 
-  const sourceRole = event.by_role_id ? allRoles.getRole(event.by_role_id)?.name || "" : "";
+  const sourceRole = event.by_role_id ? resolveRoleById(event.by_role_id)?.name || "" : "";
   if (sourcePlayer && sourceRole) {
     return `${roleNameWithArticle(sourceRole)} (${sourcePlayer})`;
   }
@@ -807,7 +831,7 @@ function grimoireEventSummaryParts(event: GrimoireEventLike): GrimoireEventSumma
     if (event.by_role_id === "pixie" && sourceActor) {
       const sourcePlayer = grimoireEventSourcePlayerLabel(event);
       const sourceRole = event.by_role_id
-        ? allRoles.getRole(event.by_role_id)?.name || ""
+        ? resolveRoleById(event.by_role_id)?.name || ""
         : "";
       const subject = sourcePlayer || sourceActor;
       const byLabel =
@@ -1004,12 +1028,6 @@ function grimoireEventSeatOptionsForPage(
 
   const currentOptions = ordered
     .filter((token) => {
-      if (
-        abilityAllowed &&
-        (!token.role_id || !abilityAllowed.has(token.role_id))
-      ) {
-        return false;
-      }
       if (cause !== GrimoireEventCause.NOMINATION) return true;
       const prev =
         previousPage && pageIndex > 0
@@ -1072,16 +1090,26 @@ function grimoireEventSeatOptionGroupsForPage(
   eventType: GrimoireEventType | null
 ) {
   const options = grimoireEventSeatOptionsForPage(pageIndex, cause, eventType);
-  const eligibleOptions = options.filter(
-    (option) => !option.role_id || !wildcardRoleIds.has(option.role_id)
-  );
-  const wildcardOptions = options.filter(
-    (option) => !!option.role_id && wildcardRoleIds.has(option.role_id)
-  );
+  const allowed = grimoireEventAllowedRoleIds(cause, eventType);
+  const eligibleOptions = options.filter((option) => {
+    if (allowed && (!option.role_id || !allowed.has(option.role_id))) return false;
+    return !option.role_id || !wildcardRoleIds.has(option.role_id);
+  });
+  const wildcardOptions = options.filter((option) => {
+    if (!option.role_id) return false;
+    if (allowed && !allowed.has(option.role_id)) return false;
+    return wildcardRoleIds.has(option.role_id);
+  });
+  const otherOptions = options.filter((option) => {
+    if (!allowed) return false;
+    if (!option.role_id) return true;
+    return !allowed.has(option.role_id);
+  });
 
   return [
     { label: "Eligible Characters", options: eligibleOptions },
     { label: "Wildcard Characters", options: wildcardOptions },
+    { label: "Other Characters", options: otherOptions },
   ].filter((group) => group.options.length > 0);
 }
 
@@ -1230,7 +1258,7 @@ function allowManualGrimoireEventByRole(event: {
  */
 function grimoireEventByRoleCharacter(event: { by_role_id: string | null }) {
   if (!event.by_role_id) return blankCharacter();
-  const role = allRoles.getRole(event.by_role_id);
+  const role = resolveRoleById(event.by_role_id);
   if (!role) return blankCharacter();
   return {
     name: role.name,
@@ -1314,7 +1342,7 @@ function reminderMatchesAnyRoleHint(
   if (!reminderUrlHint) return false;
 
   return roleIds.some((roleId) => {
-    const roleNameHint = normalizeReminderRoleHint(allRoles.getRole(roleId)?.name);
+    const roleNameHint = normalizeReminderRoleHint(resolveRoleById(roleId)?.name);
     const roleIdHint = normalizeReminderRoleHint(roleId);
     return (
       (!!roleNameHint && reminderUrlHint.includes(roleNameHint)) ||
