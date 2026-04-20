@@ -1171,11 +1171,11 @@ const endTriggerSummary = computed(() => {
     const triggerCauseLabel = (() => {
         switch (data.end_trigger_cause) {
             case GameEndTriggerCause.ABILITY:
-                return "ability";
+                return "an ability";
             case GameEndTriggerCause.NOMINATION:
-                return "nomination";
+                return "a nomination";
             case GameEndTriggerCause.FAILED_ABILITY:
-                return "failed ability";
+                return "a failed ability";
             default:
                 return "";
         }
@@ -1221,6 +1221,9 @@ const endTriggerSummary = computed(() => {
     const actorAbilityCauseLabel = character
         ? `the ability of ${roleArticle(character)}${character}${player ? ` (${player})` : ""}`
         : "an additional win condition";
+    const genericAbilityCauseLabel = character
+        ? actorAbilityCauseLabel
+        : "an ability";
 
     const triggerEventLabel = (() => {
         switch (data.end_trigger_type) {
@@ -1266,14 +1269,14 @@ const endTriggerSummary = computed(() => {
     switch (data.end_trigger) {
         case GameEndTrigger.NO_LIVING_DEMON:
             if (data.end_trigger_cause === GameEndTriggerCause.ABILITY) {
-                return `No living Demon remained due to ${actorAbilityCauseLabel}`;
+                return `No living Demon remained due to ${genericAbilityCauseLabel}`;
             }
             return triggerCauseText
                 ? `No living Demon remained after ${triggerCauseText}`
                 : "No living Demon remained";
         case GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE:
             if (data.end_trigger_cause === GameEndTriggerCause.ABILITY) {
-                return `Two players left alive due to ${actorAbilityCauseLabel}`;
+                return `Two players left alive due to ${genericAbilityCauseLabel}`;
             }
             return triggerCauseText
                 ? `Two players left alive after ${triggerCauseText}`
