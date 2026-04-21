@@ -608,6 +608,43 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `No Lleech has killed a player yet.`,
   },
   {
+    id: "lleech_host_saves",
+    category: "role",
+    scope: "as_role",
+    roleIds: ["lleech"],
+    script: "experimental",
+    source: "grimoire_event",
+    label: "Unkillable Appetite",
+    getCount: ({ games, roleId }) =>
+      !roleId
+        ? 0
+        : countMatchingEvents(games, (game, event) => {
+            if (
+              event.by_role_id !== roleId ||
+              event.event_type !== GrimoireEventType.OTHER ||
+              event.status_source !== "Saved"
+            ) {
+              return false;
+            }
+
+            const currentToken = getEventCurrentToken(game, event);
+            const previousToken = getEventPreviousToken(game, event);
+            return (
+              currentToken?.role_id === roleId || previousToken?.role_id === roleId
+            );
+          }),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Lleech, you've avoided ${count} death${pluralize(count)}.`
+          : `As the Lleech, this player has avoided ${count} death${pluralize(count)}.`)
+        : `As the Lleech, survive death.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `A Lleech has avoided death at least ${count} time${pluralize(count)}.`
+        : `No Lleech has avoided death yet.`,
+  },
+  {
     id: "lleech_hosts_received",
     category: "role",
     roleIds: ["lleech"],
