@@ -82,6 +82,11 @@ const trackingReminders = [
     type: ReminderType.TRACKING,
   },
   {
+    role_id: "lleech",
+    reminder: "Saved",
+    type: ReminderType.TRACKING,
+  },
+  {
     role_id: "ojo",
     reminder: "Not in play",
     type: ReminderType.TRACKING,

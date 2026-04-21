@@ -202,6 +202,14 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     sourceRoleIds: ["deviant"],
   },
   {
+    reminder: "Saved",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "each_night",
+    sourceRoleIds: ["lleech"],
+    targetScope: "self",
+    targetRoleIds: ["lleech"],
+  },
+  {
     reminder: "No Ability",
     eventType: GrimoireEventType.OTHER,
     cadence: "each_night",
