@@ -23,6 +23,7 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
   {
     id: "angel_deaths",
     category: "role",
+    globalDataNeeds: ["grimoire_events"],
     roleIds: ["angel"],
     scope: "affected_player",
     script: "npc",
@@ -51,6 +52,7 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
   {
     id: "doomsayer_deaths",
     category: "role",
+    globalDataNeeds: ["grimoire_events"],
     roleIds: ["doomsayer"],
     scope: "affected_player",
     script: "npc",
@@ -77,6 +79,7 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
   {
     id: "hells_librarian_deaths",
     category: "role",
+    globalDataNeeds: ["grimoire_events"],
     roleIds: ["hells_librarian"],
     scope: "affected_player",
     script: "npc",
@@ -104,6 +107,7 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
   {
     id: "fiddler_game_end_trigger_received",
     category: "role",
+    globalDataNeeds: ["grimoire_events"],
     roleIds: ["fiddler"],
     scope: "affected_player",
     script: "npc",
@@ -140,6 +144,7 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
   {
     id: "big_wig_deaths_received",
     category: "role",
+    globalDataNeeds: ["grimoire_events"],
     roleIds: ["big_wig"],
     scope: "affected_player",
     script: "npc",
@@ -169,6 +174,7 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
   {
     id: "hindu_revives",
     category: "role",
+    globalDataNeeds: ["grimoire_events"],
     roleIds: ["hindu"],
     scope: "affected_player",
     script: "npc",
@@ -196,6 +202,7 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
   {
     id: "storm_catcher_protected_received",
     category: "role",
+    globalDataNeeds: ["grimoire_events"],
     roleIds: ["storm_catcher"],
     scope: "affected_player",
     script: "npc",
@@ -225,6 +232,7 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
   {
     id: "zenomancer_goals_assigned_received",
     category: "role",
+    globalDataNeeds: ["grimoire_events"],
     roleIds: ["zenomancer"],
     scope: "affected_player",
     script: "npc",
@@ -252,6 +260,7 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
   {
     id: "zenomancer_goals_completed_received",
     category: "role",
+    globalDataNeeds: ["grimoire_events"],
     roleIds: ["zenomancer"],
     scope: "affected_player",
     script: "npc",

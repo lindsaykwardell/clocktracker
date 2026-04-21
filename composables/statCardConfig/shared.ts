@@ -3,6 +3,10 @@ import { GrimoireEventType } from "~/composables/useGames";
 
 export type RoleStatCardCategory = "role" | "general";
 export type RoleStatCardVisibility = "personal" | "global" | "both";
+export type RoleStatCardGlobalDataNeed =
+  | "grimoire_events"
+  | "grimoire_state"
+  | "end_trigger_role";
 
 export type RoleStatCardDisplayRole = {
   id: string;
@@ -28,6 +32,7 @@ export type RoleStatCardDefinition = {
   sao?: number;
   hidden?: boolean;
   visibility?: RoleStatCardVisibility;
+  globalDataNeeds?: RoleStatCardGlobalDataNeed[];
   scope?: "as_role" | "affected_player" | "triggering_player";
   source: string;
   label: string;

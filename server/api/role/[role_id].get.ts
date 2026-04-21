@@ -222,6 +222,12 @@ export default defineEventHandler(async (handler) => {
   });
 
   const roleCardDefinitions = getRoleCardDefinitions(role_id, "global");
+  const needsGrimoireState = roleCardDefinitions.some((definition) =>
+    definition.globalDataNeeds?.includes("grimoire_state")
+  );
+  const needsEndTriggerRole = roleCardDefinitions.some((definition) =>
+    definition.globalDataNeeds?.includes("end_trigger_role")
+  );
   const roleStatGames = roleCardDefinitions.length
     ? await prisma.game.findMany({
         where: {
@@ -262,40 +268,79 @@ export default defineEventHandler(async (handler) => {
             },
           ],
         },
-        include: {
-          grimoire_events: true,
-          end_trigger_role: {
+        select: {
+          id: true,
+          ignore_for_stats: true,
+          win_v2: true,
+          end_trigger: true,
+          end_trigger_type: true,
+          end_trigger_cause: true,
+          end_trigger_role_id: true,
+          end_trigger_participant_alignment: true,
+          end_trigger_subtype: true,
+          end_trigger_note: true,
+          grimoire_events: {
             select: {
-              id: true,
-              token_url: true,
-              type: true,
-              initial_alignment: true,
-              name: true,
+              grimoire_page: true,
+              participant_id: true,
+              event_type: true,
+              status_source: true,
+              cause: true,
+              by_participant_id: true,
+              role_id: true,
+              by_role_id: true,
+              old_role_id: true,
+              new_role_id: true,
+              old_alignment: true,
+              new_alignment: true,
             },
           },
-          grimoire: {
-            include: {
-              tokens: {
-                orderBy: {
-                  order: "asc",
+          end_trigger_role: needsEndTriggerRole
+            ? {
+                select: {
+                  id: true,
+                  token_url: true,
+                  type: true,
+                  initial_alignment: true,
+                  name: true,
                 },
-                include: {
-                  role: true,
-                  related_role: true,
-                  reminders: true,
-                  player: {
-                    select: {
-                      username: true,
-                      display_name: true,
-                      avatar: true,
+              }
+            : false,
+          grimoire: {
+            ...(needsGrimoireState
+              ? {
+                  select: {
+                    tokens: {
+                      orderBy: {
+                        order: "asc",
+                      },
+                      select: {
+                        grimoire_participant_id: true,
+                        role_id: true,
+                        alignment: true,
+                        order: true,
+                        role: {
+                          select: {
+                            id: true,
+                            token_url: true,
+                            type: true,
+                            initial_alignment: true,
+                            name: true,
+                          },
+                        },
+                      },
                     },
                   },
-                },
-              },
-            },
-            orderBy: {
-              id: "asc",
-            },
+                  orderBy: {
+                    id: "asc",
+                  },
+                }
+              : {
+                  select: {
+                    id: true,
+                  },
+                  take: 0,
+                }),
           },
         },
       })
