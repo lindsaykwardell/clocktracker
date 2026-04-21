@@ -16,6 +16,10 @@ import { GENERAL_ROLE_STAT_CARD_DEFINITIONS } from "~/composables/statCardConfig
 
 export type RoleStatCardCategory = "role" | "general";
 export type RoleStatCardVisibility = "personal" | "global" | "both";
+export type RoleStatCardGlobalDataNeed =
+  | "grimoire_events"
+  | "grimoire_state"
+  | "end_trigger_role";
 
 export type RoleStatCardRecord = {
   id: number;
@@ -66,6 +70,7 @@ export type RoleStatCardDefinition = {
   sao?: number;
   hidden?: boolean;
   visibility?: RoleStatCardVisibility;
+  globalDataNeeds?: RoleStatCardGlobalDataNeed[];
   scope?: "as_role" | "affected_player" | "triggering_player";
   source: string;
   label: string;
