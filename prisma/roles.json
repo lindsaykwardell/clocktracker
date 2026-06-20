@@ -877,7 +877,10 @@
     "reminders": [],
     "setup": true,
     "ability": "The Storyteller can break the game rules, and if executed, good wins, even if you are dead. [No evil characters]",
-    "special": [{ "type": "selection", "name": "good-duplicate" }],
+    "special": [
+      { "type": "selection", "name": "good-duplicate" },
+      { "type": "selection", "name": "evil-duplicate" }
+    ],
     "flavor": "Let us disperse with unnecessary conjecture and silly paranoia. There is a perfectly rational explanation for everything. Yes, a teacup may indeed be orbiting the planet, too small to see, but I shall drink my tea from the very real china in my very real hands."
   },
   {
@@ -1486,7 +1489,7 @@
     "reminders": ["Night 1", "Night 2", "Night 3"],
     "setup": true,
     "ability": "You get 3 bluffs. On the 3rd night, choose a player: they become an evil Demon of your choice. [No Demon]",
-    "flavor": "Hail the guardians of the north; by my intellect, thou art cut. Hail the guardians of the east; by my will, thou art dominated. Hail the guardians of the south; by that which lies beyond, the mystery is revealed. Hail the guardians of the west; a shield in the darkness",
+    "flavor": "Hail the guardians of the north; by my intellect, thou art cut. Hail the guardians of the east; by my will, thou art dominated. Hail the guardians of the south; by that which lies beyond, the mystery is revealed. Hail the guardians of the west; a shield in the darkness.",
     "jinxes": [
       {
         "id": "clockmaker",
@@ -2201,7 +2204,7 @@
     "edition": "carousel",
     "team": "traveller",
     "otherNightReminder": "Before dawn, choose a player not marked *NOT ME*. Wake the target. Show the *YOU ARE* info token & their new character token.",
-    "reminders": ["Not me"],
+    "reminders": ["Not Me"],
     "setup": false,
     "ability": "Each day, choose a player: a different player changes character tonight.",
     "flavor": "Wire α To wire β. LigHt oN. BuZZer off. GAzOinks! Arms STra1ght. FingER 2 nose. hOooLd stiLL. BoiNgo-banGo! Ha-ha-ha!"
@@ -2478,8 +2481,8 @@
   },
   {
     "id": "bootlegger",
-    "reminders": [],
-    "setup": false,
+    "reminders": ["?", "?"],
+    "setup": true,
     "name": "Bootlegger",
     "team": "loric",
     "edition": "loric",
@@ -2501,15 +2504,29 @@
   {
     "id": "gardener",
     "reminders": [],
-    "setup": false,
+    "setup": true,
     "name": "Gardener",
     "team": "loric",
     "edition": "loric",
-    "ability": "The Storyteller assigns 1 or more players' characters.",
+    "ability": "The Storyteller assigns all players' characters.",
     "special": [
       { "name": "distribute-roles", "type": "ability", "time": "pregame" }
     ],
     "flavor": "When sophistry becomes stupidity and hypocrisy cruelty, retreat to the garden. The final love of old men is flowers and stones."
+  },
+  {
+    "id": "godofug",
+    "reminders": ["Hat"],
+    "setup": false,
+    "name": "God of Ug",
+    "team": "loric",
+    "edition": "loric",
+    "ability": "One Ug hat. When wear Ug hat, must speak one sound at a time but vote twice. If fail, pass Ug hat.",
+    "flavor": "Blessed are my children, for they see the beauty in simple things.",
+    "special": [
+      { "type": "vote", "name": "multiplier", "value": 2 },
+      { "type": "reminder", "name": "public" }
+    ]
   },
   {
     "id": "hindu",
@@ -2522,6 +2539,16 @@
     "flavor": "चत्वारो मृत्युमध्ये पतन्ति, चत्वारो यात्री पुनरुद्गताः। चत्वारो धर्मे स्थितचित्तवृत्तेः, चत्वार एषां न पुनः क्षयः॥"
   },
   {
+    "id": "knaves",
+    "reminders": [],
+    "setup": false,
+    "name": "Knaves",
+    "team": "loric",
+    "edition": "loric",
+    "ability": "There are 2 Storytellers: one lies & one tells the truth. Once per game, at dusk, they might switch.",
+    "flavor": "Every wall is a door. Every meal is a feast."
+  },
+  {
     "id": "pope",
     "reminders": [],
     "setup": true,
@@ -2530,7 +2557,10 @@
     "edition": "loric",
     "ability": "There are duplicate good characters in play. They might also be bluffs.",
     "flavor": "...Pulcherrimae.",
-    "special": [{ "type": "selection", "name": "good-duplicate" }]
+    "special": [
+      { "type": "selection", "name": "good-duplicate" },
+      { "type": "selection", "name": "evil-duplicate" }
+    ]
   },
   {
     "id": "stormcatcher",
@@ -2545,7 +2575,8 @@
   },
   {
     "id": "tor",
-    "otherNightReminder": "If a player died tonight, show the *YOU ARE* info token, their character token, & a thumbs up or thumbs down.",
+    "firstNightReminder": "Skip Minion Info and Demon Info.",
+    "otherNightReminder": "If a player died tonight, show the *YOU ARE* info token, their character token, & give a thumb signal.",
     "reminders": [],
     "setup": true,
     "name": "Tor",
