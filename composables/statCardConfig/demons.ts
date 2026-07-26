@@ -14,8 +14,6 @@ import {
   getEventPreviousToken,
   getMostCommonByRole,
   getMostCommonByRoleSubtitle,
-  getMostCommonEndTriggerRole,
-  getMostCommonEndTriggerRoleSubtitle,
   isDemonKillEvent,
   pluralize,
   wasWere,
@@ -23,6 +21,10 @@ import {
 import type { RoleStatCardDefinition } from "./shared";
 
 function countLeviathanGoodExecutions(game: GameRecord) {
+  if (game.grimoire.length === 0) {
+    return null;
+  }
+
   const executedGoodParticipants = new Set(
     game.grimoire_events
       .filter((event) => event.event_type === GrimoireEventType.EXECUTION)
@@ -523,7 +525,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         if (subtype === "LEVIATHAN_SECOND_GOOD_EXECUTION") return true;
         if (subtype === "LEVIATHAN_DAY_FIVE") return false;
 
-        return countLeviathanGoodExecutions(game) >= 2;
+        const goodExecutions = countLeviathanGoodExecutions(game);
+        if (goodExecutions === null) return false;
+
+        return goodExecutions >= 2;
       }).length,
     getSentence: ({ count, isMe }) =>
       count > 0
@@ -563,7 +568,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         if (subtype === "LEVIATHAN_DAY_FIVE") return true;
         if (subtype === "LEVIATHAN_SECOND_GOOD_EXECUTION") return false;
 
-        return countLeviathanGoodExecutions(game) < 2;
+        const goodExecutions = countLeviathanGoodExecutions(game);
+        if (goodExecutions === null) return false;
+
+        return goodExecutions < 2;
       }).length,
     getSentence: ({ count, isMe }) =>
       count > 0

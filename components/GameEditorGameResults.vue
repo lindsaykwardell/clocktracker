@@ -282,6 +282,7 @@ type EndTriggerPlayerCharacter = {
   name: string;
   role_id: string | null;
   role?: {
+    id?: string;
     token_url: string;
     type: string;
     initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
@@ -295,6 +296,7 @@ type EndTriggerSeatOption = {
   role_id: string | null;
   label: string;
   role: {
+    id?: string;
     name: string;
     token_url: string;
     type: string;
@@ -318,6 +320,7 @@ const props = defineProps<{
     end_trigger_note: string;
     end_trigger_participant_id: string | null;
     end_trigger_role?: {
+      id?: string;
       token_url: string;
       type: string;
       initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
@@ -337,19 +340,20 @@ const endTriggerCharacter = computed(() => {
   if (!role) {
     return {
       name: "",
-      alignment: "NEUTRAL",
+      alignment: "NEUTRAL" as const,
       role: {
         token_url: "/1x1.png",
         type: "",
-        initial_alignment: "NEUTRAL",
+        initial_alignment: "NEUTRAL" as const,
       },
     };
   }
 
   return {
     name: role.name,
-    alignment: role.initial_alignment,
+    alignment: role.initial_alignment as "GOOD" | "EVIL" | "NEUTRAL",
     role: {
+      id: role.id,
       token_url: role.token_url,
       type: role.type,
       initial_alignment: role.initial_alignment,
@@ -602,26 +606,63 @@ const endTriggerSeatSelection = ref<string | "custom" | null>(
   props.game.end_trigger_participant_id ?? null
 );
 
-watch(
-  () => props.game.end_trigger_participant_id,
-  (value) => {
-    if (value === null || value === undefined) {
-      endTriggerSeatSelection.value = null;
-    } else {
-      endTriggerSeatSelection.value = value as string;
+function resolveEndTriggerSeatSelectionFromGame() {
+  if (props.game.end_trigger_participant_id) {
+    return props.game.end_trigger_participant_id as string;
+  }
+
+  if (!props.advancedModeEnabled) {
+    const playerCharacterOption = endTriggerSeatOptions.value.find(
+      (option) => option.source === "player_character"
+    );
+    if (
+      playerCharacterOption &&
+      props.game.end_trigger_role_id &&
+      playerCharacterOption.role_id === props.game.end_trigger_role_id
+    ) {
+      return playerCharacterOption.participant_id as string;
     }
   }
+
+  return null;
+}
+
+watch(
+  () => [
+    props.game.end_trigger_participant_id,
+    props.game.end_trigger_role_id,
+    props.advancedModeEnabled,
+    endTriggerSeatOptions.value.map((option) => option.participant_id).join("|"),
+  ],
+  () => {
+    endTriggerSeatSelection.value = resolveEndTriggerSeatSelectionFromGame();
+  },
+  { immediate: true }
 );
 
 watch(
-  () => endTriggerSeatOptions.value.length,
-  (length) => {
-    if (length === 0) {
+  () => endTriggerSeatOptions.value.map((option) => option.participant_id).join("|"),
+  () => {
+    const options = endTriggerSeatOptions.value;
+    const selection = endTriggerSeatSelection.value;
+
+    if (options.length === 0) {
       endTriggerSeatSelection.value = "custom";
-    } else if (endTriggerSeatSelection.value === "custom") {
+      return;
+    }
+
+    if (selection === "custom") {
       if (props.game.end_trigger_participant_id === null) {
         endTriggerSeatSelection.value = null;
       }
+      return;
+    }
+
+    if (
+      selection &&
+      !options.some((option) => option.participant_id === selection)
+    ) {
+      endTriggerSeatSelection.value = resolveEndTriggerSeatSelectionFromGame();
     }
   },
   { immediate: true }

@@ -846,16 +846,18 @@ const props = defineProps<{
       related: string;
       related_role_id: string | null;
       role?: {
+        id?: string;
         token_url: string;
         type: string;
         initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
       };
-      related_role?: { token_url: string };
+      related_role?: { id?: string; token_url: string };
     }[];
     demon_bluffs: {
       name: string;
       role_id: string | null;
       role?: {
+        id?: string;
         token_url: string;
         type: string;
       };
@@ -864,6 +866,7 @@ const props = defineProps<{
       name: string;
       role_id: string | null;
       role?: {
+        id?: string;
         token_url: string;
         type: string;
       };
@@ -877,6 +880,7 @@ const props = defineProps<{
     end_trigger_note: string;
     end_trigger_participant_id: string | null;
     end_trigger_role?: {
+      id?: string;
       token_url: string;
       type: string;
       initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
@@ -887,6 +891,7 @@ const props = defineProps<{
       grimoire_page: number;
       participant_id: string;
       event_type: GrimoireEventType | null;
+      status_source: string | null;
       cause: GrimoireEventCause | null;
       by_participant_id: string | null;
       player_name: string;
@@ -911,13 +916,14 @@ const props = defineProps<{
         grimoire_participant_id?: string | null;
         role_id: string | null;
         role?: {
+          id?: string;
           token_url: string;
           type: string;
           initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
           name?: string;
         };
         related_role_id: string | null;
-        related_role?: { token_url: string; name?: string };
+        related_role?: { id?: string; token_url: string; name?: string };
         player_name: string;
         player_id?: string | null;
         reminders: {
@@ -943,12 +949,13 @@ type Character = {
   related?: string;
   related_role_id?: string | null;
   role?: {
+    id?: string;
     token_url: string;
     alternate_token_urls?: string[];
     initial_alignment?: "GOOD" | "EVIL" | "NEUTRAL";
     type: string;
   };
-  related_role?: { token_url: string };
+  related_role?: { id?: string; token_url: string };
 };
 
 const user = useUser();
@@ -970,11 +977,17 @@ const roles = ref<
     token_url: string;
     name: string;
     initial_alignment: Alignment;
-    reminders: { id: number; reminder: string; role_id: string }[];
+    reminders: {
+      id: number;
+      reminder: string;
+      role_id: string;
+      type: "OFFICIAL" | "TRACKING" | "IMPORTED" | "LEGACY" | "CUSTOM";
+    }[];
   }[]
 >([]);
 const scriptVersions = ref<{ id: number; version: string }[]>([]);
 const fetchingScriptVersions = ref(false);
+const autoAddedScriptFabledRoleIds = ref<string[]>([]);
 const tokenMode = ref<
   "role" | "related_role" | "end_trigger_role" | "event_by_role"
 >("role");
@@ -1103,6 +1116,7 @@ function restoreSnapshot(snapshot: GrimoireSnapshot) {
         role_id: token.role_id,
         role: role
           ? {
+              id: role.id,
               token_url: role.token_url,
               type: role.type,
               initial_alignment: role.initial_alignment,
@@ -1111,7 +1125,11 @@ function restoreSnapshot(snapshot: GrimoireSnapshot) {
           : undefined,
         related_role_id: token.related_role_id,
         related_role: relatedRole
-          ? { token_url: relatedRole.token_url, name: relatedRole.name }
+          ? {
+              id: relatedRole.id,
+              token_url: relatedRole.token_url,
+              name: relatedRole.name,
+            }
           : undefined,
         player_name: token.player_name,
         player_id: token.player_id,
@@ -1128,6 +1146,7 @@ function restoreSnapshot(snapshot: GrimoireSnapshot) {
   props.game.player_count = restored[0]?.tokens.length ?? props.game.player_count;
   grimPage.value = Math.max(0, restored.length - 1);
   recomputeGrimoireParticipantIds();
+  syncGrimoireEventsFromGrimoire({ force: true, silent: true });
   showSnapshotDialog.value = false;
 }
 const initializedPageTitles = new WeakSet<object>();
@@ -1648,11 +1667,33 @@ function selectLSGame(game: {
   }
 }
 
-watchEffect(async () => {
-  scriptVersions.value = [];
-  roles.value = [];
+let latestScriptRequest = 0;
 
-  if (props.game.script_id) {
+watch(
+  () => props.game.script_id,
+  async (scriptId) => {
+    const requestId = ++latestScriptRequest;
+    scriptVersions.value = [];
+    roles.value = [];
+    customBackground.value = null;
+
+    if (autoAddedScriptFabledRoleIds.value.length > 0) {
+      props.game.fabled = props.game.fabled.filter(
+        (fabled) =>
+          !(
+            fabled.role_id &&
+            autoAddedScriptFabledRoleIds.value.includes(fabled.role_id)
+          )
+      );
+      autoAddedScriptFabledRoleIds.value = [];
+    }
+
+    if (!scriptId) {
+      fetchingScriptVersions.value = false;
+      roles.value = allRoles.getAllRoles();
+      return;
+    }
+
     fetchingScriptVersions.value = true;
     try {
       const result = await $fetch<{
@@ -1663,42 +1704,62 @@ watchEffect(async () => {
           token_url: string;
           name: string;
           initial_alignment: Alignment;
-          reminders: { id: number; reminder: string; role_id: string }[];
+          reminders: {
+            id: number;
+            reminder: string;
+            role_id: string;
+            type?: "OFFICIAL" | "TRACKING" | "IMPORTED" | "LEGACY" | "CUSTOM";
+          }[];
         }[];
-      }>(`/api/script/${props.game.script_id}`);
-      roles.value = result.roles ?? [];
+      }>(`/api/script/${scriptId}`);
+
+      if (requestId !== latestScriptRequest) return;
+
+      roles.value = (result.roles ?? []).map((role) => ({
+        ...role,
+        reminders: role.reminders.map((reminder) => ({
+          ...reminder,
+          type: reminder.type ?? "OFFICIAL",
+        })),
+      }));
       customBackground.value = result.background ?? null;
 
       const fabled = roles.value.filter((role) => role.type === "FABLED");
-
-      if (fabled.length > 0) {
-        fabled.forEach((fabledRole) => {
-          if (
-            !props.game.fabled.some(
-              (fabled) => fabled.role?.token_url === fabledRole.token_url
-            )
+      const newlyAutoAddedFabledRoleIds: string[] = [];
+      for (const fabledRole of fabled) {
+        if (
+          !props.game.fabled.some(
+            (existingFabled) => existingFabled.role_id === fabledRole.id
           )
-            props.game.fabled.push({
-              name: fabledRole.name,
-              role_id: fabledRole.id,
-              role: {
-                token_url: fabledRole.token_url,
-                type: fabledRole.type,
-              },
-            });
-        });
+        ) {
+          props.game.fabled.push({
+            name: fabledRole.name,
+            role_id: fabledRole.id,
+            role: {
+              id: fabledRole.id,
+              token_url: fabledRole.token_url,
+              type: fabledRole.type,
+            },
+          });
+          newlyAutoAddedFabledRoleIds.push(fabledRole.id);
+        }
       }
+      autoAddedScriptFabledRoleIds.value = newlyAutoAddedFabledRoleIds;
 
-      scriptVersions.value = await fetchScriptVersions(props.game.script_id);
+      const versions = await fetchScriptVersions(scriptId);
+      if (requestId !== latestScriptRequest) return;
+      scriptVersions.value = versions;
     } catch {
+      if (requestId !== latestScriptRequest) return;
       alert("Unable to load the selected script!");
-      // Do nothing
+    } finally {
+      if (requestId === latestScriptRequest) {
+        fetchingScriptVersions.value = false;
+      }
     }
-    fetchingScriptVersions.value = false;
-  } else {
-    roles.value = allRoles.getAllRoles();
-  }
-});
+  },
+  { immediate: true }
+);
 
 function openRoleSelectionDialog(
   token: Partial<Character> | null,
@@ -2286,30 +2347,33 @@ watch(
 );
 
 function applyMyRoleToGrimoire() {
+  const playerCharacter = props.game.player_characters[0];
+  if (!playerCharacter) return;
+
   props.game.grimoire.forEach((page) => {
     page.tokens.forEach((token) => {
       if (!(!!token.player_id && token.player_id === user.value?.id)) return;
 
-      const playerRole = props.game.player_characters[0].role;
-      const relatedRole = props.game.player_characters[0].related_role;
+      const playerRole = playerCharacter.role;
+      const relatedRole = playerCharacter.related_role;
 
       if (!token.role_id) {
         token.role = playerRole
           ? {
               token_url: playerRole.token_url,
               type: playerRole.type,
-              name: props.game.player_characters[0].name,
+              name: playerCharacter.name,
               initial_alignment: playerRole.initial_alignment,
             }
           : undefined;
-        token.role_id = props.game.player_characters[0].role_id;
+        token.role_id = playerCharacter.role_id;
         token.related_role = relatedRole
           ? {
               token_url: relatedRole.token_url,
             }
           : undefined;
-        token.related_role_id = props.game.player_characters[0].related_role_id;
-        token.alignment = props.game.player_characters[0].alignment;
+        token.related_role_id = playerCharacter.related_role_id;
+        token.alignment = playerCharacter.alignment;
       }
 
       if (!token.related_role_id) {
@@ -2318,7 +2382,7 @@ function applyMyRoleToGrimoire() {
               token_url: relatedRole.token_url,
             }
           : undefined;
-        token.related_role_id = props.game.player_characters[0].related_role_id;
+        token.related_role_id = playerCharacter.related_role_id;
       }
     });
   });

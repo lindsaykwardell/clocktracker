@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ status: 401, statusMessage: "Unauthorized" });
   }
 
-  if (!(await hasPermission(me.id, "EXPORT_USER_DATA"))) {
+  if (!(await hasPermission(me.id, "MANAGE_APP_TOOLS"))) {
     throw createError({ status: 403, statusMessage: "Forbidden" });
   }
 

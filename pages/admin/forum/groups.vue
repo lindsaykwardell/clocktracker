@@ -285,6 +285,7 @@ const PERMISSION_LABELS: Record<string, string> = {
   MANAGE_CATEGORIES: "Manage Categories",
   MANAGE_GROUPS: "Manage Groups",
   MANAGE_FEATURE_FLAGS: "Manage Feature Flags",
+  MANAGE_APP_TOOLS: "Manage App Tools",
   VIEW_REPORTS: "View Reports",
   VIEW_MOD_LOG: "View Mod Log",
   VIEW_PRIVATE_USERS: "View Private Users",
@@ -315,7 +316,7 @@ const permissionGroups = [
   },
   {
     label: "Administration",
-    permissions: ["MANAGE_CATEGORIES", "MANAGE_GROUPS", "MANAGE_FEATURE_FLAGS", "VIEW_REPORTS", "VIEW_MOD_LOG", "VIEW_PRIVATE_USERS", "VIEW_PRIVATE_GAMES", "VIEW_PRIVATE_COMMUNITIES", "EXPORT_USER_DATA", "GITHUB"],
+    permissions: ["MANAGE_CATEGORIES", "MANAGE_GROUPS", "MANAGE_FEATURE_FLAGS", "MANAGE_APP_TOOLS", "VIEW_REPORTS", "VIEW_MOD_LOG", "VIEW_PRIVATE_USERS", "VIEW_PRIVATE_GAMES", "VIEW_PRIVATE_COMMUNITIES", "EXPORT_USER_DATA", "GITHUB"],
   },
 ];
 

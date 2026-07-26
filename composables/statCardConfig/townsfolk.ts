@@ -13,8 +13,6 @@ import {
   getEventPreviousToken,
   getMostCommonByRole,
   getMostCommonByRoleSubtitle,
-  getMostCommonEndTriggerRole,
-  getMostCommonEndTriggerRoleSubtitle,
   isDemonKillEvent,
   pluralize,
   wasWere,
@@ -3025,18 +3023,28 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["snake_charmer"],
     scope: "affected_player",
-    globalDataNeeds: ["grimoire_events"],
+    globalDataNeeds: ["grimoire_events", "grimoire_state"],
     script: "snv",
     sao: 3,
     source: "grimoire_event",
     label: "Snakebit",
     getCount: ({ games }) =>
-      countMatchingEvents(
-        games,
-        (_, event) =>
-          event.event_type === GrimoireEventType.ROLE_CHANGE &&
-          event.by_role_id === "snake_charmer"
-      ),
+      countMatchingEvents(games, (game, event) => {
+        if (
+          event.event_type !== GrimoireEventType.ROLE_CHANGE ||
+          event.by_role_id !== "snake_charmer"
+        ) {
+          return false;
+        }
+
+        const previousToken = getEventPreviousToken(game, event);
+        const currentToken = getEventCurrentToken(game, event);
+
+        return (
+          previousToken?.role?.type === "DEMON" &&
+          currentToken?.role_id === "snake_charmer"
+        );
+      }),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe

@@ -184,7 +184,7 @@ const canManageReminders = computed(() => {
   const meVal = me.value;
   if (meVal.status === Status.SUCCESS && meVal.data.is_admin) return true;
   if (!forumMe.value) return false;
-  return forumMe.value.permissions.includes("EXPORT_USER_DATA");
+  return forumMe.value.permissions.includes("MANAGE_APP_TOOLS");
 });
 
 const loading = ref(true);

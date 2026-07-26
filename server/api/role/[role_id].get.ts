@@ -225,9 +225,6 @@ export default defineEventHandler(async (handler) => {
   const needsGrimoireState = roleCardDefinitions.some((definition) =>
     definition.globalDataNeeds?.includes("grimoire_state")
   );
-  const needsEndTriggerRole = roleCardDefinitions.some((definition) =>
-    definition.globalDataNeeds?.includes("end_trigger_role")
-  );
   const roleStatGames = roleCardDefinitions.length
     ? await prisma.game.findMany({
         where: {
@@ -295,17 +292,6 @@ export default defineEventHandler(async (handler) => {
               new_alignment: true,
             },
           },
-          end_trigger_role: needsEndTriggerRole
-            ? {
-                select: {
-                  id: true,
-                  token_url: true,
-                  type: true,
-                  initial_alignment: true,
-                  name: true,
-                },
-              }
-            : false,
           grimoire: {
             ...(needsGrimoireState
               ? {

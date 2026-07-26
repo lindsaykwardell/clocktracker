@@ -13,8 +13,6 @@ import {
   getEventPreviousToken,
   getMostCommonByRole,
   getMostCommonByRoleSubtitle,
-  getMostCommonEndTriggerRole,
-  getMostCommonEndTriggerRoleSubtitle,
   isDemonKillEvent,
   pluralize,
   wasWere,
@@ -1232,10 +1230,13 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
       !roleId
         ? 0
         : countMatchingEvents(games, (game, event) => {
+            const isVirginExecution =
+              event.by_role_id === "virgin" ||
+              (!event.by_role_id && event.status_source === "Executed");
+
             if (
               event.event_type !== GrimoireEventType.EXECUTION ||
-              (event.by_role_id !== "virgin" &&
-                event.status_source !== "Executed")
+              !isVirginExecution
             ) {
               return false;
             }

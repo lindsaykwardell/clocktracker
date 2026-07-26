@@ -20,6 +20,27 @@ import { sendPushNotifications } from "~/server/utils/sendPushNotifications";
 
 const MAX_GRIMOIRE_PAGE_TITLE_LENGTH = 64;
 
+function resolveEndTriggerParticipantAlignment(
+  grimoire: {
+    tokens?: {
+      grimoire_participant_id?: string | null;
+      alignment?: Alignment | null;
+    }[];
+  }[],
+  participantId?: string | null
+): Alignment | null {
+  if (!participantId || !grimoire.length) return null;
+
+  for (let i = grimoire.length - 1; i >= 0; i--) {
+    const token = grimoire[i]?.tokens?.find(
+      (t) => t.grimoire_participant_id === participantId
+    );
+    if (token?.alignment) return token.alignment;
+  }
+
+  return null;
+}
+
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
   const body = await readBody<
@@ -76,6 +97,10 @@ export default defineEventHandler(async (handler) => {
   const newGame = await prisma.game.create({
     data: {
       ...gameData,
+      end_trigger_participant_alignment: resolveEndTriggerParticipantAlignment(
+        body.grimoire,
+        body.end_trigger_participant_id
+      ),
       date: new Date(body.date),
       user_id: user.id,
       player_characters: {

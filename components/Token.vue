@@ -95,7 +95,7 @@ const props = defineProps<{
         role_id?: string | null;
         related_role_id?: string | null;
         role?: {
-          id: string;
+          id?: string;
           token_url?: string;
           type: string;
           initial_alignment?: "GOOD" | "EVIL" | "NEUTRAL";
