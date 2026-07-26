@@ -13,8 +13,6 @@ import {
   getEventPreviousToken,
   getMostCommonByRole,
   getMostCommonByRoleSubtitle,
-  getMostCommonEndTriggerRole,
-  getMostCommonEndTriggerRoleSubtitle,
   isDemonKillEvent,
   pluralize,
   wasWere,

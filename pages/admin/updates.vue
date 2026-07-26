@@ -25,6 +25,10 @@
 
     <Loading v-if="loading && updates.length === 0" />
 
+    <Alert v-else-if="loadError" color="negative" class="mb-4">
+      {{ loadError }}
+    </Alert>
+
     <div v-else-if="updates.length === 0" class="text-center py-8 text-stone-500">
       No updates registered.
     </div>
@@ -133,6 +137,7 @@ const forumMe = ref<{ permissions: string[]; is_admin: boolean } | null>(null);
 const updates = ref<AppUpdateRow[]>([]);
 const loading = ref(false);
 const refreshing = ref(false);
+const loadError = ref("");
 const runningById = ref<Record<string, boolean>>({});
 const errorsById = ref<Record<string, string>>({});
 const messagesById = ref<Record<string, string>>({});
@@ -142,7 +147,7 @@ const canManageUpdates = computed(() => {
   const meVal = me.value;
   if (meVal.status === Status.SUCCESS && meVal.data.is_admin) return true;
   if (!forumMe.value) return false;
-  return forumMe.value.permissions.includes("EXPORT_USER_DATA");
+  return forumMe.value.permissions.includes("MANAGE_APP_TOOLS");
 });
 
 function statusColor(status: string) {
@@ -186,6 +191,7 @@ async function fetchUpdates() {
   const isInitialLoad = updates.value.length === 0;
   if (isInitialLoad) loading.value = true;
   else refreshing.value = true;
+  loadError.value = "";
   try {
     updates.value = await $fetch<AppUpdateRow[]>("/api/admin/updates");
     const hasRunning =
@@ -193,6 +199,13 @@ async function fetchUpdates() {
       Object.values(runningById.value).some(Boolean);
     if (hasRunning) ensurePolling();
     else stopPolling();
+  } catch (error: any) {
+    loadError.value =
+      error?.data?.statusMessage || error?.message || "Failed to load updates.";
+    if (isInitialLoad) {
+      updates.value = [];
+    }
+    stopPolling();
   } finally {
     loading.value = false;
     refreshing.value = false;

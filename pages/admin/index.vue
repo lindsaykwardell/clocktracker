@@ -83,7 +83,7 @@ const forumMe = ref<{ permissions: string[]; is_admin: boolean } | null>(null);
 const ADMIN_PAGE_PERMISSIONS = [
   "MANAGE_CATEGORIES", "MANAGE_GROUPS", "BAN_USER",
   "MANAGE_FEATURE_FLAGS", "VIEW_REPORTS", "VIEW_MOD_LOG",
-  "EXPORT_USER_DATA",
+  "EXPORT_USER_DATA", "MANAGE_APP_TOOLS",
 ];
 
 const isAdminUser = computed(() => {

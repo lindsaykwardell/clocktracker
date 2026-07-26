@@ -92,6 +92,7 @@
                     :key="role.id"
                     :href="`/roles/${role.id}`"
                     target="_blank"
+                    rel="noopener noreferrer"
                     class="role-card token-wrapper relative flex items-center gap-4 rounded-lg border dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 p-4"
                   >
                     <div class="role-card-token relative shrink-0">
@@ -277,6 +278,13 @@ const scripts = await $fetch<Array<Script & { roles: Role[] }>>(
   )}?custom_script_id=${script_id}`
 );
 
+if (scripts.length === 0) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: "Script not found",
+  });
+}
+
 if (!version.value) {
   version.value = scripts[0].version;
 }
@@ -299,12 +307,11 @@ watchEffect(() => {
   // update the URL when the version changes
   // This needs to be
   if (version.value !== route.query.version) {
-    // route.query.version = version.value;
-    router.push({ query: { version: version.value, id: script_id } });
+    router.replace({ query: { version: version.value, id: script_id } });
   }
 });
 
-useHead({
+useHead(() => ({
   title: script.value.name,
   meta: [
     {
@@ -349,7 +356,7 @@ useHead({
       content: script.value.logo ?? scriptLogo(script.value.name),
     },
   ],
-});
+}));
 
 const scriptStats = ref<{
   count: number;
@@ -744,11 +751,14 @@ const scriptLink = computed(() => {
   }
 });
 
+let latestScriptStatsRequest = 0;
+
 watch(
   script,
   async (newScript) => {
+    const requestId = ++latestScriptStatsRequest;
     try {
-      scriptStats.value = await $fetch<{
+      const stats = await $fetch<{
         count: number;
         win_loss: {
           total: number;
@@ -771,6 +781,9 @@ watch(
         >;
         role_ability_endings: Record<string, number>;
       }>("/api/script/" + newScript.id + "/stats");
+
+      if (requestId !== latestScriptStatsRequest) return;
+      scriptStats.value = stats;
     } catch (e) {
       console.error(e);
     }

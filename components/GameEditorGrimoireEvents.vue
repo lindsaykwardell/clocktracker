@@ -17,7 +17,7 @@
         <ul class="py-2 space-y-2">
           <li
             v-for="event in pageGroup.events"
-            :key="`${pageGroup.page}-${event.participant_id}-${event.event_type}-${event.player_name}`"
+            :key="grimoireEventRowKey(pageGroup.page, event)"
             class="border border-stone-600 rounded bg-stone-300/50 dark:bg-stone-900/60"
           >
             <details :open="isEventExpandedByDefault(event)">
@@ -417,6 +417,7 @@ function blankCharacter() {
     name: "",
     alignment: "NEUTRAL" as const,
     role: {
+      id: "blank",
       token_url: "/1x1.png",
       type: "",
       initial_alignment: "NEUTRAL" as const,
@@ -1043,6 +1044,7 @@ function grimoireEventSeatOptionsForPage(
         : null;
       const sourceToken =
         previousToken?.role_id &&
+        abilityAllowed &&
         abilityAllowed.has(previousToken.role_id) &&
         previousToken.role_id !== token.role_id
           ? previousToken
@@ -1278,6 +1280,34 @@ function grimoireEventByRoleCharacter(event: { by_role_id: string | null }) {
  */
 function isReviveEventType(eventType: GrimoireEventType | null) {
   return eventType === GrimoireEventType.REVIVE;
+}
+
+function isLifecycleEventType(eventType: GrimoireEventType | null) {
+  return (
+    eventType === null ||
+    eventType === GrimoireEventType.NOT_RECORDED ||
+    eventType === GrimoireEventType.DEATH ||
+    eventType === GrimoireEventType.EXECUTION ||
+    eventType === GrimoireEventType.REVIVE
+  );
+}
+
+function grimoireEventRowKey(pageIndex: number, event: GrimoireEventLike) {
+  return [
+    pageIndex,
+    event.participant_id || "",
+    event.event_type ?? "null",
+    event.status_source ?? "",
+    event.cause ?? "",
+    event.by_participant_id ?? "",
+    event.by_role_id ?? "",
+    event.role_id ?? "",
+    event.old_role_id ?? "",
+    event.new_role_id ?? "",
+    event.old_alignment ?? "",
+    event.new_alignment ?? "",
+    event.player_name ?? "",
+  ].join(":");
 }
 
 /**
@@ -1911,7 +1941,8 @@ function recordGrimoireEvent(payload: {
   const existingIndex = props.game.grimoire_events.findIndex(
     (event) =>
       event.grimoire_page === payload.pageIndex &&
-      event.participant_id === participantId
+      event.participant_id === participantId &&
+      isLifecycleEventType(event.event_type)
   );
   if (existingIndex >= 0) {
     props.game.grimoire_events.splice(existingIndex, 1);
@@ -2556,8 +2587,8 @@ function syncGrimoireEventsFromGrimoire(options?: {
       }
     });
 
-    if (!bestKey || bestScore <= 0) return null;
-    const match = expected.get(bestKey) || null;
+    if (!bestKey || bestScore <= 0) return undefined;
+    const match = expected.get(bestKey);
     if (match) {
       expected.delete(bestKey);
     }
