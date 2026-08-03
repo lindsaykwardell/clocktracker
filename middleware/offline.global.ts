@@ -9,7 +9,9 @@ export default defineNuxtRouteMiddleware((to, from) => {
   if (ONLINE_ONLY_PREFIXES.some((prefix) => path.startsWith(prefix)) ||
       ONLINE_ONLY_EXACT.some((exact) => path === exact)) {
     if (import.meta.client) {
-      alert("You're offline. This page will be available when you're back online.");
+      useOfflineSync().notifyOfflineBlocked(
+        "That page isn't available offline. It'll work again once you're back online."
+      );
     }
     return abortNavigation();
   }

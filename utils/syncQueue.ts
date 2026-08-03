@@ -3,6 +3,15 @@ import { nanoid } from "nanoid";
 
 const QUEUE_STORE = "sync-queue";
 
+// Optimistic, client-only games are keyed with this prefix until they sync.
+// Anything reading a game id should treat these as local-only (never fetch
+// them from the API, since the server has no record of them yet).
+export const PENDING_GAME_PREFIX = "pending-";
+
+export function isPendingGameId(id: string): boolean {
+  return id.startsWith(PENDING_GAME_PREFIX);
+}
+
 export interface QueuedGame {
   id?: number;
   placeholderId: string;
@@ -12,7 +21,7 @@ export interface QueuedGame {
 }
 
 export async function enqueueGame(payload: string, displayData?: string): Promise<string> {
-  const placeholderId = `pending-${nanoid()}`;
+  const placeholderId = `${PENDING_GAME_PREFIX}${nanoid()}`;
   const db = await openOfflineDB();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(QUEUE_STORE, "readwrite");

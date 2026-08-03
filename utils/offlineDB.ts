@@ -1,5 +1,5 @@
 const DB_NAME = "clocktracker-offline";
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 let dbPromise: Promise<IDBDatabase> | null = null;
 
@@ -18,6 +18,9 @@ export function openOfflineDB(): Promise<IDBDatabase> {
           keyPath: "id",
           autoIncrement: true,
         });
+      }
+      if (!db.objectStoreNames.contains("pending-images")) {
+        db.createObjectStore("pending-images", { keyPath: "id" });
       }
     };
     request.onsuccess = () => resolve(request.result);

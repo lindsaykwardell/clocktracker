@@ -542,7 +542,7 @@
         </Button>
         <div class="flex flex-wrap gap-5">
           <div class='relative' v-for="file in game.image_urls" :key="file">
-            <img
+            <GameImage
               crossorigin="anonymous"
               :src="file"
               class="w-64 h-64 object-cover"
@@ -1138,6 +1138,16 @@ async function uploadFile() {
   const files = await pickImages({ multiple: true });
   if (files.length === 0) return;
 
+  // Offline: stash the images locally and reference them by sentinel. They're
+  // uploaded and swapped for real URLs when the game syncs (see useOfflineSync).
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    for (const file of files) {
+      const ref = await storeOfflineImage(file);
+      props.game.image_urls.push(ref);
+    }
+    return;
+  }
+
   const formData = new FormData();
   files.forEach((file) => {
     formData.append("file", file);
@@ -1153,6 +1163,9 @@ async function uploadFile() {
 
 async function removeFile(name: string) {
   props.game.image_urls = props.game.image_urls.filter((file) => file !== name);
+  if (isOfflineImageRef(name)) {
+    await removeOfflineImage(name);
+  }
 }
 
 function selectScript(script: { name: string; id: number | null }) {

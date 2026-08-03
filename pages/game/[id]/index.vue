@@ -6,6 +6,11 @@
                 player.status === Status.SUCCESS
             "
         >
+            <Alert v-if="isPendingGameId(gameId)" color="info">
+                This game is saved on your device and will sync automatically
+                when you're back online.
+            </Alert>
+
             <Alert
                 v-if="
                     isMe && me.status === Status.SUCCESS && (isNew || isUpdate)
@@ -628,12 +633,12 @@
                                     :key="file"
                                 >
                                     <a
-                                        :href="fullImageUrl(file)"
+                                        :href="isOfflineImageRef(file) ? undefined : fullImageUrl(file)"
                                         target="_blank"
                                         class="w-full sm:w-1/2 md:w-64 md:h-64"
                                     >
-                                        <img
-                                            :src="fullImageUrl(file)"
+                                        <GameImage
+                                            :src="file"
                                             class="w-full sm:w-1/2 md:w-64 md:h-64 object-cover shadow-lg"
                                             crossorigin="anonymous"
                                         />
@@ -1067,13 +1072,17 @@ watchEffect(() => {
     }
 });
 
-const gameMetadata = await useFetch(`/api/games/${gameId}/minimal`);
+// Optimistic offline games aren't on the server yet — skip the metadata fetch
+// (and its hard error) and rely on the placeholder already in the store.
+const gameMetadata = isPendingGameId(gameId)
+    ? null
+    : await useFetch(`/api/games/${gameId}/minimal`);
 
-if (gameMetadata.error.value) {
+if (gameMetadata?.error.value) {
     throw gameMetadata.error.value;
 }
 
-const meta = gameMetadata.data.value;
+const meta = gameMetadata?.data.value;
 if (meta?.user) {
     const displayName = meta.user.display_name;
     const script = meta.script;
@@ -1409,15 +1418,18 @@ async function claimSeat(token: { order: number }) {
 }
 
 onMounted(() => {
-    games.fetchGame(route.params.id as string).then(() => {
-        if (game.value.status === Status.SUCCESS) {
-            games.fetchSimilarGames(game.value.data.id);
+    // Pending offline games only exist locally; don't hit the API for them.
+    if (!isPendingGameId(gameId)) {
+        games.fetchGame(gameId).then(() => {
+            if (game.value.status === Status.SUCCESS) {
+                games.fetchSimilarGames(game.value.data.id);
 
-            if (game.value.data.community?.slug) {
-                communities.fetchCommunity(game.value.data.community.slug);
+                if (game.value.data.community?.slug) {
+                    communities.fetchCommunity(game.value.data.community.slug);
+                }
             }
-        }
-    });
+        });
+    }
 
     if (friends.friends.status !== Status.SUCCESS) {
         friends.fetchFriends();

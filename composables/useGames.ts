@@ -479,6 +479,11 @@ export const useGames = defineStore("games", {
   },
   actions: {
     async fetchGame(gameId: string) {
+      // Optimistic offline games live only in the local store/queue until they
+      // sync. The server has no record of them, so skip the fetch and keep the
+      // injected placeholder instead of overwriting it with an error.
+      if (isPendingGameId(gameId)) return;
+
       // Mark as loading if we don't have the user yet
       if (!this.games.has(gameId))
         this.games.set(gameId, { status: Status.LOADING });

@@ -5,14 +5,40 @@ import {
   getQueueCount,
   type QueuedGame,
 } from "~/utils/syncQueue";
+import {
+  isOfflineImageRef,
+  getOfflineImageFile,
+  removeOfflineImage,
+} from "~/utils/offlineImages";
 import { WinStatus_V2, type GameRecord } from "~/composables/useGames";
 import { markRaw } from "vue";
 
 const pendingCount = ref(0);
 const syncing = ref(false);
 
+// Shared online state — one set of listeners for the whole app.
+const isOnline = ref(
+  typeof navigator !== "undefined" ? navigator.onLine : true
+);
+let onlineListenersAttached = false;
+function ensureOnlineListeners() {
+  if (onlineListenersAttached || typeof window === "undefined") return;
+  onlineListenersAttached = true;
+  window.addEventListener("online", () => (isOnline.value = true));
+  window.addEventListener("offline", () => (isOnline.value = false));
+}
+
+// Transient message shown when the user tries to reach an online-only page.
+const blockedNotice = ref<string | null>(null);
+let blockedTimer: ReturnType<typeof setTimeout> | null = null;
+function notifyOfflineBlocked(message: string) {
+  blockedNotice.value = message;
+  if (blockedTimer) clearTimeout(blockedTimer);
+  blockedTimer = setTimeout(() => (blockedNotice.value = null), 5000);
+}
+
 export function useOfflineSync() {
-  const isOnline = useOnline();
+  ensureOnlineListeners();
 
   async function refreshCount() {
     try {
@@ -41,17 +67,31 @@ export function useOfflineSync() {
     try {
       for (const entry of queued) {
         try {
-          const result = await $fetch<{ id: string }>("/api/games", {
+          // Upload any locally-stashed images first and swap in the real URLs.
+          const { payload, uploadedRefs } = await uploadQueuedImages(entry.payload);
+
+          await $fetch<{ id: string }>("/api/games", {
             method: "POST",
-            body: entry.payload,
+            body: payload,
             headers: { "Content-Type": "application/json" },
           });
           await removeQueuedGame(entry.id!);
+          for (const ref of uploadedRefs) await removeOfflineImage(ref);
 
           // Remove placeholder from store
           games.games.delete(entry.placeholderId);
-        } catch (err) {
-          console.error("[sync] Failed to sync game:", err);
+        } catch (err: any) {
+          // Distinguish a server rejection (4xx — this game will never sync,
+          // so drop it rather than blocking the queue forever) from a
+          // connectivity failure (stop and retry the whole queue later).
+          const status = err?.statusCode ?? err?.response?.status;
+          if (typeof status === "number" && status >= 400 && status < 500) {
+            console.error("[sync] Server rejected queued game, dropping it:", err);
+            await removeQueuedGame(entry.id!);
+            games.games.delete(entry.placeholderId);
+            continue;
+          }
+          console.error("[sync] Failed to sync game, will retry later:", err);
           break;
         }
       }
@@ -79,13 +119,53 @@ export function useOfflineSync() {
   }
 
   return {
+    isOnline: readonly(isOnline),
     pendingCount: readonly(pendingCount),
     syncing: readonly(syncing),
+    blockedNotice: readonly(blockedNotice),
+    notifyOfflineBlocked,
     queueGame,
     flushQueue,
     refreshCount,
     hydrateQueuedGames,
   };
+}
+
+// Uploads any offline image blobs referenced in a queued game's payload and
+// rewrites image_urls to the real URLs. Returns the rewritten payload plus the
+// refs that were successfully uploaded, so the caller can clean them up once
+// the game itself has synced.
+async function uploadQueuedImages(
+  payloadStr: string
+): Promise<{ payload: string; uploadedRefs: string[] }> {
+  const parsed = JSON.parse(payloadStr);
+  const imageUrls: string[] = parsed.image_urls ?? [];
+  if (!imageUrls.some(isOfflineImageRef)) {
+    return { payload: payloadStr, uploadedRefs: [] };
+  }
+
+  const uploadedRefs: string[] = [];
+  const resolved: string[] = [];
+  for (const url of imageUrls) {
+    if (!isOfflineImageRef(url)) {
+      resolved.push(url);
+      continue;
+    }
+    const file = await getOfflineImageFile(url);
+    if (!file) continue; // blob is gone — skip rather than block the sync
+
+    const formData = new FormData();
+    formData.append("file", file);
+    const urls = await $fetch<string[]>("/api/storage/game-attachments", {
+      method: "POST",
+      body: formData,
+    });
+    resolved.push(...urls);
+    uploadedRefs.push(url);
+  }
+
+  parsed.image_urls = resolved;
+  return { payload: JSON.stringify(parsed), uploadedRefs };
 }
 
 function injectQueuedGameIntoStore(placeholderId: string, payload: string, createdAt: number) {
@@ -193,17 +273,4 @@ function injectQueuedGameIntoStore(placeholderId: string, payload: string, creat
   } catch (err) {
     console.error("[sync] Failed to inject queued game:", err);
   }
-}
-
-function useOnline() {
-  const online = ref(
-    typeof navigator !== "undefined" ? navigator.onLine : true
-  );
-
-  if (typeof window !== "undefined") {
-    window.addEventListener("online", () => (online.value = true));
-    window.addEventListener("offline", () => (online.value = false));
-  }
-
-  return online;
 }

@@ -52,6 +52,7 @@ const route = useRoute();
 const rolesStore = useRoles();
 const inFlight = ref(false);
 const { notification: hapticNotification } = useHaptics();
+const { queueGame } = useOfflineSync();
 const userSettings = await useFetch("/api/settings");
 
 const importGamesDialogVisible = ref(false);
@@ -384,18 +385,45 @@ async function submitGame() {
   ) {
     inFlight.value = true;
 
-    const { data, error } = await useFetch("/api/games", {
-      method: "POST",
-      body: JSON.stringify(formattedGame.value),
-    });
-
-    if (error.value) {
-      inFlight.value = false;
-      console.error(error.value);
-    } else {
+    // Queue the game locally and jump to the optimistic placeholder. The
+    // queue flushes automatically when connectivity returns (see
+    // plugins/offline-sync.client.ts).
+    async function saveOffline() {
+      const placeholderId = await queueGame(
+        JSON.stringify(formattedGame.value), // payload the server expects
+        JSON.stringify(game) // richer data for offline rendering
+      );
       hapticNotification("Success" as any);
       localStorage.removeItem("draftGame");
-      router.push(`/game/${data.value?.id}?new=true`);
+      inFlight.value = false;
+      router.push(`/game/${placeholderId}`);
+    }
+
+    // No connectivity at all — skip the pointless network attempt.
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      await saveOffline();
+      return;
+    }
+
+    try {
+      const data = await $fetch<{ id: string }>("/api/games", {
+        method: "POST",
+        body: formattedGame.value,
+      });
+      hapticNotification("Success" as any);
+      localStorage.removeItem("draftGame");
+      router.push(`/game/${data.id}?new=true`);
+    } catch (err: any) {
+      // If the server was reached and rejected the request, surface the error.
+      // If it was a connectivity failure (no response — flaky network, captive
+      // portal, etc.), fall back to queueing it offline.
+      const status = err?.statusCode ?? err?.response?.status;
+      if (typeof status === "number") {
+        inFlight.value = false;
+        console.error(err);
+      } else {
+        await saveOffline();
+      }
     }
   }
 }

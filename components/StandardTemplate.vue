@@ -18,6 +18,7 @@
                         updates.
                     </p>
                 </div>
+                <SyncStatusBanner />
             </ClientOnly>
             <slot />
         </main>
