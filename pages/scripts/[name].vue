@@ -47,7 +47,7 @@
               </Button>
               <Button
                 component="a"
-                v-if="!script.is_custom_script"
+                v-if="!script.is_custom_script && !script.download_unavailable"
                 :href="script.json_url"
                 icon="json"
               >
@@ -66,7 +66,7 @@
               </Button>
               <Button
                 component="a"
-                v-if="!script.is_custom_script"
+                v-if="!script.is_custom_script && !script.download_unavailable"
                 :href="script.pdf_url"
                 icon="pdf"
               >
@@ -123,7 +123,7 @@
               </Button>
               <Button
                 component="a"
-                v-if="!script.is_custom_script"
+                v-if="!script.is_custom_script && !script.download_unavailable"
                 :href="script.json_url"
                 icon="json"
                 wide
@@ -144,7 +144,7 @@
               </Button>
               <Button
                 component="a"
-                v-if="!script.is_custom_script"
+                v-if="!script.is_custom_script && !script.download_unavailable"
                 :href="script.pdf_url"
                 icon="pdf"
                 wide

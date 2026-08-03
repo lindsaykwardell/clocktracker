@@ -1,6 +1,7 @@
 import { RoleType } from "~/server/generated/prisma/client";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import naturalOrder from "natural-order";
+import { fetchScriptJsonRoles } from "~/server/utils/fetchScriptJsonRoles";
 import { isVersionOne } from "~/server/utils/getScriptVersions";
 import { prisma } from "~/server/utils/prisma";
 
@@ -77,15 +78,14 @@ export default defineEventHandler(async (handler) => {
     }
   }
 
-  // If the characters have not been fetched, fetch them from the json_url.
-  // Custom scripts have an empty json_url, so skip them.
+  // If the characters have not been fetched, fetch them from the botcscripts API.
+  // Custom scripts are skipped.
   for (const script of scripts) {
-    if (script.roles.length === 0 && script.json_url) {
-      const roleIds: { id: string }[] = (
-        await fetch(script.json_url).then((res) => res.json())
-      )
-        .filter((role: { id: string }) => role.id !== "_meta")
-        .map((role: { id: string }) => ({ id: role.id.toLowerCase() }));
+    if (script.roles.length === 0 && !script.download_unavailable) {
+      const roleIds = await fetchScriptJsonRoles(script);
+      if (!roleIds) {
+        continue;
+      }
 
       // filter out roles that we don't have in the database
       const existingRoles = await prisma.role.findMany({

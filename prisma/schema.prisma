@@ -176,9 +176,11 @@ model Script {
   version          String
   author           String
   type             String
-  json_url         String
-  pdf_url          String
-  description      String        @default("")
+  version_pk            Int?
+  json_url              String
+  pdf_url               String
+  download_unavailable  Boolean       @default(false)
+  description           String        @default("")
   background       String?
   json             String?
   user             UserSettings? @relation(fields: [user_id], references: [user_id])
@@ -542,6 +544,12 @@ model City {
 model CronLock {
   task_id    String   @id
   created_at DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model ScriptImportState {
+  id              Int      @id @default(1)
+  last_version_pk Int      @default(0)
+  updated_at      DateTime @updatedAt @db.Timestamptz(6)
 }
 
 model LSCampaign {

@@ -1,5 +1,5 @@
-import { RoleType } from "~/server/generated/prisma/client";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
+import { fetchScriptJsonRoles } from "~/server/utils/fetchScriptJsonRoles";
 import { prisma } from "~/server/utils/prisma";
 
 // This endpoint is specifically for fetching a script by its ID
@@ -54,14 +54,10 @@ export default defineEventHandler(async (handler) => {
   }
 
   // If the characters have not been fetched, fetch them
-  if (!script.is_custom_script) {
-    try {
-      const roleIds: { id: string }[] = (
-        await fetch(script.json_url).then((res) => res.json())
-      )
-        .filter((role: { id: string }) => role.id !== "_meta")
-        .map((role: { id: string }) => ({ id: role.id.toLowerCase() }));
+  if (!script.is_custom_script && !script.download_unavailable) {
+    const roleIds = await fetchScriptJsonRoles(script);
 
+    if (roleIds) {
       const baseRoles = await prisma.role.findMany({
         where: {
           custom_role: false,
@@ -115,29 +111,26 @@ export default defineEventHandler(async (handler) => {
           roles: {
             include: {
               reminders: true,
-            }
+            },
           },
         },
       });
 
       return updated;
-    } catch {
-      // The script database is either down, or the script doesn't exist in the database
-      // We don't want to throw an error here, because we still have the script data
-      // We just won't have the roles
-      console.error(`Failed to fetch roles for script: ${id}`);
-
-      if (script.roles.length === 0) {
-        script.roles = await prisma.role.findMany({
-          where: {
-            custom_role: false,
-          },
-          include: {
-            reminders: true,
-          },
-        });
-      }
     }
+
+    console.error(`Failed to fetch roles for script: ${id}`);
+  }
+
+  if (!script.is_custom_script && script.roles.length === 0) {
+    script.roles = await prisma.role.findMany({
+      where: {
+        custom_role: false,
+      },
+      include: {
+        reminders: true,
+      },
+    });
   }
 
   return script;
