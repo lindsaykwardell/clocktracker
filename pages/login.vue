@@ -101,7 +101,9 @@ async function register() {
 
 async function sendResetPassword() {
   const { error } = await supabase.auth.resetPasswordForEmail(email.value, {
-    redirectTo: `${window.location.origin}/settings`,
+    // Must be a public route — auth middleware on /settings drops ?code=
+    // before the recovery session can be established.
+    redirectTo: `${window.location.origin}/reset-password`,
   });
 
   if (error) {
