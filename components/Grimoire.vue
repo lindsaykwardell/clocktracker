@@ -178,12 +178,14 @@ type Token = {
   used_ghost_vote: boolean;
   role_id: string | null;
   role?: {
+    id?: string;
     token_url: string;
     alternate_token_urls?: string[];
     type: string;
     initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
     ability?: string;
     name?: string;
+    custom_role?: boolean;
   };
   related_role_id: string | null;
   related_role?: { token_url: string; name?: string };
@@ -401,16 +403,19 @@ function selectRoleForToken(role: {
   alternate_token_urls?: string[];
   name: string;
   initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+  custom_role?: boolean;
 }) {
   if (focusedToken.value) {
     if (tokenMode.value === "role") {
       if (role.id) {
         focusedToken.value.role = {
+          id: role.id,
           token_url: role.token_url,
           alternate_token_urls: role.alternate_token_urls,
           initial_alignment: role.initial_alignment,
           type: role.type,
           name: role.name,
+          custom_role: role.custom_role,
         };
         focusedToken.value.role_id = role.id;
         focusedToken.value.alignment = role.initial_alignment;

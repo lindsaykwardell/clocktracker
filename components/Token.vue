@@ -158,8 +158,8 @@ function hashString(value: string) {
 const {
   alignmentSuffix,
   isRoleAssetUrl,
+  resolveRoleBaseUrl,
   roleBaseUrlFromId,
-  roleBaseUrlFromRole,
   sizeAdjustedUrl,
 } = useRoleImage();
 
@@ -273,20 +273,9 @@ const relatedImageSize = computed(() => {
   }
 });
 
-const baseRoleImage = computed(() => {
-  const tokenUrl = props.character?.role?.token_url?.trim();
-  const inferredCustom =
-    props.character?.role?.custom_role ??
-    (tokenUrl ? !isRoleAssetUrl(tokenUrl) : false);
-  if (inferredCustom) {
-    return roleBaseUrlFromRole(props.character?.role);
-  }
-  return (
-    roleBaseUrlFromId(props.character?.role?.id) ??
-    roleBaseUrlFromId(props.character?.role_id) ??
-    tokenUrl
-  );
-});
+const baseRoleImage = computed(() =>
+  resolveRoleBaseUrl(props.character?.role, props.character?.role_id)
+);
 
 // If we're using alignment-specific art, skip shader/filter overlays.
 const usesAlignmentVariant = computed(() => {

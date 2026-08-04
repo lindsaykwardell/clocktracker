@@ -296,7 +296,9 @@ export const useGames = defineStore("games", {
           }
         }
 
-        return Array.from(tags);
+        return Array.from(tags).sort((a, b) =>
+          a.localeCompare(b, undefined, { sensitivity: "base" })
+        );
       };
     },
     getCommunityNamesByPlayer(): (username: string) => string[] {

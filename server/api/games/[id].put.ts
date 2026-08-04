@@ -133,6 +133,7 @@ export default defineEventHandler(async (handler) => {
       player_count: body.player_count,
       traveler_count: body.traveler_count,
       win_v2: body.win_v2,
+      ignore_for_stats: body.ignore_for_stats,
       tags: body.tags,
       notes: body.notes,
       privacy: body.privacy,

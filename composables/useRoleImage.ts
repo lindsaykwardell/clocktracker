@@ -21,6 +21,28 @@ export const useRoleImage = () => {
   const isRoleAssetUrl = (url?: string) =>
     url?.startsWith("/img/role/") ?? false;
 
+  // Empty / transparent placeholders used before a role is chosen.
+  // These must not be treated as custom art or they block role_id resolution.
+  const isPlaceholderTokenUrl = (url?: string | null) => {
+    const trimmed = url?.trim();
+    return !trimmed || trimmed === "/1x1.png";
+  };
+
+  // Custom/homebrew art: explicit flag, or a non-placeholder URL outside /img/role.
+  const isInferredCustomRole = (role?: RoleLike | null) => {
+    if (!role) {
+      return false;
+    }
+    if (role.custom_role != null) {
+      return !!role.custom_role;
+    }
+    const trimmedTokenUrl = role.token_url?.trim();
+    if (isPlaceholderTokenUrl(trimmedTokenUrl)) {
+      return false;
+    }
+    return !isRoleAssetUrl(trimmedTokenUrl);
+  };
+
   // Append the cache-bust param when configured.
   const withAssetVersion = (url?: string) => {
     if (!url || !assetVersion) {
@@ -46,13 +68,29 @@ export const useRoleImage = () => {
       return undefined;
     }
     const trimmedTokenUrl = role.token_url?.trim();
-    const inferredCustom =
-      role.custom_role ??
-      (trimmedTokenUrl ? !isRoleAssetUrl(trimmedTokenUrl) : false);
-    if (inferredCustom) {
+    if (isInferredCustomRole(role)) {
       return trimmedTokenUrl;
     }
-    return roleBaseUrlFromId(role.id) ?? trimmedTokenUrl;
+    return (
+      roleBaseUrlFromId(role.id) ??
+      (isPlaceholderTokenUrl(trimmedTokenUrl) ? undefined : trimmedTokenUrl)
+    );
+  };
+
+  // Resolve from role + optional character-level role_id (demon bluffs/fabled).
+  const resolveRoleBaseUrl = (
+    role?: RoleLike | null,
+    roleId?: string | null
+  ) => {
+    if (isInferredCustomRole(role)) {
+      return role?.token_url?.trim();
+    }
+    const trimmedTokenUrl = role?.token_url?.trim();
+    return (
+      roleBaseUrlFromId(role?.id) ??
+      roleBaseUrlFromId(roleId) ??
+      (isPlaceholderTokenUrl(trimmedTokenUrl) ? undefined : trimmedTokenUrl)
+    );
   };
 
   // Alignment variants are encoded by suffix for local assets (_g/_e).
@@ -125,8 +163,11 @@ export const useRoleImage = () => {
 
   return {
     alignmentSuffix,
+    isInferredCustomRole,
+    isPlaceholderTokenUrl,
     isRoleAssetUrl,
     normalizeRoleId,
+    resolveRoleBaseUrl,
     roleBaseUrlFromId,
     roleBaseUrlFromRole,
     sizeAdjustedUrl,

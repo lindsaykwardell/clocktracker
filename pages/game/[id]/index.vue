@@ -1182,6 +1182,11 @@ const isTaggedWithoutChildGame = computed(() => {
     if (me.value.status !== Status.SUCCESS) return false;
 
     const myUserId = me.value.data.user_id;
+
+    // Already on their profile — they own this game record (logged it
+    // themselves, or claimed a seat earlier and got a child copy).
+    if (game.value.data.user_id === myUserId) return false;
+
     const isTagged = game.value.data.grimoire.some((page) =>
         page.tokens.some(
             (token) => token.player_id === myUserId,
