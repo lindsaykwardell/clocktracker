@@ -86,7 +86,7 @@
             class="rounded-full shadow-lg w-36 h-36 md:w-48 md:h-48 aspect-square bg-stone-200 dark:bg-stone-800 border border-stone-400"
           />
           <p class="text-center text-sm text-stone-400 text-balance">
-            No eligable character.
+            No eligible character.
           </p>
         </div>
       </div>
@@ -134,7 +134,7 @@
             class="rounded-full shadow-lg w-36 h-36 md:w-48 md:h-48 aspect-square bg-stone-200 dark:bg-stone-800 border border-stone-400"
           />
           <p class="text-center text-sm text-stone-400 text-balance">
-            No eligable character.
+            No eligible character.
           </p>
         </div>
       </div>
