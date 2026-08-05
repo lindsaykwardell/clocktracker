@@ -9,6 +9,10 @@ type ScriptLookup = Pick<
   "id" | "script_id" | "version" | "version_pk" | "is_custom_script"
 >;
 
+function isOfficialBotcScript(script: ScriptLookup): boolean {
+  return !script.is_custom_script && /^\d+$/.test(script.script_id);
+}
+
 async function markDownloadUnavailable(scriptId: number, url: string, status: number) {
   console.error(
     `Script JSON unavailable (${status}) for script ${scriptId}: ${url}`
@@ -75,7 +79,7 @@ async function resolveVersionPk(script: ScriptLookup): Promise<number | null> {
 export async function fetchScriptJsonRoles(
   script: ScriptLookup
 ): Promise<{ id: string }[] | null> {
-  if (script.is_custom_script) {
+  if (!isOfficialBotcScript(script)) {
     return null;
   }
 

@@ -1,7 +1,5 @@
-import { PrivacySetting, type Script } from "~/server/generated/prisma/client";
+import { type Script } from "~/server/generated/prisma/client";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
-import axios from "axios";
-import * as cheerio from "cheerio";
 import { prisma } from "./prisma";
 
 export async function getScriptVersions(script: Script, me: User | null) {
@@ -70,16 +68,3 @@ export function isVersionOne(version: string): boolean {
 }
 
 const versionOne = ["1.0.0", "0.0.1", "0.0.0"];
-
-async function fetchVersions(id: string) {
-  const response = await axios.get(`https://botcscripts.com/script/${id}`);
-  const $ = cheerio.load(response.data);
-  // const description = $("div#notes").text();
-  const versions: string[] = [];
-  $("select[name=selected_version] option").each((index, element) => {
-    const version = $(element).text().trim();
-    versions.push(version);
-  });
-
-  return versions;
-}
