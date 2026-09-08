@@ -1,9 +1,11 @@
 import { test, expect } from "@playwright/test";
 import { faker } from "@faker-js/faker";
-import { PrismaClient, PrivacySetting } from "@prisma/client";
+import { PrismaClient, PrivacySetting } from "../../server/generated/prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
-const prisma = new PrismaClient();
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
+const prisma = new PrismaClient({ adapter });
 
 interface TestUserDetails {
   email: string;

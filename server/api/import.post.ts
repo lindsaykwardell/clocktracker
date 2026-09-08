@@ -5,7 +5,7 @@ import {
   LocationType,
   Role,
   WinStatus_V2,
-} from "@prisma/client";
+} from "~/server/generated/prisma/client";
 import papaparse from "papaparse";
 import { prisma } from "~/server/utils/prisma";
 

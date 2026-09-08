@@ -1,4 +1,4 @@
-import { RoleType } from "@prisma/client";
+import { RoleType } from "~/server/generated/prisma/client";
 import { User } from "@supabase/supabase-js";
 import { prisma } from "~/server/utils/prisma";
 

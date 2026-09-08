@@ -1,4 +1,4 @@
-import { Alignment, WinStatus_V2 } from "@prisma/client";
+import { Alignment, WinStatus_V2 } from "~/server/generated/prisma/client";
 // @ts-ignore
 import dayjs from "dayjs";
 import { winRateByRole } from "~/server/utils/stats";

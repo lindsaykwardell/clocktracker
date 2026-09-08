@@ -7,7 +7,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { Doughnut } from "vue-chartjs";
-import type { Game, Character } from "@prisma/client";
+import type { Game, Character } from "~/server/generated/prisma/client";
 import { chartColors } from "~/composables/useChartColors";
 
 type Alignment = "GOOD" | "EVIL" | null;

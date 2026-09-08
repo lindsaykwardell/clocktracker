@@ -5,8 +5,8 @@ import type {
   Token,
   ReminderToken,
   GrimoireEvent,
-} from "@prisma/client";
-import { PrivacySetting } from "@prisma/client";
+} from "~/server/generated/prisma/client";
+import { PrivacySetting } from "~/server/generated/prisma/client";
 import { User } from "@supabase/supabase-js";
 
 export type FullCharacter = Character & {

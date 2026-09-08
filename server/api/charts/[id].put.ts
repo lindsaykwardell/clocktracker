@@ -1,5 +1,5 @@
 import type { User } from "@supabase/supabase-js";
-import { Chart } from "@prisma/client";
+import { Chart } from "~/server/generated/prisma/client";
 import { prisma } from "~/server/utils/prisma";
 
 export default defineEventHandler(async (handler) => {

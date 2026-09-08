@@ -149,7 +149,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import type { Game, Character } from "@prisma/client";
+import type { Game, Character } from "~/server/generated/prisma/client";
 
 type RoleType = string;
 

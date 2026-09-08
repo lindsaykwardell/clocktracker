@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import type { FetchStatus } from "./useFetchStatus";
-import type { Chart } from "@prisma/client";
+import type { Chart } from "~/server/generated/prisma/client";
 import type { RoleStatCardRecord } from "~/composables/useRoleStatCards";
 
 export enum PrivacySetting {

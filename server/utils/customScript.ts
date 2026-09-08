@@ -1,4 +1,4 @@
-import { Alignment, ReminderType, RoleType } from "@prisma/client";
+import { Alignment, ReminderType, RoleType } from "~/server/generated/prisma/client";
 import { User } from "@supabase/supabase-js";
 import { nanoid } from "nanoid";
 import { prisma } from "./prisma";

@@ -1,4 +1,4 @@
-import { WhoCanRegister } from "@prisma/client";
+import { WhoCanRegister } from "~/server/generated/prisma/client";
 import {
   ActionRowBuilder,
   ButtonBuilder,

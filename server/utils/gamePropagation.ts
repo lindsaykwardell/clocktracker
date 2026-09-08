@@ -1,4 +1,4 @@
-import { Alignment, GrimoireEvent, GrimoireEventType } from "@prisma/client";
+import { Alignment, GrimoireEvent, GrimoireEventType } from "~/server/generated/prisma/client";
 
 // Shared by games.post.ts, games/[id].put.ts, and games.put.ts, which all
 // need to map a game's grimoire_events onto a nested Prisma create() input

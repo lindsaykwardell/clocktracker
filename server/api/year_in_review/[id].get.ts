@@ -4,7 +4,7 @@ import {
   Role,
   RoleType,
   WinStatus_V2,
-} from "@prisma/client";
+} from "~/server/generated/prisma/client";
 import { User } from "@supabase/supabase-js";
 import dayjs from "dayjs";
 import { prisma } from "~/server/utils/prisma";

@@ -177,7 +177,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import type { Game, Character } from "@prisma/client";
+import type { Game, Character } from "~/server/generated/prisma/client";
 import { chartColors } from "~/composables/useChartColors";
 
 // Minimum number of games required for a character to be considered in best/worst performance.

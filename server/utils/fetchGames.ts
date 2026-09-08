@@ -1,5 +1,5 @@
 import type { User } from "@supabase/supabase-js";
-import { PrivacySetting } from "@prisma/client";
+import { PrivacySetting } from "~/server/generated/prisma/client";
 import { anonymizeGame, GameRecord } from "~/server/utils/anonymizeGame";
 import { prisma } from "./prisma";
 

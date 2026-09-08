@@ -4,7 +4,7 @@ import {
   WinStatus_V2,
   PrivacySetting,
   type GameEndTrigger,
-} from "@prisma/client";
+} from "~/server/generated/prisma/client";
 import { prisma } from "~/server/utils/prisma";
 import {
   getTaggedPlayerIds,

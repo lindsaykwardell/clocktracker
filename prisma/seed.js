@@ -1,6 +1,7 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
-const { PrismaClient, WinStatus, WinStatus_V2 } = require("@prisma/client");
+const { PrismaClient, WinStatus, WinStatus_V2 } = require("../server/generated/prisma/client");
+const { PrismaPg } = require("@prisma/adapter-pg");
 const { faker } = require("@faker-js/faker");
 const { v4: uuidv4 } = require("uuid");
 const dayjs = require("dayjs");
@@ -8,7 +9,8 @@ const { roles, roleNames, reminders } = require("./roles");
 const citySeed = require("./city-seed.json");
 const scripts = require("./scripts.json");
 
-const prisma = new PrismaClient();
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+const prisma = new PrismaClient({ adapter });
 
 const existingRoleIds = roles.map((role) => ({
   id: role.id,

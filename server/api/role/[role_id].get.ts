@@ -1,4 +1,4 @@
-import { Alignment, WinStatus_V2 } from "@prisma/client";
+import { Alignment, WinStatus_V2 } from "~/server/generated/prisma/client";
 import dayjs from "dayjs";
 import { prisma } from "~/server/utils/prisma";
 

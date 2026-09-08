@@ -1,4 +1,4 @@
-import { Alignment, Role, WinStatus_V2 } from "@prisma/client";
+import { Alignment, Role, WinStatus_V2 } from "~/server/generated/prisma/client";
 import { GameRecord } from "./anonymizeGame";
 
 export function winRateByRole(

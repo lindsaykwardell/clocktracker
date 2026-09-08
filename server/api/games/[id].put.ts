@@ -9,7 +9,7 @@ import {
   Fabled,
   ReminderToken,
   GrimoireEvent,
-} from "@prisma/client";
+} from "~/server/generated/prisma/client";
 import { prisma } from "~/server/utils/prisma";
 import {
   mapGrimoireEventsForCreate,

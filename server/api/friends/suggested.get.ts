@@ -1,4 +1,4 @@
-import { PrivacySetting, UserSettings } from "@prisma/client";
+import { PrivacySetting, UserSettings } from "~/server/generated/prisma/client";
 import { User } from "@supabase/supabase-js";
 import naturalOrder from "natural-order";
 import { prisma } from "~/server/utils/prisma";

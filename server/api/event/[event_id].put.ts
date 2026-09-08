@@ -1,4 +1,4 @@
-import { LocationType, WhoCanRegister } from "@prisma/client";
+import { LocationType, WhoCanRegister } from "~/server/generated/prisma/client";
 import { User } from "@supabase/supabase-js";
 import { prisma } from "~/server/utils/prisma";
 
