@@ -1,12 +1,10 @@
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["fullTextSearch"]
+  provider = "prisma-client"
+  output   = "../server/generated/prisma"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_DATABASE_URL")
+  provider = "postgresql"
 }
 
 model FeatureFlag {
@@ -16,60 +14,62 @@ model FeatureFlag {
   active                 Boolean        @default(false)
   active_for             UserSettings[]
   enabled_for_supporters Boolean        @default(false)
+  rollout_percentage     Int?
   effective_date         DateTime?
   created_at             DateTime       @default(now()) @db.Timestamptz(6)
 }
 
 model Game {
-  id                          String         @id @default(uuid())
-  bgg_id                      Int?           @unique
-  ls_game_id                  Int?           @unique
-  ls_game                     LSGame?        @relation(fields: [ls_game_id], references: [id])
-  user_id                     String
-  created_at                  DateTime?      @default(now()) @db.Timestamptz(6)
-  date                        DateTime       @default(now()) @db.Date
-  script                      String
-  script_id                   Int?
-  location_type               LocationType   @default(ONLINE)
-  location                    String
-  community_name              String         @default("")
-  community                   Community?     @relation(fields: [community_id], references: [id])
-  community_id                Int?
-  player_count                Int?
-  traveler_count              Int?
-  player_characters           Character[]
-  win_v2                      WinStatus_V2   @default(NOT_RECORDED)
-  end_trigger                 GameEndTrigger @default(NOT_RECORDED)
-  end_trigger_type            GameEndTriggerType?
-  end_trigger_cause           GameEndTriggerCause?
-  end_trigger_role            Role?          @relation("GameEndTriggerRole", fields: [end_trigger_role_id], references: [id])
-  end_trigger_role_id         String?
-  end_trigger_note            String         @default("")
+  id                         String               @id @default(uuid())
+  bgg_id                     Int?                 @unique
+  ls_game_id                 Int?                 @unique
+  ls_game                    LSGame?              @relation(fields: [ls_game_id], references: [id])
+  user_id                    String
+  created_at                 DateTime?            @default(now()) @db.Timestamptz(6)
+  date                       DateTime             @default(now()) @db.Date
+  script                     String
+  script_id                  Int?
+  location_type              LocationType         @default(ONLINE)
+  location                   String
+  community_name             String               @default("")
+  community                  Community?           @relation(fields: [community_id], references: [id])
+  community_id               Int?
+  player_count               Int?
+  traveler_count             Int?
+  player_characters          Character[]
+  win_v2                     WinStatus_V2         @default(NOT_RECORDED)
+  end_trigger                GameEndTrigger       @default(NOT_RECORDED)
+  end_trigger_type           GameEndTriggerType?
+  end_trigger_cause          GameEndTriggerCause?
+  end_trigger_role           Role?                @relation("GameEndTriggerRole", fields: [end_trigger_role_id], references: [id])
+  end_trigger_role_id        String?
+  end_trigger_note           String               @default("")
   end_trigger_participant_id String?
-  notes                       String
-  image_urls                  String[]
-  old_image_urls              String[]
-  storyteller                 String?
-  co_storytellers             String[]
-  user                        UserSettings?  @relation(fields: [user_id], references: [user_id])
-  associated_script           Script?        @relation(fields: [script_id], references: [id])
-  grimoire                    Grimoire[]
-  grimoire_id                 Int?           @unique
-  is_storyteller              Boolean        @default(false)
-  parent_game                 Game?          @relation("AssociatedGame", fields: [parent_game_id], references: [id])
-  parent_game_id              String?
-  child_games                 Game[]         @relation("AssociatedGame")
-  ignore_for_stats            Boolean        @default(false)
-  tags                        String[]
-  waiting_for_confirmation    Boolean        @default(false)
-  deleted                     Boolean        @default(false)
-  deleted_date                DateTime?
-  privacy                     PrivacySetting @default(PUBLIC)
-  demon_bluffs                DemonBluff[]
-  fabled                      Fabled[]
-  grimoire_events             GrimoireEvent[]
-  favorite                    FavoriteGame?
-  favorite_id                 Int?           @unique
+  notes                      String
+  image_urls                 String[]
+  old_image_urls             String[]
+  storyteller                String?
+  co_storytellers            String[]
+  user                       UserSettings?        @relation(fields: [user_id], references: [user_id])
+  associated_script          Script?              @relation(fields: [script_id], references: [id])
+  grimoire                   Grimoire[]
+  grimoire_id                Int?                 @unique
+  is_storyteller             Boolean              @default(false)
+  parent_game                Game?                @relation("AssociatedGame", fields: [parent_game_id], references: [id])
+  parent_game_id             String?
+  child_games                Game[]               @relation("AssociatedGame")
+  ignore_for_stats           Boolean              @default(false)
+  tags                       String[]
+  waiting_for_confirmation   Boolean              @default(false)
+  deleted                    Boolean              @default(false)
+  deleted_date               DateTime?
+  privacy                    PrivacySetting       @default(PUBLIC)
+  demon_bluffs               DemonBluff[]
+  fabled                     Fabled[]
+  grimoire_events            GrimoireEvent[]
+  favorite                   FavoriteGame?
+  favorite_id                Int?                 @unique
+  grimoire_snapshots         GrimoireSnapshot[]
 
   @@index([user_id])
 }
@@ -139,25 +139,25 @@ enum GrimoireEventType {
 }
 
 model GrimoireEvent {
-  id                Int              @id @default(autoincrement())
-  game              Game             @relation(fields: [game_id], references: [id])
+  id                Int                 @id @default(autoincrement())
+  game              Game                @relation(fields: [game_id], references: [id])
   game_id           String
   grimoire_page     Int
-  participant_id    String           @default("")
-  event_type        GrimoireEventType @default(NOT_RECORDED)
+  participant_id    String              @default("")
+  event_type        GrimoireEventType   @default(NOT_RECORDED)
   status_source     String?
   cause             GrimoireEventCause?
   by_participant_id String?
-  player_name       String           @default("")
+  player_name       String              @default("")
   role_id           String?
-  role              Role?            @relation(fields: [role_id], references: [id])
+  role              Role?               @relation(fields: [role_id], references: [id])
   by_role_id        String?
-  by_role           Role?            @relation("GrimoireEventByRole", fields: [by_role_id], references: [id])
+  by_role           Role?               @relation("GrimoireEventByRole", fields: [by_role_id], references: [id])
   old_role_id       String?
   new_role_id       String?
   old_alignment     Alignment?
   new_alignment     Alignment?
-  created_at        DateTime         @default(now()) @db.Timestamptz(6)
+  created_at        DateTime            @default(now()) @db.Timestamptz(6)
 }
 
 model Grimoire {
@@ -165,6 +165,16 @@ model Grimoire {
   created_at DateTime @default(now()) @db.Timestamptz(6)
   tokens     Token[]
   game       Game[]
+}
+
+model GrimoireSnapshot {
+  id         Int      @id @default(autoincrement())
+  game_id    String
+  game       Game     @relation(fields: [game_id], references: [id])
+  snapshot   Json
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([game_id])
 }
 
 model Token {
@@ -188,12 +198,12 @@ model Token {
 }
 
 model ReminderToken {
-  id         Int      @id @default(autoincrement())
-  reminder   String   @default("")
+  id         Int          @id @default(autoincrement())
+  reminder   String       @default("")
   type       ReminderType @default(CUSTOM)
-  token_url  String   @default("")
-  created_at DateTime @default(now()) @db.Timestamptz(6)
-  token      Token?   @relation(fields: [token_id], references: [id])
+  token_url  String       @default("")
+  created_at DateTime     @default(now()) @db.Timestamptz(6)
+  token      Token?       @relation(fields: [token_id], references: [id])
   token_id   Int?
 }
 
@@ -231,63 +241,65 @@ model Fabled {
 }
 
 model Script {
-  id               Int           @id @default(autoincrement())
-  script_id        String        @default(uuid()) // This is EITHER the botcscripts.com ID, or a custom script ID
-  is_custom_script Boolean       @default(false)
-  logo             String?
-  website          String?
-  name             String
-  version          String
-  author           String
-  type             String
-  json_url         String
-  pdf_url          String
-  description      String        @default("")
-  background       String?
-  json             String?
-  user             UserSettings? @relation(fields: [user_id], references: [user_id])
-  user_id          String?
-  roles            Role[]
-  games            Game[]
-  events           Event[]
-  ls_game          LSGame?
+  id                   Int           @id @default(autoincrement())
+  script_id            String        @default(uuid()) // This is EITHER the botcscripts.com ID, or a custom script ID
+  is_custom_script     Boolean       @default(false)
+  logo                 String?
+  website              String?
+  name                 String
+  version              String
+  author               String
+  type                 String
+  version_pk           Int?
+  json_url             String
+  pdf_url              String
+  download_unavailable Boolean       @default(false)
+  description          String        @default("")
+  background           String?
+  json                 String?
+  user                 UserSettings? @relation(fields: [user_id], references: [user_id])
+  user_id              String?
+  roles                Role[]
+  games                Game[]
+  events               Event[]
+  ls_game              LSGame?
 
   @@unique([script_id, version])
 }
 
 model Role {
-  id                   String         @id
+  id                   String          @id
   name                 String
   initial_alignment    Alignment
-  ability              String         @default("")
+  ability              String          @default("")
   token_url            String
   alternate_token_urls String[]
   type                 RoleType
-  custom_role          Boolean        @default(false)
+  custom_role          Boolean         @default(false)
   scripts              Script[]
-  related_character    Character[]    @relation("RelatedRole")
+  related_character    Character[]     @relation("RelatedRole")
   character            Character[]
   tokens               Token[]
-  related_tokens       Token[]        @relation("RelatedToken")
+  related_tokens       Token[]         @relation("RelatedToken")
   demon_bluffs         DemonBluff[]
   fabled               Fabled[]
-  end_trigger_games    Game[]         @relation("GameEndTriggerRole")
+  end_trigger_games    Game[]          @relation("GameEndTriggerRole")
   grimoire_events      GrimoireEvent[]
-  grimoire_by_events   GrimoireEvent[]   @relation("GrimoireEventByRole")
+  grimoire_by_events   GrimoireEvent[] @relation("GrimoireEventByRole")
   role_stat_cards      RoleStatCard[]
   reminders            RoleReminder[]
   ls_campaigns         LSCampaign[]
-  ls_games             LSGame[]       @relation("Games")
-  ls_game_deaths       LSGame[]       @relation("Deaths")
-  ls_game_retires      LSGame[]       @relation("Retire")
+  ls_games             LSGame[]        @relation("Games")
+  ls_game_deaths       LSGame[]        @relation("Deaths")
+  ls_game_retires      LSGame[]        @relation("Retire")
 }
 
 model RoleReminder {
-  id       Int    @id @default(autoincrement())
+  id       Int          @id @default(autoincrement())
   reminder String
   type     ReminderType @default(OFFICIAL)
   role_id  String
-  role     Role   @relation(fields: [role_id], references: [id])
+  role     Role         @relation(fields: [role_id], references: [id])
 
   @@unique([role_id, reminder])
 }
@@ -320,50 +332,66 @@ enum LocationType {
 }
 
 model UserSettings {
-  user_id                 String                  @id
-  discord_id              String?                 @unique
-  username                String                  @unique
-  display_name            String
-  finished_welcome        Boolean                 @default(false)
-  avatar                  String?
-  old_avatar              String?
-  email                   String                  @unique @default("your@address.here")
-  pronouns                String?
-  bio                     String                  @default("")
-  location                String?
-  city_id                 String?
-  city                    City?                   @relation(fields: [city_id], references: [id])
-  is_admin                Boolean                 @default(false)
-  privacy                 PrivacySetting          @default(PUBLIC)
-  created_at              DateTime?               @default(now()) @db.Timestamptz(6)
-  games                   Game[]
-  friend_requests         FriendRequest[]         @relation("Receiver")
-  sent_friend_requests    FriendRequest[]         @relation("Sender")
-  friends                 Friend[]                @relation("Friend")
-  friend_of               Friend[]                @relation("FriendOf")
-  token                   Token[]
-  charts                  Chart[]
-  role_stat_cards         RoleStatCard[]
-  bgg_username            String?
-  bgg_cookies             String[]
-  enable_bgstats          Boolean                 @default(false)
-  opt_into_testing        Boolean                 @default(false)
-  disable_tutorials       Boolean                 @default(false)
-  communities             Community[]             @relation("CommunityMember")
-  community_admin         Community[]             @relation("CommunityAdmin")
-  community_banned        Community[]             @relation("CommunityBanned")
-  community_join_requests Community[]             @relation("CommunityJoinRequest")
-  community_posts         CommunityPost[]
-  events                  EventAttendee[]
-  FeatureFlag             FeatureFlag[]
-  waitlisted_events       EventWaitlistAttendee[]
-  payments                KoFiPayment[]
-  uploaded_scripts        Script[]
-  dids                    Did[]
-  favorites               FavoriteGame[]
-  created_events          Event[]
-  calendar                SharedCalendarLink?
-  year_reviews            YearInReview[]
+  user_id                      String                      @id
+  discord_id                   String?                     @unique
+  username                     String                      @unique
+  display_name                 String
+  finished_welcome             Boolean                     @default(false)
+  avatar                       String?
+  old_avatar                   String?
+  email                        String                      @unique @default("your@address.here")
+  pronouns                     String?
+  bio                          String                      @default("")
+  location                     String?
+  city_id                      String?
+  city                         City?                       @relation(fields: [city_id], references: [id])
+  is_admin                     Boolean                     @default(false)
+  privacy                      PrivacySetting              @default(PUBLIC)
+  created_at                   DateTime?                   @default(now()) @db.Timestamptz(6)
+  games                        Game[]
+  friend_requests              FriendRequest[]             @relation("Receiver")
+  sent_friend_requests         FriendRequest[]             @relation("Sender")
+  friends                      Friend[]                    @relation("Friend")
+  friend_of                    Friend[]                    @relation("FriendOf")
+  token                        Token[]
+  charts                       Chart[]
+  role_stat_cards              RoleStatCard[]
+  bgg_username                 String?
+  bgg_cookies                  String[]
+  enable_bgstats               Boolean                     @default(false)
+  opt_into_testing             Boolean                     @default(false)
+  disable_tutorials            Boolean                     @default(false)
+  communities                  Community[]                 @relation("CommunityMember")
+  community_admin              Community[]                 @relation("CommunityAdmin")
+  community_banned             Community[]                 @relation("CommunityBanned")
+  community_join_requests      Community[]                 @relation("CommunityJoinRequest")
+  community_posts              CommunityPost[]
+  events                       EventAttendee[]
+  FeatureFlag                  FeatureFlag[]
+  waitlisted_events            EventWaitlistAttendee[]
+  payments                     KoFiPayment[]
+  uploaded_scripts             Script[]
+  dids                         Did[]
+  favorites                    FavoriteGame[]
+  created_events               Event[]
+  year_reviews                 YearInReview[]
+  forum_group_memberships      UserGroupMembership[]
+  forum_threads                ForumThread[]
+  forum_posts                  ForumPost[]
+  forum_bans                   ForumBan[]                  @relation("BannedUser")
+  forum_bans_issued            ForumBan[]                  @relation("BannedByUser")
+  forum_reactions              ForumPostReaction[]
+  forum_reports                ForumPostReport[]           @relation("ReportedBy")
+  forum_reports_resolved       ForumPostReport[]           @relation("ResolvedBy")
+  forum_edits                  ForumPostEdit[]
+  forum_mod_logs               ForumModLog[]
+  forum_subscriptions          ForumThreadSubscription[]
+  forum_category_subscriptions ForumCategorySubscription[]
+  forum_reads                  ForumThreadRead[]
+  forum_first_visit_at         DateTime?                   @db.Timestamptz(6)
+  push_notifications_enabled   Boolean                     @default(false)
+  push_subscriptions           PushSubscription[]
+  fcm_tokens                   FcmToken[]
 }
 
 model Did {
@@ -384,12 +412,6 @@ model KoFiPayment {
   expires_at              DateTime
   user                    UserSettings? @relation(fields: [user_id], references: [user_id])
   user_id                 String?
-}
-
-model SharedCalendarLink {
-  id      String       @id
-  user    UserSettings @relation(fields: [user_id], references: [user_id])
-  user_id String       @unique
 }
 
 enum PrivacySetting {
@@ -622,6 +644,12 @@ model CronLock {
   created_at DateTime @default(now()) @db.Timestamptz(6)
 }
 
+model ScriptImportState {
+  id              Int      @id @default(1)
+  last_version_pk Int      @default(0)
+  updated_at      DateTime @updatedAt @db.Timestamptz(6)
+}
+
 model LSCampaign {
   id                    String   @id
   title                 String
@@ -656,4 +684,235 @@ model LSGame {
   script_id      Int?         @unique
 
   @@unique([id, game_number])
+}
+
+// ---- Forum ----
+
+model UserGroup {
+  id           String                @id @default(uuid())
+  name         String                @unique
+  permissions  String[]
+  restrictions String[]              @default([])
+  is_default   Boolean               @default(false)
+  color        String?
+  created_at   DateTime              @default(now()) @db.Timestamptz(6)
+  members      UserGroupMembership[]
+  categories   CategoryAccess[]
+}
+
+model UserGroupMembership {
+  id          String       @id @default(uuid())
+  user_id     String
+  group_id    String
+  assigned_at DateTime     @default(now()) @db.Timestamptz(6)
+  user        UserSettings @relation(fields: [user_id], references: [user_id])
+  group       UserGroup    @relation(fields: [group_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, group_id])
+}
+
+model ForumCategoryGroup {
+  id         String          @id @default(uuid())
+  name       String
+  sort_order Int             @default(0)
+  created_at DateTime        @default(now()) @db.Timestamptz(6)
+  categories ForumCategory[]
+}
+
+model ForumCategory {
+  id               String                      @id @default(uuid())
+  name             String
+  slug             String                      @unique
+  description      String?
+  sort_order       Int                         @default(0)
+  is_private       Boolean                     @default(false)
+  mod_posting_only Boolean                     @default(false)
+  is_announcement  Boolean                     @default(false)
+  created_at       DateTime                    @default(now()) @db.Timestamptz(6)
+  group_id         String?
+  group            ForumCategoryGroup?         @relation(fields: [group_id], references: [id])
+  threads          ForumThread[]
+  access           CategoryAccess[]
+  bans             ForumBan[]
+  subscriptions    ForumCategorySubscription[]
+}
+
+model CategoryAccess {
+  id          String        @id @default(uuid())
+  category_id String
+  group_id    String
+  can_view    Boolean       @default(true)
+  can_post    Boolean       @default(true)
+  category    ForumCategory @relation(fields: [category_id], references: [id], onDelete: Cascade)
+  group       UserGroup     @relation(fields: [group_id], references: [id], onDelete: Cascade)
+
+  @@unique([category_id, group_id])
+}
+
+model ForumThread {
+  id               String                    @id @default(uuid())
+  title            String
+  category_id      String
+  author_id        String
+  is_pinned        Boolean                   @default(false)
+  is_locked        Boolean                   @default(false)
+  created_at       DateTime                  @default(now()) @db.Timestamptz(6)
+  last_post_at     DateTime                  @default(now()) @db.Timestamptz(6)
+  deleted_at       DateTime?                 @db.Timestamptz(6)
+  github_issue_url String?
+  category         ForumCategory             @relation(fields: [category_id], references: [id])
+  author           UserSettings              @relation(fields: [author_id], references: [user_id])
+  posts            ForumPost[]
+  subscriptions    ForumThreadSubscription[]
+  reads            ForumThreadRead[]
+
+  @@index([category_id, deleted_at])
+  @@index([last_post_at])
+}
+
+model ForumPost {
+  id         String              @id @default(uuid())
+  body       String
+  thread_id  String
+  author_id  String
+  created_at DateTime            @default(now()) @db.Timestamptz(6)
+  edited_at  DateTime?           @db.Timestamptz(6)
+  deleted_at DateTime?           @db.Timestamptz(6)
+  thread     ForumThread         @relation(fields: [thread_id], references: [id], onDelete: Cascade)
+  author     UserSettings        @relation(fields: [author_id], references: [user_id])
+  reactions  ForumPostReaction[]
+  reports    ForumPostReport[]
+  edits      ForumPostEdit[]
+
+  @@index([thread_id, deleted_at])
+}
+
+model ForumCategorySubscription {
+  id          String        @id @default(uuid())
+  category_id String
+  user_id     String
+  created_at  DateTime      @default(now()) @db.Timestamptz(6)
+  category    ForumCategory @relation(fields: [category_id], references: [id], onDelete: Cascade)
+  user        UserSettings  @relation(fields: [user_id], references: [user_id])
+
+  @@unique([category_id, user_id])
+  @@index([user_id])
+}
+
+model ForumThreadSubscription {
+  id           String       @id @default(uuid())
+  thread_id    String
+  user_id      String
+  last_read_at DateTime     @default(now()) @db.Timestamptz(6)
+  created_at   DateTime     @default(now()) @db.Timestamptz(6)
+  thread       ForumThread  @relation(fields: [thread_id], references: [id], onDelete: Cascade)
+  user         UserSettings @relation(fields: [user_id], references: [user_id])
+
+  @@unique([thread_id, user_id])
+  @@index([user_id])
+}
+
+model ForumThreadRead {
+  id           String       @id @default(uuid())
+  thread_id    String
+  user_id      String
+  last_read_at DateTime     @default(now()) @db.Timestamptz(6)
+  thread       ForumThread  @relation(fields: [thread_id], references: [id], onDelete: Cascade)
+  user         UserSettings @relation(fields: [user_id], references: [user_id])
+
+  @@unique([thread_id, user_id])
+  @@index([user_id])
+}
+
+model ForumPostEdit {
+  id            String       @id @default(uuid())
+  post_id       String
+  previous_body String
+  edited_by     String
+  created_at    DateTime     @default(now()) @db.Timestamptz(6)
+  post          ForumPost    @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  editor        UserSettings @relation(fields: [edited_by], references: [user_id])
+
+  @@index([post_id])
+}
+
+model ForumPostReaction {
+  id         String       @id @default(uuid())
+  post_id    String
+  user_id    String
+  emoji      String
+  created_at DateTime     @default(now()) @db.Timestamptz(6)
+  post       ForumPost    @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  user       UserSettings @relation(fields: [user_id], references: [user_id])
+
+  @@unique([post_id, user_id, emoji])
+  @@index([post_id])
+}
+
+model ForumPostReport {
+  id          String        @id @default(uuid())
+  post_id     String
+  reporter_id String
+  reason      String
+  resolved    Boolean       @default(false)
+  resolved_by String?
+  resolved_at DateTime?     @db.Timestamptz(6)
+  created_at  DateTime      @default(now()) @db.Timestamptz(6)
+  post        ForumPost     @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  reporter    UserSettings  @relation("ReportedBy", fields: [reporter_id], references: [user_id])
+  resolver    UserSettings? @relation("ResolvedBy", fields: [resolved_by], references: [user_id])
+
+  @@index([post_id])
+  @@index([resolved])
+}
+
+model ForumModLog {
+  id          String       @id @default(uuid())
+  action      String
+  actor_id    String
+  target_type String
+  target_id   String
+  details     String?
+  created_at  DateTime     @default(now()) @db.Timestamptz(6)
+  actor       UserSettings @relation(fields: [actor_id], references: [user_id])
+
+  @@index([created_at])
+}
+
+model PushSubscription {
+  id         String       @id @default(uuid())
+  user_id    String
+  endpoint   String
+  p256dh     String
+  auth       String
+  created_at DateTime     @default(now()) @db.Timestamptz(6)
+  user       UserSettings @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@unique([user_id, endpoint])
+  @@index([user_id])
+}
+
+model FcmToken {
+  user_id    String
+  token      String
+  created_at DateTime     @default(now()) @db.Timestamptz(6)
+  user       UserSettings @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  @@id([user_id, token])
+  @@index([user_id])
+}
+
+model ForumBan {
+  id             String         @id @default(uuid())
+  user_id        String
+  category_id    String?
+  reason         String?
+  banned_by      String
+  expires_at     DateTime?      @db.Timestamptz(6)
+  created_at     DateTime       @default(now()) @db.Timestamptz(6)
+  user           UserSettings   @relation("BannedUser", fields: [user_id], references: [user_id])
+  category       ForumCategory? @relation(fields: [category_id], references: [id])
+  banned_by_user UserSettings   @relation("BannedByUser", fields: [banned_by], references: [user_id])
+
+  @@index([user_id])
 }
