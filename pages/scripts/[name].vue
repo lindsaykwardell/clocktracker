@@ -40,6 +40,7 @@
             <div class="md:hidden mt-4 flex flex-wrap justify-center gap-1">
               <Button
                 component="a"
+                v-if="scriptLink"
                 :href="scriptLink"
                 icon="website"
               >
@@ -115,6 +116,7 @@
             <div class="flex flex-col items-center gap-1">
               <Button
                 component="a"
+                v-if="scriptLink"
                 :href="scriptLink"
                 icon="website"
                 wide
@@ -510,9 +512,11 @@ const scriptLink = computed(() => {
   else if (script.value.name === "Sects and Violets")
     return "https://wiki.bloodontheclocktower.com/Sects_%26_Violets";
   else if (script.value.website) return script.value.website;
-  else {
+  else if (script.value.is_custom_script) return undefined;
+  else if (/^\d+$/.test(script.value.script_id)) {
     return `https://botcscripts.com/script/${script.value.script_id}/${script.value.version}`;
   }
+  return undefined;
 });
 
 watch(

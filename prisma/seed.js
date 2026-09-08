@@ -1,5 +1,3 @@
-const axios = require("axios");
-const cheerio = require("cheerio");
 const { PrismaClient, WinStatus, WinStatus_V2 } = require("../server/generated/prisma/client");
 const { PrismaPg } = require("@prisma/adapter-pg");
 const { faker } = require("@faker-js/faker");
