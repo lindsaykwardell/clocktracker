@@ -1,10 +1,12 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../server/generated/prisma"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
 }
 
 datasource db {
-  provider = "postgresql"
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
 }
 
 model FeatureFlag {
