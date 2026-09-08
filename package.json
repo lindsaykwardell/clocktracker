@@ -4,10 +4,10 @@
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
-    "db:reset": "supabase db reset && prisma migrate reset --force",
+    "db:reset": "supabase db reset && prisma migrate reset --force && prisma db seed",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare",
+    "postinstall": "nuxt prepare && prisma generate && node scripts/patch-prisma.js",
     "test": "playwright test"
   },
   "devDependencies": {
@@ -20,17 +20,19 @@
     "@types/formidable": "^3.4.5",
     "@types/node": "^20.16.5",
     "@types/papaparse": "^5.3.14",
+    "@types/pg": "^8.11.0",
     "@types/ua-parser-js": "^0.7.39",
     "@types/uuid": "^10.0.0",
     "@vite-pwa/nuxt": "^1.0.0",
     "nuxt": "^3.14.159",
     "nuxt-bugsnag": "^8.0.0",
     "playwright-core": "^1.52.0",
-    "prisma": "^6.7.0",
+    "prisma": "^7.0.0",
     "progress": "^2.0.3",
     "sass": "^1.79.3",
     "start-server-and-test": "^2.0.8",
     "supabase": "^2.22.12",
+    "tsx": "^4.21.0",
     "typescript": "^5.6.2"
   },
   "dependencies": {
@@ -42,7 +44,8 @@
     "@globalhive/vuejs-tour": "^1.6.1",
     "@headlessui/vue": "^1.7.23",
     "@pinia/nuxt": "^0.11.0",
-    "@prisma/client": "^6.7.0",
+    "@prisma/adapter-pg": "^7.0.0",
+    "@prisma/client": "^7.0.0",
     "@supabase/supabase-js": "^2.49.4",
     "@vueuse/core": "^13.1.0",
     "axios": "^1.7.7",
@@ -55,12 +58,12 @@
     "floating-vue": "^5.2.2",
     "formidable": "^3.5.1",
     "geolib": "^3.3.4",
-    "ics": "^3.8.1",
     "jimp": "^0.22.12",
     "nanoid": "^5.0.7",
     "natural-order": "^2.0.2",
     "nuxt-cron": "^1.6.0",
     "papaparse": "^5.4.1",
+    "pg": "^8.13.0",
     "pinia": "^3.0.2",
     "ua-parser-js": "^1.0.39",
     "uuid": "^11.0.2",
@@ -68,7 +71,7 @@
     "vue-markdown-render": "^2.2.1"
   },
   "prisma": {
-    "seed": "node prisma/seed.js"
+    "seed": "npx tsx prisma/seed.js"
   },
   "overrides": {
     "vue": "latest"
