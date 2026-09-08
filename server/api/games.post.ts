@@ -8,10 +8,14 @@ import {
   DemonBluff,
   Fabled,
   GrimoireEvent,
-  GrimoireEventType,
   ReminderToken,
 } from "@prisma/client";
 import { prisma } from "~/server/utils/prisma";
+import {
+  mapGrimoireEventsForCreate,
+  getTaggedPlayerIds,
+  buildPlayerCharactersForToken,
+} from "~/server/utils/gamePropagation";
 
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
@@ -55,7 +59,8 @@ export default defineEventHandler(async (handler) => {
 
   const incomingGrimoireEvents: GrimoireEvent[] = body.grimoire_events ?? [];
 
-  const newGame = await prisma.game.create({
+  const newGame = await prisma.$transaction(async (tx) => {
+    const newGame = await tx.game.create({
     data: {
       ...gameData,
       date: new Date(body.date),
@@ -70,24 +75,7 @@ export default defineEventHandler(async (handler) => {
         create: [...body.fabled],
       },
       grimoire_events: {
-        create:
-          incomingGrimoireEvents.map((grimoireEvent) => ({
-            grimoire_page: grimoireEvent.grimoire_page,
-            participant_id: grimoireEvent.participant_id,
-            event_type:
-              grimoireEvent.event_type ??
-              GrimoireEventType.NOT_RECORDED,
-            cause: grimoireEvent.cause ?? null,
-            by_participant_id: grimoireEvent.by_participant_id ?? null,
-            player_name: grimoireEvent.player_name ?? "",
-            role_id: grimoireEvent.role_id ?? null,
-            by_role_id: grimoireEvent.by_role_id ?? null,
-            old_role_id: (grimoireEvent as any).old_role_id ?? null,
-            new_role_id: (grimoireEvent as any).new_role_id ?? null,
-            old_alignment: (grimoireEvent as any).old_alignment ?? null,
-            new_alignment: (grimoireEvent as any).new_alignment ?? null,
-            status_source: (grimoireEvent as any).status_source ?? null,
-          })) || [],
+        create: mapGrimoireEventsForCreate(incomingGrimoireEvents),
       },
       grimoire: {
         create: [
@@ -162,52 +150,15 @@ export default defineEventHandler(async (handler) => {
     },
   });
 
-  const taggedPlayers = new Set(
-    newGame.grimoire.flatMap((g) => g.tokens?.map((t) => t.player_id)),
-  );
+  const taggedPlayers = getTaggedPlayerIds(newGame.grimoire, user.id);
 
   for (const id of taggedPlayers) {
-    if (!id || id === user.id) continue;
-
-    // Reduce grimoire to find all tokens that have this player_id
-    const player_characters = newGame.grimoire.reduce(
-      (acc, g) => {
-        const tokens = g.tokens?.filter((t) => t.player_id === id);
-        if (tokens) {
-          for (const token of tokens) {
-            // Avoid duplicating identical consecutive tokens (same role/related/alignment)
-            const lastToken = acc[acc.length - 1];
-            if (
-              lastToken &&
-              lastToken.role_id === token.role_id &&
-              lastToken.related_role_id === token.related_role_id &&
-              lastToken.alignment === token.alignment
-            ) {
-              continue;
-            }
-
-            acc.push({
-              name: token.role?.name || "",
-              alignment: token.alignment,
-              related: token.related_role?.name || "",
-              role_id: token.role_id,
-              related_role_id: token.related_role_id,
-            });
-          }
-        }
-
-        return acc;
-      },
-      [] as {
-        name: string;
-        alignment: Alignment;
-        related: string;
-        role_id: string | null;
-        related_role_id: string | null;
-      }[],
+    const player_characters = buildPlayerCharactersForToken(
+      newGame.grimoire,
+      id,
     );
 
-    await prisma.game.create({
+    await tx.game.create({
       data: {
         ...gameData,
         is_storyteller: false,
@@ -227,24 +178,7 @@ export default defineEventHandler(async (handler) => {
           create: [...body.fabled],
         },
         grimoire_events: {
-          create:
-            incomingGrimoireEvents.map((grimoireEvent) => ({
-              grimoire_page: grimoireEvent.grimoire_page,
-              participant_id: grimoireEvent.participant_id,
-            event_type:
-              grimoireEvent.event_type ??
-              GrimoireEventType.NOT_RECORDED,
-            cause: grimoireEvent.cause ?? null,
-            by_participant_id: grimoireEvent.by_participant_id ?? null,
-            player_name: grimoireEvent.player_name ?? "",
-            role_id: grimoireEvent.role_id ?? null,
-            by_role_id: grimoireEvent.by_role_id ?? null,
-            old_role_id: (grimoireEvent as any).old_role_id ?? null,
-            new_role_id: (grimoireEvent as any).new_role_id ?? null,
-            old_alignment: (grimoireEvent as any).old_alignment ?? null,
-            new_alignment: (grimoireEvent as any).new_alignment ?? null,
-            status_source: (grimoireEvent as any).status_source ?? null,
-          })) || [],
+          create: mapGrimoireEventsForCreate(incomingGrimoireEvents),
         },
         notes: "",
         // map the already created grimoires to the new game
@@ -263,7 +197,7 @@ export default defineEventHandler(async (handler) => {
   for (const storyteller of storytellers) {
     if (storyteller?.includes("@")) {
       // Verify that it's a friend
-      const friend = await prisma.userSettings.findUnique({
+      const friend = await tx.userSettings.findUnique({
         where: {
           username: storyteller.replace("@", ""),
           friends: {
@@ -275,7 +209,7 @@ export default defineEventHandler(async (handler) => {
       });
 
       if (friend !== null) {
-        await prisma.game.create({
+        await tx.game.create({
           data: {
             ...gameData,
             is_storyteller: true,
@@ -285,31 +219,14 @@ export default defineEventHandler(async (handler) => {
             demon_bluffs: {
               create: [...body.demon_bluffs],
             },
-        fabled: {
-          create: [...body.fabled],
-        },
-        grimoire_events: {
-          create:
-            incomingGrimoireEvents.map((grimoireEvent) => ({
-              grimoire_page: grimoireEvent.grimoire_page,
-              participant_id: grimoireEvent.participant_id,
-            event_type:
-              grimoireEvent.event_type ??
-              GrimoireEventType.NOT_RECORDED,
-            cause: grimoireEvent.cause ?? null,
-            by_participant_id: grimoireEvent.by_participant_id ?? null,
-            player_name: grimoireEvent.player_name ?? "",
-            role_id: grimoireEvent.role_id ?? null,
-            by_role_id: grimoireEvent.by_role_id ?? null,
-            old_role_id: (grimoireEvent as any).old_role_id ?? null,
-            new_role_id: (grimoireEvent as any).new_role_id ?? null,
-            old_alignment: (grimoireEvent as any).old_alignment ?? null,
-            new_alignment: (grimoireEvent as any).new_alignment ?? null,
-            status_source: (grimoireEvent as any).status_source ?? null,
-          })) || [],
-        },
-        notes: "",
-        grimoire: {
+            fabled: {
+              create: [...body.fabled],
+            },
+            grimoire_events: {
+              create: mapGrimoireEventsForCreate(incomingGrimoireEvents),
+            },
+            notes: "",
+            grimoire: {
               connect: newGame.grimoire.map((g) => ({ id: g.id })),
             },
             parent_game_id: newGame.id,
@@ -320,6 +237,9 @@ export default defineEventHandler(async (handler) => {
       }
     }
   }
+
+    return newGame;
+  });
 
   return newGame;
 });

@@ -1,12 +1,15 @@
 import type { User } from "@supabase/supabase-js";
 import {
-  Alignment,
   LocationType,
   WinStatus_V2,
   PrivacySetting,
   type GameEndTrigger,
 } from "@prisma/client";
 import { prisma } from "~/server/utils/prisma";
+import {
+  getTaggedPlayerIds,
+  buildPlayerCharactersForToken,
+} from "~/server/utils/gamePropagation";
 
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
@@ -55,8 +58,9 @@ export default defineEventHandler(async (handler) => {
     },
   });
 
+  await prisma.$transaction(async (tx) => {
   for (const payload of games) {
-    const game = await prisma.game.update({
+    const game = await tx.game.update({
       where: {
         id: payload.id,
       },
@@ -185,56 +189,19 @@ export default defineEventHandler(async (handler) => {
       related_games.push(...game.parent_game.child_games);
     }
 
-    const taggedPlayers = new Set(
-      game.grimoire.flatMap((g) => g.tokens?.map((t) => t.player_id))
-    );
+    const taggedPlayers = getTaggedPlayerIds(game.grimoire, user.id);
 
     for (const id of taggedPlayers) {
-      if (!id || id === user.id) continue;
-
-      // Reduce grimoire to find all tokens that have this player_id
-      const player_characters = game.grimoire.reduce(
-        (acc, g) => {
-          const tokens = g.tokens?.filter((t) => t.player_id === id);
-          if (tokens) {
-            for (const token of tokens) {
-            // Avoid duplicating identical consecutive tokens (same role/related/alignment)
-            const lastToken = acc[acc.length - 1];
-            if (
-              lastToken &&
-              lastToken.role_id === token.role_id &&
-              lastToken.related_role_id === token.related_role_id &&
-              lastToken.alignment === token.alignment
-            ) {
-              continue;
-            }
-
-              acc.push({
-                name: token.role?.name || "",
-                alignment: token.alignment,
-                related: token.related_role?.name || "",
-                role_id: token.role_id,
-                related_role_id: token.related_role_id,
-              });
-            }
-          }
-
-          return acc;
-        },
-        [] as {
-          name: string;
-          alignment: Alignment;
-          related: string;
-          role_id: string | null;
-          related_role_id: string | null;
-        }[]
+      const player_characters = buildPlayerCharactersForToken(
+        game.grimoire,
+        id,
       );
 
       const relatedGame = related_games?.find((g) => g!.user_id === id);
 
       try {
         if (!relatedGame) {
-          await prisma.game.create({
+          await tx.game.create({
             data: {
               ...game,
               community: undefined,
@@ -263,7 +230,7 @@ export default defineEventHandler(async (handler) => {
             },
           });
         } else {
-          await prisma.game.update({
+          await tx.game.update({
             where: {
               id: relatedGame.id,
             },
@@ -337,7 +304,7 @@ export default defineEventHandler(async (handler) => {
     for (const storyteller of storytellers) {
       if (storyteller?.includes("@")) {
         // Verify that it's a friend
-        const friend = await prisma.userSettings.findUnique({
+        const friend = await tx.userSettings.findUnique({
           where: {
             username: storyteller.replace("@", ""),
             friends: {
@@ -354,7 +321,7 @@ export default defineEventHandler(async (handler) => {
           );
 
           if (!childGame) {
-            await prisma.game.create({
+            await tx.game.create({
               data: {
                 ...game,
                 community: undefined,
@@ -382,7 +349,7 @@ export default defineEventHandler(async (handler) => {
               },
             });
           } else {
-            await prisma.game.update({
+            await tx.game.update({
               where: {
                 id: childGame.id,
               },
@@ -429,4 +396,5 @@ export default defineEventHandler(async (handler) => {
       }
     }
   }
+  });
 });
