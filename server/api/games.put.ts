@@ -241,6 +241,7 @@ export default defineEventHandler(async (handler) => {
               associated_script: undefined,
               parent_game: undefined,
               child_games: undefined,
+              end_trigger_role: undefined,
               date: new Date(game.date),
               user_id: id,
               player_characters: {
@@ -360,6 +361,7 @@ export default defineEventHandler(async (handler) => {
                 associated_script: undefined,
                 parent_game: undefined,
                 child_games: undefined,
+                end_trigger_role: undefined,
                 is_storyteller: true,
                 date: new Date(game.date),
                 user_id: friend.user_id,
