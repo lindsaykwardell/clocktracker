@@ -40,6 +40,7 @@ type DigitalGrimoireGame = {
   player_count: number;
   traveler_count: number;
   win: "GOOD_WINS" | "EVIL_WINS" | "NOT_RECORDED";
+  location_type?: "ONLINE" | "IN_PERSON";
   demon_bluffs: string[];
   fabled: string[];
   grimoire: GrimoireToken[] | GrimoireToken[][];
@@ -219,7 +220,7 @@ export default defineEventHandler(async (handler) => {
     date: new Date(body.date),
     script: scriptName,
     script_id: scriptId,
-    location_type: "ONLINE",
+    location_type: body.location_type === "IN_PERSON" ? "IN_PERSON" : "ONLINE",
     location: "",
     player_count: body.player_count,
     traveler_count: body.traveler_count,
