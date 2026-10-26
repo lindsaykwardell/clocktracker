@@ -52,7 +52,7 @@ const route = useRoute();
 const rolesStore = useRoles();
 const inFlight = ref(false);
 const { notification: hapticNotification } = useHaptics();
-const userSettings = await useFetch("/api/settings");
+const userSettings = useFetch("/api/settings", { server: false, lazy: true });
 
 const importGamesDialogVisible = ref(false);
 
@@ -202,6 +202,12 @@ const game = reactive<{
 
 watch(game, () => {
   localStorage.setItem("draftGame", JSON.stringify(game));
+});
+
+watch(userSettings.data, (settings) => {
+	if (game.privacy === "PUBLIC" && settings?.privacy) {
+		game.privacy = settings.privacy;
+	}
 });
 
 onMounted(async () => {
