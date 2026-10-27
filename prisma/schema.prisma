@@ -122,6 +122,8 @@ model Token {
   player          UserSettings?   @relation(fields: [player_id], references: [user_id])
   player_id       String?
   reminders       ReminderToken[]
+
+  @@index([grimoire_id])
 }
 
 model ReminderToken {
@@ -131,6 +133,8 @@ model ReminderToken {
   created_at DateTime @default(now()) @db.Timestamptz(6)
   token      Token?   @relation(fields: [token_id], references: [id])
   token_id   Int?
+
+  @@index([token_id])
 }
 
 model Character {
@@ -144,6 +148,8 @@ model Character {
   role_id         String?
   related_role_id String?
   related_role    Role?     @relation("RelatedRole", fields: [related_role_id], references: [id])
+
+  @@index([game_id])
 }
 
 model DemonBluff {
@@ -154,6 +160,8 @@ model DemonBluff {
   game    Game?   @relation(fields: [game_id], references: [id])
   game_id String?
   role_id String?
+
+  @@index([game_id])
 }
 
 model Fabled {
