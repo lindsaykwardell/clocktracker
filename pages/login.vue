@@ -36,13 +36,13 @@
           placeholder="Password"
         />
       </label>
-      <Button type="submit" color="primary" wide>
+      <Button type="submit" color="primary" :disabled="emailRequestPending" wide>
         Login
       </Button>
-      <Button type="button" @click="register" wide>
+      <Button type="button" @click="register" :disabled="emailRequestPending" wide>
         Register
       </Button>
-      <Button @click.prevent="sendResetPassword" variant="link" size="sm">
+      <Button type="button" @click.prevent="sendResetPassword" :disabled="emailRequestPending" variant="link" size="sm">
         Forgot Password?
       </Button>
     </form>
@@ -64,6 +64,27 @@ const email = ref("");
 const password = ref("");
 const errorMessage = ref();
 const resetPasswordSent = ref(false);
+const emailRequestPending = ref(false);
+
+async function requestEmail(send: (address: string) => Promise<void>) {
+  if (emailRequestPending.value) return;
+  const address = email.value.trim();
+  errorMessage.value = "";
+  resetPasswordSent.value = false;
+  emailRequestPending.value = true;
+  try {
+    // This reserves an attempt; Supabase still sends the email directly from the browser.
+    await $fetch("/api/auth/email-allowance", { method: "POST", body: { email: address }, retry: 0 });
+    await send(address);
+  } catch (error: any) {
+    const seconds = Number(error?.data?.data?.retryAfter);
+    errorMessage.value = seconds > 0
+      ? `Please wait ${Math.ceil(seconds / 60)} minute(s) before requesting another email.`
+      : error?.data?.message || error?.message || "Unable to request an email. Please try again later.";
+  } finally {
+    emailRequestPending.value = false;
+  }
+}
 
 async function login() {
   const { data, error } = await supabase.auth.signInWithPassword({
@@ -83,34 +104,28 @@ async function login() {
 }
 
 async function register() {
-  const { data, error } = await supabase.auth.signUp({
-    email: email.value,
-    password: password.value,
-  });
-
-  if (error) {
-    console.error(error);
-    errorMessage.value = error.message;
-  } else {
+  if (!password.value) {
+    errorMessage.value = "Enter a password.";
+    return;
+  }
+  const enteredPassword = password.value;
+  await requestEmail(async (address) => {
+    const { error } = await supabase.auth.signUp({ email: address, password: enteredPassword });
+    if (error) throw error;
     friends.fetchFriends();
     friends.fetchRequests();
-
     router.push("/welcome");
-  }
+  });
 }
 
 async function sendResetPassword() {
-  const { error } = await supabase.auth.resetPasswordForEmail(email.value, {
-    // Must be a public route — auth middleware on /settings drops ?code=
-    // before the recovery session can be established.
-    redirectTo: `${window.location.origin}/reset-password`,
-  });
-
-  if (error) {
-    console.error(error);
-    errorMessage.value = error.message;
-  } else {
+  await requestEmail(async (address) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(address, {
+      // Keep the recovery callback public so the session can be established.
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) throw error;
     resetPasswordSent.value = true;
-  }
+  });
 }
 </script>
