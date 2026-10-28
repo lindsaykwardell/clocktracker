@@ -350,6 +350,15 @@ const scriptStats = ref<{
   role_win_rates: {},
 });
 
+const protectedFetch = useProtectedFetch();
+const { data: fetchedStats } = await useAsyncData(
+  () => `script-stats-${script.value.id}`,
+  () => protectedFetch<typeof scriptStats.value>(`/api/script/${script.value.id}/stats`),
+);
+watch(fetchedStats, (value) => {
+  if (value) scriptStats.value = value;
+}, { immediate: true });
+
 const averageGamesPlayed = computed(() =>
   Math.round(
     Object.values(scriptStats.value.games_by_month).reduce((a, b) => a + b, 0) /
@@ -518,35 +527,6 @@ const scriptLink = computed(() => {
   }
   return undefined;
 });
-
-watch(
-  script,
-  async (newScript) => {
-    try {
-      scriptStats.value = await $fetch<{
-        count: number;
-        win_loss: {
-          total: number;
-          win: number;
-          loss: number;
-          pct: number;
-        };
-        games_by_month: Record<string, number>;
-        role_win_rates: Record<
-          string,
-          {
-            total: number;
-            win: number;
-            loss: number;
-          }
-        >;
-      }>("/api/script/" + newScript.id + "/stats");
-    } catch (e) {
-      console.error(e);
-    }
-  },
-  { immediate: true }
-);
 
 onMounted(() => {
   if (me.value.status === Status.SUCCESS) {

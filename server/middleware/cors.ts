@@ -22,6 +22,7 @@ export default defineEventHandler((event) => {
     "GET, POST, PUT, DELETE, OPTIONS"
   );
   setHeader(event, "Access-Control-Allow-Credentials", "true");
+  setHeader(event, "Access-Control-Expose-Headers", "Retry-After");
 
   // Handle preflight
   if (event.method === "OPTIONS") {

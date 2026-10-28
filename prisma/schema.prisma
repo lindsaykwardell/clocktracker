@@ -64,6 +64,7 @@ model Game {
   grimoire_snapshots       GrimoireSnapshot[]
 
   @@index([user_id])
+  @@index([script_id, parent_game_id])
 }
 
 model ImportedGame {
@@ -150,6 +151,7 @@ model Character {
   related_role    Role?     @relation("RelatedRole", fields: [related_role_id], references: [id])
 
   @@index([game_id])
+  @@index([role_id])
 }
 
 model DemonBluff {
@@ -172,6 +174,8 @@ model Fabled {
   game    Game?   @relation(fields: [game_id], references: [id])
   game_id String?
   role_id String?
+
+  @@index([game_id])
 }
 
 model Script {
@@ -334,6 +338,8 @@ model KoFiPayment {
   expires_at              DateTime
   user                    UserSettings? @relation(fields: [user_id], references: [user_id])
   user_id                 String?
+
+  @@index([user_id, expires_at])
 }
 
 enum PrivacySetting {

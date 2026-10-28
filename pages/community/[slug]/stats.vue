@@ -381,6 +381,7 @@ type CommunityStats = {
   games: CommunityGame[];
 };
 
+const protectedFetch = useProtectedFetch();
 const route = useRoute();
 const slug = route.params.slug as string;
 const communities = useCommunities();
@@ -389,7 +390,8 @@ const user = useUser();
 const metadata = await $fetch(`/api/community/${slug}/minimal`);
 
 const { data: stats, pending, error } = useFetch<CommunityStats>(
-  () => `/api/community/${slug}/stats`
+  () => `/api/community/${slug}/stats`,
+  { $fetch: protectedFetch as typeof $fetch, retry: 0 }
 );
 
 const statsGames = computed<CommunityGame[]>(() => stats.value?.games ?? []);
