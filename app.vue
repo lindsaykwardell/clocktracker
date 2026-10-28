@@ -1,5 +1,6 @@
 <template>
     <NuxtPage />
+    <RateLimitNotice />
     <AnnouncementDialog
         v-if="announcement"
         :id="`announcement-${announcement.threadId}`"

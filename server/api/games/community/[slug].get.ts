@@ -1,10 +1,11 @@
+import { defineProtectedHandler } from "~/server/utils/protectedHandler";
 import { PrivacySetting } from "~/server/generated/prisma/client";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import type { GameRecord } from "~/server/utils/anonymizeGame";
 import { prisma } from "~/server/utils/prisma";
 import { hasPermission } from "~/server/utils/permissions";
 
-export default defineEventHandler(async (handler) => {
+export default defineProtectedHandler("games-stats", async (handler) => {
   const me: User | null = handler.context.user;
   const slug = handler.context.params?.slug as string;
 

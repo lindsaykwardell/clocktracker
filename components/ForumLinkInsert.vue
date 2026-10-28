@@ -387,6 +387,8 @@ const filteredGames = computed(() => {
     );
 });
 
+const protectedFetch = useProtectedFetch();
+
 let searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
 watch(query, (val) => {
@@ -403,16 +405,11 @@ watch(query, (val) => {
     loading.value = true;
     searchTimeout = setTimeout(async () => {
         try {
-            results.value = await $fetch("/api/search", {
+            results.value = await protectedFetch<any>("/api/search", {
                 query: { query: val },
             });
         } catch {
-            results.value = {
-                users: [],
-                roles: [],
-                scripts: [],
-                communities: [],
-            };
+            // Keep the last results; rate-limit feedback is displayed globally.
         } finally {
             loading.value = false;
         }

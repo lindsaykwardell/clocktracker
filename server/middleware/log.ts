@@ -1,6 +1,8 @@
 export default defineEventHandler((event) => {
   const start = Date.now();
-  const ip = getRequestIP(event, { xForwardedFor: true });
+  const ip = process.env.FLY_APP_NAME
+    ? getHeader(event, "fly-client-ip")
+    : getRequestIP(event);
   const method = event.node.req.method;
   const url = getRequestURL(event);
 
@@ -16,7 +18,7 @@ export default defineEventHandler((event) => {
     const userId = event.context.user?.id ?? "-";
 
     console.log(
-      `${ip} [${method}] ${status} ${url} ${duration}ms auth=${auth} user=${userId}`,
+      `${ip} [${method}] ${status} ${url} ${duration}ms auth=${auth} verified=${Boolean(event.context.user?.id)} user=${userId} category=${event.context.rateLimitCategory ?? "other"}`,
     );
   });
 });

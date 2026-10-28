@@ -143,7 +143,7 @@ export default defineNuxtConfig({
   ...(!isCapacitorBuild
     ? {
         bugsnag: {
-          publishRelease: true,
+          publishRelease: Boolean(process.env.BUGSNAG_API_KEY),
           // performance: true,
           baseUrl: "https://clocktracker.app",
           disableLog: true,
