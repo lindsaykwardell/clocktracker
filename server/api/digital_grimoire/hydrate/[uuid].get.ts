@@ -48,6 +48,8 @@ type DigitalGrimoireGame = {
 
 type GrimoireToken = {
   role_id: string;
+  // The character the player thinks they are, such as a Drunk's Townsfolk.
+  related_role_id?: string;
   alignment: "GOOD" | "EVIL" | "NEUTRAL";
   is_dead: boolean;
   used_ghost_vote: boolean;
@@ -147,6 +149,9 @@ export default defineEventHandler(async (handler) => {
       Promise.all(
         page.map(async (token) => {
           const role_id = await mapOfficialIdToClocktrackerId(token.role_id);
+          const related_role_id = token.related_role_id
+            ? await mapOfficialIdToClocktrackerId(token.related_role_id)
+            : null;
 
           const mappedReminders = await Promise.all(
             token.reminders.map(async (reminder) => {
@@ -164,6 +169,7 @@ export default defineEventHandler(async (handler) => {
 
           return {
             role_id: role_id || null,
+            related_role_id: related_role_id || null,
             alignment: token.alignment as Alignment,
             is_dead: token.is_dead,
             used_ghost_vote: token.used_ghost_vote,
@@ -234,6 +240,7 @@ export default defineEventHandler(async (handler) => {
       tokens: {
         create: page.map((token, index) => ({
           role_id: token.role_id,
+          related_role_id: token.related_role_id,
           alignment: token.alignment,
           is_dead: token.is_dead,
           used_ghost_vote: token.used_ghost_vote,
