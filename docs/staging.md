@@ -98,6 +98,8 @@ Create the GitHub Environment `staging-operations`. Restrict deployments to the 
 
 Scheduled cleanup must run unattended: do not configure required human reviewers on this environment. Restrict repository write/Actions permissions to trusted operators instead. GitHub concurrency allows one running and one pending operation; newer queued requests may replace older pending requests. Existing deployed environments remain independent.
 
+Create the **repository-level** Actions variable `STAGING_ENABLED` with value `true` only after completing the private setup below. Scheduled cleanup skips unconfigured repositories; launching is refused until this switch is enabled. Keep it enabled until every environment has been destroyed. Manual list/destroy/cleanup remain available with the switch off.
+
 Create these environment variables:
 
 | Variable | Value |

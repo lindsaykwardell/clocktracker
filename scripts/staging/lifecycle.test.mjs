@@ -79,7 +79,7 @@ if(args[0]==='postgres' && args[1]==='connect') {
       STAGING_DOMAIN: "staging.example.com", STAGING_STATE_BUCKET: "test-state", STAGING_SOURCE_DIR: source,
       STAGING_SOURCE_DATABASE_APP: "production-test-source", STAGING_DATABASE_NAME: "clocktracker",
       CLOUDFLARE_ZONE_ID: "test-zone", CLOUDFLARE_API_TOKEN: "test", SUPABASE_URL: "https://example.supabase.co", SUPABASE_KEY: "sb_publishable_test",
-      STAGING_HOURS: "1", GITHUB_STEP_SUMMARY: "", ...extra },
+      STAGING_ENABLED: "true", STAGING_HOURS: "1", GITHUB_STEP_SUMMARY: "", ...extra },
   });
   const read = async () => JSON.parse(await readFile(store, "utf8"));
   const update = async fn => {const state=await read();fn(state);await writeFile(store,JSON.stringify(state));};
@@ -114,5 +114,14 @@ test("cleanup retains failed journals for retry and ignores active environments"
     await update(s=>{for(const k of Object.keys(s.objects)){const state=JSON.parse(s.objects[k]);state.expiresAt=0;s.objects[k]=JSON.stringify(state);}s.fail='dns-delete';});
     assert.equal(invoke('cleanup').status,1);assert.equal(Object.keys((await read()).objects).length,1);
     await update(s=>s.fail='');assert.equal(invoke('cleanup').status,0);assert.equal(Object.keys((await read()).apps).length,0);
+  });
+});
+
+test("launch refuses to provision when scheduled cleanup has not been enabled", async () => {
+  await fixture(async ({invoke,read}) => {
+    assert.equal(invoke("up", {STAGING_ENABLED:"false"}).status, 1);
+    const state=await read();
+    assert.equal(Object.keys(state.objects).length,0);
+    assert.equal(Object.keys(state.apps).length,0);
   });
 });

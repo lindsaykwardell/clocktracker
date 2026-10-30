@@ -107,6 +107,7 @@ async function destroy(state) {
   await summary(`Destroyed staging environment ${state.id}.`);
 }
 async function up() {
+  if (process.env.STAGING_ENABLED !== "true") throw new Error("Enable scheduled cleanup with the STAGING_ENABLED repository variable before launching");
   const hours = lifetime(process.env.STAGING_HOURS ?? "1");
   const source = path.resolve(required("STAGING_SOURCE_DIR"));
   const sourceDb = required("STAGING_SOURCE_DATABASE_APP");
