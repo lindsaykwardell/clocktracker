@@ -314,6 +314,10 @@ model UserSettings {
   forum_subscriptions     ForumThreadSubscription[]
   forum_category_subscriptions ForumCategorySubscription[]
   forum_reads             ForumThreadRead[]
+  forum_preferences ForumUserPreference[] @relation("ForumPreferenceOwner")
+  forum_preferred_by ForumUserPreference[] @relation("ForumPreferenceTarget")
+  forum_submissions ForumSubmission[] @relation("ForumSubmissionAuthor")
+  forum_reviews ForumSubmission[] @relation("ForumSubmissionReviewer")
   forum_first_visit_at    DateTime?               @db.Timestamptz(6)
   push_notifications_enabled Boolean              @default(false)
   push_subscriptions      PushSubscription[]
@@ -666,6 +670,8 @@ model CategoryAccess {
 }
 
 model ForumThread {
+  published Boolean @default(true)
+  submissions ForumSubmission[]
   id           String        @id @default(uuid())
   title        String
   category_id  String
@@ -687,6 +693,8 @@ model ForumThread {
 }
 
 model ForumPost {
+  published Boolean @default(true)
+  submissions ForumSubmission[]
   id         String              @id @default(uuid())
   body       String
   thread_id  String
@@ -831,4 +839,40 @@ model ForumBan {
   banned_by_user UserSettings @relation("BannedByUser", fields: [banned_by], references: [user_id])
 
   @@index([user_id])
+}
+
+// Proposed revisions are separate from published content.
+model ForumSubmission {
+  id String @id @default(uuid())
+  author_id String
+  thread_id String
+  post_id String?
+  kind String
+  status String @default("PENDING")
+  title String?
+  body String
+  base_body String?
+  base_title String?
+  reason String
+  review_reason String?
+  reviewed_by String?
+  reviewed_at DateTime? @db.Timestamptz(6)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  author UserSettings @relation("ForumSubmissionAuthor", fields: [author_id], references: [user_id], onDelete: Cascade)
+  reviewer UserSettings? @relation("ForumSubmissionReviewer", fields: [reviewed_by], references: [user_id])
+  thread ForumThread @relation(fields: [thread_id], references: [id], onDelete: Cascade)
+  post ForumPost? @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  @@index([status, created_at])
+  @@index([author_id, created_at])
+}
+
+model ForumUserPreference {
+  user_id String
+  target_id String
+  kind String
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  user UserSettings @relation("ForumPreferenceOwner", fields: [user_id], references: [user_id], onDelete: Cascade)
+  target UserSettings @relation("ForumPreferenceTarget", fields: [target_id], references: [user_id], onDelete: Cascade)
+  @@id([user_id, target_id])
+  @@index([target_id, kind])
 }

@@ -1,4 +1,3 @@
-import { PrismaClient } from "~/server/generated/prisma/client";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { createHash } from "crypto";
 import { prisma } from "./prisma";
@@ -17,7 +16,7 @@ function isInRollout(userId: string, flagName: string, percentage: number): bool
   return bucket < percentage;
 }
 
-export async function getFeatureFlags(me: User | null) {
+export async function getFeatureFlags(me: Pick<User, "id"> | null) {
   const is_admin = await prisma.userSettings
     .findUnique({
       where: {
@@ -104,7 +103,7 @@ export async function getFeatureFlags(me: User | null) {
   return payload;
 }
 
-export async function useFeatureFlags(me: User | null) {
+export async function useFeatureFlags(me: Pick<User, "id"> | null) {
   const flags = new Map<string, boolean>();
   const feature_flags = await getFeatureFlags(me);
 

@@ -11,13 +11,14 @@
                 New Thread
             </h1>
 
+            <p class="text-sm text-stone-500 mb-4">First contributions may need moderator approval. Track their status in Your submissions.</p>
             <form @submit.prevent="submit" class="flex flex-col gap-4">
                 <div class="flex flex-col gap-1">
-                    <label>Title</label>
-                    <Input v-model="title" />
+                    <label for="forum-thread-title">Title</label>
+                    <Input id="forum-thread-title" v-model="title" maxlength="200" />
                 </div>
                 <div class="flex flex-col gap-1">
-                    <label>Body</label>
+                    <label for="forum-thread-body">Body</label>
                     <div
                         class="flex items-center justify-between text-sm border-b border-stone-300 dark:border-stone-700"
                     >
@@ -51,6 +52,7 @@
                     </div>
                     <ExpandingTextarea
                         v-if="bodyTab === 'write'"
+                        id="forum-thread-body"
                         v-model="body"
                         :rows="5"
                     />
@@ -159,7 +161,7 @@ async function submit() {
 
     try {
         const thread = await forum.createThread(slug, title.value, body.value);
-        router.push(`/forum/${slug}/${thread.id}`);
+        router.push(thread.pending ? "/forum/submissions" : `/forum/${slug}/${thread.id}`);
     } catch (err: any) {
         error.value =
             err?.data?.statusMessage ||

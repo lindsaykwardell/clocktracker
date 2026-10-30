@@ -1,3 +1,4 @@
+import { forumVisibility } from "~/server/utils/forumSafety";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
 import {
@@ -17,8 +18,9 @@ export default defineEventHandler(async (handler) => {
   let page = Math.max(1, Number(query.page) || 1);
   const perPage = 25;
 
+  const visible = await forumVisibility(me?.id ?? null);
   const thread = await prisma.forumThread.findFirst({
-    where: { id: threadId, deleted_at: null },
+    where: { id: threadId, ...visible },
     select: {
       id: true,
       title: true,
@@ -93,7 +95,7 @@ export default defineEventHandler(async (handler) => {
     if (cutoff) {
       // Find the first post created after the cutoff
       const firstUnread = await prisma.forumPost.findFirst({
-        where: { thread_id: threadId, created_at: { gt: cutoff } },
+        where: { ...visible, thread_id: threadId, created_at: { gt: cutoff } },
         orderBy: { created_at: "asc" },
         select: { id: true },
       });
@@ -102,13 +104,13 @@ export default defineEventHandler(async (handler) => {
         firstUnreadPostId = firstUnread.id;
         // Count posts before this one to determine its page
         const positionIndex = await prisma.forumPost.count({
-          where: { thread_id: threadId, created_at: { lte: cutoff } },
+          where: { ...visible, thread_id: threadId, created_at: { lte: cutoff } },
         });
         page = Math.floor(positionIndex / perPage) + 1;
       } else {
         // All posts are read — go to the last page
         const totalPosts = await prisma.forumPost.count({
-          where: { thread_id: threadId },
+          where: { ...visible, thread_id: threadId },
         });
         page = Math.max(1, Math.ceil(totalPosts / perPage));
       }
@@ -117,7 +119,7 @@ export default defineEventHandler(async (handler) => {
     }
   }
 
-  const where = { thread_id: threadId };
+  const where = { ...visible, thread_id: threadId };
 
   const [rawPosts, total] = await Promise.all([
     prisma.forumPost.findMany({
@@ -199,7 +201,7 @@ export default defineEventHandler(async (handler) => {
         id: post.id,
         body: "[deleted]",
         created_at: post.created_at,
-        edited_at: null,
+        edited_at: null as Date | null,
         deleted: true,
         edited_by_label: null as string | null,
         author: {
@@ -218,7 +220,7 @@ export default defineEventHandler(async (handler) => {
           username: string;
           display_name: string;
           avatar: string | null;
-          created_at: string | null;
+          created_at: Date | null;
           name_color: string | null;
           badge: string | null;
         } | null,

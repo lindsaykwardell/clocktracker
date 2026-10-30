@@ -143,6 +143,7 @@
                     title="Admin"
                 >
                     Admin
+                    <ForumModerationAlert v-if="featureFlags.isEnabled('forum')" />
                 </NavLink>
             </li>
         </ul>

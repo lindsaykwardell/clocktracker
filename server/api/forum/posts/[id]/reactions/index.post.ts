@@ -1,3 +1,5 @@
+import { requireNoForumBlock } from "~/server/utils/forumSafety";
+import { requireForumPostAccess, requireForumWriteAccess } from "~/server/utils/forum";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
 
@@ -8,20 +10,17 @@ export default defineEventHandler(async (handler) => {
   }
 
   const postId = handler.context.params!.id;
+  const accessible = await requireForumPostAccess(me?.id ?? null, postId);
+  await requireForumWriteAccess(me.id, accessible.thread);
   const body = await readBody<{ emoji: string }>(handler);
 
-  if (!body.emoji || typeof body.emoji !== "string" || body.emoji.length > 8) {
+  if (typeof body?.emoji !== "string" || !body.emoji || body.emoji.length > 8) {
     throw createError({ status: 400, statusMessage: "Invalid emoji" });
   }
 
   // Verify post exists and is not deleted
-  const post = await prisma.forumPost.findFirst({
-    where: { id: postId, deleted_at: null },
-  });
-
-  if (!post) {
-    throw createError({ status: 404, statusMessage: "Post not found" });
-  }
+  const { post } = accessible;
+  await requireNoForumBlock(me.id, post.author_id);
 
   // Toggle: if reaction exists, remove it; otherwise, add it
   const existing = await prisma.forumPostReaction.findUnique({
