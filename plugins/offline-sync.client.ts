@@ -1,4 +1,5 @@
 export default defineNuxtPlugin(() => {
+  if (useRuntimeConfig().public.staging) return;
   const { flushQueue, refreshCount, hydrateQueuedGames } = useOfflineSync();
   const user = useUser();
 

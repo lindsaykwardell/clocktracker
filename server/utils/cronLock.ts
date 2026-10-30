@@ -7,6 +7,7 @@ export async function performLockedTask(
   task_id: string,
   callback: (prisma: PrismaClient) => Promise<void>
 ) {
+  if (process.env.STAGING === "true") return;
   // Try to create the lock row
   try {
     await prisma.cronLock.create({

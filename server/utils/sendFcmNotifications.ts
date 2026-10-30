@@ -70,6 +70,7 @@ export async function sendFcmNotifications({
   body,
   url,
 }: FcmSendOptions) {
+  if (process.env.STAGING === "true") return;
   try {
     const config = useRuntimeConfig();
     const { fcmProjectId, fcmClientEmail, fcmPrivateKey } = config;

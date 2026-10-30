@@ -1,7 +1,30 @@
-import { serverSupabaseUser } from "#supabase/server";
+import { serverSupabaseClient, serverSupabaseUser } from "#supabase/server";
 import { jwtVerify } from "jose";
 
+import { enforceStagingAccess } from "../utils/stagingAccess";
+import { prisma } from "../utils/prisma";
+
 export default defineEventHandler(async (event) => {
+  if (process.env.STAGING === "true") {
+    const token = getHeader(event, "authorization")?.match(/^Bearer (.+)$/)?.[1];
+    try {
+      if (token) {
+        const client = await serverSupabaseClient(event);
+        const { data, error } = await client.auth.getUser(token);
+        if (!error && data.user) event.context.user = data.user;
+      } else {
+        const claims = await serverSupabaseUser(event);
+        if (claims) event.context.user = { ...claims, id: claims.sub };
+      }
+    } catch { /* Missing or invalid credentials remain unauthenticated. */ }
+    return enforceStagingAccess(event, {
+      enabled: true,
+      expiresAt: process.env.STAGING_EXPIRES_AT,
+      isAdmin: async (id) => (await prisma.userSettings.findUnique({
+        where: { user_id: id }, select: { is_admin: true },
+      }))?.is_admin === true,
+    });
+  }
   // Skip auth for CORS preflight requests
   if (event.method === "OPTIONS") {
     return;
