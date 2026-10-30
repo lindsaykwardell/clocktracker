@@ -10,7 +10,7 @@ export function useForumMutes() {
     loading.value = true;
     error.value = false;
     try {
-      const preferences = await $fetch('/api/forum/preferences');
+      const preferences: { target_id: string }[] = await $fetch('/api/forum/preferences');
       muted.value = Object.fromEntries(preferences.map(item => [item.target_id, true]));
       loaded.value = true;
     } catch { error.value = true; }
