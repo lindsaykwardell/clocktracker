@@ -1,0 +1,56 @@
+name: Staging checks
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: --health-cmd 'redis-cli ping' --health-interval 5s --health-timeout 3s --health-retries 5
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run test:unit
+        env:
+          TEST_REDIS_URL: redis://127.0.0.1:6379
+      - run: node --test scripts/staging/*.test.mjs
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        staging: ['true', 'false']
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+        env:
+          STAGING: ${{ matrix.staging }}
+          SUPABASE_URL: https://example.supabase.co
+          SUPABASE_KEY: build-test-placeholder
+      - name: Build staging container without production credentials
+        if: matrix.staging == 'true'
+        env:
+          SUPABASE_URL: https://example.supabase.co
+          SUPABASE_KEY: build-test-placeholder
+        run: >-
+          docker build --file scripts/staging/Dockerfile
+          --secret id=SUPABASE_URL,env=SUPABASE_URL
+          --secret id=SUPABASE_KEY,env=SUPABASE_KEY
+          --tag clocktracker-staging-validation .
