@@ -1,3 +1,4 @@
+import { requireForumPostAccess } from "~/server/utils/forum";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
 
@@ -8,9 +9,10 @@ export default defineEventHandler(async (handler) => {
   }
 
   const postId = handler.context.params!.id;
+  const accessible = await requireForumPostAccess(me?.id ?? null, postId);
   const body = await readBody<{ reason: string }>(handler);
 
-  if (!body.reason?.trim()) {
+  if (typeof body?.reason !== "string" || !body.reason.trim()) {
     throw createError({ status: 400, statusMessage: "Reason is required" });
   }
 
@@ -18,13 +20,7 @@ export default defineEventHandler(async (handler) => {
     throw createError({ status: 400, statusMessage: "Reason is too long" });
   }
 
-  const post = await prisma.forumPost.findFirst({
-    where: { id: postId, deleted_at: null },
-  });
-
-  if (!post) {
-    throw createError({ status: 404, statusMessage: "Post not found" });
-  }
+  const { post } = accessible;
 
   // Don't allow reporting your own posts
   if (post.author_id === me.id) {

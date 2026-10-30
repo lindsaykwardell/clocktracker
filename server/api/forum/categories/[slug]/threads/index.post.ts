@@ -4,7 +4,6 @@ import {
   forumUserSelect,
   userCanPostInCategory,
   checkForumBan,
-  isRateLimited,
   checkPostLength,
 } from "~/server/utils/forum";
 import { hasRestriction } from "~/server/utils/permissions";
@@ -23,11 +22,17 @@ export default defineEventHandler(async (handler) => {
   const slug = handler.context.params!.slug;
   const body = await readBody<{ title: string; body: string } | null>(handler);
 
-  if (!body?.title?.trim() || !body?.body?.trim()) {
+  if (
+    typeof body?.title !== "string" || !body.title.trim() ||
+    typeof body?.body !== "string" || !body.body.trim()
+  ) {
     throw createError({
       status: 400,
       statusMessage: "Title and body are required",
     });
+  }
+  if (body.title.trim().length > 200) {
+    throw createError({ status: 400, statusMessage: "Title cannot exceed 200 characters" });
   }
 
   const category = await prisma.forumCategory.findUnique({
@@ -61,13 +66,6 @@ export default defineEventHandler(async (handler) => {
   }
 
   await checkPostLength(me.id, body.body.trim());
-
-  if (await isRateLimited(me.id, "thread")) {
-    throw createError({
-      status: 429,
-      statusMessage: "You are creating threads too quickly. Please wait a moment.",
-    });
-  }
 
   const now = new Date();
 
@@ -136,8 +134,6 @@ export default defineEventHandler(async (handler) => {
   if (category.is_announcement) {
     void sendAnnouncementNotifications({
       threadId: thread.id,
-      threadTitle: thread.title,
-      categorySlug: slug,
       postBody: body.body.trim(),
     });
   }
@@ -146,9 +142,6 @@ export default defineEventHandler(async (handler) => {
   if (categorySubscribers.length > 0) {
     void sendCategoryNewThreadNotifications({
       threadId: thread.id,
-      threadTitle: thread.title,
-      categorySlug: slug,
-      categoryName: category.name,
       postBody: body.body.trim(),
       authorDisplayName: thread.author.display_name,
       subscriberUserIds: categorySubscribers.map((s) => s.user_id),

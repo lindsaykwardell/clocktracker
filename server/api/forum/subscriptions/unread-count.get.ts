@@ -1,3 +1,4 @@
+import { userCanViewCategory } from "~/server/utils/forum";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
 
@@ -15,12 +16,18 @@ export default defineEventHandler(async (handler) => {
         select: {
           last_post_at: true,
           deleted_at: true,
+          category: { select: { id: true, is_private: true } },
         },
       },
     },
   });
 
-  const count = subscriptions.filter(
+  const visibility = await Promise.all(subscriptions.map(s =>
+    userCanViewCategory(me.id, s.thread.category.id, s.thread.category.is_private)
+  ));
+  const visibleSubscriptions = subscriptions.filter((_, index) => visibility[index]);
+
+  const count = visibleSubscriptions.filter(
     (s) =>
       s.thread.deleted_at === null &&
       new Date(s.thread.last_post_at) > new Date(s.last_read_at)

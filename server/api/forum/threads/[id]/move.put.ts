@@ -1,6 +1,10 @@
+import {
+  requireForumThreadAccess,
+  hasForumPermission,
+  logModAction,
+} from "~/server/utils/forum";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
-import { hasForumPermission, logModAction } from "~/server/utils/forum";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
@@ -14,20 +18,13 @@ export default defineEventHandler(async (handler) => {
   }
 
   const threadId = handler.context.params!.id;
+  const thread = await requireForumThreadAccess(me.id, threadId);
   const body = await readBody<{ category_id: string } | null>(handler);
 
   if (!body?.category_id) {
     throw createError({ status: 400, statusMessage: "category_id is required" });
   }
 
-  const thread = await prisma.forumThread.findFirst({
-    where: { id: threadId, deleted_at: null },
-    select: { id: true, title: true, category_id: true },
-  });
-
-  if (!thread) {
-    throw createError({ status: 404, statusMessage: "Thread not found" });
-  }
 
   if (thread.category_id === body.category_id) {
     throw createError({ status: 400, statusMessage: "Thread is already in this category" });

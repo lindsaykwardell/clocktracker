@@ -1,14 +1,13 @@
-import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
-import { prisma } from "~/server/utils/prisma";
 import {
+  requireForumThreadAccess,
+  requireForumWriteAccess,
   forumUserSelect,
-  userCanPostInCategory,
-  checkForumBan,
-  isRateLimited,
   checkPostLength,
   getForumNameColor,
   getForumBadges,
 } from "~/server/utils/forum";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
+import { prisma } from "~/server/utils/prisma";
 import { sendForumNotifications } from "~/server/utils/sendForumNotifications";
 
 export default defineEventHandler(async (handler) => {
@@ -19,55 +18,15 @@ export default defineEventHandler(async (handler) => {
   }
 
   const threadId = handler.context.params!.id;
+  const accessibleThread = await requireForumThreadAccess(me.id, threadId);
+  await requireForumWriteAccess(me.id, accessibleThread);
   const body = await readBody<{ body: string } | null>(handler);
 
-  if (!body?.body?.trim()) {
+  if (typeof body?.body !== "string" || !body.body.trim()) {
     throw createError({ status: 400, statusMessage: "Post body is required" });
   }
 
-  const thread = await prisma.forumThread.findFirst({
-    where: { id: threadId, deleted_at: null },
-    include: {
-      category: { select: { id: true, is_private: true } },
-    },
-  });
-
-  if (!thread) {
-    throw createError({ status: 404, statusMessage: "Not Found" });
-  }
-
-  if (thread.is_locked) {
-    throw createError({
-      status: 403,
-      statusMessage: "This thread is locked",
-    });
-  }
-
-  const canPost = await userCanPostInCategory(
-    me.id,
-    thread.category.id,
-    thread.category.is_private
-  );
-
-  if (!canPost) {
-    throw createError({ status: 403, statusMessage: "Forbidden" });
-  }
-
-  if (await checkForumBan(me.id, thread.category.id)) {
-    throw createError({
-      status: 403,
-      statusMessage: "You are banned from posting",
-    });
-  }
-
   await checkPostLength(me.id, body.body.trim());
-
-  if (await isRateLimited(me.id, "post")) {
-    throw createError({
-      status: 429,
-      statusMessage: "You are posting too quickly. Please wait a moment.",
-    });
-  }
 
   const now = new Date();
 

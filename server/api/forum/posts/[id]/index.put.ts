@@ -1,6 +1,12 @@
+import {
+  requireForumPostAccess,
+  requireForumWriteAccess,
+  forumUserSelect,
+  hasForumPermission,
+  checkPostLength,
+} from "~/server/utils/forum";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
-import { forumUserSelect, hasForumPermission, checkPostLength } from "~/server/utils/forum";
 import { hasRestriction } from "~/server/utils/permissions";
 
 export default defineEventHandler(async (handler) => {
@@ -11,19 +17,14 @@ export default defineEventHandler(async (handler) => {
   }
 
   const postId = handler.context.params!.id;
+  const accessible = await requireForumPostAccess(me?.id ?? null, postId);
   const body = await readBody<{ body: string } | null>(handler);
 
-  if (!body?.body?.trim()) {
+  if (typeof body?.body !== "string" || !body.body.trim()) {
     throw createError({ status: 400, statusMessage: "Post body is required" });
   }
 
-  const post = await prisma.forumPost.findFirst({
-    where: { id: postId, deleted_at: null },
-  });
-
-  if (!post) {
-    throw createError({ status: 404, statusMessage: "Not Found" });
-  }
+  const { post } = accessible;
 
   const isAuthor = post.author_id === me.id;
   const canEditOwn =
@@ -34,31 +35,33 @@ export default defineEventHandler(async (handler) => {
     throw createError({ status: 403, statusMessage: "Forbidden" });
   }
 
+  await requireForumWriteAccess(me.id, accessible.thread, { moderation: canEditAny });
+
   await checkPostLength(me.id, body.body.trim());
 
-  // Save edit history
-  await prisma.forumPostEdit.create({
-    data: {
-      post_id: postId,
-      previous_body: post.body,
-      edited_by: me.id,
-    },
-  });
-
-  const updated = await prisma.forumPost.update({
-    where: { id: postId },
-    data: {
-      body: body.body.trim(),
-      edited_at: new Date(),
-    },
-    select: {
-      id: true,
-      body: true,
-      created_at: true,
-      edited_at: true,
-      author: { select: forumUserSelect },
-    },
-  });
+  const [, updated] = await prisma.$transaction([
+    prisma.forumPostEdit.create({
+      data: {
+        post_id: postId,
+        previous_body: post.body,
+        edited_by: me.id,
+      },
+    }),
+    prisma.forumPost.update({
+      where: { id: postId },
+      data: {
+        body: body.body.trim(),
+        edited_at: new Date(),
+      },
+      select: {
+        id: true,
+        body: true,
+        created_at: true,
+        edited_at: true,
+        author: { select: forumUserSelect },
+      },
+    }),
+  ]);
 
   return updated;
 });

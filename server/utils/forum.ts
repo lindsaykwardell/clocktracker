@@ -55,6 +55,8 @@ export async function userCanPostInCategory(
 ): Promise<boolean> {
   if (await isAdmin(userId)) return true;
 
+  if (!(await userCanViewCategory(userId, categoryId, isPrivate))) return false;
+
   if (modPostingOnly) {
     return await isModerator(userId);
   }
@@ -273,30 +275,46 @@ export async function checkPostLength(
   });
 }
 
-// Rate limiting: returns true if the user should be rate-limited
-export async function isRateLimited(
-  userId: string,
-  type: "thread" | "post"
-): Promise<boolean> {
-  const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
-
-  if (type === "thread") {
-    const recentThreads = await prisma.forumThread.count({
-      where: {
-        author_id: userId,
-        created_at: { gt: oneMinuteAgo },
-        deleted_at: null,
-      },
-    });
-    return recentThreads >= 1;
-  }
-
-  const recentPosts = await prisma.forumPost.count({
-    where: {
-      author_id: userId,
-      created_at: { gt: oneMinuteAgo },
-      deleted_at: null,
-    },
+// All post-specific actions must also authorize the parent thread.
+export async function requireForumThreadAccess(userId: string | null, threadId: string) {
+  const thread = await prisma.forumThread.findFirst({
+    where: { id: threadId, deleted_at: null },
+    include: { category: true },
   });
-  return recentPosts >= 5;
+  if (!thread || !(await userCanViewCategory(userId, thread.category.id, thread.category.is_private))) {
+    throw createError({ status: 404, statusMessage: "Thread not found" });
+  }
+  return thread;
+}
+
+export async function requireForumPostAccess(userId: string | null, postId: string) {
+  const post = await prisma.forumPost.findFirst({
+    where: { id: postId, deleted_at: null },
+  });
+  if (!post) throw createError({ status: 404, statusMessage: "Post not found" });
+  const thread = await requireForumThreadAccess(userId, post.thread_id);
+  return { post, thread };
+}
+
+export async function requireForumWriteAccess(
+  userId: string,
+  thread: Awaited<ReturnType<typeof requireForumThreadAccess>>,
+  { moderation = false }: { moderation?: boolean } = {},
+) {
+  if (await checkForumBan(userId, thread.category.id)) {
+    throw createError({ status: 403, statusMessage: "You are banned from posting" });
+  }
+  if (moderation) return;
+  if (thread.is_locked) {
+    throw createError({ status: 403, statusMessage: "This thread is locked" });
+  }
+  if (!(await userCanPostInCategory(userId, thread.category.id, thread.category.is_private))) {
+    throw createError({ status: 403, statusMessage: "Forbidden" });
+  }
+}
+
+export async function filterForumRecipients(userIds: string[], category: { id: string; is_private: boolean }) {
+  const uniqueIds = [...new Set(userIds)];
+  const allowed = await Promise.all(uniqueIds.map(id => userCanViewCategory(id, category.id, category.is_private)));
+  return uniqueIds.filter((_, index) => allowed[index]);
 }

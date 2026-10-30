@@ -1,12 +1,12 @@
 import { prisma } from "~/server/utils/prisma";
-import { forumUserSelect } from "~/server/utils/forum";
+import { forumUserSelect, userCanViewCategory } from "~/server/utils/forum";
 
-export default defineEventHandler(async () => {
+export default defineEventHandler(async (handler) => {
   const category = await prisma.forumCategory.findFirst({
     where: { is_announcement: true },
   });
 
-  if (!category) return null;
+  if (!category || !(await userCanViewCategory(handler.context.user?.id ?? null, category.id, category.is_private))) return null;
 
   const latestThread = await prisma.forumThread.findFirst({
     where: {

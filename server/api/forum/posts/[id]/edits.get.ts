@@ -1,24 +1,19 @@
-import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
-import { prisma } from "~/server/utils/prisma";
 import {
+  requireForumPostAccess,
   forumUserSelect,
   isModerator,
   getForumBadges,
 } from "~/server/utils/forum";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
+import { prisma } from "~/server/utils/prisma";
 import { isAdmin } from "~/server/utils/permissions";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
   const postId = handler.context.params!.id;
+  const accessible = await requireForumPostAccess(me?.id ?? null, postId);
 
-  const post = await prisma.forumPost.findUnique({
-    where: { id: postId },
-    select: { author_id: true },
-  });
-
-  if (!post) {
-    throw createError({ status: 404, statusMessage: "Not Found" });
-  }
+  const { post } = accessible;
 
   const viewerIsMod = me
     ? (await isAdmin(me.id)) || (await isModerator(me.id))

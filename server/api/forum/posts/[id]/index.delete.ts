@@ -1,6 +1,10 @@
+import {
+  requireForumPostAccess,
+  hasForumPermission,
+  logModAction,
+} from "~/server/utils/forum";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
-import { hasForumPermission, logModAction } from "~/server/utils/forum";
 import { hasRestriction } from "~/server/utils/permissions";
 
 export default defineEventHandler(async (handler) => {
@@ -11,6 +15,7 @@ export default defineEventHandler(async (handler) => {
   }
 
   const postId = handler.context.params!.id;
+  await requireForumPostAccess(me?.id ?? null, postId);
 
   const post = await prisma.forumPost.findFirst({
     where: { id: postId, deleted_at: null },

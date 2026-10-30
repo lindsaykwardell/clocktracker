@@ -1,6 +1,9 @@
+import {
+  userCanViewCategory,
+  forumUserSelect,
+} from "~/server/utils/forum";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
-import { forumUserSelect } from "~/server/utils/forum";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
@@ -24,7 +27,7 @@ export default defineEventHandler(async (handler) => {
           last_post_at: true,
           deleted_at: true,
           category: {
-            select: { slug: true },
+            select: { id: true, slug: true, is_private: true },
           },
           author: { select: forumUserSelect },
           _count: { select: { posts: true } },
@@ -33,7 +36,12 @@ export default defineEventHandler(async (handler) => {
     },
   });
 
-  const result = subscriptions
+  const visibility = await Promise.all(subscriptions.map(s =>
+    userCanViewCategory(me.id, s.thread.category.id, s.thread.category.is_private)
+  ));
+  const visibleSubscriptions = subscriptions.filter((_, index) => visibility[index]);
+
+  const result = visibleSubscriptions
     .filter((s) => s.thread.deleted_at === null)
     .map((s) => ({
       id: s.id,
