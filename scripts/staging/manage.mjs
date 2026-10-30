@@ -126,6 +126,8 @@ async function up() {
   }
   const id = randomBytes(8).toString("hex");
   const n = names(id, domain);
+  // Validate DNS credentials before paying for a restore or creating resources.
+  if ((await dns(`?name=${encodeURIComponent(n.hostname)}`)).length) throw new Error("Staging hostname already exists");
   if (sourceDb.startsWith("ct-stg-")) throw new Error("Restore source must be the configured production backup source");
   const state = { id, domain, ref: process.env.STAGING_REF || "unspecified", backup, createdAt: Date.now(), expiresAt: Date.now() + 2 * 3600000, status: "provisioning" };
   // Journal before creating anything. Cancellation is recovered by the sweeper.
