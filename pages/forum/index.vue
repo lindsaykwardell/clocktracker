@@ -10,7 +10,7 @@
             <Button size="xs" color="secondary" icon="star">Subscribed</Button>
           </nuxt-link>
           <nuxt-link to="/forum/submissions"><Button size="xs" color="secondary">Your submissions</Button></nuxt-link>
-          <nuxt-link to="/forum/preferences"><Button size="xs" color="secondary">Muted / blocked</Button></nuxt-link>
+          <nuxt-link to="/forum/preferences"><Button size="xs" color="secondary">Muted users</Button></nuxt-link>
           <nuxt-link to="/forum/search">
             <Button size="xs" color="secondary" icon="search">Search</Button>
           </nuxt-link>

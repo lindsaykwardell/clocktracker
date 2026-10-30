@@ -1,4 +1,4 @@
-import { forumVisibility, requireNoForumBlock } from "./forumSafety";
+import { forumVisibility } from "./forumSafety";
 import { prisma } from "./prisma";
 export {
   getUserPermissions as getUserForumPermissions,
@@ -308,7 +308,6 @@ export async function requireForumWriteAccess(
     throw createError({ status: 403, statusMessage: "You are banned from posting" });
   }
   if (moderation) return;
-  await requireNoForumBlock(userId, thread.author_id);
   if (thread.is_locked) {
     throw createError({ status: 403, statusMessage: "This thread is locked" });
   }

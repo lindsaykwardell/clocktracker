@@ -94,17 +94,44 @@ test("Docker forum workflow: moderation, privacy, limits, reports, and mute/bloc
       assert.equal(after.reports, before.reports + 1);
       await json(await api(member, "/forum/moderation"), 403);
     });
-    await t.test("mute is one-way; block hides both directions and prevents replies and reactions", async () => {
+    await t.test("mute preserves readable posts and interactions; block is no longer supported", async () => {
       await json(await api(newcomer, "/forum/preferences", "PUT", { targetId: member.id, kind: "MUTE" }));
-      assert.equal((await json(await api(newcomer, path))).posts.some((p: any) => p.id === reply.id), false);
-      assert.equal((await api(member, path)).status, 200);
-      await json(await api(newcomer, "/forum/preferences", "PUT", { targetId: member.id, kind: "BLOCK" }));
-      await clear(member.id);
-      await json(await api(member, `${path}/posts`, "POST", { body: "Blocked reply" }), 404);
-      await json(await api(member, `/forum/posts/${postId}/reactions`, "POST", { emoji: "👍" }), 404);
+      assert.ok((await json(await api(newcomer, path))).posts.some((p: any) => p.id === reply.id));
+      assert.ok((await json(await api(newcomer, "/forum/preferences"))).some((p: any) => p.target_id === member.id));
+      await json(await api(newcomer, "/forum/preferences", "PUT", { targetId: member.id, kind: "BLOCK" }), 400);
+      await json(await api(member, `/forum/posts/${postId}/reactions`, "POST", { emoji: "👍" }));
       await json(await api(newcomer, "/forum/preferences", "PUT", { targetId: member.id, kind: null }));
       assert.equal((await api(member, path)).status, 200);
-      assert.equal((await json(await api(newcomer, path))).posts.some((p: any) => p.id === reply.id), true);
+    });
+    await t.test("deleted posts survive fresh reads as redacted placeholders, with originals only for moderators", async () => {
+      await json(await api(admin, `/forum/posts/${reply.id}`, "DELETE"));
+      for (const viewer of [null, member, newcomer]) {
+        const result = await json(await api(viewer, path));
+        const deleted = result.posts.find((p: any) => p.id === reply.id);
+        assert.ok(deleted, "Deleted post remains in the thread after a fresh request");
+        assert.equal(deleted.deleted, true);
+        assert.equal(deleted.body, "[deleted]");
+        assert.equal(deleted.author.user_id, "");
+        assert.equal(deleted.deleted_body, null);
+        assert.equal(deleted.deleted_author, null);
+      }
+      const result = await json(await api(admin, path));
+      const deleted = result.posts.find((p: any) => p.id === reply.id);
+      assert.equal(deleted.deleted_body, `${marker} established reply`);
+      assert.equal(deleted.deleted_author.user_id, member.id);
+      assert.equal(result.total, 2, "Unpublished submissions remain excluded");
+    });
+    await t.test("own replies do not trigger NEW, but other members' replies still do", async () => {
+      await clear(admin.id);
+      const ownThread = await json(await api(admin, "/forum/categories/forum-testing/threads", "POST", { title: `${marker} unread checks`, body: `${marker} unread opening` }));
+      const ownPath = `/forum/threads/${ownThread.id}`;
+      await json(await api(admin, ownPath));
+      await clear(admin.id);
+      await json(await api(admin, `${ownPath}/posts`, "POST", { body: `${marker} own visible reply` }));
+      assert.equal((await json(await api(admin, `${ownPath}?unread=1`))).firstUnreadPostId, null);
+      await clear(member.id);
+      const other = await json(await api(member, `${ownPath}/posts`, "POST", { body: `${marker} another member reply` }));
+      assert.equal((await json(await api(admin, `${ownPath}?unread=1`))).firstUnreadPostId, other.id);
     });
   } finally {
     await api(newcomer, "/forum/preferences", "PUT", { targetId: member.id, kind: null });

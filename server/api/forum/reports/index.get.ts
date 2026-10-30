@@ -55,7 +55,7 @@ export default defineEventHandler(async (handler) => {
     reports.map(async (report) => {
       const postIndex = await prisma.forumPost.count({
         where: {
-          published: true, deleted_at: null,
+          published: true,
           thread_id: report.post.thread_id,
           created_at: { lt: report.post.created_at },
         },
