@@ -14,8 +14,8 @@ async function main() {
   const category = await prisma.forumCategory.upsert({ where: { slug: "forum-testing" }, create: { name: "Forum Testing", slug: "forum-testing", description: "Local moderation and privacy checks" }, update: {} });
   for (const [label, established] of [["new", false], ["member", true]] as const) {
     const email = `forum-${label}@example.test`;
-    let result = await supabase.auth.signInWithPassword({ email, password: "password123" });
-    if (result.error) result = await supabase.auth.signUp({ email, password: "password123" });
+    const signIn = await supabase.auth.signInWithPassword({ email, password: "password123" });
+    const result = signIn.error ? await supabase.auth.signUp({ email, password: "password123" }) : signIn;
     if (!result.data.user) throw new Error(result.error?.message || "Local user creation failed");
     const user = await prisma.userSettings.upsert({ where: { user_id: result.data.user.id }, create: { user_id: result.data.user.id, email, username: `forum-${label}`, display_name: `Forum ${label}`, finished_welcome: true, created_at: new Date(Date.now() - (established ? 30 : 0) * 86400000) }, update: {} });
     if (established && !await prisma.forumThread.findFirst({ where: { title: "Local established member thread", author_id: user.user_id } })) {

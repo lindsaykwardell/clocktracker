@@ -64,7 +64,7 @@ async function review(id: string, action: string) {
 }
 onMounted(async () => {
   try {
-    const me = await $fetch<any>('/api/forum/me');
+    const me = await $fetch('/api/forum/me');
     allowed.value = me.is_admin || (me.permissions.includes('VIEW_REPORTS') && me.permissions.includes('EDIT_ANY_POST'));
     if (allowed.value) await refresh();
   } catch { error.value = 'Unable to check moderation access.'; }

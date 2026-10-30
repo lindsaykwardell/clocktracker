@@ -17,7 +17,7 @@ let timer: ReturnType<typeof setInterval> | null = null;
 async function refresh() {
   if (!useFeatureFlags().isEnabled('forum')) return;
   try {
-    const result = await $fetch<{ pending: number; reports: number }>('/api/forum/moderation/summary');
+    const result = await $fetch('/api/forum/moderation/summary');
     pending.value = result.pending;
     reports.value = result.reports;
   } catch { pending.value = 0; reports.value = 0; }
