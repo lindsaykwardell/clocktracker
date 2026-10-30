@@ -23,9 +23,8 @@
         <template v-if="results.threads.length">
           <h2 class="font-sorts text-lg mb-3">Threads</h2>
           <div class="flex flex-col gap-2 mb-6">
-            <nuxt-link
-              v-for="thread in results.threads"
-              :key="thread.id"
+            <ForumMutedContent v-for="thread in results.threads" :key="thread.id" :author-id="thread.author.user_id">
+<nuxt-link
               :to="`/forum/${thread.categorySlug}/${thread.id}`"
               class="p-3 rounded border border-stone-300 dark:border-stone-700/50
                      bg-stone-300/40 dark:bg-stone-900/50 hover:border-purple-700
@@ -38,6 +37,7 @@
                 &middot; {{ formatDate(thread.last_post_at) }}
               </div>
             </nuxt-link>
+</ForumMutedContent>
           </div>
         </template>
 
@@ -45,9 +45,8 @@
         <template v-if="results.posts.length">
           <h2 class="font-sorts text-lg mb-3">Posts</h2>
           <div class="flex flex-col gap-2">
-            <nuxt-link
-              v-for="post in results.posts"
-              :key="post.id"
+            <ForumMutedContent v-for="post in results.posts" :key="post.id" :author-id="post.author.user_id">
+<nuxt-link
               :to="`/forum/${post.thread.categorySlug}/${post.thread.id}`"
               class="p-3 rounded border border-stone-300 dark:border-stone-700/50
                      bg-stone-300/40 dark:bg-stone-900/50 hover:border-purple-700
@@ -61,6 +60,7 @@
                 {{ post.author.display_name }} &middot; {{ formatDate(post.created_at) }}
               </div>
             </nuxt-link>
+</ForumMutedContent>
           </div>
         </template>
 
@@ -82,7 +82,7 @@ type SearchResults = {
     title: string;
     created_at: string;
     last_post_at: string;
-    author: { display_name: string };
+    author: { user_id: string; display_name: string };
     postCount: number;
     categorySlug: string;
   }[];
@@ -90,7 +90,7 @@ type SearchResults = {
     id: string;
     body: string;
     created_at: string;
-    author: { display_name: string };
+    author: { user_id: string; display_name: string };
     thread: {
       id: string;
       title: string;

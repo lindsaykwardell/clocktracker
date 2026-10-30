@@ -19,6 +19,8 @@ export default defineEventHandler(async (handler) => {
   const perPage = 25;
 
   const visible = await forumVisibility(me?.id ?? null);
+  // Deleted published posts retain their position as redacted placeholders.
+  const postVisibility = { published: visible.published };
   const thread = await prisma.forumThread.findFirst({
     where: { id: threadId, ...visible },
     select: {
@@ -95,22 +97,22 @@ export default defineEventHandler(async (handler) => {
     if (cutoff) {
       // Find the first post created after the cutoff
       const firstUnread = await prisma.forumPost.findFirst({
-        where: { ...visible, thread_id: threadId, created_at: { gt: cutoff } },
+        where: { ...visible, author_id: { not: me.id }, thread_id: threadId, created_at: { gt: cutoff } },
         orderBy: { created_at: "asc" },
-        select: { id: true },
+        select: { id: true, created_at: true },
       });
 
       if (firstUnread) {
         firstUnreadPostId = firstUnread.id;
         // Count posts before this one to determine its page
         const positionIndex = await prisma.forumPost.count({
-          where: { ...visible, thread_id: threadId, created_at: { lte: cutoff } },
+          where: { ...postVisibility, thread_id: threadId, created_at: { lt: firstUnread.created_at } },
         });
         page = Math.floor(positionIndex / perPage) + 1;
       } else {
         // All posts are read — go to the last page
         const totalPosts = await prisma.forumPost.count({
-          where: { ...visible, thread_id: threadId },
+          where: { ...postVisibility, thread_id: threadId },
         });
         page = Math.max(1, Math.ceil(totalPosts / perPage));
       }
@@ -119,7 +121,7 @@ export default defineEventHandler(async (handler) => {
     }
   }
 
-  const where = { ...visible, thread_id: threadId };
+  const where = { ...postVisibility, thread_id: threadId };
 
   const [rawPosts, total] = await Promise.all([
     prisma.forumPost.findMany({

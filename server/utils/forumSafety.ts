@@ -26,25 +26,16 @@ export async function assessForumSubmission(userId: string, body: string, exclud
   return screeningReason(body, await isForumNewcomer(userId));
 }
 
-export async function hiddenForumAuthors(userId: string | null): Promise<string[]> {
+export async function mutedForumAuthors(userId: string | null): Promise<string[]> {
   if (!userId) return [];
   const preferences = await prisma.forumUserPreference.findMany({
-    where: { OR: [{ user_id: userId }, { target_id: userId, kind: "BLOCK" }] },
-    select: { user_id: true, target_id: true },
+    where: { user_id: userId, kind: "MUTE" }, select: { target_id: true },
   });
-  return [...new Set(preferences.map(p => p.user_id === userId ? p.target_id : p.user_id))];
+  return preferences.map(p => p.target_id);
 }
 
-export async function forumVisibility(userId: string | null) {
-  const hidden = await hiddenForumAuthors(userId);
-  return { published: true, deleted_at: null, author_id: { notIn: hidden } };
-}
-
-export async function requireNoForumBlock(userId: string, targetId: string) {
-  const blocked = await prisma.forumUserPreference.findFirst({ where: { kind: "BLOCK", OR: [
-    { user_id: userId, target_id: targetId }, { user_id: targetId, target_id: userId },
-  ] } });
-  if (blocked) throw createError({ statusCode: 403, statusMessage: "Interactions with this user are blocked." });
+export async function forumVisibility(_userId: string | null) {
+  return { published: true, deleted_at: null };
 }
 
 export async function canReviewForum(userId: string) {

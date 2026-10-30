@@ -203,29 +203,7 @@ export const useForum = defineStore("forum", {
       if (!result.threadDeleted) {
         const cached = this.threadDetail.get(threadId);
         if (cached?.status === Status.SUCCESS) {
-          const idx = cached.data.posts.findIndex((p) => p.id === postId);
-          if (idx !== -1) {
-            const existing = cached.data.posts[idx];
-            cached.data.posts[idx] = {
-              ...existing,
-              body: "[deleted]",
-              deleted: true,
-              edited_at: null,
-              edited_by_label: null,
-              deleted_body: existing.body,
-              deleted_author: { ...existing.author },
-              author: {
-                user_id: "",
-                username: "",
-                display_name: "[deleted]",
-                avatar: null,
-                created_at: null,
-                name_color: null,
-                badge: null,
-              },
-              reactions: [],
-            };
-          }
+          await this.fetchThread(threadId, cached.data.page);
         }
       }
 

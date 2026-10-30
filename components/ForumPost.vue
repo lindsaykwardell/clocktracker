@@ -3,10 +3,7 @@
     :id="`post-${post.id}`"
     class="p-4 rounded border border-stone-300 dark:border-stone-700/50 bg-stone-300/40 dark:bg-stone-900/50"
   >
-    <div v-if="!post.deleted && isLoggedIn && post.author.user_id !== currentUserId" class="flex flex-wrap gap-2 mb-3 text-xs">
-      <button type="button" class="underline" :disabled="preferenceBusy" @click="setPreference('MUTE')">Mute {{ post.author.display_name }}</button>
-      <button type="button" class="underline" :disabled="preferenceBusy" @click="setPreference('BLOCK')">Block {{ post.author.display_name }}</button>
-    </div>
+    <ForumMutedContent :author-id="post.author.user_id">
     <p v-if="actionError" role="alert" class="text-sm text-red-500 mb-2">{{ actionError }}</p>
     <!-- Deleted post -->
     <template v-if="post.deleted">
@@ -87,7 +84,7 @@
       <!-- Post actions: inline on desktop, 3-dot menu on mobile -->
       <div
         v-if="isLoggedIn || canEdit || canDelete || showBanAction"
-        class="float-right ml-4"
+        class="float-right ml-4 flex items-center gap-1"
       >
         <!-- Desktop: inline icons -->
         <div class="hidden sm:flex items-center gap-1">
@@ -101,17 +98,6 @@
             @click="$emit('quote', post)"
           >
             Quote
-          </Button>
-          <Button
-            v-if="isLoggedIn && post.author.user_id !== currentUserId"
-            variant="link"
-            size="sm"
-            icon="exclamation-circle"
-            display="icon-only"
-            title="Report"
-            @click="openReportDialog"
-          >
-            Report
           </Button>
           <Button
             v-if="canEdit"
@@ -149,10 +135,12 @@
             Ban user
           </Button>
         </div>
-        <!-- Mobile: 3-dot menu -->
-        <Menu as="div" class="relative sm:hidden" v-slot="{ open }">
-          <MenuButton class="text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 transition-colors">
-            <IconUI id="dots" size="sm" />
+        <!-- Shared overflow menu; primary actions remain inline on desktop. -->
+        <Menu as="div" class="relative" :class="{ 'sm:hidden': !isLoggedIn || post.author.user_id === currentUserId }" v-slot="{ open }">
+          <MenuButton as="template">
+            <Button variant="link" size="sm" icon="dots" display="icon-only" title="Post actions">
+              Post actions
+            </Button>
           </MenuButton>
           <transition
             enter-active-class="transition duration-100 ease-out"
@@ -164,14 +152,10 @@
           >
             <div v-show="open">
               <MenuItems static class="ct-contextual-links right-0">
+                <div class="sm:hidden">
                 <MenuItem v-if="isLoggedIn && !threadIsLocked">
                   <ButtonSubmenu icon="reply" @click="$emit('quote', post)">
                     Quote
-                  </ButtonSubmenu>
-                </MenuItem>
-                <MenuItem v-if="isLoggedIn && post.author.user_id !== currentUserId">
-                  <ButtonSubmenu icon="exclamation-circle" @click="openReportDialog">
-                    Report
                   </ButtonSubmenu>
                 </MenuItem>
                 <MenuItem v-if="canEdit">
@@ -193,6 +177,18 @@
                     Ban User
                   </ButtonSubmenu>
                 </MenuItem>
+                </div>
+                <MenuItem v-if="isLoggedIn && post.author.user_id !== currentUserId">
+                  <ButtonSubmenu @click="openReportDialog">
+                    Report
+                  </ButtonSubmenu>
+                </MenuItem>
+                <template v-if="isLoggedIn && post.author.user_id !== currentUserId">
+                  <MenuItem>
+                    <ButtonSubmenu :disabled="preferenceBusy" @click="setPreference(activePreference === 'MUTE' ? null : 'MUTE')">{{ activePreference === 'MUTE' ? 'Unmute user' : 'Mute user' }}</ButtonSubmenu>
+                  </MenuItem>
+
+                </template>
               </MenuItems>
             </div>
           </transition>
@@ -374,6 +370,17 @@
         </div>
       </div>
     </template>
+
+    </ForumMutedContent>
+
+    <Dialog v-model:visible="showPreferenceResult" size="sm">
+      <template #title><h2 class="font-sorts text-xl">Preference updated</h2></template>
+      <div class="p-4 flex flex-col gap-4">
+        <p role="status">{{ preferenceMessage }}</p>
+        <p class="text-sm text-stone-400">Muted posts stay in the discussion. Choose “View muted content” to reveal one.</p>
+        <Button color="secondary" @click="showPreferenceResult = false">Continue reading</Button>
+      </div>
+    </Dialog>
 
     <!-- Report Dialog -->
     <Dialog v-model:visible="showReportDialogVisible" size="sm">
@@ -604,12 +611,19 @@ onBeforeUnmount(() => document.removeEventListener("click", onClickOutsideEmoji)
 
 const actionError = ref("");
 const preferenceBusy = ref(false);
-async function setPreference(kind: "MUTE" | "BLOCK") {
+const { muted } = useForumMutes();
+const activePreference = computed(() => muted.value[props.post.author.user_id] ? "MUTE" : null);
+const showPreferenceResult = ref(false);
+const preferenceMessage = ref("");
+async function setPreference(kind: "MUTE" | null) {
   preferenceBusy.value = true;
   actionError.value = "";
   try {
     await $fetch("/api/forum/preferences", { method: "PUT", body: { targetId: props.post.author.user_id, kind } });
-    await navigateTo("/forum/preferences");
+    muted.value[props.post.author.user_id] = kind === "MUTE";
+    const action = kind === "MUTE" ? "muted" : "unmuted";
+    preferenceMessage.value = `${props.post.author.display_name} has been ${action}.`;
+    showPreferenceResult.value = true;
   } catch (err: any) { actionError.value = err?.data?.statusMessage || "Unable to update user preference."; }
   finally { preferenceBusy.value = false; }
 }

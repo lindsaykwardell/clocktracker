@@ -1,4 +1,4 @@
-import { hiddenForumAuthors } from "./forumSafety";
+import { mutedForumAuthors } from "./forumSafety";
 import { prisma } from "~/server/utils/prisma";
 import { filterForumRecipients } from "./forum";
 import { getFeatureFlags } from "./featureFlags";
@@ -144,6 +144,6 @@ export async function sendAnnouncementNotifications({
 
 async function notificationRecipients(userIds: string[], category: { id: string; is_private: boolean }, authorId: string) {
   const visible = await filterForumRecipients(userIds, category);
-  const enabled = await Promise.all(visible.map(async id => (await getFeatureFlags({ id })).forum && !(await hiddenForumAuthors(id)).includes(authorId)));
+  const enabled = await Promise.all(visible.map(async id => (await getFeatureFlags({ id })).forum && !(await mutedForumAuthors(id)).includes(authorId)));
   return visible.filter((_, index) => enabled[index]);
 }
