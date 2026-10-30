@@ -7,7 +7,14 @@
 <script setup lang="ts">
 const supabase = useSupabaseClient();
 const router = useRouter();
+const staging = useRuntimeConfig().public.staging;
 onMounted(async () => {
+  if (staging) {
+    // There is no staging service worker. Keep other production sessions intact.
+    await supabase.auth.signOut({ scope: "local" });
+    window.location.assign("/");
+    return;
+  }
   // Unregister push subscription before signing out
   try {
     const registration = await navigator.serviceWorker?.ready;
