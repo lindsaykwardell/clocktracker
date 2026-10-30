@@ -10,7 +10,7 @@ const router = useRouter();
 onMounted(async () => {
   // Unregister push subscription before signing out
   try {
-    const registration = await navigator.serviceWorker?.ready;
+    const registration = await navigator.serviceWorker?.getRegistration();
     const subscription = await registration?.pushManager?.getSubscription();
     if (subscription) {
       const endpoint = subscription.endpoint;

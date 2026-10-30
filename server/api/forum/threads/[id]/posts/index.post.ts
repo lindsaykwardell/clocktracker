@@ -8,7 +8,8 @@ import {
 } from "~/server/utils/forum";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
-import { sendForumNotifications } from "~/server/utils/sendForumNotifications";
+import { assessForumSubmission } from "~/server/utils/forumSafety";
+import { notifyForumPublication } from "~/server/utils/forumPublication";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
@@ -28,68 +29,20 @@ export default defineEventHandler(async (handler) => {
 
   await checkPostLength(me.id, body.body.trim());
 
-  const now = new Date();
-
-  const [post] = await prisma.$transaction([
-    prisma.forumPost.create({
-      data: {
-        body: body.body.trim(),
-        thread_id: threadId,
-        author_id: me.id,
-      },
-      select: {
-        id: true,
-        body: true,
-        created_at: true,
-        edited_at: true,
-        author: { select: forumUserSelect },
-      },
-    }),
-    prisma.forumThread.update({
-      where: { id: threadId },
-      data: { last_post_at: now },
-    }),
-  ]);
-
-  // Mark thread as read and auto-subscribe replier
-  await Promise.all([
-    prisma.forumThreadRead.upsert({
-      where: {
-        thread_id_user_id: { thread_id: threadId, user_id: me.id },
-      },
-      create: { thread_id: threadId, user_id: me.id, last_read_at: now },
-      update: { last_read_at: now },
-    }),
-    prisma.forumThreadSubscription.upsert({
-      where: {
-        thread_id_user_id: { thread_id: threadId, user_id: me.id },
-      },
-      create: { thread_id: threadId, user_id: me.id, last_read_at: now },
-      update: { last_read_at: now },
-    }),
-  ]);
-
-  // Fire-and-forget push notifications to thread subscribers
-  void sendForumNotifications({
-    threadId,
-    posterId: me.id,
-    posterDisplayName: post.author.display_name,
-    postBody: post.body,
+  const reason = await assessForumSubmission(me.id, body.body.trim());
+  const post = await prisma.$transaction(async tx => {
+    const created = await tx.forumPost.create({
+      data: { body: body.body.trim(), thread_id: threadId, author_id: me.id, published: !reason },
+      include: { author: { select: forumUserSelect } },
+    });
+    if (reason) {
+      await tx.forumSubmission.create({ data: { author_id: me.id, thread_id: threadId, post_id: created.id, kind: "POST", body: created.body, reason } });
+    } else {
+      await tx.forumThread.update({ where: { id: threadId }, data: { last_post_at: new Date() } });
+    }
+    return created;
   });
-
-  const [nameColor, badges] = await Promise.all([
-    getForumNameColor(me.id),
-    getForumBadges([me.id]),
-  ]);
-
-  return {
-    ...post,
-    reactions: [],
-    deleted: false,
-    author: {
-      ...post.author,
-      name_color: nameColor,
-      badge: badges[me.id] ?? null,
-    },
-  };
+  if (!reason) await notifyForumPublication(threadId, post.id, false);
+  const [nameColor, badges] = await Promise.all([getForumNameColor(me.id), getForumBadges([me.id])]);
+  return { ...post, pending: !!reason, reactions: [], deleted: false, author: { ...post.author, name_color: nameColor, badge: badges[me.id] ?? null } };
 });

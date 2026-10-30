@@ -45,6 +45,7 @@
             >
               Bans
             </nuxt-link>
+            <nuxt-link v-if="canViewReports && hasPerm('EDIT_ANY_POST')" to="/admin/forum/moderation" class="profile-tab" :class="tabClass('/admin/forum/moderation')">Moderation</nuxt-link>
             <nuxt-link
               v-if="canViewReports"
               to="/admin/forum/reports"

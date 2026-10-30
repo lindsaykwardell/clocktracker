@@ -3,6 +3,11 @@
     :id="`post-${post.id}`"
     class="p-4 rounded border border-stone-300 dark:border-stone-700/50 bg-stone-300/40 dark:bg-stone-900/50"
   >
+    <div v-if="!post.deleted && isLoggedIn && post.author.user_id !== currentUserId" class="flex flex-wrap gap-2 mb-3 text-xs">
+      <button type="button" class="underline" :disabled="preferenceBusy" @click="setPreference('MUTE')">Mute {{ post.author.display_name }}</button>
+      <button type="button" class="underline" :disabled="preferenceBusy" @click="setPreference('BLOCK')">Block {{ post.author.display_name }}</button>
+    </div>
+    <p v-if="actionError" role="alert" class="text-sm text-red-500 mb-2">{{ actionError }}</p>
     <!-- Deleted post -->
     <template v-if="post.deleted">
       <div class="flex items-center gap-2 mb-2">
@@ -597,6 +602,17 @@ onBeforeUnmount(() => document.removeEventListener("click", onClickOutsideEmoji)
 
 // --- Edit ---
 
+const actionError = ref("");
+const preferenceBusy = ref(false);
+async function setPreference(kind: "MUTE" | "BLOCK") {
+  preferenceBusy.value = true;
+  actionError.value = "";
+  try {
+    await $fetch("/api/forum/preferences", { method: "PUT", body: { targetId: props.post.author.user_id, kind } });
+    await navigateTo("/forum/preferences");
+  } catch (err: any) { actionError.value = err?.data?.statusMessage || "Unable to update user preference."; }
+  finally { preferenceBusy.value = false; }
+}
 const editing = ref(false);
 const editBody = ref("");
 const editTab = ref<"write" | "preview">("write");
@@ -617,13 +633,18 @@ function cancelEdit() {
 async function submitEdit() {
   if (!editBody.value.trim()) return;
   try {
-    await forum.editPost(props.post.id, editBody.value);
+    const result = await forum.editPost(props.post.id, editBody.value);
+    if (result.pending) {
+      cancelEdit();
+      await navigateTo("/forum/submissions");
+      return;
+    }
     localBody.value = editBody.value;
     localEditedAt.value = new Date().toISOString();
     emit("edited", props.post.id, editBody.value);
     cancelEdit();
   } catch (err: any) {
-    console.error(err);
+    actionError.value = err?.data?.statusMessage || "Unable to save edit.";
   }
 }
 

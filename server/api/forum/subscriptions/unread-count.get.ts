@@ -1,3 +1,4 @@
+import { forumVisibility } from "~/server/utils/forumSafety";
 import { userCanViewCategory } from "~/server/utils/forum";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
@@ -8,8 +9,9 @@ export default defineEventHandler(async (handler) => {
     return { count: 0 };
   }
 
+  const visible = await forumVisibility(me.id);
   const subscriptions = await prisma.forumThreadSubscription.findMany({
-    where: { user_id: me.id },
+    where: { user_id: me.id, thread: visible },
     select: {
       last_read_at: true,
       thread: {

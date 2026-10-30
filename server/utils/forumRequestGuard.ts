@@ -11,6 +11,7 @@ export function forumWriteLimit(path: string, method: string) {
 
 export function createForumRequestGuard(dependencies: {
   enabled: (event: H3Event) => Promise<boolean>;
+  newcomer?: (userId: string) => Promise<boolean>;
   consume: (key: string, limit: number) => Promise<{ allowed: boolean; retryAfter: number } | null>;
 }) {
   return defineEventHandler(async (event) => {
@@ -24,6 +25,14 @@ export function createForumRequestGuard(dependencies: {
     if (!budget) return;
     const userId = event.context.user?.id;
     if (!userId) throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
+    if (["thread", "post", "edit"].includes(budget.category) && await dependencies.newcomer?.(userId)) {
+      const allowance = await dependencies.consume(`forum:v1:newcomer:${userId}`, 1);
+      if (!allowance) throw createError({ statusCode: 503, statusMessage: "Posting is temporarily unavailable." });
+      if (!allowance.allowed) {
+        setHeader(event, "Retry-After", allowance.retryAfter);
+        throw createError({ statusCode: 429, statusMessage: "New accounts can submit one contribution per minute. Please wait." });
+      }
+    }
     const result = await dependencies.consume(`forum:v1:${budget.category}:${userId}`, budget.limit);
     if (!result) {
       throw createError({ statusCode: 503, statusMessage: "Posting is temporarily unavailable. Please try again shortly." });

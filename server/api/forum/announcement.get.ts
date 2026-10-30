@@ -1,3 +1,4 @@
+import { forumVisibility } from "~/server/utils/forumSafety";
 import { prisma } from "~/server/utils/prisma";
 import { forumUserSelect, userCanViewCategory } from "~/server/utils/forum";
 
@@ -8,10 +9,11 @@ export default defineEventHandler(async (handler) => {
 
   if (!category || !(await userCanViewCategory(handler.context.user?.id ?? null, category.id, category.is_private))) return null;
 
+  const visible = await forumVisibility(handler.context.user?.id ?? null);
   const latestThread = await prisma.forumThread.findFirst({
     where: {
       category_id: category.id,
-      deleted_at: null,
+      ...visible,
     },
     orderBy: { created_at: "desc" },
     select: {
@@ -20,7 +22,7 @@ export default defineEventHandler(async (handler) => {
       created_at: true,
       author: { select: forumUserSelect },
       posts: {
-        where: { deleted_at: null },
+        where: visible,
         orderBy: { created_at: "asc" },
         take: 1,
         select: {

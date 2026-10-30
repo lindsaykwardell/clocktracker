@@ -1,3 +1,4 @@
+import { forumVisibility } from "~/server/utils/forumSafety";
 import {
   userCanViewCategory,
   forumUserSelect,
@@ -14,8 +15,9 @@ export default defineEventHandler(async (handler) => {
   const query = getQuery(handler);
   const unreadOnly = query.unread === "true";
 
+  const visible = await forumVisibility(me.id);
   const subscriptions = await prisma.forumThreadSubscription.findMany({
-    where: { user_id: me.id },
+    where: { user_id: me.id, thread: visible },
     orderBy: { created_at: "desc" },
     select: {
       id: true,
@@ -30,7 +32,7 @@ export default defineEventHandler(async (handler) => {
             select: { id: true, slug: true, is_private: true },
           },
           author: { select: forumUserSelect },
-          _count: { select: { posts: true } },
+          _count: { select: { posts: { where: visible } } },
         },
       },
     },

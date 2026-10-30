@@ -1,3 +1,4 @@
+import { requireNoForumBlock } from "~/server/utils/forumSafety";
 import { requireForumPostAccess, requireForumWriteAccess } from "~/server/utils/forum";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
@@ -19,6 +20,7 @@ export default defineEventHandler(async (handler) => {
 
   // Verify post exists and is not deleted
   const { post } = accessible;
+  await requireNoForumBlock(me.id, post.author_id);
 
   // Toggle: if reaction exists, remove it; otherwise, add it
   const existing = await prisma.forumPostReaction.findUnique({

@@ -1,3 +1,4 @@
+import { forumVisibility, requireNoForumBlock } from "./forumSafety";
 import { prisma } from "./prisma";
 export {
   getUserPermissions as getUserForumPermissions,
@@ -277,8 +278,9 @@ export async function checkPostLength(
 
 // All post-specific actions must also authorize the parent thread.
 export async function requireForumThreadAccess(userId: string | null, threadId: string) {
+  const moderator = userId && (await isAdmin(userId) || await isModerator(userId));
   const thread = await prisma.forumThread.findFirst({
-    where: { id: threadId, deleted_at: null },
+    where: { id: threadId, ...(moderator ? { published: true, deleted_at: null } : await forumVisibility(userId)) },
     include: { category: true },
   });
   if (!thread || !(await userCanViewCategory(userId, thread.category.id, thread.category.is_private))) {
@@ -288,8 +290,9 @@ export async function requireForumThreadAccess(userId: string | null, threadId: 
 }
 
 export async function requireForumPostAccess(userId: string | null, postId: string) {
+  const moderator = userId && (await isAdmin(userId) || await isModerator(userId));
   const post = await prisma.forumPost.findFirst({
-    where: { id: postId, deleted_at: null },
+    where: { id: postId, ...(moderator ? { published: true, deleted_at: null } : await forumVisibility(userId)) },
   });
   if (!post) throw createError({ status: 404, statusMessage: "Post not found" });
   const thread = await requireForumThreadAccess(userId, post.thread_id);
@@ -305,6 +308,7 @@ export async function requireForumWriteAccess(
     throw createError({ status: 403, statusMessage: "You are banned from posting" });
   }
   if (moderation) return;
+  await requireNoForumBlock(userId, thread.author_id);
   if (thread.is_locked) {
     throw createError({ status: 403, statusMessage: "This thread is locked" });
   }
@@ -317,4 +321,16 @@ export async function filterForumRecipients(userIds: string[], category: { id: s
   const uniqueIds = [...new Set(userIds)];
   const allowed = await Promise.all(uniqueIds.map(id => userCanViewCategory(id, category.id, category.is_private)));
   return uniqueIds.filter((_, index) => allowed[index]);
+}
+
+export async function visibleForumCategoryIds(userId: string | null) {
+  const admin = userId ? await isAdmin(userId) : false;
+  const categories = await prisma.forumCategory.findMany({
+    where: admin ? {} : { OR: [
+      { is_private: false },
+      ...(userId ? [{ access: { some: { can_view: true, group: { members: { some: { user_id: userId } } } } } }] : []),
+    ] },
+    select: { id: true },
+  });
+  return categories.map(c => c.id);
 }

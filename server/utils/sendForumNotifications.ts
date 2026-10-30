@@ -1,3 +1,4 @@
+import { hiddenForumAuthors } from "./forumSafety";
 import { prisma } from "~/server/utils/prisma";
 import { filterForumRecipients } from "./forum";
 import { getFeatureFlags } from "./featureFlags";
@@ -18,9 +19,10 @@ export async function sendForumNotifications({
 }: SendForumNotificationsOptions) {
   try {
     const thread = await prisma.forumThread.findFirst({
-      where: { id: threadId, deleted_at: null },
+      where: { id: threadId, deleted_at: null, published: true },
       select: {
         title: true,
+        author_id: true,
         category: { select: { id: true, slug: true, is_private: true } },
       },
     });
@@ -35,7 +37,7 @@ export async function sendForumNotifications({
       select: { user_id: true },
     });
 
-    const userIds = await notificationRecipients(subscriptions.map(s => s.user_id), thread.category);
+    const userIds = await notificationRecipients(subscriptions.map(s => s.user_id), thread.category, posterId);
     if (userIds.length === 0) return;
 
     // Strip markdown and truncate for the notification snippet
@@ -73,11 +75,11 @@ export async function sendCategoryNewThreadNotifications({
 }) {
   try {
     const thread = await prisma.forumThread.findFirst({
-      where: { id: threadId, deleted_at: null },
+      where: { id: threadId, deleted_at: null, published: true },
       include: { category: true },
     });
     if (!thread) return;
-    const userIds = await notificationRecipients(subscriberUserIds, thread.category);
+    const userIds = await notificationRecipients(subscriberUserIds, thread.category, thread.author_id);
     if (userIds.length === 0) return;
 
     const snippet = postBody
@@ -110,7 +112,7 @@ export async function sendAnnouncementNotifications({
 }) {
   try {
     const thread = await prisma.forumThread.findFirst({
-      where: { id: threadId, deleted_at: null },
+      where: { id: threadId, deleted_at: null, published: true },
       include: { category: true },
     });
     if (!thread || !thread.category.is_announcement) return;
@@ -120,7 +122,7 @@ export async function sendAnnouncementNotifications({
       select: { user_id: true },
     });
 
-    const userIds = await notificationRecipients(users.map(u => u.user_id), thread.category);
+    const userIds = await notificationRecipients(users.map(u => u.user_id), thread.category, thread.author_id);
     if (userIds.length === 0) return;
 
     const snippet = postBody
@@ -140,8 +142,8 @@ export async function sendAnnouncementNotifications({
   }
 }
 
-async function notificationRecipients(userIds: string[], category: { id: string; is_private: boolean }) {
+async function notificationRecipients(userIds: string[], category: { id: string; is_private: boolean }, authorId: string) {
   const visible = await filterForumRecipients(userIds, category);
-  const enabled = await Promise.all(visible.map(async id => (await getFeatureFlags({ id })).forum));
+  const enabled = await Promise.all(visible.map(async id => (await getFeatureFlags({ id })).forum && !(await hiddenForumAuthors(id)).includes(authorId)));
   return visible.filter((_, index) => enabled[index]);
 }

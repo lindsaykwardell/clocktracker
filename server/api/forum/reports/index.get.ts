@@ -1,7 +1,7 @@
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
 import { hasPermission } from "~/server/utils/permissions";
-import { forumUserSelect } from "~/server/utils/forum";
+import { forumUserSelect, visibleForumCategoryIds } from "~/server/utils/forum";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
@@ -17,7 +17,7 @@ export default defineEventHandler(async (handler) => {
   const showResolved = query.resolved === "true";
 
   const reports = await prisma.forumPostReport.findMany({
-    where: { resolved: showResolved },
+    where: { resolved: showResolved, post: { thread: { category_id: { in: await visibleForumCategoryIds(me.id) } } } },
     orderBy: { created_at: "desc" },
     select: {
       id: true,
@@ -55,6 +55,7 @@ export default defineEventHandler(async (handler) => {
     reports.map(async (report) => {
       const postIndex = await prisma.forumPost.count({
         where: {
+          published: true, deleted_at: null,
           thread_id: report.post.thread_id,
           created_at: { lt: report.post.created_at },
         },

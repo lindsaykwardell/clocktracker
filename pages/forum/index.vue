@@ -5,15 +5,22 @@
         <h1 class="font-sorts text-center text-2xl lg:text-3xl mb-3">
           Discussions
         </h1>
-        <div class="flex justify-center gap-2">
+        <div class="flex flex-wrap justify-center gap-2">
           <nuxt-link to="/forum/subscribed">
             <Button size="xs" color="secondary" icon="star">Subscribed</Button>
           </nuxt-link>
+          <nuxt-link to="/forum/submissions"><Button size="xs" color="secondary">Your submissions</Button></nuxt-link>
+          <nuxt-link to="/forum/preferences"><Button size="xs" color="secondary">Muted / blocked</Button></nuxt-link>
           <nuxt-link to="/forum/search">
             <Button size="xs" color="secondary" icon="search">Search</Button>
           </nuxt-link>
           <nuxt-link v-if="canAccessAdmin" to="/admin">
-            <Button size="xs" color="caution" icon="edit">Admin</Button>
+            <Button size="xs" color="caution" icon="edit">
+              Admin
+              <ForumModerationAlert
+                style="--badge-bg: #78350f; --badge-fg: #fffbeb; --size: 1.125rem; --fontsize: 0.6875rem; --badge-p: 0.375rem; border-radius: 9999px; font-variant-numeric: tabular-nums"
+              />
+            </Button>
           </nuxt-link>
         </div>
       </div>

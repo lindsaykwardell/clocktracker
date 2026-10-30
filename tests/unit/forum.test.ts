@@ -66,6 +66,7 @@ test("forum access rejects private and deleted content and enforces bans and loc
     userSettings: { findUnique: async () => ({ is_admin: false }) },
     userGroupMembership: { findMany: async () => [] },
     categoryAccess: { findFirst: async () => visible ? { can_view: true, can_post: true } : null },
+    forumUserPreference: { findMany: async () => [], findFirst: async () => null },
     forumBan: { findFirst: async () => banned ? { id: "ban" } : null },
     forumThread: { findFirst: async () => deleted ? null : { id: "t", title: "Private title", author_id: "member", author: {}, posts: [{ id: "p", body: "Private body" }], is_locked: locked, category } },
     forumPost: { findFirst: async () => postDeleted ? null : { id: "p", thread_id: "t", author_id: "member", body: "original" }, update: async () => { writes++; return {}; } },

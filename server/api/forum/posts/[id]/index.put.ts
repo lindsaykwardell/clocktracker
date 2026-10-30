@@ -1,3 +1,4 @@
+import { assessForumSubmission } from "~/server/utils/forumSafety";
 import {
   requireForumPostAccess,
   requireForumWriteAccess,
@@ -38,6 +39,17 @@ export default defineEventHandler(async (handler) => {
   await requireForumWriteAccess(me.id, accessible.thread, { moderation: canEditAny });
 
   await checkPostLength(me.id, body.body.trim());
+
+  const existing = await prisma.forumSubmission.findFirst({ where: { post_id: postId, status: "PENDING" } });
+  if (existing) throw createError({ status: 409, statusMessage: "An edit is already awaiting review." });
+  const reason = await assessForumSubmission(me.id, body.body.trim(), postId);
+  if (reason) {
+    await prisma.forumSubmission.create({ data: {
+      author_id: me.id, thread_id: post.thread_id, post_id: postId, kind: "EDIT_POST",
+      body: body.body.trim(), base_body: post.body, reason,
+    } });
+    return { ...post, pending: true };
+  }
 
   const [, updated] = await prisma.$transaction([
     prisma.forumPostEdit.create({

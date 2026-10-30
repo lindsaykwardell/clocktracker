@@ -7,10 +7,9 @@ import {
   checkPostLength,
 } from "~/server/utils/forum";
 import { hasRestriction } from "~/server/utils/permissions";
-import {
-  sendAnnouncementNotifications,
-  sendCategoryNewThreadNotifications,
-} from "~/server/utils/sendForumNotifications";
+import { screeningReason } from "~/server/utils/forumPolicy";
+import { assessForumSubmission } from "~/server/utils/forumSafety";
+import { notifyForumPublication } from "~/server/utils/forumPublication";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
@@ -67,86 +66,22 @@ export default defineEventHandler(async (handler) => {
 
   await checkPostLength(me.id, body.body.trim());
 
-  const now = new Date();
-
-  const thread = await prisma.forumThread.create({
-    data: {
-      title: body.title.trim(),
-      category_id: category.id,
-      author_id: me.id,
-      last_post_at: now,
-      posts: {
-        create: {
-          body: body.body.trim(),
-          author_id: me.id,
-        },
+  const reason = await assessForumSubmission(me.id, body.body.trim()) || screeningReason(body.title.trim(), false);
+  const thread = await prisma.$transaction(async tx => {
+    const created = await tx.forumThread.create({
+      data: {
+        title: body.title.trim(), category_id: category.id, author_id: me.id,
+        published: !reason,
+        posts: { create: { body: body.body.trim(), author_id: me.id, published: !reason } },
       },
-    },
-    select: {
-      id: true,
-      title: true,
-      is_pinned: true,
-      is_locked: true,
-      created_at: true,
-      last_post_at: true,
-      author: { select: forumUserSelect },
-      _count: { select: { posts: true } },
-    },
-  });
-
-  // Get category subscribers (excluding the thread author)
-  const categorySubscribers = await prisma.forumCategorySubscription.findMany({
-    where: {
-      category_id: category.id,
-      user_id: { not: me.id },
-    },
-    select: { user_id: true },
-  });
-
-  // Mark as read and auto-subscribe thread author + category subscribers
-  await Promise.all([
-    prisma.forumThreadRead.create({
-      data: { thread_id: thread.id, user_id: me.id, last_read_at: now },
-    }),
-    prisma.forumThreadSubscription.create({
-      data: { thread_id: thread.id, user_id: me.id, last_read_at: now },
-    }),
-    // Auto-subscribe category subscribers to the new thread
-    ...categorySubscribers.map((sub) =>
-      prisma.forumThreadSubscription.upsert({
-        where: {
-          thread_id_user_id: {
-            thread_id: thread.id,
-            user_id: sub.user_id,
-          },
-        },
-        create: {
-          thread_id: thread.id,
-          user_id: sub.user_id,
-          last_read_at: new Date(0), // Mark as unread
-        },
-        update: {},
-      })
-    ),
-  ]);
-
-  // Send push notifications if this is an announcement category
-  if (category.is_announcement) {
-    void sendAnnouncementNotifications({
-      threadId: thread.id,
-      postBody: body.body.trim(),
+      include: { posts: true, author: { select: forumUserSelect }, _count: { select: { posts: true } } },
     });
-  }
-
-  // Notify category subscribers about the new thread
-  if (categorySubscribers.length > 0) {
-    void sendCategoryNewThreadNotifications({
-      threadId: thread.id,
-      postBody: body.body.trim(),
-      authorDisplayName: thread.author.display_name,
-      subscriberUserIds: categorySubscribers.map((s) => s.user_id),
-    });
-  }
-
-  return thread;
+    if (reason) await tx.forumSubmission.create({ data: {
+      author_id: me.id, thread_id: created.id, post_id: created.posts[0].id,
+      kind: "THREAD", title: created.title, body: body.body.trim(), reason,
+    } });
+    return created;
+  });
+  if (!reason) await notifyForumPublication(thread.id, thread.posts[0].id, true);
+  return { ...thread, pending: !!reason };
 });

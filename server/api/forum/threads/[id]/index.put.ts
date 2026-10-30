@@ -1,3 +1,4 @@
+import { assessForumSubmission } from "~/server/utils/forumSafety";
 import {
   requireForumThreadAccess,
   requireForumWriteAccess,
@@ -37,6 +38,17 @@ export default defineEventHandler(async (handler) => {
   await requireForumWriteAccess(me.id, accessibleThread, { moderation: canEditAny });
   if (isAuthor && !canEditAny && await hasRestriction(me.id, "EDIT_OWN_POST")) {
     throw createError({ status: 403, statusMessage: "Forbidden" });
+  }
+
+  const existing = await prisma.forumSubmission.findFirst({ where: { thread_id: threadId, kind: "EDIT_TITLE", status: "PENDING" } });
+  if (existing) throw createError({ status: 409, statusMessage: "A title edit is already awaiting review." });
+  const reason = await assessForumSubmission(me.id, body.title.trim());
+  if (reason) {
+    await prisma.forumSubmission.create({ data: {
+      author_id: me.id, thread_id: threadId, kind: "EDIT_TITLE", title: body.title.trim(),
+      body: body.title.trim(), base_title: thread.title, reason,
+    } });
+    return { id: threadId, title: thread.title, pending: true };
   }
 
   const updated = await prisma.forumThread.update({
