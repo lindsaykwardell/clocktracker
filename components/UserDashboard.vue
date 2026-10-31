@@ -338,8 +338,8 @@ const featureFlags = useFeatureFlags();
 const isCapacitor = useRuntimeConfig().public.isCapacitorBuild;
 const { selectionChanged } = useHaptics();
 const { data: initialPage } = await useFetch("/api/dashboard/recent");
-const roleOfTheDay = await useFetch("/api/role_of_the_day");
-const scriptsOfTheWeek = await useFetch("/api/scripts_of_the_week");
+const roleOfTheDay = useFetch("/api/role_of_the_day", { server: false, lazy: true });
+const scriptsOfTheWeek = useFetch("/api/scripts_of_the_week", { server: false, lazy: true });
 
 // Pagination state
 const allUpdates = ref(initialPage.value?.updates ?? []);
