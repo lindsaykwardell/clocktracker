@@ -76,6 +76,8 @@ You can then log in with the created user credentials and start developling!
 
 NOTE: Currently, it is not possible to configure file uploads for local development. This is just because it hasn't been a problem yet, but if you're wanting to work on that, let me know and we can collaborate on making that section of code more modular.
 
-## Temporary staging
+## Staging
+
+Use [Stable staging with Hover DNS](docs/stable-staging.md) for the current single persistent environment at staging.clocktracker.app.
 
 See [Temporary staging and Cloudflare migration](docs/staging.md) for launching isolated, admin-only environments, automatic teardown, private configuration, and the domain/ownership migration runbook.

@@ -52,7 +52,7 @@ globalThis.fetch = async (url, options={}) => {
     else if(method==='GET') data=resource?s.apps[app][resource]:{name:app};
     else if(method==='DELETE' && !resource) {delete s.apps[app];data={};}
     else if(method==='DELETE') {s.apps[app][resource]=[];data={};}
-  } else if(u.hostname.endsWith('.staging.example.com')) {data={};}
+  } else if((u.hostname.endsWith('.staging.example.com') || u.hostname==='ct-stg-clocktracker.fly.dev')) {data={};}
   else throw Error('Unexpected network access in test');
   save(s); return new Response(JSON.stringify(data),{status:200});
 };
@@ -123,5 +123,65 @@ test("launch refuses to provision when scheduled cleanup has not been enabled", 
     const state=await read();
     assert.equal(Object.keys(state.objects).length,0);
     assert.equal(Object.keys(state.apps).length,0);
+  });
+});
+
+test("stable launches reuse one app/database, preserve the snapshot, and never use Cloudflare", async () => {
+  await fixture(async ({invoke,read}) => {
+    const env = {STAGING_MODE:"stable", STAGING_ENABLED:"false", CLOUDFLARE_API_TOKEN:"", CLOUDFLARE_ZONE_ID:""};
+    for (let i=0;i<2;i++) {
+      const result=invoke("up",env);
+      assert.equal(result.status,0,result.stderr);
+      assert.ok(!result.stdout.includes("SECRET_TEST_PASSWORD"));
+    }
+    const state=await read();
+    assert.equal(Object.keys(state.apps).length,2);
+    assert.equal(Object.keys(state.objects).length,1);
+    assert.equal(JSON.parse(Object.values(state.objects)[0]).expiresAt,null);
+    assert.equal(state.calls.filter(c=>c[0]==="fly" && c[1]==="postgres" && c[2]==="backup").length,1);
+    assert.equal(state.calls.filter(c=>c[0]==="fly" && c[1]==="deploy").length,2);
+    assert.equal(state.calls.filter(c=>c[1]?.includes("/dns_records")).length,0);
+    assert.equal(invoke("cleanup").status,0);
+    assert.equal(Object.keys((await read()).apps).length,2);
+    assert.equal(invoke("extend",env).status,1);
+    assert.equal(invoke("destroy",env).status,1);
+    assert.equal(Object.keys((await read()).apps).length,2);
+    assert.equal(invoke("destroy",{...env,STAGING_DNS_REMOVED:"true"}).status,0);
+    assert.equal(Object.keys((await read()).apps).length,0);
+  });
+});
+
+test("stable failed redeploy retains database and can be retried", async () => {
+  await fixture(async ({invoke,read,update}) => {
+    const env={STAGING_MODE:"stable"};
+    assert.equal(invoke("up",env).status,0);
+    await update(s=>s.fail="deploy");
+    assert.equal(invoke("up",env).status,1);
+    assert.equal(Object.keys((await read()).apps).length,2);
+    await update(s=>s.fail="");
+    assert.equal(invoke("up",env).status,0);
+    assert.equal((await read()).calls.filter(c=>c[0]==="fly" && c[1]==="postgres" && c[2]==="backup").length,1);
+  });
+});
+
+test("stable partial provisioning is retained and cannot be overwritten", async () => {
+  await fixture(async ({invoke,read,update}) => {
+    const env={STAGING_MODE:"stable"};
+    await update(s=>s.fail="deploy");
+    assert.equal(invoke("up",env).status,1);
+    assert.equal(Object.keys((await read()).apps).length,2);
+    await update(s=>s.fail="");
+    assert.equal(invoke("up",env).status,1);
+    assert.equal(invoke("destroy",{...env,STAGING_DNS_REMOVED:"true"}).status,0);
+    assert.equal(invoke("up",env).status,0);
+  });
+});
+
+test("stable provisioning refuses to adopt an unjournaled app", async () => {
+  await fixture(async ({invoke,read,update}) => {
+    await update(s=>s.apps["ct-stg-clocktracker"]={machines:[],volumes:[]});
+    assert.equal(invoke("up",{STAGING_MODE:"stable"}).status,1);
+    assert.equal(Object.keys((await read()).objects).length,0);
+    assert.equal((await read()).calls.filter(c=>c[0]==="POST").length,0);
   });
 });

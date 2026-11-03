@@ -4,6 +4,7 @@ import { stagingDisabledRoute, stagingPublicPages } from "../../shared/staging";
 interface StagingOptions {
   enabled: boolean;
   expiresAt: string | undefined;
+  persistent?: boolean;
   isAdmin: (id: string) => Promise<boolean>;
 }
 
@@ -12,7 +13,7 @@ export async function enforceStagingAccess(event: H3Event, options: StagingOptio
   setHeader(event, "Cache-Control", "private, no-store");
   setHeader(event, "X-Robots-Tag", "noindex, nofollow, noarchive");
   const expires = Date.parse(options.expiresAt ?? "");
-  if (!Number.isFinite(expires) || Date.now() >= expires) {
+  if (!options.persistent && (!Number.isFinite(expires) || Date.now() >= expires)) {
     throw createError({ statusCode: 410, statusMessage: "Staging environment expired" });
   }
   const path = getRequestURL(event).pathname.replace(/\/+$/, "") || "/";

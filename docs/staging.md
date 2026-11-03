@@ -1,5 +1,7 @@
 # Temporary staging and Cloudflare migration
 
+> Retained for future use. The current deployment path is [stable staging with Hover DNS](stable-staging.md); Cloudflare migration is deferred.
+
 ## Scope
 
 The `Temporary staging` GitHub Actions workflow launches independent web environments from trusted branches. Each has a unique hostname, an application machine, and a restored PostgreSQL cluster. Multiple environments can remain active concurrently. Management operations are serialized to avoid cleanup/extension races.
