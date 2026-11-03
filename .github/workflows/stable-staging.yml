@@ -1,11 +1,11 @@
-name: Stable staging
+name: Fixed URL staging
 
 on:
   workflow_dispatch:
     inputs:
       action:
         type: choice
-        options: [up, list, destroy]
+        options: [up, list, destroy, extend, cleanup]
         default: up
         required: true
       ref:
@@ -13,13 +13,15 @@ on:
         default: main
         required: true
       backup:
-        description: Initial restore only; ignored on redeploy (latest or Barman ID)
+        description: Snapshot for this run (latest or Barman ID)
         default: latest
         required: true
-      dns_removed:
-        description: For destroy only, confirm Hover staging DNS records have been removed
-        type: boolean
-        default: false
+      hours:
+        description: Lifetime in whole hours, 1–168; for extend, hours from now
+        default: '1'
+        required: true
+  schedule:
+    - cron: '12,27,42,57 * * * *'
 
 permissions:
   contents: read
@@ -30,7 +32,9 @@ concurrency:
 
 jobs:
   manage:
-    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    if: >-
+      github.ref == format('refs/heads/{0}', github.event.repository.default_branch) &&
+      (github.event_name == 'workflow_dispatch' || vars.STAGING_STABLE_ENABLED == 'true')
     runs-on: ubuntu-latest
     timeout-minutes: 100
     environment: staging-operations
@@ -57,16 +61,16 @@ jobs:
       - uses: superfly/flyctl-actions/setup-flyctl@1.5
         with:
           version: '0.4.123'
-      - name: Manage stable staging
+      - name: Manage fixed URL staging
         working-directory: control
         env:
           STAGING_MODE: stable
-          STAGING_ACTION: ${{ inputs.action }}
-          STAGING_DNS_REMOVED: ${{ inputs.dns_removed }}
+          STAGING_STABLE_ENABLED: ${{ vars.STAGING_STABLE_ENABLED }}
+          STAGING_ACTION: ${{ inputs.action || 'cleanup' }}
+          STAGING_HOURS: ${{ inputs.hours || '1' }}
           STAGING_BACKUP: ${{ inputs.backup }}
           STAGING_REF: ${{ inputs.ref }}
           STAGING_SOURCE_DIR: ${{ github.workspace }}/source
-          STAGING_DOMAIN: ${{ vars.STAGING_DOMAIN || 'staging.clocktracker.app' }}
           STAGING_REGION: ${{ vars.STAGING_REGION }}
           STAGING_SOURCE_DATABASE_APP: ${{ secrets.STAGING_SOURCE_DATABASE_APP }}
           STAGING_DATABASE_NAME: ${{ secrets.STAGING_DATABASE_NAME }}

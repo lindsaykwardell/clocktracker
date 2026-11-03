@@ -4,7 +4,7 @@ import { createServer } from "node:http";
 import { createApp, defineEventHandler, toNodeListener } from "h3";
 import { enforceStagingAccess } from "../../server/utils/stagingAccess";
 
-async function server(options: { persistent?: boolean; enabled?: boolean; expiresAt?: string; admin?: boolean; fail?: boolean }, run: (request: (path: string, user?: string, method?: string) => Promise<Response>) => Promise<void>) {
+async function server(options: { enabled?: boolean; expiresAt?: string; admin?: boolean; fail?: boolean }, run: (request: (path: string, user?: string, method?: string) => Promise<Response>) => Promise<void>) {
   const app = createApp();
   app.use(defineEventHandler(async event => {
     // Test-only identity injection, not an authentication mechanism.
@@ -12,7 +12,6 @@ async function server(options: { persistent?: boolean; enabled?: boolean; expire
     if (typeof id === "string") event.context.user = { id };
     const response = await enforceStagingAccess(event, {
       enabled: options.enabled ?? true,
-      persistent: options.persistent,
       expiresAt: options.expiresAt ?? new Date(Date.now() + 60_000).toISOString(),
       isAdmin: async () => { if (options.fail) throw new Error("Database unavailable"); return options.admin ?? false; },
     });
@@ -63,17 +62,4 @@ test("expired and invalid deadlines fail closed, including public pages", async 
 test("database outage does not grant staging access; production behavior is unchanged", async () => {
   await server({ fail: true }, async request => assert.equal((await request("/api/games", "admin")).status, 500));
   await server({ enabled: false }, async request => assert.equal((await request("/api/games")).status, 200));
-});
-
-
-test("persistent staging ignores expiry but retains admin and side-effect restrictions", async () => {
-  await server({ persistent: true, expiresAt: "", admin: true }, async request => {
-    assert.equal((await request("/login")).status, 200);
-    assert.equal((await request("/api/games")).status, 401);
-    assert.equal((await request("/api/games", "admin")).status, 200);
-    assert.equal((await request("/api/storage/avatars", "admin")).status, 403);
-  });
-  await server({ persistent: true, expiresAt: "", admin: false }, async request => {
-    assert.equal((await request("/api/games", "member")).status, 403);
-  });
 });

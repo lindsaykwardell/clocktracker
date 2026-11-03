@@ -47,12 +47,13 @@ globalThis.fetch = async (url, options={}) => {
     data={success:true,result:data};
   } else if(u.hostname==='api.machines.dev') {
     const [, , , app, resource]=u.pathname.split('/');
+    if(s.fail==='volume-delete' && resource==='volumes' && method==='DELETE') {save(s); return new Response('{}',{status:503});}
     if(u.pathname==='/v1/apps' && method==='POST') {const name=JSON.parse(options.body).app_name;s.apps[name]={machines:[],volumes:[]};data={name};}
     else if(!s.apps[app]) {save(s);return new Response('{}',{status:404});}
     else if(method==='GET') data=resource?s.apps[app][resource]:{name:app};
     else if(method==='DELETE' && !resource) {delete s.apps[app];data={};}
     else if(method==='DELETE') {s.apps[app][resource]=[];data={};}
-  } else if((u.hostname.endsWith('.staging.example.com') || u.hostname==='ct-stg-clocktracker.fly.dev')) {data={};}
+  } else if((u.hostname.endsWith('.staging.example.com') || u.hostname==='clocktracker-staging.fly.dev')) {data={};}
   else throw Error('Unexpected network access in test');
   save(s); return new Response(JSON.stringify(data),{status:200});
 };
@@ -79,7 +80,7 @@ if(args[0]==='postgres' && args[1]==='connect') {
       STAGING_DOMAIN: "staging.example.com", STAGING_STATE_BUCKET: "test-state", STAGING_SOURCE_DIR: source,
       STAGING_SOURCE_DATABASE_APP: "production-test-source", STAGING_DATABASE_NAME: "clocktracker",
       CLOUDFLARE_ZONE_ID: "test-zone", CLOUDFLARE_API_TOKEN: "test", SUPABASE_URL: "https://example.supabase.co", SUPABASE_KEY: "sb_publishable_test",
-      STAGING_ENABLED: "true", STAGING_HOURS: "1", GITHUB_STEP_SUMMARY: "", ...extra },
+      STAGING_STABLE_ENABLED: "true", STAGING_ENABLED: "true", STAGING_HOURS: "1", GITHUB_STEP_SUMMARY: "", ...extra },
   });
   const read = async () => JSON.parse(await readFile(store, "utf8"));
   const update = async fn => {const state=await read();fn(state);await writeFile(store,JSON.stringify(state));};
@@ -126,62 +127,82 @@ test("launch refuses to provision when scheduled cleanup has not been enabled", 
   });
 });
 
-test("stable launches reuse one app/database, preserve the snapshot, and never use Cloudflare", async () => {
-  await fixture(async ({invoke,read}) => {
-    const env = {STAGING_MODE:"stable", STAGING_ENABLED:"false", CLOUDFLARE_API_TOKEN:"", CLOUDFLARE_ZONE_ID:""};
-    for (let i=0;i<2;i++) {
-      const result=invoke("up",env);
-      assert.equal(result.status,0,result.stderr);
-      assert.ok(!result.stdout.includes("SECRET_TEST_PASSWORD"));
-    }
-    const state=await read();
-    assert.equal(Object.keys(state.apps).length,2);
-    assert.equal(Object.keys(state.objects).length,1);
-    assert.equal(JSON.parse(Object.values(state.objects)[0]).expiresAt,null);
-    assert.equal(state.calls.filter(c=>c[0]==="fly" && c[1]==="postgres" && c[2]==="backup").length,1);
-    assert.equal(state.calls.filter(c=>c[0]==="fly" && c[1]==="deploy").length,2);
-    assert.equal(state.calls.filter(c=>c[1]?.includes("/dns_records")).length,0);
+
+test("fixed URL runs expire, retain only the app reservation, and restore again next run", async () => {
+  await fixture(async ({invoke,read,update}) => {
+    const env={STAGING_MODE:"stable", STAGING_DOMAIN:"", CLOUDFLARE_API_TOKEN:"", CLOUDFLARE_ZONE_ID:""};
+    assert.equal(invoke("up",env).status,0);
+    assert.equal(invoke("up",env).status,1);
+    assert.equal(invoke("cleanup",env).status,0);
+    assert.equal(Object.keys((await read()).apps).length,2);
+    assert.equal(invoke("extend",{...env,STAGING_HOURS:"2"}).status,0);
+    let state=await read();
+    const journal=JSON.parse(Object.values(state.objects)[0]);
+    assert.ok(journal.expiresAt > journal.readyAt);
+    assert.ok(journal.expiresAt <= journal.readyAt + 168*3600000);
     assert.equal(invoke("cleanup").status,0);
     assert.equal(Object.keys((await read()).apps).length,2);
+    await update(s=>{for(const k of Object.keys(s.objects)){const j=JSON.parse(s.objects[k]);j.expiresAt=0;s.objects[k]=JSON.stringify(j);}});
+    assert.equal(invoke("cleanup",env).status,0);
+    state=await read();
+    assert.deepEqual(Object.keys(state.apps),["clocktracker-staging"]);
+    assert.deepEqual(state.apps["clocktracker-staging"],{machines:[],volumes:[]});
+    assert.equal(JSON.parse(Object.values(state.objects)[0]).status,"idle");
     assert.equal(invoke("extend",env).status,1);
-    assert.equal(invoke("destroy",env).status,1);
-    assert.equal(Object.keys((await read()).apps).length,2);
-    assert.equal(invoke("destroy",{...env,STAGING_DNS_REMOVED:"true"}).status,0);
+    assert.equal(invoke("cleanup",env).status,0);
+    assert.equal(invoke("up",env).status,0);
+    state=await read();
+    assert.equal(state.calls.filter(c=>c[0]==="fly" && c[1]==="postgres" && c[2]==="backup").length,2);
+    assert.equal(state.calls.filter(c=>c[1]?.includes("/dns_records") || (c[0]==="fly" && c[1]==="certs")).length,0);
+    assert.equal(state.calls.filter(c=>c[0]==="DELETE" && c[1]==="/v1/apps/clocktracker-staging").length,0);
+    assert.ok(state.calls.some(c=>c[0]==="fly" && c[1]==="secrets" && c[2]==="unset" && c.includes("DATABASE_URL") && c.includes("--stage")));
+    assert.equal(invoke("destroy",env).status,0);
+    assert.equal(invoke("destroy",env).status,0);
+  });
+});
+
+test("fixed URL launch failures remove compute and database but preserve the URL for retry", async () => {
+  await fixture(async ({invoke,read,update}) => {
+    const env={STAGING_MODE:"stable"};
+    await update(s=>s.fail="deploy");
+    const result=invoke("up",env);
+    assert.equal(result.status,1);
+    assert.ok(!result.stdout.includes("SECRET_TEST_PASSWORD"));
+    assert.deepEqual(Object.keys((await read()).apps),["clocktracker-staging"]);
+    await update(s=>s.fail="");
+    assert.equal(invoke("up",env).status,0);
+  });
+});
+
+test("fixed URL provisioning refuses to adopt an unjournaled app", async () => {
+  await fixture(async ({invoke,read,update}) => {
+    await update(s=>s.apps["clocktracker-staging"]={machines:[],volumes:[]});
+    assert.equal(invoke("up",{STAGING_MODE:"stable"}).status,1);
+    assert.equal(Object.keys((await read()).objects).length,0);
+    assert.equal((await read()).calls.filter(c=>c[0]==="POST").length,0);
+  });
+});
+
+test("fixed URL launches require cleanup opt-in and enforce lifetime bounds", async () => {
+  await fixture(async ({invoke,read}) => {
+    assert.equal(invoke("up",{STAGING_MODE:"stable",STAGING_STABLE_ENABLED:"false"}).status,1);
+    for(const hours of ["0","169","1.5"]) assert.equal(invoke("up",{STAGING_MODE:"stable",STAGING_HOURS:hours}).status,1);
+    assert.equal(Object.keys((await read()).objects).length,0);
     assert.equal(Object.keys((await read()).apps).length,0);
   });
 });
 
-test("stable failed redeploy retains database and can be retried", async () => {
+test("fixed URL cleanup retains failed teardown for retry", async () => {
   await fixture(async ({invoke,read,update}) => {
     const env={STAGING_MODE:"stable"};
     assert.equal(invoke("up",env).status,0);
-    await update(s=>s.fail="deploy");
+    await update(s=>s.fail="volume-delete");
+    assert.equal(invoke("destroy",env).status,1);
+    assert.equal(JSON.parse(Object.values((await read()).objects)[0]).status,"destroying");
     assert.equal(invoke("up",env).status,1);
-    assert.equal(Object.keys((await read()).apps).length,2);
     await update(s=>s.fail="");
-    assert.equal(invoke("up",env).status,0);
-    assert.equal((await read()).calls.filter(c=>c[0]==="fly" && c[1]==="postgres" && c[2]==="backup").length,1);
-  });
-});
-
-test("stable partial provisioning is retained and cannot be overwritten", async () => {
-  await fixture(async ({invoke,read,update}) => {
-    const env={STAGING_MODE:"stable"};
-    await update(s=>s.fail="deploy");
-    assert.equal(invoke("up",env).status,1);
-    assert.equal(Object.keys((await read()).apps).length,2);
-    await update(s=>s.fail="");
-    assert.equal(invoke("up",env).status,1);
-    assert.equal(invoke("destroy",{...env,STAGING_DNS_REMOVED:"true"}).status,0);
-    assert.equal(invoke("up",env).status,0);
-  });
-});
-
-test("stable provisioning refuses to adopt an unjournaled app", async () => {
-  await fixture(async ({invoke,read,update}) => {
-    await update(s=>s.apps["ct-stg-clocktracker"]={machines:[],volumes:[]});
-    assert.equal(invoke("up",{STAGING_MODE:"stable"}).status,1);
-    assert.equal(Object.keys((await read()).objects).length,0);
-    assert.equal((await read()).calls.filter(c=>c[0]==="POST").length,0);
+    assert.equal(invoke("cleanup",env).status,0);
+    assert.equal(JSON.parse(Object.values((await read()).objects)[0]).status,"idle");
+    assert.deepEqual(Object.keys((await read()).apps),["clocktracker-staging"]);
   });
 });

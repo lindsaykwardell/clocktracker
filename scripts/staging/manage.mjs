@@ -17,14 +17,13 @@ const required = name => {
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 const stable = process.env.STAGING_MODE === "stable";
 if (process.env.STAGING_MODE && !["stable", "temporary"].includes(process.env.STAGING_MODE)) throw new Error("Invalid staging mode");
-const domain = required("STAGING_DOMAIN");
+const domain = stable ? "clocktracker-staging.fly.dev" : required("STAGING_DOMAIN");
 const stableId = "0000000000000000";
 const prefix = stable ? "staging/stable/v1/" : "staging/v1/";
 function environmentNames(id, domain) {
-  const result = names(id, domain);
-  if (!stable) return result;
+  if (!stable) return names(id, domain);
   if (id !== stableId) throw new Error("Invalid stable environment ID");
-  return { app: "ct-stg-clocktracker", db: "ct-stg-clocktracker-db", hostname: domain };
+  return { app: "clocktracker-staging", db: "ct-stg-clocktracker-db", hostname: domain };
 }
 const bucket = required("STAGING_STATE_BUCKET");
 const s3 = new S3Client({ region: "auto", endpoint: "https://fly.storage.tigris.dev" });
@@ -33,7 +32,7 @@ const save = state => s3.send(new PutObjectCommand({ Bucket: bucket, Key: stateK
 async function load(id) {
   const result = await s3.send(new GetObjectCommand({ Bucket: bucket, Key: stateKey(id) }));
   const state = JSON.parse(await result.Body.transformToString());
-  if (state.id !== id || state.domain !== domain || (stable ? state.mode !== "stable" || state.expiresAt !== null : !Number.isFinite(state.expiresAt))) throw new Error("Invalid environment state");
+  if (state.id !== id || state.domain !== domain || (!Number.isFinite(state.expiresAt) || (stable && state.mode !== "stable"))) throw new Error("Invalid environment state");
   return state;
 }
 async function states() {
@@ -97,7 +96,11 @@ async function sql(db, database, input) {
 }
 async function destroy(state) {
   const n = environmentNames(state.id, domain);
-  if (stable && process.env.STAGING_DNS_REMOVED !== "true") throw new Error("Remove the Hover staging DNS records, then set STAGING_DNS_REMOVED=true before destroy");
+  if (stable) {
+    state.status = "destroying";
+    state.expiresAt = 0;
+    await save(state);
+  }
   // DNS removal first avoids dangling records pointing at a released app name.
   for (const hostname of (stable ? [] : [n.hostname, `_fly-ownership.${n.hostname}`, `_acme-challenge.${n.hostname}`])) {
     const records = await dns(`?name=${encodeURIComponent(hostname)}`);
@@ -112,14 +115,25 @@ async function destroy(state) {
     // Explicitly remove volumes; stopping machines alone continues storage billing.
     for (const machine of await flyAPI(`/apps/${app}/machines`)) await flyAPI(`/apps/${app}/machines/${machine.id}?force=true`, "DELETE", undefined, true);
     for (const volume of await flyAPI(`/apps/${app}/volumes`)) await flyAPI(`/apps/${app}/volumes/${volume.id}`, "DELETE", undefined, true);
-    await flyAPI(`/apps/${app}`, "DELETE", undefined, true);
+    if (stable && app === n.app) {
+      // Keep the app name and its default TLS hostname reserved, without compute.
+      await fly(["secrets", "unset", "DATABASE_URL", "SUPABASE_URL", "SUPABASE_KEY", "STAGING_EXPIRES_AT", "-a", n.app, "--stage"]);
+    } else {
+      await flyAPI(`/apps/${app}`, "DELETE", undefined, true);
+    }
   }
-  await s3.send(new DeleteObjectCommand({ Bucket: bucket, Key: stateKey(state.id) }));
+  if (stable) {
+    state.status = "idle";
+    await save(state);
+  } else {
+    await s3.send(new DeleteObjectCommand({ Bucket: bucket, Key: stateKey(state.id) }));
+  }
   await summary(`Destroyed staging environment ${state.id}.`);
 }
 async function up() {
-  if (!stable && process.env.STAGING_ENABLED !== "true") throw new Error("Enable scheduled cleanup with the STAGING_ENABLED repository variable before launching");
-  const hours = stable ? null : lifetime(process.env.STAGING_HOURS ?? "1");
+  const enabled = stable ? process.env.STAGING_STABLE_ENABLED : process.env.STAGING_ENABLED;
+  if (enabled !== "true") throw new Error("Enable this workflow's scheduled cleanup repository variable before launching");
+  const hours = lifetime(process.env.STAGING_HOURS ?? "1");
   const source = path.resolve(required("STAGING_SOURCE_DIR"));
   const sourceDb = required("STAGING_SOURCE_DATABASE_APP");
   const database = required("STAGING_DATABASE_NAME");
@@ -139,38 +153,43 @@ async function up() {
   const n = environmentNames(id, domain);
   // Validate DNS credentials before paying for a restore or creating resources.
   if (!stable && (await dns(`?name=${encodeURIComponent(n.hostname)}`)).length) throw new Error("Staging hostname already exists");
-  if (sourceDb.startsWith("ct-stg-")) throw new Error("Restore source must be the configured production backup source");
+  if (sourceDb.startsWith("ct-stg-") || sourceDb === n.app) throw new Error("Restore source must be the configured production backup source");
   const existing = stable ? (await states()).find(state => state.id === id) : undefined;
-  if (existing && existing.status !== "ready") throw new Error("Stable provisioning is incomplete. Inspect private Fly resources and explicitly destroy before retrying");
+  if (existing && existing.status !== "idle") throw new Error("A staging run already exists; extend it or destroy it before starting another");
   if (stable && !existing) {
     for (const app of [n.app, n.db]) {
       if (await flyAPI(`/apps/${app}`, "GET", undefined, true)) throw new Error("Stable app name already exists without a journal; refusing to adopt or overwrite it");
     }
   }
-  const state = existing ?? { id, domain, mode: stable ? "stable" : "temporary", ref: process.env.STAGING_REF || "unspecified", backup, createdAt: Date.now(), expiresAt: stable ? null : Date.now() + 2 * 3600000, status: "provisioning" };
-  // Journal before creation. Stable failures retain resources for explicit recovery.
-  if (!existing) await save(state);
+  if (stable && existing) {
+    if (await flyAPI(`/apps/${n.db}`, "GET", undefined, true)) throw new Error("Idle staging still has a database; run destroy before launching");
+    const app = await flyAPI(`/apps/${n.app}`, "GET", undefined, true);
+    if (app && ((await flyAPI(`/apps/${n.app}/machines`)).length || (await flyAPI(`/apps/${n.app}/volumes`)).length)) throw new Error("Idle staging still has resources; run destroy before launching");
+  }
+  const state = { id, domain, mode: stable ? "stable" : "temporary", ref: process.env.STAGING_REF || "unspecified", backup, createdAt: Date.now(), expiresAt: Date.now() + 2 * 3600000, status: "provisioning" };
+  // Cancellation leaves a tracked provisional deadline for the scheduled sweeper.
+  await save(state);
   const temp = await mkdtemp(path.join(tmpdir(), "ct-staging-"));
   try {
     await summary(`Provisioning staging environment ${id}.`);
-    if (!existing) {
+    if (!stable || !await flyAPI(`/apps/${n.app}`, "GET", undefined, true)) {
       await flyAPI("/apps", "POST", { app_name: n.app, org_slug: required("FLY_ORG") });
-      await fly(["postgres", "backup", "restore", n.db, "-a", sourceDb, "--restore-target-name", backup], { timeout: 45 * 60_000 });
-      await sql(n.db, database, await readFile(path.join(here, "sanitize.sql"), "utf8"));
-      // Restore needs source backup access temporarily; remove it before app launch.
-      await fly(["secrets", "unset", "S3_ARCHIVE_REMOTE_RESTORE_CONFIG", "-a", n.db]);
-      const dbUser = `staging_${id}`;
-      await fly(["postgres", "attach", n.db, "-a", n.app, "--database-name", database, "--database-user", dbUser, "--superuser=false", "--yes"]);
-      // Give the fresh role ownership for migrations without cluster superuser access.
-      await sql(n.db, database, `
+    }
+    await fly(["postgres", "backup", "restore", n.db, "-a", sourceDb, "--restore-target-name", backup], { timeout: 45 * 60_000 });
+    await sql(n.db, database, await readFile(path.join(here, "sanitize.sql"), "utf8"));
+    // Restore needs source backup access temporarily; remove it before app launch.
+    await fly(["secrets", "unset", "S3_ARCHIVE_REMOTE_RESTORE_CONFIG", "-a", n.db]);
+    const dbUser = `staging_${id}`;
+    await fly(["postgres", "attach", n.db, "-a", n.app, "--database-name", database, "--database-user", dbUser, "--superuser=false", "--yes"]);
+    // Give the fresh role ownership for migrations without cluster superuser access.
+    await sql(n.db, database, `
 ALTER DATABASE "${database}" OWNER TO "${dbUser}";
 ALTER SCHEMA public OWNER TO "${dbUser}";
 SELECT format('ALTER TABLE %I.%I OWNER TO %I', schemaname, tablename, '${dbUser}') FROM pg_tables WHERE schemaname = 'public' \\gexec
 SELECT format('ALTER SEQUENCE %I.%I OWNER TO %I', sequence_schema, sequence_name, '${dbUser}') FROM information_schema.sequences WHERE sequence_schema = 'public' \\gexec
 SELECT format('ALTER TYPE %I.%I OWNER TO %I', n.nspname, t.typname, '${dbUser}') FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace WHERE n.nspname = 'public' AND t.typtype = 'e' \\gexec
 `);
-    }
-    await fly(["secrets", "import", "-a", n.app, "--stage"], { input: `SUPABASE_URL=${required("SUPABASE_URL")}\nSUPABASE_KEY=${required("SUPABASE_KEY")}\nSTAGING_PERSISTENT=${stable}\nSTAGING_EXPIRES_AT=${stable ? "" : new Date(state.expiresAt).toISOString()}\n` });
+    await fly(["secrets", "import", "-a", n.app, "--stage"], { input: `SUPABASE_URL=${required("SUPABASE_URL")}\nSUPABASE_KEY=${required("SUPABASE_KEY")}\nSTAGING_EXPIRES_AT=${new Date(state.expiresAt).toISOString()}\n` });
     await cp(path.join(here, "Dockerfile"), path.join(source, "Dockerfile.staging"));
     const config = path.join(temp, "fly.toml");
     await writeFile(config, `app = "${n.app}"
@@ -198,12 +217,12 @@ primary_region = "${region}"
     const addresses = JSON.parse(await fly(["ips", "list", "-a", n.app, "--json"]));
     if (!addresses.some(ip => ip.Type === "v6")) await fly(["ips", "allocate-v6", "-a", n.app]);
     if (!addresses.some(ip => ip.Type === "v4" || ip.Type === "shared_v4")) await fly(["ips", "allocate-v4", "--shared", "-a", n.app]);
-    if (!existing) await fly(["certs", "add", n.hostname, "-a", n.app]);
+    if (!stable) await fly(["certs", "add", n.hostname, "-a", n.app]);
     if (!stable) await dns("", "POST", { type: "CNAME", name: n.hostname, content: `${n.app}.fly.dev`, ttl: 60, proxied: false, comment: `clocktracker-staging:${id}` });
     let ready = false;
     for (let attempt = 0; attempt < 60; attempt++) {
       try {
-        const response = await fetch(`https://${stable ? n.app + ".fly.dev" : n.hostname}/login`, { redirect: "manual", signal: AbortSignal.timeout(10_000) });
+        const response = await fetch(`https://${n.hostname}/login`, { redirect: "manual", signal: AbortSignal.timeout(10_000) });
         if (response.ok) { ready = true; break; }
       } catch { /* DNS propagation and certificate issuance are asynchronous. */ }
       await sleep(10_000);
@@ -211,19 +230,14 @@ primary_region = "${region}"
     if (!ready) throw new Error("DNS, certificate, or application readiness timed out");
     const readyAt = Date.now();
     state.readyAt = readyAt;
-    state.expiresAt = stable ? null : readyAt + hours * 3600000;
+    state.expiresAt = readyAt + hours * 3600000;
     state.ref = process.env.STAGING_REF || "unspecified";
     state.status = "ready";
     // Persist first so a crash cannot leave an untracked longer-lived instance.
     await save(state);
-    if (!stable) await fly(["secrets", "import", "-a", n.app], { input: `STAGING_PERSISTENT=${stable}\nSTAGING_EXPIRES_AT=${stable ? "" : new Date(state.expiresAt).toISOString()}\n` });
-    if (stable) {
-      await summary(`Stable application deployed: https://${n.app}.fly.dev\nConfigure Hover CNAME staging → ${n.app}.fly.dev, then verify the certificate with flyctl certs check ${n.hostname} -a ${n.app}.\nTarget URL: https://${n.hostname} (custom DNS/TLS requires separate verification). No automatic expiration.`);
-      return;
-    }
+    await fly(["secrets", "import", "-a", n.app], { input: `STAGING_EXPIRES_AT=${new Date(state.expiresAt).toISOString()}\n` });
     await summary(`Ready: https://${n.hostname}\nEnvironment: ${id}\nExpires: ${new Date(state.expiresAt).toISOString()}\nBackup selection: ${backup}`);
   } catch (error) {
-    if (stable) { await summary("Stable resources retained for recovery; no database or DNS was deleted."); throw error; }
     try { await destroy(state); } catch { await summary(`Cleanup pending for ${id}; the scheduled sweeper will retry. Check the private provider dashboards.`); }
     throw error;
   } finally {
@@ -232,24 +246,23 @@ primary_region = "${region}"
   }
 }
 async function main() {
-  if (stable && ["extend", "cleanup"].includes(process.argv[2])) throw new Error("Stable staging does not expire; cleanup and extend are unavailable");
   switch (process.argv[2]) {
     case "up": return up();
     case "list":
-      for (const state of await states()) await summary(`${state.id}: ${state.status}, ref ${JSON.stringify(state.ref)}, backup ${state.backup}, expires ${state.expiresAt === null ? "never" : new Date(state.expiresAt).toISOString()}`);
+      for (const state of await states()) await summary(`${state.id}: ${state.status}, ref ${JSON.stringify(state.ref)}, backup ${state.backup}, expires ${state.status === "idle" ? "idle (no machines)" : new Date(state.expiresAt).toISOString()}`);
       return;
     case "destroy": return destroy(await load(stable ? stableId : validateId(required("STAGING_ID"))));
     case "extend": {
       const state = await load(stable ? stableId : validateId(required("STAGING_ID")));
       state.expiresAt = extendedExpiry(state, process.env.STAGING_HOURS ?? "1");
       await save(state);
-      await fly(["secrets", "import", "-a", environmentNames(state.id, domain).app], { input: `STAGING_PERSISTENT=${stable}\nSTAGING_EXPIRES_AT=${stable ? "" : new Date(state.expiresAt).toISOString()}\n` });
+      await fly(["secrets", "import", "-a", environmentNames(state.id, domain).app], { input: `STAGING_EXPIRES_AT=${new Date(state.expiresAt).toISOString()}\n` });
       return summary(`Extended ${state.id} until ${new Date(state.expiresAt).toISOString()}.`);
     }
     case "cleanup": {
       let failed = false;
       for (const state of await states()) {
-        if (state.expiresAt > Date.now()) continue;
+        if (state.status === "idle" || state.expiresAt > Date.now()) continue;
         try { await destroy(state); } catch { failed = true; await summary(`Cleanup failed for ${state.id}; retry required.`); }
       }
       if (failed) throw new Error("Some environments could not be cleaned up");

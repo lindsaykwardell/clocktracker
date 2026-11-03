@@ -19,7 +19,6 @@ export default defineEventHandler(async (event) => {
     } catch { /* Missing or invalid credentials remain unauthenticated. */ }
     return enforceStagingAccess(event, {
       enabled: true,
-      persistent: process.env.STAGING_PERSISTENT === "true",
       expiresAt: process.env.STAGING_EXPIRES_AT,
       isAdmin: async (id) => (await prisma.userSettings.findUnique({
         where: { user_id: id }, select: { is_admin: true },

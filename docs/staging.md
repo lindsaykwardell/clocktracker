@@ -1,6 +1,6 @@
 # Temporary staging and Cloudflare migration
 
-> Retained for future use. The current deployment path is [stable staging with Hover DNS](stable-staging.md); Cloudflare migration is deferred.
+> Retained for future use. The current deployment path is [temporary staging with a fixed Fly URL](stable-staging.md); Cloudflare migration is deferred.
 
 ## Scope
 
