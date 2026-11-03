@@ -1,9 +1,11 @@
+import { defineProtectedHandler } from "~/server/utils/protectedHandler";
 import { PrivacySetting } from "~/server/generated/prisma/client";
-import { User } from "@supabase/supabase-js";
-import { GameRecord } from "~/server/utils/anonymizeGame";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
+import type { GameRecord } from "~/server/utils/anonymizeGame";
 import { prisma } from "~/server/utils/prisma";
+import { hasPermission } from "~/server/utils/permissions";
 
-export default defineEventHandler(async (handler) => {
+export default defineProtectedHandler("games-stats", async (handler) => {
   const me: User | null = handler.context.user;
   const slug = handler.context.params?.slug as string;
 
@@ -47,24 +49,29 @@ export default defineEventHandler(async (handler) => {
     });
   }
 
+  const canViewPrivate = me ? await hasPermission(me.id, "VIEW_PRIVATE_GAMES") : false;
+
   // If the community is private, only members can see the games
   // But it's not an error.
   const isMember = community.members.some(
     (member) => member.user_id === me?.id
   );
 
-  if (community.is_private && !isMember) {
+  if (community.is_private && !isMember && !canViewPrivate) {
     return [];
   }
 
   const games = await prisma.game.findMany({
+    take: 200,
     where: {
       deleted: false,
       community_id: community.id,
-      ...(isMember ? {} : { privacy: PrivacySetting.PUBLIC }),
+      ...(isMember || canViewPrivate ? {} : { privacy: PrivacySetting.PUBLIC }),
       parent_game_id: null,
     },
     include: {
+      grimoire_events: true,
+      end_trigger_role: true,
       ls_game: {
         select: {
           campaign: {
@@ -99,7 +106,10 @@ export default defineEventHandler(async (handler) => {
         },
       },
       demon_bluffs: {
-        include: {
+        select: {
+          id: true,
+          role_id: true,
+          game_id: true,
           role: {
             select: {
               token_url: true,
@@ -109,7 +119,10 @@ export default defineEventHandler(async (handler) => {
         },
       },
       fabled: {
-        include: {
+        select: {
+          id: true,
+          role_id: true,
+          game_id: true,
           role: {
             select: {
               token_url: true,
@@ -121,10 +134,33 @@ export default defineEventHandler(async (handler) => {
       grimoire: {
         include: {
           tokens: {
-            include: {
-              role: true,
-              related_role: true,
+            select: {
+              id: true,
+              role_id: true,
+              related_role_id: true,
+              alignment: true,
+              is_dead: true,
+              used_ghost_vote: true,
+              order: true,
+              grimoire_id: true,
+              player_name: true,
+              player_id: true,
+              grimoire_participant_id: true,
               reminders: true,
+              created_at: true,
+              role: {
+                select: {
+                  token_url: true,
+                  type: true,
+                  initial_alignment: true,
+                  name: true,
+                },
+              },
+              related_role: {
+                select: {
+                  token_url: true,
+                },
+              },
               player: {
                 select: {
                   display_name: true,
@@ -186,13 +222,9 @@ export default defineEventHandler(async (handler) => {
   for (const game of games) {
     anonymizedGames.push(
       await anonymizeGame(
-        {
-          ...game,
-          demon_bluffs: [],
-          fabled: [],
-        } as GameRecord,
+        game as GameRecord,
         me,
-        false // always default to anonymous when loading on a community page
+        canViewPrivate // bypass anonymization for users with VIEW_PRIVATE_GAMES
       )
     );
   }

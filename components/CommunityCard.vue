@@ -22,7 +22,7 @@
         <span class="sr-only">Location: </span><span>{{ community.location }}</span>
       </div>
 
-      <p class="whitespace-pre-wrap text-center md:text-start w-full max-w-[80ch]">
+      <p class="whitespace-pre-wrap break-words text-center md:text-start w-full max-w-[80ch]">
         {{ community.description }}
       </p>
 

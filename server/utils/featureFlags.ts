@@ -1,8 +1,22 @@
-import { PrismaClient } from "~/server/generated/prisma/client";
-import { User } from "@supabase/supabase-js";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
+import { createHash } from "crypto";
 import { prisma } from "./prisma";
 
-export async function getFeatureFlags(me: User | null) {
+/**
+ * Deterministically check if a user falls within a rollout percentage for a flag.
+ * Uses SHA-256 of (userId + flagName) so the same user consistently gets the same
+ * result for a given flag, but different results across different flags.
+ */
+function isInRollout(userId: string, flagName: string, percentage: number): boolean {
+  if (percentage <= 0) return false;
+  if (percentage >= 100) return true;
+  const hash = createHash("sha256").update(userId + flagName).digest();
+  // Use first 4 bytes as a uint32, mod 100 gives 0-99
+  const bucket = hash.readUInt32BE(0) % 100;
+  return bucket < percentage;
+}
+
+export async function getFeatureFlags(me: Pick<User, "id"> | null) {
   const is_admin = await prisma.userSettings
     .findUnique({
       where: {
@@ -31,6 +45,7 @@ export async function getFeatureFlags(me: User | null) {
       id: true,
       name: true,
       effective_date: true,
+      rollout_percentage: true,
     },
   });
 
@@ -71,15 +86,24 @@ export async function getFeatureFlags(me: User | null) {
       continue;
     }
 
-    payload[flag.name] = enabledFlags.some(
+    const explicitlyEnabled = enabledFlags.some(
       (enabledFlag) => enabledFlag.id === flag.id
     );
+
+    // Check percentage-based rollout if not already enabled by other means
+    const inRollout =
+      !explicitlyEnabled &&
+      me?.id &&
+      flag.rollout_percentage != null &&
+      isInRollout(me.id, flag.name, flag.rollout_percentage);
+
+    payload[flag.name] = explicitlyEnabled || !!inRollout;
   }
 
   return payload;
 }
 
-export async function useFeatureFlags(me: User | null) {
+export async function useFeatureFlags(me: Pick<User, "id"> | null) {
   const flags = new Map<string, boolean>();
   const feature_flags = await getFeatureFlags(me);
 

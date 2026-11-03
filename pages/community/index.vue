@@ -40,7 +40,7 @@ definePageMeta({
 });
 
 const users = useUsers();
-const user = useSupabaseUser();
+const user = useUser();
 
 const me = computed(() => {
   if (user.value) {

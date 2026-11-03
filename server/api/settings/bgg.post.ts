@@ -1,5 +1,5 @@
-import type { User } from "@supabase/supabase-js";
-import { UserSettings } from "~/server/generated/prisma/client";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
+import type { UserSettings } from "~/server/generated/prisma/client";
 import axios from "axios";
 import { prisma } from "~/server/utils/prisma";
 
@@ -25,7 +25,7 @@ export default defineEventHandler(async (handler) => {
 
   const response = await axios
     .post(
-      "https://www.boardgamegeek.com/login/api/v1",
+      "https://boardgamegeek.com/login/api/v1",
       {
         credentials: {
           username: body.username,

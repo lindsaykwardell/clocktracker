@@ -256,9 +256,10 @@ const props = defineProps<{
 
 const emit = defineEmits(["save"]);
 
-const user = useSupabaseUser();
+const user = useUser();
 const users = useUsers();
 const games = useGames();
+const { pickImages } = useImagePicker();
 const showScriptDialog = ref(false);
 
 const me = computed(() => users.getUserById(user.value?.id));
@@ -270,26 +271,12 @@ const myLocations = computed(() => {
   return [];
 });
 
-function uploadFile() {
-  const input = document.createElement("input");
-  input.type = "file";
-  input.accept = "image/jpg, image/jpeg, image/png";
-  input.onchange = selectFiles;
-  input.click();
-}
-
-function removeFile() {
-  props.event.image = null;
-}
-
-async function selectFiles(e: Event) {
-  const uploadedFiles = (e.target as HTMLInputElement).files;
-  if (!uploadedFiles) return;
-
-  const file = Array.from(uploadedFiles)[0];
+async function uploadFile() {
+  const files = await pickImages();
+  if (files.length === 0) return;
 
   const formData = new FormData();
-  formData.append("file", file);
+  formData.append("file", files[0]);
 
   const data = await $fetch(`/api/storage/events`, {
     method: "POST",
@@ -297,6 +284,10 @@ async function selectFiles(e: Event) {
   });
 
   props.event.image = data[0];
+}
+
+function removeFile() {
+  props.event.image = null;
 }
 
 watchEffect(() => {

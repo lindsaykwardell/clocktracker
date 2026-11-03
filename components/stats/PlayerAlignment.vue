@@ -28,34 +28,34 @@
                 {{ props.isMe ? 'Your hands' : `This player's hands` }} seem blessed, <span class="font-semibold" :style="`color: ${chartColors.good}`">Good</span> tokens find {{ props.isMe ? 'you' : `them` }} often.
               </template>
               <template v-else>
-                {{ props.isMe ? 'You land' : `This player draws` }} <span class="font-semibold" :style="`color: ${chartColors.good}`">Good</span> and 
+                {{ props.isMe ? 'You land' : `This player draws` }} <span class="font-semibold" :style="`color: ${chartColors.good}`">Good</span> and
                 <span class="font-semibold" :style="`color: ${chartColors.evil}`">Evil</span> tokens exactly as probability predicts.
               </template>
 
             </div>
           </div>
-          
+
           <div class="text-center text-sm text-pretty space-y-2">
             <p>
-              Based on the {{ evilBias?.games }} games {{ props.isMe ? 'you' : `this player` }} played, 
-              {{ props.isMe ? 'you were' : `this player was` }} expected to draw 
+              Based on the {{ evilBias?.games }} games {{ props.isMe ? 'you' : `this player` }} played,
+              {{ props.isMe ? 'you were' : `this player was` }} expected to draw
               an Evil token {{ evilBias?.expectedEvil.toFixed(1) }} times.
             </p>
             <p>
               <template v-if="evilBias.diffRate === 0">
-                {{ props.isMe ? 'You' : `This player` }} drew one {{ evilBias?.actualEvil }} times, 
+                {{ props.isMe ? 'You' : `This player` }} drew one {{ evilBias?.actualEvil }} times,
                 which is exactly as probability predicts.
               </template>
               <template v-else-if="evilBias.diffRate < 0.05 && evilBias.diffRate > -0.05">
-                {{ props.isMe ? 'You' : `This player` }} drew one {{ evilBias?.actualEvil }} times, 
-                which is only a small difference of 
+                {{ props.isMe ? 'You' : `This player` }} drew one {{ evilBias?.actualEvil }} times,
+                which is only a small difference of
                 <span class="font-semibold" :style="`color: ${evilBias?.diffRate > 0 ? chartColors.evil : chartColors.good}`">
                   {{ (evilBias?.diffRate > 0 ? '+' : '') + Math.round(evilBias?.diffRate * 100) }}%
                 </span>
               </template>
               <template v-else>
-                {{ props.isMe ? 'You' : `This player` }} actually drew one {{ evilBias?.actualEvil }} times, 
-                which is a difference of 
+                {{ props.isMe ? 'You' : `This player` }} actually drew one {{ evilBias?.actualEvil }} times,
+                which is a difference of
                 <span class="font-semibold" :style="`color: ${evilBias?.diffRate > 0 ? chartColors.evil : chartColors.good}`">
                   {{ (evilBias?.diffRate > 0 ? '+' : '') + Math.round(evilBias?.diffRate * 100) }}%
                 </span>
@@ -74,7 +74,7 @@
         </h3> -->
         <div class="flex flex-col text-center after:content-[''] after:mx-auto after:my-3 after:w-8 after:h-[1px] after:bg-stone-400">
           <div class="text-center text-balance max-w-64 mx-auto">
-            <template 
+            <template
               v-if="alignmentSwitchStats"
             >
               {{ props.isMe ? `You've` : `This player has` }} switched alignment
@@ -93,7 +93,7 @@
           </div>
         </div>
 
-        <div 
+        <div
           v-if="alignmentSwitchStats && alignmentSwitchStats.gamesWithSwitch > 0"
           class="flex flex-col text-center"
         >
@@ -188,8 +188,8 @@
           <div class="flex flex-col after:content-[''] after:mx-auto after:my-3 after:w-8 after:h-[1px] after:bg-stone-400">
             <div class="text-center text-balance max-w-64 mx-auto">
               <div v-if="alignmentStreaks.current">
-                {{ props.isMe ? "You've" : 'This player has' }} finished the last 
-                <span class="text-nowrap">{{ alignmentStreaks.current.length }} game<span v-if="alignmentStreaks.current.length > 1">s</span></span> 
+                {{ props.isMe ? "You've" : 'This player has' }} finished the last
+                <span class="text-nowrap">{{ alignmentStreaks.current.length }} game<span v-if="alignmentStreaks.current.length > 1">s</span></span>
                 on the
                 <span class="font-semibold" :style="`color: ${alignmentStreaks.current.alignment === 'GOOD' ? chartColors.good : chartColors.evil}`">
                   {{ alignmentStreaks.current.alignment === 'GOOD' ? 'Good' : 'Evil' }}
@@ -203,16 +203,16 @@
           <div class="flex flex-col text-center">
             <div class="text-center text-sm text-pretty space-y-2">
               <p>
-                {{ props.isMe ? 'Your' : "This player's" }} longest stretch as <span class="font-semibold" :style="`color: ${chartColors.good}`">Good</span> 
+                {{ props.isMe ? 'Your' : "This player's" }} longest stretch as <span class="font-semibold" :style="`color: ${chartColors.good}`">Good</span>
                 ran for {{ alignmentStreaks.longest.good }} game<span v-if="alignmentStreaks.longest.good !== 1">s</span>
               </p>
               <p>
-                {{ props.isMe ? 'Your' : "This player's" }} longest streak on the side of <span class="font-semibold" :style="`color: ${chartColors.evil}`">Evil</span> 
+                {{ props.isMe ? 'Your' : "This player's" }} longest streak on the side of <span class="font-semibold" :style="`color: ${chartColors.evil}`">Evil</span>
                 lasted {{ alignmentStreaks.longest.evil }} game<span v-if="alignmentStreaks.longest.evil !== 1">s</span>.
               </p>
             </div>
           </div>
-        </div>  
+        </div>
         <p v-else class="text-center text-sm text-stone-400">
           Not enough data.
         </p>
@@ -224,6 +224,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { Game, Character } from "~/server/generated/prisma/client";
+import type { GameRecord } from "~/composables/useGames";
 import { chartColors } from "~/composables/useChartColors";
 
 type Alignment = "GOOD" | "EVIL" | null;
@@ -268,9 +269,12 @@ type GameWithChars = Game & {
 };
 
 const props = defineProps<{
-  games: GameWithChars[];
+  games: GameRecord[];
   isMe?: boolean;
 }>();
+
+// Cast GameRecord[] to the wider local type for internal use.
+const internalGames = computed(() => props.games as unknown as GameWithChars[]);
 
 type AlignmentSwitchStats = {
   trackedGames: number;
@@ -300,7 +304,7 @@ type AlignmentStreaks = {
 };
 
 const orderedGames = computed(() => {
-  return [...props.games]
+  return [...internalGames.value]
     .map((game, index) => ({
       game,
       index,

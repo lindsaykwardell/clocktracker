@@ -49,19 +49,31 @@
                 required
               />
             </label>
-            <Button @click.prevent="connectBoardGameGeek" color="bgg">
-              Connect
+            <Button
+              @click.prevent="connectBoardGameGeek"
+              color="bgg"
+              :disabled="inFlight || !username || !password"
+            >
+              {{ inFlight ? "Connecting…" : "Connect" }}
             </Button>
           </div>
           <div v-if="bgg_username" class="pt-4">
             <p class="pb-2">
               Connected as <strong>{{ bgg_username }}</strong>
             </p>
-            <Button @click.prevent="disconnectBoardGameGeek" color="negative" size="sm">
+            <Button
+              @click.prevent="disconnectBoardGameGeek"
+              color="negative"
+              size="sm"
+              :disabled="inFlight"
+            >
               Disconnect
             </Button>
           </div>
         </div>
+        <p v-if="bggError" class="text-red-600 dark:text-red-400 text-sm">
+          {{ bggError }}
+        </p>
       </div>
       <div class="space-y-4 w-full xl:w-3/4">
         <h3 class="text-2xl">BGStats</h3>
@@ -83,17 +95,25 @@ definePageMeta({
 const supabase = useSupabaseClient();
 const settings = await useFetch("/api/settings");
 const users = useUsers();
-const user = useSupabaseUser();
+const user = useUser();
 const bgg_username = ref(settings.data?.value?.bgg_username);
 const enable_bgstats = ref(settings.data?.value?.enable_bgstats || false);
 
 const username = ref("");
 const password = ref("");
 const inFlight = ref(false);
+const bggError = ref("");
 
-// Discord integration
+// Discord integration — identities are on the full User object, not JWT claims
+const fullUser = ref<Awaited<ReturnType<typeof supabase.auth.getUser>>["data"]["user"]>(null);
+
+onMounted(async () => {
+  const { data } = await supabase.auth.getUser();
+  fullUser.value = data.user;
+});
+
 const discordIdentity = computed(() => {
-  return user.value?.identities?.find((identity) => identity.provider === "discord");
+  return fullUser.value?.identities?.find((identity) => identity.provider === "discord");
 });
 
 async function connectDiscord() {
@@ -120,9 +140,12 @@ async function disconnectDiscord() {
 }
 
 async function connectBoardGameGeek() {
+  if (inFlight.value || !username.value || !password.value) return;
+
   inFlight.value = true;
+  bggError.value = "";
   try {
-    const result = await $fetch("/api/settings/bgg", {
+    await $fetch("/api/settings/bgg", {
       method: "POST",
       body: JSON.stringify({
         username: username.value,
@@ -130,29 +153,33 @@ async function connectBoardGameGeek() {
       }),
     });
 
-    inFlight.value = false;
     bgg_username.value = username.value;
     username.value = "";
     password.value = "";
 
     users.fetchMe(user.value?.id);
   } catch {
+    bggError.value =
+      "Unable to connect to BoardGameGeek. Check your username and password, then try again.";
+  } finally {
     inFlight.value = false;
   }
 }
 
 async function disconnectBoardGameGeek() {
   inFlight.value = true;
+  bggError.value = "";
   try {
-    const result = await $fetch("/api/settings/bgg", {
+    await $fetch("/api/settings/bgg", {
       method: "DELETE",
     });
 
-    inFlight.value = false;
     bgg_username.value = null;
 
     users.fetchMe(user.value?.id);
   } catch {
+    bggError.value = "Unable to disconnect BoardGameGeek. Please try again.";
+  } finally {
     inFlight.value = false;
   }
 }

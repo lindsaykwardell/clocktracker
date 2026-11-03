@@ -17,6 +17,8 @@ export const useFeatureFlags = defineStore("featureFlags", {
         // 1. Check if the flag is enabled via API (already in state.flags)
         const apiEnabled = state.flags.get(flagName) || false;
 
+        if (flagName === "forum") return apiEnabled;
+
         // 2. Check if the flag is enabled via URL query parameter
         let urlEnabled = false;
         const params = queryParams || useRoute().query;

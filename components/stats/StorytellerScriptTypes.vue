@@ -126,8 +126,8 @@ const chartOptions = computed(() => ({
     datalabels: {
       display: true,
       color: chartColors.labelColor,
-      anchor: "center",
-      align: "center",
+      anchor: "center" as const,
+      align: "center" as const,
       clamp: true,
       backgroundColor: chartColors.labelBackground,
       borderRadius: chartColors.labelRadius,
@@ -149,8 +149,7 @@ const chartOptions = computed(() => ({
     },
     tooltip: {
       callbacks: {
-        // @ts-expect-error Chart.js context typing
-        label(context) {
+        label(context: any) {
           const label = context.label || "";
           const value = context.parsed as number;
 

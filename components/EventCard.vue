@@ -154,7 +154,7 @@
         </div>
         
         <template v-if="event.description">
-          <VueMarkdown
+          <MarkdownRenderer
             class="post max-w-[80ch] text-stone-700 dark:text-stone-400"
             :class="{
               'text-sm md:text-base': display !== 'small',
@@ -276,7 +276,6 @@
 
 <script setup lang="ts">
 import type { Event } from "~/composables/useCommunities";
-import VueMarkdown from "vue-markdown-render";
 import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
 import { chartColors } from "~/composables/useChartColors";
 

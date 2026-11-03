@@ -153,7 +153,7 @@
 <script setup lang="ts">
 const games = useGames();
 const users = useUsers();
-const user = useSupabaseUser();
+const user = useUser();
 const router = useRouter();
 const route = useRoute();
 

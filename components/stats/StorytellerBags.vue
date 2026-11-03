@@ -198,14 +198,14 @@ const scripts = computed<ScriptMeta[]>(() => {
     const background = associatedScript?.background ?? null;
 
     if (!map.has(scriptName)) {
-      map.set(scriptName, { 
-        scriptName, 
-        scriptId, 
-        rolesFromGame, 
-        background, 
+      map.set(scriptName, {
+        scriptName,
+        scriptId,
+        rolesFromGame,
+        background,
         playCount: 1,
       });
-    } 
+    }
     else {
       const existing = map.get(scriptName)!;
       existing.playCount++;

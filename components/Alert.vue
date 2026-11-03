@@ -86,6 +86,10 @@
 
     &-positive {
       --alert-color: theme(colors.green.800);
+
+      &:where(.dark, .dark *) {
+        --alert-color: theme(colors.green.400);
+      }
     }
 
     &-caution {

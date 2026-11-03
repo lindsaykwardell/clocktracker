@@ -25,4 +25,4 @@ ENV HOST 0.0.0.0
 ENV PORT 8080
 
 # Source: https://nuxt.com/docs/getting-started/deployment#entry-point
-CMD ["node", ".output/server/index.mjs"]
+CMD ["node", "--max-old-space-size=512", ".output/server/index.mjs"]

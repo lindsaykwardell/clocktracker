@@ -51,11 +51,13 @@
   const ArrowCounterClockwise = resolveComponent("IconArrowCounterClockwise");
   const ArrowsMove = resolveComponent("IconArrowsMove");
   const Bgg = resolveComponent("IconBgg");
+  const Book = resolveComponent("IconBook");
   const Json = resolveComponent("IconBraces");
   const CalenderPlus = resolveComponent("IconCalenderPlus");
   const Check = resolveComponent("IconCheck");
   const CheckCircle = resolveComponent("IconCheckCircle");
   const ChevronDown = resolveComponent("IconChevronDown");
+  const ClockHistory = resolveComponent("IconClockHistory");
   const ChevronLeft = resolveComponent("IconChevronLeft");
   const ChevronRight = resolveComponent("IconChevronRight");
   const Copy = resolveComponent("IconCopy");
@@ -103,6 +105,10 @@
   const MenuClose = resolveComponent("IconMenuClose");
   const Sun = resolveComponent("IconSun");
   const Moon = resolveComponent("IconMoon");
+  const Search = resolveComponent("IconSearch");
+  const Pin = resolveComponent("IconPin");
+  const Lock = resolveComponent("IconLock");
+  const Unlock = resolveComponent("IconUnlock");
 
   // Socials
   const Website = resolveComponent("IconGlobe");
@@ -134,6 +140,8 @@
         return Filter;
       case "bgg":
         return Bgg;
+      case "book":
+        return Book;
       case "view":
         return View;
       case "disabled":
@@ -233,6 +241,8 @@
         return GraphUpArrow;   
       case "check-circle":
         return CheckCircle;
+      case "clock-history":
+        return ClockHistory;
       case "exclamation-circle":
         return ExclamationCircle;
       case "info-circle":
@@ -246,7 +256,15 @@
       case "sun":
         return Sun;
       case "moon":
-        return Moon;            
+        return Moon;
+      case "search":
+        return Search;
+      case "pin":
+        return Pin;
+      case "lock":
+        return Lock;
+      case "unlock":
+        return Unlock;
       default:
         return EyeSlash;
     }

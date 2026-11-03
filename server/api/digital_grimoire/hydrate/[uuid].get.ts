@@ -1,91 +1,95 @@
-import type { User } from "@supabase/supabase-js";
-import { Alignment, ReminderType, WinStatus_V2 } from "~/server/generated/prisma/client";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
+import { Alignment,ReminderType,WinStatus_V2 } from "~/server/generated/prisma/client";
 import { mapOfficialIdToClocktrackerId } from "~/server/utils/getRoleMap";
-import { saveCustomScript, UploadedScript } from "~/server/utils/customScript";
+import { saveCustomScript,type UploadedScript } from "~/server/utils/customScript";
 import { prisma } from "~/server/utils/prisma";
 
-type DigitalGrimoireGame = {
+type DigitalGrimoireGame={
   date: Date;
   script_id?: number;
   script:
-    | [
-        {
-          id: "_meta";
-          name: string;
-          author?: string;
-          logo?: string;
-          almanac?: string;
-          background?: string;
-        },
-        ...(
-          | {
-              id: string;
-              image?: string | string[];
-              reminders?: string[];
-              name: string;
-              team?:
-                | "townsfolk"
-                | "outsider"
-                | "minion"
-                | "demon"
-                | "traveler"
-                | "fabled";
-              ability?: string;
-            }
-          | string
-        )[]
-      ]
-    | string;
+  |[
+    {
+      id: "_meta";
+      name: string;
+      author?: string;
+      logo?: string;
+      almanac?: string;
+      background?: string;
+    },
+    ...(
+      |{
+        id: string;
+        image?: string|string[];
+        reminders?: string[];
+        name: string;
+        team?:
+        |"townsfolk"
+        |"outsider"
+        |"minion"
+        |"demon"
+        |"traveler"
+        |"fabled";
+        ability?: string;
+      }
+      |string
+    )[]
+  ]
+  |string;
   script_version?: string;
   player_count: number;
   traveler_count: number;
-  win: "GOOD_WINS" | "EVIL_WINS" | "NOT_RECORDED";
+  win: "GOOD_WINS"|"EVIL_WINS"|"NOT_RECORDED";
+  location_type?: "ONLINE"|"IN_PERSON";
   demon_bluffs: string[];
   fabled: string[];
-  grimoire: {
+  grimoire: GrimoireToken[]|GrimoireToken[][];
+};
+
+type GrimoireToken={
+  role_id: string;
+  // The character the player thinks they are, such as a Drunk's Townsfolk.
+  related_role_id?: string;
+  alignment: "GOOD"|"EVIL"|"NEUTRAL";
+  is_dead: boolean;
+  used_ghost_vote: boolean;
+  order: number;
+  created_at: Date;
+  player_name: string;
+  reminders: {
     role_id: string;
-    alignment: "GOOD" | "EVIL" | "NEUTRAL";
-    is_dead: boolean;
-    used_ghost_vote: boolean;
-    order: number;
-    created_at: Date;
-    player_name: string;
-    reminders: {
-      role_id: string;
-      reminder: string;
-    }[];
+    reminder: string;
   }[];
 };
 
 export default defineEventHandler(async (handler) => {
-  const imported_game_uuid = handler.context.params!.uuid;
+  const imported_game_uuid=handler.context.params!.uuid;
 
-  const user: User | null = handler.context.user;
+  const user: User|null=handler.context.user;
 
-  if (!user) {
+  if(!user) {
     // Rather than throw here, redirect to the login page
-    return sendRedirect(handler, "/login");
+    return sendRedirect(handler,"/login");
   }
 
   let body: DigitalGrimoireGame;
   try {
-    const importedGame = await prisma.importedGame.findFirst({
+    const importedGame=await prisma.importedGame.findFirst({
       where: {
         id: imported_game_uuid,
       },
     });
 
-    body = JSON.parse(importedGame!.payload) as DigitalGrimoireGame;
-  } catch (e) {
+    body=JSON.parse(importedGame!.payload) as DigitalGrimoireGame;
+  } catch(e) {
     throw createError({
       status: 400,
-      statusMessage: `Bad Request - game doesn't exist or invalid JSON : ${
-        e instanceof Error ? e.message : "Unknown error"
-      }`,
+      statusMessage: `Bad Request - game doesn't exist or invalid JSON : ${e instanceof Error? e.message:"Unknown error"
+        }`,
     });
   }
 
-  if (!body) {
+  if(!body) {
     throw createError({
       status: 400,
       statusMessage: "Bad Request",
@@ -93,17 +97,17 @@ export default defineEventHandler(async (handler) => {
   }
 
   // Handle script - either find existing or create custom
-  let scriptId: number | null = null;
-  let scriptName = "";
+  let scriptId: number|null=null;
+  let scriptName="";
 
-  if (typeof body.script === "string") {
+  if(typeof body.script==="string") {
     // Script is a name, try to find it
-    scriptName = body.script;
+    scriptName=body.script;
 
-    if (body.script_id) {
-      scriptId = body.script_id;
+    if(body.script_id) {
+      scriptId=body.script_id;
     } else {
-      const existingScript = await prisma.script.findFirst({
+      const existingScript=await prisma.script.findFirst({
         where: {
           name: {
             equals: body.script,
@@ -116,114 +120,128 @@ export default defineEventHandler(async (handler) => {
         },
       });
 
-      if (existingScript) {
-        scriptId = existingScript.id;
+      if(existingScript) {
+        scriptId=existingScript.id;
       }
     }
-  } else if (Array.isArray(body.script) && body.script.length > 0) {
+  } else if(Array.isArray(body.script)&&body.script.length>0) {
     // Script is a custom script array, save it
-    const meta = body.script[0];
-    scriptName = meta.name;
+    const meta=body.script[0];
+    scriptName=meta.name;
 
-    const savedScript = await saveCustomScript(
+    const savedScript=await saveCustomScript(
       body.script as UploadedScript,
       user
     );
-    scriptId = savedScript.id;
+    scriptId=savedScript.id;
   }
 
-  // Map role IDs for grimoire tokens
-  const mappedGrimoire = await Promise.all(
-    body.grimoire.map(async (token) => {
-      const role_id = await mapOfficialIdToClocktrackerId(token.role_id);
+  // Normalize grimoire to pages: single flat array becomes one page, nested arrays are multiple pages
+  const grimoirePages: GrimoireToken[][]=
+    body.grimoire.length>0&&Array.isArray(body.grimoire[0])
+      ? (body.grimoire as GrimoireToken[][])
+      :[body.grimoire as GrimoireToken[]];
 
-      const mappedReminders = await Promise.all(
-        token.reminders.map(async (reminder) => {
-          const mappedReminderRoleId =
-            (await mapOfficialIdToClocktrackerId(reminder.role_id)) ??
-            reminder.role_id;
+  // Map role IDs for each grimoire page
+  const mappedGrimoirePages=await Promise.all(
+    grimoirePages.map((page) =>
+      Promise.all(
+        page.map(async (token) => {
+          const role_id=await mapOfficialIdToClocktrackerId(token.role_id);
+          const related_role_id=token.related_role_id
+            ? await mapOfficialIdToClocktrackerId(token.related_role_id)
+            :null;
 
-          const [reminderRole, roleReminder] = await Promise.all([
-            prisma.role.findUnique({
-              where: { id: mappedReminderRoleId },
-              select: { token_url: true },
-            }),
-            prisma.roleReminder.findUnique({
-              where: {
-                role_id_reminder: {
-                  role_id: mappedReminderRoleId,
-                  reminder: reminder.reminder,
-                },
-              },
-              select: { type: true },
-            }),
-          ]);
+          const mappedReminders=await Promise.all(
+            token.reminders.map(async (reminder) => {
+              const mappedReminderRoleId=
+                (await mapOfficialIdToClocktrackerId(reminder.role_id))??
+                reminder.role_id;
+
+              const [reminderRole,roleReminder]=await Promise.all([
+                prisma.role.findUnique({
+                  where: { id: mappedReminderRoleId },
+                  select: { token_url: true },
+                }),
+                prisma.roleReminder.findUnique({
+                  where: {
+                    role_id_reminder: {
+                      role_id: mappedReminderRoleId,
+                      reminder: reminder.reminder,
+                    },
+                  },
+                  select: { type: true },
+                }),
+              ]);
+
+              return {
+                reminder: reminder.reminder,
+                token_url: reminderRole?.token_url||"",
+                type: roleReminder?.type??ReminderType.CUSTOM,
+              };
+            })
+          );
 
           return {
-            reminder: reminder.reminder,
-            token_url: reminderRole?.token_url || "",
-            type: roleReminder?.type ?? ReminderType.CUSTOM,
+            role_id: role_id||null,
+            related_role_id: related_role_id||null,
+            alignment: token.alignment as Alignment,
+            is_dead: token.is_dead,
+            used_ghost_vote: token.used_ghost_vote,
+            order: token.order,
+            player_name: token.player_name,
+            reminders: mappedReminders,
           };
         })
-      );
-
-      return {
-        role_id: role_id || null,
-        alignment: token.alignment as Alignment,
-        is_dead: token.is_dead,
-        used_ghost_vote: token.used_ghost_vote,
-        order: token.order,
-        player_name: token.player_name,
-        reminders: mappedReminders,
-      };
-    })
+      )
+    )
   );
 
   // Map demon bluffs
-  const mappedDemonBluffs = await Promise.all(
+  const mappedDemonBluffs=await Promise.all(
     body.demon_bluffs.map(async (bluff) => {
-      const role_id = await mapOfficialIdToClocktrackerId(bluff);
-      const role = role_id
+      const role_id=await mapOfficialIdToClocktrackerId(bluff);
+      const role=role_id
         ? await prisma.role.findUnique({
-            where: { id: role_id },
-            select: { name: true },
-          })
-        : null;
+          where: { id: role_id },
+          select: { name: true },
+        })
+        :null;
 
       return {
-        name: role?.name || bluff,
-        role_id: role_id || null,
+        name: role?.name||bluff,
+        role_id: role_id||null,
       };
     })
   );
 
   // Map fabled
-  const mappedFabled = await Promise.all(
+  const mappedFabled=await Promise.all(
     body.fabled.map(async (fab) => {
-      const role_id = await mapOfficialIdToClocktrackerId(fab);
-      const role = role_id
+      const role_id=await mapOfficialIdToClocktrackerId(fab);
+      const role=role_id
         ? await prisma.role.findUnique({
-            where: { id: role_id },
-            select: { name: true },
-          })
-        : null;
+          where: { id: role_id },
+          select: { name: true },
+        })
+        :null;
 
       return {
-        name: role?.name || fab,
-        role_id: role_id || null,
+        name: role?.name||fab,
+        role_id: role_id||null,
       };
     })
   );
 
   // Map win status
-  const win_v2 = body.win as WinStatus_V2;
+  const win_v2=body.win as WinStatus_V2;
 
-  const hydratedGame = {
+  const hydratedGame={
     user_id: user.id,
     date: new Date(body.date),
     script: scriptName,
     script_id: scriptId,
-    location_type: "ONLINE",
+    location_type: body.location_type==="IN_PERSON"? "IN_PERSON":"ONLINE",
     location: "",
     player_count: body.player_count,
     traveler_count: body.traveler_count,
@@ -233,23 +251,22 @@ export default defineEventHandler(async (handler) => {
     waiting_for_confirmation: true,
     demon_bluffs: mappedDemonBluffs,
     fabled: mappedFabled,
-    grimoire: [
-      {
-        tokens: {
-          create: mappedGrimoire.map((token, index) => ({
-            role_id: token.role_id,
-            alignment: token.alignment,
-            is_dead: token.is_dead,
-            used_ghost_vote: token.used_ghost_vote,
-            order: token.order ?? index,
-            player_name: token.player_name,
-            reminders: {
-              create: token.reminders,
-            },
-          })),
-        },
+    grimoire: mappedGrimoirePages.map((page) => ({
+      tokens: {
+        create: page.map((token,index) => ({
+          role_id: token.role_id,
+          related_role_id: token.related_role_id,
+          alignment: token.alignment,
+          is_dead: token.is_dead,
+          used_ghost_vote: token.used_ghost_vote,
+          order: token.order??index,
+          player_name: token.player_name,
+          reminders: {
+            create: token.reminders,
+          },
+        })),
       },
-    ],
+    })),
   };
 
   // delete the payload

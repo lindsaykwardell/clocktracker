@@ -260,7 +260,7 @@ export const useCommunities = defineStore("communities", {
     },
     async joinCommunity(slug: string) {
       try {
-        const user = useSupabaseUser();
+        const user = useUser();
         const users = useUsers();
         const me = users.getUserById(user.value?.id);
         const community = this.communities.get(slug);
@@ -288,7 +288,7 @@ export const useCommunities = defineStore("communities", {
     },
     async leaveCommunity(slug: string) {
       try {
-        const user = useSupabaseUser();
+        const user = useUser();
 
         const community = this.communities.get(slug);
         if (user.value && community?.status === Status.SUCCESS) {
@@ -380,7 +380,7 @@ export const useCommunities = defineStore("communities", {
       }
     },
     async updateIcon(slug: string, icon: string) {
-      const user = useSupabaseUser();
+      const user = useUser();
       if (this.isModerator(slug, user.value?.id)) {
         const response = await $fetch<Community>(`/api/community/${slug}`, {
           method: "PUT",
@@ -407,7 +407,7 @@ export const useCommunities = defineStore("communities", {
         city_id: string | null;
       }
     ) {
-      const user = useSupabaseUser();
+      const user = useUser();
       if (this.isModerator(slug, user.value?.id)) {
         const response = await $fetch<Community>(`/api/community/${slug}`, {
           method: "PUT",

@@ -253,11 +253,11 @@
             >
               <div class="flex flex-col items-center justify-center">
                 <Token
-                  :character="{ name: change.role.name, role: change.role }"
+                  :character="{ name: change.role?.name, role: change.role }"
                   size="md"
                 />
                 <span class="whitespace-nowrap">
-                  {{ change.role.name }}
+                  {{ change.role?.name }}
                 </span>
               </div>
               <div

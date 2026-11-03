@@ -476,7 +476,7 @@
     "name": "Engineer",
     "edition": "carousel",
     "team": "townsfolk",
-    "firstNightReminder": "The Engineer might choose Minions or Demons. Put the Engineer to sleep. Wake the target(s). Show the *YOU ARE* info token & their new character token. :reminder:",
+    "firstNightReminder": "The Engineer might choose Minions or Demons. Put the Engineer to sleep. Wake the target(s) one at a time. Show the *YOU ARE* info token & their new character token. :reminder:",
     "otherNightReminder": "The Engineer might choose Minions or Demons. Put the Engineer to sleep. Wake the target(s) one at a time. Show the *YOU ARE* info token & their new character token. :reminder:",
     "reminders": ["No Ability"],
     "setup": false,
@@ -877,7 +877,10 @@
     "reminders": [],
     "setup": true,
     "ability": "The Storyteller can break the game rules, and if executed, good wins, even if you are dead. [No evil characters]",
-    "special": [{ "type": "selection", "name": "good-duplicate" }],
+    "special": [
+      { "type": "selection", "name": "good-duplicate" },
+      { "type": "selection", "name": "evil-duplicate" }
+    ],
     "flavor": "Let us disperse with unnecessary conjecture and silly paranoia. There is a perfectly rational explanation for everything. Yes, a teacup may indeed be orbiting the planet, too small to see, but I shall drink my tea from the very real china in my very real hands."
   },
   {
@@ -1157,7 +1160,7 @@
     "name": "Snitch",
     "edition": "carousel",
     "team": "outsider",
-    "firstNightReminder": "Wake each Minion. Show the *THESE CHARACTERS ARE NOT IN PLAY* token. Show 3 not-in-play good character tokens.",
+    "firstNightReminder": "Wake each Minion. Show the *THESE CHARACTERS ARE NOT IN PLAY* token. Show 3 not-in-play character tokens.",
     "reminders": [],
     "setup": false,
     "ability": "Each Minion gets 3 bluffs.",
@@ -1271,8 +1274,8 @@
     "name": "Harpy",
     "team": "minion",
     "edition": "carousel",
-    "firstNightReminder": "The Harpy chooses 2 players. :reminder: Put the Harpy to sleep. Wake the 1st target. Show the *THIS CHARACTER SELECTED YOU* token, the Harpy token, then point to the 2nd target.",
-    "otherNightReminder": "The Harpy chooses 2 players. :reminder: Put the Harpy to sleep. Wake the 1st target. Show the *THIS CHARACTER SELECTED YOU* token, the Harpy token, then point to the 2nd target.",
+    "firstNightReminder": "The Harpy chooses 2 players. :reminder: :reminder: Put the Harpy to sleep. Wake the 1st target. Show the *THIS CHARACTER SELECTED YOU* token, the Harpy token, then point to the 2nd target.",
+    "otherNightReminder": "The Harpy chooses 2 players. :reminder: :reminder: Put the Harpy to sleep. Wake the 1st target. Show the *THIS CHARACTER SELECTED YOU* token, the Harpy token, then point to the 2nd target.",
     "reminders": ["Mad", "2nd"],
     "setup": false,
     "ability": "Each night, choose 2 players: tomorrow, the 1st player is mad that the 2nd is evil, or one or both might die.",
@@ -1486,7 +1489,7 @@
     "reminders": ["Night 1", "Night 2", "Night 3"],
     "setup": true,
     "ability": "You get 3 bluffs. On the 3rd night, choose a player: they become an evil Demon of your choice. [No Demon]",
-    "flavor": "Hail the guardians of the north; by my intellect, thou art cut. Hail the guardians of the east; by my will, thou art dominated. Hail the guardians of the south; by that which lies beyond, the mystery is revealed. Hail the guardians of the west; a shield in the darkness",
+    "flavor": "Hail the guardians of the north; by my intellect, thou art cut. Hail the guardians of the east; by my will, thou art dominated. Hail the guardians of the south; by that which lies beyond, the mystery is revealed. Hail the guardians of the west; a shield in the darkness.",
     "jinxes": [
       {
         "id": "clockmaker",
@@ -2006,6 +2009,7 @@
     "id": "riot",
     "name": "Riot",
     "edition": "carousel",
+    "otherNightReminder": "Change the Riot reminder token to the relevant day. :reminder: If it is night 3, you may wake the Minions. Show the *YOU ARE* & Riot tokens.",
     "team": "demon",
     "reminders": ["Day 1", "Day 2", "Day 3"],
     "setup": false,
@@ -2166,8 +2170,8 @@
     "name": "Barista",
     "edition": "snv",
     "team": "traveller",
-    "firstNightReminder": "Choose a player. Wake them and give a finger signal. :reminder:",
-    "otherNightReminder": "Choose a player. Wake them and give a finger signal. :reminder:",
+    "firstNightReminder": "Choose a player. Wake them, show the *THIS CHARACTER SELECTED YOU* & Barista tokens, then give a finger signal. :reminder:",
+    "otherNightReminder": "Choose a player. Wake them, show the *THIS CHARACTER SELECTED YOU* & Barista tokens, then give a finger signal. :reminder:",
     "reminders": ["Sober & Healthy", "Acts Twice", "?", "?"],
     "setup": false,
     "ability": "Each night, until dusk, 1) a player becomes sober, healthy & gets true info, or 2) their ability works twice. They learn which.",
@@ -2193,6 +2197,17 @@
     "setup": false,
     "ability": "Each day, after the 1st execution, you may nominate again.",
     "flavor": "It tastes like chicken. More please."
+  },
+  {
+    "id": "cacklejack",
+    "name": "Cacklejack",
+    "edition": "carousel",
+    "team": "traveller",
+    "otherNightReminder": "Before dawn, choose a player not marked *NOT ME*. Wake the target. Show the *YOU ARE* info token & their new character token.",
+    "reminders": ["Not Me"],
+    "setup": false,
+    "ability": "Each day, choose a player: a different player changes character tonight.",
+    "flavor": "Wire α To wire β. LigHt oN. BuZZer off. GAzOinks! Arms STra1ght. FingER 2 nose. hOooLd stiLL. BoiNgo-banGo! Ha-ha-ha!"
   },
   {
     "id": "gunslinger",
@@ -2345,7 +2360,7 @@
     "setup": true,
     "name": "Deus ex Fiasco",
     "team": "fabled",
-    "edition": "fabled",
+    "edition": "carousel",
     "ability": "At least once per game, the Storyteller will make a mistake, correct it, and publicly admit to it.",
     "flavor": "It's not a bug, it's a feature. It's not an error, it's a tweak. It's not broken, it's quirky."
   },
@@ -2371,7 +2386,7 @@
   },
   {
     "id": "duchess",
-    "otherNightReminder": "One at a time: Wake each player marked *VISITOR* or *FALSE INFO*. Give a finger signal.",
+    "otherNightReminder": "One at a time: Wake each player marked *VISITOR* or *FALSE INFO*. Show the *THIS CHARACTER SELECTED YOU* & Duchess tokens, then give a finger signal.",
     "reminders": ["Visitor", "Visitor", "False Info"],
     "setup": false,
     "name": "Duchess",
@@ -2386,7 +2401,7 @@
     "setup": false,
     "name": "Ferryman",
     "team": "fabled",
-    "edition": "fabled",
+    "edition": "carousel",
     "ability": "On the final day, all dead players regain their vote token.",
     "special": [{ "name": "ghost-votes", "type": "ability", "time": "day" }],
     "flavor": "When righteous dreams come, they have the weight of truth."
@@ -2466,8 +2481,8 @@
   },
   {
     "id": "bootlegger",
-    "reminders": [],
-    "setup": false,
+    "reminders": ["?", "?"],
+    "setup": true,
     "name": "Bootlegger",
     "team": "loric",
     "edition": "loric",
@@ -2489,15 +2504,29 @@
   {
     "id": "gardener",
     "reminders": [],
-    "setup": false,
+    "setup": true,
     "name": "Gardener",
     "team": "loric",
     "edition": "loric",
-    "ability": "The Storyteller assigns 1 or more players' characters.",
+    "ability": "The Storyteller assigns all players' characters.",
     "special": [
       { "name": "distribute-roles", "type": "ability", "time": "pregame" }
     ],
     "flavor": "When sophistry becomes stupidity and hypocrisy cruelty, retreat to the garden. The final love of old men is flowers and stones."
+  },
+  {
+    "id": "godofug",
+    "reminders": ["Hat"],
+    "setup": false,
+    "name": "God of Ug",
+    "team": "loric",
+    "edition": "loric",
+    "ability": "One Ug hat. When wear Ug hat, must speak one sound at a time but vote twice. If fail, pass Ug hat.",
+    "flavor": "Blessed are my children, for they see the beauty in simple things.",
+    "special": [
+      { "type": "vote", "name": "multiplier", "value": 2 },
+      { "type": "reminder", "name": "public" }
+    ]
   },
   {
     "id": "hindu",
@@ -2510,6 +2539,16 @@
     "flavor": "चत्वारो मृत्युमध्ये पतन्ति, चत्वारो यात्री पुनरुद्गताः। चत्वारो धर्मे स्थितचित्तवृत्तेः, चत्वार एषां न पुनः क्षयः॥"
   },
   {
+    "id": "knaves",
+    "reminders": [],
+    "setup": false,
+    "name": "Knaves",
+    "team": "loric",
+    "edition": "loric",
+    "ability": "There are 2 Storytellers: one lies & one tells the truth. Once per game, at dusk, they might switch.",
+    "flavor": "Every wall is a door. Every meal is a feast."
+  },
+  {
     "id": "pope",
     "reminders": [],
     "setup": true,
@@ -2518,7 +2557,10 @@
     "edition": "loric",
     "ability": "There are duplicate good characters in play. They might also be bluffs.",
     "flavor": "...Pulcherrimae.",
-    "special": [{ "type": "selection", "name": "good-duplicate" }]
+    "special": [
+      { "type": "selection", "name": "good-duplicate" },
+      { "type": "selection", "name": "evil-duplicate" }
+    ]
   },
   {
     "id": "stormcatcher",
@@ -2533,7 +2575,8 @@
   },
   {
     "id": "tor",
-    "otherNightReminder": "If a player died tonight, show the *YOU ARE* info token, their character token, & a thumbs up or thumbs down.",
+    "firstNightReminder": "Skip Minion Info and Demon Info.",
+    "otherNightReminder": "If a player died tonight, show the *YOU ARE* info token, their character token, & give a thumb signal.",
     "reminders": [],
     "setup": true,
     "name": "Tor",
@@ -2541,6 +2584,16 @@
     "edition": "loric",
     "ability": "Players don't know their character or alignment. They learn them when they die.",
     "flavor": "With thunder as my voice and lightning as my blade, I, the eternal guardian, feast upon the fools who dare approach the forbidden gate. Behold, my sacred goal! To purge the beetle from the belly of the rocky earth, to ensnare it in a net of stars, on the hilltop where heaven meets earth."
+  },
+  {
+    "id": "ventriloquist",
+    "reminders": ["Mad"],
+    "setup": false,
+    "name": "Ventriloquist",
+    "team": "loric",
+    "edition": "loric",
+    "ability": "If a player is mad as a fresh character during their nomination, they might not die if executed today.",
+    "flavor": "Well, folks, gather ‘round! This here’s my pal Charlie, and he’s got a mouth on him that’d make a mule blush. But don’t worry folks, I do all the talkin’... or do I?"
   },
   {
     "id": "zenomancer",

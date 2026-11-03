@@ -161,13 +161,28 @@ const weeks = computed(() => {
   return weeks;
 });
 
-function eventsOnDay(day: dayjs.Dayjs) {
-  return props.events.filter((e) => {
-    const start = dayjs(e.start);
-    const end = dayjs(e.end);
+// Pre-index events by date for O(1) lookups instead of O(n) filter per day cell.
+const eventsByDate = computed(() => {
+  const map = new Map<string, Event[]>();
+  for (const e of props.events) {
+    const startKey = dayjs(e.start).format("YYYY-MM-DD");
+    const endKey = dayjs(e.end).format("YYYY-MM-DD");
 
-    return day.isSame(start, "day") || day.isSame(end, "day");
-  });
+    let startList = map.get(startKey);
+    if (!startList) { startList = []; map.set(startKey, startList); }
+    startList.push(e);
+
+    if (endKey !== startKey) {
+      let endList = map.get(endKey);
+      if (!endList) { endList = []; map.set(endKey, endList); }
+      endList.push(e);
+    }
+  }
+  return map;
+});
+
+function eventsOnDay(day: dayjs.Dayjs) {
+  return eventsByDate.value.get(day.format("YYYY-MM-DD")) ?? [];
 }
 
 function backOneMonth() {

@@ -4,6 +4,10 @@
     :slug="
       event.status === Status.SUCCESS ? event.data.community?.slug : undefined
     "
+    :publicContent="
+      event.status === Status.SUCCESS &&
+      ['ANYONE', 'PRIVATE'].includes(event.data.who_can_register)
+    "
   >
     <template v-if="event.status === Status.SUCCESS">
       <UserHeader
@@ -233,7 +237,7 @@ const route = useRoute();
 const router = useRouter();
 const eventId = route.params.eventId as string;
 const users = useUsers();
-const user = useSupabaseUser();
+const user = useUser();
 const communities = useCommunities();
 const friends = useFriends();
 
@@ -341,7 +345,7 @@ watch(event, () => {
       } - ${event.value.data.title}`,
       meta: [
         {
-          hid: "description",
+          key: "description",
           name: "description",
           content: `${event.value.data.title}, hosted by ${
             event.value.data.community?.name ??

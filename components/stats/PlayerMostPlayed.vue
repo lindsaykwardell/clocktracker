@@ -3,7 +3,7 @@
     <h2 class="font-sorts text-center text-xl lg:text-2xl mb-1 lg:mb-2">
       Most played
     </h2>
-    
+
     <div class="text-center text-balance max-w-[80ch] mb-2 lg:mb-4 mx-auto text-stone-800 dark:text-stone-300 space-y-2">
       <p>
         An overview of {{ props.isMe ? 'your' : `this player's` }} most played characters by type.
@@ -24,7 +24,7 @@
         <div class="grid grid-cols-[minmax(0,_1.5rem)_2.5rem_2.5rem_minmax(0,_1.5rem)] grid-rows-[2.5rem_1.5rem_2rem] md:grid-cols-[minmax(0,_2rem)_3.5rem_3.5rem_minmax(0,_2rem)] md:grid-rows-[3.5rem_2rem_3rem] mx-auto">
           <!-- 1st: top middle -->
           <div v-if="roleCharacters[0]" class="relative mb-8 col-start-2 col-span-2 row-span-2 z-[1]">
-            <nuxt-link 
+            <nuxt-link
               :to="roleLink(roleCharacters[0].name)"
             >
               <Token
@@ -44,7 +44,7 @@
               {{ roleCharacters[0].count }}
             </span>
           </div>
-          <div 
+          <div
             v-else
             class="relative mb-8 col-start-2 col-span-2 row-span-2 z-[1]"
           >
@@ -85,7 +85,7 @@
               {{ roleCharacters[1].count }}
             </span>
           </div>
-          <div 
+          <div
             v-else
             class="relative col-start-1 row-start-3"
           >
@@ -120,13 +120,13 @@
                 v-tooltip="`${roleCharacters[2].name}`"
               />
             </nuxt-link>
-            <span 
+            <span
               class="absolute right-3 -bottom-2 z-20 text-xs leading-none flex items-center justify-center w-5 h-5 px-1 py-0.5 rounded-full text-white bg-stone-500"
             >
               {{ roleCharacters[2].count }}
             </span>
           </div>
-          <div 
+          <div
             v-else
             dir="rtl"
             class="relative col-end-5 row-start-3"
@@ -149,7 +149,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import type { Game, Character } from "~/server/generated/prisma/client";
+import type { GameRecord } from "~/composables/useGames";
 
 type RoleType = string;
 
@@ -159,17 +159,8 @@ type CharacterStat = {
   token_url: string | null;
 };
 
-type GameWithChars = Game & {
-  ignore_for_stats?: boolean | null;
-  player_characters: (Character & {
-    name: string | null;
-    role?: { token_url: string; type: string };
-    related_role?: { token_url: string };
-  })[];
-};
-
 const props = defineProps<{
-  games: GameWithChars[];
+  games: GameRecord[];
   isMe?: boolean;
 }>();
 
@@ -223,7 +214,7 @@ const topCharactersByRole = computed<Record<RoleType, CharacterStat[]>>(() => {
     })
     .filter((character) => character.name);
 
-  // Count per role type, per character name  
+  // Count per role type, per character name
   const counts: Record<RoleType, Record<string, number>> = {};
 
   // Character tokens indexed by character name

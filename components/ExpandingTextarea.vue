@@ -2,7 +2,8 @@
   <textarea
     ref="textarea"
     v-model="input"
-    class="block w-full border bg-stone-300 dark:bg-stone-600 disabled:bg-stone-400 dark:disabled:bg-stone-700 border-stone-100 dark:border-stone-500 rounded-md p-2 h-[2.5rem]"
+    class="block w-full border bg-stone-300 dark:bg-stone-600 disabled:bg-stone-400 dark:disabled:bg-stone-700 border-stone-100 dark:border-stone-500 rounded-md p-2"
+    :style="{ minHeight: minHeight }"
   ></textarea>
 </template>
 
@@ -11,9 +12,18 @@ import { useTextareaAutosize } from "@vueuse/core";
 
 const { textarea, input } = useTextareaAutosize();
 
-const props = defineProps<{
-  modelValue: string;
-}>();
+const props = withDefaults(
+  defineProps<{
+    modelValue: string;
+    rows?: number;
+  }>(),
+  { rows: 1 }
+);
+
+const minHeight = computed(() => {
+  // ~1.5rem line height + 1rem padding (0.5rem top + 0.5rem bottom)
+  return `${props.rows * 1.5 + 1}rem`;
+});
 const emit = defineEmits(["update:modelValue"]);
 
 const value = computed({

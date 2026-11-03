@@ -1,6 +1,8 @@
+import { defineProtectedHandler } from "~/server/utils/protectedHandler";
 import { PrivacySetting } from "~/server/generated/prisma/client";
-import type { User } from "@supabase/supabase-js";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
+import { hasPermission } from "~/server/utils/permissions";
 
 type PlayerSummary = {
   key: string;
@@ -28,7 +30,7 @@ type PlayerSummary = {
   roles: Record<string, number>;
 };
 
-export default defineEventHandler(async (handler) => {
+export default defineProtectedHandler("games-stats", async (handler) => {
   const me: User | null = handler.context.user;
   const slug = handler.context.params?.slug as string;
 
@@ -52,9 +54,12 @@ export default defineEventHandler(async (handler) => {
     throw createError({ status: 403, statusMessage: "Forbidden" });
   }
 
+  const canViewPrivate = me ? await hasPermission(me.id, "VIEW_PRIVATE_COMMUNITIES") : false;
+
   if (
     community.is_private &&
-    !community.members.some((member) => member.user_id === me?.id)
+    !community.members.some((member) => member.user_id === me?.id) &&
+    !canViewPrivate
   ) {
     return emptyStats();
   }
@@ -63,7 +68,9 @@ export default defineEventHandler(async (handler) => {
     where: {
       deleted: false,
       community_id: community.id,
-      privacy: PrivacySetting.PUBLIC,
+      privacy: community.is_private
+        ? { in: [PrivacySetting.PUBLIC, PrivacySetting.PRIVATE, PrivacySetting.FRIENDS_ONLY] }
+        : PrivacySetting.PUBLIC,
       parent_game_id: null,
     },
     select: {
@@ -123,6 +130,7 @@ export default defineEventHandler(async (handler) => {
       { created_at: "desc" },
       { id: "desc" },
     ],
+    take: 5000,
   });
 
   const memberIds = new Set(community.members.map((m) => m.user_id));
@@ -448,7 +456,7 @@ function resolvePlayerIdentity(
     };
   }
 
-  const name = player_name || player?.username;
+  const name = player_name;
   if (!name) return null;
 
   return {

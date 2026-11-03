@@ -14,7 +14,7 @@
       >
         <div class="reminder-tokens">
           <div
-            v-for="(reminderToken, tokenIndex) in token.reminders"
+            v-for="(reminderToken, tokenIndex) in (token.reminders ?? [])"
             class="reminder-token"
             :style="`--ti: ${tokenIndex}`"
           >
@@ -68,15 +68,15 @@
           </button>
         </template>
         <template v-else>
-          <img 
+          <img
             v-if="token.used_ghost_vote"
-            src="/img/token-bg-dead.webp" 
-            class="absolute top-0 left-[50%] translate-x-[-50%] z-20 w-4 md:w-8" 
+            src="/img/token-bg-dead.webp"
+            class="absolute top-0 left-[50%] translate-x-[-50%] z-20 w-4 md:w-8"
           />
-          <img 
-            v-if="token.is_dead" 
-            src="/img/shroud.png" 
-            class="absolute top-0 left-[50%] translate-x-[-50%] z-10 w-8 md:w-10 cursor-help" 
+          <img
+            v-if="token.is_dead"
+            src="/img/shroud.png"
+            class="absolute top-0 left-[50%] translate-x-[-50%] z-10 w-8 md:w-10 cursor-help"
             v-tooltip="props.deathTooltips?.[index]"
           />
         </template>
@@ -162,7 +162,7 @@
           </button>
           {{ token.player_name }}
         </div>
-        <div 
+        <div
           v-if="!props.readonly"
           class="text-xs text-stone-300 text-center"
         >
@@ -198,16 +198,18 @@ type Token = {
   grimoire_participant_id?: string | null;
   role_id: string | null;
   role?: {
+    id?: string;
     token_url: string;
     alternate_token_urls?: string[];
     type: string;
     initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
     ability?: string;
     name?: string;
+    custom_role?: boolean;
   };
   related_role_id: string | null;
   related_role?: { token_url: string; name?: string };
-  reminders: {
+  reminders?: {
     reminder: string;
     token_url: string;
     type?: "OFFICIAL" | "TRACKING" | "CUSTOM" | null;
@@ -217,7 +219,9 @@ type Token = {
   player?: {
     username: string;
     display_name: string;
+    [key: string]: unknown;
   };
+  [key: string]: unknown;
 };
 
 const friends = useFriends();
@@ -466,16 +470,19 @@ function selectRoleForToken(role: {
   alternate_token_urls?: string[];
   name: string;
   initial_alignment: "GOOD" | "EVIL" | "NEUTRAL";
+  custom_role?: boolean;
 }) {
   if (focusedToken.value) {
     if (tokenMode.value === "role") {
       if (role.id) {
         focusedToken.value.role = {
+          id: role.id,
           token_url: role.token_url,
           alternate_token_urls: role.alternate_token_urls,
           initial_alignment: role.initial_alignment,
           type: role.type,
           name: role.name,
+          custom_role: role.custom_role,
         };
         focusedToken.value.role_id = role.id;
         focusedToken.value.alignment = role.initial_alignment;
@@ -603,6 +610,7 @@ function selectReminder(reminder: {
   type?: "OFFICIAL" | "TRACKING" | "CUSTOM" | null;
 }) {
   if (focusedToken.value) {
+    focusedToken.value.reminders ??= [];
     focusedToken.value.reminders.push({
       reminder: reminder.reminder,
       token_url: reminder.token_url,
@@ -620,7 +628,7 @@ function removeReminder(
     type?: "OFFICIAL" | "TRACKING" | "CUSTOM" | null;
   }
 ) {
-  token.reminders = token.reminders.filter(
+  token.reminders = (token.reminders ?? []).filter(
     (r) =>
       r.reminder !== reminder.reminder && r.token_url !== reminder.token_url
   );

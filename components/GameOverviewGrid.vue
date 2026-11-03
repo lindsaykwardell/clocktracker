@@ -113,9 +113,9 @@
                   class="w-2/3"
                 />
               </div>
-              <div v-if="uniquePlayableRoles(game).length">
+              <div v-if="getOrbitData(game.id).uniqueRoles.length">
                 <Token
-                  v-for="(role, i) in orbitRoles(game)"
+                  v-for="(role, i) in getOrbitData(game.id).orbitRoles"
                   :key="role.key"
                   :character="{
                     alignment: role.alignment,
@@ -129,10 +129,10 @@
                   size="sm"
                   class="orbit-token"
                   :class="`orbit-token--${i}`"
-                  :style="{ '--pos': orbitPos(game, i + orbitOffset(game)) }"
+                  :style="{ '--pos': orbitPos(getOrbitData(game.id).orbitCount, i + getOrbitData(game.id).orbitOffset) }"
                 />
                 <Token
-                  v-if="uniquePlayableRoles(game).length > 5"
+                  v-if="getOrbitData(game.id).extraCount > 0"
                   :character="{
                     role: {
                       name: '',
@@ -141,10 +141,10 @@
                   }"
                   size="sm"
                   class="orbit-token orbit-token--more"
-                  :style="{ '--pos': orbitPos(game, 0) }"
+                  :style="{ '--pos': orbitPos(getOrbitData(game.id).orbitCount, 0) }"
                 >
                   <span class="font-sorts font-semibold text-lg text-black"
-                    >+{{ uniquePlayableRoles(game).length - 4 }}</span
+                    >+{{ getOrbitData(game.id).extraCount }}</span
                   >
                 </Token>
               </div>
@@ -301,7 +301,7 @@ const gamesStore = useGames();
 const users = useUsers();
 const me = useMe();
 const friends = useFriends();
-const user = useSupabaseUser();
+const user = useUser();
 
 const config = useRuntimeConfig();
 const scripts = useScripts();
@@ -407,83 +407,95 @@ function isMyGame(game: GameRecord) {
   return me.value?.data.user_id === game.user_id;
 }
 
-function uniquePlayableRoles(game: GameRecord) {
-  // Identify the final playable role to avoid duplicating it in the mini-row
-  const lastPlayable = [...game.player_characters]
-    .reverse()
-    .find(
-      (c) => c.role_id && c.role?.type !== "FABLED" && c.role?.type !== "LORIC"
-    );
-  const lastPlayableRoleId = lastPlayable?.role_id ?? null;
-  const lastPlayableAlignment = lastPlayable?.alignment ?? "UNKNOWN";
-
-  // Track which alignments we've already shown for each role_id (to avoid repeats).
-  const seenAlignmentsByRole = new Map<string, Set<string>>();
-
-  const roles: {
-    key: string;
-    id: string;
-    name: string;
-    token_url: string | null;
-    alternate_token_urls?: string[] | null;
-    alignment: string | null;
-    initial_alignment: string | null;
-  }[] = [];
-
-  for (const [index, character] of game.player_characters.entries()) {
-    if (!character.role_id || !character.name) continue;
-    if (character.role?.type === "FABLED" || character.role?.type === "LORIC")
-      continue;
-
-    // Skip entries that match the final role/alignment (shown as the main token).
-    if (
-      lastPlayableRoleId &&
-      character.role_id === lastPlayableRoleId &&
-      (character.alignment ?? "UNKNOWN") === lastPlayableAlignment
-    ) {
-      continue;
-    }
-
-    const alignmentKey = character.alignment ?? "UNKNOWN";
-    const seen =
-      seenAlignmentsByRole.get(character.role_id) ?? new Set<string>();
-    if (seen.has(alignmentKey)) continue;
-    seen.add(alignmentKey);
-    seenAlignmentsByRole.set(character.role_id, seen);
-
-    roles.push({
-      key: `${character.role_id}:${alignmentKey}:${index}`,
-      id: character.role_id,
-      name: character.name,
-      token_url:
-        character.role?.token_url ?? character.related_role?.token_url ?? null,
-      alternate_token_urls: character.role?.alternate_token_urls ?? null,
-      alignment: character.alignment ?? null,
-      initial_alignment: character.role?.initial_alignment ?? null,
-    });
-  }
-
-  return roles;
-}
-
-const orbitRoles = (game: GameRecord) => {
-  const roles = uniquePlayableRoles(game);
-  if (roles.length > 5) {
-    // Keep the most recent 4 roles; oldest are summarized in +N.
-    return roles.slice(-4);
-  }
-  // Keep up to the most recent 5 roles.
-  return roles.slice(-5);
+type OrbitRole = {
+  key: string;
+  id: string;
+  name: string;
+  token_url: string | null;
+  alternate_token_urls?: string[] | null;
+  alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
+  initial_alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
 };
 
-const orbitCount = (game: GameRecord) =>
-  Math.min(uniquePlayableRoles(game).length, 5);
+type GameOrbitData = {
+  uniqueRoles: OrbitRole[];
+  orbitRoles: OrbitRole[];
+  orbitCount: number;
+  orbitOffset: number;
+  extraCount: number;
+};
 
-const orbitOffset = (game: GameRecord) =>
-  uniquePlayableRoles(game).length > 5 ? 1 : 0;
+const orbitDataMap = computed<Record<string, GameOrbitData>>(() => {
+  const entries: Record<string, GameOrbitData> = {};
+  for (const game of props.games) {
+    // Identify the final playable role to avoid duplicating it in the mini-row
+    const lastPlayable = [...game.player_characters]
+      .reverse()
+      .find(
+        (c) => c.role_id && c.role?.type !== "FABLED" && c.role?.type !== "LORIC"
+      );
+    const lastPlayableRoleId = lastPlayable?.role_id ?? null;
+    const lastPlayableAlignment = lastPlayable?.alignment ?? "UNKNOWN";
 
-const orbitPos = (game: GameRecord, index: number) => {
-  const count = orbitCount(game);
+    const seenAlignmentsByRole = new Map<string, Set<string>>();
+    const roles: OrbitRole[] = [];
+
+    for (const [index, character] of game.player_characters.entries()) {
+      if (!character.role_id || !character.name) continue;
+      if (character.role?.type === "FABLED" || character.role?.type === "LORIC")
+        continue;
+
+      if (
+        lastPlayableRoleId &&
+        character.role_id === lastPlayableRoleId &&
+        (character.alignment ?? "UNKNOWN") === lastPlayableAlignment
+      ) {
+        continue;
+      }
+
+      const alignmentKey = character.alignment ?? "UNKNOWN";
+      const seen =
+        seenAlignmentsByRole.get(character.role_id) ?? new Set<string>();
+      if (seen.has(alignmentKey)) continue;
+      seen.add(alignmentKey);
+      seenAlignmentsByRole.set(character.role_id, seen);
+
+      roles.push({
+        key: `${character.role_id}:${alignmentKey}:${index}`,
+        id: character.role_id,
+        name: character.name,
+        token_url:
+          character.role?.token_url ?? character.related_role?.token_url ?? null,
+        alternate_token_urls: character.role?.alternate_token_urls ?? null,
+        alignment: (character.alignment as OrbitRole["alignment"]) ?? null,
+        initial_alignment: (character.role?.initial_alignment as OrbitRole["initial_alignment"]) ?? null,
+      });
+    }
+
+    const orbit = roles.length > 5 ? roles.slice(-4) : roles.slice(-5);
+    const count = Math.min(roles.length, 5);
+
+    entries[game.id] = {
+      uniqueRoles: roles,
+      orbitRoles: orbit,
+      orbitCount: count,
+      orbitOffset: roles.length > 5 ? 1 : 0,
+      extraCount: roles.length > 5 ? roles.length - 4 : 0,
+    };
+  }
+  return entries;
+});
+
+const getOrbitData = (gameId: string) =>
+  orbitDataMap.value[gameId] ?? {
+    uniqueRoles: [],
+    orbitRoles: [],
+    orbitCount: 0,
+    orbitOffset: 0,
+    extraCount: 0,
+  };
+
+const orbitPos = (count: number, index: number) => {
   if (!count) return 0;
   return index - (count - 1) / 2;
 };
@@ -501,7 +513,7 @@ const computeTaggedPlayers = (game: GameRecord): TaggedPlayer[] => {
       const player = t.player;
       if (!t.player_id || !player) continue;
 
-      const key = player.id ?? player.username;
+      const key = t.player_id ?? player.username;
       if (!key || seen.has(key)) continue;
 
       seen.add(key);

@@ -1,0 +1,335 @@
+import { forumVisibility } from "./forumSafety";
+import { prisma } from "./prisma";
+export {
+  getUserPermissions as getUserForumPermissions,
+  hasPermission as hasForumPermission,
+} from "./permissions";
+import { isAdmin, getUserPermissions, hasRestriction } from "./permissions";
+
+// Lightweight user select for forum responses
+export const forumUserSelect = {
+  user_id: true,
+  username: true,
+  display_name: true,
+  avatar: true,
+  created_at: true,
+} as const;
+
+export async function userCanViewCategory(
+  userId: string | null,
+  categoryId: string,
+  isPrivate: boolean
+): Promise<boolean> {
+  if (!isPrivate) return true;
+  if (!userId) return false;
+  if (await isAdmin(userId)) return true;
+
+  const access = await prisma.categoryAccess.findFirst({
+    where: {
+      category_id: categoryId,
+      can_view: true,
+      group: {
+        members: { some: { user_id: userId } },
+      },
+    },
+  });
+  return !!access;
+}
+
+export async function isModerator(userId: string): Promise<boolean> {
+  const permissions = await getUserPermissions(userId);
+  return (
+    permissions.includes("EDIT_ANY_POST") ||
+    permissions.includes("DELETE_ANY_POST") ||
+    permissions.includes("LOCK_THREAD") ||
+    permissions.includes("PIN_THREAD") ||
+    permissions.includes("BAN_USER") ||
+    permissions.includes("MANAGE_CATEGORIES")
+  );
+}
+
+export async function userCanPostInCategory(
+  userId: string,
+  categoryId: string,
+  isPrivate: boolean,
+  modPostingOnly: boolean = false
+): Promise<boolean> {
+  if (await isAdmin(userId)) return true;
+
+  if (!(await userCanViewCategory(userId, categoryId, isPrivate))) return false;
+
+  if (modPostingOnly) {
+    return await isModerator(userId);
+  }
+
+  // Users can post by default unless restricted
+  if (await hasRestriction(userId, "CREATE_POST")) return false;
+
+  if (!isPrivate) return true;
+
+  const access = await prisma.categoryAccess.findFirst({
+    where: {
+      category_id: categoryId,
+      can_post: true,
+      group: {
+        members: { some: { user_id: userId } },
+      },
+    },
+  });
+  return !!access;
+}
+
+export async function checkForumBan(
+  userId: string,
+  categoryId?: string
+): Promise<boolean> {
+  const ban = await prisma.forumBan.findFirst({
+    where: {
+      user_id: userId,
+      AND: [
+        {
+          OR: [
+            { category_id: null },
+            ...(categoryId ? [{ category_id: categoryId }] : []),
+          ],
+        },
+        {
+          OR: [{ expires_at: null }, { expires_at: { gt: new Date() } }],
+        },
+      ],
+    },
+  });
+  return !!ban;
+}
+
+// Compute display name color for a forum user
+// Priority: admin (red) > user group color > kofi supporter (teal) > null
+export async function getForumNameColor(userId: string): Promise<string | null> {
+  // Check admin
+  const user = await prisma.userSettings.findUnique({
+    where: { user_id: userId },
+    select: { is_admin: true },
+  });
+  if (user?.is_admin) return "admin";
+
+  // Check user group color
+  const memberships = await prisma.userGroupMembership.findMany({
+    where: { user_id: userId },
+    include: { group: { select: { color: true } } },
+  });
+  for (const m of memberships) {
+    if (m.group.color) return m.group.color;
+  }
+
+  // Check KoFi supporter
+  const payment = await prisma.koFiPayment.findFirst({
+    where: {
+      user_id: userId,
+      expires_at: { gte: new Date() },
+    },
+  });
+  if (payment) return "supporter";
+
+  return null;
+}
+
+// Batch version for multiple users
+export async function getForumNameColors(userIds: string[]): Promise<Record<string, string | null>> {
+  if (userIds.length === 0) return {};
+
+  const uniqueIds = [...new Set(userIds)];
+
+  // Fetch admin status
+  const users = await prisma.userSettings.findMany({
+    where: { user_id: { in: uniqueIds } },
+    select: { user_id: true, is_admin: true },
+  });
+  const adminSet = new Set(users.filter((u) => u.is_admin).map((u) => u.user_id));
+
+  // Fetch group colors
+  const memberships = await prisma.userGroupMembership.findMany({
+    where: { user_id: { in: uniqueIds } },
+    include: { group: { select: { color: true } } },
+  });
+  const groupColorMap = new Map<string, string>();
+  for (const m of memberships) {
+    if (m.group.color && !groupColorMap.has(m.user_id)) {
+      groupColorMap.set(m.user_id, m.group.color);
+    }
+  }
+
+  // Fetch KoFi supporters
+  const payments = await prisma.koFiPayment.findMany({
+    where: {
+      user_id: { in: uniqueIds },
+      expires_at: { gte: new Date() },
+    },
+    distinct: ["user_id"],
+  });
+  const supporterSet = new Set(payments.map((p) => p.user_id));
+
+  const result: Record<string, string | null> = {};
+  for (const id of uniqueIds) {
+    if (adminSet.has(id)) result[id] = "admin";
+    else if (groupColorMap.has(id)) result[id] = groupColorMap.get(id)!;
+    else if (supporterSet.has(id)) result[id] = "supporter";
+    else result[id] = null;
+  }
+  return result;
+}
+
+// Batch compute badges for forum users
+// Priority: admin > moderator > supporter > null
+const MOD_PERMISSIONS = [
+  "EDIT_ANY_POST",
+  "DELETE_ANY_POST",
+  "LOCK_THREAD",
+  "PIN_THREAD",
+  "BAN_USER",
+  "MANAGE_CATEGORIES",
+];
+
+export async function getForumBadges(
+  userIds: string[]
+): Promise<Record<string, string | null>> {
+  if (userIds.length === 0) return {};
+
+  const uniqueIds = [...new Set(userIds)];
+
+  const [users, memberships, payments] = await Promise.all([
+    prisma.userSettings.findMany({
+      where: { user_id: { in: uniqueIds } },
+      select: { user_id: true, is_admin: true },
+    }),
+    prisma.userGroupMembership.findMany({
+      where: { user_id: { in: uniqueIds } },
+      include: { group: { select: { permissions: true } } },
+    }),
+    prisma.koFiPayment.findMany({
+      where: {
+        user_id: { in: uniqueIds },
+        expires_at: { gte: new Date() },
+      },
+      distinct: ["user_id"],
+    }),
+  ]);
+
+  const adminSet = new Set(
+    users.filter((u) => u.is_admin).map((u) => u.user_id)
+  );
+
+  const modSet = new Set<string>();
+  for (const m of memberships) {
+    if (m.group.permissions.some((p) => MOD_PERMISSIONS.includes(p))) {
+      modSet.add(m.user_id);
+    }
+  }
+
+  const supporterSet = new Set(payments.map((p) => p.user_id));
+
+  const result: Record<string, string | null> = {};
+  for (const id of uniqueIds) {
+    if (adminSet.has(id)) result[id] = "admin";
+    else if (modSet.has(id)) result[id] = "moderator";
+    else if (supporterSet.has(id)) result[id] = "supporter";
+    else result[id] = null;
+  }
+  return result;
+}
+
+// Mod log
+export async function logModAction(
+  actorId: string,
+  action: string,
+  targetType: string,
+  targetId: string,
+  details?: string
+): Promise<void> {
+  await prisma.forumModLog.create({
+    data: {
+      actor_id: actorId,
+      action,
+      target_type: targetType,
+      target_id: targetId,
+      details: details || null,
+    },
+  });
+}
+
+// Post body character limit for non-moderators/non-admins
+export const POST_BODY_MAX_LENGTH = 10_000;
+
+export async function checkPostLength(
+  userId: string,
+  body: string
+): Promise<void> {
+  if (body.length <= POST_BODY_MAX_LENGTH) return;
+  if (await isAdmin(userId)) return;
+
+  const permissions = await getUserPermissions(userId);
+  const isModerator = permissions.includes("EDIT_ANY_POST") || permissions.includes("DELETE_ANY_POST");
+  if (isModerator) return;
+
+  throw createError({
+    status: 400,
+    statusMessage: `Post body cannot exceed ${POST_BODY_MAX_LENGTH.toLocaleString()} characters`,
+  });
+}
+
+// All post-specific actions must also authorize the parent thread.
+export async function requireForumThreadAccess(userId: string | null, threadId: string) {
+  const moderator = userId && (await isAdmin(userId) || await isModerator(userId));
+  const thread = await prisma.forumThread.findFirst({
+    where: { id: threadId, ...(moderator ? { published: true, deleted_at: null } : await forumVisibility(userId)) },
+    include: { category: true },
+  });
+  if (!thread || !(await userCanViewCategory(userId, thread.category.id, thread.category.is_private))) {
+    throw createError({ status: 404, statusMessage: "Thread not found" });
+  }
+  return thread;
+}
+
+export async function requireForumPostAccess(userId: string | null, postId: string) {
+  const moderator = userId && (await isAdmin(userId) || await isModerator(userId));
+  const post = await prisma.forumPost.findFirst({
+    where: { id: postId, ...(moderator ? { published: true, deleted_at: null } : await forumVisibility(userId)) },
+  });
+  if (!post) throw createError({ status: 404, statusMessage: "Post not found" });
+  const thread = await requireForumThreadAccess(userId, post.thread_id);
+  return { post, thread };
+}
+
+export async function requireForumWriteAccess(
+  userId: string,
+  thread: Awaited<ReturnType<typeof requireForumThreadAccess>>,
+  { moderation = false }: { moderation?: boolean } = {},
+) {
+  if (await checkForumBan(userId, thread.category.id)) {
+    throw createError({ status: 403, statusMessage: "You are banned from posting" });
+  }
+  if (moderation) return;
+  if (thread.is_locked) {
+    throw createError({ status: 403, statusMessage: "This thread is locked" });
+  }
+  if (!(await userCanPostInCategory(userId, thread.category.id, thread.category.is_private))) {
+    throw createError({ status: 403, statusMessage: "Forbidden" });
+  }
+}
+
+export async function filterForumRecipients(userIds: string[], category: { id: string; is_private: boolean }) {
+  const uniqueIds = [...new Set(userIds)];
+  const allowed = await Promise.all(uniqueIds.map(id => userCanViewCategory(id, category.id, category.is_private)));
+  return uniqueIds.filter((_, index) => allowed[index]);
+}
+
+export async function visibleForumCategoryIds(userId: string | null) {
+  const admin = userId ? await isAdmin(userId) : false;
+  const categories = await prisma.forumCategory.findMany({
+    where: admin ? {} : { OR: [
+      { is_private: false },
+      ...(userId ? [{ access: { some: { can_view: true, group: { members: { some: { user_id: userId } } } } } }] : []),
+    ] },
+    select: { id: true },
+  });
+  return categories.map(c => c.id);
+}

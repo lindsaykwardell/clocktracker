@@ -86,25 +86,27 @@
 <script setup lang="ts">
 import { useRoleImage } from "~/composables/useRoleImage";
 
+type TokenCharacter = {
+  alignment?: string | null;
+  name?: string | null;
+  related?: string | null;
+  role_id?: string | null;
+  related_role_id?: string | null;
+  role?: {
+    id?: string;
+    token_url?: string | null;
+    type?: string | null;
+    initial_alignment?: string | null;
+    name?: string | null;
+    custom_role?: boolean;
+    [key: string]: unknown;
+  } | null;
+  related_role?: { token_url?: string | null; id?: string; name?: string | null; [key: string]: unknown } | null;
+  [key: string]: unknown;
+};
+
 const props = defineProps<{
-  character?:
-    | {
-        alignment?: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
-        name?: string;
-        related?: string | null;
-        role_id?: string | null;
-        related_role_id?: string | null;
-        role?: {
-          id: string;
-          token_url?: string;
-          type: string;
-          initial_alignment?: "GOOD" | "EVIL" | "NEUTRAL";
-          name?: string;
-          custom_role?: boolean;
-        };
-        related_role?: { token_url?: string; id?: string; name?: string };
-      }
-    | undefined;
+  character?: TokenCharacter | undefined;
   size?: "sm" | "sm-reminder" | "reminder" | "md" | "front" | "lg";
   alwaysShowAlignment?: boolean;
   hideRelated?: boolean;
@@ -158,8 +160,8 @@ function hashString(value: string) {
 const {
   alignmentSuffix,
   isRoleAssetUrl,
+  resolveRoleBaseUrl,
   roleBaseUrlFromId,
-  roleBaseUrlFromRole,
   sizeAdjustedUrl,
 } = useRoleImage();
 
@@ -247,7 +249,7 @@ const imageSize = computed(() => {
     case "sm":
       return "md:w-12 md:h-12";
     case "sm-reminder":
-      return "relative w-8 h-8 md:w-9 md:h-9";  
+      return "relative w-8 h-8 md:w-9 md:h-9";
     case "reminder":
       return "relative w-8 h-8 md:w-12 md:h-12";
     case "md":
@@ -292,20 +294,9 @@ const relatedImageSize = computed(() => {
   }
 });
 
-const baseRoleImage = computed(() => {
-  const tokenUrl = props.character?.role?.token_url?.trim();
-  const inferredCustom =
-    props.character?.role?.custom_role ??
-    (tokenUrl ? !isRoleAssetUrl(tokenUrl) : false);
-  if (inferredCustom) {
-    return roleBaseUrlFromRole(props.character?.role);
-  }
-  return (
-    roleBaseUrlFromId(props.character?.role?.id) ??
-    roleBaseUrlFromId(props.character?.role_id) ??
-    tokenUrl
-  );
-});
+const baseRoleImage = computed(() =>
+  resolveRoleBaseUrl(props.character?.role, props.character?.role_id)
+);
 
 // If we're using alignment-specific art, skip shader/filter overlays.
 const usesAlignmentVariant = computed(() => {
@@ -366,7 +357,7 @@ const alignmentImage = computed(() => {
   }
   if (props.character?.alignment === "EVIL") {
     return "/img/role/evil.webp";
-  } 
+  }
   else {
     return "/1x1.png";
   }

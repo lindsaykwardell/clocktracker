@@ -1,5 +1,5 @@
 import { WhoCanRegister } from "~/server/generated/prisma/client";
-import { User } from "@supabase/supabase-js";
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
 
 export default defineEventHandler(async (handler) => {
@@ -33,6 +33,18 @@ export default defineEventHandler(async (handler) => {
               },
             },
           ],
+        },
+        {
+          who_can_register: {
+            in: [WhoCanRegister.ANYONE, WhoCanRegister.PRIVATE],
+          },
+          community: {
+            banned_users: {
+              none: {
+                user_id: me?.id || "",
+              },
+            },
+          },
         },
         {
           community: {

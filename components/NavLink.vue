@@ -3,7 +3,7 @@
     :to="to"
   >
     <div class="relative">
-      <div class="w-[28px] md:w-[32px] overflow-hidden">
+      <div class="w-[24px] md:w-[32px] overflow-hidden">
         <ImageUI :image="icon" alt="" />
       </div>
     </div>

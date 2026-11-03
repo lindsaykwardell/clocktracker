@@ -48,7 +48,7 @@
               </Button>
               <Button
                 component="a"
-                v-if="!script.is_custom_script"
+                v-if="!script.is_custom_script && !script.download_unavailable"
                 :href="script.json_url"
                 icon="json"
               >
@@ -67,7 +67,7 @@
               </Button>
               <Button
                 component="a"
-                v-if="!script.is_custom_script"
+                v-if="!script.is_custom_script && !script.download_unavailable"
                 :href="script.pdf_url"
                 icon="pdf"
               >
@@ -125,7 +125,7 @@
               </Button>
               <Button
                 component="a"
-                v-if="!script.is_custom_script"
+                v-if="!script.is_custom_script && !script.download_unavailable"
                 :href="script.json_url"
                 icon="json"
                 wide
@@ -146,7 +146,7 @@
               </Button>
               <Button
                 component="a"
-                v-if="!script.is_custom_script"
+                v-if="!script.is_custom_script && !script.download_unavailable"
                 :href="script.pdf_url"
                 icon="pdf"
                 wide
@@ -278,7 +278,7 @@ useHead({
   title: script.value.name,
   meta: [
     {
-      hid: "description",
+      key: "description",
       name: "description",
       content: `View stats and recent games for ${script.value.name}.`,
     },
@@ -349,6 +349,15 @@ const scriptStats = ref<{
   games_by_month: {},
   role_win_rates: {},
 });
+
+const protectedFetch = useProtectedFetch();
+const { data: fetchedStats } = await useAsyncData(
+  () => `script-stats-${script.value.id}`,
+  () => protectedFetch<typeof scriptStats.value>(`/api/script/${script.value.id}/stats`),
+);
+watch(fetchedStats, (value) => {
+  if (value) scriptStats.value = value;
+}, { immediate: true });
 
 const averageGamesPlayed = computed(() =>
   Math.round(
@@ -518,35 +527,6 @@ const scriptLink = computed(() => {
   }
   return undefined;
 });
-
-watch(
-  script,
-  async (newScript) => {
-    try {
-      scriptStats.value = await $fetch<{
-        count: number;
-        win_loss: {
-          total: number;
-          win: number;
-          loss: number;
-          pct: number;
-        };
-        games_by_month: Record<string, number>;
-        role_win_rates: Record<
-          string,
-          {
-            total: number;
-            win: number;
-            loss: number;
-          }
-        >;
-      }>("/api/script/" + newScript.id + "/stats");
-    } catch (e) {
-      console.error(e);
-    }
-  },
-  { immediate: true }
-);
 
 onMounted(() => {
   if (me.value.status === Status.SUCCESS) {

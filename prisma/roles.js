@@ -29,19 +29,6 @@ const all_raw_roles = [
     firstNight: 0,
     otherNight: 50,
   },
-  {
-    id: "cacklejack",
-    name: "Cacklejack",
-    edition: "",
-    team: "traveller",
-    firstNightReminder: "",
-    otherNightReminder: "",
-    reminders: ["NOT ME"],
-    ability:
-      "Each day, choose a player: a different player changes character tonight.",
-    flavor:
-      "Wire α To wire β. LigHt oN. BuZZer off. GAzOinks! Arms STra1ght. FingER 2 nose. hOooLd stiLL. BoiNgo-banGo! Ha-ha-ha!",
-  },
 ];
 const reminders = [];
 const abilities = [];
@@ -114,7 +101,7 @@ const roleNames = [
 
 fs.writeFileSync(
   path.join(__dirname, "../server/utils/role_names.json"),
-  JSON.stringify(roleNames, null, 2)
+  JSON.stringify(roleNames, null, 2),
 );
 
 function toRole(name, type, alignment) {
@@ -136,7 +123,7 @@ function toRole(name, type, alignment) {
   for (const alternate_image_name of alternate_image_names) {
     const alternate_image_path = path.join(
       __dirname,
-      `../public/img/role/${alternate_image_name}.webp`
+      `../public/img/role/${alternate_image_name}.webp`,
     );
     if (fs.existsSync(alternate_image_path)) {
       alternate_token_urls.push(`/img/role/${alternate_image_name}.webp`);
@@ -171,7 +158,7 @@ const roles = [
   ...minions.map((role) => toRole(role, RoleType.MINION, Alignment.EVIL)),
   ...demons.map((role) => toRole(role, RoleType.DEMON, Alignment.EVIL)),
   ...travelers.map((role) =>
-    toRole(role, RoleType.TRAVELER, Alignment.NEUTRAL)
+    toRole(role, RoleType.TRAVELER, Alignment.NEUTRAL),
   ),
   ...fabled.map((role) => toRole(role, RoleType.FABLED, Alignment.NEUTRAL)),
   ...loric.map((role) => toRole(role, RoleType.LORIC, Alignment.NEUTRAL)),

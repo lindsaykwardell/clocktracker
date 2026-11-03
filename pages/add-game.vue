@@ -58,7 +58,8 @@ const router = useRouter();
 const route = useRoute();
 const rolesStore = useRoles();
 const inFlight = ref(false);
-const userSettings = await useFetch("/api/settings");
+const { notification: hapticNotification } = useHaptics();
+const userSettings = useFetch("/api/settings", { server: false, lazy: true });
 
 const importGamesDialogVisible = ref(false);
 
@@ -247,6 +248,12 @@ watch(game, () => {
   localStorage.setItem("draftGame", JSON.stringify(game));
 });
 
+watch(userSettings.data, (settings) => {
+	if (game.privacy === "PUBLIC" && settings?.privacy) {
+		game.privacy = settings.privacy;
+	}
+});
+
 onMounted(async () => {
   const importedGameId = route.query.imported_game as string;
 
@@ -284,6 +291,7 @@ onMounted(async () => {
           tokens: {
             create: {
               role_id: string | null;
+              related_role_id: string | null;
               alignment: "GOOD" | "EVIL" | "NEUTRAL";
               is_dead: boolean;
               used_ghost_vote: boolean;
@@ -304,6 +312,9 @@ onMounted(async () => {
           const role = token.role_id
             ? rolesStore.getRole(token.role_id)
             : undefined;
+          const relatedRole = token.related_role_id
+            ? rolesStore.getRole(token.related_role_id)
+            : undefined;
           return {
             alignment: token.alignment,
             order: token.order,
@@ -318,8 +329,8 @@ onMounted(async () => {
                   initial_alignment: role.initial_alignment,
                 }
               : undefined,
-            related_role_id: null,
-            related_role: { token_url: "/1x1.png" },
+            related_role_id: relatedRole ? token.related_role_id : null,
+            related_role: { token_url: relatedRole?.token_url ?? "/1x1.png" },
             player_name: token.player_name,
             player_id: token.player_id ?? null,
             reminders: token.reminders.create,
@@ -457,6 +468,7 @@ async function submitGame() {
       inFlight.value = false;
       console.error(error.value);
     } else {
+      hapticNotification("Success" as any);
       localStorage.removeItem("draftGame");
       router.push(`/game/${data.value?.id}?new=true`);
     }

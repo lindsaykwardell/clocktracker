@@ -26,6 +26,9 @@ logs
 .env.*
 !.env.example
 
+# DB backups
+backups/
+
 # Local Netlify folder
 .netlify
 
@@ -33,3 +36,9 @@ tmp
 test-results/*
 playwright-report/*
 tests/e2e/test-account.json
+
+# Capacitor iOS (no Apple Developer account yet)
+ios/
+
+# Firebase config (download from Firebase Console)
+android/app/google-services.json
