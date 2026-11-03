@@ -650,7 +650,7 @@ async function submitEdit() {
     const result = await forum.editPost(props.post.id, editBody.value);
     if (result.pending) {
       cancelEdit();
-      await navigateTo("/forum/submissions");
+      await navigateTo("/forum/submissions?submitted=1");
       return;
     }
     localBody.value = editBody.value;

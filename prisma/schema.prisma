@@ -857,6 +857,7 @@ model ForumSubmission {
   review_reason String?
   reviewed_by String?
   reviewed_at DateTime? @db.Timestamptz(6)
+  decision_seen_at DateTime? @db.Timestamptz(6)
   created_at DateTime @default(now()) @db.Timestamptz(6)
   author UserSettings @relation("ForumSubmissionAuthor", fields: [author_id], references: [user_id], onDelete: Cascade)
   reviewer UserSettings? @relation("ForumSubmissionReviewer", fields: [reviewed_by], references: [user_id])

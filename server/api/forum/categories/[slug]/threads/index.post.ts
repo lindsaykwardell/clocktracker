@@ -7,7 +7,6 @@ import {
   checkPostLength,
 } from "~/server/utils/forum";
 import { hasRestriction } from "~/server/utils/permissions";
-import { screeningReason } from "~/server/utils/forumPolicy";
 import { assessForumSubmission } from "~/server/utils/forumSafety";
 import { notifyForumPublication } from "~/server/utils/forumPublication";
 
@@ -66,7 +65,7 @@ export default defineEventHandler(async (handler) => {
 
   await checkPostLength(me.id, body.body.trim());
 
-  const reason = await assessForumSubmission(me.id, body.body.trim()) || screeningReason(body.title.trim(), false);
+  const reason = await assessForumSubmission(me.id, body.body.trim(), { title: body.title.trim() });
   const thread = await prisma.$transaction(async tx => {
     const created = await tx.forumThread.create({
       data: {

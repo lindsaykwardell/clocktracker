@@ -252,7 +252,7 @@ export const useForum = defineStore("forum", {
       const cached = this.threadDetail.get(threadId);
       if (cached?.status === Status.SUCCESS) {
         cached.data.thread.title = result.title;
-        if (result.pending) await navigateTo("/forum/submissions");
+        if (result.pending) await navigateTo("/forum/submissions?submitted=1");
       }
     },
 

@@ -9,7 +9,7 @@
           <nuxt-link to="/forum/subscribed">
             <Button size="xs" color="secondary" icon="star">Subscribed</Button>
           </nuxt-link>
-          <nuxt-link to="/forum/submissions"><Button size="xs" color="secondary">Your submissions</Button></nuxt-link>
+          <nuxt-link to="/forum/submissions"><Button size="xs" color="secondary">Your submissions <ForumSubmissionUpdates /></Button></nuxt-link>
           <nuxt-link to="/forum/preferences"><Button size="xs" color="secondary">Muted users</Button></nuxt-link>
           <nuxt-link to="/forum/search">
             <Button size="xs" color="secondary" icon="search">Search</Button>
