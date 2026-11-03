@@ -3,3 +3,14 @@ node_modules
 .nuxt
 .output
 .env
+
+.git
+.env*
+!.env.example
+backups
+tmp
+.aws
+.codex
+.agents
+test-results
+playwright-report

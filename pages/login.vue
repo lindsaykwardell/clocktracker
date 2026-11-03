@@ -4,6 +4,7 @@
       <img src="/logo.png" class="w-48 bg-stone-900 rounded-full" alt="ClockTracker" />
     </nuxt-link>
     <h1>Sign in</h1>
+    <p v-if="staging" class="text-sm">Staging is restricted to administrators. Use your existing account.</p>
     <!-- @todo Fix input fields-->
      <template v-if="errorMessage">
         <Alert color="negative">
@@ -39,15 +40,16 @@
       <Button type="submit" color="primary" :disabled="emailRequestPending" wide>
         Login
       </Button>
-      <Button type="button" @click="register" :disabled="emailRequestPending" wide>
+      <Button v-if="!staging" type="button" @click="register" :disabled="emailRequestPending" wide>
         Register
       </Button>
-      <Button type="button" @click.prevent="sendResetPassword" :disabled="emailRequestPending" variant="link" size="sm">
+      <Button v-if="!staging" type="button" @click.prevent="sendResetPassword" :disabled="emailRequestPending" variant="link" size="sm">
         Forgot Password?
       </Button>
     </form>
     <p class="p-2">OR</p>
     <LoginWithDiscord />
+    <Button v-if="staging && signedInUser" variant="link" @click="signOutStaging">Sign out of staging</Button>
   </div>
 </template>
 
@@ -56,6 +58,12 @@ definePageMeta({
   middleware: "guest",
 });
 
+const staging = useRuntimeConfig().public.staging;
+const signedInUser = useUser();
+async function signOutStaging() {
+  await supabase.auth.signOut({ scope: "local" });
+  window.location.assign("/login");
+}
 const supabase = useSupabaseClient();
 const router = useRouter();
 const friends = useFriends();
@@ -67,6 +75,7 @@ const resetPasswordSent = ref(false);
 const emailRequestPending = ref(false);
 
 async function requestEmail(send: (address: string) => Promise<void>) {
+  if (staging) return;
   if (emailRequestPending.value) return;
   const address = email.value.trim();
   errorMessage.value = "";

@@ -75,3 +75,9 @@ npm run dev
 You can then log in with the created user credentials and start developling!
 
 NOTE: Currently, it is not possible to configure file uploads for local development. This is just because it hasn't been a problem yet, but if you're wanting to work on that, let me know and we can collaborate on making that section of code more modular.
+
+## Staging
+
+Use [Temporary staging with a fixed Fly URL](docs/stable-staging.md) for one temporary run at a time at clocktracker-staging.fly.dev. Runs expire after 1–168 hours; only the URL remains reserved.
+
+See [Temporary staging and Cloudflare migration](docs/staging.md) for launching isolated, admin-only environments, automatic teardown, private configuration, and the domain/ownership migration runbook.
