@@ -11,7 +11,6 @@
                 New Thread
             </h1>
 
-            <p class="text-sm text-stone-500 mb-4">First contributions may need moderator approval. Track their status in Your submissions.</p>
             <form @submit.prevent="submit" class="flex flex-col gap-4">
                 <div class="flex flex-col gap-1">
                     <label for="forum-thread-title">Title</label>
@@ -161,7 +160,7 @@ async function submit() {
 
     try {
         const thread = await forum.createThread(slug, title.value, body.value);
-        router.push(thread.pending ? "/forum/submissions" : `/forum/${slug}/${thread.id}`);
+        router.push(thread.pending ? "/forum/submissions?submitted=1" : `/forum/${slug}/${thread.id}`);
     } catch (err: any) {
         error.value =
             err?.data?.statusMessage ||

@@ -42,7 +42,7 @@ export default defineEventHandler(async (handler) => {
 
   const existing = await prisma.forumSubmission.findFirst({ where: { thread_id: threadId, kind: "EDIT_TITLE", status: "PENDING" } });
   if (existing) throw createError({ status: 409, statusMessage: "A title edit is already awaiting review." });
-  const reason = await assessForumSubmission(me.id, body.title.trim());
+  const reason = await assessForumSubmission(me.id, body.title.trim(), { previousText: thread.title });
   if (reason) {
     await prisma.forumSubmission.create({ data: {
       author_id: me.id, thread_id: threadId, kind: "EDIT_TITLE", title: body.title.trim(),

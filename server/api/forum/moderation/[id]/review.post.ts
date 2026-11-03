@@ -1,3 +1,5 @@
+import { sendPushNotifications } from "~/server/utils/sendPushNotifications";
+import { getFeatureFlags } from "~/server/utils/featureFlags";
 import { hasRestriction } from "~/server/utils/permissions";
 import { prisma } from "~/server/utils/prisma";
 import { canReviewForum } from "~/server/utils/forumSafety";
@@ -48,6 +50,12 @@ export default defineEventHandler(async event => {
       }
     }
     await tx.forumModLog.create({ data: { actor_id: userId, action: body.action === "approve" ? "APPROVE_SUBMISSION" : "REJECT_SUBMISSION", target_type: "submission", target_id: submission.id, details: body.reason.trim() } });
+  });
+  if ((await getFeatureFlags({ id: submission.author_id })).forum) await sendPushNotifications({
+    userIds: [submission.author_id],
+    title: body.action === "approve" ? "Your forum contribution was approved" : "Your forum contribution was not published",
+    body: "A moderator reviewed your submission. Open to see the decision and explanation.",
+    url: `/forum/submissions?decision=${submission.id}#submission-${submission.id}`,
   });
   if (body.action === "approve" && ["THREAD", "POST"].includes(submission.kind)) await notifyForumPublication(submission.thread_id, submission.post_id!, submission.kind === "THREAD");
   return { success: true };

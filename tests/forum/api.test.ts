@@ -57,9 +57,27 @@ test("Docker forum workflow: moderation, privacy, limits, reports, and mute/bloc
       const published = await json(await api(null, path));
       assert.equal(published.posts[0].body, `${marker} original`);
     });
+    await t.test("review decisions are author-only, counted until read, and link to published content", async () => {
+      const before = await json(await api(newcomer, "/forum/submissions/unread-count"));
+      assert.ok(before.count > 0);
+      const mine = await json(await api(newcomer, `/forum/submissions?decision=${queued.id}`));
+      assert.equal(mine.length, 1);
+      assert.equal(mine[0].status, "PUBLISHED");
+      assert.equal(mine[0].decision_seen_at, null);
+      assert.deepEqual(await json(await api(member, `/forum/submissions?decision=${queued.id}`)), []);
+      await json(await api(member, `/forum/submissions/${queued.id}/location`), 404);
+      const location = await json(await api(newcomer, `/forum/submissions/${queued.id}/location`));
+      assert.ok(location.url.includes(thread.id));
+      assert.ok(location.url.endsWith(`#post-${postId}`));
+      await json(await api(member, "/forum/submissions/read", "POST", { ids: [queued.id] }));
+      assert.equal((await json(await api(newcomer, "/forum/submissions/unread-count"))).count, before.count);
+      await json(await api(newcomer, "/forum/submissions/read", "POST", { ids: [queued.id] }));
+      assert.equal((await json(await api(newcomer, "/forum/submissions/unread-count"))).count, before.count - 1);
+      await json(await api(null, "/forum/submissions/unread-count"), 401);
+    });
     await t.test("pending edits keep the approved version and rejected edits explain why", async () => {
       await clear(newcomer.id);
-      const edit = await json(await api(newcomer, `/forum/posts/${postId}`, "PUT", { body: `${marker} pending edit` }));
+      const edit = await json(await api(newcomer, `/forum/posts/${postId}`, "PUT", { body: `${marker} pending edit https://example.test/pending` }));
       assert.equal(edit.pending, true);
       assert.equal((await json(await api(null, path))).posts[0].body, `${marker} original`);
       assert.equal(JSON.stringify(await json(await api(null, `/forum/posts/${postId}/edits`))).includes("pending edit"), false);
@@ -68,10 +86,16 @@ test("Docker forum workflow: moderation, privacy, limits, reports, and mute/bloc
       const mine = await json(await api(newcomer, "/forum/submissions"));
       assert.ok(mine.some((s: any) => s.id === queued.id && s.status === "REJECTED" && s.review_reason === "Please clarify the example."));
       await clear(newcomer.id);
-      await json(await api(newcomer, `/forum/posts/${postId}`, "PUT", { body: `${marker} approved edit` }));
+      await json(await api(newcomer, `/forum/posts/${postId}`, "PUT", { body: `${marker} approved edit https://example.test/approved` }));
       queued = (await json(await api(admin, "/forum/moderation"))).find((s: any) => s.post_id === postId);
       await json(await api(admin, `/forum/moderation/${queued.id}/review`, "POST", { action: "approve", reason: "Thanks for clarifying." }));
-      assert.equal((await json(await api(null, path))).posts[0].body, `${marker} approved edit`);
+      assert.equal((await json(await api(null, path))).posts[0].body, `${marker} approved edit https://example.test/approved`);
+    });
+    await t.test("new accounts can make ordinary edits without another review", async () => {
+      await clear(newcomer.id);
+      const result = await json(await api(newcomer, `/forum/posts/${postId}`, "PUT", { body: `${marker} typo corrected https://example.test/approved` }));
+      assert.notEqual(result.pending, true);
+      assert.equal((await json(await api(null, path))).posts[0].body, `${marker} typo corrected https://example.test/approved`);
     });
     let reply: any;
     await t.test("established members publish, duplicates are rejected, and link-heavy posts are held", async () => {
@@ -132,6 +156,22 @@ test("Docker forum workflow: moderation, privacy, limits, reports, and mute/bloc
       await clear(member.id);
       const other = await json(await api(member, `${ownPath}/posts`, "POST", { body: `${marker} another member reply` }));
       assert.equal((await json(await api(admin, `${ownPath}?unread=1`))).firstUnreadPostId, other.id);
+    });
+    await t.test("five held contributions do not prevent otherwise acceptable posts", async () => {
+      await clear(admin.id);
+      const capThread = await json(await api(admin, "/forum/categories/forum-testing/threads", "POST", { title: `${marker} pending cap`, body: `${marker} cap opening` }));
+      const capPath = `/forum/threads/${capThread.id}/posts`;
+      const links = Array(6).fill("https://example.test").join(" ");
+      for (let i = 0; i < 5; i++) {
+        await clear(member.id);
+        assert.equal((await json(await api(member, capPath, "POST", { body: `${marker} held ${i} ${links}` }))).pending, true);
+      }
+      await clear(member.id);
+      assert.equal((await json(await api(member, capPath, "POST", { body: `${marker} acceptable despite queue` }))).pending, false);
+      await clear(member.id);
+      await json(await api(member, capPath, "POST", { body: `${marker} sixth held ${links}` }), 429);
+      const held = (await json(await api(admin, "/forum/moderation"))).filter((item: any) => item.thread_id === capThread.id);
+      for (const item of held) await json(await api(admin, `/forum/moderation/${item.id}/review`, "POST", { action: "reject", reason: "Local pending-cap test completed." }));
     });
   } finally {
     await api(newcomer, "/forum/preferences", "PUT", { targetId: member.id, kind: null });
