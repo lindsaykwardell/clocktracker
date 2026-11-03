@@ -1,4 +1,5 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+const isStaging = process.env.STAGING === "true";
 const isCapacitorBuild = process.env.CAPACITOR_BUILD === "true";
 
 export default defineNuxtConfig({
@@ -6,7 +7,7 @@ export default defineNuxtConfig({
   experimental: {
     viewTransition: false,
   },
-  sourcemap: true,
+  sourcemap: !isStaging,
 
   devtools: { enabled: false },
 
@@ -21,11 +22,11 @@ export default defineNuxtConfig({
   modules: [
     "@nuxtjs/tailwindcss",
     "@nuxtjs/supabase",
-    ...(!isCapacitorBuild ? ["@vite-pwa/nuxt"] : []),
+    ...(!isCapacitorBuild && !isStaging ? ["@vite-pwa/nuxt"] : []),
     "@pinia/nuxt",
     "floating-vue/nuxt",
-    ...(!isCapacitorBuild ? ["nuxt-cron"] : []),
-    ...(!isCapacitorBuild ? ["nuxt-bugsnag"] : []),
+    ...(!isCapacitorBuild && !isStaging ? ["nuxt-cron"] : []),
+    ...(!isCapacitorBuild && !isStaging ? ["nuxt-bugsnag"] : []),
   ],
 
   app: {
@@ -84,11 +85,11 @@ export default defineNuxtConfig({
         },
       ],
       script: [
-        {
+        ...(!isStaging ? [{
           "data-goatcounter": "https://clocktracker.goatcounter.com/count",
           async: true,
           src: "//gc.zgo.at/count.js",
-        },
+        }] : []),
         {
           innerHTML: `
           if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -133,6 +134,7 @@ export default defineNuxtConfig({
     fcmClientEmail: "",
     fcmPrivateKey: "",
     public: {
+      staging: isStaging,
       assetVersion: process.env.NUXT_PUBLIC_ASSET_VERSION ?? "v1",
       vapidPublicKey: process.env.VAPID_PUBLIC_KEY ?? "",
       apiBaseUrl: isCapacitorBuild ? "https://clocktracker.app" : "",
@@ -140,7 +142,7 @@ export default defineNuxtConfig({
     },
   },
 
-  ...(!isCapacitorBuild
+  ...(!isCapacitorBuild && !isStaging
     ? {
         bugsnag: {
           publishRelease: Boolean(process.env.BUGSNAG_API_KEY),
@@ -156,7 +158,7 @@ export default defineNuxtConfig({
       }
     : {}),
 
-  ...(!isCapacitorBuild
+  ...(!isCapacitorBuild && !isStaging
     ? {
         pwa: {
           registerType: "autoUpdate",
@@ -245,7 +247,7 @@ export default defineNuxtConfig({
       }
     : {}),
 
-  ...(!isCapacitorBuild
+  ...(!isCapacitorBuild && !isStaging
     ? {
         cron: {
           timeZone: "America/Los_Angeles",
