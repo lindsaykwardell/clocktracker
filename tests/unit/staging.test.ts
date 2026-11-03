@@ -3,8 +3,19 @@ import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { createApp, defineEventHandler, toNodeListener } from "h3";
 import { enforceStagingAccess } from "../../server/utils/stagingAccess";
+import { hasPermission } from "../../server/utils/permissions";
+import { prisma } from "../../server/utils/prisma";
 
-async function server(options: { enabled?: boolean; expiresAt?: string; admin?: boolean; fail?: boolean }, run: (request: (path: string, user?: string, method?: string) => Promise<Response>) => Promise<void>) {
+async function server(options: { enabled?: boolean; expiresAt?: string; admin?: boolean; permissions?: string[]; fail?: boolean }, run: (request: (path: string, user?: string, method?: string) => Promise<Response>) => Promise<void>) {
+  const userLookup = prisma.userSettings.findUnique;
+  const membershipLookup = prisma.userGroupMembership.findMany;
+  prisma.userSettings.findUnique = (async () => {
+    if (options.fail) throw new Error("Database unavailable");
+    return { is_admin: options.admin ?? false };
+  }) as typeof userLookup;
+  prisma.userGroupMembership.findMany = (async () => [
+    { group: { permissions: options.permissions ?? [] } },
+  ]) as typeof membershipLookup;
   const app = createApp();
   app.use(defineEventHandler(async event => {
     // Test-only identity injection, not an authentication mechanism.
@@ -13,7 +24,7 @@ async function server(options: { enabled?: boolean; expiresAt?: string; admin?: 
     const response = await enforceStagingAccess(event, {
       enabled: options.enabled ?? true,
       expiresAt: options.expiresAt ?? new Date(Date.now() + 60_000).toISOString(),
-      isAdmin: async () => { if (options.fail) throw new Error("Database unavailable"); return options.admin ?? false; },
+      canAccess: (id) => hasPermission(id, "ACCESS_STAGING"),
     });
     return response ?? { data: "protected" };
   }));
@@ -21,7 +32,12 @@ async function server(options: { enabled?: boolean; expiresAt?: string; admin?: 
   await new Promise<void>(resolve => http.listen(0, "127.0.0.1", resolve));
   const base = `http://127.0.0.1:${(http.address() as { port: number }).port}`;
   try { await run((path, user, method = "GET") => fetch(base + path, { method, redirect: "manual", headers: user ? { "x-test-user": user } : {} })); }
-  finally { http.closeAllConnections(); await new Promise<void>(resolve => http.close(() => resolve())); }
+  finally {
+    http.closeAllConnections();
+    await new Promise<void>(resolve => http.close(() => resolve()));
+    prisma.userSettings.findUnique = userLookup;
+    prisma.userGroupMembership.findMany = membershipLookup;
+  }
 }
 
 test("signed-out staging exposes only home, login, and static assets; APIs fail closed", async () => {
@@ -40,7 +56,7 @@ test("signed-out staging exposes only home, login, and static assets; APIs fail 
     assert.equal((await request("/", undefined, "POST")).status, 401);
   });
 });
-test("non-admins cannot read or mutate staging, even with authenticated IDs", async () => {
+test("users without staging permission cannot read or mutate staging", async () => {
   await server({}, async request => {
     for (const method of ["GET", "POST", "PUT", "DELETE"]) assert.equal((await request("/api/games", "member", method)).status, 403);
     assert.equal((await request("/game/test", "member")).status, 403);
@@ -62,4 +78,21 @@ test("expired and invalid deadlines fail closed, including public pages", async 
 test("database outage does not grant staging access; production behavior is unchanged", async () => {
   await server({ fail: true }, async request => assert.equal((await request("/api/games", "admin")).status, 500));
   await server({ enabled: false }, async request => assert.equal((await request("/api/games")).status, 200));
+});
+
+test("staging permission admits testers without granting admin permissions or external actions", async () => {
+  const permissions = ["ACCESS_STAGING"];
+  await server({ permissions }, async request => {
+    assert.equal((await request("/game/test", "tester")).status, 200);
+    assert.equal((await request("/api/games", "tester", "POST")).status, 200);
+    assert.equal((await request("/api/staging-access", "tester")).status, 200);
+    assert.equal(await hasPermission("tester", "MANAGE_GROUPS"), false);
+    assert.equal(await hasPermission("tester", "EXPORT_USER_DATA"), false);
+    assert.equal((await request("/api/storage/avatars", "tester", "POST")).status, 403);
+    permissions.length = 0;
+    assert.equal((await request("/api/staging-access", "tester")).status, 403);
+  });
+  await server({ permissions: ["GITHUB", "VIEW_REPORTS"] }, async request => {
+    assert.equal((await request("/api/staging-access", "member")).status, 403);
+  });
 });

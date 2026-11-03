@@ -4,7 +4,7 @@
       <img src="/logo.png" class="w-48 bg-stone-900 rounded-full" alt="ClockTracker" />
     </nuxt-link>
     <h1>Sign in</h1>
-    <p v-if="staging" class="text-sm">Staging is restricted to administrators. Use your existing account.</p>
+    <p v-if="staging" class="text-sm">Sign in with your existing account. Staging is available to administrators and users with the Access Staging permission.</p>
     <!-- @todo Fix input fields-->
      <template v-if="errorMessage">
         <Alert color="negative">

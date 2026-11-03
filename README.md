@@ -80,4 +80,4 @@ NOTE: Currently, it is not possible to configure file uploads for local developm
 
 Use [Temporary staging with a fixed Fly URL](docs/stable-staging.md) for one temporary run at a time at clocktracker-staging.fly.dev. Runs expire after 1–168 hours; only the URL remains reserved.
 
-See [Temporary staging and Cloudflare migration](docs/staging.md) for launching isolated, admin-only environments, automatic teardown, private configuration, and the domain/ownership migration runbook.
+See [Temporary staging and Cloudflare migration](docs/staging.md) for launching isolated environments restricted to admins and permitted testers, automatic teardown, private configuration, and the domain/ownership migration runbook.

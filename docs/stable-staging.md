@@ -2,9 +2,17 @@
 
 The current setup runs one temporary staging environment at **https://clocktracker-staging.fly.dev**. Only its URL is permanent. Each run restores a fresh sanitized snapshot from the existing Tigris backups and expires after 1–168 hours (default one hour).
 
-Production Supabase authentication, existing account IDs, Discord login, and admin-only access remain unchanged. Only home and login are public pages, with their required static assets. All data APIs and other pages require an admin from the copied database.
+Production Supabase authentication, existing account IDs, and Discord login remain unchanged. Only home and login are public pages, with their required static assets. All data APIs and other pages require either an admin or a user with ACCESS_STAGING in the copied database.
 
 The [multiple temporary environments and Cloudflare migration runbook](staging.md) remains available for future use. No Hover DNS or Cloudflare setup is needed for the fixed Fly hostname.
+
+## Who can launch and who can sign in
+
+GitHub collaborators with write, maintain, or admin access can run the workflow. Website access is independent: Clocktracker admins are allowed automatically; other users need the Access Staging permission.
+
+To grant website access without making someone an admin, open production Admin → User Groups (/admin/forum/groups), create a Staging testers group, enable only Access Staging, and add the user's existing Clocktracker account. Existing group-management authorization applies. This permission grants entry to staging; normal page/API permissions still apply and it grants no production admin access.
+
+Group membership and permissions come from the backup. Select a backup taken after the grant, and recreate staging with a current backup after revocation. Changes in production do not update an already running staging snapshot.
 
 ## Lifecycle
 
@@ -59,7 +67,7 @@ Fly provides the default fly.dev hostname and HTTPS; no custom certificate comma
 
 After merge and private configuration, run **Fixed URL staging → up** from the default branch. Select a trusted ref containing the current staging controls, a backup (latest or Barman ID), and 1–168 hours. The workflow reports the fixed URL and UTC expiry.
 
-Verify password and Discord login with an existing admin, non-admin 403 responses, anonymous API 401 responses, and anonymous protected-page redirects. Confirm staging logout leaves production sessions usable. After destroy or scheduled cleanup, verify the web app has zero machines/volumes and the staging database app is gone. Launch again and confirm a fresh backup is restored at the same URL.
+Verify password and Discord login with an existing admin, successful non-admin tester access with ACCESS_STAGING, 403 responses for users without it, anonymous API 401 responses, and anonymous protected-page redirects. Confirm staging logout leaves production sessions usable. After destroy or scheduled cleanup, verify the web app has zero machines/volumes and the staging database app is gone. Launch again and confirm a fresh backup is restored at the same URL.
 
 The application rejects all page/API requests after the deadline, including home/login. Cleanup is scheduled every 15 minutes, but GitHub schedules are best effort: access expires at the deadline; actual resource deletion and billing can lag. Monitor cleanup failures and use manual cleanup when needed. A strict destruction deadline requires an independent scheduler.
 
@@ -71,6 +79,6 @@ For permanent retirement, first remove the Fly URL from the Supabase allowlist, 
 
 During a run there is one web machine (one shared CPU, 1 GB RAM) plus a restored database machine and volume. Native restore inherits the source database sizing. Teardown removes these billable compute/volume resources rather than merely stopping them. The app reservation uses shared IPv4 and IPv6, with no dedicated IPv4 allocation. The private state bucket, backup storage, and any account-level or retained-image charges remain subject to provider billing. See [Fly pricing](https://fly.io/docs/about/pricing/).
 
-Admin membership comes from the restored UserSettings.is_admin snapshot. Destroy/recreate after production admin changes, choosing a current backup. Existing guards block uploads, external posting, notifications, cron jobs, account management, service workers, and analytics. The [original runbook](staging.md) details backup isolation and shared Supabase limitations.
+Admin status and ACCESS_STAGING group permissions come from the restored snapshot. Destroy/recreate after production access changes, choosing a current backup. Existing guards block uploads, external posting, notifications, cron jobs, account management, service workers, and analytics. The [original runbook](staging.md) details backup isolation and shared Supabase limitations.
 
 No live resources, DNS records, or provider settings are changed by merging alone. Live restore and login acceptance require private configuration. Tests use mocked infrastructure and cannot establish live readiness.
