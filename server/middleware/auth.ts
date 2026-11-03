@@ -2,7 +2,7 @@ import { serverSupabaseClient, serverSupabaseUser } from "#supabase/server";
 import { jwtVerify } from "jose";
 
 import { enforceStagingAccess } from "../utils/stagingAccess";
-import { prisma } from "../utils/prisma";
+import { hasPermission } from "../utils/permissions";
 
 export default defineEventHandler(async (event) => {
   if (process.env.STAGING === "true") {
@@ -20,9 +20,7 @@ export default defineEventHandler(async (event) => {
     return enforceStagingAccess(event, {
       enabled: true,
       expiresAt: process.env.STAGING_EXPIRES_AT,
-      isAdmin: async (id) => (await prisma.userSettings.findUnique({
-        where: { user_id: id }, select: { is_admin: true },
-      }))?.is_admin === true,
+      canAccess: (id) => hasPermission(id, "ACCESS_STAGING"),
     });
   }
   // Skip auth for CORS preflight requests

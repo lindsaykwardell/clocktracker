@@ -6,7 +6,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   try {
     await useRequestFetch()("/api/staging-access");
   } catch {
-    return abortNavigation(createError({ statusCode: 403, statusMessage: "Staging is restricted to administrators" }));
+    return abortNavigation(createError({ statusCode: 403, statusMessage: "Staging access requires an administrator or the Access Staging permission" }));
   }
   if (stagingDisabledRoute(to.path)) return navigateTo("/");
 });

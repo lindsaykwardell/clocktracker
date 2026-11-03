@@ -4,7 +4,7 @@ import { stagingDisabledRoute, stagingPublicPages } from "../../shared/staging";
 interface StagingOptions {
   enabled: boolean;
   expiresAt: string | undefined;
-  isAdmin: (id: string) => Promise<boolean>;
+  canAccess: (id: string) => Promise<boolean>;
 }
 
 export async function enforceStagingAccess(event: H3Event, options: StagingOptions) {
@@ -26,9 +26,9 @@ export async function enforceStagingAccess(event: H3Event, options: StagingOptio
     if (!path.startsWith("/api/") && event.method === "GET") return sendRedirect(event, "/login", 302);
     throw createError({ statusCode: 401, statusMessage: "Sign in to staging" });
   }
-  // Database failures fail closed. Admin status is checked on every protected request.
-  if (!(await options.isAdmin(userId))) {
-    throw createError({ statusCode: 403, statusMessage: "Staging is restricted to administrators" });
+  // Database failures fail closed. Staging permission is checked on every protected request.
+  if (!(await options.canAccess(userId))) {
+    throw createError({ statusCode: 403, statusMessage: "Staging access requires an administrator or the Access Staging permission" });
   }
   if (stagingDisabledRoute(path)) {
     throw createError({ statusCode: 403, statusMessage: "This action is disabled in staging" });

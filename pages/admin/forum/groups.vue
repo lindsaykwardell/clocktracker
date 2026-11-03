@@ -292,6 +292,7 @@ const PERMISSION_LABELS: Record<string, string> = {
   VIEW_PRIVATE_COMMUNITIES: "View Private Communities",
   EXPORT_USER_DATA: "Export User Data",
   GITHUB: "GitHub Integration",
+  ACCESS_STAGING: "Access Staging",
 };
 
 const RESTRICTION_LABELS: Record<string, string> = {
@@ -315,7 +316,7 @@ const permissionGroups = [
   },
   {
     label: "Administration",
-    permissions: ["MANAGE_CATEGORIES", "MANAGE_GROUPS", "MANAGE_FEATURE_FLAGS", "VIEW_REPORTS", "VIEW_MOD_LOG", "VIEW_PRIVATE_USERS", "VIEW_PRIVATE_GAMES", "VIEW_PRIVATE_COMMUNITIES", "EXPORT_USER_DATA", "GITHUB"],
+    permissions: ["MANAGE_CATEGORIES", "MANAGE_GROUPS", "MANAGE_FEATURE_FLAGS", "VIEW_REPORTS", "VIEW_MOD_LOG", "VIEW_PRIVATE_USERS", "VIEW_PRIVATE_GAMES", "VIEW_PRIVATE_COMMUNITIES", "EXPORT_USER_DATA", "GITHUB", "ACCESS_STAGING"],
   },
 ];
 

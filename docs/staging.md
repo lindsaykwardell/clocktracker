@@ -13,12 +13,12 @@ No provisioning occurs simply by merging this PR. The Cloudflare migration and p
 ## Authentication and access
 
 - Production Supabase authenticates existing accounts, including Discord. Application data comes from the isolated backup restore; application user IDs are preserved.
-- Only `/` and `/login` are public pages. Static resources required to render them remain accessible. Every data API, including normally public game/community/forum APIs, requires an authenticated admin. Signed-out page requests redirect to login; API requests return 401; signed-in non-admin requests return 403.
-- Admin membership is read from `UserSettings.is_admin` in the **restored snapshot** on every protected request. This is not a live production authorization mirror. Choose a recent backup; destroy/recreate environments if an administrator is removed in production. New administrators added after the snapshot will not have access until a newer snapshot is restored.
+- Only `/` and `/login` are public pages. Static resources required to render them remain accessible. Every data API, including normally public game/community/forum APIs, requires an authenticated admin or a user with ACCESS_STAGING. Signed-out page requests redirect to login; API requests return 401; signed-in users without either grant receive 403.
+- Admin status or ACCESS_STAGING group permission is read in the **restored snapshot** on every protected request. This is not a live production authorization mirror. Choose a recent backup; destroy/recreate environments if staging access is revoked in production. New grants made after the snapshot will not have access until a newer snapshot is restored.
 - Missing/invalid expiry and authorization lookup failures fail closed. Responses disable caching and indexing. Staging builds disable service workers, offline persistence, analytics, error-reporting releases, and scheduled application jobs.
 - Staging logout signs out only the current session; it does not revoke production sessions.
-- Password login and Discord login remain available. Registration/reset buttons and password/integration settings are unavailable in staging. Supabase is shared: direct provider requests still have normal production account effects, and Discord may create a production auth identity for a first-time user. The staging server rejects that user unless the copied database marks them as an admin. These UI restrictions do not alter Supabase's global policy.
-- Staging is for trusted administrators and trusted code. An admin can export copied production data. Never publish database contents, account IDs, backup downloads, raw logs, or screenshots containing personal information in the public repository.
+- Password login and Discord login remain available. Registration/reset buttons and password/integration settings are unavailable in staging. Supabase is shared: direct provider requests still have normal production account effects, and Discord may create a production auth identity for a first-time user. The staging server rejects that user unless the copied database marks them as an admin or grants ACCESS_STAGING. These UI restrictions do not alter Supabase's global policy.
+- Staging is for trusted administrators, explicitly permitted testers, and trusted code. An admin can export copied production data. Never publish database contents, account IDs, backup downloads, raw logs, or screenshots containing personal information in the public repository.
 
 ## Backup and data isolation
 
@@ -92,7 +92,7 @@ https://*.staging.example.com/**
 
 Keep the production Site URL unchanged. Discord's developer-console callback remains the existing production Supabase `/auth/v1/callback`; staging does not require a separate Discord application. Clocktracker already passes the current web origin as `redirectTo`.
 
-Test existing Discord and password accounts on two simultaneous staging hosts. Confirm that callbacks return to the initiating host, sessions persist on refresh, and a non-admin cannot retrieve data. Verify missing/incorrect redirect configuration does not accidentally send testers to production. Avoid broad `*.fly.dev` allowlists.
+Test existing Discord and password accounts on two simultaneous staging hosts. Confirm that callbacks return to the initiating host, sessions persist on refresh, and a user without either access grant cannot retrieve data. Verify missing/incorrect redirect configuration does not accidentally send testers to production. Avoid broad `*.fly.dev` allowlists.
 
 ## Private GitHub configuration
 
@@ -161,7 +161,7 @@ npm run build
 Use disposable infrastructure for the first live validation after configuring secrets:
 
 1. Launch two trusted branches using a recent backup. Confirm distinct app/database resources, URLs, credentials, and independent writes.
-2. Verify admin password and Discord sign-in, non-admin denial, anonymous page redirects, and 401 responses from direct data APIs.
+2. Verify admin password and Discord sign-in, permissioned tester access and denial for users without a grant, anonymous page redirects, and 401 responses from direct data APIs.
 3. Confirm only home/login are public pages; check a direct game, user, forum, and community URL and an API URL with a file-like suffix.
 4. Verify migrations change only the copied database, copied integration tokens are removed, no scheduled jobs run, and uploads/external writes are blocked.
 5. Exercise manual destruction of one environment while the other remains available; verify DNS and volumes disappear.
