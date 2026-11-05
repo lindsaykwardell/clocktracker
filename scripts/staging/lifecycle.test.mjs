@@ -62,7 +62,8 @@ globalThis.fetch = async (url, options={}) => {
 const fs=require('node:fs');
 const file=${JSON.stringify(store)}, s=JSON.parse(fs.readFileSync(file)), args=process.argv.slice(2);
 s.calls.push(['fly',...args]);
-if(args[0]==='postgres' && args[1]==='backup') s.apps[args[3]]={machines:[{id:'db-machine'}],volumes:[{id:'db-volume'}]};
+if(args[0]==='postgres' && args[1]==='backup') s.apps[args[3]]={machines:[{id:'db-machine',state:'started',checks:[{name:'role',status:'passing',output:'primary'}]}],volumes:[{id:'db-volume'}]};
+if(s.fail==='restore-empty' && args[0]==='postgres' && args[1]==='backup') s.apps[args[3]].machines=[];
 if(args[0]==='deploy') {
   if(s.fail==='deploy') {fs.writeFileSync(file,JSON.stringify(s));process.exit(1);}
   const config=fs.readFileSync(args[args.indexOf('--config')+1],'utf8');
@@ -71,6 +72,7 @@ if(args[0]==='deploy') {
 fs.writeFileSync(file,JSON.stringify(s));
 if(args[0]==='ips' && args[1]==='list') {console.log('[]');process.exit(0);}
 if(args[0]==='postgres' && args[1]==='connect') {
+  if(s.fail==='connect') {console.error('error connecting to SSH server SECRET_TEST_PASSWORD_MUST_NOT_APPEAR');process.exit(1);}
   process.stdin.resume();process.stdin.on('end',()=>console.log('STAGING_SQL_OK'));
 } else {console.log('SECRET_TEST_PASSWORD_MUST_NOT_APPEAR');process.exit(0);}
 `, { mode: 0o755 });
@@ -204,5 +206,32 @@ test("fixed URL cleanup retains failed teardown for retry", async () => {
     assert.equal(invoke("cleanup",env).status,0);
     assert.equal(JSON.parse(Object.values((await read()).objects)[0]).status,"idle");
     assert.deepEqual(Object.keys((await read()).apps),["clocktracker-staging"]);
+  });
+});
+
+
+test("a successful restore exit without a machine never reaches SQL or deploy", async () => {
+  await fixture(async ({invoke,read,update}) => {
+    await update(s=>s.fail="restore-empty");
+    const result=invoke("up",{STAGING_MODE:"stable"});
+    assert.equal(result.status,1);
+    assert.match(result.stderr,/restore created no machine/);
+    const state=await read();
+    assert.ok(!state.calls.some(c=>c[0]==="fly" && (c[1]==="deploy" || (c[1]==="postgres" && c[2]==="connect"))));
+    assert.deepEqual(Object.keys(state.apps),["clocktracker-staging"]);
+    assert.equal(JSON.parse(Object.values(state.objects)[0]).status,"idle");
+  });
+});
+
+test("connection failures report a safe category and clean up the restored database", async () => {
+  await fixture(async ({invoke,read,update}) => {
+    await update(s=>s.fail="connect");
+    const result=invoke("up",{STAGING_MODE:"stable"});
+    assert.equal(result.status,1);
+    assert.match(result.stderr,/private-network SSH connection failed/);
+    assert.ok(!(result.stdout+result.stderr).includes("SECRET_TEST_PASSWORD"));
+    const state=await read();
+    assert.deepEqual(Object.keys(state.apps),["clocktracker-staging"]);
+    assert.equal(JSON.parse(Object.values(state.objects)[0]).status,"idle");
   });
 });
