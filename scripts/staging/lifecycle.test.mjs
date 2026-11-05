@@ -235,3 +235,17 @@ test("connection failures report a safe category and clean up the restored datab
     assert.equal(JSON.parse(Object.values(state.objects)[0]).status,"idle");
   });
 });
+
+
+test("latest uses Fly's default restore target while explicit backup IDs are forwarded", async () => {
+  await fixture(async ({invoke,read}) => {
+    assert.equal(invoke("up",{STAGING_MODE:"stable",STAGING_BACKUP:"latest"}).status,0);
+    assert.equal(invoke("destroy",{STAGING_MODE:"stable"}).status,0);
+    assert.equal(invoke("up",{STAGING_MODE:"stable",STAGING_BACKUP:"20261103T175530"}).status,0);
+    const restores=(await read()).calls.filter(c=>c[0]==="fly" && c[1]==="postgres" && c[2]==="backup");
+    assert.equal(restores.length,2);
+    assert.equal(restores[0].includes("--restore-target-name"),false);
+    assert.equal(restores[0].includes("latest"),false);
+    assert.deepEqual(restores[1].slice(-2),["--restore-target-name","20261103T175530"]);
+  });
+});

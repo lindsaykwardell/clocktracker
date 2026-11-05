@@ -179,7 +179,10 @@ async function up() {
       await flyAPI("/apps", "POST", { app_name: n.app, org_slug: required("FLY_ORG") });
     }
     await summary("Restoring the selected backup into the staging database.");
-    await fly(["postgres", "backup", "restore", n.db, "-a", sourceDb, "--restore-target-name", backup], { timeout: 45 * 60_000 });
+    // Fly treats target names literally; omitting the selector chooses its latest backup.
+    const restoreArgs = ["postgres", "backup", "restore", n.db, "-a", sourceDb];
+    if (backup !== "latest") restoreArgs.push("--restore-target-name", backup);
+    await fly(restoreArgs, { timeout: 45 * 60_000 });
     await summary("Waiting for the restored database to report a ready primary.");
     await waitForDatabase(() => flyAPI(`/apps/${n.db}/machines`));
     await summary("Sanitizing the staging database.");
