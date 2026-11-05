@@ -7,6 +7,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { S3Client, PutObjectCommand, GetObjectCommand, ListObjectsV2Command, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { lifetime, validateId, names, extendedExpiry, validateAuth } from "./policy.mjs";
+import { waitForDatabase, flyFailureReason } from "./database.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const required = name => {
@@ -57,13 +58,15 @@ function fly(args, { input, cwd, timeout = 15 * 60_000 } = {}) {
       FLY_API_TOKEN: required("FLY_API_TOKEN"), CI: "true", NO_COLOR: "1",
     }, stdio: ["pipe", "pipe", "pipe"] });
     let output = "";
-    const timer = setTimeout(() => { child.kill("SIGKILL"); }, timeout);
+    let errors = "";
+    let timedOut = false;
+    const timer = setTimeout(() => { timedOut = true; child.kill("SIGKILL"); }, timeout);
     child.stdout.on("data", chunk => { output = (output + chunk).slice(-8_000_000); });
-    child.stderr.on("data", () => {});
+    child.stderr.on("data", chunk => { errors = (errors + chunk).slice(-32_000); });
     child.on("error", () => { clearTimeout(timer); reject(new Error("Unable to run flyctl")); });
     child.on("close", code => {
       clearTimeout(timer);
-      code === 0 ? resolve(output) : reject(new Error(`Fly ${args.slice(0, 2).join(" ")} failed; inspect the private Fly dashboard (output suppressed)`));
+      code === 0 ? resolve(output) : reject(new Error(`Fly ${args.slice(0, 2).join(" ")} failed: ${flyFailureReason(output + "\n" + errors, timedOut)} (provider output suppressed)`));
     });
     child.stdin.on("error", () => {});
     child.stdin.end(input);
@@ -175,13 +178,18 @@ async function up() {
     if (!stable || !await flyAPI(`/apps/${n.app}`, "GET", undefined, true)) {
       await flyAPI("/apps", "POST", { app_name: n.app, org_slug: required("FLY_ORG") });
     }
+    await summary("Restoring the selected backup into the staging database.");
     await fly(["postgres", "backup", "restore", n.db, "-a", sourceDb, "--restore-target-name", backup], { timeout: 45 * 60_000 });
+    await summary("Waiting for the restored database to report a ready primary.");
+    await waitForDatabase(() => flyAPI(`/apps/${n.db}/machines`));
+    await summary("Sanitizing the staging database.");
     await sql(n.db, database, await readFile(path.join(here, "sanitize.sql"), "utf8"));
     // Restore needs source backup access temporarily; remove it before app launch.
     await fly(["secrets", "unset", "S3_ARCHIVE_REMOTE_RESTORE_CONFIG", "-a", n.db]);
     const dbUser = `staging_${id}`;
     await fly(["postgres", "attach", n.db, "-a", n.app, "--database-name", database, "--database-user", dbUser, "--superuser=false", "--yes"]);
     // Give the fresh role ownership for migrations without cluster superuser access.
+    await summary("Preparing staging database ownership for migrations.");
     await sql(n.db, database, `
 ALTER DATABASE "${database}" OWNER TO "${dbUser}";
 ALTER SCHEMA public OWNER TO "${dbUser}";
@@ -212,6 +220,7 @@ primary_region = "${region}"
 [deploy]
   release_command = "npx prisma migrate deploy"
 `);
+    await summary("Building and deploying the staging application.");
     await fly(["deploy", "--config", config, "--remote-only", "--ha=false", "--build-secret", `SUPABASE_URL=${required("SUPABASE_URL")}`, "--build-secret", `SUPABASE_KEY=${required("SUPABASE_KEY")}`], { cwd: source, timeout: 30 * 60_000 });
     // IPv6 enables domain validation; shared IPv4 serves IPv4 clients without a dedicated IP charge.
     const addresses = JSON.parse(await fly(["ips", "list", "-a", n.app, "--json"]));

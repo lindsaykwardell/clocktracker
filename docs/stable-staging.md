@@ -71,6 +71,8 @@ Verify password and Discord login with an existing admin, successful non-admin t
 
 The application rejects all page/API requests after the deadline, including home/login. Cleanup is scheduled every 15 minutes, but GitHub schedules are best effort: access expires at the deadline; actual resource deletion and billing can lag. Monitor cleanup failures and use manual cleanup when needed. A strict destruction deadline requires an independent scheduler.
 
+The controller waits for a running database primary before preparing SQL; a successful restore-command exit alone is not considered readiness. Progress messages identify the provisioning stage, and failures expose only fixed error categories while suppressing raw provider output.
+
 Failed launches attempt cleanup immediately. Cancellation leaves a two-hour provisional deadline for the sweeper. Failed teardown keeps a retryable journal; rerun cleanup or destroy. Never remove the journal to bypass an incomplete run.
 
 For permanent retirement, first remove the Fly URL from the Supabase allowlist, destroy the run, then manually remove the empty Fly app and its idle journal. Routine teardown must retain that app reservation.
