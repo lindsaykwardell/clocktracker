@@ -44,3 +44,10 @@ test('deployment diagnostics classify failures without exposing provider text', 
   ]) assert.equal(flyFailureReason(message + secret, false, 'deploy'), expected);
   assert.equal(flyFailureReason('ERROR: ' + secret), 'provider reported an error');
 });
+
+test('readiness permits longer recovery but respects the shared restore deadline', async () => {
+  let checks = 0;
+  await waitForDatabase(async () => machine('started', ++checks > 90 ? 'passing' : 'critical', 'primary'), {pause:async()=>{}});
+  assert.equal(checks, 91);
+  await assert.rejects(waitForDatabase(async () => { throw Error('Expired restore must not be polled'); }, {deadline:Date.now()-1}), /restore deadline/);
+});

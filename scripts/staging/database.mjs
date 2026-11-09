@@ -1,10 +1,10 @@
 // Fly's pinned backup restore can swallow launcher errors. Check the Machines
 // API instead of treating a successful CLI exit as a ready database.
 export async function waitForDatabase(listMachines, {
-  attempts = 90,
+  attempts = 270,
+  deadline = Date.now() + 45 * 60_000,
   pause = () => new Promise(resolve => setTimeout(resolve, 10_000)),
 } = {}) {
-  const deadline = Date.now() + 15 * 60_000;
   for (let attempt = 0; attempt < attempts && Date.now() < deadline; attempt++) {
     const machines = await listMachines();
     if (machines.length === 0) throw new Error("Database restore created no machine; staging launch stopped before SQL preparation");
@@ -13,7 +13,7 @@ export async function waitForDatabase(listMachines, {
     ))) return;
     if (attempt + 1 < attempts) await pause();
   }
-  throw new Error("Database restore did not produce a ready primary within 15 minutes; staging launch stopped before SQL preparation");
+  throw new Error("Database restore did not produce a ready primary before the restore deadline; staging launch stopped before SQL preparation");
 }
 
 // Return only fixed labels, never provider output, SQL text, or credentials.

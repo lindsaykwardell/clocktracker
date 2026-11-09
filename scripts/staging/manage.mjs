@@ -182,9 +182,10 @@ async function up() {
     // Fly treats target names literally; omitting the selector chooses its latest backup.
     const restoreArgs = ["postgres", "backup", "restore", n.db, "-a", sourceDb];
     if (backup !== "latest") restoreArgs.push("--restore-target-name", backup);
+    const restoreDeadline = Date.now() + 45 * 60_000;
     await fly(restoreArgs, { timeout: 45 * 60_000 });
     await summary("Waiting for the restored database to report a ready primary.");
-    await waitForDatabase(() => flyAPI(`/apps/${n.db}/machines`));
+    await waitForDatabase(() => flyAPI(`/apps/${n.db}/machines`), { deadline: restoreDeadline });
     await summary("Sanitizing the staging database.");
     await sql(n.db, database, await readFile(path.join(here, "sanitize.sql"), "utf8"));
     // Restore needs source backup access temporarily; remove it before app launch.
