@@ -66,7 +66,7 @@ function fly(args, { input, cwd, timeout = 15 * 60_000 } = {}) {
     child.on("error", () => { clearTimeout(timer); reject(new Error("Unable to run flyctl")); });
     child.on("close", code => {
       clearTimeout(timer);
-      code === 0 ? resolve(output) : reject(new Error(`Fly ${args.slice(0, 2).join(" ")} failed: ${flyFailureReason(output + "\n" + errors, timedOut)} (provider output suppressed)`));
+      code === 0 ? resolve(output) : reject(new Error(`Fly ${args.slice(0, 2).join(" ")} failed: ${flyFailureReason(output + "\n" + errors, timedOut, args[0])} (provider output suppressed)`));
     });
     child.stdin.on("error", () => {});
     child.stdin.end(input);
@@ -206,7 +206,7 @@ SELECT format('ALTER TYPE %I.%I OWNER TO %I', n.nspname, t.typname, '${dbUser}')
     await writeFile(config, `app = "${n.app}"
 primary_region = "${region}"
 [build]
-  dockerfile = "Dockerfile.staging"
+  dockerfile = ${JSON.stringify(path.join(source, "Dockerfile.staging"))}
 [env]
   STAGING = "true"
   PORT = "8080"

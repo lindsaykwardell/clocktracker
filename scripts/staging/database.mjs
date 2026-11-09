@@ -17,7 +17,7 @@ export async function waitForDatabase(listMachines, {
 }
 
 // Return only fixed labels, never provider output, SQL text, or credentials.
-export function flyFailureReason(output, timedOut = false) {
+export function flyFailureReason(output, timedOut = false, operation = "") {
   if (timedOut) return "command deadline exceeded";
   if (/no active leader found/i.test(output)) return "no ready database primary";
   if (/create ssh certificate|failed to issue.*certificate/i.test(output)) return "SSH certificate creation failed";
@@ -25,7 +25,19 @@ export function flyFailureReason(output, timedOut = false) {
   if (/password authentication failed/i.test(output)) return "database authentication failed";
   if (/permission denied|unauthorized|not authorized/i.test(output)) return "permission denied";
   if (/ERROR:.*(?:relation|column).*does not exist/i.test(output)) return "database schema does not match the preparation SQL";
-  if (/ERROR:|FATAL:/i.test(output)) return "database reported an error";
   if (/timed out|timeout/i.test(output)) return "provider operation timed out";
+  if (operation === "deploy") {
+    for (const [pattern, reason] of [
+      [/dockerfile.*(?:not found|does not exist)|failed to read dockerfile|unable to load dockerfile/i, "deployment Dockerfile not found"],
+      [/failed to (?:load|parse).*config|invalid.*configuration|configuration.*invalid/i, "deployment configuration invalid"],
+      [/failed to resolve.*image|pull access denied/i, "container image resolution failed"],
+      [/failed to solve|error building|failed to build|build failed/i, "container build failed"],
+      [/release command.*(?:failed|non-zero)|migration.*failed|P30\d{2}/i, "release migration failed"],
+      [/health checks.*failed|smoke checks.*failed|failed to become healthy/i, "application health checks failed"],
+      [/out of memory|oom kill/i, "deployment ran out of memory"],
+    ]) if (pattern.test(output)) return reason;
+    return "application deployment failed";
+  }
+  if (/ERROR:|FATAL:/i.test(output)) return "provider reported an error";
   return "provider command failed";
 }

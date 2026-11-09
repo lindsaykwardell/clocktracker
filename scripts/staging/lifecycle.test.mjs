@@ -67,6 +67,8 @@ if(s.fail==='restore-empty' && args[0]==='postgres' && args[1]==='backup') s.app
 if(args[0]==='deploy') {
   if(s.fail==='deploy') {fs.writeFileSync(file,JSON.stringify(s));process.exit(1);}
   const config=fs.readFileSync(args[args.indexOf('--config')+1],'utf8');
+  const dockerfile=JSON.parse(config.match(/dockerfile = (.+)/)[1]);
+  if(!require('node:path').isAbsolute(dockerfile) || !fs.existsSync(dockerfile)) throw Error('Dockerfile must resolve independently of the temporary Fly config');
   const app=config.match(/app = "([^"]+)"/)[1];s.apps[app].machines=[{id:'app-machine'}];
 }
 fs.writeFileSync(file,JSON.stringify(s));
