@@ -66,9 +66,11 @@ if(args[0]==='postgres' && args[1]==='backup') s.apps[args[3]]={machines:[{id:'d
 if(s.fail==='restore-empty' && args[0]==='postgres' && args[1]==='backup') s.apps[args[3]].machines=[];
 if(args[0]==='deploy') {
   if(s.fail==='deploy') {fs.writeFileSync(file,JSON.stringify(s));process.exit(1);}
-  const config=fs.readFileSync(args[args.indexOf('--config')+1],'utf8');
+  const configPath=args[args.indexOf('--config')+1];
+  const config=fs.readFileSync(configPath,'utf8');
   const dockerfile=JSON.parse(config.match(/dockerfile = (.+)/)[1]);
-  if(!require('node:path').isAbsolute(dockerfile) || !fs.existsSync(dockerfile)) throw Error('Dockerfile must resolve independently of the temporary Fly config');
+  const path=require('node:path');
+  if(path.isAbsolute(dockerfile) || !fs.existsSync(path.resolve(path.dirname(configPath),dockerfile))) throw Error('Dockerfile must resolve relative to the Fly config');
   const app=config.match(/app = "([^"]+)"/)[1];s.apps[app].machines=[{id:'app-machine'}];
 }
 fs.writeFileSync(file,JSON.stringify(s));
