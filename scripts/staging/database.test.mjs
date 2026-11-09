@@ -31,3 +31,16 @@ test('error categories never expose raw provider credentials or SQL', () => {
   }
   assert.equal(flyFailureReason(secret,true),'command deadline exceeded');
 });
+
+test('deployment diagnostics classify failures without exposing provider text', () => {
+  const secret = 'postgres://private:password@example.invalid/db';
+  for (const [message, expected] of [
+    ['Error: failed to read dockerfile', 'deployment Dockerfile not found'],
+    ['Error: failed to solve: process exited', 'container build failed'],
+    ['release command failed', 'release migration failed'],
+    ['P3009 failed migration', 'release migration failed'],
+    ['health checks failed', 'application health checks failed'],
+    ['Error: unknown detail', 'application deployment failed'],
+  ]) assert.equal(flyFailureReason(message + secret, false, 'deploy'), expected);
+  assert.equal(flyFailureReason('ERROR: ' + secret), 'provider reported an error');
+});
