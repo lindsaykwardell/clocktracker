@@ -5,7 +5,7 @@ on:
     inputs:
       action:
         type: choice
-        options: [up, list, destroy, extend, cleanup]
+        options: [up, redeploy, list, destroy, extend, cleanup]
         default: up
         required: true
       ref:
@@ -13,11 +13,11 @@ on:
         default: main
         required: true
       backup:
-        description: Snapshot for this run (latest or Barman ID)
+        description: Snapshot for up only (latest or Barman ID)
         default: latest
         required: true
       hours:
-        description: Lifetime in whole hours, 1–168; for extend, hours from now
+        description: Lifetime for up/extend, 1–168 hours; ignored by redeploy
         default: '1'
         required: true
   schedule:
@@ -45,7 +45,7 @@ jobs:
           path: control
           persist-credentials: false
       - uses: actions/checkout@v5
-        if: inputs.action == 'up'
+        if: inputs.action == 'up' || inputs.action == 'redeploy'
         with:
           ref: ${{ inputs.ref }}
           path: source
