@@ -1,5 +1,13 @@
 <template>
-    <div v-if="staging" class="bg-amber-200 text-stone-900 px-4 py-2 text-center text-sm">Staging — copied data. Administrator access only.</div>
+    <div
+        v-if="staging"
+        role="status"
+        class="pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center"
+    >
+        <span class="rounded-b bg-amber-200 px-2 text-[10px] leading-4 font-semibold text-stone-900 shadow-sm">
+            Staging · copied data
+        </span>
+    </div>
     <NuxtPage />
     <RateLimitNotice />
     <AnnouncementDialog
