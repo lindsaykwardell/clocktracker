@@ -207,7 +207,7 @@ SELECT format('ALTER TYPE %I.%I OWNER TO %I', n.nspname, t.typname, '${dbUser}')
     await writeFile(config, `app = "${n.app}"
 primary_region = "${region}"
 [build]
-  dockerfile = ${JSON.stringify(path.join(source, "Dockerfile.staging"))}
+  dockerfile = ${JSON.stringify(path.relative(temp, path.join(source, "Dockerfile.staging")))}
 [env]
   STAGING = "true"
   PORT = "8080"
