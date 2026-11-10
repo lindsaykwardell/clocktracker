@@ -5,7 +5,7 @@
         class="pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center"
     >
         <span class="rounded-b bg-amber-200 px-2 text-[10px] leading-4 font-semibold text-stone-900 shadow-sm">
-            Staging · copied data
+            Staging environment. Administrator access only.
         </span>
     </div>
     <NuxtPage />
