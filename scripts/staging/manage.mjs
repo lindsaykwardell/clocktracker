@@ -133,6 +133,87 @@ async function destroy(state) {
   }
   await summary(`Destroyed staging environment ${state.id}.`);
 }
+async function validateSource(source) {
+  // Old branches must merge the staging access controls before being deployed.
+  for (const file of ["server/middleware/auth.ts", "server/utils/stagingAccess.ts", "nuxt.config.ts"]) {
+    const expected = await readFile(path.resolve(here, "../..", file), "utf8");
+    if (await readFile(path.join(source, file), "utf8") !== expected) throw new Error(`Branch must include the current staging controls: ${file}`);
+  }
+}
+async function deployApplication(n, source, region, deadline = Infinity) {
+  const temp = await mkdtemp(path.join(tmpdir(), "ct-staging-"));
+  try {
+    await cp(path.join(here, "Dockerfile"), path.join(source, "Dockerfile.staging"));
+    const config = path.join(temp, "fly.toml");
+    await writeFile(config, `app = "${n.app}"
+primary_region = "${region}"
+[build]
+  dockerfile = ${JSON.stringify(path.relative(temp, path.join(source, "Dockerfile.staging")))}
+[env]
+  STAGING = "true"
+  PORT = "8080"
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "off"
+  auto_start_machines = true
+  min_machines_running = 1
+[[vm]]
+  memory = "1024mb"
+  cpu_kind = "shared"
+  cpus = 1
+[deploy]
+  release_command = "npx prisma migrate deploy"
+`);
+    if (Date.now() >= deadline) throw new Error("Staging expired before deployment; run cleanup");
+    await summary("Building and deploying the staging application.");
+    await fly(["deploy", "--config", config, "--remote-only", "--ha=false", "--build-secret", `SUPABASE_URL=${required("SUPABASE_URL")}`, "--build-secret", `SUPABASE_KEY=${required("SUPABASE_KEY")}`], { cwd: source, timeout: Math.max(1, Math.min(30 * 60_000, deadline - Date.now())) });
+  } finally {
+    await rm(temp, { recursive: true, force: true });
+    await rm(path.join(source, "Dockerfile.staging"), { force: true });
+  }
+}
+async function redeploy() {
+  if (!stable) throw new Error("Redeploy is only available for fixed URL staging");
+  if (process.env.STAGING_STABLE_ENABLED !== "true") throw new Error("Enable scheduled cleanup before redeploying");
+  const state = (await states()).find(state => state.id === stableId);
+  if (!state || !["ready", "redeploying", "redeploy_failed"].includes(state.status) || state.expiresAt <= Date.now()) {
+    throw new Error("Redeploy requires an existing, unexpired staging run; use up to start a new run");
+  }
+  const source = path.resolve(required("STAGING_SOURCE_DIR"));
+  await validateSource(source);
+  validateAuth(required("SUPABASE_URL"), required("SUPABASE_KEY"));
+  const region = process.env.STAGING_REGION || "sjc";
+  if (!/^[a-z0-9]{3}$/.test(region)) throw new Error("Invalid Fly region");
+  const n = environmentNames(state.id, domain);
+  for (const app of [n.app, n.db]) {
+    if (!await flyAPI(`/apps/${app}`, "GET", undefined, true) || !(await flyAPI(`/apps/${app}/machines`)).length) {
+      throw new Error("Staging resources are missing; destroy the incomplete run before using up");
+    }
+  }
+  state.status = "redeploying";
+  state.pendingRef = required("STAGING_REF");
+  await save(state);
+  try {
+    await summary("Redeploying staging using its existing database and expiration.");
+    await deployApplication(n, source, region, state.expiresAt);
+    const response = await fetch(`https://${n.hostname}/login`, { redirect: "manual", signal: AbortSignal.timeout(10_000) });
+    if (state.expiresAt <= Date.now()) throw new Error("Staging expired during redeploy; run cleanup");
+    if (!response.ok) throw new Error("Redeployed application readiness check failed");
+    state.ref = state.pendingRef;
+    delete state.pendingRef;
+    state.status = "ready";
+    state.redeployedAt = Date.now();
+    await save(state);
+    await summary(`Redeployed: https://${n.hostname}\nExpires: ${new Date(state.expiresAt).toISOString()}`);
+  } catch (error) {
+    // A release migration may already have changed data. Never destroy or claim rollback.
+    state.status = "redeploy_failed";
+    await save(state);
+    await summary("Redeploy failed; database retained with its original expiration. Inspect the run before retrying or destroying it.");
+    throw error;
+  }
+}
 async function up() {
   const enabled = stable ? process.env.STAGING_STABLE_ENABLED : process.env.STAGING_ENABLED;
   if (enabled !== "true") throw new Error("Enable this workflow's scheduled cleanup repository variable before launching");
@@ -147,18 +228,14 @@ async function up() {
   required("FLY_ORG");
   const region = process.env.STAGING_REGION || "sjc";
   if (!/^[a-z0-9]{3}$/.test(region)) throw new Error("Invalid Fly region");
-  // Old branches must merge the staging access controls before being deployed.
-  for (const file of ["server/middleware/auth.ts", "server/utils/stagingAccess.ts", "nuxt.config.ts"]) {
-    const expected = await readFile(path.resolve(here, "../..", file), "utf8");
-    if (await readFile(path.join(source, file), "utf8") !== expected) throw new Error(`Branch must include the current staging controls: ${file}`);
-  }
+  await validateSource(source);
   const id = stable ? stableId : randomBytes(8).toString("hex");
   const n = environmentNames(id, domain);
   // Validate DNS credentials before paying for a restore or creating resources.
   if (!stable && (await dns(`?name=${encodeURIComponent(n.hostname)}`)).length) throw new Error("Staging hostname already exists");
   if (sourceDb.startsWith("ct-stg-") || sourceDb === n.app) throw new Error("Restore source must be the configured production backup source");
   const existing = stable ? (await states()).find(state => state.id === id) : undefined;
-  if (existing && existing.status !== "idle") throw new Error("A staging run already exists; extend it or destroy it before starting another");
+  if (existing && existing.status !== "idle") throw new Error("A staging run already exists; redeploy, extend, or destroy it before starting another");
   if (stable && !existing) {
     for (const app of [n.app, n.db]) {
       if (await flyAPI(`/apps/${app}`, "GET", undefined, true)) throw new Error("Stable app name already exists without a journal; refusing to adopt or overwrite it");
@@ -172,7 +249,6 @@ async function up() {
   const state = { id, domain, mode: stable ? "stable" : "temporary", ref: process.env.STAGING_REF || "unspecified", backup, createdAt: Date.now(), expiresAt: Date.now() + 2 * 3600000, status: "provisioning" };
   // Cancellation leaves a tracked provisional deadline for the scheduled sweeper.
   await save(state);
-  const temp = await mkdtemp(path.join(tmpdir(), "ct-staging-"));
   try {
     await summary(`Provisioning staging environment ${id}.`);
     if (!stable || !await flyAPI(`/apps/${n.app}`, "GET", undefined, true)) {
@@ -202,30 +278,7 @@ SELECT format('ALTER SEQUENCE %I.%I OWNER TO %I', sequence_schema, sequence_name
 SELECT format('ALTER TYPE %I.%I OWNER TO %I', n.nspname, t.typname, '${dbUser}') FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace WHERE n.nspname = 'public' AND t.typtype = 'e' \\gexec
 `);
     await fly(["secrets", "import", "-a", n.app, "--stage"], { input: `SUPABASE_URL=${required("SUPABASE_URL")}\nSUPABASE_KEY=${required("SUPABASE_KEY")}\nSTAGING_EXPIRES_AT=${new Date(state.expiresAt).toISOString()}\n` });
-    await cp(path.join(here, "Dockerfile"), path.join(source, "Dockerfile.staging"));
-    const config = path.join(temp, "fly.toml");
-    await writeFile(config, `app = "${n.app}"
-primary_region = "${region}"
-[build]
-  dockerfile = ${JSON.stringify(path.relative(temp, path.join(source, "Dockerfile.staging")))}
-[env]
-  STAGING = "true"
-  PORT = "8080"
-[http_service]
-  internal_port = 8080
-  force_https = true
-  auto_stop_machines = "off"
-  auto_start_machines = true
-  min_machines_running = 1
-[[vm]]
-  memory = "1024mb"
-  cpu_kind = "shared"
-  cpus = 1
-[deploy]
-  release_command = "npx prisma migrate deploy"
-`);
-    await summary("Building and deploying the staging application.");
-    await fly(["deploy", "--config", config, "--remote-only", "--ha=false", "--build-secret", `SUPABASE_URL=${required("SUPABASE_URL")}`, "--build-secret", `SUPABASE_KEY=${required("SUPABASE_KEY")}`], { cwd: source, timeout: 30 * 60_000 });
+    await deployApplication(n, source, region);
     // IPv6 enables domain validation; shared IPv4 serves IPv4 clients without a dedicated IP charge.
     const addresses = JSON.parse(await fly(["ips", "list", "-a", n.app, "--json"]));
     if (!addresses.some(ip => ip.Type === "v6")) await fly(["ips", "allocate-v6", "-a", n.app]);
@@ -253,14 +306,12 @@ primary_region = "${region}"
   } catch (error) {
     try { await destroy(state); } catch { await summary(`Cleanup pending for ${id}; the scheduled sweeper will retry. Check the private provider dashboards.`); }
     throw error;
-  } finally {
-    await rm(temp, { recursive: true, force: true });
-    await rm(path.join(source, "Dockerfile.staging"), { force: true });
   }
 }
 async function main() {
   switch (process.argv[2]) {
     case "up": return up();
+    case "redeploy": return redeploy();
     case "list":
       for (const state of await states()) await summary(`${state.id}: ${state.status}, ref ${JSON.stringify(state.ref)}, backup ${state.backup}, expires ${state.status === "idle" ? "idle (no machines)" : new Date(state.expiresAt).toISOString()}`);
       return;
@@ -281,7 +332,7 @@ async function main() {
       if (failed) throw new Error("Some environments could not be cleaned up");
       return;
     }
-    default: throw new Error("Choose up, list, destroy, extend, or cleanup");
+    default: throw new Error("Choose up, redeploy, list, destroy, extend, or cleanup");
   }
 }
 main().catch(error => {
