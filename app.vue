@@ -366,4 +366,106 @@ body {
     white-space: nowrap;
     position: relative;
 }
+
+/* Grimoire chrome shared by the game page and GameEditor (add/edit game).
+   Kept global so it is present no matter which page is loaded first. */
+.grimoire {
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    display: block;
+    inset: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+
+  &::before {
+    background: url("/img/ui/cloud-pattern.webp");
+    opacity: 0;
+  }
+
+  &::after {
+    background-color: theme(colors.indigo.950);
+    opacity: 0;
+  }
+
+  &--night {
+    &::before {
+      opacity: .2;
+    }
+
+    &::after {
+      opacity: .4;
+    }
+  }
+
+  .overflow-scroll {
+    /* Compensate scrollbars (and page count) so tokens are centered */
+    padding-inline-start: 1rem;
+    padding-block-start: 5rem;
+    padding-block-end: 5rem;
+
+    scrollbar-width: thin;
+    scrollbar-color: oklch(44.4% 0.011 73.639) transparent;
+    scrollbar-gutter: stable;
+  }
+}
+
+.grimoire-title-wrapper {
+  @apply absolute w-full flex flex-col justify-center items-center;
+
+  inset-block-start: 1rem;
+  z-index: 10;
+}
+
+.grimoire-title {
+  @apply font-sorts font-semibold text-lg text-stone-800;
+
+  position: relative;
+  min-inline-size: 12rem;
+  margin-inline: 16px;
+  padding: .825rem 1rem .75rem;
+  text-align: center;
+  line-height: 1.25rem;
+  background-color: theme(colors.amber.50);
+  border: 2px solid theme(colors.grimtitle);
+  outline: 1px solid theme(colors.grimtitle);
+  outline-offset: -5px;
+
+  &::before,
+  &::after {
+    content: "";
+    background-image: url('/img/ui/vector.svg');
+    width: 16px;
+    height: 27px;
+    background-size: 16px;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: absolute;
+    right: -18px;
+    top: 0;
+    bottom: 0;
+    margin-block: auto;
+  }
+
+  &::before {
+    right: auto;
+    left: -18px;
+    transform: rotate(-180deg);
+  }
+}
+
+.grimoire-pager {
+  @apply text-xs text-black;
+
+  position: relative;
+  z-index: 1;
+  padding: .125rem .25rem;
+  background: theme(colors.amber.50);
+  border: 1px solid theme(colors.grimtitle);
+  border-block-start: none;
+  border-end-start-radius: 0.375rem;
+  border-end-end-radius: 0.375rem;
+}
 </style>
