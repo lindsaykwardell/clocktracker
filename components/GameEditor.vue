@@ -1485,12 +1485,19 @@ const potentiallyTaggedPlayers = computed(() => {
 });
 
 const potentialCoStorytellers = computed(() => {
+  // Collect every seat's player name once, instead of scanning every page and
+  // seat again for each taggable player (this list is rebuilt on every
+  // keystroke in a player name).
+  const namesInGrimoire = new Set(
+    props.game.grimoire.flatMap(({ tokens }) =>
+      tokens.map((token) => token.player_name)
+    )
+  );
+
   return allTaggablePlayers.value.filter(
     (player) =>
       !player ||
-      (!props.game.grimoire.some(({ tokens }) =>
-        tokens.find((token) => token.player_name === player.username)
-      ) &&
+      (!namesInGrimoire.has(player.username) &&
         !props.game.co_storytellers.find(
           (costoryteller) => costoryteller === player.username
         ))
