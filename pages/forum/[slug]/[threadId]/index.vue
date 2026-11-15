@@ -861,7 +861,8 @@ async function submitReply() {
     replyError.value = "";
 
     try {
-        await forum.createPost(threadId, replyBody.value);
+        const result = await forum.createPost(threadId, replyBody.value);
+        if (result.pending) await router.push("/forum/submissions?submitted=1");
         replyBody.value = "";
     } catch (err: any) {
         replyError.value =

@@ -42,6 +42,7 @@ export type ForumCategoriesResponse = {
 };
 
 export type ForumThread = {
+  pending?: boolean;
   id: string;
   title: string;
   is_pinned: boolean;
@@ -61,6 +62,7 @@ export type ForumPostReaction = {
 };
 
 export type ForumPost = {
+  pending?: boolean;
   id: string;
   body: string;
   created_at: string;
@@ -174,7 +176,7 @@ export const useForum = defineStore("forum", {
       );
 
       const cached = this.threadDetail.get(threadId);
-      if (cached?.status === Status.SUCCESS) {
+      if (!post.pending && cached?.status === Status.SUCCESS) {
         cached.data.posts.push(post);
         cached.data.total++;
       }
@@ -201,29 +203,7 @@ export const useForum = defineStore("forum", {
       if (!result.threadDeleted) {
         const cached = this.threadDetail.get(threadId);
         if (cached?.status === Status.SUCCESS) {
-          const idx = cached.data.posts.findIndex((p) => p.id === postId);
-          if (idx !== -1) {
-            const existing = cached.data.posts[idx];
-            cached.data.posts[idx] = {
-              ...existing,
-              body: "[deleted]",
-              deleted: true,
-              edited_at: null,
-              edited_by_label: null,
-              deleted_body: existing.body,
-              deleted_author: { ...existing.author },
-              author: {
-                user_id: "",
-                username: "",
-                display_name: "[deleted]",
-                avatar: null,
-                created_at: null,
-                name_color: null,
-                badge: null,
-              },
-              reactions: [],
-            };
-          }
+          await this.fetchThread(threadId, cached.data.page);
         }
       }
 
@@ -264,14 +244,15 @@ export const useForum = defineStore("forum", {
     },
 
     async editThreadTitle(threadId: string, title: string): Promise<void> {
-      await $fetch(`/api/forum/threads/${threadId}`, {
+      const result = await $fetch<{ title: string; pending?: boolean }>(`/api/forum/threads/${threadId}`, {
         method: "PUT",
         body: { title },
       });
 
       const cached = this.threadDetail.get(threadId);
       if (cached?.status === Status.SUCCESS) {
-        cached.data.thread.title = title;
+        cached.data.thread.title = result.title;
+        if (result.pending) await navigateTo("/forum/submissions?submitted=1");
       }
     },
 

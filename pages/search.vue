@@ -6,6 +6,7 @@
   >
     <div class="max-w-[1000px] w-5/6 py-4 m-auto">
       <div class="py-4 flex flex-col gap-4">
+        <p v-if="searchError" role="alert">{{ searchError }}</p>
         <div v-if="searching" class="flex justify-center gap-1">
           <Spinner />
           Searching...
@@ -103,6 +104,8 @@
 <script setup lang="ts">
 import type { Role } from "~/server/generated/prisma/client";
 import { useGeolocation } from "@vueuse/core";
+const protectedFetch = useProtectedFetch();
+const searchError = ref("");
 const router = useRouter();
 const route = useRoute();
 const { coords } = useGeolocation();
@@ -201,64 +204,66 @@ async function search(query: string | undefined) {
     },
   });
   searching.value = true;
-  users.value = [];
-  communities.value = [];
-  scripts.value = [];
-  roles.value = [];
-  const result = await $fetch("/api/search", {
-    params: {
-      query: query ?? "",
-      near_me: near_me.value ? "true" : undefined,
-      lat: near_me.value
-        ? isFinite(coords.value.latitude)
-          ? coords.value.latitude
-          : undefined
-        : undefined,
-      lon: near_me.value
-        ? isFinite(coords.value.longitude)
-          ? coords.value.longitude
-          : undefined
-        : undefined,
-    },
-  });
+  searchError.value = "";
+  try {
+    const result = await protectedFetch<any>("/api/search", {
+      params: {
+        query: query ?? "",
+        near_me: near_me.value ? "true" : undefined,
+        lat: near_me.value
+          ? isFinite(coords.value.latitude)
+            ? coords.value.latitude
+            : undefined
+          : undefined,
+        lon: near_me.value
+          ? isFinite(coords.value.longitude)
+            ? coords.value.longitude
+            : undefined
+          : undefined,
+      },
+    });
 
-  users.value = result.users;
-  scripts.value = result.scripts as any;
-  communities.value = result.communities;
-  if ("roles" in result) {
-    roles.value = result.roles as any;
-  } else {
-    roles.value = [];
-  }
-
-  // check if the current tab has content
-  const hasContent = (() => {
-    switch (activeTab.value) {
-      case "USERS":
-        return users.value.length > 0;
-      case "COMMUNITIES":
-        return communities.value.length > 0;
-      case "SCRIPTS":
-        return scripts.value.length > 0;
-      case "ROLES":
-        return roles.value.length > 0;
+    users.value = result.users;
+    scripts.value = result.scripts as any;
+    communities.value = result.communities;
+    if ("roles" in result) {
+      roles.value = result.roles as any;
+    } else {
+      roles.value = [];
     }
-  })();
 
-  if (!hasContent) {
-    // switch to a tab that has content
-    if (users.value.length > 0) {
-      activeTab.value = "USERS";
-    } else if (communities.value.length > 0) {
-      activeTab.value = "COMMUNITIES";
-    } else if (scripts.value.length > 0) {
-      activeTab.value = "SCRIPTS";
-    } else if (roles.value.length > 0) {
-      activeTab.value = "ROLES";
+    // check if the current tab has content
+    const hasContent = (() => {
+      switch (activeTab.value) {
+        case "USERS":
+          return users.value.length > 0;
+        case "COMMUNITIES":
+          return communities.value.length > 0;
+        case "SCRIPTS":
+          return scripts.value.length > 0;
+        case "ROLES":
+          return roles.value.length > 0;
+      }
+    })();
+
+    if (!hasContent) {
+      // switch to a tab that has content
+      if (users.value.length > 0) {
+        activeTab.value = "USERS";
+      } else if (communities.value.length > 0) {
+        activeTab.value = "COMMUNITIES";
+      } else if (scripts.value.length > 0) {
+        activeTab.value = "SCRIPTS";
+      } else if (roles.value.length > 0) {
+        activeTab.value = "ROLES";
+      }
     }
-  }
 
-  searching.value = false;
+  } catch (error: any) {
+    searchError.value = error?.statusCode === 429 ? "Search limit reached. Please wait before searching again." : "Search failed. Please try again.";
+  } finally {
+    searching.value = false;
+  }
 }
 
 watch(near_me, async () => {

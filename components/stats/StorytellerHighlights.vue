@@ -30,7 +30,7 @@
           </nuxt-link>
 
           <div class="text-center text-sm text-balance max-w-44">
-            {{ roleArticle(mostStorytold.name) }}<span class="font-semibold">{{ mostStorytold.name }}</span> 
+            {{ roleArticle(mostStorytold.name) }}<span class="font-semibold">{{ mostStorytold.name }}</span>
             made an appearance in {{ mostStorytold.total }} game<span v-if="mostStorytold.total !== 1">s</span>.
           </div>
         </div>
@@ -70,7 +70,7 @@
           </nuxt-link>
 
           <div class="text-center text-sm text-balance max-w-44">
-            {{ roleArticle(favoriteBluff.name) }}<span class="font-semibold">{{ favoriteBluff.name }}</span> 
+            {{ roleArticle(favoriteBluff.name) }}<span class="font-semibold">{{ favoriteBluff.name }}</span>
             was shown to the demon a total of {{ favoriteBluff.bluffs }} time<span v-if="favoriteBluff.bluffs !== 1">s</span>!
           </div>
         </div>
@@ -110,7 +110,7 @@
           </nuxt-link>
 
           <div class="text-center text-sm text-balance max-w-40">
-            {{ roleArticle(favoriteNpc.name) }}<span class="font-semibold">{{ favoriteNpc.name }}</span> 
+            {{ roleArticle(favoriteNpc.name) }}<span class="font-semibold">{{ favoriteNpc.name }}</span>
             was added to {{ favoriteNpc.npcUses }} game<span v-if="favoriteNpc.npcUses !== 1">s</span>.
           </div>
         </div>
@@ -313,11 +313,11 @@ function resolveHighlight(
 
     if (value > bestValue) {
       best = { role, usage };
-    } 
+    }
     else if (value === bestValue) {
       if (usage.total > best.usage.total) {
         best = { role, usage };
-      } 
+      }
       else if (
         usage.total === best.usage.total &&
         role.name.localeCompare(best.role.name) < 0
@@ -394,9 +394,9 @@ function roleLink(id?: string) {
  */
 function roleArticle(name: string): "" | "The " {
   const pluralRoles = [
-    "Legion", 
-    "Lil' Monsta", 
-    "Riot", 
+    "Legion",
+    "Lil' Monsta",
+    "Riot",
   ];
   if (pluralRoles.includes(name)) return "";
   if (name.startsWith("The ")) return "";

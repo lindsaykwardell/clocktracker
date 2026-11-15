@@ -25,7 +25,7 @@ export default defineEventHandler(async (handler) => {
 
   const response = await axios
     .post(
-      "https://www.boardgamegeek.com/login/api/v1",
+      "https://boardgamegeek.com/login/api/v1",
       {
         credentials: {
           username: body.username,

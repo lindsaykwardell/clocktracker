@@ -10,7 +10,7 @@
         }"
       >
         <div class="max-w-[800px] w-full mx-auto mt-4 mb-8 space-y-8">
-          
+
           <div class="space-y-2">
             <div>
               <h2 class="text-xl font-sorts">Stats at a glance</h2>

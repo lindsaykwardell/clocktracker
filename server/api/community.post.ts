@@ -54,7 +54,7 @@ export default defineEventHandler(async (handler) => {
         description: true,
       },
     });
-  
+
     return community;
   } catch (err) {
     console.error(err);

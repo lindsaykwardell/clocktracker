@@ -1,6 +1,10 @@
+import {
+  requireForumThreadAccess,
+  hasForumPermission,
+  logModAction,
+} from "~/server/utils/forum";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
-import { hasForumPermission, logModAction } from "~/server/utils/forum";
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
@@ -10,14 +14,8 @@ export default defineEventHandler(async (handler) => {
   }
 
   const threadId = handler.context.params!.id;
+  const thread = await requireForumThreadAccess(me.id, threadId);
 
-  const thread = await prisma.forumThread.findFirst({
-    where: { id: threadId, deleted_at: null },
-  });
-
-  if (!thread) {
-    throw createError({ status: 404, statusMessage: "Not Found" });
-  }
 
   const isAuthor = thread.author_id === me.id;
   const canDeleteAny = await hasForumPermission(me.id, "DELETE_ANY_POST");

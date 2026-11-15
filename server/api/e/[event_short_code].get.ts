@@ -1,40 +1,11 @@
-import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
 
 export default defineEventHandler(async (handler) => {
-  const me: User | null = handler.context.user;
   const event_short_code = handler.context.params!.event_short_code;
 
   const event = await prisma.event.findUnique({
     where: {
       short_link: event_short_code,
-      OR: [
-        {
-          community_id: null,
-        },
-        {
-          community: {
-            banned_users: {
-              none: {
-                user_id: me?.id || "",
-              },
-            },
-            OR: [
-              {
-                is_private: false,
-              },
-              {
-                members: {
-                  some: {
-                    user_id: me?.id || "",
-                  },
-                },
-                is_private: true,
-              },
-            ],
-          },
-        },
-      ],
     },
     select: {
       id: true,

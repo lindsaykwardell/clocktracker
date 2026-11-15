@@ -143,6 +143,7 @@ import type { Event } from "~/composables/useCommunities";
 import { Status } from "~/composables/useFetchStatus";
 import type { GameRecord } from "~/composables/useGames";
 
+const protectedFetch = useProtectedFetch();
 const route = useRoute();
 const slug = route.params.slug as string;
 const communities = useCommunities();
@@ -153,7 +154,7 @@ const metadata = await $fetch(`/api/community/${slug}/minimal`);
 const { data: stats } = await useFetch<{
   totals: { games: number; players: number };
   games: GameRecord[];
-}>(() => `/api/community/${slug}/stats`);
+}>(() => `/api/community/${slug}/stats`, { $fetch: protectedFetch as typeof $fetch, retry: 0 });
 
 const message = ref("");
 const statsGames = computed(() => stats.value?.games ?? []);

@@ -24,9 +24,8 @@
         {{ showUnreadOnly ? "No unread threads." : "You haven't subscribed to any threads yet." }}
       </p>
       <div v-else class="flex flex-col gap-2">
-        <nuxt-link
-          v-for="sub in subscriptions"
-          :key="sub.id"
+        <ForumMutedContent v-for="sub in subscriptions" :key="sub.id" :author-id="sub.thread.author.user_id">
+<nuxt-link
           :to="`/forum/${sub.thread.categorySlug}/${sub.thread.id}`"
           class="p-3 rounded border transition-colors block"
           :class="sub.hasUnread
@@ -46,6 +45,7 @@
             &middot; last activity {{ formatDate(sub.thread.lastPostAt) }}
           </div>
         </nuxt-link>
+</ForumMutedContent>
       </div>
     </div>
   </StandardTemplate>
@@ -63,7 +63,7 @@ type Subscription = {
     title: string;
     lastPostAt: string;
     categorySlug: string;
-    author: { display_name: string };
+    author: { user_id: string; display_name: string };
     postCount: number;
   };
 };

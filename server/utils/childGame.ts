@@ -1,5 +1,33 @@
-import { type Alignment } from "~/server/generated/prisma/client";
+import { type Alignment,type Game,type GrimoireEvent,type Prisma } from "~/server/generated/prisma/client";
 import { prisma } from "./prisma";
+import { mapGrimoireEventsForCreate } from "./gamePropagation";
+
+type GameTrackingData=Partial<Pick<Game,
+  |"end_trigger"
+  |"end_trigger_type"
+  |"end_trigger_cause"
+  |"end_trigger_role_id"
+  |"end_trigger_subtype"
+  |"end_trigger_note"
+  |"end_trigger_participant_id"
+  |"end_trigger_participant_alignment"
+  |"ls_game_id"
+>>&{ grimoire_events?: GrimoireEvent[] };
+
+function trackingData(game: GameTrackingData) {
+  return {
+    end_trigger: game.end_trigger,
+    end_trigger_type: game.end_trigger_type,
+    end_trigger_cause: game.end_trigger_cause,
+    end_trigger_role_id: game.end_trigger_role_id,
+    end_trigger_subtype: game.end_trigger_subtype,
+    end_trigger_note: game.end_trigger_note,
+    end_trigger_participant_id: game.end_trigger_participant_id,
+    end_trigger_participant_alignment: game.end_trigger_participant_alignment,
+    ls_game_id: game.ls_game_id,
+  };
+}
+
 
 /**
  * Resolve the root parent game ID for a game tree.
@@ -8,9 +36,9 @@ import { prisma } from "./prisma";
  */
 export function resolveRootParentId(game: {
   id: string;
-  parent_game_id: string | null;
+  parent_game_id: string|null;
 }): string {
-  return game.parent_game_id || game.id;
+  return game.parent_game_id||game.id;
 }
 
 /**
@@ -22,34 +50,34 @@ async function wouldCreateCycle(
   childId: string,
   parentId: string
 ): Promise<boolean> {
-  let current: string | null = parentId;
-  const visited = new Set<string>();
+  let current: string|null=parentId;
+  const visited=new Set<string>();
 
-  while (current) {
-    if (current === childId) return true;
-    if (visited.has(current)) return true; // existing cycle in DB
+  while(current) {
+    if(current===childId) return true;
+    if(visited.has(current)) return true; // existing cycle in DB
     visited.add(current);
 
-    const parentGame: { parent_game_id: string | null } | null =
+    const parentGame: { parent_game_id: string|null }|null=
       await prisma.game.findUnique({
         where: { id: current },
         select: { parent_game_id: true },
       });
-    current = parentGame?.parent_game_id ?? null;
+    current=parentGame?.parent_game_id??null;
   }
 
   return false;
 }
 
-type ChildGameTokenData = {
+type ChildGameTokenData={
   name: string;
   alignment: Alignment;
   related: string;
-  role_id: string | null;
-  related_role_id: string | null;
+  role_id: string|null;
+  related_role_id: string|null;
 };
 
-type RelatedGame = {
+type RelatedGame={
   id: string;
   user_id: string;
   demon_bluffs: { id: number }[];
@@ -68,49 +96,27 @@ type RelatedGame = {
  */
 export async function findOrCreatePlayerChildGame(opts: {
   /** The game that was just saved (the source of truth for metadata). */
-  game: {
+  db?: Prisma.TransactionClient;
+  game: GameTrackingData&{
     id: string;
-    parent_game_id: string | null;
-    date: Date | string;
+    parent_game_id: string|null;
+    date: Date|string;
     script: string;
-    script_id: number | null;
+    script_id: number|null;
     location_type: string;
     location: string;
     community_name: string;
-    community_id: number | null;
-    player_count: number | null;
-    traveler_count: number | null;
-    storyteller: string | null;
+    community_id: number|null;
+    player_count: number|null;
+    traveler_count: number|null;
+    storyteller: string|null;
     co_storytellers: string[];
     win_v2: string;
-    end_trigger?: string | null;
-    end_trigger_type?: string | null;
-    end_trigger_cause?: string | null;
-    end_trigger_role_id?: string | null;
-    end_trigger_subtype?: string | null;
-    end_trigger_note?: string | null;
-    end_trigger_participant_id?: string | null;
-    end_trigger_participant_alignment?: Alignment | null;
     is_storyteller: boolean;
-    grimoire_events?: {
-      grimoire_page: number;
-      participant_id: string;
-      event_type: string;
-      cause: string | null;
-      by_participant_id: string | null;
-      player_name: string;
-      role_id: string | null;
-      by_role_id: string | null;
-      old_role_id?: string | null;
-      new_role_id?: string | null;
-      old_alignment?: string | null;
-      new_alignment?: string | null;
-      status_source?: string | null;
-    }[];
     grimoire: { id: number }[];
-    demon_bluffs: { id?: number; name: string; role_id: string | null }[];
-    fabled: { id?: number; name: string; role_id: string | null }[];
-    user?: { username: string } | null;
+    demon_bluffs: { id?: number; name: string; role_id: string|null }[];
+    fabled: { id?: number; name: string; role_id: string|null }[];
+    user?: { username: string }|null;
   };
   /** The user ID of the tagged player. */
   playerId: string;
@@ -120,14 +126,14 @@ export async function findOrCreatePlayerChildGame(opts: {
   relatedGames: RelatedGame[];
   /** If false, the child game won't need confirmation (e.g. claim_seat). Defaults to true. */
   waitingForConfirmation?: boolean;
-}): Promise<string | null> {
-  const { game, playerId, playerCharacters, relatedGames, waitingForConfirmation = true } = opts;
+}): Promise<string|null> {
+  const { game,playerId,playerCharacters,relatedGames,waitingForConfirmation=true,db=prisma }=opts;
 
-  const existingGame = relatedGames.find((g) => g.user_id === playerId);
+  const existingGame=relatedGames.find((g) => g.user_id===playerId);
 
-  if (existingGame) {
+  if(existingGame) {
     // Update the existing child game
-    await prisma.game.update({
+    await db.game.update({
       where: { id: existingGame.id },
       data: {
         date: new Date(game.date as string),
@@ -142,15 +148,11 @@ export async function findOrCreatePlayerChildGame(opts: {
         storyteller: game.storyteller,
         co_storytellers: game.co_storytellers,
         win_v2: game.win_v2 as any,
-        end_trigger: game.end_trigger as any,
-        end_trigger_type: game.end_trigger_type as any,
-        end_trigger_cause: game.end_trigger_cause as any,
-        end_trigger_role_id: game.end_trigger_role_id ?? null,
-        end_trigger_subtype: game.end_trigger_subtype ?? "",
-        end_trigger_note: game.end_trigger_note ?? "",
-        end_trigger_participant_id: game.end_trigger_participant_id ?? null,
-        end_trigger_participant_alignment:
-          game.end_trigger_participant_alignment ?? null,
+        ...trackingData(game),
+        grimoire_events: game.grimoire_events===undefined? undefined:{
+          deleteMany: {},
+          create: mapGrimoireEventsForCreate(game.grimoire_events),
+        },
         demon_bluffs: {
           deleteMany: existingGame.demon_bluffs.map((g) => ({ id: g.id })),
           create: game.demon_bluffs.map((g) => ({
@@ -171,25 +173,6 @@ export async function findOrCreatePlayerChildGame(opts: {
           })),
           create: playerCharacters,
         },
-        grimoire_events: {
-          deleteMany: {},
-          create:
-            game.grimoire_events?.map((event) => ({
-              grimoire_page: event.grimoire_page,
-              participant_id: event.participant_id,
-              event_type: event.event_type as any,
-              cause: event.cause as any,
-              by_participant_id: event.by_participant_id,
-              player_name: event.player_name,
-              role_id: event.role_id,
-              by_role_id: event.by_role_id,
-              old_role_id: event.old_role_id ?? null,
-              new_role_id: event.new_role_id ?? null,
-              old_alignment: event.old_alignment as any,
-              new_alignment: event.new_alignment as any,
-              status_source: event.status_source ?? null,
-            })) ?? [],
-        },
         grimoire: {
           connect: game.grimoire.map((g) => ({ id: g.id })),
         },
@@ -199,11 +182,11 @@ export async function findOrCreatePlayerChildGame(opts: {
   }
 
   // No existing game — create a new child game
-  const parentId = resolveRootParentId(game);
+  const parentId=resolveRootParentId(game);
 
   // Double-check: does the player already have a game in this tree?
   // This is the atomic check that prevents the TOCTOU race.
-  const existingInTree = await prisma.game.findFirst({
+  const existingInTree=await db.game.findFirst({
     where: {
       user_id: playerId,
       OR: [
@@ -215,12 +198,12 @@ export async function findOrCreatePlayerChildGame(opts: {
     select: { id: true },
   });
 
-  if (existingInTree) {
+  if(existingInTree) {
     // Another concurrent request already created the child game
     return existingInTree.id;
   }
 
-  const newGame = await prisma.game.create({
+  const newGame=await db.game.create({
     data: {
       date: new Date(game.date as string),
       script: game.script,
@@ -232,20 +215,15 @@ export async function findOrCreatePlayerChildGame(opts: {
       player_count: game.player_count,
       traveler_count: game.traveler_count,
       storyteller:
-        game.is_storyteller && game.user
+        game.is_storyteller&&game.user
           ? `@${game.user.username}`
-          : game.storyteller,
+          :game.storyteller,
       co_storytellers: game.co_storytellers,
       win_v2: game.win_v2 as any,
-      end_trigger: game.end_trigger as any,
-      end_trigger_type: game.end_trigger_type as any,
-      end_trigger_cause: game.end_trigger_cause as any,
-      end_trigger_role_id: game.end_trigger_role_id ?? null,
-      end_trigger_subtype: game.end_trigger_subtype ?? "",
-      end_trigger_note: game.end_trigger_note ?? "",
-      end_trigger_participant_id: game.end_trigger_participant_id ?? null,
-      end_trigger_participant_alignment:
-        game.end_trigger_participant_alignment ?? null,
+      ...trackingData(game),
+      grimoire_events: game.grimoire_events===undefined? undefined:{
+        create: mapGrimoireEventsForCreate(game.grimoire_events),
+      },
       user_id: playerId,
       player_characters: {
         create: [...playerCharacters],
@@ -261,24 +239,6 @@ export async function findOrCreatePlayerChildGame(opts: {
           name: g.name,
           role_id: g.role_id,
         })),
-      },
-      grimoire_events: {
-        create:
-          game.grimoire_events?.map((event) => ({
-            grimoire_page: event.grimoire_page,
-            participant_id: event.participant_id,
-            event_type: event.event_type as any,
-            cause: event.cause as any,
-            by_participant_id: event.by_participant_id,
-            player_name: event.player_name,
-            role_id: event.role_id,
-            by_role_id: event.by_role_id,
-            old_role_id: event.old_role_id ?? null,
-            new_role_id: event.new_role_id ?? null,
-            old_alignment: event.old_alignment as any,
-            new_alignment: event.new_alignment as any,
-            status_source: event.status_source ?? null,
-          })) ?? [],
       },
       grimoire: {
         connect: game.grimoire.map((g) => ({ id: g.id })),
@@ -301,61 +261,39 @@ export async function findOrCreatePlayerChildGame(opts: {
  * and no player_characters.
  */
 export async function findOrCreateStorytellerChildGame(opts: {
-  game: {
+  db?: Prisma.TransactionClient;
+  game: GameTrackingData&{
     id: string;
-    parent_game_id: string | null;
-    date: Date | string;
+    parent_game_id: string|null;
+    date: Date|string;
     script: string;
-    script_id: number | null;
+    script_id: number|null;
     location_type: string;
     location: string;
     community_name: string;
-    community_id: number | null;
-    player_count: number | null;
-    traveler_count: number | null;
-    storyteller: string | null;
+    community_id: number|null;
+    player_count: number|null;
+    traveler_count: number|null;
+    storyteller: string|null;
     co_storytellers: string[];
     win_v2: string;
-    end_trigger?: string | null;
-    end_trigger_type?: string | null;
-    end_trigger_cause?: string | null;
-    end_trigger_role_id?: string | null;
-    end_trigger_subtype?: string | null;
-    end_trigger_note?: string | null;
-    end_trigger_participant_id?: string | null;
-    end_trigger_participant_alignment?: Alignment | null;
-    grimoire_events?: {
-      grimoire_page: number;
-      participant_id: string;
-      event_type: string;
-      cause: string | null;
-      by_participant_id: string | null;
-      player_name: string;
-      role_id: string | null;
-      by_role_id: string | null;
-      old_role_id?: string | null;
-      new_role_id?: string | null;
-      old_alignment?: string | null;
-      new_alignment?: string | null;
-      status_source?: string | null;
-    }[];
     grimoire: { id: number }[];
-    demon_bluffs: { id?: number; name: string; role_id: string | null }[];
-    fabled: { id?: number; name: string; role_id: string | null }[];
+    demon_bluffs: { id?: number; name: string; role_id: string|null }[];
+    fabled: { id?: number; name: string; role_id: string|null }[];
   };
   /** The user ID of the co-storyteller. */
   storytellerUserId: string;
   /** Existing child games of this game. */
   childGames: RelatedGame[];
-}): Promise<string | null> {
-  const { game, storytellerUserId, childGames } = opts;
+}): Promise<string|null> {
+  const { game,storytellerUserId,childGames,db=prisma }=opts;
 
-  const existingGame = childGames.find(
-    (g) => g.user_id === storytellerUserId
+  const existingGame=childGames.find(
+    (g) => g.user_id===storytellerUserId
   );
 
-  if (existingGame) {
-    await prisma.game.update({
+  if(existingGame) {
+    await db.game.update({
       where: { id: existingGame.id },
       data: {
         date: new Date(game.date as string),
@@ -370,15 +308,11 @@ export async function findOrCreateStorytellerChildGame(opts: {
         storyteller: game.storyteller,
         co_storytellers: game.co_storytellers,
         win_v2: game.win_v2 as any,
-        end_trigger: game.end_trigger as any,
-        end_trigger_type: game.end_trigger_type as any,
-        end_trigger_cause: game.end_trigger_cause as any,
-        end_trigger_role_id: game.end_trigger_role_id ?? null,
-        end_trigger_subtype: game.end_trigger_subtype ?? "",
-        end_trigger_note: game.end_trigger_note ?? "",
-        end_trigger_participant_id: game.end_trigger_participant_id ?? null,
-        end_trigger_participant_alignment:
-          game.end_trigger_participant_alignment ?? null,
+        ...trackingData(game),
+        grimoire_events: game.grimoire_events===undefined? undefined:{
+          deleteMany: {},
+          create: mapGrimoireEventsForCreate(game.grimoire_events),
+        },
         demon_bluffs: {
           deleteMany: existingGame.demon_bluffs.map((g) => ({ id: g.id })),
           create: game.demon_bluffs.map((g) => ({
@@ -393,25 +327,6 @@ export async function findOrCreateStorytellerChildGame(opts: {
             role_id: g.role_id,
           })),
         },
-        grimoire_events: {
-          deleteMany: {},
-          create:
-            game.grimoire_events?.map((event) => ({
-              grimoire_page: event.grimoire_page,
-              participant_id: event.participant_id,
-              event_type: event.event_type as any,
-              cause: event.cause as any,
-              by_participant_id: event.by_participant_id,
-              player_name: event.player_name,
-              role_id: event.role_id,
-              by_role_id: event.by_role_id,
-              old_role_id: event.old_role_id ?? null,
-              new_role_id: event.new_role_id ?? null,
-              old_alignment: event.old_alignment as any,
-              new_alignment: event.new_alignment as any,
-              status_source: event.status_source ?? null,
-            })) ?? [],
-        },
         grimoire: {
           connect: game.grimoire.map((g) => ({ id: g.id })),
         },
@@ -421,10 +336,10 @@ export async function findOrCreateStorytellerChildGame(opts: {
   }
 
   // No existing game — create new
-  const parentId = game.id; // storyteller children always point to this game directly
+  const parentId=game.id; // storyteller children always point to this game directly
 
   // Atomic double-check
-  const existingInTree = await prisma.game.findFirst({
+  const existingInTree=await db.game.findFirst({
     where: {
       user_id: storytellerUserId,
       parent_game_id: game.id,
@@ -433,11 +348,11 @@ export async function findOrCreateStorytellerChildGame(opts: {
     select: { id: true },
   });
 
-  if (existingInTree) {
+  if(existingInTree) {
     return existingInTree.id;
   }
 
-  const newGame = await prisma.game.create({
+  const newGame=await db.game.create({
     data: {
       date: new Date(game.date as string),
       script: game.script,
@@ -451,15 +366,10 @@ export async function findOrCreateStorytellerChildGame(opts: {
       storyteller: game.storyteller,
       co_storytellers: game.co_storytellers,
       win_v2: game.win_v2 as any,
-      end_trigger: game.end_trigger as any,
-      end_trigger_type: game.end_trigger_type as any,
-      end_trigger_cause: game.end_trigger_cause as any,
-      end_trigger_role_id: game.end_trigger_role_id ?? null,
-      end_trigger_subtype: game.end_trigger_subtype ?? "",
-      end_trigger_note: game.end_trigger_note ?? "",
-      end_trigger_participant_id: game.end_trigger_participant_id ?? null,
-      end_trigger_participant_alignment:
-        game.end_trigger_participant_alignment ?? null,
+      ...trackingData(game),
+      grimoire_events: game.grimoire_events===undefined? undefined:{
+        create: mapGrimoireEventsForCreate(game.grimoire_events),
+      },
       is_storyteller: true,
       user_id: storytellerUserId,
       player_characters: {},
@@ -474,24 +384,6 @@ export async function findOrCreateStorytellerChildGame(opts: {
           name: g.name,
           role_id: g.role_id,
         })),
-      },
-      grimoire_events: {
-        create:
-          game.grimoire_events?.map((event) => ({
-            grimoire_page: event.grimoire_page,
-            participant_id: event.participant_id,
-            event_type: event.event_type as any,
-            cause: event.cause as any,
-            by_participant_id: event.by_participant_id,
-            player_name: event.player_name,
-            role_id: event.role_id,
-            by_role_id: event.by_role_id,
-            old_role_id: event.old_role_id ?? null,
-            new_role_id: event.new_role_id ?? null,
-            old_alignment: event.old_alignment as any,
-            new_alignment: event.new_alignment as any,
-            status_source: event.status_source ?? null,
-          })) ?? [],
       },
       grimoire: {
         connect: game.grimoire.map((g) => ({ id: g.id })),

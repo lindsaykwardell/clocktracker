@@ -110,6 +110,9 @@ const groupItems = computed<Record<GroupKey, NavItem[]>>(() => ({
       : null,
     canManageGroups.value ? { label: "User Groups", to: "/admin/forum/groups" } : null,
     canManageBans.value ? { label: "Bans", to: "/admin/forum/bans" } : null,
+    canViewReports.value && hasPerm("EDIT_ANY_POST")
+      ? { label: "Moderation", to: "/admin/forum/moderation" }
+      : null,
     canViewReports.value ? { label: "Reports", to: "/admin/forum/reports" } : null,
     canViewModLog.value ? { label: "Mod Log", to: "/admin/forum/mod-log" } : null,
   ].filter((item): item is NavItem => !!item),

@@ -1,5 +1,5 @@
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
-import { Alignment } from "~/server/generated/prisma/client";
+import { Alignment, type ReminderType } from "~/server/generated/prisma/client";
 import { prisma } from "~/server/utils/prisma";
 
 type SnapshotToken = {
@@ -15,7 +15,7 @@ type SnapshotToken = {
   reminders: {
     reminder: string;
     token_url: string;
-    type?: string;
+    type?: ReminderType;
   }[];
 };
 
@@ -146,7 +146,7 @@ export default defineEventHandler(async (handler) => {
               create: token.reminders.map((r) => ({
                 reminder: r.reminder,
                 token_url: r.token_url,
-                type: (r.type as any) ?? undefined,
+                type: r.type,
               })),
             },
           })),

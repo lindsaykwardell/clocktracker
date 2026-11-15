@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # Run Prisma migrate deploy
 npx prisma migrate deploy

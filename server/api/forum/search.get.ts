@@ -1,3 +1,4 @@
+import { forumVisibility } from "~/server/utils/forumSafety";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
 import { forumUserSelect, userCanViewCategory } from "~/server/utils/forum";
@@ -14,13 +15,14 @@ export default defineEventHandler(async (handler) => {
   const page = Math.max(1, Number(query.page) || 1);
   const perPage = 20;
 
+  const visible = await forumVisibility(me?.id ?? null);
   // Search posts by body content and threads by title
   const [posts, threads] = await Promise.all([
     prisma.forumPost.findMany({
       where: {
-        deleted_at: null,
+        ...visible,
         body: { contains: q, mode: "insensitive" },
-        thread: { deleted_at: null },
+        thread: visible,
       },
       orderBy: { created_at: "desc" },
       take: perPage,
@@ -48,7 +50,7 @@ export default defineEventHandler(async (handler) => {
     page === 1
       ? prisma.forumThread.findMany({
           where: {
-            deleted_at: null,
+            ...visible,
             title: { contains: q, mode: "insensitive" },
           },
           orderBy: { last_post_at: "desc" },
@@ -59,7 +61,7 @@ export default defineEventHandler(async (handler) => {
             created_at: true,
             last_post_at: true,
             author: { select: forumUserSelect },
-            _count: { select: { posts: true } },
+            _count: { select: { posts: { where: visible } } },
             category: {
               select: {
                 slug: true,

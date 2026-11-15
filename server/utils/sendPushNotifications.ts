@@ -26,6 +26,7 @@ export async function sendPushNotifications({
   body,
   url,
 }: SendPushOptions) {
+  if (process.env.STAGING === "true") return;
   try {
     const config = useRuntimeConfig();
     const vapidPublicKey = config.public.vapidPublicKey as string;

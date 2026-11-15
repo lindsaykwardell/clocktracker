@@ -176,6 +176,7 @@ function hydrateFeatureFlags(
 }
 
 export default defineNuxtPlugin(async () => {
+  if (useRuntimeConfig().public.staging) return;
   const config = useRuntimeConfig();
   const featureFlags = useFeatureFlags();
 

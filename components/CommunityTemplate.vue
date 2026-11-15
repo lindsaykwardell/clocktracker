@@ -138,7 +138,7 @@
             You have been banned from this community.
           </p>
         </div>
-        <div v-else-if="isNotAllowed">
+        <div v-else-if="isNotAllowed && !props.publicContent">
           <p class="text-center py-3 text-stone-400">
             This community is private. You must join to view it.
           </p>
@@ -172,6 +172,7 @@ import { Status } from "@/composables/useFetchStatus";
 const props = defineProps<{
   moderatorOnly?: boolean;
   slug?: string;
+  publicContent?: boolean;
 }>();
 
 const slug = (route.params.slug || props.slug) as string;

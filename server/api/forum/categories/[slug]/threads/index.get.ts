@@ -1,3 +1,4 @@
+import { forumVisibility } from "~/server/utils/forumSafety";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
 import { forumUserSelect, userCanViewCategory } from "~/server/utils/forum";
@@ -27,9 +28,10 @@ export default defineEventHandler(async (handler) => {
     throw createError({ status: 403, statusMessage: "Forbidden" });
   }
 
+  const visible = await forumVisibility(me?.id ?? null);
   const where = {
     category_id: category.id,
-    deleted_at: null,
+    ...visible,
   };
 
   const [threads, total] = await Promise.all([
@@ -48,7 +50,7 @@ export default defineEventHandler(async (handler) => {
         author: { select: forumUserSelect },
         _count: {
           select: {
-            posts: { where: { deleted_at: null } },
+            posts: { where: visible },
           },
         },
       },

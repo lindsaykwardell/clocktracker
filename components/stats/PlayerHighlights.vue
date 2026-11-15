@@ -28,7 +28,7 @@
           </nuxt-link>
 
           <div class="text-center text-sm text-balance max-w-44">
-            {{ props.isMe ? `You've` : `This player has` }} been {{ roleArticle(mostPlayed.role.name) }}<span class="font-semibold">{{ mostPlayed.role.name }}</span> 
+            {{ props.isMe ? `You've` : `This player has` }} been {{ roleArticle(mostPlayed.role.name) }}<span class="font-semibold">{{ mostPlayed.role.name }}</span>
             a total of {{ mostPlayed.plays }} game<span v-if="mostPlayed.plays !== 1">s</span>.
           </div>
         </div>
@@ -47,18 +47,18 @@
       <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-2 md:gap-3">
         <h3 class="font-sorts text-center text-lg lg:text-xl">
           Best Performing
-          <IconUI 
+          <IconUI
             v-tooltip="{
               content: bestPerformingTooltip,
               html: true,
             }"
-            id="info-circle" 
-            size="sm" 
+            id="info-circle"
+            size="sm"
           />
         </h3>
 
         <div v-if="bestPerforming" class="flex flex-col items-center gap-2">
-          <nuxt-link 
+          <nuxt-link
             :to="roleLink(bestPerforming.role.name)"
           >
             <Token
@@ -86,7 +86,7 @@
             class="rounded-full shadow-lg w-36 h-36 md:w-48 md:h-48 aspect-square bg-stone-200 dark:bg-stone-800 border border-stone-400"
           />
           <p class="text-center text-sm text-stone-400 text-balance">
-            No eligable character.
+            No eligible character.
           </p>
         </div>
       </div>
@@ -95,18 +95,18 @@
       <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-2 md:gap-3">
         <h3 class="font-sorts text-center text-lg lg:text-xl">
           Worst Performing
-          <IconUI 
+          <IconUI
             v-tooltip="{
               content: worstPerformingTooltip,
               html: true,
             }"
-            id="info-circle" 
-            size="sm" 
+            id="info-circle"
+            size="sm"
           />
         </h3>
 
         <div v-if="worstPerforming" class="flex flex-col items-center gap-2">
-          <nuxt-link 
+          <nuxt-link
           :to="roleLink(worstPerforming.role.name)"
           >
             <Token
@@ -123,7 +123,7 @@
 
           <div class="text-center text-sm text-balance max-w-44">
             {{ props.isMe ? `You` : `This player` }} finished {{ worstPerforming.plays }} game<span v-if="worstPerforming.plays !== 1">s</span> as
-            {{ roleArticle(worstPerforming.role.name) }}<span class="font-semibold">{{ worstPerforming.role.name }}</span> and 
+            {{ roleArticle(worstPerforming.role.name) }}<span class="font-semibold">{{ worstPerforming.role.name }}</span> and
             <span v-if="worstPerforming.wins > 0">won only {{ worstPerforming.wins }} of those.</span>
             <span v-else>tragically all of those were losses...</span>
           </div>
@@ -134,7 +134,7 @@
             class="rounded-full shadow-lg w-36 h-36 md:w-48 md:h-48 aspect-square bg-stone-200 dark:bg-stone-800 border border-stone-400"
           />
           <p class="text-center text-sm text-stone-400 text-balance">
-            No eligable character.
+            No eligible character.
           </p>
         </div>
       </div>
@@ -145,9 +145,9 @@
           Win Rate
         </h3>
 
-        <StatsPlayerAlignmentWins 
-          :games="games" 
-          class="w-full mb-2" 
+        <StatsPlayerAlignmentWins
+          :games="games"
+          class="w-full mb-2"
         />
 
         <div v-if="alignmentWinMessage" class="text-center text-sm text-balance max-w-64 mx-auto">
@@ -213,9 +213,9 @@ type SideSummary = {
 
 /**
  * Build stats map for roles.
- * 
+ *
  * Currently only considers the character the player ended the game as.
- * 
+ *
  * @todo Maybe this should include all characters during a game?
  */
 const roleStatsMap = computed<Map<string, RoleSummary>>(() => {
@@ -261,7 +261,7 @@ const roleStatsMap = computed<Map<string, RoleSummary>>(() => {
       (alignment === "EVIL" && evilWins)
     ) {
       stats.wins++;
-    } 
+    }
     else if (
       (alignment === "GOOD" && evilWins) ||
       (alignment === "EVIL" && goodWins)
@@ -295,7 +295,7 @@ const alignmentStats = computed(() => {
       good.plays++;
       if (goodWins) good.wins++;
       else if (evilWins) good.losses++;
-    } 
+    }
     else if (alignment === "EVIL") {
       evil.plays++;
       if (evilWins) evil.wins++;
@@ -350,8 +350,8 @@ const mostPlayed = computed<RoleSummary | null>(() => {
 
 /**
  * Determine "Best Performing" character.
- * 
- * Characters need at least MIN_PLAYS_FOR_PERFORMANCE 
+ *
+ * Characters need at least MIN_PLAYS_FOR_PERFORMANCE
  * plays to be considered.
  */
 const bestPerforming = computed<RoleSummary | null>(() => {
@@ -393,8 +393,8 @@ const bestPerformingTooltip = computed(
 
 /**
  * Determine "Worst Performing" character.
- * 
- * Characters need at least MIN_PLAYS_FOR_PERFORMANCE 
+ *
+ * Characters need at least MIN_PLAYS_FOR_PERFORMANCE
  * plays to be considered.
  */
 const worstPerforming = computed<RoleSummary | null>(() => {
@@ -470,9 +470,9 @@ function roleLink(name?: string) {
  */
 function roleArticle(name: string): "" | "the " {
   const pluralRoles = [
-    "Legion", 
-    "Lil' Monsta", 
-    "Riot", 
+    "Legion",
+    "Lil' Monsta",
+    "Riot",
   ];
   if (pluralRoles.includes(name)) return "";
   if (name.startsWith("The ")) return "";

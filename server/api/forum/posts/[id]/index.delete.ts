@@ -1,6 +1,10 @@
+import {
+  requireForumPostAccess,
+  hasForumPermission,
+  logModAction,
+} from "~/server/utils/forum";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
-import { hasForumPermission, logModAction } from "~/server/utils/forum";
 import { hasRestriction } from "~/server/utils/permissions";
 
 export default defineEventHandler(async (handler) => {
@@ -11,6 +15,7 @@ export default defineEventHandler(async (handler) => {
   }
 
   const postId = handler.context.params!.id;
+  await requireForumPostAccess(me?.id ?? null, postId);
 
   const post = await prisma.forumPost.findFirst({
     where: { id: postId, deleted_at: null },
@@ -18,7 +23,7 @@ export default defineEventHandler(async (handler) => {
       thread: {
         select: {
           id: true,
-          _count: { select: { posts: { where: { deleted_at: null } } } },
+          _count: { select: { posts: { where: { deleted_at: null, published: true } } } },
         },
       },
     },
@@ -41,7 +46,7 @@ export default defineEventHandler(async (handler) => {
 
   // Check if this is the first post and the only remaining post
   const firstPost = await prisma.forumPost.findFirst({
-    where: { thread_id: post.thread.id, deleted_at: null },
+    where: { thread_id: post.thread.id, deleted_at: null, published: true },
     orderBy: { created_at: "asc" },
     select: { id: true },
   });

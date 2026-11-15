@@ -1,3 +1,4 @@
+import { requireForumThreadAccess } from "~/server/utils/forum";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
 
@@ -8,14 +9,8 @@ export default defineEventHandler(async (handler) => {
   }
 
   const threadId = handler.context.params!.id;
+  await requireForumThreadAccess(me.id, threadId);
 
-  const thread = await prisma.forumThread.findFirst({
-    where: { id: threadId, deleted_at: null },
-  });
-
-  if (!thread) {
-    throw createError({ status: 404, statusMessage: "Thread not found" });
-  }
 
   // Toggle subscription
   const existing = await prisma.forumThreadSubscription.findUnique({

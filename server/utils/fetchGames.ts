@@ -188,32 +188,10 @@ export async function fetchGames(user_id: string, me: User | null) {
             orderBy: {
               order: "asc",
             },
-            select: {
-              id: true,
-              role_id: true,
-              related_role_id: true,
-              alignment: true,
-              is_dead: true,
-              used_ghost_vote: true,
-              order: true,
-              grimoire_id: true,
-              grimoire_participant_id: true,
-              player_name: true,
-              player_id: true,
-              created_at: true,
-              role: {
-                select: {
-                  token_url: true,
-                  type: true,
-                  initial_alignment: true,
-                  name: true,
-                },
-              },
-              related_role: {
-                select: {
-                  token_url: true,
-                },
-              },
+            include: {
+              role: true,
+              related_role: true,
+              reminders: true,
               player: {
                 select: {
                   display_name: true,
@@ -223,9 +201,6 @@ export async function fetchGames(user_id: string, me: User | null) {
               },
             },
           },
-        },
-        orderBy: {
-          id: "asc",
         },
       },
       parent_game: {

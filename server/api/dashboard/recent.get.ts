@@ -1,3 +1,5 @@
+import { forumVisibility } from "~/server/utils/forumSafety";
+import { userCanViewCategory } from "~/server/utils/forum";
 import type { CommunityPost, Event } from "~/server/generated/prisma/client";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
@@ -439,14 +441,19 @@ export default defineEventHandler(async (handler) => {
 
   // Forum posts from subscribed threads (gated by feature flag)
   const featureFlags = await useFeatureFlags(user);
+  const forumVisible = await forumVisibility(user.id);
+  const forumCategories = await prisma.forumCategory.findMany({ select: { id: true, is_private: true } });
+  const forumAccess = await Promise.all(forumCategories.map(c => userCanViewCategory(user.id, c.id, c.is_private)));
+  const forumCategoryIds = forumCategories.filter((_, i) => forumAccess[i]).map(c => c.id);
   const recentForumPosts = featureFlags.isEnabled("forum")
     ? await prisma.forumPost.findMany({
         where: {
-          deleted_at: null,
-          author_id: { not: user.id },
+          ...forumVisible,
+          author_id: { ...forumVisible.author_id, not: user.id },
           ...(dateFilter && { created_at: dateFilter }),
           thread: {
-            deleted_at: null,
+            ...forumVisible,
+            category_id: { in: forumCategoryIds },
             subscriptions: {
               some: { user_id: user.id },
             },

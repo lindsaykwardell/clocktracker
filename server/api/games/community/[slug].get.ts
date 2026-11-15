@@ -1,10 +1,11 @@
+import { defineProtectedHandler } from "~/server/utils/protectedHandler";
 import { PrivacySetting } from "~/server/generated/prisma/client";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import type { GameRecord } from "~/server/utils/anonymizeGame";
 import { prisma } from "~/server/utils/prisma";
 import { hasPermission } from "~/server/utils/permissions";
 
-export default defineEventHandler(async (handler) => {
+export default defineProtectedHandler("games-stats", async (handler) => {
   const me: User | null = handler.context.user;
   const slug = handler.context.params?.slug as string;
 
@@ -69,6 +70,8 @@ export default defineEventHandler(async (handler) => {
       parent_game_id: null,
     },
     include: {
+      grimoire_events: true,
+      end_trigger_role: true,
       ls_game: {
         select: {
           campaign: {
@@ -131,9 +134,6 @@ export default defineEventHandler(async (handler) => {
       grimoire: {
         include: {
           tokens: {
-            orderBy: {
-              order: "asc",
-            },
             select: {
               id: true,
               role_id: true,
@@ -143,9 +143,10 @@ export default defineEventHandler(async (handler) => {
               used_ghost_vote: true,
               order: true,
               grimoire_id: true,
-              grimoire_participant_id: true,
               player_name: true,
               player_id: true,
+              grimoire_participant_id: true,
+              reminders: true,
               created_at: true,
               role: {
                 select: {
@@ -169,9 +170,6 @@ export default defineEventHandler(async (handler) => {
               },
             },
           },
-        },
-        orderBy: {
-          id: "asc",
         },
       },
       parent_game: {

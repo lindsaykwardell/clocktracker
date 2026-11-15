@@ -1,5 +1,9 @@
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
+import {
+  requireForumThreadAccess,
+  hasForumPermission,
+} from "~/server/utils/forum";
 import { githubApiFetch } from "~/server/utils/github";
-import { hasForumPermission } from "~/server/utils/forum";
 import { isAdmin } from "~/server/utils/permissions";
 import { prisma } from "~/server/utils/prisma";
 
@@ -16,6 +20,7 @@ export default defineEventHandler(async (handler) => {
   }
 
   const threadId = handler.context.params!.id;
+  await requireForumThreadAccess(me.id, threadId);
   const body = await readBody<{ labels?: string[] } | null>(handler);
 
   const thread = await prisma.forumThread.findUnique({

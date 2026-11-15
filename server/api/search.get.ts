@@ -1,3 +1,4 @@
+import { defineProtectedHandler } from "~/server/utils/protectedHandler";
 import { PrivacySetting } from "~/server/generated/prisma/client";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { addUserKofiLevel } from "../utils/addUserKofiLevel";
@@ -5,7 +6,7 @@ import geolib from "geolib";
 import { prisma } from "~/server/utils/prisma";
 import { hasPermission } from "~/server/utils/permissions";
 
-export default defineEventHandler(async (handler) => {
+export default defineProtectedHandler("search", async (handler) => {
   const me: User | null = handler.context.user;
   const params = getQuery(handler) as {
     query: string;

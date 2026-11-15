@@ -1,3 +1,4 @@
+import { forumVisibility } from "~/server/utils/forumSafety";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
 import { forumUserSelect, userCanViewCategory } from "~/server/utils/forum";
@@ -13,12 +14,13 @@ async function buildCategoryData(
   );
   if (!canView) return null;
 
+  const visible = await forumVisibility(me?.id ?? null);
   const lastPost = await prisma.forumPost.findFirst({
     where: {
-      deleted_at: null,
+      ...visible,
       thread: {
         category_id: category.id,
-        deleted_at: null,
+        ...visible,
       },
     },
     orderBy: { created_at: "desc" },
@@ -58,6 +60,7 @@ async function buildCategoryData(
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
 
+  const visible = await forumVisibility(me?.id ?? null);
   const [categories, categoryGroups] = await Promise.all([
     prisma.forumCategory.findMany({
       orderBy: { sort_order: "asc" },
@@ -65,7 +68,7 @@ export default defineEventHandler(async (handler) => {
         access: true,
         _count: {
           select: {
-            threads: { where: { deleted_at: null } },
+            threads: { where: visible },
           },
         },
       },
@@ -75,7 +78,7 @@ export default defineEventHandler(async (handler) => {
     }),
   ]);
 
-  const visibleCategories = [];
+  const visibleCategories: NonNullable<Awaited<ReturnType<typeof buildCategoryData>>>[] = [];
   for (const category of categories) {
     const data = await buildCategoryData(category, me);
     if (data) visibleCategories.push(data);
@@ -108,7 +111,7 @@ export default defineEventHandler(async (handler) => {
       const threads = await prisma.forumThread.findMany({
         where: {
           category_id: { in: categoryIds },
-          deleted_at: null,
+          ...visible,
           last_post_at: { gte: firstVisit },
         },
         select: { id: true, category_id: true, last_post_at: true },

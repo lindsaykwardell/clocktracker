@@ -41,9 +41,8 @@
           v-if="threadData.data.threads.length"
           class="flex flex-col gap-2"
         >
-          <nuxt-link
-            v-for="thread in threadData.data.threads"
-            :key="thread.id"
+          <ForumMutedContent v-for="thread in threadData.data.threads" :key="thread.id" :author-id="thread.author.user_id">
+<nuxt-link
             :to="threadLink(thread)"
             class="flex items-start gap-3 p-3 sm:p-4 rounded border
                    border-stone-300 dark:border-stone-700/50
@@ -84,6 +83,7 @@
               </div>
             </div>
           </nuxt-link>
+</ForumMutedContent>
         </div>
         <p v-else class="text-center py-3 text-stone-400">
           No threads yet. Start the conversation!

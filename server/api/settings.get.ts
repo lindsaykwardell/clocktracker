@@ -152,7 +152,7 @@ export default defineEventHandler(async (handler) => {
         await prisma.userSettings.findFirst({
           where: {
             username: {
-              equals: user.user_metadata.full_name,
+              equals: user.user_metadata?.full_name,
               mode: "insensitive",
             },
           },
@@ -175,9 +175,9 @@ export default defineEventHandler(async (handler) => {
       },
       data: {
         user_id: user.id,
-        avatar: user.user_metadata.avatar_url || existingByEmail.avatar,
+        avatar: user.user_metadata?.avatar_url || existingByEmail.avatar,
         display_name:
-          user.user_metadata.full_name || existingByEmail.display_name,
+          user.user_metadata?.full_name || existingByEmail.display_name,
       },
     });
 

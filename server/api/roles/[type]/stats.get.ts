@@ -1,7 +1,8 @@
+import { defineProtectedHandler } from "~/server/utils/protectedHandler";
 import { Prisma } from "~/server/generated/prisma/client";
 import { prisma } from "~/server/utils/prisma";
 
-export default defineEventHandler(async (handler) => {
+export default defineProtectedHandler("games-stats", async (handler) => {
   const name = handler.context.params?.type as string;
   let { script, compared_to_role, game_size } = getQuery(handler) as {
     script?: string;

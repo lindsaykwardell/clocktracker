@@ -4,6 +4,10 @@
     :slug="
       event.status === Status.SUCCESS ? event.data.community?.slug : undefined
     "
+    :publicContent="
+      event.status === Status.SUCCESS &&
+      ['ANYONE', 'PRIVATE'].includes(event.data.who_can_register)
+    "
   >
     <template v-if="event.status === Status.SUCCESS">
       <UserHeader

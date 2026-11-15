@@ -382,7 +382,9 @@ export const useGames = defineStore("games", {
           }
         }
 
-        return Array.from(tags);
+        return Array.from(tags).sort((a, b) =>
+          a.localeCompare(b, undefined, { sensitivity: "base" })
+        );
       };
     },
     getCommunityNamesByPlayer(): (username: string) => string[] {
@@ -587,7 +589,15 @@ export const useGames = defineStore("games", {
       if (!this.players.has(username))
         this.players.set(username, { status: Status.LOADING });
 
-      const games = await $fetch<GameRecord[]>(`/api/user/${username}/games`);
+      let games: GameRecord[];
+      try {
+        games = await useProtectedFetch()<GameRecord[]>(`/api/user/${username}/games`);
+      } catch (error) {
+        if (this.players.get(username)?.status !== Status.SUCCESS) {
+          this.players.set(username, { status: Status.ERROR, error });
+        }
+        return;
+      }
 
       // Batch all reactive updates into a single notification.
       // markRaw prevents Vue from creating deep Proxy wrappers for each game
@@ -647,7 +657,12 @@ export const useGames = defineStore("games", {
       });
     },
     async fetchCommunityGames(slug: string) {
-      const games = await $fetch<GameRecord[]>(`/api/games/community/${slug}`);
+      let games: GameRecord[];
+      try {
+        games = await useProtectedFetch()<GameRecord[]>(`/api/games/community/${slug}`);
+      } catch {
+        return;
+      }
 
       this.$patch((state) => {
         for (const game of games) {

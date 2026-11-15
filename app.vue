@@ -1,5 +1,7 @@
 <template>
+    <div v-if="staging" class="bg-amber-200 text-stone-900 px-4 py-2 text-center text-sm">Staging — copied data. Administrator access only.</div>
     <NuxtPage />
+    <RateLimitNotice />
     <AnnouncementDialog
         v-if="announcement"
         :id="`announcement-${announcement.threadId}`"
@@ -34,7 +36,7 @@
             </div>
         </template>
     </AnnouncementDialog>
-    <VitePwaManifest />
+    <VitePwaManifest v-if="!staging" />
 </template>
 
 <script setup lang="ts">
@@ -66,12 +68,15 @@ import { nanoid } from "nanoid";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
+const staging = useRuntimeConfig().public.staging;
 const users = useUsers();
 const user = useUser();
 const featureFlags = useFeatureFlags();
 
-await featureFlags.init();
-await featureFlags.fetchScheduledMaintenance();
+if (!staging || user.value) {
+    await featureFlags.init();
+    await featureFlags.fetchScheduledMaintenance();
+}
 
 // Fetch user settings during SSR
 const { data: userSettings, error: userSettingsError } = await useAsyncData(
@@ -119,7 +124,7 @@ watch(
             // console.log('userSettings watcher: Storing new settings in Pinia');
             users.storeUser(newSettings);
             // Re-register push subscription on this browser if user has notifications enabled
-            if (import.meta.client) {
+            if (import.meta.client && !staging) {
                 syncPushSubscription(!!newSettings.push_notifications_enabled);
             }
         } else if (oldSettings && !newSettings) {
@@ -184,6 +189,7 @@ const announcement = ref<{
 } | null>(null);
 
 onMounted(async () => {
+    if (staging && !user.value) return;
     try {
         const data = await $fetch("/api/forum/announcement");
         if (data) {

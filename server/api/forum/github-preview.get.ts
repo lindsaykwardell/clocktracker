@@ -1,3 +1,6 @@
+import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
+import { forumVisibility } from "~/server/utils/forumSafety";
+import { userCanViewCategory } from "~/server/utils/forum";
 import { getCachedGitHubPreview } from "~/server/utils/github";
 import { prisma } from "~/server/utils/prisma";
 
@@ -5,10 +8,6 @@ import { prisma } from "~/server/utils/prisma";
 const anonRateLimit = new Map<string, { count: number; resetAt: number }>();
 const ANON_RATE_LIMIT = 30; // requests per window
 const ANON_RATE_WINDOW = 60 * 1000; // 1 minute
-
-// Cache of verified GitHub URLs that exist in forum content
-const verifiedUrls = new Map<string, number>(); // url -> timestamp
-const VERIFIED_URL_TTL = 10 * 60 * 1000; // 10 minutes
 
 export default defineEventHandler(async (handler) => {
   const me: User | null = handler.context.user;
@@ -59,16 +58,20 @@ export default defineEventHandler(async (handler) => {
     owner === config.githubRepoOwner && repo === config.githubRepoName;
 
   if (!isConfiguredRepo) {
-    const cachedAt = verifiedUrls.get(githubUrl);
-    if (!cachedAt || Date.now() - cachedAt > VERIFIED_URL_TTL) {
+    {
+      const visible = await forumVisibility(me?.id ?? null);
+      const categories = await prisma.forumCategory.findMany({ select: { id: true, is_private: true } });
+      const access = await Promise.all(categories.map(c => userCanViewCategory(me?.id ?? null, c.id, c.is_private)));
+      const ids = categories.filter((_, i) => access[i]).map(c => c.id);
+      const threadWhere = { ...visible, category_id: { in: ids } };
       // Check if this URL exists in any forum post or as a thread's github_issue_url
       const [postMatch, threadMatch] = await Promise.all([
         prisma.forumPost.findFirst({
-          where: { body: { contains: githubUrl }, deleted_at: null },
+          where: { body: { contains: githubUrl }, ...visible, thread: threadWhere },
           select: { id: true },
         }),
         prisma.forumThread.findFirst({
-          where: { github_issue_url: { contains: githubUrl }, deleted_at: null },
+          where: { github_issue_url: { contains: githubUrl }, ...threadWhere },
           select: { id: true },
         }),
       ]);
@@ -80,7 +83,7 @@ export default defineEventHandler(async (handler) => {
         });
       }
 
-      verifiedUrls.set(githubUrl, Date.now());
+
     }
   }
 
