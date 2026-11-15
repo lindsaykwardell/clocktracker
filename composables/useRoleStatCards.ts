@@ -440,6 +440,52 @@ export function buildGlobalRoleStatCardPreview(
   };
 }
 
+// Scoping a game list for a card used to re-scan every game for every card
+// (~250 cards per page). Each card scope only depends on the game list and the
+// username (plus the role id for "as_role"), so the work is done once per list
+// and shared by every card. The cache is keyed by the array itself: the games
+// store builds a new array whenever its data changes and never mutates one.
+type ScopeIndex = {
+  userParticipantIds: Set<string>[];
+  userRoleIds: Set<string>[];
+  affectedPlayer?: GameRecord[];
+  triggeringPlayer?: GameRecord[];
+  asRole: Map<string, GameRecord[]>;
+};
+
+const scopeIndexCache = new WeakMap<GameRecord[], Map<string, ScopeIndex>>();
+
+function getScopeIndex(games: GameRecord[], username: string): ScopeIndex {
+  let byUser = scopeIndexCache.get(games);
+  if (!byUser) {
+    byUser = new Map();
+    scopeIndexCache.set(games, byUser);
+  }
+
+  let index = byUser.get(username);
+  if (!index) {
+    const userParticipantIds: Set<string>[] = [];
+    const userRoleIds: Set<string>[] = [];
+    for (const game of games) {
+      const participantIds = new Set<string>();
+      const roleIds = new Set<string>();
+      for (const page of game.grimoire) {
+        for (const token of page.tokens) {
+          if (token.player?.username !== username) continue;
+          if (token.grimoire_participant_id) participantIds.add(token.grimoire_participant_id);
+          if (token.role_id) roleIds.add(token.role_id);
+        }
+      }
+      userParticipantIds.push(participantIds);
+      userRoleIds.push(roleIds);
+    }
+    index = { userParticipantIds, userRoleIds, asRole: new Map() };
+    byUser.set(username, index);
+  }
+
+  return index;
+}
+
 function getScopedGamesForRole(
   games: GameRecord[],
   username: string | undefined,
@@ -451,16 +497,11 @@ function getScopedGamesForRole(
     return games;
   }
 
-  if (scope === "affected_player") {
-    return games.flatMap((game) => {
-      const participantIds = new Set(
-        game.grimoire
-          .flatMap((page) => page.tokens)
-          .filter((token) => token.player?.username === username)
-          .map((token) => token.grimoire_participant_id)
-          .filter((id): id is string => !!id)
-      );
+  const index = getScopeIndex(games, username);
 
+  if (scope === "affected_player") {
+    index.affectedPlayer ??= games.flatMap((game, i) => {
+      const participantIds = index.userParticipantIds[i];
       if (!participantIds.size) return [];
 
       return [
@@ -472,18 +513,12 @@ function getScopedGamesForRole(
         },
       ];
     });
+    return index.affectedPlayer;
   }
 
   if (scope === "triggering_player") {
-    return games.flatMap((game) => {
-      const participantIds = new Set(
-        game.grimoire
-          .flatMap((page) => page.tokens)
-          .filter((token) => token.player?.username === username)
-          .map((token) => token.grimoire_participant_id)
-          .filter((id): id is string => !!id)
-      );
-
+    index.triggeringPlayer ??= games.flatMap((game, i) => {
+      const participantIds = index.userParticipantIds[i];
       if (!participantIds.size) return [];
 
       const triggeringEvents = game.grimoire_events.filter(
@@ -513,17 +548,17 @@ function getScopedGamesForRole(
         },
       ];
     });
+    return index.triggeringPlayer;
   }
 
   if (!roleId) return games;
 
-  return games.filter((game) =>
-    game.grimoire.some((page) =>
-      page.tokens.some(
-        (token) => token.player?.username === username && token.role_id === roleId
-      )
-    )
-  );
+  let asRole = index.asRole.get(roleId);
+  if (!asRole) {
+    asRole = games.filter((_, i) => index.userRoleIds[i].has(roleId));
+    index.asRole.set(roleId, asRole);
+  }
+  return asRole;
 }
 
 function countGrimoireEvents(
