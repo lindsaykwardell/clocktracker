@@ -9,9 +9,14 @@
         :class="inputClass"
         :placeholder="placeholder"
       />
+      <!--
+        No v-if on ComboboxOptions: filteredPeople always contains at least the
+        typed value, so a length check was always true, but it forced every
+        input to filter and sort the full user list on each change.
+        ComboboxOptions only renders (and computes the list) while open.
+      -->
       <Transition @afterLeave="emit('optionSelected')">
         <ComboboxOptions
-          v-if="filteredPeople.length > 0"
           class="absolute text-sm bg-stone-200 dark:bg-stone-900 border border-stone-300 dark:border-stone-500 max-h-[150px] min-w-[200px] w-full overflow-y-scroll overflow-x-hidden z-10"
           :class="{
             'bottom-8': renderListOnTop,
