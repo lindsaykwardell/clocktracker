@@ -181,6 +181,7 @@ export default defineEventHandler(async (handler) => {
             : null) ?? null
         );
   if (Array.isArray(data.grimoire_events)) {
+    gameUpdateData.grimoire_events_generated_at = new Date();
     gameUpdateData.grimoire_events = {
       deleteMany: {},
       create: data.grimoire_events.map((event) => ({

@@ -1,7 +1,7 @@
 import type { AppUpdateDefinition } from "./types";
-import { grimoireEventsBackfillUpdate } from "./grimoireEventsBackfill";
-
-const UPDATES: AppUpdateDefinition[] = [grimoireEventsBackfillUpdate];
+// Grimoire events for older games are filled by the background job in
+// server/cron/grimoireEventsFill.ts, which only ever adds events.
+const UPDATES: AppUpdateDefinition[] = [];
 
 export function listAppUpdates() {
   return UPDATES;

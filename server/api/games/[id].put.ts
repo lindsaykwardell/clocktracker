@@ -265,6 +265,7 @@ export default defineEventHandler(async (handler) => {
           deleteMany: {},
           create: mapGrimoireEventsForCreate(incomingGrimoireEvents),
         },
+        grimoire_events_generated_at: new Date(),
         grimoire: {
           deleteMany: {
             id: {

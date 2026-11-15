@@ -137,6 +137,7 @@ export default defineEventHandler(async (handler) => {
         grimoire_events: {
           create: mapGrimoireEventsForCreate(incomingGrimoireEvents),
         },
+        grimoire_events_generated_at: new Date(),
         grimoire: {
           create: [
             ...body.grimoire.map((g) => ({

@@ -500,7 +500,12 @@ export function generateEventsForMissingGames(grimoire: PageLike[]) {
 
   grimoire.forEach((page, pageIndex) => {
     const orderedTokens = page.tokens.slice().sort((a, b) => a.order - b.order);
-    const usedPreviousOrders = new Set<number>();
+    // Participant-id assignment and event matching each need their own set of
+    // claimed previous-page tokens. Sharing one set made the event lookup skip
+    // the token's own match (just claimed by the assignment), which produced
+    // phantom deaths/revivals on grimoires that had no participant ids yet.
+    const usedForParticipantIds = new Set<number>();
+    const usedForEvents = new Set<number>();
 
     for (const token of orderedTokens) {
       if (!token.grimoire_participant_id) {
@@ -510,7 +515,7 @@ export function generateEventsForMissingGames(grimoire: PageLike[]) {
                 grimoire,
                 pageIndex,
                 token,
-                usedPreviousOrders
+                usedForParticipantIds
               )
             : null;
         token.grimoire_participant_id =
@@ -528,7 +533,7 @@ export function generateEventsForMissingGames(grimoire: PageLike[]) {
               grimoire,
               pageIndex,
               token,
-              usedPreviousOrders,
+              usedForEvents,
               !token.is_dead
             )
           : null;

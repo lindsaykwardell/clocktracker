@@ -14,6 +14,12 @@ type GameTrackingData=Partial<Pick<Game,
   |"ls_game_id"
 >>&{ grimoire_events?: GrimoireEvent[] };
 
+// A child copy counts as having generated events whenever this save passes
+// the events along, so the background fill never touches it.
+function eventsGeneratedAt(game: GameTrackingData) {
+  return game.grimoire_events===undefined? undefined:new Date();
+}
+
 function trackingData(game: GameTrackingData) {
   return {
     end_trigger: game.end_trigger,
@@ -149,6 +155,7 @@ export async function findOrCreatePlayerChildGame(opts: {
         co_storytellers: game.co_storytellers,
         win_v2: game.win_v2 as any,
         ...trackingData(game),
+        grimoire_events_generated_at: eventsGeneratedAt(game),
         grimoire_events: game.grimoire_events===undefined? undefined:{
           deleteMany: {},
           create: mapGrimoireEventsForCreate(game.grimoire_events),
@@ -221,6 +228,7 @@ export async function findOrCreatePlayerChildGame(opts: {
       co_storytellers: game.co_storytellers,
       win_v2: game.win_v2 as any,
       ...trackingData(game),
+      grimoire_events_generated_at: eventsGeneratedAt(game),
       grimoire_events: game.grimoire_events===undefined? undefined:{
         create: mapGrimoireEventsForCreate(game.grimoire_events),
       },
@@ -309,6 +317,7 @@ export async function findOrCreateStorytellerChildGame(opts: {
         co_storytellers: game.co_storytellers,
         win_v2: game.win_v2 as any,
         ...trackingData(game),
+        grimoire_events_generated_at: eventsGeneratedAt(game),
         grimoire_events: game.grimoire_events===undefined? undefined:{
           deleteMany: {},
           create: mapGrimoireEventsForCreate(game.grimoire_events),
@@ -367,6 +376,7 @@ export async function findOrCreateStorytellerChildGame(opts: {
       co_storytellers: game.co_storytellers,
       win_v2: game.win_v2 as any,
       ...trackingData(game),
+      grimoire_events_generated_at: eventsGeneratedAt(game),
       grimoire_events: game.grimoire_events===undefined? undefined:{
         create: mapGrimoireEventsForCreate(game.grimoire_events),
       },
