@@ -53,7 +53,7 @@ const playerGames = computed(() =>
     (game) =>
       !game.ignore_for_stats &&
       !game.is_storyteller &&
-      validMonths.has(dayjs(game.date).tz("UTC").format("YYYY-MM"))
+      validMonths.has(dayjs.utc(game.date).format("YYYY-MM"))
   )
 );
 
@@ -80,7 +80,7 @@ const monthlyCounts = computed(() => {
   }
 
   for (const game of playerGames.value) {
-    const key = dayjs(game.date).tz("UTC").format("YYYY-MM");
+    const key = dayjs.utc(game.date).format("YYYY-MM");
     const entry = counts[key];
     if (!entry) continue;
 
@@ -130,7 +130,7 @@ const winRates = computed(() => {
     const alignment = last.alignment as Alignment;
     if (!alignment) continue;
 
-    const key = dayjs(game.date).tz("UTC").format("YYYY-MM");
+    const key = dayjs.utc(game.date).format("YYYY-MM");
     const entry = monthly[key];
     if (!entry) continue;
 

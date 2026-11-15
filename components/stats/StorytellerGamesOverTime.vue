@@ -55,7 +55,7 @@ const validMonths = new Set(monthKeys);
  */
 const storytellerGames = computed(() =>
   filterStorytellerGames(props.games, props.username).filter((game) =>
-    validMonths.has(dayjs(game.date).tz("UTC").format("YYYY-MM"))
+    validMonths.has(dayjs.utc(game.date).format("YYYY-MM"))
   )
 );
 
@@ -82,7 +82,7 @@ const monthlyCounts = computed(() => {
   }
 
   for (const game of storytellerGames.value) {
-    const key = dayjs(game.date).tz("UTC").format("YYYY-MM");
+    const key = dayjs.utc(game.date).format("YYYY-MM");
     const entry = counts[key];
     if (!entry) continue;
 
@@ -114,7 +114,7 @@ const monthlyOutcomes = computed(() => {
   }
 
   for (const game of storytellerGames.value) {
-    const key = dayjs(game.date).tz("UTC").format("YYYY-MM");
+    const key = dayjs.utc(game.date).format("YYYY-MM");
     const entry = outcomes[key];
     if (!entry) continue;
 

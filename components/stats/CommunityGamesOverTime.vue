@@ -55,7 +55,7 @@ const filteredGames = computed(() =>
   props.games.filter(
     (game) =>
       !game.ignore_for_stats &&
-      validMonths.has(dayjs(game.date).tz("UTC").format("YYYY-MM"))
+      validMonths.has(dayjs.utc(game.date).format("YYYY-MM"))
   )
 );
 
@@ -82,7 +82,7 @@ const monthlyCounts = computed(() => {
   }
 
   for (const game of filteredGames.value) {
-    const key = dayjs(game.date).tz("UTC").format("YYYY-MM");
+    const key = dayjs.utc(game.date).format("YYYY-MM");
     const entry = counts[key];
     if (!entry) continue;
 
@@ -114,7 +114,7 @@ const monthlyOutcomes = computed(() => {
   }
 
   for (const game of filteredGames.value) {
-    const key = dayjs(game.date).tz("UTC").format("YYYY-MM");
+    const key = dayjs.utc(game.date).format("YYYY-MM");
     const entry = outcomes[key];
     if (!entry) continue;
 

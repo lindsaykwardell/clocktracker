@@ -53,7 +53,7 @@ const data = computed(() => {
       !game.ignore_for_stats &&
       validMonths.includes(dayjs(game.date).format("YYYY MMMM"))
   )) {
-    const month = dayjs(game.date).tz("UTC").format("MMMM");
+    const month = dayjs.utc(game.date).format("MMMM");
     if (!data[month]) {
       data[month] = {
         troubleBrewing: 0,
