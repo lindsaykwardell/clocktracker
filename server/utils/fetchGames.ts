@@ -182,16 +182,42 @@ export async function fetchGames(user_id: string, me: User | null) {
           name: true,
         },
       },
+      // The list is every game a user has, so tokens only carry what the game
+      // list, stats and stat cards read. The full grimoire (reminders, ability
+      // text, ...) is loaded per game by fetchGame().
       grimoire: {
         include: {
           tokens: {
             orderBy: {
               order: "asc",
             },
-            include: {
-              role: true,
-              related_role: true,
-              reminders: true,
+            select: {
+              id: true,
+              role_id: true,
+              related_role_id: true,
+              alignment: true,
+              is_dead: true,
+              used_ghost_vote: true,
+              order: true,
+              grimoire_id: true,
+              grimoire_participant_id: true,
+              player_name: true,
+              player_id: true,
+              created_at: true,
+              role: {
+                select: {
+                  id: true,
+                  token_url: true,
+                  type: true,
+                  initial_alignment: true,
+                  name: true,
+                },
+              },
+              related_role: {
+                select: {
+                  token_url: true,
+                },
+              },
               player: {
                 select: {
                   display_name: true,
@@ -201,6 +227,11 @@ export async function fetchGames(user_id: string, me: User | null) {
               },
             },
           },
+        },
+        // Grimoire events refer to pages by index, so the page order must
+        // match fetchGame() and the editor.
+        orderBy: {
+          id: "asc",
         },
       },
       parent_game: {
