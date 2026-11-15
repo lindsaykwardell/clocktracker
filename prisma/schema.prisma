@@ -75,6 +75,7 @@ model Game {
 
   @@index([user_id])
   @@index([script_id, parent_game_id])
+  @@index([end_trigger_role_id])
 }
 
 model ImportedGame {
@@ -161,6 +162,12 @@ model GrimoireEvent {
   old_alignment     Alignment?
   new_alignment     Alignment?
   created_at        DateTime            @default(now()) @db.Timestamptz(6)
+
+  @@index([game_id])
+  @@index([role_id])
+  @@index([by_role_id])
+  @@index([old_role_id])
+  @@index([new_role_id])
 }
 
 model Grimoire {
@@ -202,6 +209,7 @@ model Token {
   reminders               ReminderToken[]
 
   @@index([grimoire_id])
+  @@index([role_id])
 }
 
 model ReminderToken {

@@ -7,11 +7,28 @@ import {
 } from "~/composables/useRoleStatCards";
 import { prisma } from "~/server/utils/prisma";
 
+// Role stats are the same for every viewer and expensive to build (the stat
+// cards replay every game that mentions the role), so one copy per role is
+// cached and refreshed in the background. The forum link previews also call
+// this endpoint, which is why it is cached rather than rate limited.
+const ROLE_STATS_CACHE_SECONDS = 15 * 60;
+
+// Keeps each `IN (...)` well under Postgres' bind-parameter limit.
+const GAME_ID_CHUNK_SIZE = 5000;
+
 function scriptKey(scriptId: number | null, scriptName: string | null) {
   return `${scriptId ?? "custom"}:${scriptName ?? ""}`;
 }
 
-export default defineEventHandler(async (handler) => {
+function chunk<T>(items: T[], size: number) {
+  const chunks: T[][] = [];
+  for (let i = 0; i < items.length; i += size) {
+    chunks.push(items.slice(i, i + size));
+  }
+  return chunks;
+}
+
+export default defineCachedEventHandler(async (handler) => {
   const role_id = handler.context.params?.role_id as string;
 
   const role = await prisma.role.findUnique({
@@ -53,14 +70,21 @@ export default defineEventHandler(async (handler) => {
         AND c."role_id" = ${role_id}
       ORDER BY c."game_id", c."id" DESC
     ),
-    last_grimoire_page AS (
-      SELECT gg."A" AS game_id, MAX(gg."B") AS grimoire_id
-      FROM "_GameToGrimoire" gg
+    storyteller_games_with_role AS (
+      SELECT DISTINCT gg."A" AS game_id
+      FROM "Token" t
+      JOIN "_GameToGrimoire" gg ON gg."B" = t."grimoire_id"
       JOIN "Game" g ON g."id" = gg."A"
-      WHERE g."deleted" = false
+      WHERE t."role_id" = ${role_id}
+        AND g."deleted" = false
         AND g."parent_game_id" IS NULL
         AND g."ignore_for_stats" = false
         AND g."is_storyteller" = true
+    ),
+    last_grimoire_page AS (
+      SELECT gg."A" AS game_id, MAX(gg."B") AS grimoire_id
+      FROM "_GameToGrimoire" gg
+      WHERE gg."A" IN (SELECT game_id FROM storyteller_games_with_role)
       GROUP BY gg."A"
     ),
     storyteller_tokens AS (
@@ -225,112 +249,104 @@ export default defineEventHandler(async (handler) => {
   const needsGrimoireState = roleCardDefinitions.some((definition) =>
     definition.globalDataNeeds?.includes("grimoire_state")
   );
-  const roleStatGames = roleCardDefinitions.length
-    ? await prisma.game.findMany({
-        where: {
-          deleted: false,
-          parent_game_id: null,
-          ignore_for_stats: false,
-          OR: [
-            {
-              end_trigger_role_id: role_id,
-            },
-            {
-              grimoire_events: {
-                some: {
-                  by_role_id: role_id,
-                },
-              },
-            },
-            {
-              grimoire_events: {
-                some: {
-                  role_id,
-                },
-              },
-            },
-            {
-              grimoire_events: {
-                some: {
-                  old_role_id: role_id,
-                },
-              },
-            },
-            {
-              grimoire_events: {
-                some: {
-                  new_role_id: role_id,
-                },
-              },
-            },
-          ],
-        },
-        select: {
-          id: true,
-          ignore_for_stats: true,
-          win_v2: true,
-          end_trigger: true,
-          end_trigger_type: true,
-          end_trigger_cause: true,
-          end_trigger_role_id: true,
-          end_trigger_participant_alignment: true,
-          end_trigger_subtype: true,
-          end_trigger_note: true,
-          grimoire_events: {
-            select: {
-              grimoire_page: true,
-              participant_id: true,
-              event_type: true,
-              status_source: true,
-              cause: true,
-              by_participant_id: true,
-              role_id: true,
-              by_role_id: true,
-              old_role_id: true,
-              new_role_id: true,
-              old_alignment: true,
-              new_alignment: true,
-            },
+  const roleStatGameIds = roleCardDefinitions.length
+    ? (
+        await prisma.$queryRaw<{ id: string }[]>(Prisma.sql`
+          SELECT g."id"
+          FROM "Game" g
+          WHERE g."id" IN (
+              SELECT "id" FROM "Game" WHERE "end_trigger_role_id" = ${role_id}
+              UNION
+              SELECT "game_id" FROM "GrimoireEvent" WHERE "by_role_id" = ${role_id}
+              UNION
+              SELECT "game_id" FROM "GrimoireEvent" WHERE "role_id" = ${role_id}
+              UNION
+              SELECT "game_id" FROM "GrimoireEvent" WHERE "old_role_id" = ${role_id}
+              UNION
+              SELECT "game_id" FROM "GrimoireEvent" WHERE "new_role_id" = ${role_id}
+            )
+            AND g."deleted" = false
+            AND g."parent_game_id" IS NULL
+            AND g."ignore_for_stats" = false
+        `)
+      ).map((row) => row.id)
+    : [];
+
+  const roleStatGames = (
+    await Promise.all(
+      chunk(roleStatGameIds, GAME_ID_CHUNK_SIZE).map((ids) =>
+        prisma.game.findMany({
+          where: {
+            id: { in: ids },
           },
-          grimoire: {
-            ...(needsGrimoireState
-              ? {
-                  select: {
-                    tokens: {
-                      orderBy: {
-                        order: "asc",
-                      },
-                      select: {
-                        grimoire_participant_id: true,
-                        role_id: true,
-                        alignment: true,
-                        order: true,
-                        role: {
-                          select: {
-                            id: true,
-                            token_url: true,
-                            type: true,
-                            initial_alignment: true,
-                            name: true,
+          select: {
+            id: true,
+            ignore_for_stats: true,
+            win_v2: true,
+            end_trigger: true,
+            end_trigger_type: true,
+            end_trigger_cause: true,
+            end_trigger_role_id: true,
+            end_trigger_participant_alignment: true,
+            end_trigger_subtype: true,
+            end_trigger_note: true,
+            grimoire_events: {
+              select: {
+                grimoire_page: true,
+                participant_id: true,
+                event_type: true,
+                status_source: true,
+                cause: true,
+                by_participant_id: true,
+                role_id: true,
+                by_role_id: true,
+                old_role_id: true,
+                new_role_id: true,
+                old_alignment: true,
+                new_alignment: true,
+              },
+            },
+            grimoire: {
+              ...(needsGrimoireState
+                ? {
+                    select: {
+                      tokens: {
+                        orderBy: {
+                          order: "asc",
+                        },
+                        select: {
+                          grimoire_participant_id: true,
+                          role_id: true,
+                          alignment: true,
+                          order: true,
+                          role: {
+                            select: {
+                              id: true,
+                              token_url: true,
+                              type: true,
+                              initial_alignment: true,
+                              name: true,
+                            },
                           },
                         },
                       },
                     },
-                  },
-                  orderBy: {
-                    id: "asc",
-                  },
-                }
-              : {
-                  select: {
-                    id: true,
-                  },
-                  take: 0,
-                }),
+                    orderBy: {
+                      id: "asc",
+                    },
+                  }
+                : {
+                    select: {
+                      id: true,
+                    },
+                    take: 0,
+                  }),
+            },
           },
-        },
-      })
-    : [];
+        })
+      )
+    )
+  ).flat();
 
   const role_stat_cards = roleCardDefinitions
     .map((definition) =>
@@ -357,4 +373,9 @@ export default defineEventHandler(async (handler) => {
     count: totalCount,
     role_stat_cards,
   };
+}, {
+  name: "role-stats",
+  maxAge: ROLE_STATS_CACHE_SECONDS,
+  swr: true,
+  getKey: (event) => String(event.context.params?.role_id ?? ""),
 });
