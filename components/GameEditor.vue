@@ -1190,7 +1190,35 @@ function syncGrimoireEventsFromGrimoire(options?: {
   force?: boolean;
   silent?: boolean;
 }) {
+  // A direct sync covers any change still waiting for the debounced one.
+  cancelScheduledGrimoireEventSync();
   grimoireEventsRef.value?.syncGrimoireEventsFromGrimoire(options);
+}
+
+// Typing in the grimoire changes it on every keystroke, but the full event
+// sync only needs the settled state. Grimoire edits therefore schedule one
+// sync for when changes pause; saving, leaving the page and closing the tab
+// run a pending sync immediately, so nothing is ever saved unsynced.
+const GRIMOIRE_EVENT_SYNC_DELAY_MS = 300;
+let scheduledGrimoireEventSync: ReturnType<typeof setTimeout> | null = null;
+
+function cancelScheduledGrimoireEventSync() {
+  if (scheduledGrimoireEventSync === null) return;
+  clearTimeout(scheduledGrimoireEventSync);
+  scheduledGrimoireEventSync = null;
+}
+
+function scheduleGrimoireEventSync() {
+  cancelScheduledGrimoireEventSync();
+  scheduledGrimoireEventSync = setTimeout(() => {
+    scheduledGrimoireEventSync = null;
+    syncGrimoireEventsFromGrimoire({ force: true, silent: true });
+  }, GRIMOIRE_EVENT_SYNC_DELAY_MS);
+}
+
+function flushScheduledGrimoireEventSync() {
+  if (scheduledGrimoireEventSync === null) return;
+  syncGrimoireEventsFromGrimoire({ force: true, silent: true });
 }
 
 function normalizePageTokenOrders(
@@ -1285,6 +1313,7 @@ function recomputeGrimoireParticipantIds() {
 }
 
 function onSubmit() {
+  flushScheduledGrimoireEventSync();
   recomputeGrimoireParticipantIds();
   emit("submit");
 }
@@ -2348,10 +2377,29 @@ watch(
       grimoireChangedSinceOpen.value = true;
     }
 
-    syncGrimoireEventsFromGrimoire({ force: true, silent: true });
+    scheduleGrimoireEventSync();
   },
   { deep: true }
 );
+
+// Run a pending sync while the page is still fully alive, so the add-game
+// draft (saved by the page whenever the game changes) includes it.
+onBeforeRouteLeave(() => {
+  flushScheduledGrimoireEventSync();
+});
+
+function flushGrimoireEventSyncBeforeUnload() {
+  flushScheduledGrimoireEventSync();
+}
+
+onMounted(() => {
+  window.addEventListener("beforeunload", flushGrimoireEventSyncBeforeUnload);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("beforeunload", flushGrimoireEventSyncBeforeUnload);
+  flushScheduledGrimoireEventSync();
+});
 
 function applyMyRoleToGrimoire() {
   const playerCharacter = props.game.player_characters[0];
