@@ -2,6 +2,7 @@ import { Alignment, RoleType } from "~/server/generated/prisma/client";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { nanoid } from "nanoid";
 import { prisma } from "./prisma";
+import { storeScriptImages } from "./embeddedImages";
 
 export type UploadedScript = [
   {
@@ -48,6 +49,8 @@ export async function saveCustomScript(
       statusMessage: "Script name is required.",
     });
   }
+
+  await storeScriptImages(body);
 
   const existingScripts = await prisma.script.findMany({
     where: {
