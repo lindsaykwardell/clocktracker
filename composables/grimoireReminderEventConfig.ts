@@ -433,7 +433,7 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     sourceRoleIds: [],
   },
   {
-    reminder: "Has Jumped",
+    reminder: "Jumped",
     eventType: GrimoireEventType.DEATH,
     cadence: "once",
     sourceRoleIds: ["fang_gu"],

@@ -1381,6 +1381,35 @@ function reminderMatchesAnyRoleHint(
   });
 }
 
+/**
+ * Reminders whose source usually no longer holds the role on the page the
+ * reminder is placed: the Fang Gu jumped, the Snake Charmer swapped with the
+ * Demon, the Philosopher took another character. For these the source is the
+ * player who held the role on the previous page.
+ */
+const PREVIOUS_PAGE_SOURCE_REMINDERS: { reminder: string; roleId: string }[] = [
+  { reminder: "jumped", roleId: "fang_gu" },
+  { reminder: "poisoned", roleId: "snake_charmer" },
+  { reminder: "drunk", roleId: "philosopher" },
+];
+
+/** The added reminders whose source should be looked up on the previous page. */
+function previousPageSourceReminders(
+  config: { reminder: string; sourceRoleIds: string[] },
+  remindersWithRoleHint: ReminderLike[]
+) {
+  const reminderName = normalizeReminderName(config.reminder);
+  const roleIds = PREVIOUS_PAGE_SOURCE_REMINDERS.filter(
+    (entry) =>
+      entry.reminder === reminderName &&
+      config.sourceRoleIds.includes(entry.roleId)
+  ).map((entry) => entry.roleId);
+  if (roleIds.length === 0) return [];
+  return remindersWithRoleHint.filter((reminder) =>
+    reminderMatchesAnyRoleHint(reminder, roleIds)
+  );
+}
+
 function reminderNameForStatusEvent(event: {
   event_type: GrimoireEventType | null;
   status_source?: string | null;
@@ -2324,14 +2353,13 @@ function syncGrimoireEventsFromGrimoire(options?: {
 
         let source: { by_participant_id: string | null; by_role_id: string } | null =
           null;
-        const shouldPreferPreviousPageHintSource =
-          normalizeReminderName(config.reminder) === "has jumped" &&
-          config.sourceRoleIds.includes("fang_gu") &&
-          pageIndex > 0 &&
-          addedRemindersWithRoleHint.length > 0;
-        if (shouldPreferPreviousPageHintSource) {
+        const previousPageHintReminders =
+          pageIndex > 0
+            ? previousPageSourceReminders(config, addedRemindersWithRoleHint)
+            : [];
+        if (previousPageHintReminders.length > 0) {
           const previousPageTokens = props.game.grimoire[pageIndex - 1].tokens;
-          const previousHintSources = addedRemindersWithRoleHint
+          const previousHintSources = previousPageHintReminders
             .map((reminder) =>
               detectSourceFromReminderHint(previousPageTokens, reminder)
             )

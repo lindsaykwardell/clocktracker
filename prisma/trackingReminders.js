@@ -143,7 +143,7 @@ const trackingReminders = [
   },
   {
     role_id: "fang_gu",
-    reminder: "Has Jumped",
+    reminder: "Jumped",
     type: ReminderType.TRACKING,
   },
   {
