@@ -17,12 +17,13 @@ Group membership and permissions come from the backup. Select a backup taken aft
 ## Lifecycle
 
 - **up:** restore the selected backup, sanitize copied data and database logins, deploy the trusted ref, and start the requested lifetime after HTTPS readiness.
+- **redeploy:** build and deploy the selected trusted ref against the existing database, including pending migrations. Preserve the snapshot, staging edits, URL, and expiration. Requires an unexpired run with existing web/database machines.
 - **list:** show the active run or idle reservation.
 - **extend:** increase an active run's deadline, up to seven days total from readiness.
 - **destroy:** end the run early and remove its web/database machines and volumes.
 - **cleanup:** remove expired or interrupted runs; scheduled every 15 minutes.
 
-Only one run can exist at a time. A second up refuses to overwrite an active run; extend it, or destroy it before starting a new run. Every new run restores a fresh snapshot, so staging changes are discarded between runs.
+Only one run can exist at a time. A second up refuses to overwrite an active run; redeploy its code, extend it, or destroy it before starting a new run. Every new run restores a fresh snapshot, so staging changes are discarded between runs.
 
 The controller retains the empty Fly web app named clocktracker-staging, its default hostname/IP assignments, and its private lifecycle journal. It removes every web machine and volume, deletes the restored database app and its machines/volumes, and clears runtime secrets without redeploying. Retaining the app name prevents another Fly user from claiming the Supabase-allowlisted hostname. The URL serves no application between runs.
 
@@ -67,9 +68,15 @@ Fly provides the default fly.dev hostname and HTTPS; no custom certificate comma
 
 After merge and private configuration, run **Fixed URL staging → up** from the default branch. Select a trusted ref containing the current staging controls, a backup (latest or Barman ID), and 1–168 hours. The workflow reports the fixed URL and UTC expiry.
 
+To update code without resetting data, run **Fixed URL staging → redeploy**. Keep **Use workflow from** set to `main` and set **ref** to the desired trusted branch or commit. The branch must include the current staging controls. The backup and hours inputs are ignored; use **extend** first if more time is needed. Redeploy runs pending Prisma migrations but does not reverse previous migrations when switching branches. Use compatible branches, or destroy/up for a fresh database when schemas diverge.
+
+A failed or cancelled redeploy retains the database and original expiry for retry or scheduled cleanup. The app may be partially updated and migrations may already have applied; there is no automatic rollback. The journal records `redeploying` or `redeploy_failed` and the pending ref until a successful retry. An expired run cannot be redeployed.
+
 Verify password and Discord login with an existing admin, successful non-admin tester access with ACCESS_STAGING, 403 responses for users without it, anonymous API 401 responses, and anonymous protected-page redirects. Confirm staging logout leaves production sessions usable. After destroy or scheduled cleanup, verify the web app has zero machines/volumes and the staging database app is gone. Launch again and confirm a fresh backup is restored at the same URL.
 
 The application rejects all page/API requests after the deadline, including home/login. Cleanup is scheduled every 15 minutes, but GitHub schedules are best effort: access expires at the deadline; actual resource deletion and billing can lag. Monitor cleanup failures and use manual cleanup when needed. A strict destruction deadline requires an independent scheduler.
+
+The controller waits for a running database primary before preparing SQL; a successful restore-command exit alone is not considered readiness. Progress messages identify the provisioning stage, and failures expose only fixed error categories while suppressing raw provider output.
 
 Failed launches attempt cleanup immediately. Cancellation leaves a two-hour provisional deadline for the sweeper. Failed teardown keeps a retryable journal; rerun cleanup or destroy. Never remove the journal to bypass an incomplete run.
 

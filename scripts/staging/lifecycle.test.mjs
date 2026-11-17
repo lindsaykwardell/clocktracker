@@ -53,7 +53,7 @@ globalThis.fetch = async (url, options={}) => {
     else if(method==='GET') data=resource?s.apps[app][resource]:{name:app};
     else if(method==='DELETE' && !resource) {delete s.apps[app];data={};}
     else if(method==='DELETE') {s.apps[app][resource]=[];data={};}
-  } else if((u.hostname.endsWith('.staging.example.com') || u.hostname==='clocktracker-staging.fly.dev')) {data={};}
+  } else if((u.hostname.endsWith('.staging.example.com') || u.hostname==='clocktracker-staging.fly.dev')) {if(s.fail==='readiness'){save(s);return new Response('{}',{status:503});}data={};}
   else throw Error('Unexpected network access in test');
   save(s); return new Response(JSON.stringify(data),{status:200});
 };
@@ -62,15 +62,22 @@ globalThis.fetch = async (url, options={}) => {
 const fs=require('node:fs');
 const file=${JSON.stringify(store)}, s=JSON.parse(fs.readFileSync(file)), args=process.argv.slice(2);
 s.calls.push(['fly',...args]);
-if(args[0]==='postgres' && args[1]==='backup') s.apps[args[3]]={machines:[{id:'db-machine'}],volumes:[{id:'db-volume'}]};
+if(args[0]==='postgres' && args[1]==='backup') s.apps[args[3]]={machines:[{id:'db-machine',state:'started',checks:[{name:'role',status:'passing',output:'primary'}]}],volumes:[{id:'db-volume'}]};
+if(s.fail==='restore-empty' && args[0]==='postgres' && args[1]==='backup') s.apps[args[3]].machines=[];
 if(args[0]==='deploy') {
   if(s.fail==='deploy') {fs.writeFileSync(file,JSON.stringify(s));process.exit(1);}
-  const config=fs.readFileSync(args[args.indexOf('--config')+1],'utf8');
+  const configPath=args[args.indexOf('--config')+1];
+  const config=fs.readFileSync(configPath,'utf8');
+  const dockerfile=JSON.parse(config.match(/dockerfile = (.+)/)[1]);
+  const path=require('node:path');
+  if(path.isAbsolute(dockerfile) || !fs.existsSync(path.resolve(path.dirname(configPath),dockerfile))) throw Error('Dockerfile must resolve relative to the Fly config');
+  if(!config.includes('npx prisma migrate deploy')) throw Error('Missing migration release command');
   const app=config.match(/app = "([^"]+)"/)[1];s.apps[app].machines=[{id:'app-machine'}];
 }
 fs.writeFileSync(file,JSON.stringify(s));
 if(args[0]==='ips' && args[1]==='list') {console.log('[]');process.exit(0);}
 if(args[0]==='postgres' && args[1]==='connect') {
+  if(s.fail==='connect') {console.error('error connecting to SSH server SECRET_TEST_PASSWORD_MUST_NOT_APPEAR');process.exit(1);}
   process.stdin.resume();process.stdin.on('end',()=>console.log('STAGING_SQL_OK'));
 } else {console.log('SECRET_TEST_PASSWORD_MUST_NOT_APPEAR');process.exit(0);}
 `, { mode: 0o755 });
@@ -84,7 +91,7 @@ if(args[0]==='postgres' && args[1]==='connect') {
   });
   const read = async () => JSON.parse(await readFile(store, "utf8"));
   const update = async fn => {const state=await read();fn(state);await writeFile(store,JSON.stringify(state));};
-  try { await run({invoke,read,update}); } finally { await rm(dir, {recursive:true,force:true}); }
+  try { await run({invoke,read,update,source}); } finally { await rm(dir, {recursive:true,force:true}); }
 }
 
 test("two launches remain isolated; destroy removes only one environment and its volumes/DNS", async () => {
@@ -204,5 +211,134 @@ test("fixed URL cleanup retains failed teardown for retry", async () => {
     assert.equal(invoke("cleanup",env).status,0);
     assert.equal(JSON.parse(Object.values((await read()).objects)[0]).status,"idle");
     assert.deepEqual(Object.keys((await read()).apps),["clocktracker-staging"]);
+  });
+});
+
+
+test("a successful restore exit without a machine never reaches SQL or deploy", async () => {
+  await fixture(async ({invoke,read,update}) => {
+    await update(s=>s.fail="restore-empty");
+    const result=invoke("up",{STAGING_MODE:"stable"});
+    assert.equal(result.status,1);
+    assert.match(result.stderr,/restore created no machine/);
+    const state=await read();
+    assert.ok(!state.calls.some(c=>c[0]==="fly" && (c[1]==="deploy" || (c[1]==="postgres" && c[2]==="connect"))));
+    assert.deepEqual(Object.keys(state.apps),["clocktracker-staging"]);
+    assert.equal(JSON.parse(Object.values(state.objects)[0]).status,"idle");
+  });
+});
+
+test("connection failures report a safe category and clean up the restored database", async () => {
+  await fixture(async ({invoke,read,update}) => {
+    await update(s=>s.fail="connect");
+    const result=invoke("up",{STAGING_MODE:"stable"});
+    assert.equal(result.status,1);
+    assert.match(result.stderr,/private-network SSH connection failed/);
+    assert.ok(!(result.stdout+result.stderr).includes("SECRET_TEST_PASSWORD"));
+    const state=await read();
+    assert.deepEqual(Object.keys(state.apps),["clocktracker-staging"]);
+    assert.equal(JSON.parse(Object.values(state.objects)[0]).status,"idle");
+  });
+});
+
+
+test("latest uses Fly's default restore target while explicit backup IDs are forwarded", async () => {
+  await fixture(async ({invoke,read}) => {
+    assert.equal(invoke("up",{STAGING_MODE:"stable",STAGING_BACKUP:"latest"}).status,0);
+    assert.equal(invoke("destroy",{STAGING_MODE:"stable"}).status,0);
+    assert.equal(invoke("up",{STAGING_MODE:"stable",STAGING_BACKUP:"20261103T175530"}).status,0);
+    const restores=(await read()).calls.filter(c=>c[0]==="fly" && c[1]==="postgres" && c[2]==="backup");
+    assert.equal(restores.length,2);
+    assert.equal(restores[0].includes("--restore-target-name"),false);
+    assert.equal(restores[0].includes("latest"),false);
+    assert.deepEqual(restores[1].slice(-2),["--restore-target-name","20261103T175530"]);
+  });
+});
+
+const stableEnv = {STAGING_MODE:"stable", STAGING_REF:"main"};
+const journalOf = state => JSON.parse(Object.values(state.objects)[0]);
+
+test("redeploy preserves database, snapshot and deadline while updating the selected ref", async () => {
+  await fixture(async ({invoke,read,update}) => {
+    assert.equal(invoke("up",stableEnv).status,0);
+    const before=await read(), previous=journalOf(before);
+    await update(s=>s.calls=[]);
+    const result=invoke("redeploy",{...stableEnv,STAGING_REF:"feature/test",STAGING_HOURS:"168",STAGING_BACKUP:"ignored",STAGING_SOURCE_DATABASE_APP:"",STAGING_DATABASE_NAME:""});
+    assert.equal(result.status,0,result.stderr);
+    const after=await read(), current=journalOf(after);
+    assert.deepEqual(after.apps["ct-stg-clocktracker-db"],before.apps["ct-stg-clocktracker-db"]);
+    for(const key of ["expiresAt","readyAt","createdAt","backup"]) assert.equal(current[key],previous[key]);
+    assert.equal(current.ref,"feature/test");assert.equal(current.status,"ready");
+    assert.equal(after.calls.filter(c=>c[0]==="fly" && c[1]==="deploy").length,1);
+    assert.ok(!after.calls.some(c=>c[0]==="DELETE" || c[0]==="POST" || (c[0]==="fly" && c[1]!=="deploy")));
+    assert.ok(!(result.stdout+result.stderr).includes("SECRET_TEST_PASSWORD"));
+  });
+});
+
+test("failed redeploy retains the database and deadline, allows retry, and remains cleanup eligible", async () => {
+  await fixture(async ({invoke,read,update}) => {
+    assert.equal(invoke("up",stableEnv).status,0);
+    const before=await read();
+    await update(s=>{s.fail="deploy";s.calls=[];});
+    const failed=invoke("redeploy",{...stableEnv,STAGING_REF:"feature/failing"});
+    assert.equal(failed.status,1);
+    let state=await read();
+    assert.deepEqual(state.apps,before.apps);
+    assert.equal(journalOf(state).expiresAt,journalOf(before).expiresAt);
+    assert.equal(journalOf(state).ref,"main");
+    assert.equal(journalOf(state).pendingRef,"feature/failing");
+    assert.equal(journalOf(state).status,"redeploy_failed");
+    assert.ok(!state.calls.some(c=>c[0]==="DELETE"));
+    await update(s=>s.fail="");
+    assert.equal(invoke("redeploy",stableEnv).status,0);
+    assert.equal(journalOf(await read()).pendingRef,undefined);
+    await update(s=>{const key=Object.keys(s.objects)[0], j=JSON.parse(s.objects[key]);j.status="redeploying";s.objects[key]=JSON.stringify(j);});
+    assert.equal(invoke("redeploy",stableEnv).status,0);
+    await update(s=>{const key=Object.keys(s.objects)[0], j=JSON.parse(s.objects[key]);j.status="redeploy_failed";j.expiresAt=0;s.objects[key]=JSON.stringify(j);});
+    assert.equal(invoke("cleanup",stableEnv).status,0);
+    assert.equal(journalOf(await read()).status,"idle");
+  });
+});
+
+test("redeploy refuses missing, idle, provisioning, destroying and expired runs without deployment", async () => {
+  await fixture(async ({invoke,read,update}) => {
+    assert.equal(invoke("redeploy",stableEnv).status,1);
+    assert.equal(invoke("up",stableEnv).status,0);
+    for(const status of ["idle","provisioning","destroying","ready"]) {
+      await update(s=>{s.calls=[];const key=Object.keys(s.objects)[0],j=JSON.parse(s.objects[key]);j.status=status;if(status==="ready")j.expiresAt=0;s.objects[key]=JSON.stringify(j);});
+      assert.equal(invoke("redeploy",stableEnv).status,1);
+      assert.ok(!(await read()).calls.some(c=>c[0]==="fly" || c[0]==="DELETE"));
+    }
+  });
+});
+
+test("redeploy enforces cleanup opt-in, staging controls and existing resources", async () => {
+  await fixture(async ({invoke,read,update,source}) => {
+    assert.equal(invoke("up",stableEnv).status,0);
+    await update(s=>s.calls=[]);
+    assert.equal(invoke("redeploy",{...stableEnv,STAGING_STABLE_ENABLED:"false"}).status,1);
+    const file=path.join(source,"server/middleware/auth.ts"),original=await readFile(file,"utf8");
+    await writeFile(file,"// stale branch controls");
+    assert.equal(invoke("redeploy",stableEnv).status,1);
+    await writeFile(file,original);
+    await update(s=>delete s.apps["ct-stg-clocktracker-db"]);
+    assert.equal(invoke("redeploy",stableEnv).status,1);
+    assert.ok(!(await read()).calls.some(c=>c[0]==="fly" || c[0]==="DELETE"));
+  });
+});
+
+test("redeploy does not report success or discard the database when HTTPS readiness fails", async () => {
+  await fixture(async ({invoke,read,update}) => {
+    assert.equal(invoke("up",stableEnv).status,0);
+    const before=await read();
+    await update(s=>{s.fail="readiness";s.calls=[];});
+    const result=invoke("redeploy",{...stableEnv,STAGING_REF:"feature/new"});
+    assert.equal(result.status,1);assert.match(result.stderr,/readiness check failed/);
+    const after=await read();
+    assert.equal(journalOf(after).status,"redeploy_failed");
+    assert.equal(journalOf(after).ref,"main");
+    assert.equal(journalOf(after).expiresAt,journalOf(before).expiresAt);
+    assert.deepEqual(after.apps["ct-stg-clocktracker-db"],before.apps["ct-stg-clocktracker-db"]);
+    assert.ok(!after.calls.some(c=>c[0]==="DELETE"));
   });
 });
