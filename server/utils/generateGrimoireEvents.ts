@@ -524,6 +524,53 @@ function findReminderByNames(
   return null;
 }
 
+function isLifecycleEventType(eventType: GrimoireEventType) {
+  return (
+    eventType === GrimoireEventType.DEATH ||
+    eventType === GrimoireEventType.EXECUTION ||
+    eventType === GrimoireEventType.REVIVE
+  );
+}
+
+/**
+ * Detects the single participant who moved when a seat rotation is effectively
+ * one move, because a seat move recorded as many independent moves is noisy.
+ * Same as the editor's `detectSingleSeatMove`.
+ */
+function detectSingleSeatMove(previousIds: string[], currentIds: string[]) {
+  if (previousIds.length !== currentIds.length) return null;
+  if (previousIds.join("|") === currentIds.join("|")) return null;
+
+  const prevSet = new Set(previousIds);
+  if (
+    prevSet.size !== previousIds.length ||
+    currentIds.some((id) => !prevSet.has(id))
+  ) {
+    return null;
+  }
+
+  let foundMovedId: string | null = null;
+  for (let from = 0; from < previousIds.length; from += 1) {
+    const moved = previousIds[from];
+    const withoutMoved = previousIds
+      .slice(0, from)
+      .concat(previousIds.slice(from + 1));
+    for (let to = 0; to <= withoutMoved.length; to += 1) {
+      const candidate = withoutMoved
+        .slice(0, to)
+        .concat([moved], withoutMoved.slice(to));
+      if (candidate.join("|") === currentIds.join("|")) {
+        if (foundMovedId && foundMovedId !== moved) {
+          return null;
+        }
+        foundMovedId = moved;
+      }
+    }
+  }
+
+  return foundMovedId;
+}
+
 export function generateEventsForMissingGames(grimoire: PageLike[]) {
   const events: GeneratedEvent[] = [];
   const tokenParticipantUpdates: { tokenId: number; participantId: string }[] = [];
@@ -536,6 +583,13 @@ export function generateEventsForMissingGames(grimoire: PageLike[]) {
     // phantom deaths/revivals on grimoires that had no participant ids yet.
     const usedForParticipantIds = new Set<number>();
     const usedForEvents = new Set<number>();
+    // Death/revival rows from the shroud on this page, so death-style
+    // reminders can enrich them instead of adding a second row (like the
+    // editor's lifecycle merge).
+    const lifecycleEvents = new Map<string, GeneratedEvent>();
+    // Seat moves by participant, so a seat-change reminder (the Matron's
+    // "Swapped") enriches the move instead of adding a second event.
+    const seatEvents = new Map<string, GeneratedEvent>();
 
     for (const token of orderedTokens) {
       if (!token.grimoire_participant_id) {
@@ -578,7 +632,7 @@ export function generateEventsForMissingGames(grimoire: PageLike[]) {
 
       if (shouldHaveDeath) {
         const deadReminderSource = detectDeadReminderSource(orderedTokens, token);
-        events.push({
+        const deathEvent: GeneratedEvent = {
           grimoire_page: pageIndex,
           participant_id: participantId,
           event_type: deadReminderSource
@@ -594,11 +648,13 @@ export function generateEventsForMissingGames(grimoire: PageLike[]) {
           new_role_id: newRoleId,
           old_alignment: oldAlignment,
           new_alignment: newAlignment,
-        });
+        };
+        events.push(deathEvent);
+        lifecycleEvents.set(`${participantId}:death`, deathEvent);
       }
 
       if (shouldHaveRevival) {
-        events.push({
+        const revivalEvent: GeneratedEvent = {
           grimoire_page: pageIndex,
           participant_id: participantId,
           event_type: GrimoireEventType.REVIVE,
@@ -612,7 +668,9 @@ export function generateEventsForMissingGames(grimoire: PageLike[]) {
           new_role_id: newRoleId,
           old_alignment: oldAlignment,
           new_alignment: newAlignment,
-        });
+        };
+        events.push(revivalEvent);
+        lifecycleEvents.set(`${participantId}:revival`, revivalEvent);
       }
 
       if (!previousToken && pageIndex === 0) {
@@ -701,7 +759,7 @@ export function generateEventsForMissingGames(grimoire: PageLike[]) {
         }
 
         if (token.order !== previousToken.order) {
-          events.push({
+          const seatEvent: GeneratedEvent = {
             grimoire_page: pageIndex,
             participant_id: participantId,
             event_type: GrimoireEventType.SEAT_CHANGE,
@@ -715,7 +773,9 @@ export function generateEventsForMissingGames(grimoire: PageLike[]) {
             new_role_id: newRoleId,
             old_alignment: oldAlignment,
             new_alignment: newAlignment,
-          });
+          };
+          events.push(seatEvent);
+          seatEvents.set(participantId, seatEvent);
         }
 
         if (token.alignment !== previousToken.alignment) {
@@ -877,6 +937,61 @@ export function generateEventsForMissingGames(grimoire: PageLike[]) {
                 }))
               : [null];
 
+        if (isLifecycleEventType(config.eventType)) {
+          // Lifecycle events only come from shroud changes. A death-style
+          // reminder enriches that row but never creates one on its own.
+          const lifecycleEvent = lifecycleEvents.get(
+            `${participantId}:${
+              config.eventType === GrimoireEventType.REVIVE ? "revival" : "death"
+            }`
+          );
+          if (!lifecycleEvent) continue;
+
+          const sourceVariant = sourceVariants[0];
+          if (
+            config.eventType === GrimoireEventType.EXECUTION &&
+            (lifecycleEvent.event_type === GrimoireEventType.NOT_RECORDED ||
+              lifecycleEvent.event_type === GrimoireEventType.DEATH)
+          ) {
+            lifecycleEvent.event_type = GrimoireEventType.EXECUTION;
+          }
+          if (
+            config.eventType === GrimoireEventType.DEATH &&
+            lifecycleEvent.event_type === GrimoireEventType.NOT_RECORDED
+          ) {
+            lifecycleEvent.event_type = GrimoireEventType.DEATH;
+          }
+          lifecycleEvent.status_source = config.reminder;
+          lifecycleEvent.by_participant_id =
+            lifecycleEvent.by_participant_id ??
+            sourceVariant?.by_participant_id ??
+            null;
+          lifecycleEvent.by_role_id =
+            lifecycleEvent.by_role_id ?? sourceVariant?.by_role_id ?? null;
+          if (
+            !lifecycleEvent.cause &&
+            lifecycleEvent.event_type !== GrimoireEventType.EXECUTION &&
+            lifecycleEvent.by_role_id
+          ) {
+            lifecycleEvent.cause = GrimoireEventCause.ABILITY;
+          }
+          continue;
+        }
+
+        const seatEvent =
+          config.eventType === GrimoireEventType.SEAT_CHANGE
+            ? seatEvents.get(participantId)
+            : undefined;
+        if (seatEvent) {
+          const sourceVariant = sourceVariants[0];
+          seatEvent.status_source = config.reminder;
+          seatEvent.cause = GrimoireEventCause.ABILITY;
+          seatEvent.by_participant_id =
+            sourceVariant?.by_participant_id ?? seatEvent.by_participant_id;
+          seatEvent.by_role_id = sourceVariant?.by_role_id ?? seatEvent.by_role_id;
+          continue;
+        }
+
         for (const sourceVariant of sourceVariants) {
           events.push({
             grimoire_page: pageIndex,
@@ -892,6 +1007,63 @@ export function generateEventsForMissingGames(grimoire: PageLike[]) {
             new_role_id: newRoleId,
             old_alignment: oldAlignment,
             new_alignment: newAlignment,
+          });
+        }
+      }
+    }
+
+    if (pageIndex > 0) {
+      const previousOrderedTokens = grimoire[pageIndex - 1].tokens
+        .slice()
+        .sort((a, b) => a.order - b.order);
+      const previousIds = previousOrderedTokens
+        .map((t) => t.grimoire_participant_id)
+        .filter((id): id is string => !!id);
+      const currentIds = orderedTokens
+        .map((t) => t.grimoire_participant_id)
+        .filter((id): id is string => !!id);
+      const movedId =
+        previousIds.length > 0 ? detectSingleSeatMove(previousIds, currentIds) : null;
+
+      if (movedId) {
+        // Keep only the moved player's seat change on this page.
+        for (let index = events.length - 1; index >= 0; index -= 1) {
+          const event = events[index];
+          if (
+            event.grimoire_page === pageIndex &&
+            event.event_type === GrimoireEventType.SEAT_CHANGE &&
+            event.participant_id !== movedId
+          ) {
+            events.splice(index, 1);
+          }
+        }
+        const hasMovedEvent = events.some(
+          (event) =>
+            event.grimoire_page === pageIndex &&
+            event.event_type === GrimoireEventType.SEAT_CHANGE &&
+            event.participant_id === movedId
+        );
+        const movedToken = orderedTokens.find(
+          (t) => t.grimoire_participant_id === movedId
+        );
+        if (!hasMovedEvent && movedToken) {
+          const previousMovedToken =
+            previousOrderedTokens.find((t) => t.grimoire_participant_id === movedId) ??
+            null;
+          events.push({
+            grimoire_page: pageIndex,
+            participant_id: movedId,
+            event_type: GrimoireEventType.SEAT_CHANGE,
+            status_source: null,
+            cause: null,
+            by_participant_id: null,
+            player_name: movedToken.player_name || "",
+            role_id: movedToken.role_id ?? null,
+            by_role_id: null,
+            old_role_id: previousMovedToken?.role_id ?? null,
+            new_role_id: movedToken.role_id ?? null,
+            old_alignment: previousMovedToken?.alignment ?? null,
+            new_alignment: movedToken.alignment ?? null,
           });
         }
       }
