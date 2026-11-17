@@ -280,6 +280,8 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     eventType: GrimoireEventType.OTHER,
     cadence: "once",
     sourceRoleIds: ["deviant"],
+    targetScope: "self",
+    targetRoleIds: ["deviant"],
   },
   {
     reminder: "Saved",
@@ -414,13 +416,13 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     sourceRoleIds: ["goblin"],
   },
   {
-    reminder: "Not in play",
+    reminder: "Not In Play",
     eventType: GrimoireEventType.OTHER,
     cadence: "each_night",
     sourceRoleIds: ["ojo"],
   },
   {
-    reminder: "Registers as dead",
+    reminder: "Registers As Dead",
     eventType: GrimoireEventType.OTHER,
     cadence: "once",
     sourceRoleIds: ["zombuul"],
@@ -569,6 +571,13 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     sourceMode: "npc",
   },
   {
+    reminder: "Saved",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "once",
+    sourceRoleIds: ["ventriloquist"],
+    sourceMode: "npc",
+  },
+  {
     reminder: "Stormcaught",
     eventType: GrimoireEventType.OTHER,
     cadence: "once",
@@ -631,7 +640,7 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     targetRoleIds: ["scarlet_woman"],
   },
   {
-    reminder: "DEAD",
+    reminder: "Dead",
     eventType: GrimoireEventType.DEATH,
     cadence: "once",
     sourceRoleIds: ["big_wig"],

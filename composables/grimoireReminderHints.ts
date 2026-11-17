@@ -113,6 +113,7 @@ const HINTS: [roleId: string, reminder: string, hint: string][] = [
   ["summoner", "Changed", "Place on the player the Summoner turned into the Demon on the third night. Records the Summoner as the cause of the character change."],
   ["vizier", "Executed", "Place on the player the Vizier executed right away after the vote. Records their execution, caused by the Vizier."],
   ["widow", "Poisoned", "Place on the player the Widow chose on their first night. Records that the Widow poisoned them."],
+  ["witch", "Dead", "Place on the cursed player who nominated and died. Records the Witch as the cause of death."],
   // Demons
   ["al-hadikhia", "Alive", "Place on a dead player who chose to live when the Al-Hadikhia picked them. Records the revive, caused by the Al-Hadikhia."],
   ["al-hadikhia", "Dead", "Place on a player who died to the Al-Hadikhia's choice. Records the Al-Hadikhia as the cause of death."],
@@ -134,7 +135,7 @@ const HINTS: [roleId: string, reminder: string, hint: string][] = [
   ["no_dashii", "Dead", "Place on the player the No Dashii killed. Records the No Dashii as the cause of death."],
   ["no_dashii", "Poisoned", "Place on each of the No Dashii's two Townsfolk neighbours. Records that the No Dashii poisoned them."],
   ["ojo", "Dead", "Place on the player the Ojo killed. Records the Ojo as the cause of death."],
-  ["ojo", "Not in play", "Place on the Ojo on a night they chose a character that isn't in play, so the Storyteller chose who died. Records the miss."],
+  ["ojo", "Not In Play", "Place on the Ojo on a night they chose a character that isn't in play, so the Storyteller chose who died. Records the miss."],
   ["po", "Dead", "Place on a player the Po killed. Records the Po as the cause of death."],
   ["pukka", "Dead", "Place on the player who died from the Pukka's poison. Records the Pukka as the cause of death."],
   ["pukka", "Poisoned", "Place on the player the Pukka chose tonight. Records that the Pukka poisoned them."],
@@ -147,7 +148,7 @@ const HINTS: [roleId: string, reminder: string, hint: string][] = [
   ["vortox", "Dead", "Place on the player the Vortox killed. Records the Vortox as the cause of death."],
   ["yaggababble", "Dead", "Place on a player who died because the Yaggababble said their phrase. Records the Yaggababble as the cause of death."],
   ["zombuul", "Dead", "Place on the player the Zombuul killed. Records the Zombuul as the cause of death."],
-  ["zombuul", "Registers as dead", "Place on the Zombuul after it \"died\" the first time and stayed alive. Records that the Zombuul registers as dead."],
+  ["zombuul", "Registers As Dead", "Place on the Zombuul after it \"died\" the first time and stayed alive. Records that the Zombuul registers as dead."],
   // Travellers
   ["barista", "Acts Twice", "Place on the player whose ability the Barista made work twice tonight. Records the Barista's choice."],
   ["barista", "Sober & Healthy", "Place on the player the Barista made sober and healthy tonight. Records the Barista's choice."],
@@ -177,6 +178,7 @@ const HINTS: [roleId: string, reminder: string, hint: string][] = [
   ["big_wig", "Dead", "Place on the player who died because they broke the Big Wig's madness. Records the Big Wig as the cause of death."],
   ["hindu", "Reincarnated", "Place on the dead player who came back as a Traveller. Records the revive, caused by the Hindu."],
   ["storm_catcher", "Safe", "Place on the player with the good character the Storm Catcher favours, if it is in play. Records that they can only die by execution."],
+  ["ventriloquist", "Saved", "Place on the executed player who was mad as a fresh character and didn't die. Records that the Ventriloquist saved them."],
   ["zenomancer", "Goal", "Place on each player given a goal by the Zenomancer. Records the goal."],
   ["zenomancer", "Goal Completed", "Place on a player who achieved their Zenomancer goal. Records that they completed it."],
 ];

@@ -34,6 +34,8 @@ const ROLES: Record<string, { name: string; type: string; alignment: "GOOD" | "E
   cacklejack: { name: "Cacklejack", type: "TRAVELER", alignment: "GOOD" },
   gangster: { name: "Gangster", type: "TRAVELER", alignment: "EVIL" },
   gnome: { name: "Gnome", type: "TRAVELER", alignment: "GOOD" },
+  witch: { name: "Witch", type: "MINION", alignment: "EVIL" },
+  ventriloquist: { name: "Ventriloquist", type: "LORIC", alignment: "GOOD" },
 };
 
 type Reminder = { reminder: string; token_url: string };
@@ -189,7 +191,7 @@ test("Vigormortis: kills its own Minion, who poisons a Townsfolk neighbour", () 
 test("Zombuul: registers as dead after its first death", () => {
   const s = scenario([
     page([{ id: "z", role: "zombuul" }]),
-    page([{ id: "z", role: "zombuul", reminders: [r("zombuul", "Registers as dead")] }]),
+    page([{ id: "z", role: "zombuul", reminders: [r("zombuul", "Registers As Dead")] }]),
   ]);
   assert.equal(s.card("zombuul_false_deaths", "zombuul", "z"), 1);
 });
@@ -465,4 +467,51 @@ test("Hindu: counts once when the storyteller skips the dead page", () => {
   assert.equal(s.of("REVIVE", "a").length, 0);
   assert.equal(s.of("ROLE_CHANGE", "a")[0]?.by_role_id, "hindu");
   assert.equal(s.card("hindu_revives", "hindu", "a"), 1);
+});
+
+test("Witch: a cursed nominator dies", () => {
+  const s = scenario([
+    page([
+      { id: "w", role: "witch" },
+      { id: "a", role: "chef", reminders: [r("witch", "Cursed")] },
+    ]),
+    page([
+      { id: "w", role: "witch" },
+      { id: "a", role: "chef", dead: true, reminders: [r("witch", "Dead")] },
+    ]),
+  ]);
+  assert.deepEqual(
+    s.of("DEATH").map((e) => `${e.participant_id}:${e.by_role_id}`),
+    ["a:witch"]
+  );
+  assert.equal(s.card("witch_kills", "witch", "w"), 1);
+});
+
+test("Deviant: only a Saved on the Deviant itself counts", () => {
+  const s = scenario([
+    page([
+      { id: "dv", role: "deviant" },
+      { id: "a", role: "chef" },
+    ]),
+    page([
+      { id: "dv", role: "deviant", reminders: [r("deviant", "Saved")] },
+      { id: "a", role: "chef", reminders: [r("deviant", "Saved")] },
+    ]),
+  ]);
+  assert.deepEqual(
+    s.of("OTHER").map((e) => `${e.participant_id}:${e.status_source}`),
+    ["dv:Saved"]
+  );
+  assert.equal(s.card("deviant_exiles_avoided", "deviant", "dv"), 1);
+});
+
+test("Ventriloquist: an executed player who didn't die is credited to the Loric", () => {
+  const s = scenario([
+    page([{ id: "a", role: "chef" }]),
+    page([{ id: "a", role: "chef", reminders: [r("ventriloquist", "Saved")] }]),
+  ]);
+  assert.deepEqual(
+    s.of("OTHER", "a").map((e) => `${e.by_role_id}:${e.status_source}`),
+    ["ventriloquist:Saved"]
+  );
 });

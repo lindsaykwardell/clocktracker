@@ -155,7 +155,7 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
         (_, event) =>
           event.by_role_id === "big_wig" &&
           event.event_type === GrimoireEventType.DEATH &&
-          event.status_source === "DEAD"
+          event.status_source === "Dead"
       ),
     getSentence: ({ count, isMe }) =>
       count > 0

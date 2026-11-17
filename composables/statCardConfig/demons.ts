@@ -865,7 +865,7 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
             (_, event) =>
               event.by_role_id === roleId &&
               event.event_type === GrimoireEventType.OTHER &&
-              event.status_source === "Not in play"
+              event.status_source === "Not In Play"
           ),
     getSentence: ({ count, isMe }) =>
       count > 0
@@ -1373,7 +1373,7 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
             if (
               event.by_role_id !== roleId ||
               event.event_type !== GrimoireEventType.OTHER ||
-              event.status_source !== "Registers as dead"
+              event.status_source !== "Registers As Dead"
             ) {
               return false;
             }

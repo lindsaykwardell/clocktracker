@@ -88,12 +88,12 @@ const trackingReminders = [
   },
   {
     role_id: "ojo",
-    reminder: "Not in play",
+    reminder: "Not In Play",
     type: ReminderType.TRACKING,
   },
   {
     role_id: "zombuul",
-    reminder: "Registers as dead",
+    reminder: "Registers As Dead",
     type: ReminderType.TRACKING,
   },
   {
@@ -287,6 +287,11 @@ const trackingReminders = [
     type: ReminderType.TRACKING,
   },
   {
+    role_id: "witch",
+    reminder: "Dead",
+    type: ReminderType.TRACKING,
+  },
+  {
     role_id: "harpy",
     reminder: "Dead",
     type: ReminderType.TRACKING,
@@ -344,6 +349,11 @@ const trackingReminders = [
   {
     role_id: "hindu",
     reminder: "Reincarnated",
+    type: ReminderType.TRACKING,
+  },
+  {
+    role_id: "ventriloquist",
+    reminder: "Saved",
     type: ReminderType.TRACKING,
   },
 ];
