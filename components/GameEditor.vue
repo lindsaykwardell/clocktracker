@@ -2280,7 +2280,19 @@ watch(
   props.game.grimoire,
   (value) => {
     const newTokens = value[grimPage.value].tokens;
+    // Later pages are matched to this page by participant (the same player
+    // across pages), not by seat: after a seat move the same seat is someone
+    // else. Seat is only the fallback for tokens without a participant id.
+    const newTokensByParticipant = new Map(
+      newTokens
+        .filter((token) => !!token.grimoire_participant_id)
+        .map((token) => [token.grimoire_participant_id as string, token])
+    );
     const newTokensByOrder = new Map(newTokens.map((token) => [token.order, token]));
+    const sourceTokenFor = (token: { grimoire_participant_id?: string | null; order: number }) =>
+      token.grimoire_participant_id
+        ? newTokensByParticipant.get(token.grimoire_participant_id)
+        : newTokensByOrder.get(token.order);
 
     const myCharacters: {
       name: string;
@@ -2346,7 +2358,7 @@ watch(
 
         // Only sync player identity across pages - keep all other data independent
         // to prevent data loss when editing earlier pages (e.g., reminder tokens)
-        const sourceToken = newTokensByOrder.get(token.order);
+        const sourceToken = sourceTokenFor(token);
         if (!sourceToken) return;
         token.player_id = sourceToken.player_id;
         token.player_name = sourceToken.player_name;
