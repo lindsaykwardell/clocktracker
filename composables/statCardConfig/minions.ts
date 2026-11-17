@@ -15,6 +15,7 @@ import {
   getMostCommonByRoleSubtitle,
   isDemonKillEvent,
   pluralize,
+  times,
   wasWere,
 } from "./shared";
 import type { RoleStatCardDefinition } from "./shared";
@@ -331,12 +332,12 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Devil's Advocate, you've saved the Demon from execution ${count} time${pluralize(count)}.`
-          : `As the Devil's Advocate, this player has saved the Demon from execution ${count} time${pluralize(count)}.`)
+          ? `As the Devil's Advocate, you've saved the Demon from execution ${times(count)}.`
+          : `As the Devil's Advocate, this player has saved the Demon from execution ${times(count)}.`)
         : `As the Devil's Advocate, save the Demon from execution.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `The Demon has been saved from execution by a Devil's Advocate at least ${count} time${pluralize(count)}.`
+        ? `The Demon has been saved from execution by a Devil's Advocate at least ${times(count)}.`
         : `No Demon has been saved from execution by a Devil's Advocate yet.`,
   },
   // Devil's Advocate: Maybe how many times they protected a good player?
@@ -461,8 +462,8 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've executed a claimed Goblin ${count} time${pluralize(count)}.`
-          : `This player has executed a claimed Goblin ${count} time${pluralize(count)}.`)
+          ? `You've executed a claimed Goblin ${times(count)}.`
+          : `This player has executed a claimed Goblin ${times(count)}.`)
         : `Execute a claimed Goblin.`,
     getSubtitle: ({ games, isMe }) => {
       let total = 0;
@@ -628,13 +629,13 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Harpy, you've caused ${count} game${pluralize(count)} to end by causing an execution for breaking madness, leaving only two players alive.`
-          : `As the Harpy, this player has caused ${count} game${pluralize(count)} to end by causing an execution for breaking madness, leaving only two players alive.`)
-        : `As the Harpy, cause a game to end by causing an execution for breaking madness, leaving only two players alive.`,
+          ? `As the Harpy, you've caused ${count} game${pluralize(count)} to end by causing a death for breaking madness, leaving only two players alive.`
+          : `As the Harpy, this player has caused ${count} game${pluralize(count)} to end by causing a death for breaking madness, leaving only two players alive.`)
+        : `As the Harpy, cause a game to end by causing a death for breaking madness, leaving only two players alive.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `At least ${count} game${pluralize(count)} ${wasWere(count)} ended by a Harpy causing an execution for breaking madness, leaving only two players alive.`
-        : `No Harpy has ended a game by causing an execution for breaking madness yet.`,
+        ? `At least ${count} game${pluralize(count)} ${wasWere(count)} ended by a Harpy causing a death for breaking madness, leaving only two players alive.`
+        : `No Harpy has ended a game by causing a death for breaking madness yet.`,
   },
   // Marionette: Nothing relevant. Only option: None?
   {
@@ -736,8 +737,8 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've changed alignment due to the Mezepheles ${count} time${pluralize(count)}.`
-          : `This player changed alignment due to the Mezepheles ${count} time${pluralize(count)}.`)
+          ? `You've changed alignment due to the Mezepheles ${times(count)}.`
+          : `This player changed alignment due to the Mezepheles ${times(count)}.`)
         : `Change alignment due to the Mezepheles.`,
   },
   {
@@ -763,12 +764,12 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Organ Grinder, you've chosen to become drunk ${count} time${pluralize(count)}.`
-          : `As the Organ Grinder, this player has chosen to become drunk ${count} time${pluralize(count)}.`)
+          ? `As the Organ Grinder, you've chosen to become drunk ${times(count)}.`
+          : `As the Organ Grinder, this player has chosen to become drunk ${times(count)}.`)
         : `As the Organ Grinder, choose to become drunk.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `An Organ Grinder has chosen to become drunk at least ${count} time${pluralize(count)}.`
+        ? `An Organ Grinder has chosen to become drunk at least ${times(count)}.`
         : `No Organ Grinder has chosen to become drunk yet.`,
   },
   {
@@ -827,8 +828,8 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Pit-Hag, you've changed the Demon into another Demon ${count} time${pluralize(count)}.`
-          : `As the Pit-Hag, this player has changed the Demon into another Demon ${count} time${pluralize(count)}.`)
+          ? `As the Pit-Hag, you've changed the Demon into another Demon ${times(count)}.`
+          : `As the Pit-Hag, this player has changed the Demon into another Demon ${times(count)}.`)
         : `As the Pit-Hag, change the Demon into another Demon.`,
     getGlobalSentence: ({ count }) =>
       count > 0
@@ -867,12 +868,12 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Pit-Hag, you've changed yourself ${count} time${pluralize(count)}.`
-          : `As the Pit-Hag, this player has changed themselves ${count} time${pluralize(count)}.`)
+          ? `As the Pit-Hag, you've changed yourself ${times(count)}.`
+          : `As the Pit-Hag, this player has changed themselves ${times(count)}.`)
         : `As the Pit-Hag, change yourself into a different character.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `A Pit-Hag has changed themselves into a different character at least ${count} time${pluralize(count)}.`
+        ? `A Pit-Hag has changed themselves into a different character at least ${times(count)}.`
         : `No Pit-Hag has changed themselves yet.`,
   },
   {
@@ -963,8 +964,8 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've been changed into a different character by the Pit-Hag ${count} time${pluralize(count)}.`
-          : `This player has been changed into a different character by the Pit-Hag ${count} time${pluralize(count)}.`)
+          ? `You've been changed into a different character by the Pit-Hag ${times(count)}.`
+          : `This player has been changed into a different character by the Pit-Hag ${times(count)}.`)
         : `Be changed into a different character by the Pit-Hag.`,
   },
   {
@@ -1109,12 +1110,12 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Scarlet Woman, you've become a Demon ${count} time${pluralize(count)}.`
-          : `As the Scarlet Woman, this player has become a Demon ${count} time${pluralize(count)}.`)
-        : `As the Scarlet Woman, become a demon.`,
+          ? `As the Scarlet Woman, you've become a Demon ${times(count)}.`
+          : `As the Scarlet Woman, this player has become a Demon ${times(count)}.`)
+        : `As the Scarlet Woman, become a Demon.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `A Scarlet Woman has become a Demon at least ${count} time${pluralize(count)}.`
+        ? `A Scarlet Woman has become a Demon at least ${times(count)}.`
         : `No Scarlet Woman has become a Demon yet.`,
   },
   {
@@ -1148,13 +1149,13 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Spy, you've been seen as Townsfolk by the Washerwoman ${count} time${pluralize(count)}.`
-          : `As the Spy, this player has been seen as Townsfolk by the Washerwoman ${count} time${pluralize(count)}.`)
-        : `As the Spy, be seen as Townsfolk by the Washerwoman.`,
+          ? `As the Spy, you've been seen as a Townsfolk by the Washerwoman ${times(count)}.`
+          : `As the Spy, this player has been seen as a Townsfolk by the Washerwoman ${times(count)}.`)
+        : `As the Spy, be seen as a Townsfolk by the Washerwoman.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `A Spy has been seen as Townsfolk by a Washerwoman at least ${count} time${pluralize(count)}.`
-        : `No Spy has been seen as Townsfolk by a Washerwoman yet.`,
+        ? `A Spy has been seen as a Townsfolk by a Washerwoman at least ${times(count)}.`
+        : `No Spy has been seen as a Townsfolk by a Washerwoman yet.`,
   },
   {
     id: "spy_librarian_received",
@@ -1187,12 +1188,12 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Spy, you've been seen as Outsider by the Librarian ${count} time${pluralize(count)}.`
-          : `As the Spy, this player has been seen as Outsider by the Librarian ${count} time${pluralize(count)}.`)
-        : `As the Spy, be seen as Outsider by the Librarian.`,
+          ? `As the Spy, you've been seen as an Outsider by the Librarian ${times(count)}.`
+          : `As the Spy, this player has been seen as an Outsider by the Librarian ${times(count)}.`)
+        : `As the Spy, be seen as an Outsider by the Librarian.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `A Spy has been seen as an Outsider by a Librarian at least ${count} time${pluralize(count)}.`
+        ? `A Spy has been seen as an Outsider by a Librarian at least ${times(count)}.`
         : `No Spy has been seen as an Outsider by a Librarian yet.`,
   },
   {
@@ -1225,13 +1226,13 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Spy, you've been seen as Good by the Steward ${count} time${pluralize(count)}.`
-          : `As the Spy, this player has been seen as Good by the Steward ${count} time${pluralize(count)}.`)
-        : `As the Spy, be seen as Good by the Steward.`,
+          ? `As the Spy, you've been seen as good by the Steward ${times(count)}.`
+          : `As the Spy, this player has been seen as good by the Steward ${times(count)}.`)
+        : `As the Spy, be seen as good by the Steward.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `A Spy has been seen as Good by a Steward at least ${count} time${pluralize(count)}.`
-        : `No Spy has been seen as Good by a Steward yet.`,
+        ? `A Spy has been seen as good by a Steward at least ${times(count)}.`
+        : `No Spy has been seen as good by a Steward yet.`,
   },
   {
     id: "spy_virgin_received",
@@ -1270,12 +1271,12 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Spy, you've been executed ${count} time${pluralize(count)} when nominating the Virgin.`
-          : `As the Spy, this player has been executed ${count} time${pluralize(count)} when nominating the Virgin.`)
+          ? `As the Spy, you've been executed ${times(count)} when nominating the Virgin.`
+          : `As the Spy, this player has been executed ${times(count)} when nominating the Virgin.`)
         : `As the Spy, be executed when nominating the Virgin.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `A Spy has been executed when nominating a Virgin at least ${count} time${pluralize(count)}.`
+        ? `A Spy has been executed when nominating a Virgin at least ${times(count)}.`
         : `No Spy has been executed when nominating a Virgin yet.`,
   },
   {
@@ -1310,13 +1311,13 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Spy, you've been killed by the Moonchild ${count} time${pluralize(count)} due to misregistering as Good.`
-          : `As the Spy, this player has been killed by the Moonchild ${count} time${pluralize(count)} due to misregistering as Good.`)
-        : `As the Spy, be killed by the Moonchild due to misregistering as Good.`,
+          ? `As the Spy, you've been killed by the Moonchild ${times(count)} due to misregistering as good.`
+          : `As the Spy, this player has been killed by the Moonchild ${times(count)} due to misregistering as good.`)
+        : `As the Spy, be killed by the Moonchild due to misregistering as good.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `A Spy has been killed by a Moonchild due to misregistering as Good at least ${count} time${pluralize(count)}.`
-        : `No Spy has been killed by a Moonchild due to misregistering as Good yet.`,
+        ? `A Spy has been killed by a Moonchild due to misregistering as good at least ${times(count)}.`
+        : `No Spy has been killed by a Moonchild due to misregistering as good yet.`,
   },
   {
     id: "spy_lycanthrope_received",
@@ -1350,13 +1351,13 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Spy, you've been killed by the Lycanthrope ${count} time${pluralize(count)} due to misregistering as Good.`
-          : `As the Spy, this player has been killed by the Lycanthrope ${count} time${pluralize(count)} due to misregistering as Good.`)
-        : `As the Spy, be killed by the Lycanthrope due to misregistering as Good.`,
+          ? `As the Spy, you've been killed by the Lycanthrope ${times(count)} due to misregistering as good.`
+          : `As the Spy, this player has been killed by the Lycanthrope ${times(count)} due to misregistering as good.`)
+        : `As the Spy, be killed by the Lycanthrope due to misregistering as good.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `A Spy has been killed by a Lycanthrope due to misregistering as Good at least ${count} time${pluralize(count)}.`
-        : `No Spy has been killed by a Lycanthrope due to misregistering as Good yet.`,
+        ? `A Spy has been killed by a Lycanthrope due to misregistering as good at least ${times(count)}.`
+        : `No Spy has been killed by a Lycanthrope due to misregistering as good yet.`,
   },
   {
     id: "summoner_changes",
@@ -1372,9 +1373,9 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Summoner, you've successfully summoned ${count} Demon${pluralize(count)}.`
-          : `As the Summoner, this player has successfully summoned ${count} Demon${pluralize(count)}.`)
-        : `As the Summoner, successfully summon a Demon.`,
+          ? `As the Summoner, you've summoned ${count} Demon${pluralize(count)}.`
+          : `As the Summoner, this player has summoned ${count} Demon${pluralize(count)}.`)
+        : `As the Summoner, summon a Demon.`,
     getGlobalSentence: ({ count }) =>
       count > 0
         ? `At least ${count} Demon${pluralize(count)} ${wasWere(count)} summoned by a Summoner.`
@@ -1406,8 +1407,8 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've been changed into a Demon by the Summoner ${count} time${pluralize(count)}.`
-          : `This player has been changed into a Demon by the Summoner ${count} time${pluralize(count)}.`)
+          ? `You've been changed into a Demon by the Summoner ${times(count)}.`
+          : `This player has been changed into a Demon by the Summoner ${times(count)}.`)
         : `Be changed into a Demon by the Summoner.`,
   },
   // Summoner: @todo Game ends
@@ -1463,12 +1464,12 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Vizier, you've been killed by the Demon ${count} time${pluralize(count)}.`
-          : `As the Vizier, this player has been killed by the Demon ${count} time${pluralize(count)}.`)
+          ? `As the Vizier, you've been killed by the Demon ${times(count)}.`
+          : `As the Vizier, this player has been killed by the Demon ${times(count)}.`)
         : `As the Vizier, be killed by the Demon.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `A Vizier has been killed by the Demon at least ${count} time${pluralize(count)}.`
+        ? `A Vizier has been killed by the Demon at least ${times(count)}.`
         : `No Vizier has been killed by the Demon yet.`,
   },
   {
@@ -1489,8 +1490,8 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `The Vizier forced your execution ${count} time${pluralize(count)}.`
-          : `The Vizier forced this player's execution ${count} time${pluralize(count)}.`)
+          ? `The Vizier forced your execution ${times(count)}.`
+          : `The Vizier forced this player's execution ${times(count)}.`)
         : `Have the Vizier force your execution.`,
   },
   {
@@ -1599,12 +1600,12 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Widow, you've chosen to poison yourself ${count} time${pluralize(count)}.`
-          : `As the Widow, this player has chosen to poison themselves ${count} time${pluralize(count)}.`)
+          ? `As the Widow, you've chosen to poison yourself ${times(count)}.`
+          : `As the Widow, this player has chosen to poison themselves ${times(count)}.`)
         : `As the Widow, choose to poison yourself.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `A Widow has chosen to poison themselves at least ${count} time${pluralize(count)}.`
+        ? `A Widow has chosen to poison themselves at least ${times(count)}.`
         : `No Widow has chosen to poison themselves yet.`,
   },
   {

@@ -14,6 +14,7 @@ import {
   getMostCommonByRoleSubtitle,
   isDemonKillEvent,
   pluralize,
+  times,
 } from "./shared";
 import type { RoleStatCardDefinition } from "./shared";
 
@@ -38,12 +39,12 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've been punished with death by the Angel ${count} time${pluralize(count)}.`
-          : `This player has been punished with death by the Angel ${count} time${pluralize(count)}.`)
+          ? `You've been punished with death by the Angel ${times(count)}.`
+          : `This player has been punished with death by the Angel ${times(count)}.`)
         : `Be punished with death by the Angel.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `A player has been punished with death by the Angel at least ${count} time${pluralize(count)}.`
+        ? `A player has been punished with death by the Angel at least ${times(count)}.`
         : `No player has been punished with death by the Angel yet.`,
   },
   // Buddhist: OK.
@@ -66,12 +67,12 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've died to the Doomsayer ${count} time${pluralize(count)}.`
-          : `This player has died to the Doomsayer ${count} time${pluralize(count)}.`)
+          ? `You've died to the Doomsayer ${times(count)}.`
+          : `This player has died to the Doomsayer ${times(count)}.`)
         : `Die to the Doomsayer.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `A player has died to the Doomsayer at least ${count} time${pluralize(count)}.`
+        ? `A player has died to the Doomsayer at least ${times(count)}.`
         : `No player has died to the Doomsayer yet.`,
   },
   {
@@ -94,13 +95,13 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've been punished with death by the Hell's Librarian ${count} time${pluralize(count)}.`
-          : `This player has been punished with death by the Hell's Librarian ${count} time${pluralize(count)}.`)
-        : `Be punished with death by the Hell's Librarian.`,
+          ? `You've been punished with death by Hell's Librarian ${times(count)}.`
+          : `This player has been punished with death by Hell's Librarian ${times(count)}.`)
+        : `Be punished with death by Hell's Librarian.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `A player has been punished with death by the Hell's Librarian at least ${count} time${pluralize(count)}.`
-        : `No player has been punished with death by the Hell's Librarian yet.`,
+        ? `A player has been punished with death by Hell's Librarian at least ${times(count)}.`
+        : `No player has been punished with death by Hell's Librarian yet.`,
   },
   {
     id: "fiddler_game_end_trigger_received",
@@ -159,12 +160,12 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've died due to the Big Wig ${count} time${pluralize(count)}.`
-          : `This player has died due to the Big Wig ${count} time${pluralize(count)}.`)
+          ? `You've died due to the Big Wig ${times(count)}.`
+          : `This player has died due to the Big Wig ${times(count)}.`)
         : `Die due to the Big Wig.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `A player has died due to the Big Wig at least ${count} time${pluralize(count)}.`
+        ? `A player has died due to the Big Wig at least ${times(count)}.`
         : `No player has died due to the Big Wig yet.`,
   },
   // Bootlegger: Too complex
@@ -201,12 +202,12 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've been brought back as a Traveller by the Hindu ${count} time${pluralize(count)}.`
-          : `This player has been brought back as a Traveller by the Hindu ${count} time${pluralize(count)}.`)
+          ? `You've been brought back as a Traveller by the Hindu ${times(count)}.`
+          : `This player has been brought back as a Traveller by the Hindu ${times(count)}.`)
         : `Be brought back as a Traveller by the Hindu.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `A player has been brought back as a Traveller by the Hindu at least ${count} time${pluralize(count)}.`
+        ? `A player has been brought back as a Traveller by the Hindu at least ${times(count)}.`
         : `No player has been brought back as a Traveller by the Hindu yet.`,
   },
   // Pope: Nothing to track really.
@@ -230,12 +231,12 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've been protected by the Storm Catcher ${count} time${pluralize(count)}.`
-          : `This player has been protected by the Storm Catcher ${count} time${pluralize(count)}.`)
+          ? `You've been protected by the Storm Catcher ${times(count)}.`
+          : `This player has been protected by the Storm Catcher ${times(count)}.`)
         : `Be protected by the Storm Catcher.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `A player has been protected by the Storm Catcher at least ${count} time${pluralize(count)}.`
+        ? `A player has been protected by the Storm Catcher at least ${times(count)}.`
         : `No player has been protected by the Storm Catcher yet.`,
   },
   // Tor: Nothing to track really.
@@ -265,7 +266,7 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
         : `Have a goal assigned by the Zenomancer.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `A player has had a goal assigned by the Zenomancer at least ${count} time${pluralize(count)}.`
+        ? `A player has had a goal assigned by the Zenomancer at least ${times(count)}.`
         : `No player has had a goal assigned by the Zenomancer yet.`,
   },
   {
@@ -293,7 +294,7 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
         : `Complete a goal from the Zenomancer.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `A player has completed a Zenomancer goal at least ${count} time${pluralize(count)}.`
+        ? `A player has completed a Zenomancer goal at least ${times(count)}.`
         : `No player has completed a Zenomancer goal yet.`,
   },
 ];

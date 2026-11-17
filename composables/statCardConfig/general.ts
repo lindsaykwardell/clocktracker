@@ -12,6 +12,7 @@ import {
   getMostCommonEndTriggerRoleSubtitle,
   isDemonKillEvent,
   pluralize,
+  times,
 } from "./shared";
 import type { RoleStatCardDefinition } from "./shared";
 
@@ -101,7 +102,7 @@ export const GENERAL_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
       ).length,
     getSentence: ({ count, isMe }) =>
       count > 0
-        ? `${isMe ? "You have" : "This player has"} nominated and executed the demon ${count} time${pluralize(count)}.`
+        ? `${isMe ? "You have" : "This player has"} nominated and executed the demon ${times(count)}.`
         : `Nominate and execute the demon.`,
     getSubtitle: ({ games }) =>
       getMostCommonEndTriggerRoleSubtitle(games, (game) =>

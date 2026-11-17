@@ -15,6 +15,7 @@ import {
   getMostCommonByRoleSubtitle,
   isDemonKillEvent,
   pluralize,
+  times,
   wasWere,
 } from "./shared";
 import type { RoleStatCardDefinition } from "./shared";
@@ -52,12 +53,12 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Scapegoat, you've been executed in someone else's place ${count} time${pluralize(count)}.`
-          : `As the Scapegoat, this player has been executed in someone else's place ${count} time${pluralize(count)}.`)
+          ? `As the Scapegoat, you've been executed in someone else's place ${times(count)}.`
+          : `As the Scapegoat, this player has been executed in someone else's place ${times(count)}.`)
         : `As the Scapegoat, be executed in someone else's place.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `A Scapegoat has been executed in someone else's place at least ${count} time${pluralize(count)}.`
+        ? `A Scapegoat has been executed in someone else's place at least ${times(count)}.`
         : `No Scapegoat has been executed in someone else's place yet.`,
   },
   {
@@ -139,7 +140,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getGlobalSentence: ({ count }) =>
       count > 0
         ? `At least ${count} game${pluralize(count)} ${wasWere(count)} ended by a Gunslinger killing a player, leaving only two players alive.`
-        : `No game has ended by a Gunslinger killing a player and leaving only two players alive.`,
+        : `No Gunslinger has ended a game by killing a player and leaving only two players alive yet.`,
   },
   {
     id: "beggar_votes_received",
@@ -200,7 +201,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `Give your vote token to the Beggar.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `A player has given their vote token to a Beggar at least ${count} time${pluralize(count)}.`
+        ? `A player has given their vote token to a Beggar at least ${times(count)}.`
         : `No player has given their vote token to a Beggar yet.`,
   },
   {
@@ -245,7 +246,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     scope: "affected_player",
     script: "tb",
     source: "grimoire_event",
-    label: "Backed by Bureaucracy",
+    label: "Signed in Triplicate",
     getCount: ({ games }) =>
       countMatchingEvents(
         games,
@@ -257,12 +258,12 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've received extra votes from the Bureaucrat ${count} time${pluralize(count)}.`
-          : `This player has received extra votes from the Bureaucrat ${count} time${pluralize(count)}.`)
+          ? `You've received extra votes from the Bureaucrat ${times(count)}.`
+          : `This player has received extra votes from the Bureaucrat ${times(count)}.`)
         : `Receive extra votes from the Bureaucrat.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `A player has received extra votes from a Bureaucrat at least ${count} time${pluralize(count)}.`
+        ? `A player has received extra votes from a Bureaucrat at least ${times(count)}.`
         : `No player has received extra votes from a Bureaucrat yet.`,
   },
   {
@@ -324,7 +325,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `Have a vote stolen by the Thief.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `A player has had a vote stolen by a Thief at least ${count} time${pluralize(count)}.`
+        ? `A player has had a vote stolen by a Thief at least ${times(count)}.`
         : `No player has had a vote stolen by a Thief yet.`,
   },
 
@@ -420,7 +421,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getGlobalSentence: ({ count }) =>
       count > 0
         ? `At least ${count} game${pluralize(count)} ${wasWere(count)} ended by a Butcher executing an additional player, leaving only two players alive.`
-        : `No game has ended by a Butcher executing an additional player and leaving only two players alive.`,
+        : `No Butcher has ended a game by executing an additional player and leaving only two players alive yet.`,
   },
   {
     id: "bone_collector_restored_abilities",
@@ -475,7 +476,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `As the Harlot, die alongside another player.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `A Harlot has died alongside another player at least ${count} time${pluralize(count)}.`
+        ? `A Harlot has died alongside another player at least ${times(count)}.`
         : `No Harlot has died alongside another player yet.`,
   },
   {
@@ -547,7 +548,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     roleIds: ["deviant"],
     script: "snv",
     source: "grimoire_event",
-    label: "Last Laugh",
+    label: "Saved by the Pun",
     getCount: ({ games, roleId }) =>
       games.reduce((total, game) => {
         if (!roleId || game.ignore_for_stats) return total;
@@ -565,12 +566,12 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Deviant, you've saved yourself from exile ${count} time${pluralize(count)}.`
-          : `As the Deviant, this player has saved themselves from exile ${count} time${pluralize(count)}.`)
+          ? `As the Deviant, you've saved yourself from exile ${times(count)}.`
+          : `As the Deviant, this player has saved themselves from exile ${times(count)}.`)
         : `As the Deviant, save yourself from exile.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `A Deviant has saved themselves from exile at least ${count} time${pluralize(count)}.`
+        ? `A Deviant has saved themselves from exile at least ${times(count)}.`
         : `No Deviant has saved themselves from exile yet.`,
   },
 
@@ -723,7 +724,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getGlobalSentence: ({ count }) =>
       count > 0
         ? `At least ${count} game${pluralize(count)} ${wasWere(count)} ended by a Judge forcing an execution, leaving only two players alive.`
-        : `No game has ended by a Judge forcing an execution and leaving only two players alive.`,
+        : `No Judge has ended a game by forcing an execution and leaving only two players alive yet.`,
   },
   // Bishop: @todo
   {
@@ -767,12 +768,12 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've been changed into a different character due to the Cacklejack ${count} time${pluralize(count)}.`
-          : `This player has been changed into a different character due to the Cacklejack ${count} time${pluralize(count)}.`)
+          ? `You've been changed into a different character due to the Cacklejack ${times(count)}.`
+          : `This player has been changed into a different character due to the Cacklejack ${times(count)}.`)
         : `Be changed into a different character due to the Cacklejack.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `A player has been changed into a different character by a Cacklejack at least ${count} time${pluralize(count)}.`
+        ? `A player has been changed into a different character by a Cacklejack at least ${times(count)}.`
         : `No player has been changed into a different character by a Cacklejack yet.`,
   },
   {
@@ -855,7 +856,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getGlobalSentence: ({ count }) =>
       count > 0
         ? `At least ${count} game${pluralize(count)} ${wasWere(count)} ended by a Gangster killing one of their neighbors, leaving only two players alive.`
-        : `No game has ended by a Gangster killing one of their neighbors and leaving only two players alive.`,
+        : `No Gangster has ended a game by killing one of their neighbors and leaving only two players alive yet.`,
   },
   {
     id: "gnome_kills",
@@ -936,7 +937,7 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getGlobalSentence: ({ count }) =>
       count > 0
         ? `At least ${count} game${pluralize(count)} ${wasWere(count)} ended by a Gnome killing a player, leaving only two players alive.`
-        : `No game has ended by a Gnome killing a player and leaving only two players alive.`,
+        : `No Gnome has ended a game by killing a player and leaving only two players alive yet.`,
   },
   {
     id: "gnome_amigo_marked",
@@ -958,12 +959,12 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've been the Gnome's amigo ${count} time${pluralize(count)}.`
-          : `This player has been the Gnome's amigo ${count} time${pluralize(count)}.`)
+          ? `You've been the Gnome's amigo ${times(count)}.`
+          : `This player has been the Gnome's amigo ${times(count)}.`)
         : `Be the Gnome's amigo.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `A player has been the Gnome's amigo at least ${count} time${pluralize(count)}.`
+        ? `A player has been the Gnome's amigo at least ${times(count)}.`
         : `No player has been the Gnome's amigo yet.`,
   },
 

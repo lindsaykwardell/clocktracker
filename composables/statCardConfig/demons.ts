@@ -16,6 +16,7 @@ import {
   getMostCommonByRoleSubtitle,
   isDemonKillEvent,
   pluralize,
+  times,
   wasWere,
 } from "./shared";
 import type { RoleStatCardDefinition } from "./shared";
@@ -133,12 +134,12 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Al-Hadikhia, you've killed all three chosen players ${count} time${pluralize(count)} when they all lived.`
-          : `As the Al-Hadikhia, this player has killed all three chosen players ${count} time${pluralize(count)} when they all lived.`)
-        : `As the Al-Hadikhia, kill all three chosen players when they all live.`,
+          ? `As the Al-Hadikhia, you've killed all three chosen players in a single night ${times(count)}.`
+          : `As the Al-Hadikhia, this player has killed all three chosen players in a single night ${times(count)}.`)
+        : `As the Al-Hadikhia, kill all three chosen players in a single night.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `At least ${count} time${pluralize(count)}, all three chosen players were killed by an Al-Hadikhia.`
+        ? `At least ${times(count)}, all three chosen players were killed by an Al-Hadikhia.`
         : `No Al-Hadikhia has killed all three chosen players yet.`,
   },
   {
@@ -173,12 +174,12 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Al-Hadikhia, you've included yourself in your choices and ended up dying ${count} time${pluralize(count)}.`
-          : `As the Al-Hadikhia, this player has included themselves in their choices and ended up dying ${count} time${pluralize(count)}.`)
+          ? `As the Al-Hadikhia, you've included yourself in your choices and ended up dying ${times(count)}.`
+          : `As the Al-Hadikhia, this player has included themselves in their choices and ended up dying ${times(count)}.`)
         : `As the Al-Hadikhia, include yourself in your choices and end up dying.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `An Al-Hadikhia has included themselves in their choices and ended up dying at least ${count} time${pluralize(count)}.`
+        ? `An Al-Hadikhia has included themselves in their choices and ended up dying at least ${times(count)}.`
         : `No Al-Hadikhia has included themselves in their choices and ended up dying yet.`,
   },
   {
@@ -230,6 +231,7 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     sao: 1,
     source: "grimoire_event",
     label: "Fang Goodbye",
+    // The Fang Gu's own death when it jumps ("Jumped") is not a kill.
     getCount: ({ games, roleId }) =>
       !roleId
         ? 0
@@ -319,9 +321,9 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've been chosen in the night by the Fang Gu ${count} time${pluralize(count)}.`
-          : `This player has been chosen in the night by the Fang Gu ${count} time${pluralize(count)}.`)
-        : `As an Outsider, be chosen in the night by the Fang Gu.`,
+          ? `You've become the Fang Gu ${times(count)} after they selected you in the night.`
+          : `This player has become the Fang Gu ${times(count)} after the Fang Gu selected them in the night.`)
+        : `As an Outsider, become the Fang Gu after they select you in the night.`,
   },
   {
     id: "imp_kills",
@@ -380,8 +382,8 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Imp, you've targeted yourself and passed the Demon role to a Minion ${count} time${pluralize(count)}.`
-          : `As the Imp, this player has targeted themselves and passed the Demon role to a Minion ${count} time${pluralize(count)}.`)
+          ? `As the Imp, you've targeted yourself and passed the Demon role to a Minion ${times(count)}.`
+          : `As the Imp, this player has targeted themselves and passed the Demon role to a Minion ${times(count)}.`)
         : `As the Imp, target yourself and pass the Demon role to a Minion.`,
     getGlobalSentence: ({ count }) =>
       count > 0
@@ -415,9 +417,9 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've become the Imp ${count} time${pluralize(count)} after they targeted themselves.`
-          : `This player has become the Imp ${count} time${pluralize(count)} after the Imp targeted themselves.`)
-        : `Become the Imp after they target themselves.`,
+          ? `You've become the Imp ${times(count)} after the Imp targeted themselves.`
+          : `This player has become the Imp ${times(count)} after the Imp targeted themselves.`)
+        : `Become the Imp after the Imp targets themselves.`,
   },
   {
     id: "kazali_kills",
@@ -501,8 +503,8 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've been changed into a Minion by the Kazali ${count} time${pluralize(count)}.`
-          : `This player has been changed into a Minion by the Kazali ${count} time${pluralize(count)}.`)
+          ? `You've been changed into a Minion by the Kazali ${times(count)}.`
+          : `This player has been changed into a Minion by the Kazali ${times(count)}.`)
         : `Be changed into a Minion by the Kazali.`,
   },
   // Legion: Nothing to track really.
@@ -611,8 +613,8 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've babysat Lil' Monsta ${count} time${pluralize(count)}.`
-          : `This player has babysat Lil' Monsta ${count} time${pluralize(count)}.`)
+          ? `You've babysat Lil' Monsta ${times(count)}.`
+          : `This player has babysat Lil' Monsta ${times(count)}.`)
         : `Babysit Lil' Monsta.`,
   },
   {
@@ -672,7 +674,7 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `As the Lleech, survive death.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `A Lleech has avoided death at least ${count} time${pluralize(count)}.`
+        ? `A Lleech has avoided death at least ${times(count)}.`
         : `No Lleech has avoided death yet.`,
   },
   {
@@ -693,8 +695,8 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've served as the Lleech's host ${count} time${pluralize(count)}.`
-          : `This player has served as the Lleech's host ${count} time${pluralize(count)}.`)
+          ? `You've served as the Lleech's host ${times(count)}.`
+          : `This player has served as the Lleech's host ${times(count)}.`)
         : `Serve as the Lleech's host.`,
   },
   {
@@ -759,8 +761,8 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've been changed into a minion by sitting next to the Lord of Typhon ${count} time${pluralize(count)}.`
-          : `This player has been changed into a minion by sitting next to the Lord of Typhon ${count} time${pluralize(count)}.`)
+          ? `You've been changed into a Minion by sitting next to the Lord of Typhon ${times(count)}.`
+          : `This player has been changed into a Minion by sitting next to the Lord of Typhon ${times(count)}.`)
         : `Be changed into a Minion by sitting next to the Lord of Typhon.`,
   },
   {
@@ -805,8 +807,8 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've been poisoned by the No Dashii ${count} time${pluralize(count)}.`
-          : `This player has been poisoned by the No Dashii ${count} time${pluralize(count)}.`)
+          ? `You've been poisoned by the No Dashii ${times(count)}.`
+          : `This player has been poisoned by the No Dashii ${times(count)}.`)
         : `Be poisoned by the No Dashii.`,
   },
   {
@@ -853,12 +855,12 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Ojo, you've chosen a not-in-play character ${count} time${pluralize(count)}, leaving the kill to the Storyteller.`
-          : `As the Ojo, this player has chosen a not-in-play character ${count} time${pluralize(count)}, leaving the kill to the Storyteller.`)
+          ? `As the Ojo, you've chosen a not-in-play character ${times(count)}, leaving the kill to the Storyteller.`
+          : `As the Ojo, this player has chosen a not-in-play character ${times(count)}, leaving the kill to the Storyteller.`)
         : `As the Ojo, choose a not-in-play character, leaving the kill to the Storyteller.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `An Ojo has chosen a not-in-play character at least ${count} time${pluralize(count)}.`
+        ? `An Ojo has chosen a not-in-play character at least ${times(count)}.`
         : `No Ojo has chosen a not-in-play character yet.`,
   },
   {
@@ -929,9 +931,9 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Po, you've successfully killed three players in a single night ${count} time${pluralize(count)}.`
-          : `As the Po, this player has successfully killed three players in a single night ${count} time${pluralize(count)}.`)
-        : `As the Po, successfully kill three players in a single night.`,
+          ? `As the Po, you've killed three players in a single night ${times(count)}.`
+          : `As the Po, this player has killed three players in a single night ${times(count)}.`)
+        : `As the Po, kill three players in a single night.`,
     getGlobalSentence: ({ count }) =>
       count > 0
         ? `At least ${count} night${pluralize(count)} had three players killed by a Po.`
@@ -974,9 +976,9 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As Riot, you've had ${count} player${pluralize(count)} killed due to Riot.`
-          : `As Riot, this player has had ${count} player${pluralize(count)} killed due to Riot.`)
-        : `As Riot, have a player killed due to Riot.`,
+          ? `As Riot, you've killed ${count} player${pluralize(count)}.`
+          : `As Riot, this player has killed ${count} player${pluralize(count)}.`)
+        : `As Riot, kill a player.`,
     getGlobalSentence: ({ count }) =>
       count > 0
         ? `At least ${count} player${pluralize(count)} ${wasWere(count)} killed by Riot.`
@@ -1049,8 +1051,8 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've been changed into Riot ${count} time${pluralize(count)}.`
-          : `This player has been changed into Riot ${count} time${pluralize(count)}.`)
+          ? `You've been changed into Riot ${times(count)}.`
+          : `This player has been changed into Riot ${times(count)}.`)
         : `Be changed into Riot.`,
   },
   {
@@ -1154,9 +1156,9 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Vigormortis, you've killed ${count} of your own minions.`
-          : `As the Vigormortis, this player has killed ${count} of their own minions.`)
-        : `As the Vigormortis, kill one of your own minions.`,
+          ? `As the Vigormortis, you've killed ${count} of your own Minions.`
+          : `As the Vigormortis, this player has killed ${count} of their own Minions.`)
+        : `As the Vigormortis, kill one of your own Minions.`,
     getGlobalSentence: ({ count }) =>
       count > 0
         ? `At least ${count} Minion${pluralize(count)} ${wasWere(count)} killed by a Vigormortis.`
@@ -1217,7 +1219,7 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     script: "snv",
     sao: 4,
     source: "end_trigger",
-    label: "Disinformation Reigns",
+    label: "Paralysed by Doubt",
     getCount: ({ games, roleId }) =>
       games.filter(
         (game) =>
@@ -1367,12 +1369,12 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Zombuul, you've feigned death ${count} time${pluralize(count)}.`
-          : `As the Zombuul, this player has feigned death ${count} time${pluralize(count)}.`)
+          ? `As the Zombuul, you've feigned death ${times(count)}.`
+          : `As the Zombuul, this player has feigned death ${times(count)}.`)
         : `As the Zombuul, feign your death.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `A Zombuul has feigned death at least ${count} time${pluralize(count)}.`
+        ? `A Zombuul has feigned death at least ${times(count)}.`
         : `No Zombuul has feigned death yet.`,
   },
 ];

@@ -240,6 +240,11 @@ export function pluralize(count: number) {
   return count === 1 ? "" : "s";
 }
 
+/** "once" for 1, otherwise "3 times". */
+export function times(count: number) {
+  return count === 1 ? "once" : `${count} times`;
+}
+
 export function wasWere(count: number) {
   return count === 1 ? "was" : "were";
 }
