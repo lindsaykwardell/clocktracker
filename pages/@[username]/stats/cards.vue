@@ -79,11 +79,14 @@
                 >
                   Character
                 </Button>
+                <!-- General cards are still a work in progress. -->
                 <Button
                   @click="tab = 'general'"
                   :active="tab === 'general'"
                   color="primary"
                   variant="soft"
+                  disabled
+                  title="Coming soon"
                 >
                   General
                 </Button>
