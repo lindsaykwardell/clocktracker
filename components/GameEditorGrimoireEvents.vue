@@ -791,19 +791,6 @@ function grimoireEventSourceActorLabel(event: {
   return "";
 }
 
-function grimoireEventSourcePlayerLabel(event: {
-  grimoire_page: number;
-  by_participant_id: string | null;
-}) {
-  if (!event.by_participant_id) return "";
-  const sourceToken =
-    getTokenForParticipant(event.grimoire_page, event.by_participant_id) ||
-    (event.grimoire_page > 0
-      ? getTokenForParticipant(event.grimoire_page - 1, event.by_participant_id)
-      : null);
-  return sourceToken?.player_name?.trim() || "";
-}
-
 type GrimoireEventSummaryParts = {
   before: string;
   action: string;
@@ -830,17 +817,24 @@ function grimoireEventSummaryParts(event: GrimoireEventLike): GrimoireEventSumma
   }
   if (event.event_type === GrimoireEventType.MAD) {
     if (event.by_role_id === "pixie" && sourceActor) {
-      const sourcePlayer = grimoireEventSourcePlayerLabel(event);
-      const sourceRole = event.by_role_id
-        ? resolveRoleById(event.by_role_id)?.name || ""
-        : "";
-      const subject = sourcePlayer || sourceActor;
-      const byLabel =
-        sourcePlayer && sourceRole ? `${sourcePlayer} (${sourceRole})` : sourceActor;
+      // The reminder sits on the player whose character the Pixie learned, but
+      // it's the Pixie who is mad: "the Pixie (Cara) was made mad as the Slayer
+      // (Gina)".
+      const targetRoleName =
+        resolveRoleById(event.role_id)?.name ||
+        getTokenForParticipant(event.grimoire_page, event.participant_id)?.role
+          ?.name ||
+        "";
+      const targetPlayer = event.player_name?.trim() || "";
+      const targetLabel = targetRoleName
+        ? `${roleNameWithArticle(targetRoleName)}${
+            targetPlayer ? ` (${targetPlayer})` : ""
+          }`
+        : targetName;
       return {
-        before: `${subject} was made `,
+        before: `${sourceActor} was made `,
         action: "mad",
-        after: ` as ${targetName}${byLabel ? ` by ${byLabel}` : ""}`,
+        after: ` as ${targetLabel}`,
       };
     }
     return {
