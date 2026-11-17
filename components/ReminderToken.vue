@@ -19,18 +19,23 @@
 </template>
 
 <script setup lang="ts">
+import { reminderDisplayType, type ReminderTypeName } from "~/utils/reminderType";
+
 const props = defineProps<{
   reminder: {
     token_url: string;
     reminder: string;
-    type?: "OFFICIAL" | "TRACKING" | "IMPORTED" | "LEGACY" | "CUSTOM" | null;
+    type?: ReminderTypeName | null;
+    role_reminder?: { type: ReminderTypeName } | null;
+    is_custom?: boolean | null;
   };
   size?: "sm-reminder" | "reminder";
   isTrackingRelevant?: boolean;
 }>();
 
 const reminderTypeClass = computed(
-  () => `reminder--${(props.reminder.type ?? "CUSTOM").toLowerCase()}`
+  () =>
+    `reminder--${(reminderDisplayType(props.reminder) ?? "OFFICIAL").toLowerCase()}`
 );
 
 const isTrackingRelevant = computed(() => props.isTrackingRelevant ?? false);

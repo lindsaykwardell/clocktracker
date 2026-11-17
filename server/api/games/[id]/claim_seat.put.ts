@@ -3,6 +3,7 @@ import { Alignment } from "~/server/generated/prisma/client";
 import { fetchGame } from "~/server/utils/fetchGames";
 import { prisma } from "~/server/utils/prisma";
 import { findOrCreatePlayerChildGame } from "~/server/utils/childGame";
+import { reminderTokenWithType } from "~/server/utils/reminderTokenLinks";
 
 export default defineEventHandler(async (handler) => {
   const user: User | null = handler.context.user;
@@ -120,7 +121,7 @@ export default defineEventHandler(async (handler) => {
             include: {
               role: true,
               related_role: true,
-              reminders: true,
+              reminders: reminderTokenWithType,
               player: {
                 select: {
                   username: true,

@@ -186,6 +186,7 @@
 </template>
 
 <script setup lang="ts">
+import type { GameReminder, ReminderTypeName } from "~/utils/reminderType";
 import { useRoleImage } from "~/composables/useRoleImage";
 import { RoleType } from "~/composables/useRoles";
 import { Status } from "~/composables/useFetchStatus";
@@ -211,12 +212,7 @@ type Token = {
   };
   related_role_id: string | null;
   related_role?: { token_url: string; name?: string };
-  reminders?: {
-    reminder: string;
-    token_url: string;
-    type?: "OFFICIAL" | "TRACKING" | "IMPORTED" | "LEGACY" | "CUSTOM" | null;
-    [key: string]: unknown;
-  }[];
+  reminders?: (GameReminder & { [key: string]: unknown })[];
   player_name: string;
   player_id?: string | null;
   player?: {
@@ -717,17 +713,23 @@ function emitDeathToggled(token: Token, isDead: boolean) {
 }
 
 function selectReminder(reminder: {
+  /** Catalog (RoleReminder) id; missing for a custom reminder. */
+  id?: number;
   reminder: string;
   token_url: string;
-  type?: "OFFICIAL" | "TRACKING" | "IMPORTED" | "LEGACY" | "CUSTOM" | null;
+  type?: ReminderTypeName | null;
 }) {
   if (focusedToken.value) {
     if (!focusedToken.value.reminders) {
       focusedToken.value.reminders = [];
     }
+    const roleReminderId =
+      typeof reminder.id === "number" ? reminder.id : null;
     focusedToken.value.reminders.push({
       reminder: reminder.reminder,
       token_url: reminder.token_url,
+      role_reminder_id: roleReminderId,
+      is_custom: roleReminderId === null,
       type: reminder.type ?? "CUSTOM",
     });
 
@@ -755,11 +757,7 @@ function selectReminder(reminder: {
 
 function removeReminder(
   token: Token,
-  reminder: {
-    reminder: string;
-    token_url: string;
-    type?: "OFFICIAL" | "TRACKING" | "IMPORTED" | "LEGACY" | "CUSTOM" | null;
-  }
+  reminder: GameReminder
 ) {
   token.reminders = (token.reminders ?? []).filter(
     (r) =>

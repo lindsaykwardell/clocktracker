@@ -1,6 +1,10 @@
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
 import { hasPermission } from "~/server/utils/permissions";
+import {
+  prepareReminderLinks,
+  type IncomingReminder,
+} from "~/server/utils/reminderTokenLinks";
 
 type Row = Record<string, unknown>;
 
@@ -364,10 +368,30 @@ export default defineEventHandler(async (handler) => {
 
       // --- ReminderTokens (autoincrement, remap token_id) ---
 
-      for (const row of d.reminderTokens || []) {
+      // Catalog ids differ between databases (and foreign keys are bypassed
+      // here), so links are worked out again from each reminder's icon and
+      // text. Exports from before linking carry a `type` column instead.
+      const reminderRows: Row[] = d.reminderTokens || [];
+      const reminderLinkFor = await prepareReminderLinks(
+        tx,
+        reminderRows.map((row) => ({
+          reminder: row.reminder as string,
+          token_url: row.token_url as string,
+          is_custom: row.is_custom as boolean | undefined,
+          type: row.type as string | undefined,
+        }))
+      );
+      for (const row of reminderRows) {
+        const { type, role_reminder_id, is_custom, ...rest } = row;
         await insertNewRow(tx, "ReminderToken", {
-          ...row,
+          ...rest,
           token_id: remap(tokenMap, row.token_id),
+          ...reminderLinkFor({
+            reminder: row.reminder as string,
+            token_url: row.token_url as string,
+            is_custom: is_custom as boolean | undefined,
+            type: type as string | undefined,
+          } satisfies IncomingReminder),
         });
         imported++;
       }

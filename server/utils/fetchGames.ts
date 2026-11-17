@@ -3,6 +3,7 @@ import { PrivacySetting } from "~/server/generated/prisma/client";
 import { anonymizeGame, type GameRecord } from "~/server/utils/anonymizeGame";
 import { prisma } from "./prisma";
 import { hasPermission } from "./permissions";
+import { reminderTokenWithType } from "./reminderTokenLinks";
 
 export async function fetchGames(user_id: string, me: User | null) {
   const canViewPrivate = me ? await hasPermission(me.id, "VIEW_PRIVATE_GAMES") : false;
@@ -455,7 +456,7 @@ export async function fetchGame(
             include: {
               role: true,
               related_role: true,
-              reminders: true,
+              reminders: reminderTokenWithType,
               player: {
                 select: {
                   username: true,

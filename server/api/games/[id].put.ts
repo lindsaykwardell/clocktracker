@@ -18,6 +18,12 @@ import {
 } from "~/server/utils/gamePropagation";
 import { findOrCreatePlayerChildGame,findOrCreateStorytellerChildGame } from "~/server/utils/childGame";
 import { sendPushNotifications } from "~/server/utils/sendPushNotifications";
+import {
+  prepareReminderLinks,
+  remindersInGrimoire,
+  reminderTokenWithType,
+  type IncomingReminder,
+} from "~/server/utils/reminderTokenLinks";
 
 const MAX_GRIMOIRE_PAGE_TITLE_LENGTH = 64;
 
@@ -55,7 +61,7 @@ export default defineEventHandler(async (handler) => {
         Grimoire&{
           tokens: Partial<
             Token&{
-              reminders: Partial<ReminderToken>[];
+              reminders: (Partial<ReminderToken>&IncomingReminder)[];
             }
           >[];
         }
@@ -119,6 +125,11 @@ export default defineEventHandler(async (handler) => {
 
   const notifications: Parameters<typeof sendPushNotifications>[0][]=[];
 
+  const reminderLinkFor=await prepareReminderLinks(
+    prisma,
+    remindersInGrimoire(body.grimoire),
+  );
+
   const game=await prisma.$transaction(async (tx) => {
     // Snapshot existing grimoire state before any modifications
     const existingGrimoires=await tx.grimoire.findMany({
@@ -136,7 +147,7 @@ export default defineEventHandler(async (handler) => {
           include: {
             role: true,
             related_role: true,
-            reminders: true,
+            reminders: reminderTokenWithType,
           },
         },
       },
@@ -168,7 +179,10 @@ export default defineEventHandler(async (handler) => {
                   id: r.id,
                   reminder: r.reminder,
                   token_url: r.token_url,
-                  type: r.type,
+                  role_reminder_id: r.role_reminder_id,
+                  is_custom: r.is_custom,
+                  // For showing the snapshot; restoring uses the link above.
+                  type: r.role_reminder?.type??(r.is_custom? "CUSTOM":null),
                 })),
               })),
             })),
@@ -294,7 +308,7 @@ export default defineEventHandler(async (handler) => {
                         token.reminders?.map((reminder) => ({
                           reminder: reminder.reminder,
                           token_url: reminder.token_url,
-                          type: reminder.type??undefined,
+                          ...reminderLinkFor(reminder),
                         }))||[],
                     },
                   })),
@@ -336,7 +350,7 @@ export default defineEventHandler(async (handler) => {
                             token.reminders?.map((reminder) => ({
                               reminder: reminder.reminder,
                               token_url: reminder.token_url,
-                              type: reminder.type??undefined,
+                              ...reminderLinkFor(reminder),
                             }))||[],
                         },
                       })),
@@ -369,7 +383,7 @@ export default defineEventHandler(async (handler) => {
                               .map((reminder) => ({
                                 reminder: reminder.reminder,
                                 token_url: reminder.token_url,
-                                type: reminder.type??undefined,
+                                ...reminderLinkFor(reminder),
                               })),
                             update: token.reminders
                               ?.filter((reminder) => reminder.id)
@@ -380,7 +394,7 @@ export default defineEventHandler(async (handler) => {
                                 data: {
                                   reminder: reminder.reminder,
                                   token_url: reminder.token_url,
-                                  type: reminder.type??undefined,
+                                  ...reminderLinkFor(reminder),
                                 },
                               })),
                           },
@@ -416,7 +430,7 @@ export default defineEventHandler(async (handler) => {
               include: {
                 role: true,
                 related_role: true,
-                reminders: true,
+                reminders: reminderTokenWithType,
                 player: {
                   select: {
                     username: true,

@@ -216,16 +216,26 @@ model Token {
   @@index([role_id])
 }
 
+/// A reminder placed on a token on one grimoire page. The text and icon are
+/// copied so custom reminders and older games keep working; the reminder's
+/// type comes from the linked catalog entry (RoleReminder).
+/// - role_reminder_id set: a catalog reminder; its type is role_reminder.type.
+/// - role_reminder_id null, is_custom true: a reminder the user made up (CUSTOM).
+/// - role_reminder_id null, is_custom false: saved before linking existed and
+///   not linked yet; shown like an official reminder until it is linked.
 model ReminderToken {
-  id         Int          @id @default(autoincrement())
-  reminder   String       @default("")
-  type       ReminderType @default(CUSTOM)
-  token_url  String       @default("")
-  created_at DateTime     @default(now()) @db.Timestamptz(6)
-  token      Token?       @relation(fields: [token_id], references: [id])
-  token_id   Int?
+  id               Int           @id @default(autoincrement())
+  reminder         String        @default("")
+  token_url        String        @default("")
+  created_at       DateTime      @default(now()) @db.Timestamptz(6)
+  token            Token?        @relation(fields: [token_id], references: [id])
+  token_id         Int?
+  role_reminder    RoleReminder? @relation(fields: [role_reminder_id], references: [id], onDelete: SetNull)
+  role_reminder_id Int?
+  is_custom        Boolean       @default(false)
 
   @@index([token_id])
+  @@index([role_reminder_id])
 }
 
 model Character {
@@ -320,6 +330,8 @@ model Role {
   ls_games             LSGame[]        @relation("Games")
   ls_game_deaths       LSGame[]        @relation("Deaths")
   ls_game_retires      LSGame[]        @relation("Retire")
+
+  @@index([token_url])
 }
 
 model RoleReminder {
@@ -328,6 +340,7 @@ model RoleReminder {
   type     ReminderType @default(OFFICIAL)
   role_id  String
   role     Role         @relation(fields: [role_id], references: [id])
+  tokens   ReminderToken[]
 
   @@unique([role_id, reminder])
 }

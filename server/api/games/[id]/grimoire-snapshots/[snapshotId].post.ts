@@ -1,6 +1,10 @@
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { Alignment, type ReminderType } from "~/server/generated/prisma/client";
 import { prisma } from "~/server/utils/prisma";
+import {
+  prepareReminderLinks,
+  reminderTokenWithType,
+} from "~/server/utils/reminderTokenLinks";
 
 type SnapshotToken = {
   grimoire_participant_id?: string | null;
@@ -15,6 +19,9 @@ type SnapshotToken = {
   reminders: {
     reminder: string;
     token_url: string;
+    role_reminder_id?: number | null;
+    is_custom?: boolean | null;
+    /** Snapshots saved before reminders were linked to the catalog. */
     type?: ReminderType;
   }[];
 };
@@ -113,6 +120,11 @@ export default defineEventHandler(async (handler) => {
 
   const data = snapshot.snapshot as unknown as SnapshotData;
 
+  const reminderLinkFor = await prepareReminderLinks(
+    prisma,
+    data.pages.flatMap((page) => page.tokens.flatMap((token) => token.reminders))
+  );
+
   // Delete all current grimoires for this game
   const currentGrimoires = await prisma.grimoire.findMany({
     where: { game: { some: { id: gameId } } },
@@ -146,7 +158,7 @@ export default defineEventHandler(async (handler) => {
               create: token.reminders.map((r) => ({
                 reminder: r.reminder,
                 token_url: r.token_url,
-                type: r.type,
+                ...reminderLinkFor(r),
               })),
             },
           })),
@@ -219,7 +231,7 @@ export default defineEventHandler(async (handler) => {
         include: {
           role: true,
           related_role: true,
-          reminders: true,
+          reminders: reminderTokenWithType,
           player: {
             select: {
               username: true,

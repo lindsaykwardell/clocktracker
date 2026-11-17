@@ -170,7 +170,7 @@ export default defineEventHandler(async (handler) => {
                       reminder: reminder.reminder,
                     },
                   },
-                  select: { type: true },
+                  select: { id: true, type: true },
                 }),
               ]);
 
@@ -178,6 +178,8 @@ export default defineEventHandler(async (handler) => {
                 reminder: reminder.reminder,
                 token_url: reminderRole?.token_url||"",
                 type: roleReminder?.type??ReminderType.CUSTOM,
+                role_reminder_id: roleReminder?.id??null,
+                is_custom: !roleReminder,
               };
             })
           );

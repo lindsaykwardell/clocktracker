@@ -796,6 +796,7 @@
 </template>
 
 <script setup lang="ts">
+import { toEditorReminder, type GameReminder } from "~/utils/reminderType";
 import type { Alignment } from "~/server/generated/prisma/client";
 import type { RoleType } from "~/composables/useRoles";
 import naturalOrder from "natural-order";
@@ -926,11 +927,7 @@ const props = defineProps<{
         related_role?: { id?: string; token_url: string; name?: string };
         player_name: string;
         player_id?: string | null;
-        reminders: {
-          reminder: string;
-          token_url: string;
-          type?: "OFFICIAL" | "TRACKING" | "IMPORTED" | "LEGACY" | "CUSTOM" | null;
-        }[];
+        reminders: GameReminder[];
       }[];
     }[];
     ignore_for_stats: boolean;
@@ -1072,11 +1069,7 @@ type GrimoireSnapshot = {
         order: number;
         player_name: string;
         player_id: string | null;
-        reminders: {
-          reminder: string;
-          token_url: string;
-          type?: "OFFICIAL" | "TRACKING" | "IMPORTED" | "LEGACY" | "CUSTOM" | null;
-        }[];
+        reminders: GameReminder[];
       }[];
     }[];
   };
@@ -1133,11 +1126,7 @@ function restoreSnapshot(snapshot: GrimoireSnapshot) {
           : undefined,
         player_name: token.player_name,
         player_id: token.player_id,
-        reminders: token.reminders.map((r) => ({
-          reminder: r.reminder,
-          token_url: r.token_url,
-          type: r.type ?? null,
-        })),
+        reminders: token.reminders.map(toEditorReminder),
       };
     }),
   }));

@@ -18,6 +18,12 @@ import {
 } from "~/server/utils/gamePropagation";
 import { findOrCreatePlayerChildGame,findOrCreateStorytellerChildGame } from "~/server/utils/childGame";
 import { sendPushNotifications } from "~/server/utils/sendPushNotifications";
+import {
+  prepareReminderLinks,
+  remindersInGrimoire,
+  reminderTokenWithType,
+  type IncomingReminder,
+} from "~/server/utils/reminderTokenLinks";
 
 const MAX_GRIMOIRE_PAGE_TITLE_LENGTH = 64;
 
@@ -54,7 +60,7 @@ export default defineEventHandler(async (handler) => {
         Grimoire&{
           tokens: Partial<
             Token&{
-              reminders: Partial<ReminderToken>[];
+              reminders: (Partial<ReminderToken>&IncomingReminder)[];
             }
           >[];
         }
@@ -91,6 +97,11 @@ export default defineEventHandler(async (handler) => {
   const incomingGrimoireEvents: GrimoireEvent[]=body.grimoire_events??[];
 
   const notifications: Parameters<typeof sendPushNotifications>[0][]=[];
+
+  const reminderLinkFor=await prepareReminderLinks(
+    prisma,
+    remindersInGrimoire(body.grimoire),
+  );
 
   const newGame=await prisma.$transaction(async (tx) => {
     const newGame=await tx.game.create({
@@ -158,7 +169,7 @@ export default defineEventHandler(async (handler) => {
                       token.reminders?.map((reminder) => ({
                         reminder: reminder.reminder,
                         token_url: reminder.token_url,
-                        type: reminder.type??undefined,
+                        ...reminderLinkFor(reminder),
                       }))||[],
                   },
                 })),
@@ -191,7 +202,7 @@ export default defineEventHandler(async (handler) => {
               include: {
                 role: true,
                 related_role: true,
-                reminders: true,
+                reminders: reminderTokenWithType,
                 player: {
                   select: {
                     username: true,

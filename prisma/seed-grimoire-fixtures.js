@@ -202,6 +202,7 @@ async function main() {
     },
     orderBy: [{ role_id: "asc" }, { reminder: "asc" }],
     select: {
+      id: true,
       role_id: true,
       reminder: true,
     },
@@ -210,7 +211,7 @@ async function main() {
   const reminderByRole = new Map();
   for (const entry of trackingReminders) {
     if (!reminderByRole.has(entry.role_id)) {
-      reminderByRole.set(entry.role_id, entry.reminder);
+      reminderByRole.set(entry.role_id, entry);
     }
   }
 
@@ -248,9 +249,9 @@ async function main() {
     const trackingReminder = reminderByRole.get(targetRole.id);
     if (trackingReminder) {
       page2Tokens[0].reminders.push({
-        reminder: trackingReminder,
+        reminder: trackingReminder.reminder,
         token_url: `/img/reminder/${targetRole.id}.webp`,
-        type: ReminderType.TRACKING,
+        role_reminder_id: trackingReminder.id,
       });
     }
 

@@ -4,6 +4,7 @@ import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import type { GameRecord } from "~/server/utils/anonymizeGame";
 import { prisma } from "~/server/utils/prisma";
 import { hasPermission } from "~/server/utils/permissions";
+import { reminderTokenWithType } from "~/server/utils/reminderTokenLinks";
 
 export default defineProtectedHandler("games-stats", async (handler) => {
   const me: User | null = handler.context.user;
@@ -146,7 +147,7 @@ export default defineProtectedHandler("games-stats", async (handler) => {
               player_name: true,
               player_id: true,
               grimoire_participant_id: true,
-              reminders: true,
+              reminders: reminderTokenWithType,
               created_at: true,
               role: {
                 select: {

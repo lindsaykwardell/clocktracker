@@ -13,6 +13,7 @@ import {
   buildPlayerCharactersForToken,
 } from "~/server/utils/gamePropagation";
 import { findOrCreatePlayerChildGame,findOrCreateStorytellerChildGame } from "~/server/utils/childGame";
+import { reminderTokenWithType } from "~/server/utils/reminderTokenLinks";
 
 export default defineEventHandler(async (handler) => {
   const user: User|null=handler.context.user;
@@ -137,7 +138,7 @@ export default defineEventHandler(async (handler) => {
                 include: {
                   role: true,
                   related_role: true,
-                  reminders: true,
+                  reminders: reminderTokenWithType,
                   player: {
                     select: {
                       username: true,
