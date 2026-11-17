@@ -434,6 +434,7 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["goblin"],
     scope: "triggering_player",
+    globalDataNeeds: ["grimoire_events"],
     script: "experimental",
     hidden: true,
     source: "grimoire_event",
@@ -465,7 +466,9 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `You've executed a claimed Goblin ${times(count)}.`
           : `This player has executed a claimed Goblin ${times(count)}.`)
         : `Execute a claimed Goblin.`,
-    getSubtitle: ({ games, isMe }) => {
+    getSubtitle: ({ games, isMe, username }) => {
+      // Your own results only; the global role page has no player to judge.
+      if (!username) return null;
       let total = 0;
       let wins = 0;
 
@@ -506,6 +509,10 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
       if (total === 0) return null;
       return `${isMe ? "You've" : "This player has"} won ${wins} of ${total} recorded results.`;
     },
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `A claimed Goblin has been executed at least ${times(count)}.`
+        : `No claimed Goblin has been executed yet.`,
   },
   {
     id: "godfather_kills",

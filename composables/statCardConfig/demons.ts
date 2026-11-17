@@ -599,6 +599,7 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["lil_monsta"],
     scope: "affected_player",
+    globalDataNeeds: ["grimoire_events"],
     script: "experimental",
     source: "grimoire_event",
     label: "Babysitter Duty",
@@ -616,6 +617,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `You've babysat Lil' Monsta ${times(count)}.`
           : `This player has babysat Lil' Monsta ${times(count)}.`)
         : `Babysit Lil' Monsta.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `Lil' Monsta has been babysat at least ${times(count)}.`
+        : `Lil' Monsta hasn't been babysat yet.`,
   },
   {
     id: "lleech_kills",
@@ -682,6 +687,7 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["lleech"],
     scope: "affected_player",
+    globalDataNeeds: ["grimoire_events"],
     script: "experimental",
     source: "grimoire_event",
     label: "Spoiled Slice",
@@ -698,6 +704,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `You've served as the Lleech's host ${times(count)}.`
           : `This player has served as the Lleech's host ${times(count)}.`)
         : `Serve as the Lleech's host.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} player${pluralize(count)} ${count === 1 ? "has" : "have"} been a Lleech's host.`
+        : `No player has been a Lleech's host yet.`,
   },
   {
     id: "lord_of_typhon_kills",
@@ -793,6 +803,7 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["no_dashii"],
     scope: "affected_player",
+    globalDataNeeds: ["grimoire_events"],
     script: "snv",
     sao: 3,
     source: "grimoire_event",
@@ -810,6 +821,10 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           ? `You've been poisoned by the No Dashii ${times(count)}.`
           : `This player has been poisoned by the No Dashii ${times(count)}.`)
         : `Be poisoned by the No Dashii.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} player${pluralize(count)} ${wasWere(count)} poisoned by a No Dashii.`
+        : `No player has been poisoned by a No Dashii yet.`,
   },
   {
     id: "ojo_kills",
@@ -1169,6 +1184,7 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     category: "role",
     roleIds: ["vigormortis"],
     scope: "affected_player",
+    globalDataNeeds: ["grimoire_events"],
     script: "snv",
     sao: 2,
     source: "grimoire_event",
@@ -1183,9 +1199,13 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `You've been poisoned by the Vigormortis killing a minion ${count} time${pluralize(count)}.`
-          : `This player has been poisoned by the Vigormortis killing a minion ${count} time${pluralize(count)}.`)
-        : `Have the Vigormortis poison you when they kill one of their minions.`,
+          ? `You've been poisoned by the Vigormortis killing a Minion ${times(count)}.`
+          : `This player has been poisoned by the Vigormortis killing a Minion ${times(count)}.`)
+        : `Have the Vigormortis poison you when they kill one of their Minions.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} player${pluralize(count)} ${wasWere(count)} poisoned by a Vigormortis killing a Minion.`
+        : `No player has been poisoned by a Vigormortis killing a Minion yet.`,
   },
   {
     id: "vortox_kills",
