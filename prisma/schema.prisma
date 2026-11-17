@@ -331,7 +331,8 @@ model Role {
   ls_game_deaths       LSGame[]        @relation("Deaths")
   ls_game_retires      LSGame[]        @relation("Retire")
 
-  @@index([token_url])
+  // Hash: custom role icons can be inline data URLs, too large for a B-tree.
+  @@index([token_url], type: Hash)
 }
 
 model RoleReminder {
