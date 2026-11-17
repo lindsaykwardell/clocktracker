@@ -210,7 +210,7 @@ primary_region = "${region}"
   cpu_kind = "shared"
   cpus = 1
 [deploy]
-  release_command = "npx prisma migrate deploy"
+  release_command = "./migrate.sh"
 `);
     await fly(["deploy", "--config", config, "--remote-only", "--ha=false", "--build-secret", `SUPABASE_URL=${required("SUPABASE_URL")}`, "--build-secret", `SUPABASE_KEY=${required("SUPABASE_KEY")}`], { cwd: source, timeout: 30 * 60_000 });
     // IPv6 enables domain validation; shared IPv4 serves IPv4 clients without a dedicated IP charge.
