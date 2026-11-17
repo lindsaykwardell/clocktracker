@@ -231,7 +231,15 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     source: "grimoire_event",
     label: "Fang Goodbye",
     getCount: ({ games, roleId }) =>
-      countGrimoireEvents(games, roleId, GrimoireEventType.DEATH),
+      !roleId
+        ? 0
+        : countMatchingEvents(
+            games,
+            (_, event) =>
+              event.by_role_id === roleId &&
+              event.event_type === GrimoireEventType.DEATH &&
+              event.status_source !== "Jumped"
+          ),
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe

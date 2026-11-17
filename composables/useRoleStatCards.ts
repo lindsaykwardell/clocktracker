@@ -555,7 +555,25 @@ function getScopedGamesForRole(
 
   let asRole = index.asRole.get(roleId);
   if (!asRole) {
-    asRole = games.filter((_, i) => index.userRoleIds[i].has(roleId));
+    asRole = games.flatMap((game, i) => {
+      if (!index.userRoleIds[i].has(roleId)) return [];
+
+      // Someone else can hold the same role in the same game (an Imp
+      // starpass, a Fang Gu jump), so drop the events this role caused while
+      // another player held it. Events with no recorded source stay.
+      const participantIds = index.userParticipantIds[i];
+      const ownEvents = game.grimoire_events.filter(
+        (event) =>
+          event.by_role_id !== roleId ||
+          !event.by_participant_id ||
+          participantIds.has(event.by_participant_id)
+      );
+      return [
+        ownEvents.length === game.grimoire_events.length
+          ? game
+          : { ...game, grimoire_events: ownEvents },
+      ];
+    });
     index.asRole.set(roleId, asRole);
   }
   return asRole;

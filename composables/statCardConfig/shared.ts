@@ -92,7 +92,7 @@ export function getEventCurrentToken(
   event: GameRecord["grimoire_events"][number]
 ) {
   return (
-    game.grimoire[event.grimoire_page]?.tokens.find(
+    game.grimoire[event.grimoire_page]?.tokens?.find(
       (token) => token.grimoire_participant_id === event.participant_id
     ) ?? null
   );
@@ -105,7 +105,7 @@ export function getEventPreviousToken(
   if (event.grimoire_page <= 0) return null;
 
   return (
-    game.grimoire[event.grimoire_page - 1]?.tokens.find(
+    game.grimoire[event.grimoire_page - 1]?.tokens?.find(
       (token) => token.grimoire_participant_id === event.participant_id
     ) ?? null
   );
@@ -117,14 +117,14 @@ export function getByRoleForEvent(
 ) {
   if (!event.by_role_id) return null;
 
-  const current = game.grimoire[event.grimoire_page]?.tokens.find(
+  const current = game.grimoire[event.grimoire_page]?.tokens?.find(
     (token) => token.grimoire_participant_id === event.by_participant_id
   );
   if (current?.role_id === event.by_role_id) return current.role ?? null;
 
   const previous =
     event.grimoire_page > 0
-      ? game.grimoire[event.grimoire_page - 1]?.tokens.find(
+      ? game.grimoire[event.grimoire_page - 1]?.tokens?.find(
           (token) => token.grimoire_participant_id === event.by_participant_id
         )
       : null;
@@ -132,11 +132,11 @@ export function getByRoleForEvent(
   if (previous?.role_id === event.by_role_id) return previous.role ?? null;
 
   const anyMatch =
-    game.grimoire[event.grimoire_page]?.tokens.find(
+    game.grimoire[event.grimoire_page]?.tokens?.find(
       (token) => token.role_id === event.by_role_id
     ) ??
     (event.grimoire_page > 0
-      ? game.grimoire[event.grimoire_page - 1]?.tokens.find(
+      ? game.grimoire[event.grimoire_page - 1]?.tokens?.find(
           (token) => token.role_id === event.by_role_id
         )
       : null);

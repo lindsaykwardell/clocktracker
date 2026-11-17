@@ -178,13 +178,26 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
     script: "npc",
     source: "grimoire_event",
     label: "Reincarnated",
-    getCount: ({ games }) =>
-      countMatchingEvents(
-        games,
-        (_, event) =>
-          event.event_type === GrimoireEventType.REVIVE &&
-          event.by_role_id === "hindu"
-      ),
+    // A reincarnation is a revive when the storyteller recorded a page where
+    // the player was dead, and otherwise only a character change into the
+    // Traveller. Each player counts once per game, whichever was recorded.
+    getCount: ({ games }) => {
+      let total = 0;
+      for (const game of games) {
+        if (game.ignore_for_stats) continue;
+
+        const players = new Set<string>();
+        for (const event of game.grimoire_events) {
+          const reincarnated =
+            event.by_role_id === "hindu" &&
+            (event.event_type === GrimoireEventType.REVIVE ||
+              event.event_type === GrimoireEventType.ROLE_CHANGE);
+          if (reincarnated) players.add(event.participant_id || `event:${event.id}`);
+        }
+        total += players.size;
+      }
+      return total;
+    },
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe

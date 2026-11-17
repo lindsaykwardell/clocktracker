@@ -441,10 +441,12 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
       countMatchingEvents(games, (game, event) => {
         if (event.event_type !== GrimoireEventType.EXECUTION) return false;
 
-        const currentToken = getEventCurrentToken(game, event);
-        const previousToken = getEventPreviousToken(game, event);
-        const isGoblinExecution =
-          currentToken?.role_id === "goblin" || previousToken?.role_id === "goblin";
+        // Events store the player's role, so the role page needn't load the
+        // grimoire tokens; older events without one fall back to the tokens.
+        const isGoblinExecution = event.role_id
+          ? event.role_id === "goblin"
+          : getEventCurrentToken(game, event)?.role_id === "goblin" ||
+            getEventPreviousToken(game, event)?.role_id === "goblin";
         if (!isGoblinExecution) return false;
 
         return game.grimoire_events.some(
@@ -616,7 +618,10 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           !game.ignore_for_stats &&
           !!roleId &&
           game.end_trigger === GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE &&
-          game.end_trigger_type === GameEndTriggerType.EXECUTION &&
+          // The Harpy's madness kills; endings saved before that was fixed in
+          // the game-end form are recorded as an execution.
+          (game.end_trigger_type === GameEndTriggerType.DEATH ||
+            game.end_trigger_type === GameEndTriggerType.EXECUTION) &&
           game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
           game.end_trigger_role_id === roleId
       ).length,
@@ -1077,17 +1082,30 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     script: "tb",
     source: "grimoire_event",
     label: "The New Master",
-    getCount: ({ games, roleId }) =>
-      !roleId
-        ? 0
-        : countMatchingEvents(
-            games,
-            (_, event) =>
-              event.by_role_id === roleId &&
-              (event.event_type === GrimoireEventType.ROLE_CHANGE ||
-                (event.event_type === GrimoireEventType.OTHER &&
-                  event.status_source === "Is The Demon"))
-          ),
+    // "Is The Demon" is the fallback for a Scarlet Woman token that wasn't
+    // swapped, so a player who has both it and the role change still became
+    // the Demon only once: count each player once per game.
+    getCount: ({ games, roleId }) => {
+      if (!roleId) return 0;
+
+      let total = 0;
+      for (const game of games) {
+        if (game.ignore_for_stats) continue;
+
+        const players = new Set<string>();
+        for (const event of game.grimoire_events) {
+          const becameDemon =
+            event.by_role_id === roleId &&
+            (event.event_type === GrimoireEventType.ROLE_CHANGE ||
+              (event.event_type === GrimoireEventType.OTHER &&
+                event.status_source === "Is The Demon"));
+          if (!becameDemon) continue;
+          players.add(event.participant_id || `event:${event.id}`);
+        }
+        total += players.size;
+      }
+      return total;
+    },
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe

@@ -709,8 +709,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
             if (
               event.by_role_id !== roleId ||
               event.event_type !== GrimoireEventType.OTHER ||
-              (event.status_source !== "Know" &&
-                event.status_source !== "Demon")
+              event.status_source !== "Know"
             ) {
               return false;
             }
@@ -750,8 +749,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         if (
           event.by_role_id !== "choirboy" ||
           event.event_type !== GrimoireEventType.OTHER ||
-          (event.status_source !== "Know" &&
-            event.status_source !== "Demon")
+          event.status_source !== "Know"
         ) {
           return false;
         }
@@ -1079,27 +1077,13 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         return (
           total +
           game.grimoire_events.filter((event) => {
-            if (
-              event.by_role_id !== roleId ||
-              event.event_type !== GrimoireEventType.ROLE_CHANGE ||
-              !event.by_participant_id
-            ) {
-              return false;
-            }
-
-            const sourceToken =
-              game.grimoire[event.grimoire_page]?.tokens.find(
-                (token) =>
-                  token.grimoire_participant_id === event.by_participant_id
-              ) ??
-              (event.grimoire_page > 0
-                ? game.grimoire[event.grimoire_page - 1]?.tokens.find(
-                    (token) =>
-                      token.grimoire_participant_id === event.by_participant_id
-                  )
-                : null);
-
-            return sourceToken?.player_id === game.user_id;
+            // Requires a recorded source: the role scope then keeps only the
+            // changes this player caused as a Farmer, not another Farmer's.
+            return (
+              event.by_role_id === roleId &&
+              event.event_type === GrimoireEventType.ROLE_CHANGE &&
+              !!event.by_participant_id
+            );
           }).length
         );
       }, 0),

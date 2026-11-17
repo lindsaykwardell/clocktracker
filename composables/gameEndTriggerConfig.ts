@@ -77,6 +77,7 @@ export const END_TRIGGER_ROLE_INCLUDES: Partial<
           "hells_librarian", // Something bad could be death.
           "big_wig",
           "doomsayer",
+          "harpy", // Mad demon could die (the Harpy's madness kills, it doesn't execute).
         ],
         conditional: [
           // Boffin giving demon this character's ability?
@@ -98,7 +99,6 @@ export const END_TRIGGER_ROLE_INCLUDES: Partial<
 
           // Storyteller choice/"yes-but-don't"
           "cerenovus", // Mad demon could be executed.
-          "harpy", // // Mad demon could be executed.
         ],
         conditional: [],
       },
@@ -154,6 +154,7 @@ export const END_TRIGGER_ROLE_INCLUDES: Partial<
           "angel", // Something bad could be death during final 3.
           "hells_librarian", // Something bad could be death during final 3.
           "big_wig", // Could die during final 3.
+          "harpy", // Mad player could die during final 3 (the Harpy's madness kills).
 
           // Should these 'extra death at night' abilities be counted?
           // These character could unexpectedly kill down to 2.
@@ -176,7 +177,6 @@ export const END_TRIGGER_ROLE_INCLUDES: Partial<
           ...WILDCARD_ROLE_IDS,
           "mutant", // A Mutant could get themselves executed due to their ability during final 3.
           "cerenovus", // Mad player could be executed during final 3.
-          "harpy", // Mad player could be executed during final 3.
 
           // Edge cases
           "vizier", // Could force execution during final 3, which is specific player agency.
