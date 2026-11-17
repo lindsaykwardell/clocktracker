@@ -20,6 +20,7 @@
           Certain reminder tokens can prefill these events; they are marked with
           <IconUI id="crosshair" /> in the list below.</p>
           <p>Additional reminders were also added to support this functionality; you can recognize them by their slightly brighter purple background.</p>
+          <p>Hover a reminder with <IconUI id="crosshair" /> (or touch and hold it) to see how it's used.</p>
         </div>
         <div
           v-for="group in reminderGroups"
@@ -38,8 +39,18 @@
               v-for="reminder in group.reminders"
               :key="reminder.id"
               type="button"
-              class="flex flex-col items-center"
-              @click="emit('selectReminder', reminder)"
+              class="flex flex-col items-center select-none [-webkit-touch-callout:none]"
+              :aria-describedby="
+                activeHint?.reminderId === reminder.id ? hintElementId : undefined
+              "
+              @click="onReminderClick(reminder)"
+              @pointerdown="onReminderPointerDown($event, reminder)"
+              @pointermove="onReminderPointerMove"
+              @pointerup="cancelHintTimer"
+              @pointercancel="cancelHintTimer"
+              @pointerenter="onReminderPointerEnter($event, reminder)"
+              @pointerleave="onReminderPointerLeave"
+              @contextmenu="onReminderContextMenu($event, reminder)"
             >
               <ReminderToken
                 :reminder="reminder"
@@ -48,6 +59,22 @@
             </button>
           </div>
         </div>
+      </div>
+      <div
+        v-if="activeHint"
+        :id="hintElementId"
+        ref="hintElement"
+        role="tooltip"
+        class="fixed z-30 w-72 max-w-[calc(100vw-1rem)] rounded-md border border-stone-600 bg-stone-950 p-3 text-sm text-stone-200 shadow-xl"
+        :style="hintPosition"
+      >
+        <p class="font-bold font-sorts text-base text-white">
+          {{ activeHint.title }}
+        </p>
+        <p class="mt-1">{{ activeHint.text }}</p>
+        <p class="mt-2 text-xs text-stone-400">
+          Counted on the page where you add it. Leaving it on later pages adds nothing.
+        </p>
       </div>
       <form
         class="flex flex-col gap-2 p-4"
@@ -119,6 +146,7 @@ import type { RoleReminder } from "~/server/generated/prisma/client";
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/vue";
 import { RoleType, useRoles } from "~/composables/useRoles";
 import { GRIMOIRE_REMINDER_EVENT_CONFIG } from "~/composables/grimoireReminderEventConfig";
+import { getReminderHint } from "~/composables/grimoireReminderHints";
 
 const props = defineProps<{
   visible: boolean;
@@ -141,7 +169,11 @@ const availableTokenUrls = computed(() => {
 });
 
 function normalizeReminderName(value?: string | null) {
-  return (value ?? "").trim().toLowerCase();
+  const normalized = (value ?? "").trim().toLowerCase();
+  // The Courtier's countdown ("Drunk 3", "Drunk 2", ...) counts as "Drunk",
+  // the same as in the editor's event sync.
+  if (/^drunk\s+\d+$/.test(normalized)) return "drunk";
+  return normalized;
 }
 
 function isLegacyReminder(reminder: { type?: string | null }) {
@@ -244,5 +276,163 @@ watchEffect(() => {
     customReminder.value = "";
     showLegacyReminders.value = false;
   }
+});
+
+// Hint popup: touch and hold a reminder (about half a second), or hover it
+// with a mouse, to see how it's used.
+type DialogReminder = RoleReminder & { token_url: string; role_type?: RoleType | null };
+
+const HOLD_DELAY_MS = 450;
+const HOVER_DELAY_MS = 350;
+const HOLD_MOVE_TOLERANCE_PX = 10;
+
+const hintElementId = useId();
+const hintElement = ref<HTMLElement | null>(null);
+const activeHint = ref<{
+  reminderId: number;
+  title: string;
+  text: string;
+  anchor: DOMRect;
+} | null>(null);
+const hintPosition = ref<Record<string, string>>({});
+let hintTimer: ReturnType<typeof setTimeout> | null = null;
+let holdStart: { x: number; y: number } | null = null;
+let suppressNextClick = false;
+
+function hintForReminder(reminder: DialogReminder) {
+  return getReminderHint(reminder.role_id, reminder.reminder);
+}
+
+function cancelHintTimer() {
+  if (hintTimer) clearTimeout(hintTimer);
+  hintTimer = null;
+  holdStart = null;
+}
+
+function closeHint() {
+  cancelHintTimer();
+  activeHint.value = null;
+}
+
+function openHint(reminder: DialogReminder, anchorElement: HTMLElement) {
+  const text = hintForReminder(reminder);
+  if (!text) return false;
+  const roleName = roles.getRole(reminder.role_id)?.name;
+  activeHint.value = {
+    reminderId: reminder.id,
+    title: roleName ? `${roleName}: ${reminder.reminder}` : reminder.reminder,
+    text,
+    anchor: anchorElement.getBoundingClientRect(),
+  };
+  return true;
+}
+
+function scheduleHint(
+  reminder: DialogReminder,
+  anchorElement: HTMLElement,
+  delay: number,
+  afterOpen?: () => void
+) {
+  cancelHintTimer();
+  if (!hintForReminder(reminder)) return;
+  hintTimer = setTimeout(() => {
+    hintTimer = null;
+    if (openHint(reminder, anchorElement)) afterOpen?.();
+  }, delay);
+}
+
+function onReminderPointerDown(event: PointerEvent, reminder: DialogReminder) {
+  if (event.pointerType === "mouse") return;
+  suppressNextClick = false;
+  if (activeHint.value && activeHint.value.reminderId !== reminder.id) {
+    closeHint();
+  }
+  const anchorElement = event.currentTarget as HTMLElement;
+  scheduleHint(reminder, anchorElement, HOLD_DELAY_MS, () => {
+    // Letting go after a hold shouldn't also place the reminder.
+    suppressNextClick = true;
+  });
+  holdStart = { x: event.clientX, y: event.clientY };
+}
+
+function onReminderPointerMove(event: PointerEvent) {
+  if (event.pointerType === "mouse" || !holdStart) return;
+  const moved = Math.hypot(event.clientX - holdStart.x, event.clientY - holdStart.y);
+  // Moving the finger means scrolling, not holding.
+  if (moved > HOLD_MOVE_TOLERANCE_PX) cancelHintTimer();
+}
+
+function onReminderPointerEnter(event: PointerEvent, reminder: DialogReminder) {
+  if (event.pointerType !== "mouse") return;
+  scheduleHint(reminder, event.currentTarget as HTMLElement, HOVER_DELAY_MS);
+}
+
+function onReminderPointerLeave(event: PointerEvent) {
+  if (event.pointerType !== "mouse") return;
+  closeHint();
+}
+
+function onReminderContextMenu(event: MouseEvent, reminder: DialogReminder) {
+  // A long press would otherwise open the browser's context menu (Android).
+  if (hintForReminder(reminder)) event.preventDefault();
+}
+
+function onReminderClick(reminder: DialogReminder) {
+  if (suppressNextClick) {
+    suppressNextClick = false;
+    return;
+  }
+  closeHint();
+  emit("selectReminder", reminder);
+}
+
+function positionHint() {
+  const hint = activeHint.value;
+  const element = hintElement.value;
+  if (!hint || !element) return;
+  const margin = 8;
+  const { anchor } = hint;
+  const width = element.offsetWidth;
+  const height = element.offsetHeight;
+  const left = Math.min(
+    Math.max(anchor.left + anchor.width / 2 - width / 2, margin),
+    window.innerWidth - width - margin
+  );
+  const fitsAbove = anchor.top - height - margin >= margin;
+  const top = fitsAbove ? anchor.top - height - margin : anchor.bottom + margin;
+  hintPosition.value = { left: `${left}px`, top: `${top}px` };
+}
+
+watch(activeHint, async (hint) => {
+  if (!hint) return;
+  hintPosition.value = { left: "-9999px", top: "0px" };
+  await nextTick();
+  positionHint();
+});
+
+function onDocumentPointerDown(event: PointerEvent) {
+  if (!activeHint.value) return;
+  const target = event.target as Node | null;
+  if (target && hintElement.value?.contains(target)) return;
+  closeHint();
+}
+
+function onDocumentScroll() {
+  if (activeHint.value) closeHint();
+}
+
+watch(show, (visible) => {
+  if (!visible) closeHint();
+});
+
+onMounted(() => {
+  document.addEventListener("pointerdown", onDocumentPointerDown, true);
+  document.addEventListener("scroll", onDocumentScroll, true);
+});
+
+onBeforeUnmount(() => {
+  cancelHintTimer();
+  document.removeEventListener("pointerdown", onDocumentPointerDown, true);
+  document.removeEventListener("scroll", onDocumentScroll, true);
 });
 </script>
