@@ -163,7 +163,7 @@ primary_region = "${region}"
   cpu_kind = "shared"
   cpus = 1
 [deploy]
-  release_command = "npx prisma migrate deploy"
+  release_command = "./migrate.sh"
 `);
     if (Date.now() >= deadline) throw new Error("Staging expired before deployment; run cleanup");
     await summary("Building and deploying the staging application.");
