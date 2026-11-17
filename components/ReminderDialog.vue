@@ -6,7 +6,11 @@
           Select a Reminder
         </h2>
       </div>
-      <div class="flex justify-between gap-8">
+      <div class="flex flex-wrap gap-x-8 gap-y-2">
+        <label class="inline-flex items-center gap-2 self-start">
+          <input v-model="showTrackingReminders" type="checkbox" />
+          <span class="text-sm">Show tracking reminders</span>
+        </label>
         <label class="inline-flex items-center gap-2 self-start">
           <input v-model="showLegacyReminders" type="checkbox" />
           <span class="text-sm">Show legacy reminders</span>
@@ -15,7 +19,7 @@
     </template>
     <template v-if="show">
       <div class="flex flex-col gap-4 p-4">
-        <div class="text-sm text-stone-300 space-y-2">
+        <div v-if="showTrackingReminders" class="text-sm text-stone-300 space-y-2">
           <p>ClockTracker keeps track of certain events in the game (deaths, character changes, ...).
           Certain reminder tokens can prefill these events; they are marked with
           <IconUI id="crosshair" /> in the list below.</p>
@@ -54,7 +58,9 @@
             >
               <ReminderToken
                 :reminder="reminder"
-                :isTrackingRelevant="isTrackingRelevantReminder(reminder)"
+                :isTrackingRelevant="
+                  showTrackingReminders && isTrackingRelevantReminder(reminder)
+                "
               />
             </button>
           </div>
@@ -147,6 +153,7 @@ import { Popover, PopoverButton, PopoverPanel } from "@headlessui/vue";
 import { RoleType, useRoles } from "~/composables/useRoles";
 import { GRIMOIRE_REMINDER_EVENT_CONFIG } from "~/composables/grimoireReminderEventConfig";
 import { getReminderHint } from "~/composables/grimoireReminderHints";
+import { SHOW_TRACKING_REMINDERS_KEY } from "~/composables/reminderDialogTracking";
 
 const props = defineProps<{
   visible: boolean;
@@ -157,6 +164,14 @@ const emit = defineEmits(["update:visible", "selectReminder"]);
 const customReminder = ref("");
 const tokenUrl = ref<string | undefined>(undefined);
 const showLegacyReminders = ref(false);
+// The extra reminders ClockTracker added for event tracking (not on the
+// physical tokens). Turning them off leaves the official ones. The game editor
+// shares one choice across the game's dialogs; elsewhere each dialog has its own.
+const showTrackingReminders = inject(
+  SHOW_TRACKING_REMINDERS_KEY,
+  () => ref(true),
+  true
+);
 const roles = useRoles();
 
 function setTokenUrlAndClose(url: string, close: () => void) {
@@ -255,6 +270,7 @@ const reminderGroups = computed(() => {
 
   for (const reminder of props.reminders) {
     if (!showLegacyReminders.value && isLegacyReminder(reminder)) continue;
+    if (!showTrackingReminders.value && reminder.type === "TRACKING") continue;
 
     const role = roles.getRole(reminder.role_id);
     const roleType = reminder.role_type ?? role?.type;
@@ -300,6 +316,8 @@ let holdStart: { x: number; y: number } | null = null;
 let suppressNextClick = false;
 
 function hintForReminder(reminder: DialogReminder) {
+  // With tracking reminders hidden, the dialog shows no tracking at all.
+  if (!showTrackingReminders.value) return null;
   return getReminderHint(reminder.role_id, reminder.reminder);
 }
 

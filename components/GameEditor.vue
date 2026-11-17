@@ -797,6 +797,7 @@
 
 <script setup lang="ts">
 import { toEditorReminder, type GameReminder } from "~/utils/reminderType";
+import { SHOW_TRACKING_REMINDERS_KEY } from "~/composables/reminderDialogTracking";
 import type { Alignment } from "~/server/generated/prisma/client";
 import type { RoleType } from "~/composables/useRoles";
 import naturalOrder from "natural-order";
@@ -819,6 +820,9 @@ import {
   createParticipantId,
   normalizePlayerName,
 } from "~/composables/grimoireParticipantMatching";
+
+// One "show tracking reminders" choice per game, shared by its reminder dialogs.
+provide(SHOW_TRACKING_REMINDERS_KEY, ref(true));
 
 const props = defineProps<{
   inFlight: boolean;
