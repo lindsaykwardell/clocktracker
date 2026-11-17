@@ -525,7 +525,8 @@ export const TRAVELLERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
             (_, event) =>
               event.by_role_id === roleId &&
               event.event_type === GrimoireEventType.OTHER &&
-              event.status_source === "Sober and Healthy"
+              (event.status_source === "Sober & Healthy" ||
+                event.status_source === "Sober and Healthy")
           ),
     getSentence: ({ count, isMe }) =>
       count > 0

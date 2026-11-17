@@ -3,6 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const raw_roles = require("./roles.json");
 const { trackingReminders } = require("./trackingReminders");
+const { legacyReminders } = require("./legacyReminders");
 
 function nameToId(name) {
   return name
@@ -174,6 +175,7 @@ module.exports = {
   loric,
   roleNames,
   roles,
-  reminders: [...reminders, ...trackingReminders],
+  // Legacy last, so it wins over an official entry with the same wording.
+  reminders: [...reminders, ...trackingReminders, ...legacyReminders],
   abilities,
 };

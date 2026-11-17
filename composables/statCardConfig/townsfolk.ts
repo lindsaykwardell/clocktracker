@@ -19,6 +19,16 @@ import {
 } from "./shared";
 import type { RoleStatCardDefinition, RoleStatCardDisplayRole } from "./shared";
 
+// The old Balloonist had one "Seen <type>" reminder per character type; the
+// current one uses "Know" for all of them.
+const BALLOONIST_KNOW_REMINDERS = new Set([
+  "Know",
+  "Seen Townsfolk",
+  "Seen Outsider",
+  "Seen Minion",
+  "Seen Demon",
+]);
+
 function getWasherwomanMostShownRole(
   games: Parameters<RoleStatCardDefinition["getCount"]>[0]["games"],
   roleId: string | null | undefined
@@ -391,7 +401,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
             if (
               event.by_role_id !== roleId ||
               event.event_type !== GrimoireEventType.OTHER ||
-              event.status_source !== "Know"
+              !BALLOONIST_KNOW_REMINDERS.has(event.status_source ?? "")
             ) {
               return false;
             }
@@ -432,7 +442,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           if (
             event.by_role_id !== roleId ||
             event.event_type !== GrimoireEventType.OTHER ||
-            event.status_source !== "Know"
+            !BALLOONIST_KNOW_REMINDERS.has(event.status_source ?? "")
           ) {
             continue;
           }

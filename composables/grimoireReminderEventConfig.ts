@@ -284,6 +284,31 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     cadence: "once",
     sourceRoleIds: ["steward", "balloonist", "noble"],
   },
+  // Legacy Balloonist reminders (one per character type), counted as "Know".
+  {
+    reminder: "Seen Townsfolk",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "once",
+    sourceRoleIds: ["balloonist"],
+  },
+  {
+    reminder: "Seen Outsider",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "once",
+    sourceRoleIds: ["balloonist"],
+  },
+  {
+    reminder: "Seen Minion",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "once",
+    sourceRoleIds: ["balloonist"],
+  },
+  {
+    reminder: "Seen Demon",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "once",
+    sourceRoleIds: ["balloonist"],
+  },
   {
     reminder: "Died Today",
     eventType: GrimoireEventType.OTHER,
@@ -342,14 +367,6 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
     reminder: "Dead",
     eventType: GrimoireEventType.DEATH,
     cadence: "once",
-    sourceRoleIds: ["alchemist"],
-    targetScope: "self",
-    targetRoleIds: ["alchemist"],
-  },
-  {
-    reminder: "Dead",
-    eventType: GrimoireEventType.DEATH,
-    cadence: "once",
     sourceRoleIds: ["tinker"],
     targetScope: "self",
     targetRoleIds: ["tinker"],
@@ -394,6 +411,12 @@ export const GRIMOIRE_REMINDER_EVENT_CONFIG: GrimoireReminderEventConfig[] = [
   },
   {
     reminder: "Sober and Healthy",
+    eventType: GrimoireEventType.OTHER,
+    cadence: "each_night",
+    sourceRoleIds: ["barista"],
+  },
+  {
+    reminder: "Sober & Healthy",
     eventType: GrimoireEventType.OTHER,
     cadence: "each_night",
     sourceRoleIds: ["barista"],

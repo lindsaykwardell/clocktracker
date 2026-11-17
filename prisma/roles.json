@@ -2565,7 +2565,7 @@
   {
     "id": "stormcatcher",
     "firstNightReminder": "Announce which character is stormcaught. If that character is in play, mark that player as *STORMCAUGHT*. Wake each evil player and show them the character token, then the marked player.  If not in play, wake each evil player, show them the *THESE CHARACTERS ARE NOT IN PLAY* token & the relevant character token.",
-    "reminders": ["Stormcaught"],
+    "reminders": ["Safe"],
     "setup": false,
     "name": "Storm Catcher",
     "team": "loric",
