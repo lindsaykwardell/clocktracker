@@ -157,6 +157,11 @@ const trackingReminders = [
     type: ReminderType.TRACKING,
   },
   {
+    role_id: "pit-hag",
+    reminder: "Dead",
+    type: ReminderType.TRACKING,
+  },
+  {
     role_id: "politician",
     reminder: "Changed",
     type: ReminderType.TRACKING,

@@ -106,6 +106,7 @@ const HINTS: [roleId: string, reminder: string, hint: string][] = [
   ["mezepheles", "No Ability", "Place on the Mezepheles once they have used their ability. Records that they used it."],
   ["organ_grinder", "Drunk", "Place on the Organ Grinder on a night they chose to be drunk. Records that they are drunk by their own choice."],
   ["pit-hag", "Changed", "Place on the player whose character the Pit-Hag changed. Records the Pit-Hag as the cause of the character change."],
+  ["pit-hag", "Dead", "Place on each player who died arbitrarily on the night the Pit-Hag made a Demon. Records the Pit-Hag as the cause of death."],
   ["poisoner", "Poisoned", "Place on the player the Poisoner chose. Records that they are poisoned by the Poisoner."],
   ["psychopath", "Dead", "Place on the player the Psychopath publicly chose and killed. Records the Psychopath as the cause of death."],
   ["scarlet_woman", "Changed", "Place on the Scarlet Woman when you change their token to the Demon. Records the Scarlet Woman as the cause of the character change."],

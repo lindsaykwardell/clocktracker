@@ -884,6 +884,29 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `No Pit-Hag has changed themselves yet.`,
   },
   {
+    id: "pit_hag_arbitrary_deaths",
+    category: "role",
+    scope: "as_role",
+    globalDataNeeds: ["grimoire_events"],
+    roleIds: ["pit-hag"],
+    script: "snv",
+    sao: 4,
+    source: "grimoire_event",
+    label: "Toil and Trouble",
+    getCount: ({ games, roleId }) =>
+      countGrimoireEvents(games, roleId, GrimoireEventType.DEATH),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Pit-Hag, you've caused ${count} arbitrary death${pluralize(count)} by making a Demon.`
+          : `As the Pit-Hag, this player has caused ${count} arbitrary death${pluralize(count)} by making a Demon.`)
+        : `As the Pit-Hag, cause arbitrary deaths by making a Demon.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} arbitrary death${pluralize(count)} ${wasWere(count)} caused by a Pit-Hag making a Demon.`
+        : `No Pit-Hag has caused arbitrary deaths by making a Demon yet.`,
+  },
+  {
     id: "pit_hag_good_demons",
     category: "role",
     scope: "as_role",
@@ -945,7 +968,7 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
       count > 0
         ? (isMe
           ? `As the Pit-Hag, you've caused ${count} game${pluralize(count)} to end by removing the last living Demon.`
-          : `As the Pit-Hag, this player has caused ${count} games${pluralize(count)} to end by removing the last living Demon.`)
+          : `As the Pit-Hag, this player has caused ${count} game${pluralize(count)} to end by removing the last living Demon.`)
         : `As the Pit-Hag, end a game by removing the last living Demon.`,
     getGlobalSentence: ({ count }) =>
       count > 0

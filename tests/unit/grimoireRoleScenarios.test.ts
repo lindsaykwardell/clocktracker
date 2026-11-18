@@ -35,6 +35,8 @@ const ROLES: Record<string, { name: string; type: string; alignment: "GOOD" | "E
   gangster: { name: "Gangster", type: "TRAVELER", alignment: "EVIL" },
   gnome: { name: "Gnome", type: "TRAVELER", alignment: "GOOD" },
   witch: { name: "Witch", type: "MINION", alignment: "EVIL" },
+  "pit-hag": { name: "Pit-Hag", type: "MINION", alignment: "EVIL" },
+  imp: { name: "Imp", type: "DEMON", alignment: "EVIL" },
   ventriloquist: { name: "Ventriloquist", type: "LORIC", alignment: "GOOD" },
 };
 
@@ -514,4 +516,24 @@ test("Ventriloquist: an executed player who didn't die is credited to the Loric"
     s.of("OTHER", "a").map((e) => `${e.by_role_id}:${e.status_source}`),
     ["ventriloquist:Saved"]
   );
+});
+
+test("Pit-Hag: arbitrary deaths after making a Demon", () => {
+  const s = scenario([
+    page([
+      { id: "ph", role: "pit-hag" },
+      { id: "a", role: "chef" },
+      { id: "b", role: "empath" },
+    ]),
+    page([
+      { id: "ph", role: "pit-hag" },
+      { id: "a", role: "imp", alignment: "GOOD", reminders: [r("pit-hag", "Changed")] },
+      { id: "b", role: "empath", dead: true, reminders: [r("pit-hag", "Dead")] },
+    ]),
+  ]);
+  assert.deepEqual(
+    s.of("DEATH").map((e) => `${e.participant_id}:${e.by_participant_id}:${e.by_role_id}`),
+    ["b:ph:pit-hag"]
+  );
+  assert.equal(s.card("pit_hag_arbitrary_deaths", "pit-hag", "ph"), 1);
 });
