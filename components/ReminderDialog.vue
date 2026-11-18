@@ -6,15 +6,27 @@
           Select a Reminder
         </h2>
       </div>
-      <div class="flex flex-wrap gap-x-8 gap-y-2">
-        <label class="inline-flex items-center gap-2 self-start">
-          <input v-model="showTrackingReminders" type="checkbox" />
-          <span class="text-sm">Show tracking reminders</span>
-        </label>
-        <label class="inline-flex items-center gap-2 self-start">
-          <input v-model="showLegacyReminders" type="checkbox" />
-          <span class="text-sm">Show legacy reminders</span>
-        </label>
+      <div class="flex flex-wrap items-center justify-between gap-x-8 gap-y-2">
+        <div class="flex flex-wrap gap-x-8 gap-y-2">
+          <label class="inline-flex items-center gap-2">
+            <input v-model="showTrackingReminders" type="checkbox" />
+            <span class="text-sm">Show tracking reminders</span>
+          </label>
+          <label class="inline-flex items-center gap-2">
+            <input v-model="showLegacyReminders" type="checkbox" />
+            <span class="text-sm">Show legacy reminders</span>
+          </label>
+        </div>
+        <form @submit.prevent="selectFirstMatchingReminder">
+          <input
+            v-model="reminderFilter"
+            ref="reminderFilterRef"
+            type="search"
+            placeholder="Filter reminders"
+            class="p-2 border border-gray-300 rounded-md text-black"
+            aria-label="Filter reminders by role or reminder"
+          />
+        </form>
       </div>
     </template>
     <template v-if="show">
@@ -26,6 +38,12 @@
           <p>Additional reminders were also added to support this functionality; you can recognize them by their slightly brighter purple background.</p>
           <p>Hover a reminder with <IconUI id="crosshair" /> (or touch and hold it) to see how it's used.</p>
         </div>
+        <p
+          v-if="reminderFilter.trim() && reminderGroups.length === 0"
+          class="text-center text-stone-400"
+        >
+          No reminders match "{{ reminderFilter.trim() }}".
+        </p>
         <div
           v-for="group in reminderGroups"
           :key="group.key"
@@ -164,6 +182,10 @@ const emit = defineEmits(["update:visible", "selectReminder"]);
 const customReminder = ref("");
 const tokenUrl = ref<string | undefined>(undefined);
 const showLegacyReminders = ref(false);
+// Matches the role's name or the text on the reminder, so "imp" finds the
+// Imp's reminders and "dead" finds every "Dead" reminder.
+const reminderFilter = ref("");
+const reminderFilterRef = ref<HTMLInputElement | null>(null);
 // The extra reminders ClockTracker added for event tracking (not on the
 // physical tokens). Turning them off leaves the official ones. The game editor
 // shares one choice across the game's dialogs; elsewhere each dialog has its own.
@@ -267,12 +289,20 @@ const reminderGroups = computed(() => {
   ];
 
   const byType = new Map(groups.map((group) => [group.key, group]));
+  const filter = reminderFilter.value.trim().toLowerCase();
 
   for (const reminder of props.reminders) {
     if (!showLegacyReminders.value && isLegacyReminder(reminder)) continue;
     if (!showTrackingReminders.value && reminder.type === "TRACKING") continue;
 
     const role = roles.getRole(reminder.role_id);
+    if (
+      filter &&
+      !reminder.reminder.toLowerCase().includes(filter) &&
+      !(role?.name ?? reminder.role_id).toLowerCase().includes(filter)
+    ) {
+      continue;
+    }
     const roleType = reminder.role_type ?? role?.type;
     const targetGroup = byType.get(roleType ?? "OTHER") ?? byType.get("OTHER");
     if (!targetGroup) continue;
@@ -291,8 +321,23 @@ watchEffect(() => {
   if (show.value) {
     customReminder.value = "";
     showLegacyReminders.value = false;
+    reminderFilter.value = "";
   }
 });
+
+watch(show, async (visible) => {
+  // Only with a mouse: on a phone, focusing would open the keyboard over the
+  // reminders.
+  if (!visible || !window.matchMedia("(pointer: fine)").matches) return;
+  await nextTick();
+  reminderFilterRef.value?.focus();
+});
+
+function selectFirstMatchingReminder() {
+  // Enter places the first reminder shown, like the role dialog.
+  const first = reminderGroups.value[0]?.reminders[0];
+  if (first) onReminderClick(first);
+}
 
 // Hint popup: touch and hold a reminder (about half a second), or hover it
 // with a mouse, to see how it's used.
