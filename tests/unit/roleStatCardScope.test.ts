@@ -188,3 +188,49 @@ test("a claimed Goblin execution counts on the role page without grimoire tokens
   assert.equal(definition.getCount({ games: [game], roleId: "goblin" }), 1);
   assert.equal(definition.globalDataNeeds?.includes("grimoire_state"), false);
 });
+
+// General cards count what this player did, whatever their role.
+function generalCard(metricKey: string) {
+  return {
+    id: 1,
+    role_id: null,
+    source: "end_trigger",
+    metric_key: metricKey,
+    storyteller_only: false,
+    role: null,
+  } as any;
+}
+
+function endedGame(triggerParticipantId: string | null) {
+  return {
+    ignore_for_stats: false,
+    grimoire: [
+      page([
+        { id: "steven", username: "steven", roleId: "chef", type: "TOWNSFOLK" },
+        { id: "stef", username: "stef", roleId: "farmer", type: "TOWNSFOLK" },
+      ]),
+    ],
+    grimoire_events: [],
+    end_trigger: "NO_LIVING_DEMON",
+    end_trigger_cause: "ABILITY",
+    end_trigger_participant_id: triggerParticipantId,
+    end_trigger_role: { id: "slayer", name: "Slayer", token_url: "", type: "TOWNSFOLK" },
+  } as any;
+}
+
+test("general end-trigger cards only count games this player ended", () => {
+  const games = [endedGame("steven"), endedGame("stef"), endedGame(null)];
+  const count = (username: string) =>
+    buildRoleStatCardResult(generalCard("game_ending_abilities"), games, true, username).count;
+  assert.equal(count("steven"), 1);
+  assert.equal(count("stef"), 1);
+});
+
+test("general event cards only count events this player caused", () => {
+  const count = (username: string) =>
+    buildRoleStatCardResult(generalCard("demon_kills_total"), [starpassGame], true, username)
+      .count;
+  assert.equal(count("alice"), 2);
+  assert.equal(count("bob"), 1);
+  assert.equal(count("cara"), 0);
+});

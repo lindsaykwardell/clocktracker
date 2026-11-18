@@ -450,6 +450,7 @@ type ScopeIndex = {
   userRoleIds: Set<string>[];
   affectedPlayer?: GameRecord[];
   triggeringPlayer?: GameRecord[];
+  general?: GameRecord[];
   asRole: Map<string, GameRecord[]>;
 };
 
@@ -493,11 +494,46 @@ function getScopedGamesForRole(
   category: RoleStatCardCategory,
   scope: "as_role" | "affected_player" | "triggering_player"
 ) {
-  if (category !== "role" || !username) {
+  if (!username) {
     return games;
   }
 
   const index = getScopeIndex(games, username);
+
+  if (category === "general") {
+    // General cards are about what this player did, whatever their role:
+    // the events they caused and the game endings they triggered.
+    index.general ??= games.flatMap((game, i) => {
+      const participantIds = index.userParticipantIds[i];
+      if (!participantIds.size) return [];
+
+      const triggeredEnd =
+        !!game.end_trigger_participant_id &&
+        participantIds.has(game.end_trigger_participant_id);
+      return [
+        {
+          ...game,
+          grimoire_events: game.grimoire_events.filter(
+            (event) =>
+              !!event.by_participant_id &&
+              participantIds.has(event.by_participant_id)
+          ),
+          ...(triggeredEnd
+            ? {}
+            : {
+                end_trigger: GameEndTrigger.NOT_RECORDED,
+                end_trigger_cause: null,
+                end_trigger_role: null,
+              }),
+        },
+      ];
+    });
+    return index.general;
+  }
+
+  if (category !== "role") {
+    return games;
+  }
 
   if (scope === "affected_player") {
     index.affectedPlayer ??= games.flatMap((game, i) => {
