@@ -23,6 +23,62 @@
       </div>
     </section>
 
+    <section
+      v-if="canManageUpdates"
+      class="p-4 rounded border border-stone-300 dark:border-stone-700/50
+             bg-stone-300/40 dark:bg-stone-900/50 mb-6"
+    >
+      <form class="flex flex-col gap-3" @submit.prevent="fillForUser(false)">
+        <div>
+          <h3 class="font-semibold">Fill grimoire events for a user</h3>
+          <p class="text-sm text-stone-500 dark:text-stone-400">
+            Generates events for that user's games that never had them, the
+            same way the background fill does. Events are only added, and games
+            already saved in the editor are left alone. Runs for up to about
+            25 seconds; run it again if games remain. A dry run looks at up to
+            300 games without saving anything.
+          </p>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-2">
+          <Input
+            v-model="fillUsername"
+            placeholder="Username"
+            class="flex-1"
+          />
+          <Button
+            type="button"
+            color="neutral"
+            variant="soft"
+            size="sm"
+            :disabled="!fillUsername.trim() || filling"
+            @click="fillForUser(true)"
+          >
+            Dry Run
+          </Button>
+          <Button
+            type="submit"
+            color="primary"
+            size="sm"
+            :disabled="!fillUsername.trim() || filling"
+          >
+            {{ filling ? "Running..." : "Run" }}
+          </Button>
+        </div>
+        <div v-if="fillError" class="text-sm text-red-500">
+          {{ fillError }}
+        </div>
+        <div v-if="fillResult" class="text-sm">
+          <p :class="fillResult.remaining > 0 ? 'text-primary' : 'text-green-600 dark:text-green-400'">
+            {{ fillSummary }}
+          </p>
+          <details class="mt-1">
+            <summary class="cursor-pointer text-stone-500">Details</summary>
+            <pre class="mt-2 p-3 rounded bg-stone-900/90 text-stone-100 overflow-auto">{{ JSON.stringify(fillResult, null, 2) }}</pre>
+          </details>
+        </div>
+      </form>
+    </section>
+
     <Loading v-if="loading && updates.length === 0" />
 
     <Alert v-else-if="loadError" color="negative" class="mb-4">
@@ -241,6 +297,69 @@ async function runUpdate(
     if (!anyRunning && !updates.value.some((u) => u.status === "RUNNING")) {
       stopPolling();
     }
+  }
+}
+
+type GrimoireEventsFillResponse = {
+  username: string;
+  dryRun: boolean;
+  examined: number;
+  filled: number;
+  eventsCreated: number;
+  noEvents: number;
+  alreadyHadEvents: number;
+  failed: number;
+  remaining: number;
+  [key: string]: unknown;
+};
+
+const fillUsername = ref("");
+const filling = ref(false);
+const fillError = ref("");
+const fillResult = ref<GrimoireEventsFillResponse | null>(null);
+
+const fillSummary = computed(() => {
+  const r = fillResult.value;
+  if (!r) return "";
+  const games = (n: number) => `${n} game${n === 1 ? "" : "s"}`;
+  if (r.dryRun) {
+    return (
+      `Dry run for ${r.username}: looked at ${games(r.examined)} of ` +
+      `${games(r.remaining)} never generated. ${r.filled} would get ` +
+      `${r.eventsCreated} events, ${r.noEvents} have none to add, ` +
+      `${r.alreadyHadEvents} already have events.`
+    );
+  }
+  const parts = [
+    `${r.username}: ${games(r.examined)} processed, ` +
+      `${r.eventsCreated} events added to ${games(r.filled)}`,
+    `${r.noEvents} had none to add`,
+    `${r.alreadyHadEvents} already had events`,
+  ];
+  if (r.failed) parts.push(`${r.failed} failed (see server log)`);
+  return (
+    parts.join(", ") +
+    ". " +
+    (r.remaining > 0 ? `${games(r.remaining)} left; run again.` : "All done.")
+  );
+});
+
+async function fillForUser(dryRun: boolean) {
+  const username = fillUsername.value.trim();
+  if (!username || filling.value) return;
+  filling.value = true;
+  fillError.value = "";
+  fillResult.value = null;
+  try {
+    fillResult.value = await $fetch<GrimoireEventsFillResponse>(
+      "/api/admin/grimoire-events-fill",
+      { method: "POST", body: { username, dryRun } }
+    );
+  } catch (error: any) {
+    fillError.value =
+      error?.data?.statusMessage || error?.message || "Fill failed";
+  } finally {
+    filling.value = false;
   }
 }
 

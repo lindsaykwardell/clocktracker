@@ -46,7 +46,13 @@ const MAX_TRACKED_FAILURES = 1000;
 
 export async function fillMissingGrimoireEvents(
   prisma: PrismaClient,
-  options: { batchSize?: number; timeBudgetMs?: number; dryRun?: boolean } = {}
+  options: {
+    batchSize?: number;
+    timeBudgetMs?: number;
+    dryRun?: boolean;
+    /** Only fill games recorded by this user (the admin "fill for a user" tool). */
+    userId?: string;
+  } = {}
 ): Promise<GrimoireEventsFillResult> {
   const batchSize = options.batchSize ?? 300;
   const timeBudgetMs = options.timeBudgetMs ?? 2 * 60 * 1000;
@@ -70,6 +76,7 @@ export async function fillMissingGrimoireEvents(
   const unprocessed: Prisma.GameWhereInput = {
     grimoire_events_generated_at: null,
     deleted: false,
+    ...(options.userId ? { user_id: options.userId } : {}),
     ...(failedGameIds.size ? { id: { notIn: [...failedGameIds] } } : {}),
   };
 
