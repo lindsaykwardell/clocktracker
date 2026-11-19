@@ -1146,6 +1146,16 @@ function serializeGrimoireState() {
 const showCopyGrimoireDialog = ref(false);
 const showSnapshotDialog = ref(false);
 const grimPage = ref(props.game.grimoire.length - 1);
+
+// Stay on an existing page when the grimoire shrinks from outside, like
+// "Reset Game" on add-game replacing it with a single page.
+watch(
+  () => props.game.grimoire.length,
+  (length) => {
+    if (grimPage.value > length - 1) grimPage.value = Math.max(0, length - 1);
+  }
+);
+
 const draggedSeatOrder = ref<number | null>(null);
 const dragInsertIndex = ref<number | null>(null);
 const dragTargetOrder = ref<number | null>(null);
