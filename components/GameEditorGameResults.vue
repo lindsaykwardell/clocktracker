@@ -258,6 +258,7 @@ import {
   parseEndTriggerSubtype,
 } from "~/composables/endTriggerSubtypeConfig";
 import { WILDCARD_ROLE_IDS } from "~/composables/grimoireRoleGroups";
+import type { EndTriggerFromEvent } from "~/composables/endTriggerFromEvent";
 
 const wildcardRoleIds = new Set(WILDCARD_ROLE_IDS);
 
@@ -729,10 +730,32 @@ function getRestrictRoleIds() {
   return endTriggerIncludeRoleIds.value.length > 0 ? endTriggerIncludeRoleIds.value : null;
 }
 
+// The watchers below clear the fields that depend on the one that changed.
+// While an event's values are being applied they are all set together, so
+// those resets are paused until the watchers have run.
+let applyingFromEvent = false;
+
+async function applyFromEvent(values: EndTriggerFromEvent) {
+  applyingFromEvent = true;
+  try {
+    props.game.end_trigger = values.end_trigger;
+    props.game.end_trigger_type = values.end_trigger_type;
+    props.game.end_trigger_cause = values.end_trigger_cause;
+    props.game.end_trigger_role_id = values.end_trigger_role_id;
+    props.game.end_trigger_role = values.end_trigger_role;
+    props.game.end_trigger_participant_id = values.end_trigger_participant_id;
+    props.game.end_trigger_subtype = "";
+    props.game.end_trigger_note = "";
+    await nextTick();
+  } finally {
+    applyingFromEvent = false;
+  }
+}
+
 watch(
   () => props.game.end_trigger,
   (value) => {
-    if (value === undefined) return;
+    if (value === undefined || applyingFromEvent) return;
 
     props.game.end_trigger_role_id = null;
     props.game.end_trigger_role = null;
@@ -770,7 +793,7 @@ watch(
 watch(
   () => props.game.end_trigger_type,
   (value) => {
-    if (!shouldShowEndTriggerType.value) return;
+    if (!shouldShowEndTriggerType.value || applyingFromEvent) return;
 
     props.game.end_trigger_role_id = null;
     props.game.end_trigger_role = null;
@@ -813,7 +836,7 @@ watch(
 watch(
   () => props.game.end_trigger_cause,
   (value, oldValue) => {
-    if (value === oldValue) return;
+    if (value === oldValue || applyingFromEvent) return;
     props.game.end_trigger_role_id = null;
     props.game.end_trigger_role = null;
     props.game.end_trigger_participant_id = null;
@@ -846,5 +869,6 @@ watch(
 
 defineExpose({
   getRestrictRoleIds,
+  applyFromEvent,
 });
 </script>

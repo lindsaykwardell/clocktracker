@@ -519,6 +519,7 @@
       :editingMultipleGames="editingMultipleGames"
       :scriptRoleIds="scriptRoleIds"
       @open-by-role-dialog="openGrimoireEventByRoleDialog"
+      @end-game-from-event="applyEndTriggerFromEvent"
     />
     <fieldset
       v-if="!editingMultipleGames"
@@ -800,6 +801,7 @@ import { toEditorReminder, type GameReminder } from "~/utils/reminderType";
 import { SHOW_TRACKING_REMINDERS_KEY } from "~/composables/reminderDialogTracking";
 import type { Alignment } from "~/server/generated/prisma/client";
 import type { RoleType } from "~/composables/useRoles";
+import type { EndTriggerFromEvent } from "~/composables/endTriggerFromEvent";
 import naturalOrder from "natural-order";
 import { useLocalStorage } from "@vueuse/core";
 import {
@@ -999,7 +1001,12 @@ const excludeIrrelevantEndTriggerRoles = ref(true);
 const excludeIrrelevantGrimoireEventRoles = ref(true);
 const endTriggerRef = ref<{
   getRestrictRoleIds: () => string[] | null;
+  applyFromEvent: (values: EndTriggerFromEvent) => Promise<void>;
 } | null>(null);
+
+function applyEndTriggerFromEvent(values: EndTriggerFromEvent) {
+  endTriggerRef.value?.applyFromEvent(values);
+}
 
 const grimoireEventsRef = ref<{
   recordGrimoireEvent: (payload: {

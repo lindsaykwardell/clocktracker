@@ -277,6 +277,32 @@
                     </button>
                   </Token>
                 </div>
+                <div
+                  v-if="endTriggerForEvent(event)"
+                  class="col-span-3 flex items-center gap-2 flex-wrap border-t border-stone-700 pt-3"
+                >
+                  <span
+                    v-if="eventEndedGame(event)"
+                    class="inline-flex items-center gap-1 text-sm font-semibold text-green-700 dark:text-green-400"
+                  >
+                    <IconUI id="check-circle" size="sm" />
+                    This event ended the game
+                  </span>
+                  <Button
+                    v-else
+                    type="button"
+                    size="sm"
+                    color="neutral"
+                    variant="soft"
+                    icon="check-circle"
+                    @click="markEventAsGameEnd(event)"
+                  >
+                    This event ended the game
+                  </Button>
+                  <span class="text-xs text-stone-600 dark:text-stone-400">
+                    {{ endTriggerForEventLabel(event) }}
+                  </span>
+                </div>
               </div>
             </details>
           </li>
@@ -288,9 +314,16 @@
 
 <script setup lang="ts">
 import {
+  GameEndTrigger,
+  type GameEndTriggerType,
   GrimoireEventCause,
   GrimoireEventType,
 } from "~/composables/useGames";
+import {
+  deriveEndTriggerFromEvent,
+  endTriggerMatchesGame,
+  type EndTriggerFromEvent,
+} from "~/composables/endTriggerFromEvent";
 import { useRoles } from "~/composables/useRoles";
 import {
   GRIMOIRE_EVENT_ROLE_INCLUDES,
@@ -365,11 +398,16 @@ const props = defineProps<{
   game: {
     grimoire: GrimoirePageLike[];
     grimoire_events: GrimoireEventLike[];
+    end_trigger?: GameEndTrigger;
+    end_trigger_type?: GameEndTriggerType | null;
+    end_trigger_participant_id?: string | null;
+    end_trigger_role_id?: string | null;
   };
 }>();
 
 const emit = defineEmits<{
   (e: "open-by-role-dialog", event: GrimoireEventLike): void;
+  (e: "end-game-from-event", values: EndTriggerFromEvent): void;
 }>();
 
 const allRoles = useRoles();
@@ -2790,6 +2828,50 @@ const grimoireEventSyncAlertColor = computed(() => {
   const { updated, removed } = grimoireEventSyncStats.value;
   return updated > 0 || removed > 0 ? "caution" : "positive";
 });
+
+// Game end trigger from an event
+
+const END_TRIGGER_LABELS: Partial<Record<GameEndTrigger, string>> = {
+  [GameEndTrigger.NO_LIVING_DEMON]: "No living Demon",
+  [GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE]: "Two players left alive",
+  [GameEndTrigger.ADDITIONAL_WIN_CONDITION]: "Additional win condition",
+};
+
+/**
+ * Returns the end trigger this event would set, or null when it could not
+ * have ended the game.
+ */
+function endTriggerForEvent(event: GrimoireEventLike) {
+  return deriveEndTriggerFromEvent(event, props.game.grimoire, resolveRoleById);
+}
+
+function eventEndedGame(event: GrimoireEventLike) {
+  return endTriggerMatchesGame(endTriggerForEvent(event), props.game);
+}
+
+function endTriggerForEventLabel(event: GrimoireEventLike) {
+  const values = endTriggerForEvent(event);
+  if (!values) return "";
+  const label = END_TRIGGER_LABELS[values.end_trigger] ?? "";
+  return eventEndedGame(event) ? `· ${label}` : `Sets the game end trigger to ${label}`;
+}
+
+function markEventAsGameEnd(event: GrimoireEventLike) {
+  const values = endTriggerForEvent(event);
+  if (!values) return;
+
+  const hasEndTrigger =
+    !!props.game.end_trigger &&
+    props.game.end_trigger !== GameEndTrigger.NOT_RECORDED;
+  if (
+    hasEndTrigger &&
+    !window.confirm("Replace the game end trigger that's already set?")
+  ) {
+    return;
+  }
+
+  emit("end-game-from-event", values);
+}
 
 defineExpose({
   recordGrimoireEvent,
