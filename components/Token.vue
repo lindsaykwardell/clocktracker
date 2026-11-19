@@ -15,7 +15,7 @@
     />
     <div
       v-else-if="$slots.image"
-      class="flex justify-center items-center"
+      class="shrink-0 flex justify-center items-center"
       :class="imageSize"
     >
       <slot name="image" />
@@ -124,6 +124,8 @@ const props = defineProps<{
   relatedId?: string;
   curveId?: string;
   reminderText?: string;
+  /** Keep the normal reminder text size even for a long label. */
+  fullSizeReminderText?: boolean;
   tokenTooltip?: any;
   relatedTokenTooltip?: any;
   alignmentTooltip?: any;
@@ -374,7 +376,7 @@ const alignmentImage = computed(() => {
 const reminderTextSize = computed(() => {
   // We're basing the size on the number of characters in the reminder text
   if (props.reminderText?.length) {
-    if (props.reminderText.length > 15) {
+    if (props.reminderText.length > 15 && !props.fullSizeReminderText) {
       return "text-[0.45rem] md:text-[0.5rem]";
     }
     if (props.reminderText.length > 10) {

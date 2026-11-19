@@ -20,11 +20,12 @@
           @click="emit('executed')"
         >
           <ReminderToken
-            :reminder="{ reminder: 'Executed', token_url: '', type: 'CUSTOM' }"
+            :reminder="nominatedExecutedReminder"
+            fullSizeText
           >
             <template #image>
               <svg
-                class="w-3/5 h-3/5 text-stone-200"
+                class="w-1/2 h-1/2 text-stone-200"
                 viewBox="0 0 512 512"
                 aria-hidden="true"
               >
@@ -101,6 +102,12 @@ const title = computed(() => {
   const name = props.playerName.trim() || "this player";
   return props.mode === "death" ? `Why did ${name} die?` : `How did ${name} come back?`;
 });
+
+const nominatedExecutedReminder = {
+  reminder: "Nom'd & Executed",
+  token_url: "",
+  type: "CUSTOM" as const,
+};
 
 function roleName(roleId: string) {
   return roles.getRole(roleId)?.name ?? roleId;

@@ -5,6 +5,7 @@
       :character="{ role: { token_url: reminder.token_url, type: '' } }"
       :size="size ?? 'reminder'"
       :reminderText="reminder.reminder"
+      :fullSizeReminderText="fullSizeText"
     >
       <template v-if="$slots.image" #image>
         <slot name="image" />
@@ -33,6 +34,7 @@ const props = defineProps<{
     is_custom?: boolean | null;
   };
   size?: "sm-reminder" | "reminder";
+  fullSizeText?: boolean;
   isTrackingRelevant?: boolean;
 }>();
 
