@@ -1973,7 +1973,7 @@ function recordGrimoireEvent(payload: {
     grimoire_participant_id?: string | null;
   };
   isDead: boolean;
-  /** Set when the player was executed rather than killed by an ability. */
+  /** Set when the player was nominated and executed (the shroud dialog's plain Executed). */
   deathType?: "EXECUTION";
   pageIndex: number;
 }) {
@@ -2025,7 +2025,11 @@ function recordGrimoireEvent(payload: {
         ? GrimoireEventType.EXECUTION
         : GrimoireEventType.NOT_RECORDED,
     status_source: null,
-    cause: shouldRecordRevival ? GrimoireEventCause.ABILITY : null,
+    cause: shouldRecordRevival
+      ? GrimoireEventCause.ABILITY
+      : payload.deathType === "EXECUTION"
+        ? GrimoireEventCause.NOMINATION
+        : null,
     by_participant_id: null,
     player_name: payload.token.player_name || "",
     role_id: payload.token.role_id ?? null,

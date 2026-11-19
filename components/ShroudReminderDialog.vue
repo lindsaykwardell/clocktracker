@@ -16,7 +16,7 @@
           v-if="mode === 'death'"
           type="button"
           class="flex flex-col items-center"
-          title="A normal execution, not caused by an ability"
+          title="Nominated and executed"
           @click="emit('executed')"
         >
           <ReminderToken
