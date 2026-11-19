@@ -1973,6 +1973,8 @@ function recordGrimoireEvent(payload: {
     grimoire_participant_id?: string | null;
   };
   isDead: boolean;
+  /** Set when the player was executed rather than killed by an ability. */
+  deathType?: "EXECUTION";
   pageIndex: number;
 }) {
   const pageToken = getTokenForSeat(payload.pageIndex, payload.token.order);
@@ -2019,7 +2021,9 @@ function recordGrimoireEvent(payload: {
     participant_id: participantId,
     event_type: shouldRecordRevival
       ? GrimoireEventType.REVIVE
-      : GrimoireEventType.NOT_RECORDED,
+      : payload.deathType === "EXECUTION"
+        ? GrimoireEventType.EXECUTION
+        : GrimoireEventType.NOT_RECORDED,
     status_source: null,
     cause: shouldRecordRevival ? GrimoireEventCause.ABILITY : null,
     by_participant_id: null,

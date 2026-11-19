@@ -183,6 +183,15 @@
     :reminders="reminders"
     @selectReminder="selectReminder"
   />
+  <ShroudReminderDialog
+    v-model:visible="showShroudDialog"
+    :mode="shroudPrompt?.mode ?? 'death'"
+    :playerName="shroudPrompt?.token.player_name ?? ''"
+    :suggestions="shroudSuggestions"
+    @selectReminder="selectShroudReminder"
+    @executed="markShroudDeathAsExecution"
+    @otherReminders="openReminderDialogFromShroud"
+  />
 </template>
 
 <script setup lang="ts">
@@ -192,6 +201,7 @@ import { RoleType } from "~/composables/useRoles";
 import { Status } from "~/composables/useFetchStatus";
 import { GrimoireEventType } from "~/composables/useGames";
 import { GRIMOIRE_REMINDER_EVENT_CONFIG } from "~/composables/grimoireReminderEventConfig";
+import { SHOW_TRACKING_REMINDERS_KEY } from "~/composables/reminderDialogTracking";
 
 type Token = {
   alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
@@ -312,6 +322,8 @@ const props = defineProps<{
   canClaimSeat?: boolean;
   pageIndex?: number;
   deathTooltips?: Record<number, string>;
+  /** Fabled and Loric in play; their reminders count as in play too. */
+  inPlayRoleIds?: string[];
 }>();
 
 const emit = defineEmits(["selectedMe", "claimSeat", "deathToggled"]);
@@ -697,7 +709,11 @@ function shouldRemoveShroudFromReminder(reminderName?: string | null) {
   return normalized === "alive" || normalized === "reincarnated";
 }
 
-function emitDeathToggled(token: Token, isDead: boolean) {
+function emitDeathToggled(
+  token: Token,
+  isDead: boolean,
+  deathType?: "EXECUTION"
+) {
   if (props.readonly) return;
   emit("deathToggled", {
     token: {
@@ -708,6 +724,7 @@ function emitDeathToggled(token: Token, isDead: boolean) {
       grimoire_participant_id: token.grimoire_participant_id,
     },
     isDead,
+    deathType,
     pageIndex: props.pageIndex ?? 0,
   });
 }
@@ -772,6 +789,76 @@ function toggleIsDead(token: Token) {
   token.is_dead = nextIsDead;
   token.used_ghost_vote = false;
   emitDeathToggled(token, nextIsDead);
+  promptForShroudReminder(token, nextIsDead ? "death" : "revive");
+}
+
+// Placing or removing a shroud by hand suggests the reminders that could
+// explain it, from the characters in play (like the official app).
+const showTrackingReminders = inject(
+  SHOW_TRACKING_REMINDERS_KEY,
+  () => ref(true),
+  true
+);
+const shroudPrompt = ref<{ mode: "death" | "revive"; token: Token } | null>(
+  null
+);
+const showShroudDialog = ref(false);
+
+const inPlayRoleIds = computed(() => {
+  const ids = new Set(props.inPlayRoleIds ?? []);
+  for (const token of props.tokens) {
+    if (token.role_id) ids.add(token.role_id);
+  }
+  return ids;
+});
+
+function shroudSuggestionsFor(token: Token, mode: "death" | "revive") {
+  return reminders.value.filter((reminder) => {
+    if (!inPlayRoleIds.value.has(reminder.role_id)) return false;
+    if (reminder.type === "LEGACY") return false;
+    if (!showTrackingReminders.value && reminder.type === "TRACKING") {
+      return false;
+    }
+    return mode === "death"
+      ? shouldApplyShroudFromReminder(reminder, token)
+      : shouldRemoveShroudFromReminder(reminder.reminder);
+  });
+}
+
+const shroudSuggestions = computed(() =>
+  shroudPrompt.value
+    ? shroudSuggestionsFor(shroudPrompt.value.token, shroudPrompt.value.mode)
+    : []
+);
+
+function promptForShroudReminder(token: Token, mode: "death" | "revive") {
+  if (props.readonly) return;
+  // A death can always be a plain execution; a return needs a reminder.
+  if (mode === "revive" && shroudSuggestionsFor(token, mode).length === 0) {
+    return;
+  }
+  shroudPrompt.value = { mode, token };
+  showShroudDialog.value = true;
+}
+
+function selectShroudReminder(reminder: (typeof reminders.value)[number]) {
+  if (!shroudPrompt.value) return;
+  focusedToken.value = shroudPrompt.value.token;
+  selectReminder(reminder);
+  showShroudDialog.value = false;
+}
+
+function markShroudDeathAsExecution() {
+  if (!shroudPrompt.value) return;
+  emitDeathToggled(shroudPrompt.value.token, true, "EXECUTION");
+  showShroudDialog.value = false;
+}
+
+function openReminderDialogFromShroud() {
+  if (!shroudPrompt.value) return;
+  const token = shroudPrompt.value.token;
+  showShroudDialog.value = false;
+  openReminderDialog(token);
 }
 
 function toggleUsedGhostVote(token: Token) {

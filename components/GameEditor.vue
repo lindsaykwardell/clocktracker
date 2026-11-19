@@ -374,6 +374,7 @@
               :availableRoles="orderedRoles"
               :excludePlayers="storytellerNames"
               :pageIndex="grimPage"
+              :inPlayRoleIds="fabledRoleIds"
               @deathToggled="recordGrimoireEvent"
               @selectedMe="applyMyRoleToGrimoire"
             />
@@ -1275,10 +1276,17 @@ function recordGrimoireEvent(payload: {
     grimoire_participant_id?: string | null;
   };
   isDead: boolean;
+  deathType?: "EXECUTION";
   pageIndex: number;
 }) {
   grimoireEventsRef.value?.recordGrimoireEvent(payload);
 }
+
+const fabledRoleIds = computed(() =>
+  props.game.fabled
+    .map((character) => character.role_id)
+    .filter((roleId): roleId is string => !!roleId)
+);
 
 function syncGrimoireEventsFromGrimoire(options?: {
   force?: boolean;
