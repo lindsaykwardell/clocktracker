@@ -292,11 +292,8 @@
             ? { '--bg-image-url' : `url(${customBackground})` }
             : {}
         "
+        ref="grimoireEditRef"
         class="grimoire grimoire-edit relative w-full flex flex-col gap-2"
-        :class="{
-          'grimoire--night':
-            game.grimoire[grimPage]?.page_type === 'NIGHT',
-        }"
       >
         <div class="grimoire-title-wrapper">
           <div class="grimoire-type">
@@ -357,9 +354,14 @@
             {{ game.grimoire.length }}
           </div>
         </div>
-        <div class="relative">
+        <!-- The night overlay covers only the grimoire image, not the
+             controls under it on mobile. -->
+        <div
+          class="relative grimoire-night-layer"
+          :class="{ 'is-night': game.grimoire[grimPage]?.page_type === 'NIGHT' }"
+        >
           <div
-            class="w-full max-w-[calc(100vw-4rem)] md:w-auto md:max-w-[966px] overflow-scroll bg-center bg-cover script-bg"
+            class="w-full max-w-[calc(100vw-4rem)] md:w-auto md:max-w-[966px] grimoire-scroll overflow-auto bg-center bg-cover script-bg"
             :class="{
               ...scriptBgClasses(game.script, !!customBackground),
               'grimoire--night':
@@ -378,39 +380,130 @@
           </div>
         </div>
 
-        <Button
-          type="button"
-          @click="pageBackward"
-          v-if="grimPage !== 0"
-          icon="journal-prev"
-          class="md:absolute bottom-4 left-1 z-20"
-        >
-          Previous page
-        </Button>
-        <Button
-          v-if="game.grimoire.length > 1"
-          @click.prevent="deletePage"
-          color="negative"
-          icon="journal-x"
-          class="md:absolute top-1 right-4 z-20"
-          title="Delete this page"
-        >
-          Delete page
-        </Button>
-        <Button
-          type="button"
-          @click="pageForward"
-          :color="grimPage === game.grimoire.length - 1 ? 'positive' : 'neutral'"
-          :icon="grimPage === game.grimoire.length - 1 ? 'journal-plus' : 'journal-next'"
-          display="icon-after"
-          class="md:absolute bottom-4 right-4 z-20"
-        >
-          <span v-if="grimPage <= game.grimoire.length - 1">
-            {{
-              grimPage === game.grimoire.length - 1 ? `Add Page ${game.grimoire.length + 1}` : "Next page"
-            }}
-          </span>
-        </Button>
+        <!-- Mobile: a bar under the grimoire with Previous | Next, the add or
+             clone action below them and Delete set apart. Desktop: the wrapper
+             disappears and each control is positioned on the grimoire. -->
+        <div class="grid grid-cols-2 gap-2 py-2 md:contents">
+          <div
+            v-if="deletedPage"
+            role="status"
+            class="col-span-2 flex items-center justify-between gap-3 rounded bg-stone-900/90 text-white text-sm px-3 py-2 md:absolute md:bottom-16 md:left-1/2 md:-translate-x-1/2 md:z-30 md:whitespace-nowrap"
+          >
+            <span>Deleted “{{ deletedPage.title }}”</span>
+            <Button type="button" size="sm" color="contrast" @click="undoDeletePage">
+              Undo
+            </Button>
+          </div>
+          <Button
+            type="button"
+            @click="pageBackward"
+            :disabled="grimPage === 0"
+            icon="journal-prev"
+            class="grimoire-nav-btn min-h-11 md:min-h-0 md:absolute md:bottom-4 md:left-3 md:z-20"
+          >
+            Previous page
+          </Button>
+          <Button
+            type="button"
+            @click="pageForward"
+            :disabled="grimPage === game.grimoire.length - 1"
+            icon="journal-next"
+            display="icon-after"
+            class="grimoire-nav-btn min-h-11 md:min-h-0 md:absolute md:bottom-4 md:right-3 md:z-20"
+          >
+            Next page
+          </Button>
+          <div
+            class="col-span-2 grid grid-cols-2 gap-2 md:flex md:items-center md:absolute md:bottom-4 md:left-1/2 md:-translate-x-1/2 md:z-20"
+          >
+            <!-- Split button: one tap adds the next phase (the usual case);
+                 the arrow offers another page for the current phase. -->
+            <div
+              v-if="isLastPage && nextPageType !== 'NONE'"
+              class="relative col-span-2 flex gap-px"
+            >
+              <Button
+                type="button"
+                @click="addPage"
+                color="positive"
+                :icon="nextPageType === 'NIGHT' ? 'moon' : 'sun'"
+                class="flex-1 min-h-11 md:min-h-0 !rounded-r-none"
+              >
+                Add page: {{ nextPhaseName }}
+              </Button>
+              <!-- On mobile the menu spans the whole split button, so its
+                   items are easy to hit; on desktop it hangs off the arrow. -->
+              <Menu as="div" class="flex md:relative">
+                <MenuButton as="template">
+                  <Button
+                    type="button"
+                    color="positive"
+                    icon="chevron-down"
+                    display="icon-only"
+                    class="min-h-11 md:min-h-0 !rounded-l-none"
+                    title="More ways to add a page"
+                  >
+                    More ways to add a page
+                  </Button>
+                </MenuButton>
+                <MenuItems
+                  class="ct-contextual-links left-0 md:left-auto bottom-full mb-1 !z-30 focus:outline-none"
+                >
+                  <MenuItem>
+                    <ButtonSubmenu
+                      :icon="game.grimoire[grimPage]?.page_type === 'NIGHT' ? 'moon' : 'sun'"
+                      class="min-h-12 md:min-h-0 [--fontsize:1rem] md:[--fontsize:0.875rem]"
+                      @click="clonePage"
+                    >
+                      Continue {{ currentPhaseName }}
+                    </ButtonSubmenu>
+                  </MenuItem>
+                  <MenuItem>
+                    <ButtonSubmenu
+                      :icon="nextPageType === 'NIGHT' ? 'moon' : 'sun'"
+                      class="min-h-12 md:min-h-0 [--fontsize:1rem] md:[--fontsize:0.875rem]"
+                      @click="addPage"
+                    >
+                      Start {{ nextPhaseName }}
+                    </ButtonSubmenu>
+                  </MenuItem>
+                </MenuItems>
+              </Menu>
+            </div>
+            <Button
+              v-else-if="isLastPage"
+              type="button"
+              @click="addPage"
+              color="positive"
+              icon="journal-plus"
+              class="col-span-2 min-h-11 md:min-h-0"
+            >
+              Add page {{ game.grimoire.length + 1 }}
+            </Button>
+            <Button
+              v-else
+              type="button"
+              @click="clonePage"
+              color="caution"
+              icon="journals"
+              class="col-span-2 min-h-11 md:min-h-0"
+              title="Insert an exact copy of this page after it"
+            >
+              Clone page
+            </Button>
+            <Button
+              v-if="game.grimoire.length > 1"
+              type="button"
+              @click="deletePage"
+              color="negative"
+              variant="soft"
+              icon="journal-x"
+              class="col-start-1 min-h-11 mt-1 md:min-h-0 md:mt-0 md:order-first md:mr-6"
+            >
+              Delete page
+            </Button>
+          </div>
+        </div>
         <Button
           v-if="gameId"
           type="button"
@@ -798,6 +891,7 @@
 
 <script setup lang="ts">
 import { toEditorReminder, type GameReminder } from "~/utils/reminderType";
+import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
 import { SHOW_TRACKING_REMINDERS_KEY } from "~/composables/reminderDialogTracking";
 import type { Alignment } from "~/server/generated/prisma/client";
 import type { RoleType } from "~/composables/useRoles";
@@ -2040,25 +2134,57 @@ function pageForward() {
   const nextPage = grimPage.value + 1;
   if (nextPage < props.game.grimoire.length) {
     grimPage.value = nextPage;
-  } else {
-    const currentType = props.game.grimoire[grimPage.value]?.page_type ?? "NONE";
-    const nextType = getNextPageTypeFromCurrent(currentType);
-    const pagesForAutoTitle = [
-      ...props.game.grimoire,
-      { page_type: nextType },
-    ] as { page_type?: LocalGrimoirePageType }[];
-    const nextTitle = getAutoPageTitleForIndex(pagesForAutoTitle, nextPage);
-
-    const newPage = {
-      title: nextTitle,
-      page_type: nextType,
-      tokens: JSON.parse(JSON.stringify(props.game.grimoire[grimPage.value]))
-        .tokens,
-    };
-    props.game.grimoire[nextPage] = newPage;
-    autoGeneratedPageTitles.add(newPage as object);
-    grimPage.value = nextPage;
   }
+}
+
+/**
+ * Appends a page after the last one: a copy of its tokens, with the page type
+ * advanced (night to day and back) and an automatic title.
+ */
+function addPage() {
+  const lastPage = props.game.grimoire.length - 1;
+  const nextPage = lastPage + 1;
+  const currentType = props.game.grimoire[lastPage]?.page_type ?? "NONE";
+  const nextType = getNextPageTypeFromCurrent(currentType);
+  const pagesForAutoTitle = [
+    ...props.game.grimoire,
+    { page_type: nextType },
+  ] as { page_type?: LocalGrimoirePageType }[];
+  const nextTitle = getAutoPageTitleForIndex(pagesForAutoTitle, nextPage);
+
+  const newPage = {
+    title: nextTitle,
+    page_type: nextType,
+    tokens: JSON.parse(JSON.stringify(props.game.grimoire[lastPage])).tokens,
+  };
+  props.game.grimoire[nextPage] = newPage;
+  autoGeneratedPageTitles.add(newPage as object);
+  grimPage.value = nextPage;
+}
+
+/**
+ * Inserts an exact copy of the current page right after it, so a page that
+ * combined a night and a day can be split in two. An automatic title stays
+ * automatic (it becomes "... - Part 2" until the type is changed); a custom
+ * title gets " - cloned" appended.
+ */
+function clonePage() {
+  const source = props.game.grimoire[grimPage.value];
+  if (!source) return;
+  const sourceIsAutoTitled = autoGeneratedPageTitles.has(source as object);
+
+  const newPage = {
+    title: sourceIsAutoTitled ? source.title : `${source.title ?? ""} - cloned`,
+    page_type: source.page_type,
+    tokens: JSON.parse(JSON.stringify(source)).tokens,
+  };
+  const insertAt = grimPage.value + 1;
+  props.game.grimoire.splice(insertAt, 0, newPage);
+  if (sourceIsAutoTitled) {
+    autoGeneratedPageTitles.add(newPage as object);
+  }
+  grimPage.value = insertAt;
+  syncGrimoireEventsFromGrimoire({ force: true, silent: true });
 }
 
 function defaultGrimoirePageTitle(index: number) {
@@ -2281,11 +2407,106 @@ function pageBackward() {
   }
 }
 
+// The last deleted page, kept for a few seconds so a mis-tap can be undone.
+const DELETE_UNDO_MS = 8000;
+const deletedPage = ref<{
+  page: (typeof props.game.grimoire)[number];
+  index: number;
+  title: string;
+} | null>(null);
+let deletedPageTimer: ReturnType<typeof setTimeout> | null = null;
+
+function clearDeletedPage() {
+  if (deletedPageTimer !== null) clearTimeout(deletedPageTimer);
+  deletedPageTimer = null;
+  deletedPage.value = null;
+}
+
 function deletePage() {
-  props.game.grimoire.splice(grimPage.value, 1);
-  grimPage.value = Math.max(0, grimPage.value - 1);
+  const index = grimPage.value;
+  const [page] = props.game.grimoire.splice(index, 1);
+  grimPage.value = Math.max(0, index - 1);
+  syncGrimoireEventsFromGrimoire({ force: true, silent: true });
+
+  if (!page) return;
+  clearDeletedPage();
+  deletedPage.value = {
+    page,
+    index,
+    title: page.title?.trim() || defaultGrimoirePageTitle(index),
+  };
+  deletedPageTimer = setTimeout(clearDeletedPage, DELETE_UNDO_MS);
+}
+
+function undoDeletePage() {
+  const deleted = deletedPage.value;
+  if (!deleted) return;
+  // Pages may have been added or deleted since; keep the index in range.
+  const index = Math.min(deleted.index, props.game.grimoire.length);
+  props.game.grimoire.splice(index, 0, deleted.page);
+  grimPage.value = index;
+  clearDeletedPage();
   syncGrimoireEventsFromGrimoire({ force: true, silent: true });
 }
+
+onBeforeUnmount(clearDeletedPage);
+
+const isLastPage = computed(
+  () => grimPage.value === props.game.grimoire.length - 1
+);
+
+/** The phase the current page belongs to, e.g. "Night 2" (without "- Part n"). */
+const currentPhaseName = computed(() =>
+  getAutoPageTitleForIndex(props.game.grimoire, grimPage.value).replace(
+    / - Part \d+$/,
+    ""
+  )
+);
+
+/** The phase the next-phase "Add" button would create, named like its automatic title. */
+const nextPageType = computed(() =>
+  getNextPageTypeFromCurrent(props.game.grimoire.at(-1)?.page_type ?? "NONE")
+);
+const nextPhaseName = computed(() =>
+  getAutoPageTitleForIndex(
+    [...props.game.grimoire, { page_type: nextPageType.value }] as {
+      page_type?: LocalGrimoirePageType;
+    }[],
+    props.game.grimoire.length
+  )
+);
+
+// Left/right arrow keys turn the page while the grimoire is on screen, unless
+// the user is typing or a dialog or menu is open.
+const grimoireEditRef = ref<HTMLElement | null>(null);
+
+function onGrimoirePagingKeydown(event: KeyboardEvent) {
+  if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+  if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+  if (event.defaultPrevented) return;
+
+  const target = event.target as HTMLElement | null;
+  if (
+    target?.closest("input, textarea, select, [contenteditable=''], [contenteditable='true']")
+  ) {
+    return;
+  }
+  if (document.querySelector("dialog[open], [role='dialog'], [role='menu']")) return;
+
+  const grimoire = grimoireEditRef.value;
+  if (!grimoire) return;
+  const rect = grimoire.getBoundingClientRect();
+  if (rect.bottom <= 0 || rect.top >= window.innerHeight) return;
+
+  event.preventDefault();
+  if (event.key === "ArrowLeft") pageBackward();
+  else pageForward();
+}
+
+onMounted(() => window.addEventListener("keydown", onGrimoirePagingKeydown));
+onBeforeUnmount(() =>
+  window.removeEventListener("keydown", onGrimoirePagingKeydown)
+);
 
 watch(
   props.game.grimoire,
@@ -2514,6 +2735,16 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/*
+ * The default disabled button is nearly transparent and vanishes on the dark
+ * grimoire. Previous/Next keep their normal surface and only fade the label,
+ * so they stay in place and still read as the same button.
+ */
+.ct-btn.grimoire-nav-btn:disabled:not(.ct-btn-link) {
+  background-color: var(--color-base-200);
+  --btn-fg: color-mix(in oklch, var(--color-base-content) 35%, transparent);
+}
+
 .script-bg {
   background-image: var(--bg-image-url);
   background-attachment: local, local;
@@ -2540,10 +2771,47 @@ onMounted(async () => {
 }
 
 .grimoire-edit {
-  .overflow-scroll {
+  .grimoire-scroll {
     padding-inline-start: 0;
     padding-block-start: 7rem;
     padding-block-end: 7rem;
+
+    /* No scrollbar-gutter: this box has no fixed height, so it never scrolls
+       vertically, and a reserved gutter only added an empty strip on the
+       right (tinted at night) that pushed the controls off-centre. */
+    scrollbar-width: thin;
+    scrollbar-color: oklch(44.4% 0.011 73.639) transparent;
+  }
+
+  /* Same night tint as the global .grimoire--night, limited to the image. */
+  .grimoire-night-layer {
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      opacity: 0;
+    }
+
+    &::before {
+      background: url("/img/ui/cloud-pattern.webp");
+    }
+
+    &::after {
+      background-color: theme(colors.indigo.950);
+    }
+
+    &.is-night {
+      &::before {
+        opacity: 0.2;
+      }
+
+      &::after {
+        opacity: 0.4;
+      }
+    }
   }
 
   .grimoire-title-wrapper {
@@ -2573,16 +2841,6 @@ onMounted(async () => {
 
     input[type="radio"]:checked + label {
       @apply font-semibold bg-stone-300 rounded-md;
-    }
-  }
-
-  .grimoire--night {
-    &::before {
-      opacity: .15;
-    }
-
-    &::after {
-      opacity: .25;
     }
   }
 }
