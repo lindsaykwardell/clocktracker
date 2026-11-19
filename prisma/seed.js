@@ -7,6 +7,7 @@ const dayjs = require("dayjs");
 const { roles, roleNames, reminders } = require("./roles");
 const citySeed = require("./city-seed.json");
 const scripts = require("./scripts.json");
+const { generateGame } = require("./seed-games");
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
@@ -571,6 +572,13 @@ async function main() {
   }
 
   console.log("Seeding games");
+  // Fabled, Lorics and Travellers from every edition, for games whose script
+  // doesn't list its own.
+  const extraRoles = {
+    fabled: await prisma.role.findMany({ where: { type: "FABLED" } }),
+    lorics: await prisma.role.findMany({ where: { type: "LORIC" } }),
+    travellers: await prisma.role.findMany({ where: { type: "TRAVELER" } }),
+  };
   // The goal is to create a number of games at different sizes for each player.
   // This will allow us to test the game list.
 
@@ -593,49 +601,8 @@ async function main() {
       })`
     );
     for (let i = 0; i < gameCount; i++) {
-      const player_count = Math.floor(Math.random() * 10) + 5;
       const script = scriptList[Math.floor(Math.random() * scriptList.length)];
-      const role =
-        script.roles[Math.floor(Math.random() * script.roles.length)];
-
-      const grimoirePages = Math.floor(Math.random() * 6) + 1;
-
-      const grimoire = [];
-      const players = [];
-
-      for (let i = 0; i < player_count; i++) {
-        const player = {
-          name: i === 0 ? user.username : faker.person.firstName(),
-          id: i === 0 ? user.user_id : null,
-          order: i,
-          role: script.roles[Math.floor(Math.random() * script.roles.length)],
-        };
-
-        players.push(player);
-      }
-
-      for (let p = 0; p < grimoirePages; p++) {
-        const tokens = [];
-        for (let i = 0; i < player_count; i++) {
-          const token = {
-            player_name: players[i].name,
-            player_id: players[i].id,
-            role_id: players[i].role.id,
-            alignment: players[i].role.initial_alignment,
-            is_dead:
-              grimoire.some((g) =>
-                g.tokens.some((t) => t.player_id === players[i].id && t.is_dead)
-              ) || Math.random() < p / grimoirePages,
-            order: i,
-          };
-
-          tokens.push(token);
-        }
-
-        grimoire.push({
-          tokens,
-        });
-      }
+      const game = generateGame({ script, user, extras: extraRoles });
 
       const belongsTo = communities.filter((c) =>
         c.members.some((m) => m.user_id === user.user_id)
@@ -653,34 +620,6 @@ async function main() {
         community.name = randomCommunity.name;
       }
 
-      // demon bluffs
-      const demonBluffs = [];
-      if (Math.random() > 0.5) {
-        for (let i = 0; i < 3; i++) {
-          const role =
-            script.roles[Math.floor(Math.random() * script.roles.length)];
-          demonBluffs.push(role);
-        }
-      }
-      // fabled
-      const fabled = [];
-      if (Math.random() > 0.8) {
-        const fabledCharacters = await prisma.role.findMany({
-          where: {
-            type: "FABLED",
-          },
-        });
-
-        const fabledCount = Math.floor(Math.random() * 3) + 1;
-        for (let i = 0; i < fabledCount; i++) {
-          const role =
-            fabledCharacters[
-              Math.floor(Math.random() * fabledCharacters.length)
-            ];
-          fabled.push(role);
-        }
-      }
-
       await prisma.game.create({
         data: {
           user_id: user.user_id,
@@ -691,37 +630,41 @@ async function main() {
           date: faker.date.past(),
           location_type: "ONLINE",
           location: faker.location.city(),
-          player_count,
-          win_v2:
-            Math.random() > 0.5
-              ? WinStatus_V2.GOOD_WINS
-              : WinStatus_V2.EVIL_WINS,
+          player_count: game.player_count,
+          win_v2: WinStatus_V2[game.win_v2],
+          end_trigger: game.end_trigger,
+          end_trigger_type: game.end_trigger_type,
+          end_trigger_cause: game.end_trigger_cause,
+          end_trigger_role_id: game.end_trigger_role_id,
+          end_trigger_participant_id: game.end_trigger_participant_id,
+          end_trigger_participant_alignment:
+            game.end_trigger_participant_alignment,
+          end_trigger_subtype: game.end_trigger_subtype,
+          end_trigger_note: game.end_trigger_note,
           notes: faker.lorem.paragraph(),
           storyteller: faker.person.firstName(),
           player_characters: {
-            create: [
-              {
-                name: role.name,
-                alignment: role.initial_alignment,
-                role_id: role.id,
-              },
-            ],
+            create: game.player_characters.map(({ role, alignment }) => ({
+              name: role.name,
+              alignment,
+              role_id: role.id,
+            })),
           },
           grimoire: {
-            create: grimoire.map((g) => ({
+            create: game.grimoire.map((tokens) => ({
               tokens: {
-                create: g.tokens,
+                create: tokens,
               },
             })),
           },
           demon_bluffs: {
-            create: demonBluffs.map((role) => ({
+            create: game.demon_bluffs.map((role) => ({
               name: role.name,
               role_id: role.id,
             })),
           },
           fabled: {
-            create: fabled.map((role) => ({
+            create: game.fabled.map((role) => ({
               name: role.name,
               role_id: role.id,
             })),
