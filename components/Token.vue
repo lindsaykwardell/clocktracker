@@ -13,6 +13,13 @@
       :alt="character?.name || character?.role?.name || 'Unknown'"
       v-tooltip="tokenTooltip || undefined"
     />
+    <div
+      v-else-if="$slots.image"
+      class="flex justify-center items-center"
+      :class="imageSize"
+    >
+      <slot name="image" />
+    </div>
     <svg
       v-if="!hideName && (character?.name || character?.role?.name)"
       data-v-deec739a=""
@@ -44,7 +51,7 @@
       class="text-center relative text-white"
       :class="{
         [reminderTextSize]: true,
-        '-top-2': image !== undefined,
+        '-top-2': image !== undefined || !!$slots.image,
       }"
     >
       {{ reminderText }}

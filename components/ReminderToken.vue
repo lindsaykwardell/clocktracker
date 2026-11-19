@@ -6,6 +6,9 @@
       :size="size ?? 'reminder'"
       :reminderText="reminder.reminder"
     >
+      <template v-if="$slots.image" #image>
+        <slot name="image" />
+      </template>
     </Token>
     <span
       v-if="isTrackingRelevant"
