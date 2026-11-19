@@ -5,7 +5,7 @@
       :renderListOnTop="renderListOnTop"
       :inputClass="inputClass"
       v-model:value="value"
-      @inputFocused="emit('inputFocused')"
+      @inputFocused="onInputFocused"
       @inputBlurred="emit('inputBlurred')"
     />
   </div>
@@ -36,13 +36,26 @@ const value = computed({
   },
 });
 
-const renderListOnTop = computed(() => {
+// Open the suggestion list upward when the input is too close to the bottom
+// of the grimoire for the list (max 150px) to fit below it. Measured on every
+// focus: seats move when the page or player count changes, and this component
+// is reused, so a value measured once at mount goes stale.
+const renderListOnTop = ref(false);
+
+function measureListDirection() {
   const grimoire = document.querySelector("#grimoire");
-  const grimoireDistanceToBottom =
-    grimoire?.getBoundingClientRect().bottom || 0;
-  const distanceToBottom = element.value?.getBoundingClientRect().bottom;
-  return grimoireDistanceToBottom - distanceToBottom < 150;
-});
+  const input = element.value as HTMLElement | undefined;
+  if (!grimoire || !input) return;
+  const spaceBelow =
+    grimoire.getBoundingClientRect().bottom -
+    input.getBoundingClientRect().bottom;
+  renderListOnTop.value = spaceBelow < 150;
+}
+
+function onInputFocused() {
+  measureListDirection();
+  emit("inputFocused");
+}
 
 const inputClass = computed(() =>
   [
