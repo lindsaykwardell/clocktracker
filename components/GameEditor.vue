@@ -2526,10 +2526,13 @@ onBeforeUnmount(() =>
   window.removeEventListener("keydown", onGrimoirePagingKeydown)
 );
 
+// A getter, not the array itself: "Reset Game" on add-game replaces
+// game.grimoire with a new array, and a watcher on the old array would stop
+// seeing changes (and stop syncing events).
 watch(
-  props.game.grimoire,
+  () => props.game.grimoire,
   (value) => {
-    const newTokens = value[grimPage.value].tokens;
+    const newTokens = value[grimPage.value]?.tokens ?? [];
     // Later pages are matched to this page by participant (the same player
     // across pages), not by seat: after a seat move the same seat is someone
     // else. Seat is only the fallback for tokens without a participant id.

@@ -552,6 +552,7 @@ function resetGame() {
       end_trigger_subtype: "",
       end_trigger_note: "",
       end_trigger_role: null,
+      end_trigger_participant_id: null,
       grimoire_events: [],
       notes: "",
       image_urls: [],

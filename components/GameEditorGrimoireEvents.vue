@@ -2691,6 +2691,9 @@ function syncGrimoireEventsFromGrimoire(options?: {
           event.event_type === GrimoireEventType.EXECUTION);
       if (!keepManualDeathType) {
         event.event_type = expectation.event_type;
+        // The old cause belonged to the old type (a Nomination only fits an
+        // execution); the rules below set the cause for the new type.
+        event.cause = null;
         updated += 1;
       }
     }
