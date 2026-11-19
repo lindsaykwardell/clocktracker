@@ -20,13 +20,15 @@
 </template>
 
 <script setup lang="ts">
+import type { UiIconId } from "~/utils/uiIcons";
+
   const props = withDefaults(
   defineProps<{
     component?: string;
     disabled?: boolean;
     variant?: "filled" | "soft";
     color?: "primary" | "neutral" | "positive" | "caution" | "negative" | "discord" | "bgg" | "bgstats";
-    icon?: string;
+    icon?: UiIconId;
     iconSpin?: boolean;
     iconColor?: "primary" | "neutral" | "positive" | "caution" | "negative" | "bgg";
     image?: string;

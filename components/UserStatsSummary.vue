@@ -72,6 +72,8 @@
 </template>
 
 <script setup lang="ts">
+import type { UiIconId } from "~/utils/uiIcons";
+
 import { WinStatus_V2, type GameRecord } from "~/composables/useGames";
 
 const props = defineProps<{
@@ -199,7 +201,10 @@ const bothStats = computed(() => {
 const overallStats = computed(() => bothStats.value.overall);
 const statsAtCutoff = computed(() => bothStats.value.atCutoff);
 
-const trendLabel = (delta: number, suffix = "") => {
+const trendLabel = (
+  delta: number,
+  suffix = ""
+): { iconId: UiIconId | null; textClass: string; text: string } => {
   if (delta > 0) {
     return {
       iconId: "graph-up",

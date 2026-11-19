@@ -14,11 +14,13 @@
 </template>
 
 <script setup lang="ts">
+import type { UiIconId } from "~/utils/uiIcons";
+
   const props = withDefaults(
   defineProps<{
     component?: string;
     color?: "info" | "positive" | "caution" | "negative";
-    icon?: string;
+    icon?: UiIconId;
   }>(),
   { 
     color: "info",

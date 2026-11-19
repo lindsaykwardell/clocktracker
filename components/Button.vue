@@ -48,6 +48,8 @@
 </template>
 
 <script setup lang="ts">
+import type { UiIconId } from "~/utils/uiIcons";
+
 const props = withDefaults(
   defineProps<{
     component?: string;
@@ -59,7 +61,7 @@ const props = withDefaults(
     wide?: boolean;
     circular?: boolean;
     removableTag?: boolean;
-    icon?: string;
+    icon?: UiIconId;
     iconSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
     iconSpin?: boolean;
     iconColor?: "primary" | "neutral" | "positive" | "caution" | "negative" | "bgg";

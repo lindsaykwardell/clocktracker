@@ -12,13 +12,15 @@
 </template>
 
 <script setup lang="ts">
+import type { UiIconId } from "~/utils/uiIcons";
+
   const props = withDefaults(
   defineProps<{
     component?: string;
     color?: "primary" | "neutral" | "positive" | "caution" | "negative" | "scripts" | "games" | "admins" | "digital";
     size?: "xs" | "sm-md" | "sm" | "md" | "lg";
     variant?: "filled" | "soft" | "overlay";
-    icon?: string;
+    icon?: UiIconId;
     display?: "icon-before" | "icon-only" | "icon-after";
     bold?: boolean;
     circular?: boolean;

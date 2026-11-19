@@ -33,8 +33,10 @@
 </template>
 
 <script setup lang="ts">
+  import { uiIcons, type UiIconId } from "~/utils/uiIcons";
+
   const props = defineProps<{
-    id: string;
+    id: UiIconId;
     class?: string;
     rounded?: boolean;
     shadow?: boolean;
@@ -45,286 +47,24 @@
     noHover?: boolean;
   }>();
 
-  const Arrow90degDown = resolveComponent("IconArrow90degDown");
-  const ArrowUpShort = resolveComponent("IconArrowUpShort");
-  const ArrowRightShort = resolveComponent("IconArrowRightShort");
-  const ArrowDownShort = resolveComponent("IconArrowDownShort");
-  const ArrowLeftShort = resolveComponent("IconArrowLeftShort");
-  const ArrowClockwise = resolveComponent("IconArrowClockwise");
-  const ArrowCounterClockwise = resolveComponent("IconArrowCounterClockwise");
-  const ArrowsMove = resolveComponent("IconArrowsMove");
-  const Bgg = resolveComponent("IconBgg");
-  const Book = resolveComponent("IconBook");
-  const Json = resolveComponent("IconBraces");
-  const CalenderPlus = resolveComponent("IconCalenderPlus");
-  const Check = resolveComponent("IconCheck");
-  const CheckCircle = resolveComponent("IconCheckCircle");
-  const ChevronDown = resolveComponent("IconChevronDown");
-  const ClockHistory = resolveComponent("IconClockHistory");
-  const ChevronLeft = resolveComponent("IconChevronLeft");
-  const ChevronRight = resolveComponent("IconChevronRight");
-  const Copy = resolveComponent("IconCopy");
-  const Disabled = resolveComponent("IconDisabled");
-  const Discord = resolveComponent("IconDiscord");
-  const Dots = resolveComponent("IconDots");
-  const Download = resolveComponent("IconDownload");
-  const Edit = resolveComponent("IconPencilFill");
-  const ExclamationCircle = resolveComponent("IconExclamationCircle");
-  const Mail = resolveComponent("IconEnvelope");
-  const EyeSlash = resolveComponent("IconEyeSlash");
-  const Filter = resolveComponent("IconFilter");
-  const Grid = resolveComponent("IconGrid");
-  const Info = resolveComponent("IconInfo");
-  const InfoCircle = resolveComponent("IconInfoCircle");
-  const JournalNext = resolveComponent("IconJournalNext");
-  const JournalPlus = resolveComponent("IconJournalPlus");
-  const JournalPrev = resolveComponent("IconJournalPrev");
-  const JournalX = resolveComponent("IconJournalX");
-  const Location = resolveComponent("IconLocation");
-  const Person = resolveComponent("IconPerson");
-  const PersonHeart = resolveComponent("IconPersonHeart");
-  const PersonPlus = resolveComponent("IconPersonPlus");
-  const PlusLg = resolveComponent("IconPlusLg");
-  const Reply = resolveComponent("IconReply");
-  const Sign = resolveComponent("IconSign");
-  const Star = resolveComponent("IconStar");
-  const StarBordered = resolveComponent("IconStarBordered");
-  const Stars = resolveComponent("IconStars");
-  const Table = resolveComponent("IconTable");
-  const Trash = resolveComponent("IconTrash");
-  const Upload = resolveComponent("IconUpload");
-  const View = resolveComponent("IconView");
-  const WindowStack = resolveComponent("IconWindowStack");
-  const X = resolveComponent("IconX");
-  const XCircle = resolveComponent("IconXCircle");
-  const XLg = resolveComponent("IconXLg");
-  const PDF = resolveComponent("IconFileEarmarkPDF");
-  const Menu = resolveComponent("IconList");
-  const Players = resolveComponent("IconPlayers");
-  const Chair = resolveComponent("IconChair");
-  const GraphUpArrow = resolveComponent("IconGraphUpArrow");
-  const GraphDownArrow = resolveComponent("IconGraphDownArrow");
-  const MenuOpen = resolveComponent("IconMenuOpen");
-  const MenuClose = resolveComponent("IconMenuClose");
-  const Sun = resolveComponent("IconSun");
-  const Moon = resolveComponent("IconMoon");
-  const Search = resolveComponent("IconSearch");
-  const Pin = resolveComponent("IconPin");
-  const Lock = resolveComponent("IconLock");
-  const Unlock = resolveComponent("IconUnlock");
-  const Crosshair = resolveComponent("IconCrosshair");
+  // Fall back to a crossed-out eye for an id that isn't in the map (only
+  // possible for ids that bypass the type, e.g. from data).
+  const icon = computed(() => uiIcons[props.id] ?? uiIcons["eye-slash"]);
 
-  // Socials
-  const Website = resolveComponent("IconGlobe");
-  const Github = resolveComponent("IconGithub");
-  const Twitter = resolveComponent("IconTwitter");
-  const Twitch = resolveComponent("IconTwitch");
-  const Youtube = resolveComponent("IconYoutube");
-  const Bluesky = resolveComponent("IconBluesky");
-  const Facebook = resolveComponent("IconFacebook");
-  const KoFi = resolveComponent("IconKoFi");
+  const colorClasses = {
+    primary: "text-purple-700",
+    neutral: "text-stone-700",
+    muted: "text-stone-500",
+    positive: "text-green-700",
+    caution: "text-amber-700",
+    negative: "text-red-700",
+    bgg: "text-[#ff5100]",
+    yellow: "text-yellow-400",
+  } as const;
 
-  const icon = computed(() => {
-    switch (props.id) {
-      case "edit":
-        return Edit;
-      case "person":
-        return Person;
-      case "person-plus":
-        return PersonPlus;
-      case "person-heart":
-        return PersonHeart;
-      case "info":
-        return Info;
-      case "table":
-        return Table;
-      case "grid":
-        return Grid;
-      case "filter":
-        return Filter;
-      case "bgg":
-        return Bgg;
-      case "book":
-        return Book;
-      case "view":
-        return View;
-      case "disabled":
-        return Disabled;
-      case "reply":
-        return Reply;
-      case "dots":
-        return Dots;
-      case "sign":
-        return Sign;
-      case "upload":
-        return Upload;
-      case "download":
-        return Download;
-      case "journal-plus":
-        return JournalPlus;
-      case "journal-x":
-        return JournalX;
-      case "journal-prev":
-        return JournalPrev;
-      case "journal-next":
-        return JournalNext;
-      case "location":
-        return Location;
-      case "arrow-90deg-down":
-        return Arrow90degDown;
-      case "arrow-up-short":
-        return ArrowUpShort;
-      case "arrow-right-short":
-        return ArrowRightShort;
-      case "arrow-down-short":
-        return ArrowDownShort;
-      case "arrow-left-short":
-        return ArrowLeftShort;      
-      case "arrow-clockwise":
-        return ArrowClockwise;
-      case "arrow-counterclockwise":
-        return ArrowCounterClockwise;
-      case "arrows-move":
-        return ArrowsMove;
-      case "mail":
-        return Mail;
-      case "discord":
-        return Discord;
-      case "chevron-down":
-        return ChevronDown;
-      case "chevron-left":
-        return ChevronLeft;
-      case "chevron-right":
-        return ChevronRight;
-      case "calender-plus":
-        return CalenderPlus;
-      case "star":
-        return Star;
-      case "star-bordered":
-        return StarBordered;
-      case "stars":
-        return Stars;
-      case "copy":
-        return Copy;
-      case "check":
-        return Check;
-      case "website":
-        return Website;
-      case "window-stack":
-        return WindowStack;
-      case "x":
-        return X;
-      case "x-lg":
-        return XLg;
-      case "twitter":
-        return Twitter;
-      case "github":
-        return Github;
-      case "twitch":
-        return Twitch;
-      case "youtube":
-        return Youtube;
-      case "bluesky":
-        return Bluesky;
-      case "facebook":
-        return Facebook;
-      case "json":
-        return Json;
-      case "pdf":
-        return PDF;
-      case "menu":
-        return Menu;
-      case "players":
-        return Players;
-      case "chair":
-        return Chair;  
-      case "kofi":
-        return KoFi;
-      case "trash":
-        return Trash;
-      case "add":
-      case "plus-lg":
-        return PlusLg;
-      case "graph-down":
-        return GraphDownArrow;
-      case "graph-up":
-        return GraphUpArrow;   
-      case "check-circle":
-        return CheckCircle;
-      case "clock-history":
-        return ClockHistory;
-      case "exclamation-circle":
-        return ExclamationCircle;
-      case "info-circle":
-        return InfoCircle; 
-      case "x-circle":
-        return XCircle;
-      case "menu-open":
-        return MenuOpen;
-      case "menu-close":
-        return MenuClose;
-      case "sun":
-        return Sun;
-      case "moon":
-        return Moon;
-      case "search":
-        return Search;
-      case "pin":
-        return Pin;
-      case "lock":
-        return Lock;
-      case "unlock":
-        return Unlock;
-      case "crosshair":
-        return Crosshair;  
-      default:
-        return EyeSlash;
-    }
-  });
-
-  const primary = 
-    "text-purple-700";
-  const neutral = 
-    "text-stone-700";
-  const muted = 
-    "text-stone-500";     
-  const positive = 
-    "text-green-700";
-  const caution = 
-    "text-amber-700";  
-  const negative = 
-    "text-red-700";
-  const bggColor =
-    "text-[#ff5100]"
-  const yellow =
-    "text-yellow-400"  
-
-  const colorScheme = computed(() => {
-    if (props.color === "primary") {
-      return `${primary}`;
-    }
-    else if (props.color === "neutral") {
-      return `${neutral}`;
-    }
-    else if (props.color === "muted") {
-      return `${muted}`;
-    }
-    else if (props.color === "positive") {
-      return `${positive}`;
-    }
-    else if (props.color === "caution") {
-      return `${caution}`;
-    }
-    else if (props.color === "negative") {
-      return `${negative}`;
-    }
-    else if (props.color === "bgg") {
-      return `${bggColor}`;
-    }
-    else if (props.color === "yellow") {
-      return `${yellow}`;
-    }
-  });
+  const colorScheme = computed(() =>
+    props.color ? colorClasses[props.color] : undefined
+  );
 </script>
 
 <style scoped>
