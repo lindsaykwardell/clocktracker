@@ -186,6 +186,10 @@ export default defineEventHandler(async (handler) => {
                 })),
               })),
             })),
+            // The seats on each page are players + travellers; restoring
+            // needs both counts to split them again.
+            player_count: existingGame.player_count,
+            traveler_count: existingGame.traveler_count,
             end_trigger: existingGame.end_trigger,
             end_trigger_type: existingGame.end_trigger_type,
             end_trigger_cause: existingGame.end_trigger_cause,

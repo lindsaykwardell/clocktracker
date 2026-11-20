@@ -721,7 +721,11 @@
                             @claimSeat="claimSeat"
                         />
                         <div
-                            v-if="grimPage === game.data.grimoire.length - 1"
+                            v-if="
+                                grimPage === game.data.grimoire.length - 1 &&
+                                (game.data?.win_v2 === WinStatus_V2.GOOD_WINS ||
+                                    game.data?.win_v2 === WinStatus_V2.EVIL_WINS)
+                            "
                             class="winning-team"
                             :class="
                                 game.data?.win_v2 === WinStatus_V2.GOOD_WINS

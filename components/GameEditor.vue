@@ -237,7 +237,7 @@
           tokenTooltip="The role this player had in the game"
           :relatedTokenTooltip="{
             content:
-              '<div class=\'w-[250px]\'>The related role this player saw (if applicable). Example: The Drunk sees the Empath, or the Pixie sees the Snake Charmer</div>',
+              '<div class=\'w-[250px]\'>The character this player thinks they are, or whose ability they have (if applicable). Example: the Drunk who thinks they are the Empath, or a Demon with a Boffin ability</div>',
             html: true,
           }"
         />
@@ -1169,6 +1169,9 @@ type GrimoireSnapshot = {
   id: number;
   created_at: string;
   snapshot: {
+    // Saved since snapshots started keeping them; older snapshots lack them.
+    player_count?: number | null;
+    traveler_count?: number | null;
     pages: {
       id: number;
       title?: string;
@@ -1205,6 +1208,34 @@ async function fetchSnapshots() {
   } finally {
     loadingSnapshots.value = false;
   }
+}
+
+/**
+ * Splits a restored grimoire's seats into players and travellers. Every page
+ * has player count + traveller count tokens, so the counts must add up to the
+ * seats, or the editor adds or removes seats on every page.
+ */
+function snapshotSeatCounts(snapshot: GrimoireSnapshot, seats: number) {
+  if (!seats) return null;
+
+  const saved = snapshot.snapshot;
+  if (
+    typeof saved.player_count === "number" &&
+    saved.player_count + (saved.traveler_count ?? 0) === seats
+  ) {
+    return {
+      player_count: saved.player_count,
+      traveler_count: saved.traveler_count ?? null,
+    };
+  }
+
+  // Older snapshots don't store the counts: keep the game's current
+  // travellers when they fit, otherwise make every seat a player.
+  const travelers = props.game.traveler_count ?? 0;
+  if (travelers > 0 && travelers < seats) {
+    return { player_count: seats - travelers, traveler_count: travelers };
+  }
+  return { player_count: seats, traveler_count: null };
 }
 
 function restoreSnapshot(snapshot: GrimoireSnapshot) {
@@ -1248,7 +1279,11 @@ function restoreSnapshot(snapshot: GrimoireSnapshot) {
   }));
 
   props.game.grimoire.splice(0, props.game.grimoire.length, ...restored);
-  props.game.player_count = restored[0]?.tokens.length ?? props.game.player_count;
+  const seatCounts = snapshotSeatCounts(snapshot, restored[0]?.tokens.length ?? 0);
+  if (seatCounts) {
+    props.game.player_count = seatCounts.player_count;
+    props.game.traveler_count = seatCounts.traveler_count;
+  }
   grimPage.value = Math.max(0, restored.length - 1);
   recomputeGrimoireParticipantIds();
   syncGrimoireEventsFromGrimoire({ force: true, silent: true });
@@ -1461,6 +1496,21 @@ const noChangeToIsStoryteller = computed({
     }
   },
 });
+
+// If the game has grimoire data with tokens, enable Record Grimoire without
+// changing the user preference. Watched rather than checked on mount, because
+// an imported game (botc.games, sushi buffet) or a restored draft is loaded
+// into the game after the editor has mounted.
+const hasGrimoireRoles = computed(() =>
+  props.game.grimoire.some((g) => g.tokens.some((t) => t.role_id))
+);
+watch(
+  hasGrimoireRoles,
+  (hasRoles) => {
+    if (hasRoles) grimoireOverride.value = true;
+  },
+  { immediate: true }
+);
 
 const advancedModeEnabled = computed({
   get: () => grimoireOverride.value || advancedModeEnabled_.value === "true",
@@ -2717,10 +2767,6 @@ onMounted(async () => {
     games.fetchPlayerGames(me.value.data.username);
   }
 
-  // If the game has grimoire data with tokens, enable Record Grimoire without changing user preference
-  if (props.game.grimoire.some((g) => g.tokens.length > 0 && g.tokens.some((t) => t.role_id))) {
-    grimoireOverride.value = true;
-  }
 
   if (props.game.bgg_id) {
     bggIdInput.value = `https://boardgamegeek.com/play/details/${props.game.bgg_id}`;
