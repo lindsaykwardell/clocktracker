@@ -272,13 +272,15 @@ type PlayerGame = {
   expectedEvilProb: number;
   switches: number;
   win_v2: WinStatus_V2 | null;
+  // Position in the games list, which comes newest first.
+  listIndex: number;
 };
 
 const perPlayerGames = computed<Map<string, PlayerGame[]>>(() => {
   const map = new Map<string, PlayerGame[]>();
   if (props.games.status !== Status.SUCCESS) return map;
 
-  for (const game of props.games.data) {
+  for (const [listIndex, game] of props.games.data.entries()) {
     if (game.ignore_for_stats) continue;
     const date = game.date ? new Date(game.date) : null;
 
@@ -372,6 +374,7 @@ const perPlayerGames = computed<Map<string, PlayerGame[]>>(() => {
         expectedEvilProb: expectedProb,
         switches,
         win_v2: game.win_v2 ?? null,
+        listIndex,
       };
       const list = map.get(name) ?? [];
       list.push(entry);
@@ -383,7 +386,9 @@ const perPlayerGames = computed<Map<string, PlayerGame[]>>(() => {
     list.sort((a, b) => {
       const aTime = a.date?.getTime() ?? 0;
       const bTime = b.date?.getTime() ?? 0;
-      return aTime - bTime;
+      // Games on the same date: the list is newest first, so the one further
+      // down was played earlier.
+      return aTime - bTime || b.listIndex - a.listIndex;
     });
   }
 
@@ -554,9 +559,8 @@ const currentStreakEntry = computed<Entry | null>(() => {
   let best: { name: string; alignment: Alignment; length: number } | null = null;
 
   for (const [name, games] of perPlayerGames.value.entries()) {
-    const sorted = [...games].sort(
-      (a, b) => (a.date?.getTime() ?? 0) - (b.date?.getTime() ?? 0)
-    );
+    // Already in play order (see perPlayerGames).
+    const sorted = games;
     let currentAlign: Alignment = null;
     let currentLen = 0;
     for (const g of sorted) {
