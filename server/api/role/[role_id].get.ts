@@ -54,13 +54,26 @@ export default defineCachedEventHandler(async (handler) => {
       win_v2: string;
       end_trigger_role_id: string | null;
       end_trigger_cause: string | null;
+      is_final: boolean;
     }[]
   >(Prisma.sql`
     WITH last_player_char AS (
       SELECT DISTINCT ON (c."game_id")
         c."game_id",
         c."role_id",
-        c."alignment"
+        c."alignment",
+        -- Only the character the player ended as gets the game's result.
+        NOT EXISTS (
+          SELECT 1
+          FROM "Character" later
+          LEFT JOIN "Role" later_role ON later_role."id" = later."role_id"
+          WHERE later."game_id" = c."game_id"
+            AND later."id" > c."id"
+            AND later."role_id" IS NOT NULL
+            AND later."role_id" <> c."role_id"
+            AND COALESCE(later."name", '') != ''
+            AND (later_role."type" IS NULL OR later_role."type" NOT IN ('FABLED', 'LORIC'))
+        ) AS is_final
       FROM "Character" c
       JOIN "Game" g ON g."id" = c."game_id"
       WHERE g."deleted" = false
@@ -91,18 +104,20 @@ export default defineCachedEventHandler(async (handler) => {
       SELECT
         lgp.game_id,
         t."role_id",
-        t."alignment"
+        t."alignment",
+        true AS is_final
       FROM last_grimoire_page lgp
       JOIN "Token" t ON t."grimoire_id" = lgp.grimoire_id
       WHERE t."role_id" = ${role_id}
     ),
     role_entries AS (
-      SELECT game_id, role_id, alignment FROM last_player_char
+      SELECT game_id, role_id, alignment, is_final FROM last_player_char
       UNION ALL
-      SELECT game_id, role_id, alignment FROM storyteller_tokens
+      SELECT game_id, role_id, alignment, is_final FROM storyteller_tokens
     )
     SELECT
       re.game_id,
+      re.is_final,
       g."script_id",
       g."script",
       g."date",
@@ -147,7 +162,7 @@ export default defineCachedEventHandler(async (handler) => {
     }
     popularScripts.set(key, scriptEntry);
 
-    if (row.win_v2 === "NOT_RECORDED") continue;
+    if (row.win_v2 === "NOT_RECORDED" || !row.is_final) continue;
 
     const didWin =
       (row.alignment === "GOOD" && row.win_v2 === "GOOD_WINS") ||

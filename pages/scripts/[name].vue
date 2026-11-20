@@ -120,11 +120,17 @@
                                 : "s"
                             }}
                           </div>
-                          <div>
+                          <div
+                            v-if="
+                              scriptStats.role_win_rates[role.id].win +
+                              scriptStats.role_win_rates[role.id].loss
+                            "
+                          >
                             {{
                               Math.round(
                                 (scriptStats.role_win_rates[role.id].win /
-                                  scriptStats.role_win_rates[role.id].total) *
+                                  (scriptStats.role_win_rates[role.id].win +
+                                    scriptStats.role_win_rates[role.id].loss)) *
                                   100
                               )
                             }}% win rate

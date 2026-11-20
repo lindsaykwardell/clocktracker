@@ -156,12 +156,16 @@ const roleStats = computed<Map<string, RoleStats>>(() => {
 
     // Only count the final occurrence of each role_id per game to avoid double-counting role swaps.
     const lastRolePerGame = new Map<string, typeof game.player_characters[number]>();
+    // Every character counts as played, but only the one the player ended as
+    // gets the game's result.
+    let finalRoleId: string | null = null;
 
     for (const character of game.player_characters) {
       if (!character.name || !character.role_id) continue;
       if (character.role?.type === "FABLED" || character.role?.type === "LORIC") continue;
 
       lastRolePerGame.set(character.role_id, character);
+      finalRoleId = character.role_id;
     }
 
     for (const character of lastRolePerGame.values()) {
@@ -183,6 +187,7 @@ const roleStats = computed<Map<string, RoleStats>>(() => {
       const roleStat = stats.get(roleId)!;
       roleStat.plays += 1;
 
+      if (roleId !== finalRoleId) continue;
       if (alignment && (goodWins || evilWins)) {
         if ((isGood && goodWins) || (isEvil && evilWins)) {
           roleStat.wins += 1;

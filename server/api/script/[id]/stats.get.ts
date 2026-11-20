@@ -208,14 +208,27 @@ export default defineProtectedHandler("games-stats", async (handler) => {
         role_id: string;
         total: bigint;
         wins: bigint;
+        losses: bigint;
       }[]
     >(Prisma.sql`
       WITH last_player_char AS (
-        -- For non-storyteller games: the last Character per game
-        SELECT DISTINCT ON (c."game_id")
+        -- For non-storyteller games: each role a player had, once per game
+        SELECT DISTINCT ON (c."game_id", c."role_id")
           c."game_id",
           c."role_id",
-          c."alignment"
+          c."alignment",
+        -- Only the character the player ended as gets the game's result.
+        NOT EXISTS (
+          SELECT 1
+          FROM "Character" later
+          LEFT JOIN "Role" later_role ON later_role."id" = later."role_id"
+          WHERE later."game_id" = c."game_id"
+            AND later."id" > c."id"
+            AND later."role_id" IS NOT NULL
+            AND later."role_id" <> c."role_id"
+            AND COALESCE(later."name", '') != ''
+            AND (later_role."type" IS NULL OR later_role."type" NOT IN ('FABLED', 'LORIC'))
+        ) AS is_final
         FROM "Character" c
         JOIN "Game" g ON g."id" = c."game_id"
         WHERE g."deleted" = false
@@ -224,7 +237,7 @@ export default defineProtectedHandler("games-stats", async (handler) => {
           AND g."is_storyteller" = false
           AND ${scriptFilter}
           AND c."role_id" IN (${roleIdList})
-        ORDER BY c."game_id", c."id" DESC
+        ORDER BY c."game_id", c."role_id", c."id" DESC
       ),
       last_grimoire_page AS (
         -- For storyteller games: find the last grimoire page per game
@@ -243,20 +256,22 @@ export default defineProtectedHandler("games-stats", async (handler) => {
         SELECT
           lgp.game_id,
           t."role_id",
-          t."alignment"
+          t."alignment",
+          true AS is_final
         FROM last_grimoire_page lgp
         JOIN "Token" t ON t."grimoire_id" = lgp.grimoire_id
         WHERE t."role_id" IN (${roleIdList})
       ),
       all_entries AS (
-        SELECT game_id, role_id, alignment FROM last_player_char
+        SELECT game_id, role_id, alignment, is_final FROM last_player_char
         UNION ALL
-        SELECT game_id, role_id, alignment FROM st_tokens
+        SELECT game_id, role_id, alignment, is_final FROM st_tokens
       ),
       joined AS (
         SELECT
           ae.role_id,
           ae.alignment,
+          ae.is_final,
           g."win_v2"
         FROM all_entries ae
         JOIN "Game" g ON g."id" = ae.game_id
@@ -264,18 +279,24 @@ export default defineProtectedHandler("games-stats", async (handler) => {
       SELECT
         j.role_id,
         COUNT(*)::bigint AS total,
-        COUNT(*) FILTER (WHERE
+        COUNT(*) FILTER (WHERE j.is_final AND (
           (j."win_v2" = 'GOOD_WINS' AND j.alignment = 'GOOD')
           OR (j."win_v2" = 'EVIL_WINS' AND j.alignment = 'EVIL')
-        )::bigint AS wins
+        ))::bigint AS wins,
+        COUNT(*) FILTER (WHERE j.is_final AND (
+          (j."win_v2" = 'GOOD_WINS' AND j.alignment = 'EVIL')
+          OR (j."win_v2" = 'EVIL_WINS' AND j.alignment = 'GOOD')
+        ))::bigint AS losses
       FROM joined j
       GROUP BY j.role_id
     `);
 
     for (const row of roleWinRows) {
-      const t = Number(row.total);
-      const w = Number(row.wins);
-      role_win_rates[row.role_id] = { total: t, win: w, loss: t - w };
+      role_win_rates[row.role_id] = {
+        total: Number(row.total),
+        win: Number(row.wins),
+        loss: Number(row.losses),
+      };
     }
 
     const roleAbilityEndingRows = await prisma.$queryRaw<
