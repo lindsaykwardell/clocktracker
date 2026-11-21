@@ -20,11 +20,48 @@
             :key="grimoireEventRowKey(pageGroup.page, event)"
             class="border border-stone-600 rounded bg-stone-300/50 dark:bg-stone-900/60"
           >
-            <details :open="isEventExpandedByDefault(event)">
-              <summary class="cursor-pointer px-3 py-2 text-stone-700 dark:text-stone-300/85">
-                {{ grimoireEventSummaryParts(event).before }}
-                <span class="font-semibold text-stone-900 dark:text-stone-300">{{ grimoireEventSummaryParts(event).action }}</span>
-                {{ grimoireEventSummaryParts(event).after }}
+            <details :open="isEventExpandedByDefault(event)" class="group/event">
+              <summary
+                class="cursor-pointer px-3 py-2 text-stone-700 dark:text-stone-300/85 flex flex-wrap items-center gap-x-3 gap-y-1 list-none [&::-webkit-details-marker]:hidden"
+              >
+                <span class="flex-1 min-w-[12rem] flex items-baseline gap-2">
+                  <span
+                    aria-hidden="true"
+                    class="text-xs transition-transform group-open/event:rotate-90"
+                    >&#9654;</span
+                  >
+                  <span>
+                    {{ grimoireEventSummaryParts(event).before }}
+                    <span class="font-semibold text-stone-900 dark:text-stone-300">{{ grimoireEventSummaryParts(event).action }}</span>
+                    {{ grimoireEventSummaryParts(event).after }}
+                  </span>
+                </span>
+                <!-- The end-game button on the closed bar, so an event that
+                     closed itself (all its data filled in) doesn't need opening.
+                     On a narrow screen it wraps under the text. -->
+                <span
+                  v-if="endTriggerForEvent(event)"
+                  class="ml-auto shrink-0 group-open/event:hidden"
+                >
+                  <span
+                    v-if="eventEndedGame(event)"
+                    class="inline-flex items-center gap-1 text-sm font-semibold text-green-700 dark:text-green-400"
+                  >
+                    <IconUI id="check-circle" size="sm" />
+                    This event ended the game
+                  </span>
+                  <Button
+                    v-else
+                    type="button"
+                    size="sm"
+                    color="neutral"
+                    variant="soft"
+                    icon="check-circle"
+                    @click.prevent.stop="markEventAsGameEnd(event)"
+                  >
+                    This event ended the game
+                  </Button>
+                </span>
               </summary>
               <div class="grid grid-cols-[auto_1fr_auto] gap-x-4 gap-y-2 items-center border-t border-stone-700 px-3 py-4">
                 <div class="flex items-center flex-col gap-1">
