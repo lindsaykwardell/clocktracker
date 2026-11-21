@@ -9,14 +9,10 @@
       <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-2 md:gap-3 items-center text-center">
         <h3 class="font-sorts text-center text-lg lg:text-xl text-balance">
           Most Good
-          <IconUI
+          <InfoHint
             v-if="bayesianTooltip"
-            v-tooltip="{
-            content: bayesianTooltip,
-              html: true,
-            }"
-            id="info-circle" 
-            size="sm" 
+            label="How this ranking works"
+            :content="bayesianTooltip"
           />
         </h3>
         <template v-if="mostGood">
@@ -58,14 +54,10 @@
       <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-2 md:gap-3 items-center text-center">
         <h3 class="font-sorts text-center text-lg lg:text-xl text-balance">
           Most Evil
-          <IconUI
+          <InfoHint
             v-if="bayesianTooltip"
-            v-tooltip="{
-            content: bayesianTooltip,
-              html: true,
-            }"
-            id="info-circle" 
-            size="sm" 
+            label="How this ranking works"
+            :content="bayesianTooltip"
           />
         </h3>
         <template v-if="mostEvil">
@@ -107,14 +99,10 @@
       <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-2 md:gap-3 items-center text-center">
         <h3 class="font-sorts text-center text-lg lg:text-xl text-balance">
           Highest Win Rate
-          <IconUI
+          <InfoHint
             v-if="bayesianTooltip"
-            v-tooltip="{
-            content: bayesianTooltip,
-              html: true,
-            }"
-            id="info-circle" 
-            size="sm" 
+            label="How this ranking works"
+            :content="bayesianTooltip"
           />
         </h3>
         <template v-if="bestWinRate && bestWinRate.player">

@@ -47,14 +47,7 @@
       <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-2 md:gap-3">
         <h3 class="font-sorts text-center text-lg lg:text-xl">
           Best Performing
-          <IconUI
-            v-tooltip="{
-              content: bestPerformingTooltip,
-              html: true,
-            }"
-            id="info-circle"
-            size="sm"
-          />
+          <InfoHint label="About best performing" :content="bestPerformingTooltip" />
         </h3>
 
         <div v-if="bestPerforming" class="flex flex-col items-center gap-2">
@@ -95,14 +88,7 @@
       <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col gap-2 md:gap-3">
         <h3 class="font-sorts text-center text-lg lg:text-xl">
           Worst Performing
-          <IconUI
-            v-tooltip="{
-              content: worstPerformingTooltip,
-              html: true,
-            }"
-            id="info-circle"
-            size="sm"
-          />
+          <InfoHint label="About worst performing" :content="worstPerformingTooltip" />
         </h3>
 
         <div v-if="worstPerforming" class="flex flex-col items-center gap-2">
