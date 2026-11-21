@@ -24,6 +24,7 @@
         >
           <ComboboxOption
             v-for="person in filteredPeople"
+            :key="person.key"
             :value="person.username"
           >
             <div
@@ -46,6 +47,7 @@
 
 <script setup lang="ts">
 import naturalOrder from "natural-order";
+import { refDebounced } from "@vueuse/core";
 import {
   Combobox,
   ComboboxInput,
@@ -80,24 +82,35 @@ const value = computed({
   },
 });
 
-const filteredPeople = computed(() => [
-  {
-    username: value.value,
-  },
-  ...naturalOrder(
-    value.value === ""
-      ? props.users
-      : props.users.filter((user) => {
-          return (
-            user.display_name
-              ?.toLowerCase()
-              .includes(value.value.toLowerCase()) ||
-            user.username.toLowerCase().includes(value.value.toLowerCase())
-          );
-        })
-  )
+// The suggestions are filtered while the user pauses, not on every
+// keystroke: a short or empty name matches everyone, and filtering, sorting
+// and drawing that whole list on each key made typing (and backspacing) lag.
+// The user list is debounced too, because the grimoire's list changes with
+// every keystroke (it leaves out names already in a seat). The typed text
+// itself always updates at once.
+const SEARCH_DELAY_MS = 150;
+const search = refDebounced(value, SEARCH_DELAY_MS);
+const users = refDebounced(toRef(props, "users"), SEARCH_DELAY_MS);
+
+const matchingPeople = computed(() => {
+  const query = search.value.toLowerCase();
+  const matches =
+    query === ""
+      ? users.value
+      : users.value.filter(
+          (user) =>
+            user.display_name?.toLowerCase().includes(query) ||
+            user.username.toLowerCase().includes(query)
+        );
+  return naturalOrder(matches)
     .orderBy("asc")
-    .sort(["display_name", "username"]),
+    .sort(["display_name", "username"])
+    .map((user) => ({ ...user, key: `user:${user.user_id ?? ""}:${user.username}` }));
+});
+
+const filteredPeople = computed(() => [
+  { username: value.value, key: "typed" },
+  ...matchingPeople.value,
 ]);
 </script>
 
