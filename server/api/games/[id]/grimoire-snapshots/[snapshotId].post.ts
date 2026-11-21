@@ -30,6 +30,7 @@ type SnapshotPage = {
   id: number;
   title?: string;
   page_type?: string;
+  lifetimes_applied?: boolean;
   tokens: SnapshotToken[];
 };
 
@@ -143,6 +144,7 @@ export default defineEventHandler(async (handler) => {
         game: { connect: { id: gameId } },
         title: page.title ?? "",
         page_type: (page.page_type as any) ?? "NONE",
+        lifetimes_applied: page.lifetimes_applied ?? false,
         tokens: {
           create: page.tokens.map((token) => ({
             grimoire_participant_id: token.grimoire_participant_id ?? null,

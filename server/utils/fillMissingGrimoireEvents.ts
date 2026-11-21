@@ -1,5 +1,6 @@
 import { Prisma, type PrismaClient } from "~/server/generated/prisma/client";
 import { generateEventsForMissingGames } from "~/server/utils/generateGrimoireEvents";
+import { buildReminderCatalog, type ReminderCatalog } from "~/shared/reminderCatalog";
 
 /**
  * Background fill for games that have never had grimoire events generated
@@ -43,6 +44,51 @@ export type GrimoireEventsFillResult = {
 // restart, but are not allowed to clog every batch until then.
 const failedGameIds = new Set<string>();
 const MAX_TRACKED_FAILURES = 1000;
+
+/**
+ * The catalog entries the reminders of these games point to (by link or by
+ * icon), so the events can say exactly which role a reminder came from.
+ */
+async function loadReminderCatalogFor(
+  prisma: PrismaClient,
+  games: {
+    grimoire: {
+      tokens: {
+        reminders: { token_url: string; role_reminder_id: number | null }[];
+      }[];
+    }[];
+  }[]
+): Promise<ReminderCatalog> {
+  const urls = new Set<string>();
+  const ids = new Set<number>();
+  for (const game of games) {
+    for (const page of game.grimoire) {
+      for (const token of page.tokens) {
+        for (const reminder of token.reminders) {
+          if (reminder.token_url) urls.add(reminder.token_url);
+          if (reminder.role_reminder_id !== null) ids.add(reminder.role_reminder_id);
+        }
+      }
+    }
+  }
+  if (urls.size === 0 && ids.size === 0) return buildReminderCatalog([]);
+
+  const roles = await prisma.role.findMany({
+    where: {
+      OR: [
+        { token_url: { in: [...urls] } },
+        { reminders: { some: { id: { in: [...ids] } } } },
+      ],
+    },
+    select: {
+      id: true,
+      token_url: true,
+      custom_role: true,
+      reminders: { select: { id: true, reminder: true } },
+    },
+  });
+  return buildReminderCatalog(roles);
+}
 
 export async function fillMissingGrimoireEvents(
   prisma: PrismaClient,
@@ -91,6 +137,8 @@ export async function fillMissingGrimoireEvents(
         orderBy: [{ id: "asc" }],
         select: {
           id: true,
+          page_type: true,
+          lifetimes_applied: true,
           tokens: {
             orderBy: [{ order: "asc" }],
             select: {
@@ -108,6 +156,7 @@ export async function fillMissingGrimoireEvents(
                 select: {
                   reminder: true,
                   token_url: true,
+                  role_reminder_id: true,
                 },
               },
             },
@@ -116,6 +165,8 @@ export async function fillMissingGrimoireEvents(
       },
     },
   });
+
+  const catalog = await loadReminderCatalogFor(prisma, games);
 
   for (const game of games) {
     if (Date.now() - startedAt > timeBudgetMs) break;
@@ -128,7 +179,7 @@ export async function fillMissingGrimoireEvents(
         continue;
       }
 
-      const generated = generateEventsForMissingGames(game.grimoire);
+      const generated = generateEventsForMissingGames(game.grimoire, catalog);
 
       if (dryRun) {
         if (generated.events.length === 0) result.noEvents += 1;

@@ -71,6 +71,8 @@ function doneImporting() {
   router.push("/");
 }
 
+const grimoirePreferences = useGrimoirePreferences();
+
 const game = reactive<{
   date: string;
   script: string;
@@ -151,6 +153,7 @@ const game = reactive<{
   grimoire: {
     title?: string;
     page_type?: "NONE" | "NIGHT" | "DAY";
+    lifetimes_applied?: boolean;
     tokens: {
       alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
       order: number;
@@ -240,8 +243,7 @@ const game = reactive<{
   image_urls: [],
   grimoire: [
     {
-      title: "Page 1",
-      page_type: "NONE",
+      ...firstGrimoirePage(grimoirePreferences.dayNight.value),
       tokens: [],
     },
   ],
@@ -415,6 +417,7 @@ const formattedGame = computed(() => {
   grimoire: game.grimoire.map((page) => ({
     title: page.title || "",
     page_type: page.page_type || "NONE",
+    lifetimes_applied: page.lifetimes_applied ?? false,
     tokens: page.tokens,
   })),
   player_count: game.player_count || null,
@@ -558,8 +561,7 @@ function resetGame() {
       image_urls: [],
       grimoire: [
         {
-          title: "Page 1",
-          page_type: "NONE",
+          ...firstGrimoirePage(grimoirePreferences.dayNight.value),
           tokens: [],
         },
       ],

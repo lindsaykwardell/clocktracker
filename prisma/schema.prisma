@@ -178,6 +178,8 @@ model Grimoire {
   id         Int      @id @default(autoincrement())
   title      String   @default("")
   page_type  GrimoirePageType @default(NONE)
+  /// "Add page" made this page and applied the reminder lifetimes.
+  lifetimes_applied Boolean @default(false)
   created_at DateTime @default(now()) @db.Timestamptz(6)
   tokens     Token[]
   game       Game[]

@@ -255,6 +255,58 @@
       class="flex justify-center md:justify-normal flex-wrap gap-5 border rounded border-stone-500 p-4 my-3"
     >
       <legend>Grimoire</legend>
+      <!-- Grimoire options, remembered per browser like Record Grimoire. -->
+      <div class="w-full flex flex-wrap gap-x-6 gap-y-2 text-sm">
+        <div class="flex items-center gap-2">
+          <label class="flex items-center gap-2">
+            <Toggle v-model="grimoirePreferences.dayNight.value" size="sm" />
+            <span class="whitespace-nowrap">Day/Night pages</span>
+          </label>
+          <InfoHint label="About Day/Night pages">
+            <p>The grimoire starts on a Night 1 page, and "Add page" goes from
+            night to day and back, with automatic titles (Night 1, Day 1,
+            Night 2, ...).</p>
+            <p>Off: the grimoire uses untyped pages by default (legacy
+            behavior). You can still set a page's type by hand.</p>
+          </InfoHint>
+        </div>
+        <div class="flex items-center gap-2">
+          <label class="flex items-center gap-2">
+            <Toggle v-model="grimoirePreferences.autoReminders.value" size="sm" />
+            <span class="whitespace-nowrap">Auto-update reminders</span>
+          </label>
+          <InfoHint label="About auto-update reminders">
+            <p>When Day/Night pages is enabled and "Add page" starts a new night
+            or day, reminders whose effect is over are removed (a Poisoner's
+            Poisoned at the next night, a Monk's Safe at dawn) and numbered
+            tokens are counted up/down (Courtier's Drunk, Leviathan's Day 1, 2,
+            3, 4, 5).</p>
+            <p>When enabled, this also allows reminders on consecutive pages to
+            count as separate events (a player the Cerenovus makes mad every
+            night).</p>
+          </InfoHint>
+        </div>
+        <div class="flex items-center gap-2">
+          <label class="flex items-center gap-2">
+            <Toggle v-model="grimoirePreferences.showTracking.value" size="sm" />
+            <span class="whitespace-nowrap">Use tracking reminders</span>
+          </label>
+          <InfoHint label="About tracking reminders">
+            <p>ClockTracker keeps track of certain events in the game (deaths,
+            character changes, ...). Certain reminder tokens can prefill these
+            events; they are marked with <IconUI id="crosshair" /> in the
+            reminder dialog.</p>
+            <p>Additional reminders were also added to support this; you can
+            recognize them by their slightly brighter purple background, in
+            the reminder dialog and on the grimoire.</p>
+            <p>In the reminder dialog, hover a reminder with
+            <IconUI id="crosshair" /> (or touch and hold it) to see how it's
+            used.</p>
+            <p>Off: these reminders aren't offered in the reminder and shroud
+            dialogs. Ones you already placed keep working.</p>
+          </InfoHint>
+        </div>
+      </div>
       <div
         v-if="!game.player_count"
         :style="
@@ -392,6 +444,16 @@
           >
             <span>Deleted “{{ deletedPage.title }}”</span>
             <Button type="button" size="sm" color="contrast" @click="undoDeletePage">
+              Undo
+            </Button>
+          </div>
+          <div
+            v-else-if="endedReminders"
+            role="status"
+            class="col-span-2 flex items-center justify-between gap-3 rounded bg-stone-900/90 text-white text-sm px-3 py-2 md:absolute md:bottom-16 md:left-1/2 md:-translate-x-1/2 md:z-30 md:whitespace-nowrap"
+          >
+            <span>{{ endedReminders.message }}</span>
+            <Button type="button" size="sm" color="contrast" @click="undoEndedReminders">
               Undo
             </Button>
           </div>
@@ -612,6 +674,7 @@
       :game="game"
       :editingMultipleGames="editingMultipleGames"
       :scriptRoleIds="scriptRoleIds"
+      :reminderCatalog="reminderCatalog"
       @open-by-role-dialog="openGrimoireEventByRoleDialog"
       @end-game-from-event="applyEndTriggerFromEvent"
     />
@@ -892,8 +955,14 @@
 
 <script setup lang="ts">
 import { toEditorReminder, type GameReminder } from "~/utils/reminderType";
+import { buildReminderCatalog } from "~/shared/reminderCatalog";
+import {
+  applyReminderLifetimes,
+  type ReminderLifetimeResult,
+} from "~/shared/reminderLifetimes";
 import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
 import { SHOW_TRACKING_REMINDERS_KEY } from "~/composables/reminderDialogTracking";
+import InfoHint from "~/components/InfoHint.vue";
 import type { Alignment } from "~/server/generated/prisma/client";
 import type { RoleType } from "~/composables/useRoles";
 import type { EndTriggerFromEvent } from "~/composables/endTriggerFromEvent";
@@ -918,8 +987,26 @@ import {
   normalizePlayerName,
 } from "~/composables/grimoireParticipantMatching";
 
-// One "show tracking reminders" choice per game, shared by its reminder dialogs.
-provide(SHOW_TRACKING_REMINDERS_KEY, ref(true));
+// The grimoire options above the grimoire, remembered per browser. The
+// reminder dialogs read "show tracking reminders" from here.
+const grimoirePreferences = useGrimoirePreferences();
+provide(SHOW_TRACKING_REMINDERS_KEY, grimoirePreferences.showTracking);
+
+// Switching Day/Night pages while the grimoire is still a single empty page
+// (a new game) switches that page too.
+watch(grimoirePreferences.dayNight, (dayNight) => {
+  const pages = props.game.grimoire;
+  if (pages.length !== 1) return;
+  const page = pages[0];
+  if (page.tokens?.some((token) => token.role_id || token.reminders?.length)) return;
+  const wanted = dayNight ? "NIGHT" : "NONE";
+  if ((page.page_type ?? "NONE") === wanted) return;
+  page.page_type = wanted;
+  if (autoGeneratedPageTitles.has(page as object) || !page.title?.trim()) {
+    autoGeneratedPageTitles.add(page as object);
+    page.title = getAutoPageTitleForIndex(pages, 0);
+  }
+});
 
 const props = defineProps<{
   inFlight: boolean;
@@ -1009,6 +1096,7 @@ const props = defineProps<{
     grimoire: {
       title?: string;
       page_type?: "NONE" | "NIGHT" | "DAY";
+      lifetimes_applied?: boolean;
       tokens: {
         id?: number;
         alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
@@ -1176,6 +1264,7 @@ type GrimoireSnapshot = {
       id: number;
       title?: string;
       page_type?: "NONE" | "NIGHT" | "DAY";
+      lifetimes_applied?: boolean;
       tokens: {
         grimoire_participant_id?: string | null;
         role_id: string | null;
@@ -1242,6 +1331,7 @@ function restoreSnapshot(snapshot: GrimoireSnapshot) {
   const restored = snapshot.snapshot.pages.map((page) => ({
     title: page.title ?? "",
     page_type: page.page_type ?? "NONE",
+    lifetimes_applied: page.lifetimes_applied ?? false,
     tokens: page.tokens.map((token, index) => {
       const role = token.role_id ? allRoles.getRole(token.role_id) : undefined;
       const relatedRole = token.related_role_id
@@ -2223,11 +2313,78 @@ function addPage() {
   const newPage = {
     title: nextTitle,
     page_type: nextType,
+    lifetimes_applied: false,
     tokens: JSON.parse(JSON.stringify(props.game.grimoire[lastPage])).tokens,
   };
   props.game.grimoire[nextPage] = newPage;
   autoGeneratedPageTitles.add(newPage as object);
   grimPage.value = nextPage;
+
+  // A new phase ends the reminders whose effect is over (see
+  // shared/reminderRules.ts). The page is in the grimoire already, so the
+  // tokens are the reactive ones. The marker tells the event engines that a
+  // reminder that ended here and is on the page anyway was placed again.
+  clearEndedReminders();
+  if (nextType !== "NONE" && grimoirePreferences.autoReminders.value) {
+    const page = props.game.grimoire[nextPage];
+    const result = applyReminderLifetimes(
+      page.tokens,
+      nextType,
+      reminderCatalog.value,
+      props.game.grimoire.slice(0, nextPage)
+    );
+    page.lifetimes_applied = true;
+    showEndedReminders({
+      ...result,
+      undo: () => {
+        result.undo();
+        page.lifetimes_applied = false;
+      },
+    }, nextType);
+  }
+}
+
+/** The roles' reminders, to know which role a placed reminder belongs to. */
+const reminderCatalog = computed(() =>
+  buildReminderCatalog([...allRoles.getAllRoles(true), ...roles.value])
+);
+
+// The reminders the last "Add page" removed or counted down, kept for a few
+// seconds so they can be put back.
+const endedReminders = ref<{ message: string; undo: () => void } | null>(null);
+let endedRemindersTimer: ReturnType<typeof setTimeout> | null = null;
+
+function clearEndedReminders() {
+  if (endedRemindersTimer !== null) clearTimeout(endedRemindersTimer);
+  endedRemindersTimer = null;
+  endedReminders.value = null;
+}
+
+function showEndedReminders(
+  result: ReminderLifetimeResult,
+  newPageType: "DAY" | "NIGHT"
+) {
+  const plural = (count: number) => (count === 1 ? "" : "s");
+  const endedPhase = newPageType === "DAY" ? "night" : "day";
+  const parts = [
+    result.removed &&
+      `removed ${result.removed} reminder${plural(result.removed)} that ended with the ${endedPhase}`,
+    result.countedDown &&
+      `counted down ${result.countedDown} reminder${plural(result.countedDown)}`,
+    result.countedUp && `counted up ${result.countedUp} reminder${plural(result.countedUp)}`,
+  ].filter((part): part is string => !!part);
+  if (!parts.length) return;
+  const joined = parts.join(", ");
+  const message = joined.charAt(0).toUpperCase() + joined.slice(1);
+
+  clearDeletedPage();
+  endedReminders.value = { message, undo: result.undo };
+  endedRemindersTimer = setTimeout(clearEndedReminders, DELETE_UNDO_MS);
+}
+
+function undoEndedReminders() {
+  endedReminders.value?.undo();
+  clearEndedReminders();
 }
 
 /**
@@ -2244,6 +2401,7 @@ function clonePage() {
   const newPage = {
     title: sourceIsAutoTitled ? source.title : `${source.title ?? ""} - cloned`,
     page_type: source.page_type,
+    lifetimes_applied: false,
     tokens: JSON.parse(JSON.stringify(source)).tokens,
   };
   const insertAt = grimPage.value + 1;
@@ -2260,7 +2418,7 @@ function defaultGrimoirePageTitle(index: number) {
 }
 
 function defaultGrimoirePageType() {
-  return "NONE" as const;
+  return grimoirePreferences.dayNight.value ? ("NIGHT" as const) : ("NONE" as const);
 }
 
 function getNextPageTypeFromCurrent(currentType: "NONE" | "NIGHT" | "DAY") {
@@ -2498,6 +2656,7 @@ function deletePage() {
 
   if (!page) return;
   clearDeletedPage();
+  clearEndedReminders();
   deletedPage.value = {
     page,
     index,
@@ -2517,7 +2676,10 @@ function undoDeletePage() {
   syncGrimoireEventsFromGrimoire({ force: true, silent: true });
 }
 
-onBeforeUnmount(clearDeletedPage);
+onBeforeUnmount(() => {
+  clearDeletedPage();
+  clearEndedReminders();
+});
 
 const isLastPage = computed(
   () => grimPage.value === props.game.grimoire.length - 1

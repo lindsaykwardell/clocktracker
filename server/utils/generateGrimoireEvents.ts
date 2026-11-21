@@ -7,10 +7,17 @@ import {
   findMatchingTokenOnPreviousPage,
 } from "~/composables/grimoireParticipantMatching";
 import { GRIMOIRE_REMINDER_EVENT_CONFIG } from "~/server/utils/grimoireReminderEventConfig";
+import { reminderRoleId, type ReminderCatalog } from "~/shared/reminderCatalog";
+import {
+  carriedOverReminders,
+  type LifetimeMarkedPage,
+  type LifetimePage,
+} from "~/shared/reminderLifetimes";
 
 type ReminderLike = {
   reminder: string;
   token_url: string;
+  role_reminder_id?: number | null;
 };
 
 type TokenLike = {
@@ -34,7 +41,7 @@ type TokenLike = {
 type PageLike = {
   id: number;
   tokens: TokenLike[];
-};
+} & LifetimeMarkedPage;
 
 type GeneratedEvent = {
   grimoire_page: number;
@@ -54,6 +61,44 @@ type GeneratedEvent = {
 
 function normalizeReminderRoleHint(value: string | null | undefined) {
   return (value ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+// The catalog of the run in progress (see generateEventsForMissingGames).
+let activeCatalog: ReminderCatalog | null = null;
+
+/** The role a reminder came from, when the catalog knows it. */
+function catalogRoleId(reminder: ReminderLike) {
+  return reminderRoleId(activeCatalog, reminder);
+}
+
+/**
+ * Whether a reminder says which role it came from: through the catalog, or
+ * else an icon to guess the role from.
+ */
+function hasRoleHint(reminder: ReminderLike) {
+  return !!catalogRoleId(reminder) || !!normalizeReminderRoleHint(reminder.token_url);
+}
+
+/**
+ * Whether a reminder came from this token's character: the catalog role when
+ * known, or else the role's name or id found in the reminder's icon.
+ */
+function reminderHintMatchesCharacter(
+  reminder: ReminderLike,
+  candidate: { role_id: string | null; role?: { name: string } | null }
+) {
+  if (!candidate.role_id) return false;
+  const roleId = catalogRoleId(reminder);
+  if (roleId) return candidate.role_id === roleId;
+
+  const reminderUrlHint = normalizeReminderRoleHint(reminder.token_url);
+  if (!reminderUrlHint) return false;
+  const roleNameHint = normalizeReminderRoleHint(candidate.role?.name);
+  const roleIdHint = normalizeReminderRoleHint(candidate.role_id);
+  return (
+    (!!roleNameHint && reminderUrlHint.includes(roleNameHint)) ||
+    (!!roleIdHint && reminderUrlHint.includes(roleIdHint))
+  );
 }
 
 function normalizeReminderName(value: string | null | undefined) {
@@ -138,6 +183,9 @@ function reminderMatchesAnyRoleHint(
   roleIds: string[],
   pageTokens: TokenLike[]
 ) {
+  const catalogRole = catalogRoleId(reminder);
+  if (catalogRole) return roleIds.includes(catalogRole);
+
   const reminderUrlHint = normalizeReminderRoleHint(reminder.token_url);
   if (!reminderUrlHint) return false;
 
@@ -336,21 +384,11 @@ function detectDeadReminderSource(pageTokens: TokenLike[], token: TokenLike) {
     (reminder) => reminder.reminder.trim().toLowerCase() === "dead"
   );
   if (!deadReminder?.token_url) return null;
+  if (!hasRoleHint(deadReminder)) return null;
 
-  const reminderUrlHint = normalizeReminderRoleHint(deadReminder.token_url);
-  if (!reminderUrlHint) return null;
-
-  const matchingCharacters = pageTokens.filter((candidate) => {
-    if (!candidate.role_id) return false;
-
-    const roleNameHint = normalizeReminderRoleHint(candidate.role?.name);
-    const roleIdHint = normalizeReminderRoleHint(candidate.role_id);
-
-    return (
-      (!!roleNameHint && reminderUrlHint.includes(roleNameHint)) ||
-      (!!roleIdHint && reminderUrlHint.includes(roleIdHint))
-    );
-  });
+  const matchingCharacters = pageTokens.filter((candidate) =>
+    reminderHintMatchesCharacter(deadReminder, candidate)
+  );
 
   const alive = matchingCharacters.filter((candidate) => !candidate.is_dead);
   const dead = matchingCharacters.filter((candidate) => candidate.is_dead);
@@ -369,20 +407,11 @@ function detectSourceFromReminderHint(
   sourceTokens: TokenLike[],
   reminder: ReminderLike
 ) {
-  const reminderUrlHint = normalizeReminderRoleHint(reminder.token_url);
-  if (!reminderUrlHint) return null;
+  if (!hasRoleHint(reminder)) return null;
 
-  const matchingCharacters = sourceTokens.filter((candidate) => {
-    if (!candidate.role_id) return false;
-
-    const roleNameHint = normalizeReminderRoleHint(candidate.role?.name);
-    const roleIdHint = normalizeReminderRoleHint(candidate.role_id);
-
-    return (
-      (!!roleNameHint && reminderUrlHint.includes(roleNameHint)) ||
-      (!!roleIdHint && reminderUrlHint.includes(roleIdHint))
-    );
-  });
+  const matchingCharacters = sourceTokens.filter((candidate) =>
+    reminderHintMatchesCharacter(reminder, candidate)
+  );
 
   const alive = matchingCharacters.filter((candidate) => !candidate.is_dead);
   const dead = matchingCharacters.filter((candidate) => candidate.is_dead);
@@ -413,6 +442,8 @@ const SELF_ONLY_CHANGED_SOURCE_ROLE_IDS = new Set([
 ]);
 
 function isFarmerChangedReminder(reminder: ReminderLike) {
+  const roleId = catalogRoleId(reminder);
+  if (roleId) return roleId === "farmer";
   return normalizeReminderRoleHint(reminder.token_url).includes("farmer");
 }
 
@@ -571,7 +602,24 @@ function detectSingleSeatMove(previousIds: string[], currentIds: string[]) {
   return foundMovedId;
 }
 
-export function generateEventsForMissingGames(grimoire: PageLike[]) {
+/**
+ * The events a saved grimoire implies. With a catalog, a reminder's role is
+ * read from its catalog link or icon; without one (or for a reminder the
+ * catalog doesn't know) it is guessed from the role names in its icon.
+ */
+export function generateEventsForMissingGames(
+  grimoire: PageLike[],
+  catalog?: ReminderCatalog | null
+) {
+  activeCatalog = catalog ?? null;
+  try {
+    return generateEvents(grimoire);
+  } finally {
+    activeCatalog = null;
+  }
+}
+
+function generateEvents(grimoire: PageLike[]) {
   const events: GeneratedEvent[] = [];
   const tokenParticipantUpdates: { tokenId: number; participantId: string }[] = [];
 
@@ -797,22 +845,31 @@ export function generateEventsForMissingGames(grimoire: PageLike[]) {
         }
       }
 
+      // Reminders placed again on a page with the lifetimes applied count as
+      // new (see carriedOverReminders).
+      const carriedReminders = carriedOverReminders(
+        previousToken?.reminders,
+        token,
+        page,
+        grimoire.slice(0, pageIndex) as LifetimePage[],
+        activeCatalog
+      );
       for (const config of GRIMOIRE_REMINDER_EVENT_CONFIG) {
         const previousCount = previousToken
-          ? countReminderByName(previousToken.reminders, config.reminder)
+          ? countReminderByName(carriedReminders, config.reminder)
           : 0;
         const currentCount = countReminderByName(token.reminders, config.reminder);
         if (currentCount <= previousCount) continue;
 
         const addedMatchingReminders = addedRemindersByName(
           token.reminders,
-          previousToken?.reminders,
+          carriedReminders,
           config.reminder
         );
         if (addedMatchingReminders.length === 0) continue;
 
         const remindersWithRoleHint = addedMatchingReminders.filter(
-          (reminder) => !!normalizeReminderRoleHint(reminder.token_url)
+          (reminder) => hasRoleHint(reminder)
         );
         const isSelfSourcedReminder =
           !!token.role_id && config.sourceRoleIds.includes(token.role_id);

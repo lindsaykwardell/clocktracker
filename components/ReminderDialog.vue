@@ -9,10 +9,6 @@
       <div class="flex flex-wrap items-center justify-between gap-x-8 gap-y-2">
         <div class="flex flex-wrap gap-x-8 gap-y-2">
           <label class="inline-flex items-center gap-2">
-            <input v-model="showTrackingReminders" type="checkbox" />
-            <span class="text-sm">Show tracking reminders</span>
-          </label>
-          <label class="inline-flex items-center gap-2">
             <input v-model="showLegacyReminders" type="checkbox" />
             <span class="text-sm">Show legacy reminders</span>
           </label>
@@ -31,13 +27,6 @@
     </template>
     <template v-if="show">
       <div class="flex flex-col gap-4 p-4">
-        <div v-if="showTrackingReminders" class="text-sm text-stone-300 space-y-2">
-          <p>ClockTracker keeps track of certain events in the game (deaths, character changes, ...).
-          Certain reminder tokens can prefill these events; they are marked with
-          <IconUI id="crosshair" /> in the list below.</p>
-          <p>Additional reminders were also added to support this functionality; you can recognize them by their slightly brighter purple background.</p>
-          <p>Hover a reminder with <IconUI id="crosshair" /> (or touch and hold it) to see how it's used.</p>
-        </div>
         <p
           v-if="reminderFilter.trim() && reminderGroups.length === 0"
           class="text-center text-stone-400"

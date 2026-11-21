@@ -47,6 +47,8 @@ useHead({
   title: "Edit Game",
 });
 
+const grimoirePreferences = useGrimoirePreferences();
+
 const game = reactive<{
   date: string;
   script: string;
@@ -127,6 +129,7 @@ const game = reactive<{
     id: number;
     title?: string;
     page_type?: "NONE" | "NIGHT" | "DAY";
+    lifetimes_applied?: boolean;
     tokens: {
       id: number;
       alignment: "GOOD" | "EVIL" | "NEUTRAL" | undefined;
@@ -224,6 +227,7 @@ const game = reactive<{
         id: grim.id,
         title: grim.title ?? "",
         page_type: grim.page_type ?? "NONE",
+        lifetimes_applied: grim.lifetimes_applied ?? false,
         tokens: grim.tokens?.map((token) => ({
           id: token.id,
           alignment: token.alignment,
@@ -245,8 +249,7 @@ const game = reactive<{
     : [
         {
           id: 0,
-          title: "Page 1",
-          page_type: "NONE",
+          ...firstGrimoirePage(grimoirePreferences.dayNight.value),
           tokens: [],
         },
       ],
@@ -263,6 +266,7 @@ const formattedGame = computed(() => {
     id: page.id,
     title: page.title || "",
     page_type: page.page_type || "NONE",
+    lifetimes_applied: page.lifetimes_applied ?? false,
     tokens: page.tokens,
   })),
   player_count: game.player_count || null,

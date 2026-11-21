@@ -162,6 +162,7 @@ export default defineEventHandler(async (handler) => {
               id: grimoire.id,
               title: grimoire.title,
               page_type: grimoire.page_type,
+              lifetimes_applied: grimoire.lifetimes_applied,
               tokens: grimoire.tokens.map((token) => ({
                 id: token.id,
                 role_id: token.role_id,
@@ -296,6 +297,7 @@ export default defineEventHandler(async (handler) => {
               .map((g) => ({
                 title: g.title ?? "",
                 page_type: g.page_type ?? "NONE",
+                lifetimes_applied: g.lifetimes_applied ?? false,
                 tokens: {
                   create: g.tokens?.map((token,index) => ({
                     role_id: token.role_id,
@@ -329,6 +331,7 @@ export default defineEventHandler(async (handler) => {
                 data: {
                   title: g.title ?? "",
                   page_type: g.page_type ?? "NONE",
+                  lifetimes_applied: g.lifetimes_applied ?? false,
                   tokens: {
                     deleteMany: {
                       id: {
