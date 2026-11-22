@@ -329,8 +329,10 @@
         }"
       >
         <div
-          class="font-sorts text-white bg-black/60 p-4 text-xl rounded shadow-md text-center"
+          class="relative z-10 font-sorts text-white bg-black/60 p-4 text-xl rounded shadow-md text-center"
         >
+          <!-- relative z-10: above the night tint (.grimoire--night's
+               ::before/::after in app.vue), which covers only the background. -->
           <p class="p-2">Select player count to begin</p>
           <p class="p-2">OR</p>
           <div class="flex justify-center">

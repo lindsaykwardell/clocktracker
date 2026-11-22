@@ -20,6 +20,7 @@
             type="button"
             id="reset-game"
             color="caution"
+            variant="soft"
             wide
             :disabled="inFlight"
           >
