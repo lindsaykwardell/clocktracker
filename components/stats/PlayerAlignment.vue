@@ -68,7 +68,28 @@
         </div>
       </div>
 
-      <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col">
+      <div class="relative p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col">
+        <template v-if="statsDebug.enabled.value">
+          <Button
+            @click="showSwitchDebug = true"
+            title="Debug: games behind the alignment switches"
+            variant="filled"
+            color="contrast"
+            icon="bug"
+            display="icon-only"
+            circular
+            size="xs"
+            class="absolute top-1 left-1 z-10"
+          >
+            Debug
+          </Button>
+          <StatsDebugDialog
+            v-model:visible="showSwitchDebug"
+            title="Alignment switches: games"
+            :summary="alignmentSwitchStats ? `${alignmentSwitchStats.switches} switches in ${alignmentSwitchStats.gamesWithSwitch} of ${alignmentSwitchStats.trackedGames} tracked games.` : 'Not enough data.'"
+            :rows="switchDebugRows"
+          />
+        </template>
         <!-- <h3 class="font-sorts text-center text-lg lg:text-xl mb-2 md:mb-3">
           Switching Alignment
         </h3> -->
@@ -226,6 +247,10 @@ import { computed } from "vue";
 import type { Game, Character } from "~/server/generated/prisma/client";
 import type { GameRecord } from "~/composables/useGames";
 import { chartColors } from "~/composables/useChartColors";
+import { useStatsDebug } from "~/composables/useStatsDebug";
+
+const statsDebug = useStatsDebug();
+const showSwitchDebug = ref(false);
 
 type Alignment = "GOOD" | "EVIL" | null;
 
@@ -629,15 +654,52 @@ function getAlignmentsFromEvents(game: GameWithChars): Alignment[] | null {
   return setupFrom ? [setupFrom, start, ...changes] : [start, ...changes];
 }
 
-function getAlignmentTimeline(game: GameWithChars): Alignment[] {
+function getAlignmentTimelineWithSource(game: GameWithChars): {
+  timeline: Alignment[];
+  source: "events" | "grimoire pages" | "your roles";
+} {
   const fromEvents = getAlignmentsFromEvents(game);
-  if (fromEvents) return fromEvents;
+  if (fromEvents) return { timeline: fromEvents, source: "events" };
 
   const fromGrimoire = getAlignmentsFromGrimoire(game);
-  if (fromGrimoire.length) return fromGrimoire;
+  if (fromGrimoire.length) return { timeline: fromGrimoire, source: "grimoire pages" };
 
-  return getCharacterAlignments(game);
+  return { timeline: getCharacterAlignments(game), source: "your roles" };
 }
+
+function getAlignmentTimeline(game: GameWithChars): Alignment[] {
+  return getAlignmentTimelineWithSource(game).timeline;
+}
+
+// Debug mode: every game with its alignment timeline and where it came from.
+const switchDebugRows = computed(() => {
+  if (!showSwitchDebug.value) return [];
+  return [...orderedGames.value].reverse().map((game) => {
+    const { timeline, source } = getAlignmentTimelineWithSource(game);
+    let switches = 0;
+    for (let i = 1; i < timeline.length; i++) {
+      if (timeline[i] && timeline[i] !== timeline[i - 1]) switches++;
+    }
+    const reason = game.ignore_for_stats
+      ? "Ignored for stats"
+      : !timeline.length
+        ? "No alignment found"
+        : switches
+          ? `From ${source}`
+          : `No switch (from ${source})`;
+    return {
+      id: String(game.id),
+      date: new Date(game.date).toLocaleDateString(),
+      script: game.script,
+      value: game.ignore_for_stats || !timeline.length ? "-" : `${switches}`,
+      counts: !game.ignore_for_stats && switches > 0,
+      reason,
+      details: timeline.length
+        ? [timeline.map((alignment) => (alignment ?? "?").toLowerCase()).join(" > ")]
+        : [],
+    };
+  });
+});
 
 function getEndingAlignment(game: GameWithChars): Alignment {
   const timeline = getAlignmentTimeline(game);

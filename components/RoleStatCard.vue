@@ -80,6 +80,30 @@
       v-if="showZeroOverlay && result.count === 0"
       class="absolute inset-0 rounded-lg bg-neutral-300/20 dark:bg-stone-900/50 pointer-events-none"
     />
+
+    <!-- Character pages pass global previews without games: nothing to explain there. -->
+    <template v-if="statsDebug.enabled.value && games.length">
+      <Button
+        @click="showDebug = true"
+        title="Debug: which games feed this card"
+        variant="filled"
+        color="contrast"
+        icon="bug"
+        display="icon-only"
+        circular
+        size="xs"
+        class="absolute top-1 left-1 z-10"
+      >
+        Debug
+      </Button>
+      <StatsDebugDialog
+        v-model:visible="showDebug"
+        :title="`${result.metricLabel}: games`"
+        :summary="debugSummary"
+        :warning="debugWarning"
+        :rows="debugRows"
+      />
+    </template>
   </li>
 </template>
 
@@ -88,8 +112,10 @@ import type { GameRecord } from "~/composables/useGames";
 import type { RoleStatCardRecord } from "~/composables/useRoleStatCards";
 import {
   buildRoleStatCardResult,
+  explainRoleStatCard,
   getRoleStatCardDefinition,
 } from "~/composables/useRoleStatCards";
+import { useStatsDebug } from "~/composables/useStatsDebug";
 
 const props = withDefaults(
   defineProps<{
@@ -173,6 +199,41 @@ const character = computed(() => {
     },
   };
 });
+
+const statsDebug = useStatsDebug();
+const showDebug = ref(false);
+
+// Only worked out while the dialog is open: it runs the card once per game.
+const debugResult = computed(() =>
+  showDebug.value
+    ? explainRoleStatCard(props.card, props.games, props.isMe, props.username)
+    : null
+);
+
+const debugSummary = computed(() => {
+  const debug = debugResult.value;
+  if (!debug) return "";
+  const counting = debug.rows.filter((row) => row.count > 0).length;
+  return `Count ${debug.total}, from ${counting} of ${debug.rows.length} games.`;
+});
+
+const debugWarning = computed(() => {
+  const debug = debugResult.value;
+  if (!debug || debug.sum === debug.total) return null;
+  return `The per-game counts add up to ${debug.sum}, not ${debug.total}: this card doesn't add up game by game.`;
+});
+
+const debugRows = computed(() =>
+  (debugResult.value?.rows ?? []).map((row) => ({
+    id: row.game.id,
+    date: new Date(row.game.date).toLocaleDateString(),
+    script: row.game.script,
+    value: row.count > 0 ? `+${row.count}` : "0",
+    counts: row.count > 0,
+    reason: row.reason,
+    details: row.events,
+  }))
+);
 
 const roleLink = computed(() => {
   const role = props.card.role ?? result.value.displayRole;

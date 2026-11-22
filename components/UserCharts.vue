@@ -135,6 +135,18 @@
         </div>
         <div class="flex gap-2 items-center justify-center md:justify-end">
           <Button
+            v-if="statsDebug.canDebug.value"
+            @click="statsDebug.enabled.value = !statsDebug.enabled.value"
+            :active="statsDebug.enabled.value"
+            color="positive"
+            variant="soft"
+            icon="bug"
+            title="Admins only: show which games feed each card and stat"
+          >
+            Debug
+          </Button>
+
+          <Button
             @click="setMode('player')"
             :active="mode === 'player'"
             color="primary"
@@ -436,6 +448,7 @@ const users = useUsers();
 const roles = useRoles();
 const allGames = useGames();
 const me = useUser();
+const statsDebug = useStatsDebug();
 const storytellerQuery = computed<string | undefined>(() => {
   const value = route.query.storyteller;
   return (Array.isArray(value) ? value[0] : value) ?? undefined;

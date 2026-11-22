@@ -45,7 +45,12 @@
       
       <ul class="flex flex-wrap justify-center gap-1">
         <li v-for="role in roleGroup.roles" :key="role.id">
-          <nuxt-link :to="`/roles/${role.id}`">
+          <component
+            :is="statsDebug.enabled.value ? 'button' : NuxtLink"
+            v-bind="statsDebug.enabled.value
+              ? { type: 'button', title: 'Debug: games for this character', onClick: () => openRoleDebug(role) }
+              : { to: `/roles/${role.id}` }"
+          >
             <div class="relative">
               <div
                 v-if="!characterIsPlayed(role.id)"
@@ -61,16 +66,27 @@
                 v-tooltip="{ content: roleTooltip(role), html: true }"
               />
             </div>
-          </nuxt-link>
+          </component>
         </li>
       </ul>
     </div>
+    <StatsDebugDialog
+      v-if="statsDebug.enabled.value"
+      v-model:visible="showRoleDebug"
+      :title="`${debugRole?.name ?? ''}: games`"
+      :summary="roleDebugSummary"
+      :rows="roleDebugRows"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import naturalOrder from "natural-order";
 import { WinStatus_V2 } from "~/composables/useGames";
+import { useStatsDebug } from "~/composables/useStatsDebug";
+
+const NuxtLink = resolveComponent("NuxtLink");
+const statsDebug = useStatsDebug();
 
 const roles = useRoles();
 
@@ -304,5 +320,73 @@ const characterIsPlayed = (roleId: string) => playedRoleIds.value.has(roleId);
 
 onMounted(() => {
   roles.fetchRoles();
+});
+
+// Debug mode: the games behind one character's play count and W/L, using the
+// same rules as roleStats above.
+const showRoleDebug = ref(false);
+const debugRole = ref<{ id: string; name: string } | null>(null);
+
+function openRoleDebug(role: { id: string; name: string }) {
+  debugRole.value = role;
+  showRoleDebug.value = true;
+}
+
+const roleDebugRows = computed(() => {
+  const role = debugRole.value;
+  if (!role || !showRoleDebug.value || props.games.status !== Status.SUCCESS) return [];
+
+  return props.games.data.flatMap((game) => {
+    const characters = game.player_characters.filter(
+      (character) =>
+        !!character.name &&
+        !!character.role_id &&
+        character.role?.type !== "FABLED" &&
+        character.role?.type !== "LORIC"
+    );
+    const own = characters.filter((character) => character.role_id === role.id);
+    if (!own.length) return [];
+
+    const final = characters.at(-1);
+    const isFinal = final?.role_id === role.id;
+    const character = own.at(-1)!;
+    const alignment = character.alignment ?? character.role?.initial_alignment;
+    const goodWins = game.win_v2 === WinStatus_V2.GOOD_WINS;
+    const evilWins = game.win_v2 === WinStatus_V2.EVIL_WINS;
+
+    let value = "played";
+    let reason: string | null = null;
+    if (game.ignore_for_stats) {
+      value = "-";
+      reason = "Ignored for stats";
+    } else if (!isFinal) {
+      reason = `Not your final character (${final?.name}): played, no result`;
+    } else if (!goodWins && !evilWins) {
+      reason = "No winner recorded: played, no result";
+    } else if (alignment !== "GOOD" && alignment !== "EVIL") {
+      reason = "No alignment: played, no result";
+    } else {
+      value = (alignment === "GOOD") === goodWins ? "W" : "L";
+      reason = `Ended ${alignment.toLowerCase()}`;
+    }
+
+    return [
+      {
+        id: game.id,
+        date: new Date(game.date).toLocaleDateString(),
+        script: game.script,
+        value,
+        counts: !game.ignore_for_stats,
+        reason,
+        details: [characters.map((c) => `${c.name} (${(c.alignment ?? "?").toLowerCase()})`).join(" > ")],
+      },
+    ];
+  });
+});
+
+const roleDebugSummary = computed(() => {
+  const stats = debugRole.value ? roleStats.value.get(debugRole.value.id) : null;
+  if (!stats) return "Not played.";
+  return `Played ${stats.plays}, finished ${stats.endedAs}, W/L ${stats.wins}-${stats.losses}.`;
 });
 </script>

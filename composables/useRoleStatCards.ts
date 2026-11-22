@@ -797,3 +797,88 @@ function rolePrefix(roleName?: string | null) {
   if (["Legion", "Lil' Monsta", "Riot"].includes(roleName)) return roleName;
   return `the ${roleName}`;
 }
+
+export type StatDebugRow = {
+  game: GameRecord;
+  /** What this game adds; 0 when it doesn't count. */
+  count: number;
+  /** Why the game adds nothing, or null when it counts. */
+  reason: string | null;
+  /** Grimoire events of this game that the card could see (short summary). */
+  events: string[];
+};
+
+export type StatDebugResult = {
+  total: number;
+  /** Sum of the per-game counts; differs from total for cards that don't add up per game. */
+  sum: number;
+  rows: StatDebugRow[];
+};
+
+function describeEvent(event: GameRecord["grimoire_events"][number]) {
+  const parts = [`p${event.grimoire_page + 1}`, event.event_type];
+  if (event.status_source) parts.push(`"${event.status_source}"`);
+  if (event.player_name) parts.push(`on ${event.player_name}`);
+  if (event.by_role_id) parts.push(`by ${event.by_role_id}`);
+  return parts.join(" ");
+}
+
+/**
+ * Debug view of one stat card: what each game adds, and why the others add
+ * nothing. Runs the card's count on one game at a time, so it only explains
+ * cards whose count adds up per game; `sum` shows when it doesn't.
+ */
+export function explainRoleStatCard(
+  card: RoleStatCardRecord,
+  games: GameRecord[],
+  isMe: boolean,
+  username?: string
+): StatDebugResult | null {
+  const definition = getRoleStatCardDefinition(card.metric_key);
+  if (!definition) return null;
+
+  const roleId = card.role_id;
+  const roleName = card.role?.name ?? null;
+  const scope = definition.scope ?? "as_role";
+  const scopedGames = getScopedGamesForRole(
+    games,
+    username,
+    roleId,
+    definition.category,
+    scope
+  );
+  const scopedById = new Map(scopedGames.map((game) => [game.id, game]));
+  const index = username ? getScopeIndex(games, username) : null;
+  const params = { roleId, roleName, isMe, username };
+  const total = definition.getCount({ games: scopedGames, ...params });
+
+  const rows = games.map((game, i): StatDebugRow => {
+    const scoped = scopedById.get(game.id);
+    if (!scoped) {
+      let reason = "Left out of this card";
+      if (!game.grimoire.some((page) => page.tokens.length)) {
+        reason = "No grimoire recorded";
+      } else if (index && !index.userParticipantIds[i].size) {
+        reason = "Your seat isn't tagged as you in the grimoire";
+      } else if (definition.category === "role" && scope === "as_role") {
+        reason = `You weren't ${roleName ?? roleId} in this game's grimoire`;
+      }
+      return { game, count: 0, reason, events: [] };
+    }
+
+    const count = definition.getCount({ games: [scoped], ...params });
+    const events = scoped.grimoire_events.map(describeEvent);
+    let reason: string | null = null;
+    if (!count) {
+      reason = game.ignore_for_stats
+        ? "Ignored for stats"
+        : events.length
+          ? "Included, but none of its events match this card"
+          : "Included, but it has no grimoire events this card can see";
+    }
+    return { game, count, reason, events };
+  });
+
+  const sum = rows.reduce((total, row) => total + row.count, 0);
+  return { total, sum, rows };
+}
