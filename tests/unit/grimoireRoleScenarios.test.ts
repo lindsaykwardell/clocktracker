@@ -38,6 +38,9 @@ const ROLES: Record<string, { name: string; type: string; alignment: "GOOD" | "E
   "pit-hag": { name: "Pit-Hag", type: "MINION", alignment: "EVIL" },
   imp: { name: "Imp", type: "DEMON", alignment: "EVIL" },
   ventriloquist: { name: "Ventriloquist", type: "LORIC", alignment: "GOOD" },
+  philosopher: { name: "Philosopher", type: "TOWNSFOLK", alignment: "GOOD" },
+  bounty_hunter: { name: "Bounty Hunter", type: "TOWNSFOLK", alignment: "GOOD" },
+  amnesiac: { name: "Amnesiac", type: "TOWNSFOLK", alignment: "GOOD" },
 };
 
 type Reminder = { reminder: string; token_url: string };
@@ -46,6 +49,8 @@ type Seat = {
   role: string;
   dead?: boolean;
   alignment?: "GOOD" | "EVIL";
+  /** The small token (related role). */
+  related?: string;
   reminders?: Reminder[];
 };
 
@@ -63,18 +68,20 @@ function page(seats: Seat[]) {
       order,
       player_name: seat.id,
       player_id: null,
-      role_id: seat.role,
-      related_role_id: null,
-      alignment: seat.alignment ?? ROLES[seat.role].alignment,
+      role_id: seat.role || null,
+      related_role_id: seat.related ?? null,
+      alignment: seat.alignment ?? ROLES[seat.role]?.alignment ?? "NEUTRAL",
       is_dead: seat.dead ?? false,
       grimoire_participant_id: seat.id,
       reminders: seat.reminders ?? [],
-      role: {
-        name: ROLES[seat.role].name,
-        type: ROLES[seat.role].type,
-        initial_alignment: ROLES[seat.role].alignment,
-        token_url: "",
-      },
+      role: seat.role
+        ? {
+            name: ROLES[seat.role].name,
+            type: ROLES[seat.role].type,
+            initial_alignment: ROLES[seat.role].alignment,
+            token_url: "",
+          }
+        : null,
       player: { username: seat.id },
     })),
   };
@@ -359,6 +366,37 @@ test("Cacklejack: changes another player's character", () => {
   assert.equal(changes[0].by_role_id, "cacklejack");
   assert.equal(s.card("cacklejack_role_changes_caused", "cacklejack", "ck"), 1);
   assert.equal(s.card("cacklejack_role_changes_received", "cacklejack", "a"), 1);
+});
+
+test("Bounty Hunter: an evil Townsfolk at setup is credited to the Bounty Hunter", () => {
+  const s = scenario([
+    page([
+      { id: "bh", role: "bounty_hunter" },
+      {
+        id: "a",
+        role: "amnesiac",
+        alignment: "EVIL",
+        reminders: [r("bounty_hunter", "Changed")],
+      },
+    ]),
+  ]);
+  const switches = s.of("ALIGNMENT_CHANGE", "a");
+  assert.equal(switches.length, 1);
+  assert.equal(switches[0].old_alignment, "GOOD");
+  assert.equal(switches[0].by_role_id, "bounty_hunter");
+  assert.equal(switches[0].by_participant_id, "bh");
+  assert.equal(switches[0].cause, "ABILITY");
+});
+
+test("A traveller joining later isn't an alignment switch, a later switch is", () => {
+  const s = scenario([
+    page([{ id: "a", role: "chef" }, { id: "t", role: "" }]),
+    page([{ id: "a", role: "chef" }, { id: "t", role: "bone_collector", alignment: "EVIL" }]),
+    page([{ id: "a", role: "chef" }, { id: "t", role: "bone_collector", alignment: "GOOD" }]),
+  ]);
+  const switches = s.of("ALIGNMENT_CHANGE", "t");
+  assert.equal(switches.length, 1);
+  assert.equal(switches[0].grimoire_page, 2);
 });
 
 test("Bone Collector: a dead player regains their ability", () => {

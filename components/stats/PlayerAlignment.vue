@@ -231,11 +231,13 @@ type Alignment = "GOOD" | "EVIL" | null;
 
 type GrimoireToken = {
   alignment?: Alignment | null;
+  grimoire_participant_id?: string | null;
   role_id?: string | null;
   player_id?: string | null;
   player_name?: string | null;
   player?: { username?: string | null } | null;
   role?: {
+    type?: string | null;
     initial_alignment?: Alignment | null;
   } | null;
 };
@@ -250,6 +252,12 @@ type GameWithChars = Game & {
   player_count?: number | null;
   traveler_count?: number | null;
   grimoire?: GrimoirePage[] | null;
+  grimoire_events?: {
+    grimoire_page: number;
+    participant_id: string | null;
+    event_type: string;
+    new_alignment?: string | null;
+  }[] | null;
   user?: {
     username?: string | null;
   } | null;
@@ -523,6 +531,23 @@ function alignmentFromToken(token?: GrimoireToken | null): Alignment {
   return null;
 }
 
+/**
+ * A player who starts on the other side of their character (an evil
+ * Townsfolk from the Bounty Hunter) switched during setup. Returns the
+ * character's own alignment, so the timeline starts there and counts that
+ * switch. Travellers choose their side, so they never switch at setup. Same
+ * rule as the page 1 ALIGNMENT_CHANGE events.
+ */
+function setupSwitchFrom(
+  role: { type?: string | null; initial_alignment?: Alignment | string | null } | null | undefined,
+  alignment: Alignment
+): Alignment {
+  if (!role || !alignment || role.type === "TRAVELER") return null;
+  const initial = role.initial_alignment;
+  if (initial !== "GOOD" && initial !== "EVIL") return null;
+  return initial !== alignment ? initial : null;
+}
+
 function getAlignmentsFromGrimoire(game: GameWithChars): Alignment[] {
   const alignments: Alignment[] = [];
   const pages = game.grimoire ?? [];
@@ -531,6 +556,10 @@ function getAlignmentsFromGrimoire(game: GameWithChars): Alignment[] {
     const token = findPlayerToken(page, game);
     const alignment = alignmentFromToken(token);
     if (alignment) {
+      if (!alignments.length) {
+        const from = setupSwitchFrom(token?.role, alignment);
+        if (from) alignments.push(from);
+      }
       alignments.push(alignment);
     }
   }
@@ -546,6 +575,10 @@ function getCharacterAlignments(game: GameWithChars): Alignment[] {
 
     const alignment = character.alignment as Alignment;
     if (alignment === "GOOD" || alignment === "EVIL") {
+      if (!alignments.length) {
+        const from = setupSwitchFrom(character.role, alignment);
+        if (from) alignments.push(from);
+      }
       alignments.push(alignment);
     }
   }
@@ -553,7 +586,53 @@ function getCharacterAlignments(game: GameWithChars): Alignment[] {
   return alignments;
 }
 
+/**
+ * The player's alignments through a game from its grimoire events: the
+ * alignment on the first page they're on, then every later alignment change.
+ * Starting on the other side of their character (an evil Townsfolk from the
+ * Bounty Hunter) counts as a switch at setup. Returns null when the game has no
+ * events or the player has no seat, so the caller falls back to the pages.
+ */
+function getAlignmentsFromEvents(game: GameWithChars): Alignment[] | null {
+  const events = game.grimoire_events ?? [];
+  const pages = game.grimoire ?? [];
+  if (!events.length || !pages.length) return null;
+
+  let firstPage = -1;
+  let start: Alignment = null;
+  let setupFrom: Alignment = null;
+  const participantIds = new Set<string>();
+  pages.forEach((page, pageIndex) => {
+    const token = findPlayerToken(page, game);
+    if (!token) return;
+    if (token.grimoire_participant_id) participantIds.add(token.grimoire_participant_id);
+    if (firstPage === -1) {
+      firstPage = pageIndex;
+      start = alignmentFromToken(token);
+      setupFrom = setupSwitchFrom(token.role, start);
+    }
+  });
+  if (firstPage === -1 || !participantIds.size || !start) return null;
+
+  const changes = events
+    .filter(
+      (event) =>
+        event.event_type === "ALIGNMENT_CHANGE" &&
+        event.grimoire_page > firstPage &&
+        !!event.participant_id &&
+        participantIds.has(event.participant_id) &&
+        (event.new_alignment === "GOOD" || event.new_alignment === "EVIL")
+    )
+    .sort((a, b) => a.grimoire_page - b.grimoire_page)
+    .map((event) => event.new_alignment as Alignment);
+
+  return setupFrom ? [setupFrom, start, ...changes] : [start, ...changes];
+}
+
 function getAlignmentTimeline(game: GameWithChars): Alignment[] {
+  const fromEvents = getAlignmentsFromEvents(game);
+  if (fromEvents) return fromEvents;
+
   const fromGrimoire = getAlignmentsFromGrimoire(game);
   if (fromGrimoire.length) return fromGrimoire;
 

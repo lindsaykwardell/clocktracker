@@ -761,15 +761,27 @@ export function createGrimoireEventEngine(context: GrimoireEventEngineContext) {
             token.alignment &&
             token.alignment !== initialAlignment
           ) {
+            // A "Changed" or "Turns Evil" reminder on the seat says who did it
+            // (a Bounty Hunter's evil Townsfolk), as on later pages.
+            const setupReminder = findReminderByNames(token.reminders, [
+              "Changed",
+              "Turns Evil",
+            ]);
+            const setupSource = enforceSelfScopedChangedSource(
+              setupReminder
+                ? resolveChangedReminderSource(setupReminder, pageIndex, orderedTokens)
+                : null,
+              token.role_id
+            );
             expected.set(expectedKey(pageIndex, participantId, "alignment"), {
               grimoire_page: pageIndex,
               participant_id: participantId,
               event_type: GrimoireEventType.ALIGNMENT_CHANGE,
               status_source: null,
-              by_participant_id: null,
+              by_participant_id: setupSource?.by_participant_id ?? null,
               player_name: token.player_name || "",
               role_id: token.role_id ?? null,
-              by_role_id: null,
+              by_role_id: setupSource?.by_role_id ?? null,
               old_role_id: oldRoleId,
               new_role_id: newRoleId,
               old_alignment: initialAlignment,
@@ -850,7 +862,13 @@ export function createGrimoireEventEngine(context: GrimoireEventEngineContext) {
             });
           }
 
-          if (token.alignment !== previousToken.alignment) {
+          // An empty seat on the previous page has no side to switch from: a
+          // traveller joining later, or a character filled in late, isn't a switch.
+          if (
+            !!previousToken.role_id &&
+            !!token.role_id &&
+            token.alignment !== previousToken.alignment
+          ) {
             expected.set(expectedKey(pageIndex, participantId, "alignment"), {
               grimoire_page: pageIndex,
               participant_id: participantId,

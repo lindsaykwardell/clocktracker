@@ -101,6 +101,18 @@
                           class="pointer-events-none clip-token"
                           hideRelated
                         />
+                        <!-- A switch on the first page (setup) has no earlier
+                             page: show the character on the side it started on. -->
+                        <Token
+                          v-else-if="
+                            event.event_type === GrimoireEventType.ALIGNMENT_CHANGE &&
+                            event.old_alignment
+                          "
+                          :character="grimoireEventSeatCharacter(event, event.old_alignment)"
+                          size="md"
+                          class="pointer-events-none clip-token"
+                          hideRelated
+                        />
                         <Token
                           v-else
                           :character="grimoireEventSeatCharacter(event)"
@@ -508,16 +520,19 @@ function grimoireEventDisplayName(event: {
 /**
  * Builds the current-page role token preview for an event row.
  */
-function grimoireEventSeatCharacter(event: {
-  grimoire_page: number;
-  participant_id: string;
-}) {
+function grimoireEventSeatCharacter(
+  event: {
+    grimoire_page: number;
+    participant_id: string;
+  },
+  alignment?: "GOOD" | "EVIL" | "NEUTRAL" | null
+) {
   const token = getTokenForParticipant(event.grimoire_page, event.participant_id);
   if (!token || !token.role) return blankCharacter();
 
   return {
     name: token.role?.name ?? "",
-    alignment: token.alignment ?? "NEUTRAL",
+    alignment: alignment ?? token.alignment ?? "NEUTRAL",
     role: {
       token_url: token.role.token_url,
       type: token.role.type,
