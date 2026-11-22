@@ -39,6 +39,12 @@
               </div>
             </div>
           </ComboboxOption>
+          <li
+            v-if="hiddenMatches > 0"
+            class="p-1 text-xs text-stone-500 dark:text-stone-400 italic"
+          >
+            {{ hiddenMatches }} more, keep typing to narrow it down
+          </li>
         </ComboboxOptions>
       </Transition>
     </Combobox>
@@ -83,16 +89,18 @@ const value = computed({
 });
 
 // The suggestions are filtered while the user pauses, not on every
-// keystroke: a short or empty name matches everyone, and filtering, sorting
-// and drawing that whole list on each key made typing (and backspacing) lag.
-// The user list is debounced too, because the grimoire's list changes with
+// keystroke, and at most MAX_SUGGESTIONS are drawn: a short name ("a")
+// matches hundreds of users, and drawing (or removing) that many options
+// blocked the page for up to a second, so typed letters showed late. The
+// user list is debounced too, because the grimoire's list changes with
 // every keystroke (it leaves out names already in a seat). The typed text
 // itself always updates at once.
 const SEARCH_DELAY_MS = 150;
+const MAX_SUGGESTIONS = 30;
 const search = refDebounced(value, SEARCH_DELAY_MS);
 const users = refDebounced(toRef(props, "users"), SEARCH_DELAY_MS);
 
-const matchingPeople = computed(() => {
+const allMatches = computed(() => {
   const query = search.value.toLowerCase();
   const matches =
     query === ""
@@ -102,11 +110,24 @@ const matchingPeople = computed(() => {
             user.display_name?.toLowerCase().includes(query) ||
             user.username.toLowerCase().includes(query)
         );
-  return naturalOrder(matches)
+  const sorted = naturalOrder(matches)
     .orderBy("asc")
-    .sort(["display_name", "username"])
-    .map((user) => ({ ...user, key: `user:${user.user_id ?? ""}:${user.username}` }));
+    .sort(["display_name", "username"]);
+  if (query === "") return sorted;
+  // Names that start with what was typed come first.
+  const startsWith = (user: (typeof sorted)[number]) =>
+    !!user.display_name?.toLowerCase().startsWith(query) ||
+    user.username.toLowerCase().startsWith(query);
+  return [...sorted.filter(startsWith), ...sorted.filter((user) => !startsWith(user))];
 });
+
+const matchingPeople = computed(() =>
+  allMatches.value
+    .slice(0, MAX_SUGGESTIONS)
+    .map((user) => ({ ...user, key: `user:${user.user_id ?? ""}:${user.username}` }))
+);
+
+const hiddenMatches = computed(() => allMatches.value.length - matchingPeople.value.length);
 
 const filteredPeople = computed(() => [
   { username: value.value, key: "typed" },

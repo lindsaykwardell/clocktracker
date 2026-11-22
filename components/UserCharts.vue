@@ -237,7 +237,8 @@
           class="w-full xl:w-3/4 xl:mx-auto"
         />
 
-        <div class="w-full xl:w-3/4 xl:mx-auto mt-4">
+        <!-- The stat cards are about playing, so only in the Player view. -->
+        <div v-if="mode === 'player'" class="w-full xl:w-3/4 xl:mx-auto mt-4">
           <div class="flex flex-col items-center gap-6">
             <div class="grid gap-2 md:gap-4 grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               <RoleStatCard
