@@ -58,6 +58,7 @@ const HINTS: [roleId: string, reminder: string, hint: string][] = [
   ["professor", "Alive", "Place on the dead player the Professor brought back to life. Records the revive, caused by the Professor."],
   ["professor", "No Ability", "Place on the Professor once they have used their ability. Records that they used it."],
   ["ravenkeeper", "Chosen", "Place on the player the Ravenkeeper chose after dying. Records that the Ravenkeeper learned their character."],
+  ["sage", "Know", "Place on the two players the Sage was shown after the Demon killed them, one of them the Demon. Records what the Sage learned."],
   ["sailor", "Drunk", "Place on the player the Sailor chose who got drunk. Records that the Sailor made them drunk."],
   ["sailor", "Saved", "Place on the Sailor only when something tried to kill them, an execution included, and they survived. Records that the Sailor survived."],
   ["seamstress", "No Ability", "Place on the Seamstress once they have used their ability. Records that they used it."],

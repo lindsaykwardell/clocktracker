@@ -187,6 +187,7 @@ const EVENT_GROUPS: RuleGroup[] = [
   group({ reminder: "Yes", eventType: "OTHER" }, [["fortune_teller", "until_day"]]),
   group({ reminder: "Know", eventType: "OTHER" }, ["choirboy"]),
   group({ reminder: "Know", eventType: "OTHER" }, ["puzzlemaster"]),
+  group({ reminder: "Know", eventType: "OTHER" }, ["sage"]),
   group({ reminder: "Outsider", eventType: "OTHER" }, ["librarian"]),
   group({ reminder: "Townsfolk", eventType: "OTHER" }, ["washerwoman"]),
   group({ reminder: "Minion", eventType: "OTHER" }, ["investigator"]),

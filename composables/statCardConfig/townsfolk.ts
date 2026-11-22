@@ -2601,6 +2601,54 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `No Ravenkeeper has chosen the Demon after dying yet.`,
   },
   {
+    // "Know" goes on both players the Sage was shown; only the one on the
+    // Demon counts, so a drunk or poisoned Sage shown two others doesn't.
+    id: "sage_demon_reveals",
+    category: "role",
+    scope: "as_role",
+    globalDataNeeds: ["grimoire_events", "grimoire_state"],
+    roleIds: ["sage"],
+    script: "snv",
+    sao: 13,
+    source: "grimoire_event",
+    label: "Final Footnote",
+    getCount: ({ games, roleId }) =>
+      games.reduce((total, game) => {
+        if (!roleId || game.ignore_for_stats) return total;
+
+        return (
+          total +
+          game.grimoire_events.filter((event) => {
+            if (
+              event.by_role_id !== roleId ||
+              event.event_type !== GrimoireEventType.OTHER ||
+              event.status_source !== "Know"
+            ) {
+              return false;
+            }
+
+            const currentToken = getEventCurrentToken(game, event);
+            const previousToken = getEventPreviousToken(game, event);
+
+            return (
+              currentToken?.role?.type === "DEMON" ||
+              previousToken?.role?.type === "DEMON"
+            );
+          }).length
+        );
+      }, 0),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Sage, you've been shown the Demon ${times(count)} after it killed you.`
+          : `As the Sage, this player has been shown the Demon ${times(count)} after it killed them.`)
+        : `As the Sage, be shown the Demon after it kills you.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${times(count)}, a Sage has been shown the Demon after it killed them.`
+        : `No Sage has been shown the Demon after it killed them yet.`,
+  },
+  {
     id: "sage_demon_kills_received",
     category: "role",
     roleIds: ["sage"],
