@@ -16,6 +16,25 @@ import {
 } from "./shared";
 import type { RoleStatCardDefinition } from "./shared";
 
+/**
+ * A game this player's ability ended ("Look What I Can Do!"): a Slayer's shot,
+ * a Saint or Vortox win, an Assassin killing down to two. A Demon's ordinary
+ * night kill down to two players is its basic job, so it doesn't count; a
+ * Demon ending the game another way (Vortox, Leviathan) does.
+ */
+function endedByNotableAbility(game: {
+  end_trigger: string;
+  end_trigger_cause?: string | null;
+  end_trigger_role?: { type?: string | null } | null;
+}) {
+  if (game.end_trigger === GameEndTrigger.NOT_RECORDED) return false;
+  if (game.end_trigger_cause !== GameEndTriggerCause.ABILITY) return false;
+  return !(
+    game.end_trigger === GameEndTrigger.TWO_PLAYERS_LEFT_ALIVE &&
+    game.end_trigger_role?.type === "DEMON"
+  );
+}
+
 export const GENERAL_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   {
     id: "demon_kills_total",
@@ -122,25 +141,14 @@ export const GENERAL_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     source: "end_trigger",
     label: "Look What I Can Do!",
     getCount: ({ games }) =>
-      games.filter(
-        (game) =>
-          !game.ignore_for_stats &&
-          game.end_trigger !== GameEndTrigger.NOT_RECORDED &&
-          game.end_trigger_cause === GameEndTriggerCause.ABILITY
-      ).length,
+      games.filter((game) => !game.ignore_for_stats && endedByNotableAbility(game)).length,
     getSentence: ({ count, isMe }) =>
       count > 0
-        ? `${isMe ? "You have" : "This player has"} ended ${count} game${pluralize(count)} through an additional win condition.`
-        : `End a game through an additional win condition.`,
+        ? `${isMe ? "You have" : "This player has"} ended ${count} game${pluralize(count)} with ${isMe ? "your" : "their"} ability.`
+        : `End a game with your ability.`,
     getSubtitle: ({ games }) =>
-      getMostCommonEndTriggerRoleSubtitle(games, (game) =>
-        game.end_trigger !== GameEndTrigger.NOT_RECORDED &&
-        game.end_trigger_cause === GameEndTriggerCause.ABILITY
-      ),
+      getMostCommonEndTriggerRoleSubtitle(games, endedByNotableAbility),
     getDisplayRole: ({ games }) =>
-      getMostCommonEndTriggerRole(games, (game) =>
-        game.end_trigger !== GameEndTrigger.NOT_RECORDED &&
-        game.end_trigger_cause === GameEndTriggerCause.ABILITY
-      ),
+      getMostCommonEndTriggerRole(games, endedByNotableAbility),
   },
 ];

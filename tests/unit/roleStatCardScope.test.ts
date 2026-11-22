@@ -226,6 +226,30 @@ test("general end-trigger cards only count games this player ended", () => {
   assert.equal(count("stef"), 1);
 });
 
+test("Look What I Can Do! skips a Demon's ordinary kill down to two players", () => {
+  const ended = (
+    endTrigger: string,
+    role: { id: string; name: string; type: string }
+  ) => ({
+    ...endedGame("steven"),
+    end_trigger: endTrigger,
+    end_trigger_role: { ...role, token_url: "" },
+  });
+  const games = [
+    ended("NO_LIVING_DEMON", { id: "slayer", name: "Slayer", type: "TOWNSFOLK" }),
+    ended("TWO_PLAYERS_LEFT_ALIVE", { id: "imp", name: "Imp", type: "DEMON" }),
+    ended("TWO_PLAYERS_LEFT_ALIVE", { id: "assassin", name: "Assassin", type: "MINION" }),
+    ended("ADDITIONAL_WIN_CONDITION", { id: "vortox", name: "Vortox", type: "DEMON" }),
+  ] as any[];
+  const result = buildRoleStatCardResult(
+    generalCard("game_ending_abilities"),
+    games,
+    true,
+    "steven"
+  );
+  assert.equal(result.count, 3);
+});
+
 test("general event cards only count events this player caused", () => {
   const count = (username: string) =>
     buildRoleStatCardResult(generalCard("demon_kills_total"), [starpassGame], true, username)
