@@ -784,39 +784,18 @@
       </details>
     </fieldset>
     <fieldset class="border rounded border-stone-500 p-4 my-3">
-      <legend>Notes</legend>
+      <legend class="flex items-center gap-2">Notes <MarkdownHelp /></legend>
       <ExpandingTextarea
         v-if="!editingMultipleGames"
         v-model="game.notes"
-        class="block w-full border border-stone-500 rounded-md p-2 min-h-[10rem]"
+        class="block w-full border border-stone-500 rounded-md p-2"
+        rows="3"
       />
-      <label class="block py-2">
-        <span class="block">Add Tag</span>
-        <Input
-          type="text"
-          v-model="tagsInput"
-          @keydown.enter.prevent="addTag"
-          list="tags"
-          placeholder="Enter a tag, then press enter"
-        />
-        <datalist id="tags">
-          <option
-            v-for="tag in myTags.filter((tag) => !game.tags.includes(tag))"
-            :value="tag"
-          />
-        </datalist>
-      </label>
-      <div class="flex flex-wrap gap-2">
-        <Button
-          v-for="(tag, index) in game.tags"
-          @click.prevent="game.tags.splice(index, 1)"
-          size="sm"
-          removableTag
-          :title="`Remove ${tag}`"
-        >
-          {{ tag }}
-        </Button>
-      </div>
+      <TagInput
+        class="mt-4"
+        v-model="game.tags"
+        :availableTags="myTags"
+      />
     </fieldset>
     <fieldset class="border rounded border-stone-500 p-4 my-3">
       <legend>External Links</legend>
@@ -927,7 +906,8 @@
       </p>
     </template>
 
-    <div class="text-black dark:text-stone-200">
+    <!-- The dialog is dark in both themes. -->
+    <div class="text-stone-200">
       <div v-if="loadingSnapshots" class="text-center py-8">
         Loading snapshots...
       </div>
@@ -938,25 +918,45 @@
         No snapshots available for this game.
       </div>
       <div v-else class="flex flex-col gap-3 max-h-[60vh] overflow-y-auto">
-        <button
+        <div
           v-for="snapshot in snapshots"
           :key="snapshot.id"
-          type="button"
-          class="w-full text-left border border-stone-500 rounded p-3 hover:bg-stone-300/50 dark:hover:bg-stone-700/50 transition"
-          @click="restoreSnapshot(snapshot)"
+          class="border border-stone-300 dark:border-stone-600 rounded p-3"
         >
-          <div class="font-semibold">
-            {{ dayjs(snapshot.created_at).format("MMMM D, YYYY HH:mm:ss") }}
+          <div class="flex justify-between items-start gap-2">
+            <div class="flex-1">
+              <div class="font-bold text-sm">
+                {{ dayjs(snapshot.created_at).format("MMMM D, YYYY HH:mm:ss") }}
+              </div>
+              <div class="text-xs text-stone-400 mt-1">
+                {{ snapshot.snapshot.pages.length }} page{{
+                  snapshot.snapshot.pages.length === 1 ? "" : "s"
+                }}, {{ snapshot.snapshot.pages[0]?.tokens.length || 0 }} seat{{
+                  (snapshot.snapshot.pages[0]?.tokens.length || 0) === 1 ? "" : "s"
+                }}
+              </div>
+              <!-- Who sat where on each page, to tell the versions apart. -->
+              <div v-for="(page, pi) in snapshot.snapshot.pages" :key="pi" class="mt-2">
+                <div v-if="snapshot.snapshot.pages.length > 1" class="text-xs text-stone-400 mb-1">
+                  {{ page.title || `Page ${pi + 1}` }}
+                </div>
+                <div class="flex flex-wrap gap-1">
+                  <span
+                    v-for="(token, i) in page.tokens"
+                    :key="i"
+                    class="text-xs bg-stone-700 rounded px-2 py-0.5"
+                  >
+                    {{ token.player_name || "Empty seat" }}
+                    <template v-if="token.role_name"> — {{ token.role_name }}</template>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <Button type="button" size="sm" @click="restoreSnapshot(snapshot)">
+              Restore
+            </Button>
           </div>
-          <div class="text-sm text-stone-500">
-            {{ snapshot.snapshot.pages.length }} page{{
-              snapshot.snapshot.pages.length === 1 ? "" : "s"
-            }}
-            , {{ snapshot.snapshot.pages[0]?.tokens.length || 0 }} seat{{
-              (snapshot.snapshot.pages[0]?.tokens.length || 0) === 1 ? "" : "s"
-            }}
-          </div>
-        </button>
+        </div>
       </div>
     </div>
   </Dialog>
@@ -1158,6 +1158,7 @@ const me = useMe();
 const games = useGames();
 const friends = useFriends();
 const { isBaseScript, fetchScriptVersions, scriptBgClasses } = useScripts();
+const { pickImages } = useImagePicker();
 const allRoles = useRoles();
 const route = useRoute();
 
@@ -1257,7 +1258,6 @@ const draggedSeatOrder = ref<number | null>(null);
 const dragInsertIndex = ref<number | null>(null);
 const dragTargetOrder = ref<number | null>(null);
 const dragTargetAfter = ref(false);
-const tagsInput = ref("");
 const bggIdInput = ref("");
 const bggIdIsValid = ref(true);
 const customBackground = ref<string | null>(null);
@@ -1871,13 +1871,6 @@ function addDemonBluff() {
   );
 }
 
-function addTag() {
-  if (tagsInput.value) {
-    props.game.tags.push(tagsInput.value);
-    tagsInput.value = "";
-  }
-}
-
 function removeCharacter(i: number) {
   props.game.player_characters.splice(i, 1);
 }
@@ -1907,20 +1900,9 @@ function removeFabled(i: number) {
   props.game.fabled.splice(i, 1);
 }
 
-function uploadFile() {
-  const input = document.createElement("input");
-  input.type = "file";
-  input.multiple = true;
-  input.accept = "image/jpg, image/jpeg, image/png";
-  input.onchange = selectFiles;
-  input.click();
-}
-
-async function selectFiles(event: Event) {
-  const uploadedFiles = (event.target as HTMLInputElement).files;
-  if (!uploadedFiles) return;
-
-  const files = Array.from(uploadedFiles);
+async function uploadFile() {
+  const files = await pickImages({ multiple: true });
+  if (files.length === 0) return;
 
   const formData = new FormData();
   files.forEach((file) => {
