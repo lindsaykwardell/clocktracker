@@ -8,7 +8,9 @@
         <template v-else-if="error">
           Error loading stats.
         </template>
-        <template v-else-if="!stats?.games?.length || stats?.players.length === 0 || !filteredGames.length">
+        <!-- Only when the community has nothing at all: when the filters match no
+             games, the filter bar has to stay so they can be removed again. -->
+        <template v-else-if="!stats?.games?.length || stats?.players.length === 0">
           No stats available.
         </template>
         <template v-else>
@@ -192,6 +194,10 @@
             </div>
           </div>
 
+          <p v-if="!filteredGames.length" class="text-center">
+            No games match these filters.
+          </p>
+
           <section v-if="filteredGames.length">
             <h2 class="font-sorts text-center text-xl lg:text-2xl mb-2 lg:mb-4 col-span-8">
               Community Standouts
@@ -219,7 +225,7 @@
             </div>
           </section>
 
-          <section>
+          <section v-if="filteredGames.length">
             <StatsCommunityHighlights
               :players="visiblePlayers"
               :games="(filteredGames as any)"
@@ -228,7 +234,7 @@
             />
           </section>
           
-          <section>
+          <section v-if="filteredGames.length">
             <StatsCommunityOutsiderHighlights 
               :players="visiblePlayers"
               class="w-full xl:w-3/4 xl:mx-auto"
@@ -954,7 +960,8 @@ function resolvePlayerIdentity(
     return {
       key: `user:${member.user_id}`,
       user_id: member.user_id,
-      username: member.display_name || member.username,
+      username: member.username,
+      display_name: member.display_name || member.username,
       avatar: member.avatar ?? null,
     };
   }
