@@ -61,6 +61,20 @@ test("a Matron in the game, or a seat added, is not a shift", () => {
   assert.deepEqual(seatsShifted.check(travellerJoined), []);
 });
 
+test("Musical Chairs games may move seats, but other checks still run", () => {
+  const game = {
+    script: "Musical Chairs v2",
+    grimoire: [
+      page(seat(0, "Ann", "a"), seat(1, "Bob", "b"), seat(2, "Cid", "c")),
+      page(seat(0, "Bob", "b"), seat(1, "Ann", "a"), seat(2, "Cid", "c")),
+    ],
+  };
+  assert.deepEqual(seatsShifted.check(game), []);
+
+  const duplicate = { ...game, grimoire: [page(seat(0, "Ann"), seat(1, "Ann"))] };
+  assert.equal(duplicatePlayer.check(duplicate).length, 1);
+});
+
 test("a gap in the stored seat numbers is not a shift", () => {
   // Drawn the same: the grimoire places tokens by their sorted position.
   const game = {

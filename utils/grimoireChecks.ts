@@ -25,6 +25,7 @@ export type GrimoireCheckToken = {
 };
 
 export type GrimoireCheckGame = {
+  script?: string | null;
   grimoire: { tokens: GrimoireCheckToken[] }[];
 };
 
@@ -45,6 +46,16 @@ export type GrimoireCheckRule = {
 
 // Characters that legitimately move players to other seats.
 const SEAT_MOVING_ROLES = new Set(["matron"]);
+
+// Scripts where players move seats as part of the game (lowercase; matched
+// anywhere in the script name, so versions and suffixes still match).
+// Musical Chairs: players change seats at will.
+const SEAT_MOVING_SCRIPTS = ["musical chairs"];
+
+function isSeatMovingScript(script: string | null | undefined) {
+  const name = (script ?? "").toLowerCase();
+  return SEAT_MOVING_SCRIPTS.some((moving) => name.includes(moving));
+}
 
 function cleanName(name: string | null | undefined) {
   return (name ?? "").trim().replace(/^@/, "");
@@ -118,13 +129,13 @@ export const seatsShifted: GrimoireCheckRule = {
   id: "seats-shifted",
   label: "Seats shifted",
   description:
-    "A player sits on another seat on the next page, while the number of seats stayed the same and no Matron is in the game.",
+    "A player sits on another seat on the next page, while the number of seats stayed the same, no Matron is in the game and the script isn't Musical Chairs.",
   check(game) {
     const all = pages(game);
     const hasSeatMover = all.some((page) =>
       page.tokens.some((token) => token.role_id && SEAT_MOVING_ROLES.has(token.role_id))
     );
-    if (hasSeatMover) return [];
+    if (hasSeatMover || isSeatMovingScript(game.script)) return [];
 
     const findings: GrimoireCheckFinding[] = [];
     for (let i = 1; i < all.length; i++) {
