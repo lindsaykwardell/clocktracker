@@ -61,7 +61,7 @@ test("a Matron in the game, or a seat added, is not a shift", () => {
   assert.deepEqual(seatsShifted.check(travellerJoined), []);
 });
 
-test("Musical Chairs games may move seats, but other checks still run", () => {
+test("Musical Chairs games may move seats and names, but other checks still run", () => {
   const game = {
     script: "Musical Chairs v2",
     grimoire: [
@@ -70,6 +70,16 @@ test("Musical Chairs games may move seats, but other checks still run", () => {
     ],
   };
   assert.deepEqual(seatsShifted.check(game), []);
+
+  // A player leaving a seat whose character stays is not a name change there.
+  const leftSeat = {
+    ...game,
+    grimoire: [
+      page(seat(0, "Ann", "a"), seat(1, "", "b")),
+      page(seat(0, "", "a"), seat(1, "Ann", "b")),
+    ],
+  };
+  assert.deepEqual(nameChanged.check(leftSeat), []);
 
   const duplicate = { ...game, grimoire: [page(seat(0, "Ann"), seat(1, "Ann"))] };
   assert.equal(duplicatePlayer.check(duplicate).length, 1);

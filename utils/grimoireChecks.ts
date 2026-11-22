@@ -179,8 +179,11 @@ export const nameChanged: GrimoireCheckRule = {
   id: "name-changed",
   label: "Name changed",
   description:
-    "A seat keeps its character and alignment on the next page, but the name on it is different, removed, or only linked from that page on.",
+    "A seat keeps its character and alignment on the next page, but the name on it is different, removed, or only linked from that page on. Not for Musical Chairs.",
   check(game) {
+    // In Musical Chairs players move between seats, so names come and go on
+    // a seat while its character stays.
+    if (isSeatMovingScript(game.script)) return [];
     const all = pages(game);
     const findings: GrimoireCheckFinding[] = [];
     for (let i = 1; i < all.length; i++) {
