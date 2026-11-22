@@ -2929,6 +2929,12 @@ watch(
 
 onMounted(async () => {
   friends.fetchCommunityMembers();
+  // The seat name suggestions need the friends list. Other pages load it as a
+  // side effect, so opening the editor directly (refresh, bookmark) left it
+  // empty and friends outside your communities couldn't be found.
+  if (friends.friends.status === Status.IDLE) {
+    friends.fetchFriends();
+  }
   if (me.value.status === Status.SUCCESS) {
     games.fetchPlayerGames(me.value.data.username);
   }
