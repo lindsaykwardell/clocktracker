@@ -338,12 +338,12 @@ const chartData = computed(() => {
           (game) =>
             !!game.player_count &&
             game.player_count > 6 &&
-            game.player_count <= 10,
+            game.player_count <= 9,
           (game) =>
             !!game.player_count &&
-            game.player_count > 10 &&
-            game.player_count <= 13,
-          (game) => !!game.player_count && game.player_count > 13,
+            game.player_count > 9 &&
+            game.player_count <= 12,
+          (game) => !!game.player_count && game.player_count > 12,
         ],
         [chartColors.teensy, chartColors.small, chartColors.medium, chartColors.large]
       ) ?? [
@@ -666,7 +666,7 @@ function getPivot(
           (game) =>
             game.player_count &&
             game.player_count > 6 &&
-            game.player_count <= 10 &&
+            game.player_count <= 9 &&
             validator(game)
         ).length
     );
@@ -675,8 +675,8 @@ function getPivot(
         games.filter(
           (game) =>
             game.player_count &&
-            game.player_count > 10 &&
-            game.player_count <= 13 &&
+            game.player_count > 9 &&
+            game.player_count <= 12 &&
             validator(game)
         ).length
     );
@@ -684,7 +684,7 @@ function getPivot(
       (validator) =>
         games.filter(
           (game) =>
-            game.player_count && game.player_count > 13 && validator(game)
+            game.player_count && game.player_count > 12 && validator(game)
         ).length
     );
     const total = [...teensy, ...small, ...medium, ...large].reduce(
