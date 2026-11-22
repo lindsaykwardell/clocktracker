@@ -260,23 +260,30 @@
         <div class="flex items-center gap-2">
           <label class="flex items-center gap-2">
             <Toggle v-model="grimoirePreferences.dayNight.value" size="sm" />
-            <span class="whitespace-nowrap">Day/Night pages</span>
+            <span class="whitespace-nowrap">Day/Night cycle</span>
           </label>
-          <InfoHint label="About Day/Night pages">
+          <InfoHint label="About the Day/Night cycle">
             <p>The grimoire starts on a Night 1 page, and "Add page" goes from
             night to day and back, with automatic titles (Night 1, Day 1,
             Night 2, ...).</p>
-            <p>Off: the grimoire uses untyped pages by default (legacy
-            behavior). You can still set a page's type by hand.</p>
+            <p>Off: no day/night cycle. New pages are untyped (legacy
+            behavior), and reminders aren't auto-updated. You can still set a
+            page's type by hand.</p>
           </InfoHint>
         </div>
         <div class="flex items-center gap-2">
-          <label class="flex items-center gap-2">
+          <!-- Needs the day/night cycle: without it "Add page" never starts a
+               new night or day, so it's greyed out (its setting is kept). -->
+          <label
+            class="flex items-center gap-2"
+            :class="{ 'opacity-50 pointer-events-none': !grimoirePreferences.dayNight.value }"
+            :aria-disabled="!grimoirePreferences.dayNight.value"
+          >
             <Toggle v-model="grimoirePreferences.autoReminders.value" size="sm" />
             <span class="whitespace-nowrap">Auto-update reminders</span>
           </label>
           <InfoHint label="About auto-update reminders">
-            <p>When Day/Night pages is enabled and "Add page" starts a new night
+            <p>Needs the Day/Night cycle. When "Add page" starts a new night
             or day, reminders whose effect is over are removed (a Poisoner's
             Poisoned at the next night, a Monk's Safe at dawn) and numbered
             tokens are counted up/down (Courtier's Drunk, Leviathan's Day 1, 2,
@@ -992,7 +999,7 @@ import {
 const grimoirePreferences = useGrimoirePreferences();
 provide(SHOW_TRACKING_REMINDERS_KEY, grimoirePreferences.showTracking);
 
-// Switching Day/Night pages while the grimoire is still a single empty page
+// Switching the Day/Night cycle while the grimoire is still a single empty page
 // (a new game) switches that page too.
 watch(grimoirePreferences.dayNight, (dayNight) => {
   const pages = props.game.grimoire;
@@ -2427,7 +2434,13 @@ function defaultGrimoirePageType() {
   return grimoirePreferences.dayNight.value ? ("NIGHT" as const) : ("NONE" as const);
 }
 
+/**
+ * The type of the page "Add page" makes. Only with the Day/Night cycle on does it
+ * go from night to day and back; off, new pages are untyped (no cycle, so no
+ * reminder updates either), even after a page typed by hand.
+ */
 function getNextPageTypeFromCurrent(currentType: "NONE" | "NIGHT" | "DAY") {
+  if (!grimoirePreferences.dayNight.value) return "NONE" as const;
   if (currentType === "NIGHT") return "DAY" as const;
   if (currentType === "DAY") return "NIGHT" as const;
   return "NONE" as const;
