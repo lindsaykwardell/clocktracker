@@ -132,7 +132,10 @@ const allRolesLoaded = computed(() => {
 });
 
 type RoleStats = {
+  /** Games where the character was on any grimoire page (or held at any point). */
   plays: number;
+  /** Games where it was still in play at the end: only these get a W/L. */
+  endedAs: number;
   wins: number;
   losses: number;
   topPlayer?: string;
@@ -183,6 +186,19 @@ const roleStats = computed<Map<string, RoleStats>>(() => {
     const goodWins = game.win_v2 === WinStatus_V2.GOOD_WINS;
     const evilWins = game.win_v2 === WinStatus_V2.EVIL_WINS;
 
+    // Every character on any page counts as played; the last page's
+    // characters are the ones that ended the game and get its result.
+    const playedTokenRoles = new Set<string>();
+    for (const page of game.grimoire ?? []) {
+      for (const token of page.tokens ?? []) {
+        const roleName = token.role?.name;
+        if (!roleName) continue;
+        if (token.role?.type === "FABLED" || token.role?.type === "LORIC") continue;
+        const roleId = roleNameToId.value.get(roleName.toLowerCase());
+        if (roleId) playedTokenRoles.add(roleId);
+      }
+    }
+
     const lastPage = game.grimoire?.[game.grimoire.length - 1];
     const tokenRoles = new Map<
       string,
@@ -218,16 +234,21 @@ const roleStats = computed<Map<string, RoleStats>>(() => {
 
     // Prefer grimoire tokens, fall back to player_characters
     if (tokenRoles.size) {
-      for (const [roleId, info] of tokenRoles.entries()) {
+      for (const roleId of playedTokenRoles) {
         if (!stats.has(roleId)) {
           stats.set(roleId, {
             plays: 0,
+            endedAs: 0,
             wins: 0,
             losses: 0,
           });
         }
+        stats.get(roleId)!.plays += 1;
+      }
+
+      for (const [roleId, info] of tokenRoles.entries()) {
         const roleStat = stats.get(roleId)!;
-        roleStat.plays += 1;
+        roleStat.endedAs += 1;
 
         const alignment = info.alignment ?? info.initial;
         const isGood = alignment === "GOOD";
@@ -251,6 +272,7 @@ const roleStats = computed<Map<string, RoleStats>>(() => {
         if (!stats.has(roleId)) {
           stats.set(roleId, {
             plays: 0,
+            endedAs: 0,
             wins: 0,
             losses: 0,
           });
@@ -260,6 +282,7 @@ const roleStats = computed<Map<string, RoleStats>>(() => {
         roleStat.plays += 1;
 
         if (roleId !== finalRoleId) continue;
+        roleStat.endedAs += 1;
         if (alignment && (goodWins || evilWins)) {
           if ((isGood && goodWins) || (isEvil && evilWins)) {
             roleStat.wins += 1;
@@ -328,7 +351,7 @@ const roleTooltip = (role: { id: string; name: string }) => {
   }
 
   const topLine = stats.topPlayerHtml ? `<br>Most played by: ${stats.topPlayerHtml}` : "";
-  return `<strong>${role.name}</strong><br>Games: ${stats.plays}<br>W/L: ${stats.wins}-${stats.losses} (${formatPercent(stats.wins, stats.losses)})${topLine}`;
+  return `<strong>${role.name}</strong><br>In games: ${stats.plays}<br>At game end: ${stats.endedAs}<br>W/L: ${stats.wins}-${stats.losses} (${formatPercent(stats.wins, stats.losses)})${topLine}`;
 };
 
 /**

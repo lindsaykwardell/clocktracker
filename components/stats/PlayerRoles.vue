@@ -125,7 +125,10 @@ const allRolesLoaded = computed(() => {
 });
 
 type RoleStats = {
+  /** Games where you held the character at some point. */
   plays: number;
+  /** Games where it was your character at the end: only these get a W/L. */
+  endedAs: number;
   wins: number;
   losses: number;
 };
@@ -179,6 +182,7 @@ const roleStats = computed<Map<string, RoleStats>>(() => {
       if (!stats.has(roleId)) {
         stats.set(roleId, {
           plays: 0,
+          endedAs: 0,
           wins: 0,
           losses: 0,
         });
@@ -188,6 +192,7 @@ const roleStats = computed<Map<string, RoleStats>>(() => {
       roleStat.plays += 1;
 
       if (roleId !== finalRoleId) continue;
+      roleStat.endedAs += 1;
       if (alignment && (goodWins || evilWins)) {
         if ((isGood && goodWins) || (isEvil && evilWins)) {
           roleStat.wins += 1;
@@ -223,7 +228,7 @@ const roleTooltip = (role: { id: string; name: string }) => {
   }
 
   else {
-    return `<strong>${role.name}</strong><br>Games: ${stats.plays}<br>W/L: ${stats.wins}-${stats.losses} (${formatPercent(stats.wins, stats.losses)})`;
+    return `<strong>${role.name}</strong><br>Played as: ${stats.plays}<br>Finished as: ${stats.endedAs}<br>W/L: ${stats.wins}-${stats.losses} (${formatPercent(stats.wins, stats.losses)})`;
   }
 };
 
