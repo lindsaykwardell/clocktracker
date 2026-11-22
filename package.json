@@ -8,6 +8,7 @@
     "fixtures:grimoire:seed": "npx tsx prisma/seed-grimoire-fixtures.js",
     "fixtures:grimoire:cleanup": "npx tsx prisma/cleanup-grimoire-fixtures.js",
     "roles:import": "npx tsx prisma/import-roles.js",
+    "images:roles": "node scripts/role-images/resize.mjs",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare && prisma generate && node scripts/patch-prisma.js",

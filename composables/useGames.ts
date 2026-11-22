@@ -747,9 +747,9 @@ export const useGames = defineStore("games", {
 export function displayWinIcon(game: GameRecord, showTeamWin: boolean = false) {
   return game.is_storyteller || showTeamWin
     ? game.win_v2 === WinStatus_V2.GOOD_WINS
-      ? "/img/role/good.webp"
+      ? "/img/role/good_thumb.webp"
       : game.win_v2 === WinStatus_V2.EVIL_WINS
-      ? "/img/role/evil.webp"
+      ? "/img/role/evil_thumb.webp"
       : "/1x1.png"
     : game.player_characters.length > 0
     ? (game.win_v2 === WinStatus_V2.GOOD_WINS &&

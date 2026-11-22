@@ -154,13 +154,18 @@ export async function saveCustomScript(
           return role.image[0]!;
         }
       }
-      if (initial_alignment === Alignment.GOOD) {
-        return "/img/role/good.webp";
-      } else if (initial_alignment === Alignment.EVIL) {
-        return "/img/role/evil.webp";
-      }
-
-      return "/img/default.png";
+      // No image: the official generic art for the character's team (it has
+      // good and evil versions, like the official characters).
+      const generic: Record<RoleType, string> = {
+        [RoleType.TOWNSFOLK]: "townsfolk",
+        [RoleType.OUTSIDER]: "outsider",
+        [RoleType.MINION]: "minion",
+        [RoleType.DEMON]: "demon",
+        [RoleType.TRAVELER]: "traveller",
+        [RoleType.FABLED]: "fabled",
+        [RoleType.LORIC]: "loric",
+      };
+      return `/img/role/${generic[role_type] ?? "custom"}.webp`;
     })();
     const alternate_token_urls = (() => {
       if (role.image && role.image.length > 0) {

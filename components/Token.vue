@@ -333,10 +333,10 @@ const image = computed(() => {
     return base;
   }
   if (props.character?.alignment === "GOOD") {
-    return "/img/role/good.webp";
+    return "/img/role/good_thumb.webp";
   }
   if (props.character?.alignment === "EVIL") {
-    return "/img/role/evil.webp";
+    return "/img/role/evil_thumb.webp";
   }
 });
 
@@ -354,19 +354,19 @@ const relatedImage = computed(() => {
     return derivedRelated;
   }
   if (props.character?.alignment === "GOOD") {
-    return "/img/role/good.webp";
+    return "/img/role/good_thumb.webp";
   }
   if (props.character?.alignment === "EVIL") {
-    return "/img/role/evil.webp";
+    return "/img/role/evil_thumb.webp";
   }
 });
 
 const alignmentImage = computed(() => {
   if (props.character?.alignment === "GOOD") {
-    return "/img/role/good.webp";
+    return "/img/role/good_thumb.webp";
   }
   if (props.character?.alignment === "EVIL") {
-    return "/img/role/evil.webp";
+    return "/img/role/evil_thumb.webp";
   }
   else {
     return "/1x1.png";

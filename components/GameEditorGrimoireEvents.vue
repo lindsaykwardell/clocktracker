@@ -552,9 +552,9 @@ function grimoireEventSeatAlignmentCharacter(event: {
   const alignment = token?.alignment ?? "NEUTRAL";
   const tokenUrl =
     alignment === "GOOD"
-      ? "/img/role/good.webp"
+      ? "/img/role/good_thumb.webp"
       : alignment === "EVIL"
-        ? "/img/role/evil.webp"
+        ? "/img/role/evil_thumb.webp"
         : "/1x1.png";
   return {
     name:
@@ -619,9 +619,9 @@ function grimoireEventPreviousAlignmentCharacter(event: {
   const alignment = token?.alignment ?? "NEUTRAL";
   const tokenUrl =
     alignment === "GOOD"
-      ? "/img/role/good.webp"
+      ? "/img/role/good_thumb.webp"
       : alignment === "EVIL"
-        ? "/img/role/evil.webp"
+        ? "/img/role/evil_thumb.webp"
         : "/1x1.png";
   return {
     name:
