@@ -375,6 +375,16 @@
                 </div>
               </slot>
               <Button
+                v-if="statsDebug.canDebug.value"
+                @click="showGrimoireCheck = true"
+                color="positive"
+                variant="soft"
+                icon="bug"
+                title="Admins only: list games whose grimoire looks odd (moved seats, changed names)"
+              >
+                Debug
+              </Button>
+              <Button
                 @click="gameView = 'grid'"
                 :active="gameView === 'grid'"
                 color="primary"
@@ -556,6 +566,11 @@
           </div>
         </div>
       </section>
+      <GrimoireCheckDialog
+        v-if="statsDebug.canDebug.value"
+        v-model:visible="showGrimoireCheck"
+        :games="games.data"
+      />
     </template>
     <div v-else class="flex flex-col items-center gap-6">
       <slot name="no-content">
@@ -819,6 +834,10 @@ watchEffect(() => {
     selectedPlayer.value = null;
   }
 });
+
+// Admins: a check for grimoires that look wrong (see utils/grimoireChecks.ts).
+const statsDebug = useStatsDebug();
+const showGrimoireCheck = ref(false);
 
 const props = defineProps<{
   player: {

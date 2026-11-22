@@ -13,6 +13,7 @@ import IconBgg from "~/components/icon/Bgg.vue";
 import IconBluesky from "~/components/icon/Bluesky.vue";
 import IconBook from "~/components/icon/Book.vue";
 import IconBraces from "~/components/icon/Braces.vue";
+import IconBug from "~/components/icon/Bug.vue";
 import IconCalenderPlus from "~/components/icon/CalenderPlus.vue";
 import IconChair from "~/components/icon/Chair.vue";
 import IconCheck from "~/components/icon/Check.vue";
@@ -92,6 +93,7 @@ export const uiIcons = {
   bgg: IconBgg,
   bluesky: IconBluesky,
   book: IconBook,
+  bug: IconBug,
   "calender-plus": IconCalenderPlus,
   chair: IconChair,
   check: IconCheck,
