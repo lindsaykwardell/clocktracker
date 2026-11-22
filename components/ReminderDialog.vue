@@ -1,28 +1,45 @@
 <template>
-  <Dialog v-model:visible="show" slze="lg">
+  <Dialog v-model:visible="show" size="lg">
     <template #title>
-      <div class="flex flex-col md:flex-row w-full gap-2">
+      <!-- md:-mt-2: the dialog's close button sits higher (p-2) than the
+           title (p-4); this centres the title row on it. -->
+      <div class="flex flex-col md:flex-row md:items-center md:-mt-2 w-full gap-2">
         <h2 class="flex-grow text-2xl font-bold font-sorts">
           Select a Reminder
         </h2>
-      </div>
-      <div class="flex flex-wrap items-center justify-between gap-x-8 gap-y-2">
-        <div class="flex flex-wrap gap-x-8 gap-y-2">
-          <label class="inline-flex items-center gap-2">
-            <input v-model="showLegacyReminders" type="checkbox" />
-            <span class="text-sm">Show legacy reminders</span>
-          </label>
-        </div>
         <form @submit.prevent="selectFirstMatchingReminder">
           <input
             v-model="reminderFilter"
             ref="reminderFilterRef"
             type="search"
             placeholder="Filter reminders"
-            class="p-2 border border-gray-300 rounded-md text-black"
-            aria-label="Filter reminders by role or reminder"
+            class="w-full md:w-56 h-[2.5rem] p-2 rounded-md border border-stone-500 bg-stone-600 text-lg text-white placeholder:text-stone-300"
+            aria-label="Filter reminders by character or reminder"
           />
         </form>
+      </div>
+      <div class="flex flex-col gap-1 pt-2">
+        <div class="flex flex-wrap gap-x-6 gap-y-1">
+          <label v-if="inPlayRoleIds && hasScript" class="inline-flex items-center gap-2">
+            <input v-model="inPlayOnly" type="checkbox" />
+            <span class="text-sm">In play only</span>
+          </label>
+          <label class="inline-flex items-center gap-2">
+            <input v-model="showFabledLoric" type="checkbox" />
+            <span class="text-sm">Show Fabled and Loric</span>
+          </label>
+          <label class="inline-flex items-center gap-2">
+            <input v-model="showLegacyReminders" type="checkbox" />
+            <span class="text-sm">Show legacy reminders</span>
+          </label>
+        </div>
+        <p
+          v-if="showTrackingReminders"
+          class="flex items-center gap-1 text-xs text-stone-400"
+        >
+          <IconUI id="crosshair" color="muted" size="sm" />
+          Records a game event. Hover, hold or tab to one to see how it's used.
+        </p>
       </div>
     </template>
     <template v-if="show">
@@ -31,7 +48,24 @@
           v-if="reminderFilter.trim() && reminderGroups.length === 0"
           class="text-center text-stone-400"
         >
-          No reminders match "{{ reminderFilter.trim() }}".
+          No reminders match "{{ reminderFilter.trim() }}"<template
+            v-if="hiddenByOptions"
+          >
+            with these options</template>.
+          <button
+            type="button"
+            class="block mx-auto mt-2 underline underline-offset-2 text-stone-200 hover:text-white"
+            @click="startCustomReminder(reminderFilter.trim())"
+          >
+            Add "{{ reminderFilter.trim() }}" as a custom reminder
+          </button>
+        </p>
+        <p
+          v-else-if="reminderGroups.length === 0"
+          class="text-center text-stone-400"
+        >
+          No reminders for the characters in play. Turn off "In play only" to
+          see the others.
         </p>
         <div
           v-for="group in reminderGroups"
@@ -51,10 +85,13 @@
               :key="reminder.id"
               type="button"
               class="flex flex-col items-center select-none [-webkit-touch-callout:none]"
+              :aria-label="reminderLabel(reminder)"
               :aria-describedby="
                 activeHint?.reminderId === reminder.id ? hintElementId : undefined
               "
               @click="onReminderClick(reminder)"
+              @focus="onReminderFocus($event, reminder)"
+              @blur="onReminderBlur"
               @pointerdown="onReminderPointerDown($event, reminder)"
               @pointermove="onReminderPointerMove"
               @pointerup="cancelHintTimer"
@@ -89,22 +126,28 @@
           Counted on the page where you add it. Leaving it on later pages adds nothing.
         </p>
       </div>
+      <div v-if="!customOpen" class="px-4 pb-4">
+        <Button
+          type="button"
+          size="sm"
+          color="primary"
+          icon="plus-lg"
+          @click="startCustomReminder()"
+        >
+          Custom reminder
+        </Button>
+      </div>
       <form
+        v-else
         class="flex flex-col gap-2 p-4"
-        @submit.prevent="
-          $emit('selectReminder', {
-            reminder: customReminder,
-            token_url: tokenUrl,
-            type: 'CUSTOM',
-          })
-        "
+        @submit.prevent="submitCustomReminder"
       >
         <label for="custom-reminder" class="text-lg font-bold">
           Custom Reminder
         </label>
-        <div class="flex items-center gap-4">
+        <div class="flex flex-wrap items-center gap-4">
           <Popover class="relative" v-slot="{ close }">
-            <PopoverButton>
+            <PopoverButton aria-label="Choose an icon">
               <Token
                 :character="{ role: { token_url: tokenUrl as string, type: '' } }"
                 size="reminder"
@@ -113,18 +156,26 @@
             </PopoverButton>
 
             <PopoverPanel
-              class="absolute z-10 bottom-0 max-h-[225px] w-[475px] overflow-y-scroll bg-stone-950 flex flex-row flex-wrap p-3"
+              class="absolute z-10 bottom-0 max-h-[225px] w-[min(475px,calc(100vw-3rem))] overflow-y-auto bg-stone-950 flex flex-row flex-wrap p-3"
             >
               <div>
-                <button type="button" @click="setTokenUrlAndClose('', close)">
+                <button
+                  type="button"
+                  aria-label="No icon"
+                  @click="setTokenUrlAndClose('', close)"
+                >
                   <Token
                     :character="{ role: { token_url: '', type: '' } }"
                     size="reminder"
                   />
                 </button>
               </div>
-              <div v-for="url in availableTokenUrls" :key="url">
-                <button type="button" @click="setTokenUrlAndClose(url, close)">
+              <div v-for="(url, index) in availableTokenUrls" :key="url">
+                <button
+                  type="button"
+                  :aria-label="`Icon ${index + 1}`"
+                  @click="setTokenUrlAndClose(url, close)"
+                >
                   <Token
                     :character="{ role: { token_url: url, type: '' } }"
                     size="reminder"
@@ -133,21 +184,28 @@
               </div>
             </PopoverPanel>
           </Popover>
-          <!-- @todo fix text color -->
-          <Input type="text" v-model="customReminder" />
-          <Button
-            type="submit"
-            :disabled="customReminder.length === 0"
-            @click="
-              $emit('selectReminder', {
-                reminder: customReminder,
-                token_url: tokenUrl,
-                type: 'CUSTOM',
-              })
-            "
-          >
-            Add Custom Reminder
-          </Button>
+          <input
+            id="custom-reminder"
+            ref="customReminderRef"
+            v-model="customReminder"
+            type="text"
+            required
+            class="flex-1 min-w-40 h-[2.5rem] p-2 rounded-md border border-stone-500 bg-stone-600 text-lg text-white placeholder:text-stone-300"
+          />
+          <!-- The form's submit is the only place that adds it: a click
+               handler here as well placed the reminder twice. Not disabled
+               while empty (a disabled button is unreadable on this dark
+               dialog); "required" makes the browser ask for the text. -->
+          <div class="flex items-center gap-2">
+            <Button type="submit" color="primary">Add Custom Reminder</Button>
+            <button
+              type="button"
+              class="px-2 py-1 text-sm text-stone-300 underline-offset-2 hover:text-white hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-stone-400 rounded"
+              @click="cancelCustomReminder"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       </form>
     </template>
@@ -155,6 +213,7 @@
 </template>
 
 <script setup lang="ts">
+import { useLocalStorage } from "@vueuse/core";
 import type { RoleReminder } from "~/server/generated/prisma/client";
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/vue";
 import { RoleType, useRoles } from "~/composables/useRoles";
@@ -165,12 +224,32 @@ import { SHOW_TRACKING_REMINDERS_KEY } from "~/composables/reminderDialogTrackin
 const props = defineProps<{
   visible: boolean;
   reminders: (RoleReminder & { token_url: string; role_type?: RoleType | null })[];
+  /**
+   * The characters in play (on the grimoire page, incl. small tokens and the
+   * game's Fabled and Loric). Without it, every character counts as in play.
+   */
+  inPlayRoleIds?: string[];
+  /**
+   * The game has a script. Without one, the dialog lists the grimoire's
+   * characters plus every Traveller (as before), so "In play only" is hidden.
+   */
+  hasScript?: boolean;
 }>();
 
 const emit = defineEmits(["update:visible", "selectReminder"]);
 const customReminder = ref("");
 const tokenUrl = ref<string | undefined>(undefined);
 const showLegacyReminders = ref(false);
+const customOpen = ref(false);
+const customReminderRef = ref<HTMLInputElement | null>(null);
+// Remembered per browser. By default the dialog only lists the reminders of
+// the characters in play ("In play only", with a script); Fabled and Loric
+// that aren't in play stay hidden too, like in the role dialog.
+const inPlayOnly = useLocalStorage("reminderDialogInPlayOnly", true);
+const showFabledLoric = useLocalStorage("reminderDialogShowFabledLoric", false);
+const inPlay = computed(() =>
+  props.inPlayRoleIds ? new Set(props.inPlayRoleIds) : null
+);
 // Matches the role's name or the text on the reminder, so "imp" finds the
 // Imp's reminders and "dead" finds every "Dead" reminder.
 const reminderFilter = ref("");
@@ -293,12 +372,31 @@ const reminderGroups = computed(() => {
       continue;
     }
     const roleType = reminder.role_type ?? role?.type;
+    const isInPlay = !inPlay.value || !reminder.role_id || inPlay.value.has(reminder.role_id);
+    if (!isInPlay) {
+      const fabledOrLoric = roleType === RoleType.FABLED || roleType === RoleType.LORIC;
+      if (fabledOrLoric ? !showFabledLoric.value : props.hasScript && inPlayOnly.value) continue;
+    }
     const targetGroup = byType.get(roleType ?? "OTHER") ?? byType.get("OTHER");
     if (!targetGroup) continue;
     targetGroup.reminders.push(reminder);
   }
 
   return groups.filter((group) => group.reminders.length > 0);
+});
+
+// Whether the filter text matches reminders that the options above hide, so
+// the empty state can say so.
+const hiddenByOptions = computed(() => {
+  const filter = reminderFilter.value.trim().toLowerCase();
+  if (!filter) return false;
+  return props.reminders.some((reminder) => {
+    const roleName = roles.getRole(reminder.role_id)?.name ?? reminder.role_id;
+    return (
+      reminder.reminder.toLowerCase().includes(filter) ||
+      roleName.toLowerCase().includes(filter)
+    );
+  });
 });
 
 const show = computed({
@@ -309,10 +407,35 @@ const show = computed({
 watchEffect(() => {
   if (show.value) {
     customReminder.value = "";
+    tokenUrl.value = undefined;
+    customOpen.value = false;
     showLegacyReminders.value = false;
     reminderFilter.value = "";
   }
 });
+
+async function startCustomReminder(text = "") {
+  if (text) customReminder.value = text;
+  customOpen.value = true;
+  await nextTick();
+  customReminderRef.value?.focus();
+}
+
+function cancelCustomReminder() {
+  customOpen.value = false;
+  customReminder.value = "";
+  tokenUrl.value = undefined;
+}
+
+function submitCustomReminder() {
+  const reminder = customReminder.value.trim();
+  if (!reminder) return;
+  emit("selectReminder", {
+    reminder,
+    token_url: tokenUrl.value,
+    type: "CUSTOM",
+  });
+}
 
 watch(show, async (visible) => {
   // Only with a mouse: on a phone, focusing would open the keyboard over the
@@ -321,6 +444,16 @@ watch(show, async (visible) => {
   await nextTick();
   reminderFilterRef.value?.focus();
 });
+
+// What a screen reader announces: whose reminder it is, and that it records
+// an event (the crosshair).
+function reminderLabel(reminder: DialogReminder) {
+  const roleName = roles.getRole(reminder.role_id)?.name;
+  const label = roleName ? `${roleName}: ${reminder.reminder}` : reminder.reminder;
+  return showTrackingReminders.value && isTrackingRelevantReminder(reminder)
+    ? `${label} (records a game event)`
+    : label;
+}
 
 function selectFirstMatchingReminder() {
   // Enter places the first reminder shown, like the role dialog.
@@ -422,6 +555,18 @@ function onReminderPointerEnter(event: PointerEvent, reminder: DialogReminder) {
 function onReminderPointerLeave(event: PointerEvent) {
   if (event.pointerType !== "mouse") return;
   closeHint();
+}
+
+// Keyboard users get the hint when they tab to a reminder; a mouse click or a
+// tap focuses too, but those have their own hover and hold.
+function onReminderFocus(event: FocusEvent, reminder: DialogReminder) {
+  const element = event.currentTarget as HTMLElement;
+  if (!element.matches(":focus-visible")) return;
+  openHint(reminder, element);
+}
+
+function onReminderBlur() {
+  if (activeHint.value) closeHint();
 }
 
 function onReminderContextMenu(event: MouseEvent, reminder: DialogReminder) {

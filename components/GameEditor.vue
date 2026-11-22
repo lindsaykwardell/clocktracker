@@ -436,6 +436,7 @@
               :excludePlayers="storytellerNames"
               :pageIndex="grimPage"
               :inPlayRoleIds="fabledRoleIds"
+              :hasScript="!!game.script_id"
               @deathToggled="recordGrimoireEvent"
               @selectedMe="applyMyRoleToGrimoire"
             />

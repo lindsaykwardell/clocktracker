@@ -14,7 +14,6 @@
     <span
       v-if="isTrackingRelevant"
       class="pointer-events-none absolute -bottom-4 left-[50%] translate-x-[-50%]"
-      title="Used for grimoire event tracking"
     >
       <IconUI id="crosshair" color="muted" />
       <div class="sr-only">Tracking Reminder</div>

@@ -182,6 +182,8 @@
     v-if="reminders.length > 0"
     v-model:visible="showReminderDialog"
     :reminders="reminders"
+    :inPlayRoleIds="reminderDialogInPlayRoleIds"
+    :hasScript="!!hasScript"
     @selectReminder="selectReminder"
   />
   <ShroudReminderDialog
@@ -325,6 +327,8 @@ const props = defineProps<{
   deathTooltips?: Record<number, string>;
   /** Fabled and Loric in play; their reminders count as in play too. */
   inPlayRoleIds?: string[];
+  /** The game has a script (for the reminder dialog's "In play only"). */
+  hasScript?: boolean;
 }>();
 
 const emit = defineEmits(["selectedMe", "claimSeat", "deathToggled"]);
@@ -811,6 +815,19 @@ const inPlayRoleIds = computed(() => {
     if (token.role_id) ids.add(token.role_id);
   }
   return ids;
+});
+
+// For the reminder dialog's "In play only": the characters on
+// this page, their small tokens (a Drunk's Townsfolk, a Philosopher's choice)
+// and the game's Fabled and Loric. Undefined while no seat has a character, so
+// an empty grimoire still lists every reminder.
+const reminderDialogInPlayRoleIds = computed(() => {
+  if (!props.tokens.some((token) => token.role_id)) return undefined;
+  const ids = new Set(inPlayRoleIds.value);
+  for (const token of props.tokens) {
+    if (token.related_role_id) ids.add(token.related_role_id);
+  }
+  return [...ids];
 });
 
 function shroudSuggestionsFor(token: Token, mode: "death" | "revive") {

@@ -1,40 +1,47 @@
 <template>
   <Dialog v-model:visible="show" size="lg">
     <template #title>
-      <div class="flex flex-col md:flex-row w-full gap-2">
+      <!-- Same header as the reminder dialog. md:-mt-2: the dialog's close
+           button sits higher (p-2) than the title (p-4); this centres the
+           title row on it. -->
+      <div class="flex flex-col md:flex-row md:items-center md:-mt-2 w-full gap-2">
         <h2 class="flex-grow text-2xl font-bold font-sorts">Select a Role</h2>
-      </div>
-      <div class="flex justify-between gap-8">
-        <div class="flex gap-4">
-          <label
-            v-if="showExcludeIrrelevantToggle"
-            class="flex items-center"
-          >
-            <input v-model="excludeIrrelevant" type="checkbox" class="mr-2" />
-            <span>Exclude irrelevant roles</span>
-          </label>
-          <label v-if="!hideAllRolesToggle" class="flex items-center">
-            <input v-model="showAllRoles" type="checkbox" class="mr-2" />
-            <span>All Roles</span>
-          </label>
-          <label v-if="!alwaysShowFabled" class="flex items-center">
-            <input v-model="showFabled" type="checkbox" class="mr-2" />
-            <span>Show Fabled and Loric</span>
-          </label>
-        </div>
         <form @submit.prevent="selectMatchingRole">
           <input
             v-model="roleFilter"
             ref="roleFilterRef"
-            type="text"
+            type="search"
             placeholder="Filter roles"
-            class="p-2 border border-gray-300 rounded-md text-black"
+            class="w-full md:w-56 h-[2.5rem] p-2 rounded-md border border-stone-500 bg-stone-600 text-lg text-white placeholder:text-stone-300"
             aria-label="Filter roles"
           />
         </form>
       </div>
+      <div class="flex flex-wrap gap-x-6 gap-y-1 pt-2">
+        <label
+          v-if="showExcludeIrrelevantToggle"
+          class="inline-flex items-center gap-2"
+        >
+          <input v-model="excludeIrrelevant" type="checkbox" />
+          <span class="text-sm">Exclude irrelevant roles</span>
+        </label>
+        <label v-if="!hideAllRolesToggle" class="inline-flex items-center gap-2">
+          <input v-model="showAllRoles" type="checkbox" />
+          <span class="text-sm">All Roles</span>
+        </label>
+        <label v-if="!alwaysShowFabled" class="inline-flex items-center gap-2">
+          <input v-model="showFabled" type="checkbox" />
+          <span class="text-sm">Show Fabled and Loric</span>
+        </label>
+      </div>
     </template>
     <div v-if="show" class="px-4">
+      <p
+        v-if="roleFilter.trim() && !filteredRoles.length"
+        class="pt-4 text-center text-stone-400"
+      >
+        No roles match "{{ roleFilter.trim() }}". Enter picks a blank token.
+      </p>
       <div v-for="roleGroup in roleGroups">
         <template v-if="roleGroup.roles.length">
           <h3 class="mt-4 mb-2 mx-4 text-xl font-bold font-sorts text-center">
@@ -46,6 +53,7 @@
               type="button"
               v-for="role in roleGroup.roles"
               class="flex flex-col items-center"
+              :aria-label="role.name || 'Blank token'"
               @click="emit('selectRole', role)"
             >
               <Token
@@ -63,6 +71,7 @@
 <script setup lang="ts">
 import type { Role } from "~/server/generated/prisma/client";
 import naturalOrder from "natural-order";
+import { useLocalStorage } from "@vueuse/core";
 import { RoleType } from "~/composables/useRoles";
 
 const roles = useRoles();
@@ -101,7 +110,8 @@ const hideAllRolesToggle = computed(
     props.alwaysShowAllRoles ||
     props.availableRoles.length === roles.getAllRoles().length
 );
-const showFabled = ref(false);
+// Remembered per browser, like the reminder dialog's options.
+const showFabled = useLocalStorage("roleDialogShowFabledLoric", false);
 const excludeIrrelevant = computed({
   get: () => props.excludeIrrelevant ?? false,
   set: (value) => emit("update:excludeIrrelevant", value),
@@ -247,10 +257,15 @@ function selectMatchingRole() {
 }
 
 watchEffect(() => {
-  if (show.value) {
-    roleFilter.value = "";
-    roleFilterRef.value?.focus();
-  }
+  if (show.value) roleFilter.value = "";
+});
+
+watch(show, async (visible) => {
+  // Only with a mouse: on a phone, focusing would open the keyboard over the
+  // characters.
+  if (!visible || !window.matchMedia("(pointer: fine)").matches) return;
+  await nextTick();
+  roleFilterRef.value?.focus();
 });
 
 onMounted(() => {
