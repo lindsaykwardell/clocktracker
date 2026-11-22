@@ -2159,9 +2159,13 @@ function selectRoleForToken(role: {
         };
         focusedToken.role_id = role.id;
         focusedToken.alignment = role.initial_alignment;
+        // A new character starts without the old small token (as in the
+        // grimoire), so it isn't saved again under the new one.
         focusedToken.related_role = {
           token_url: "/1x1.png",
         };
+        focusedToken.related_role_id = undefined;
+        focusedToken.related = "";
         focusedToken.name = role.name;
       } else {
         focusedToken.role = undefined;
@@ -2170,6 +2174,8 @@ function selectRoleForToken(role: {
         focusedToken.related_role = {
           token_url: "/1x1.png",
         };
+        focusedToken.related_role_id = undefined;
+        focusedToken.related = "";
         focusedToken.name = "";
       }
     } else {

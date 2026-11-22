@@ -48,7 +48,9 @@ type DigitalGrimoireGame={
 
 type GrimoireToken={
   role_id: string;
-  // The character the player thinks they are, such as a Drunk's Townsfolk.
+  // The related (small) token: the character the player thinks they are (a
+  // Drunk's Townsfolk) or whose ability they have (a Boffin's Demon, a
+  // Philosopher's choice, a Pixie that gained its ability).
   related_role_id?: string;
   alignment: "GOOD"|"EVIL"|"NEUTRAL";
   is_dead: boolean;

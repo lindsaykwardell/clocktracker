@@ -399,6 +399,23 @@ test("A traveller joining later isn't an alignment switch, a later switch is", (
   assert.equal(switches[0].grimoire_page, 2);
 });
 
+test("Philosopher: choosing a character (a new small token) isn't a character change", () => {
+  const s = scenario([
+    page([{ id: "ph", role: "philosopher" }]),
+    page([{ id: "ph", role: "philosopher", related: "empath" }]),
+    page([{ id: "ph", role: "philosopher", related: "monk" }]),
+  ]);
+  assert.equal(s.of("ROLE_CHANGE", "ph").length, 0);
+});
+
+test("Pit-Hag: a new character with a small token is one character change", () => {
+  const s = scenario([
+    page([{ id: "a", role: "chef" }]),
+    page([{ id: "a", role: "recluse", related: "empath" }]),
+  ]);
+  assert.equal(s.of("ROLE_CHANGE", "a").length, 1);
+});
+
 test("Bone Collector: a dead player regains their ability", () => {
   const s = scenario([
     page([

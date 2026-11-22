@@ -823,11 +823,12 @@ export function createGrimoireEventEngine(context: GrimoireEventEngineContext) {
             previousToken.role_id
           );
 
+          // Only the main token counts. A new small token on the same character
+          // (a Philosopher's choice, a Cannibal's ability) isn't a character change.
           const roleChanged =
             !!token.role_id &&
             !!previousToken.role_id &&
-            (token.role_id !== previousToken.role_id ||
-              token.related_role_id !== previousToken.related_role_id);
+            token.role_id !== previousToken.role_id;
           if (roleChanged) {
             expected.set(expectedKey(pageIndex, participantId, "role"), {
               grimoire_page: pageIndex,
