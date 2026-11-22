@@ -1739,7 +1739,10 @@ function syncGrimoireEventsFromGrimoire(options?: {
       event.cause = GrimoireEventCause.ABILITY;
     }
 
-    if (!event.player_name) {
+    // The name is a copy of the seat's name (it can't be edited here), so it
+    // follows the seat: typing a name fills the event while the user is still
+    // searching ("clock"), and picking "ClockTrackerDeveloper" must replace it.
+    if (event.player_name !== expectation.player_name) {
       event.player_name = expectation.player_name;
     }
     if (!event.role_id) {
