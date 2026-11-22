@@ -77,13 +77,27 @@ function sameNameAsLinked(typed: GrimoireCheckToken, linked: GrimoireCheckToken)
   return names.includes(name);
 }
 
-function pages(game: GrimoireCheckGame) {
-  return game.grimoire ?? [];
+/** A token with its place around the circle (0-based). */
+type SeatedToken = GrimoireCheckToken & { seat: number };
+
+/**
+ * The pages, with each token's seat: its place after sorting by `order`, the
+ * way the grimoire draws it. The stored numbers can have gaps or repeats
+ * (older games), so two pages can store different numbers for the same
+ * place; comparing the places avoids reporting those as moved seats.
+ */
+function pages(game: GrimoireCheckGame): { tokens: SeatedToken[] }[] {
+  return (game.grimoire ?? []).map((page) => ({
+    tokens: page.tokens
+      .slice()
+      .sort((a, b) => a.order - b.order)
+      .map((token, seat) => ({ ...token, seat })),
+  }));
 }
 
-function bySeat(tokens: GrimoireCheckToken[]) {
-  const map = new Map<number, GrimoireCheckToken>();
-  for (const token of tokens) map.set(token.order, token);
+function bySeat(tokens: SeatedToken[]) {
+  const map = new Map<number, SeatedToken>();
+  for (const token of tokens) map.set(token.seat, token);
   return map;
 }
 
@@ -123,7 +137,7 @@ export const seatsShifted: GrimoireCheckRule = {
       // reports those.
       const duplicates = new Set([...duplicateKeys(before), ...duplicateKeys(after)]);
 
-      const seatBefore = new Map<string, GrimoireCheckToken>();
+      const seatBefore = new Map<string, SeatedToken>();
       for (const token of before) {
         const key = playerKey(token);
         if (key) seatBefore.set(key, token);
@@ -133,8 +147,8 @@ export const seatsShifted: GrimoireCheckRule = {
       for (const token of after) {
         const key = playerKey(token);
         const previous = key && !duplicates.has(key) ? seatBefore.get(key) : undefined;
-        if (previous && previous.order !== token.order) {
-          moved.push(`${describePlayer(token)} seat ${previous.order + 1} → ${token.order + 1}`);
+        if (previous && previous.seat !== token.seat) {
+          moved.push(`${describePlayer(token)} seat ${previous.seat + 1} → ${token.seat + 1}`);
         }
       }
       if (moved.length) {
@@ -161,7 +175,7 @@ export const nameChanged: GrimoireCheckRule = {
     for (let i = 1; i < all.length; i++) {
       const before = bySeat(all[i - 1].tokens);
       for (const token of all[i].tokens) {
-        const previous = before.get(token.order);
+        const previous = before.get(token.seat);
         if (!previous) continue;
         if (previous.role_id !== token.role_id || previous.alignment !== token.alignment) continue;
         const keyBefore = playerKey(previous);
@@ -181,7 +195,7 @@ export const nameChanged: GrimoireCheckRule = {
         findings.push({
           rule: nameChanged.id,
           page: i + 1,
-          message: `Page ${i} → ${i + 1}: seat ${token.order + 1}${character} ${describePlayer(previous)} → ${describePlayer(token)}, ${kind}`,
+          message: `Page ${i} → ${i + 1}: seat ${token.seat + 1}${character} ${describePlayer(previous)} → ${describePlayer(token)}, ${kind}`,
         });
       }
     }
@@ -199,7 +213,7 @@ export const duplicatePlayer: GrimoireCheckRule = {
     // listing the pages.
     const found = new Map<string, { player: string; seats: string; pages: number[] }>();
     pages(game).forEach((page, index) => {
-      const seats = new Map<string, GrimoireCheckToken[]>();
+      const seats = new Map<string, SeatedToken[]>();
       for (const token of page.tokens) {
         const key = playerKey(token);
         if (!key) continue;
@@ -207,7 +221,7 @@ export const duplicatePlayer: GrimoireCheckRule = {
       }
       for (const [key, tokens] of seats) {
         if (tokens.length < 2) continue;
-        const seatList = tokens.map((token) => token.order + 1).join(", ");
+        const seatList = tokens.map((token) => token.seat + 1).join(", ");
         const id = `${key}|${seatList}`;
         const entry = found.get(id) ?? { player: describePlayer(tokens[0]), seats: seatList, pages: [] };
         entry.pages.push(index + 1);

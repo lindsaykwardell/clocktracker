@@ -61,6 +61,18 @@ test("a Matron in the game, or a seat added, is not a shift", () => {
   assert.deepEqual(seatsShifted.check(travellerJoined), []);
 });
 
+test("a gap in the stored seat numbers is not a shift", () => {
+  // Drawn the same: the grimoire places tokens by their sorted position.
+  const game = {
+    grimoire: [
+      page(seat(0, "Ann"), seat(1, "Bob"), seat(2, "Cid")),
+      page(seat(0, "Ann"), seat(2, "Bob"), seat(3, "Cid")),
+      page(seat(1, "Ann"), seat(1, "Bob"), seat(2, "Cid")),
+    ],
+  };
+  assert.deepEqual(checkGrimoire(game), []);
+});
+
 test("a name on two seats is not also reported as a seat shift", () => {
   const game = {
     grimoire: [
