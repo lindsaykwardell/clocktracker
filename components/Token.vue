@@ -57,7 +57,7 @@
       {{ reminderText }}
     </div>
     <div
-      v-if="alwaysShowAlignment || (!character?.role && character?.alignment)"
+      v-if="alwaysShowAlignment || (!character?.role && character?.alignment && !genericAlignmentImage)"
       class="token bg-center bg-cover absolute rounded-full shadow-xl border border-black flex justify-center items-center"
       :class="[relatedSize, relatedPos]"
       @click.stop="emit('clickAlignment')"
@@ -129,6 +129,12 @@ const props = defineProps<{
   tokenTooltip?: any;
   relatedTokenTooltip?: any;
   alignmentTooltip?: any;
+  /**
+   * Where a game is shown (not edited): a token with an alignment but no
+   * character shows the generic good or evil character as its image, instead
+   * of an empty token with the alignment badge.
+   */
+  alignmentArt?: boolean;
 }>();
 
 const emit = defineEmits(["clickRelated", "clickRole", "clickAlignment"]);
@@ -317,7 +323,20 @@ const usesAlignmentVariant = computed(() => {
   return alignmentSuffix(props.character?.role, props.character?.alignment) !== "";
 });
 
+// The generic good / evil character (the official generic art, not the
+// thumbs), for alignmentArt (see the prop).
+const genericAlignmentImage = computed(() => {
+  if (!props.alignmentArt) return undefined;
+  if (props.character?.role || props.character?.role_id) return undefined;
+  if (props.character?.alignment === "GOOD") return "/img/role/good.webp";
+  if (props.character?.alignment === "EVIL") return "/img/role/evil.webp";
+  return undefined;
+});
+
 const image = computed(() => {
+  if (genericAlignmentImage.value) {
+    return genericAlignmentImage.value;
+  }
   if (!props.character?.role && !props.character?.role_id) {
     return undefined;
   }

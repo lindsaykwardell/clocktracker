@@ -79,6 +79,7 @@
               "
               :character="gamesStore.getLastCharater(game.id)"
               size="sm"
+              alignmentArt
             />
           </td>
           <td class="hidden md:table-cell text-center">

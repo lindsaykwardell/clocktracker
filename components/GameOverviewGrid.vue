@@ -103,6 +103,7 @@
                 "
                 :character="lastCharacter(game.id)"
                 size="lg"
+                alignmentArt
               />
               <div v-else class="bg-black/25 flex justify-center">
                 <img

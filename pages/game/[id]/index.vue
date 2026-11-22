@@ -68,6 +68,7 @@
                                         <Token
                                             :character="last_character"
                                             size="md"
+                                            alignmentArt
                                         />
                                     </nuxt-link>
                                 </template>
@@ -76,6 +77,7 @@
                                         <Token
                                             :character="last_character"
                                             size="md"
+                                            alignmentArt
                                         />
                                     </div>
                                 </template>

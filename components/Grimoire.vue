@@ -107,6 +107,7 @@
         </a>
         <Token
           v-else
+          :alignmentArt="props.readonly"
           @clickRole="
             !props.readonly ? openRoleSelectionDialog(token, 'role') : null
           "
