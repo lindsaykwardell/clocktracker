@@ -6,9 +6,11 @@
   >
     <img
       v-if="image"
+      ref="imageEl"
       class="token-image"
       :class="dynamicTokenClass"
-      :src="sizedImage"
+      :src="shownImage"
+      @error="onImageError"
       loading="lazy"
       :alt="character?.name || character?.role?.name || 'Unknown'"
       v-tooltip="tokenTooltip || undefined"
@@ -411,6 +413,51 @@ const reminderTextSize = computed(() => {
 const sizedImage = computed(() =>
   sizeAdjustedUrl(image.value, props.size, "webp")
 );
+
+// An image that doesn't load (a homebrew character whose image host is gone,
+// for example) shows the official generic art for the character's team.
+const GENERIC_BY_TYPE: Record<string, string> = {
+  TOWNSFOLK: "townsfolk",
+  OUTSIDER: "outsider",
+  MINION: "minion",
+  DEMON: "demon",
+  TRAVELER: "traveller",
+  FABLED: "fabled",
+  LORIC: "loric",
+};
+const imageFailed = ref(false);
+const imageEl = ref<HTMLImageElement | null>(null);
+
+const fallbackImage = computed(() => {
+  const generic = GENERIC_BY_TYPE[props.character?.role?.type ?? ""];
+  // Townsfolk to Demon have good and evil versions, like the characters.
+  const suffix =
+    generic && ["townsfolk", "outsider", "minion", "demon"].includes(generic)
+      ? alignmentSuffix(props.character?.role, props.character?.alignment)
+      : "";
+  // The generic images only exist in the sized folders.
+  return sizeAdjustedUrl(`/img/role/${generic ?? "custom"}${suffix}`, props.size ?? "md", "webp");
+});
+
+const shownImage = computed(() => (imageFailed.value ? fallbackImage.value : sizedImage.value));
+
+function onImageError() {
+  // Only once: if the fallback fails too, leave it.
+  if (!imageFailed.value) imageFailed.value = true;
+}
+
+watch(sizedImage, () => {
+  imageFailed.value = false;
+});
+
+// A server-rendered image can fail before the page is interactive, so the
+// error event is missed; check it once mounted.
+onMounted(() => {
+  const el = imageEl.value;
+  if (el && el.complete && el.naturalWidth === 0 && el.getAttribute("src")) {
+    onImageError();
+  }
+});
 const sizedRelatedImage = computed(() =>
   sizeAdjustedUrl(relatedImage.value, props.size, "webp")
 );
