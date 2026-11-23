@@ -101,6 +101,7 @@ const EVENT_GROUPS: RuleGroup[] = [
     "puzzlemaster",
     ["organ_grinder", "until_night"],
     "village_idiot",
+    ["minstrel", "until_second_night"],
   ]),
   group({ reminder: "Poisoned", eventType: "POISONED" }, [
     ["poisoner", "until_night"],
@@ -111,8 +112,10 @@ const EVENT_GROUPS: RuleGroup[] = [
     "vigormortis",
     "snake_charmer",
     "cannibal",
+    ["xaan", "until_night"],
   ]),
   group({ reminder: "Lunch", eventType: "OTHER" }, ["cannibal"]),
+  group({ reminder: "Cursed", eventType: "OTHER" }, [["witch", "until_night"]]),
   group({ reminder: "Abnormal", eventType: "OTHER" }, [["mathematician", "until_day"]]),
   group({ reminder: "Chosen", eventType: "OTHER" }, [
     ["exorcist", "until_night"],
@@ -121,6 +124,12 @@ const EVENT_GROUPS: RuleGroup[] = [
   ]),
   group({ reminder: "Visit", eventType: "OTHER" }, [["high_priestess", "until_day"]]),
   group({ reminder: "Amigo", eventType: "OTHER" }, ["gnome"]),
+  group({ reminder: "Grandchild", eventType: "OTHER" }, ["grandmother"]),
+  group({ reminder: "Twin", eventType: "OTHER" }, ["evil_twin"]),
+  group({ reminder: "Friend", eventType: "OTHER" }, ["ogre"]),
+  // Moved by hand when the Fearmonger chooses a new player; choosing the same
+  // player again leaves it, so each newly feared player is one event.
+  group({ reminder: "Fear", eventType: "OTHER" }, ["fearmonger"]),
   group({ reminder: "Chosen", eventType: "OTHER" }, ["nightwatchman"]),
   group({ reminder: "Chosen", eventType: "OTHER" }, ["ravenkeeper"]),
   group(
@@ -151,6 +160,7 @@ const EVENT_GROUPS: RuleGroup[] = [
   group({ reminder: "No Ability", eventType: "OTHER" }, ["fool"]),
   group({ reminder: "No Ability", eventType: "OTHER" }, ["huntsman"]),
   group({ reminder: "Saved", eventType: "OTHER" }, [["monk", "next_phase"]]),
+  group({ reminder: "Safe", eventType: "OTHER" }, [["monk", "until_day"]]),
   group({ reminder: "Saved", eventType: "OTHER" }, [["pacifist", "next_phase"]]),
   group(
     { reminder: "Saved", eventType: "OTHER", targetScope: "self", targetRoleIds: ["soldier"] },
@@ -163,6 +173,7 @@ const EVENT_GROUPS: RuleGroup[] = [
   group({ reminder: "Saved", eventType: "OTHER" }, [["innkeeper", "next_phase"]]),
   group({ reminder: "Saved", eventType: "OTHER" }, [["tea_lady", "next_phase"]]),
   group({ reminder: "Saved", eventType: "OTHER" }, [["devils_advocate", "next_phase"]]),
+  group({ reminder: "Survives Execution", eventType: "OTHER" }, [["devils_advocate", "until_night"]]),
   group(
     { reminder: "Saved", eventType: "OTHER", targetScope: "self", targetRoleIds: ["deviant"] },
     [["deviant", "next_phase"]]
@@ -174,6 +185,10 @@ const EVENT_GROUPS: RuleGroup[] = [
   group({ reminder: "No Ability", eventType: "OTHER" }, ["preacher"]),
   group({ reminder: "Correct", eventType: "OTHER" }, ["juggler"]),
   group({ reminder: "Guess Used", eventType: "OTHER", targetScope: "self" }, ["puzzlemaster"]),
+  // On the Damsel: a Minion guessed and was wrong.
+  group({ reminder: "Guess Used", eventType: "OTHER", targetScope: "self" }, ["damsel"]),
+  // On the Minion who guessed, right or wrong (tracking reminder).
+  group({ reminder: "Guessed", eventType: "OTHER", targetScope: "others" }, ["damsel"]),
   group(
     {
       reminder: "Evil Wakes",
@@ -184,10 +199,18 @@ const EVENT_GROUPS: RuleGroup[] = [
     ["poppy_grower"]
   ),
   group({ reminder: "Red Herring", eventType: "OTHER" }, ["fortune_teller"]),
+  group({ reminder: "Faux Paw", eventType: "OTHER" }, ["lycanthrope"]),
+  group(
+    { reminder: "3 Attacks", eventType: "OTHER", targetScope: "self" },
+    [["po", "until_second_day"]]
+  ),
   group({ reminder: "Yes", eventType: "OTHER" }, [["fortune_teller", "until_day"]]),
   group({ reminder: "Know", eventType: "OTHER" }, ["choirboy"]),
   group({ reminder: "Know", eventType: "OTHER" }, ["puzzlemaster"]),
   group({ reminder: "Know", eventType: "OTHER" }, ["sage"]),
+  group({ reminder: "Know", eventType: "OTHER" }, ["bounty_hunter"]),
+  // Legacy wording of the Bounty Hunter's "Know".
+  group({ reminder: "Known", eventType: "OTHER" }, ["bounty_hunter"]),
   group({ reminder: "Outsider", eventType: "OTHER" }, ["librarian"]),
   group({ reminder: "Townsfolk", eventType: "OTHER" }, ["washerwoman"]),
   group({ reminder: "Minion", eventType: "OTHER" }, ["investigator"]),
@@ -288,6 +311,13 @@ const EVENT_GROUPS: RuleGroup[] = [
   group({ reminder: "Dead", eventType: "DEATH", sourceMode: "npc" }, [
     ["hells_librarian", "next_phase"],
   ]),
+  group({ reminder: "Protected", eventType: "OTHER", sourceMode: "npc" }, ["angel"]),
+  // "Something Bad": a punishment other than death.
+  group({ reminder: "Something Bad", eventType: "OTHER", sourceMode: "npc" }, ["angel"]),
+  group({ reminder: "Something Bad", eventType: "OTHER", sourceMode: "npc" }, ["hells_librarian"]),
+  group({ reminder: "False Info", eventType: "OTHER", sourceMode: "npc" }, [
+    ["duchess", "until_day"],
+  ]),
 ];
 
 /**
@@ -311,9 +341,7 @@ function countUp(roleId: string, phase: "Night" | "Day", last: number): Lifetime
 }
 
 const LIFETIME_ONLY: LifetimeOnly[] = [
-  ["monk", "Safe", "until_day"],
   ["innkeeper", "Safe", "until_night"],
-  ["devils_advocate", "Survives Execution", "until_night"],
   // "Executed" marks the execution of that day; the generic Executed rule
   // records the event for any role, so these only add the lifetime.
   ["virgin", "Executed", "next_phase"],
@@ -340,10 +368,8 @@ const LIFETIME_ONLY: LifetimeOnly[] = [
   ["mezepheles", "Turns Evil", "until_day"],
   ["cacklejack", "Not Me", "until_day"],
   ["duchess", "Visitor", "until_day"],
-  ["duchess", "False Info", "until_day"],
 
   // Chosen at night for tomorrow, or only for today.
-  ["witch", "Cursed", "until_night"],
   ["harpy", "2nd", "until_night"],
   ["barista", "?", "until_night"],
   ["organ_grinder", "About To Die", "until_night"],
@@ -378,7 +404,6 @@ const LIFETIME_ONLY: LifetimeOnly[] = [
 
   // Lasts one phase longer than the next.
   ["minstrel", "Everyone Is Drunk", "until_second_night"],
-  ["po", "3 Attacks", "until_second_day"],
 ];
 
 function roleEntry(role: GroupRole): [string, ReminderLifetime] {

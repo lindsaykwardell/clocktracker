@@ -9,8 +9,11 @@ import { buildRoleStatCardResult } from "../../composables/useRoleStatCards";
 
 const ROLES: Record<string, { name: string; type: string; alignment: "GOOD" | "EVIL" }> = {
   chef: { name: "Chef", type: "TOWNSFOLK", alignment: "GOOD" },
+  grandmother: { name: "Grandmother", type: "TOWNSFOLK", alignment: "GOOD" },
   empath: { name: "Empath", type: "TOWNSFOLK", alignment: "GOOD" },
   monk: { name: "Monk", type: "TOWNSFOLK", alignment: "GOOD" },
+  damsel: { name: "Damsel", type: "OUTSIDER", alignment: "GOOD" },
+  ogre: { name: "Ogre", type: "OUTSIDER", alignment: "GOOD" },
   recluse: { name: "Recluse", type: "OUTSIDER", alignment: "GOOD" },
   poisoner: { name: "Poisoner", type: "MINION", alignment: "EVIL" },
   vortox: { name: "Vortox", type: "DEMON", alignment: "EVIL" },
@@ -35,12 +38,20 @@ const ROLES: Record<string, { name: string; type: string; alignment: "GOOD" | "E
   gangster: { name: "Gangster", type: "TRAVELER", alignment: "EVIL" },
   gnome: { name: "Gnome", type: "TRAVELER", alignment: "GOOD" },
   witch: { name: "Witch", type: "MINION", alignment: "EVIL" },
+  fearmonger: { name: "Fearmonger", type: "MINION", alignment: "EVIL" },
+  evil_twin: { name: "Evil Twin", type: "MINION", alignment: "EVIL" },
+  cerenovus: { name: "Cerenovus", type: "MINION", alignment: "EVIL" },
+  harpy: { name: "Harpy", type: "MINION", alignment: "EVIL" },
   "pit-hag": { name: "Pit-Hag", type: "MINION", alignment: "EVIL" },
   imp: { name: "Imp", type: "DEMON", alignment: "EVIL" },
   ventriloquist: { name: "Ventriloquist", type: "LORIC", alignment: "GOOD" },
   philosopher: { name: "Philosopher", type: "TOWNSFOLK", alignment: "GOOD" },
   bounty_hunter: { name: "Bounty Hunter", type: "TOWNSFOLK", alignment: "GOOD" },
   amnesiac: { name: "Amnesiac", type: "TOWNSFOLK", alignment: "GOOD" },
+  lycanthrope: { name: "Lycanthrope", type: "TOWNSFOLK", alignment: "GOOD" },
+  devils_advocate: { name: "Devil's Advocate", type: "MINION", alignment: "EVIL" },
+  xaan: { name: "Xaan", type: "MINION", alignment: "EVIL" },
+  minstrel: { name: "Minstrel", type: "TOWNSFOLK", alignment: "GOOD" },
 };
 
 type Reminder = { reminder: string; token_url: string };
@@ -87,7 +98,7 @@ function page(seats: Seat[]) {
   };
 }
 
-function scenario(pages: ReturnType<typeof page>[]) {
+function scenario(pages: ReturnType<typeof page>[], gameFields: Record<string, unknown> = {}) {
   const { events } = generateEventsForMissingGames(pages as any);
   const game = {
     ignore_for_stats: false,
@@ -95,6 +106,7 @@ function scenario(pages: ReturnType<typeof page>[]) {
     player_characters: [],
     grimoire: pages,
     grimoire_events: events.map((event, index) => ({ ...event, id: index + 1 })),
+    ...gameFields,
   } as any;
 
   return {
@@ -143,6 +155,17 @@ test("Po: three kills in one night", () => {
   assert.equal(s.of("DEATH").filter((e) => e.by_role_id === "po").length, 3);
   assert.equal(s.card("po_kills", "po", "po"), 3);
   assert.equal(s.card("po_triple_kills", "po", "po"), 1);
+});
+
+test("Po: charging up counts once, also without three kills", () => {
+  const s = scenario([
+    page([{ id: "po", role: "po", reminders: [r("po", "3 Attacks")] }, { id: "a", role: "chef" }]),
+    page([{ id: "po", role: "po", reminders: [r("po", "3 Attacks")] }, { id: "a", role: "chef" }]),
+    page([{ id: "po", role: "po" }, { id: "a", role: "chef" }]),
+    // Placed on another player by mistake: not a charge.
+    page([{ id: "po", role: "po" }, { id: "a", role: "chef", reminders: [r("po", "3 Attacks")] }]),
+  ]);
+  assert.equal(s.card("po_charges", "po", "po"), 1);
 });
 
 test("Shabaloth: a kill, then the player is regurgitated", () => {
@@ -459,6 +482,278 @@ test("Deviant and Barista: saved from exile, acts twice", () => {
   assert.equal(s.card("barista_acts_twice_given", "barista", "ba"), 1);
 });
 
+test("Grandmother: the grandchild counts once per game", () => {
+  const s = scenario([
+    page([
+      { id: "g", role: "grandmother" },
+      { id: "a", role: "chef", reminders: [r("grandmother", "Grandchild")] },
+    ]),
+    page([
+      { id: "g", role: "grandmother" },
+      { id: "a", role: "chef", reminders: [r("grandmother", "Grandchild")] },
+    ]),
+  ]);
+  assert.equal(s.card("grandmother_grandchild_received", "grandmother", "a"), 1);
+  assert.equal(s.card("grandmother_grandchild_received", "grandmother", "g"), 0);
+});
+
+test("Evil Twin: the good twin counts once per game", () => {
+  const s = scenario([
+    page([
+      { id: "e", role: "evil_twin" },
+      { id: "a", role: "chef", reminders: [r("evil_twin", "Twin")] },
+    ]),
+    page([
+      { id: "e", role: "evil_twin" },
+      { id: "a", role: "chef", reminders: [r("evil_twin", "Twin")] },
+    ]),
+  ]);
+  assert.equal(s.card("evil_twin_twin_received", "evil_twin", "a"), 1);
+  assert.equal(s.card("evil_twin_twin_received", "evil_twin", "e"), 0);
+});
+
+test("Evil Twin: a new twin on another player counts for them", () => {
+  const s = scenario([
+    page([
+      { id: "e", role: "evil_twin" },
+      { id: "a", role: "chef", reminders: [r("evil_twin", "Twin")] },
+      { id: "b", role: "empath" },
+    ]),
+    page([
+      { id: "e", role: "evil_twin" },
+      { id: "a", role: "chef" },
+      { id: "b", role: "empath", reminders: [r("evil_twin", "Twin")] },
+    ]),
+  ]);
+  assert.equal(s.card("evil_twin_twin_received", "evil_twin", "a"), 1);
+  assert.equal(s.card("evil_twin_twin_received", "evil_twin", "b"), 1);
+});
+
+test("Ogre: the chosen friend counts once per game", () => {
+  const s = scenario([
+    page([
+      { id: "o", role: "ogre" },
+      { id: "a", role: "chef", reminders: [r("ogre", "Friend")] },
+    ]),
+    page([
+      { id: "o", role: "ogre" },
+      { id: "a", role: "chef", reminders: [r("ogre", "Friend")] },
+    ]),
+  ]);
+  assert.equal(s.card("ogre_friend_received", "ogre", "a"), 1);
+  assert.equal(s.card("ogre_friend_received", "ogre", "o"), 0);
+});
+
+test("Fearmonger: each newly chosen player counts, choosing them again doesn't", () => {
+  const s = scenario([
+    page([
+      { id: "f", role: "fearmonger" },
+      { id: "a", role: "chef", reminders: [r("fearmonger", "Fear")] },
+      { id: "b", role: "empath" },
+    ]),
+    // Same player again: the reminder stays.
+    page([
+      { id: "f", role: "fearmonger" },
+      { id: "a", role: "chef", reminders: [r("fearmonger", "Fear")] },
+      { id: "b", role: "empath" },
+    ]),
+    page([
+      { id: "f", role: "fearmonger" },
+      { id: "a", role: "chef" },
+      { id: "b", role: "empath", reminders: [r("fearmonger", "Fear")] },
+    ]),
+  ]);
+  assert.equal(s.card("fearmonger_players_chosen", "fearmonger", "f"), 2);
+  assert.equal(s.card("fearmonger_chosen_received", "fearmonger", "a"), 1);
+  assert.equal(s.card("fearmonger_chosen_received", "fearmonger", "b"), 1);
+});
+
+test("Damsel: a wrong guess is survived, the guess that ended the game was right", () => {
+  const pages = [
+    page([
+      { id: "d", role: "damsel" },
+      { id: "m1", role: "witch", reminders: [r("damsel", "Guessed")] },
+      { id: "m2", role: "fearmonger" },
+    ]),
+    page([
+      { id: "d", role: "damsel", reminders: [r("damsel", "Guess Used")] },
+      { id: "m1", role: "witch", reminders: [r("damsel", "Guessed")] },
+      { id: "m2", role: "fearmonger", reminders: [r("damsel", "Guessed")] },
+    ]),
+  ];
+  const endedByDamsel = {
+    end_trigger: "ADDITIONAL_WIN_CONDITION",
+    end_trigger_cause: "ABILITY",
+    end_trigger_role_id: "damsel",
+  };
+  const s = scenario(pages, endedByDamsel);
+  assert.equal(s.card("damsel_guesses_evaded", "damsel", "d"), 1);
+  // m1 guessed on the first page and was wrong; m2's guess ended the game.
+  assert.equal(s.card("damsel_guessed_right_received", "damsel", "m1"), 0);
+  assert.equal(s.card("damsel_guessed_right_received", "damsel", "m2"), 1);
+  // No Damsel ending: no guess was right.
+  assert.equal(scenario(pages).card("damsel_guessed_right_received", "damsel", "m2"), 0);
+});
+
+test("Bounty Hunter: each evil player learned counts, the legacy wording too", () => {
+  const s = scenario([
+    page([
+      { id: "bh", role: "bounty_hunter" },
+      { id: "m", role: "poisoner", reminders: [r("bounty_hunter", "Know")] },
+      { id: "w", role: "witch" },
+    ]),
+    page([
+      { id: "bh", role: "bounty_hunter" },
+      { id: "m", role: "poisoner", dead: true, reminders: [r("bounty_hunter", "Know")] },
+      { id: "w", role: "witch", reminders: [r("bounty_hunter", "Known")] },
+    ]),
+  ]);
+  assert.equal(s.card("bounty_hunter_known_received", "bounty_hunter", "m"), 1);
+  assert.equal(s.card("bounty_hunter_known_received", "bounty_hunter", "w"), 1);
+});
+
+test("Bounty Hunter seeing the Recluse counts for the Recluse", () => {
+  const s = scenario([
+    page([
+      { id: "bh", role: "bounty_hunter" },
+      { id: "rc", role: "recluse", reminders: [r("bounty_hunter", "Know")] },
+      { id: "m", role: "poisoner" },
+    ]),
+  ]);
+  assert.equal(s.card("recluse_bounty_hunter_received", "recluse", "rc"), 1);
+  assert.equal(s.card("recluse_bounty_hunter_received", "recluse", "m"), 0);
+});
+
+test("Monk: protecting the Demon counts once per night", () => {
+  const s = scenario([
+    page([
+      { id: "m", role: "monk" },
+      { id: "d", role: "imp", reminders: [r("monk", "Safe")] },
+      { id: "a", role: "chef" },
+    ]),
+    // The next night: the Demon again, then a good player.
+    page([
+      { id: "m", role: "monk" },
+      { id: "d", role: "imp" },
+      { id: "a", role: "chef" },
+    ]),
+    page([
+      { id: "m", role: "monk" },
+      { id: "d", role: "imp", reminders: [r("monk", "Safe")] },
+      { id: "a", role: "chef" },
+    ]),
+    page([
+      { id: "m", role: "monk" },
+      { id: "d", role: "imp" },
+      { id: "a", role: "chef", reminders: [r("monk", "Safe")] },
+    ]),
+  ]);
+  assert.equal(s.card("monk_demon_protected", "monk", "m"), 2);
+});
+
+test("Devil's Advocate: protecting a good player counts, protecting evil doesn't", () => {
+  const s = scenario([
+    page([
+      { id: "da", role: "devils_advocate" },
+      { id: "a", role: "chef", reminders: [r("devils_advocate", "Survives Execution")] },
+      { id: "d", role: "imp" },
+    ]),
+    page([
+      { id: "da", role: "devils_advocate" },
+      { id: "a", role: "chef", reminders: [r("devils_advocate", "Survives Execution")] },
+      { id: "d", role: "imp" },
+    ]),
+    page([
+      { id: "da", role: "devils_advocate" },
+      { id: "a", role: "chef" },
+      { id: "d", role: "imp", reminders: [r("devils_advocate", "Survives Execution")] },
+    ]),
+  ]);
+  assert.equal(s.card("devils_advocate_good_protected", "devils_advocate", "da"), 1);
+});
+
+test("Xaan: each poisoned Townsfolk counts", () => {
+  const s = scenario([
+    page([
+      { id: "x", role: "xaan" },
+      { id: "a", role: "chef", reminders: [r("xaan", "Poisoned")] },
+      { id: "b", role: "empath", reminders: [r("xaan", "Poisoned")] },
+    ]),
+  ]);
+  assert.equal(s.of("POISONED").filter((e) => e.by_role_id === "xaan").length, 2);
+  assert.equal(s.card("xaan_poisons", "xaan", "x"), 2);
+});
+
+test("Minstrel: each drunk player counts once while the drunkenness lasts", () => {
+  const drunk = [r("minstrel", "Drunk")];
+  const s = scenario([
+    page([
+      { id: "mi", role: "minstrel" },
+      { id: "a", role: "chef", reminders: drunk },
+      { id: "b", role: "empath", reminders: drunk },
+    ]),
+    page([
+      { id: "mi", role: "minstrel" },
+      { id: "a", role: "chef", reminders: drunk },
+      { id: "b", role: "empath", reminders: drunk },
+    ]),
+  ]);
+  assert.equal(s.of("DRUNK").filter((e) => e.by_role_id === "minstrel").length, 2);
+  assert.equal(s.card("minstrel_drunks", "minstrel", "mi"), 2);
+});
+
+test("Lycanthrope: the faux paw counts once per game", () => {
+  const s = scenario([
+    page([
+      { id: "ly", role: "lycanthrope" },
+      { id: "a", role: "chef", reminders: [r("lycanthrope", "Faux Paw")] },
+    ]),
+    page([
+      { id: "ly", role: "lycanthrope" },
+      { id: "a", role: "chef", reminders: [r("lycanthrope", "Faux Paw")] },
+    ]),
+  ]);
+  assert.equal(s.card("lycanthrope_faux_paw_received", "lycanthrope", "a"), 1);
+  assert.equal(s.card("lycanthrope_faux_paw_received", "lycanthrope", "ly"), 0);
+});
+
+test("Witch: curses cast and received,a curse kept into the day counts once", () => {
+  const s = scenario([
+    page([
+      { id: "w", role: "witch" },
+      { id: "a", role: "chef", reminders: [r("witch", "Cursed")] },
+      { id: "b", role: "empath" },
+    ]),
+    page([
+      { id: "w", role: "witch" },
+      { id: "a", role: "chef", reminders: [r("witch", "Cursed")] },
+      { id: "b", role: "empath" },
+    ]),
+    page([
+      { id: "w", role: "witch" },
+      { id: "a", role: "chef" },
+      { id: "b", role: "empath", reminders: [r("witch", "Cursed")] },
+    ]),
+  ]);
+  assert.equal(s.card("witch_curses", "witch", "w"), 2);
+  assert.equal(s.card("witch_curses_received", "witch", "a"), 1);
+  assert.equal(s.card("witch_curses_received", "witch", "b"), 1);
+});
+
+test("Cerenovus and Harpy: made mad, counted for the mad player", () => {
+  const s = scenario([
+    page([
+      { id: "c", role: "cerenovus" },
+      { id: "h", role: "harpy" },
+      { id: "a", role: "chef", reminders: [r("cerenovus", "Mad")] },
+      { id: "b", role: "empath", reminders: [r("harpy", "Mad")] },
+    ]),
+  ]);
+  assert.equal(s.card("cerenovus_madness_received", "cerenovus", "a"), 1);
+  assert.equal(s.card("cerenovus_madness_received", "cerenovus", "b"), 0);
+  assert.equal(s.card("harpy_madness_received", "harpy", "b"), 1);
+});
+
 // --- Fabled and Loric (not seated: reminders sit on the affected player) -------
 
 test("Angel, Doomsayer, Hell's Librarian and Big Wig: deaths credited to the Fabled", () => {
@@ -484,6 +779,32 @@ test("Angel, Doomsayer, Hell's Librarian and Big Wig: deaths credited to the Fab
   assert.equal(s.card("doomsayer_deaths", "doomsayer", "b"), 1);
   assert.equal(s.card("hells_librarian_deaths", "hells_librarian", "c"), 1);
   assert.equal(s.card("big_wig_deaths_received", "big_wig", "d"), 1);
+});
+
+test("Angel, Hell's Librarian and Duchess: protection, punishments and false info", () => {
+  const s = scenario([
+    page([
+      { id: "a", role: "chef", reminders: [r("angel", "Protected")] },
+      { id: "b", role: "empath" },
+      { id: "c", role: "monk" },
+      { id: "d", role: "recluse" },
+    ]),
+    page([
+      { id: "a", role: "chef", reminders: [r("angel", "Protected")] },
+      { id: "b", role: "empath", reminders: [r("angel", "Something Bad")] },
+      { id: "c", role: "monk", reminders: [r("hells_librarian", "Something Bad")] },
+      { id: "d", role: "recluse", reminders: [r("duchess", "False Info")] },
+    ]),
+  ]);
+  assert.deepEqual(
+    s.of("OTHER").map((e) => `${e.participant_id}:${e.by_role_id}:${e.status_source}`),
+    ["a:angel:Protected", "b:angel:Something Bad", "c:hells_librarian:Something Bad", "d:duchess:False Info"]
+  );
+  assert.equal(s.card("angel_protected_received", "angel", "a"), 1);
+  assert.equal(s.card("angel_something_bad_received", "angel", "b"), 1);
+  assert.equal(s.card("hells_librarian_something_bad_received", "hells_librarian", "c"), 1);
+  assert.equal(s.card("hells_librarian_something_bad_received", "hells_librarian", "b"), 0);
+  assert.equal(s.card("duchess_false_info_received", "duchess", "d"), 1);
 });
 
 test("Storm Catcher and Zenomancer: protection and goals", () => {

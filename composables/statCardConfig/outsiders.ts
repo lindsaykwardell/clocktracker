@@ -84,6 +84,8 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     roleIds: ["damsel"],
     script: "experimental",
     source: "end_trigger",
+    // Hidden: the Damsel's team loses, so don't make it a goal.
+    hidden: true,
     label: "Happily Never After",
     getCount: ({ games, roleId }) =>
       games.filter(
@@ -104,6 +106,64 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
       count > 0
         ? `At least ${count} game${pluralize(count)} ${wasWere(count)} ended by a Damsel being guessed.`
         : `No Damsel has ended a game by being guessed yet.`,
+  },
+  {
+    id: "damsel_guesses_evaded",
+    category: "role",
+    scope: "as_role",
+    globalDataNeeds: ["grimoire_events"],
+    roleIds: ["damsel"],
+    script: "experimental",
+    source: "grimoire_event",
+    label: "Gone by Midnight",
+    getCount: ({ games, roleId }) =>
+      countMatchingEvents(
+        games,
+        (_, event) =>
+          event.by_role_id === roleId &&
+          event.event_type === GrimoireEventType.OTHER &&
+          event.status_source === "Guess Used"
+      ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Damsel, you've evaded a Minion's guess ${times(count)}.`
+          : `As the Damsel, this player has evaded a Minion's guess ${times(count)}.`)
+        : `As the Damsel, evade a Minion's guess.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `A Damsel has evaded a Minion's guess at least ${times(count)}.`
+        : `No Damsel has evaded a Minion's guess yet.`,
+  },
+  {
+    id: "damsel_guessed_right_received",
+    category: "role",
+    roleIds: ["damsel"],
+    scope: "affected_player",
+    globalDataNeeds: ["grimoire_events", "grimoire_state"],
+    script: "experimental",
+    source: "grimoire_event",
+    label: "Dark Prince",
+    // A guess is right when the game ended by the Damsel being guessed and the
+    // "Guessed" was placed on the last page (the guess ended the game there).
+    getCount: ({ games }) =>
+      countMatchingEvents(
+        games,
+        (game, event) =>
+          event.by_role_id === "damsel" &&
+          event.event_type === GrimoireEventType.OTHER &&
+          event.status_source === "Guessed" &&
+          game.end_trigger === GameEndTrigger.ADDITIONAL_WIN_CONDITION &&
+          game.end_trigger_cause === GameEndTriggerCause.ABILITY &&
+          game.end_trigger_role_id === "damsel" &&
+          event.grimoire_page === game.grimoire.length - 1
+      ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As a Minion, you've guessed the Damsel right ${times(count)}.`
+          : `As a Minion, this player has guessed the Damsel right ${times(count)}.`)
+        : `As a Minion, guess the Damsel right.`,
   },
   // Drunk [sao: 4]: Too complex.
   {
@@ -457,6 +517,29 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `No Ogre has changed alignment yet.`,
   },
   {
+    id: "ogre_friend_received",
+    category: "role",
+    roleIds: ["ogre"],
+    scope: "affected_player",
+    script: "experimental",
+    source: "grimoire_event",
+    label: "Ogre-ly Attached",
+    getCount: ({ games }) =>
+      countMatchingEvents(
+        games,
+        (_, event) =>
+          event.by_role_id === "ogre" &&
+          event.event_type === GrimoireEventType.OTHER &&
+          event.status_source === "Friend"
+      ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `You've been chosen as the Ogre's friend ${times(count)}.`
+          : `This player has been chosen as the Ogre's friend ${times(count)}.`)
+        : `Be chosen as the Ogre's friend.`,
+  },
+  {
     id: "plague_doctor_storyteller_abilities",
     category: "role",
     scope: "as_role",
@@ -733,6 +816,48 @@ export const OUTSIDERS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
       count > 0
         ? `A Recluse has become the Imp after the Imp targeted themselves at least ${times(count)}.`
         : `No Recluse has become the Imp after the Imp targeted themselves yet.`,
+  },
+  {
+    id: "recluse_bounty_hunter_received",
+    category: "role",
+    scope: "affected_player",
+    globalDataNeeds: ["grimoire_events", "grimoire_state"],
+    script: "experimental",
+    roleIds: ["recluse"],
+    sao: 3,
+    source: "grimoire_event",
+    label: "Usual Suspect",
+    getCount: ({ games }) =>
+      countMatchingEvents(
+        games,
+        (game, event) => {
+          if (
+            event.event_type !== GrimoireEventType.OTHER ||
+            event.by_role_id !== "bounty_hunter" ||
+            (event.status_source !== "Know" && event.status_source !== "Known")
+          ) {
+            return false;
+          }
+
+          const currentToken = getEventCurrentToken(game, event);
+          const previousToken = getEventPreviousToken(game, event);
+
+          return (
+            currentToken?.role_id === "recluse" ||
+            previousToken?.role_id === "recluse"
+          );
+        }
+      ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Recluse, you've been seen as evil by the Bounty Hunter ${times(count)}.`
+          : `As the Recluse, this player has been seen as evil by the Bounty Hunter ${times(count)}.`)
+        : `As the Recluse, be seen as evil by the Bounty Hunter.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `A Recluse has been seen as evil by a Bounty Hunter at least ${times(count)}.`
+        : `No Recluse has been seen as evil by a Bounty Hunter yet.`,
   },
   {
     id: "saint_game_endings",

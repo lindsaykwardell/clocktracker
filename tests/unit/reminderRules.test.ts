@@ -62,6 +62,7 @@ test("the event rules keep one rule per group with its roles in order", () => {
       "puzzlemaster",
       "organ_grinder",
       "village_idiot",
+      "minstrel",
     ],
   });
   const soldierSaved = REMINDER_EVENT_CONFIG.find(

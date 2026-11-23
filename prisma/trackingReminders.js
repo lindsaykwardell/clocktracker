@@ -22,6 +22,24 @@ const trackingReminders = [
     type: ReminderType.TRACKING,
   },
   {
+    role_id: "damsel",
+    reminder: "Guessed",
+    type: ReminderType.TRACKING,
+  },
+  {
+    // The Xaan has no "Poisoned" reminder; placed on each Townsfolk on night X.
+    role_id: "xaan",
+    reminder: "Poisoned",
+    type: ReminderType.TRACKING,
+  },
+  {
+    // The Minstrel has no "Drunk" reminder; placed on every other player
+    // (not Travellers) after a Minion died by execution.
+    role_id: "minstrel",
+    reminder: "Drunk",
+    type: ReminderType.TRACKING,
+  },
+  {
     role_id: "amnesiac",
     reminder: "Bingo",
     type: ReminderType.TRACKING,

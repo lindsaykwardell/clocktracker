@@ -269,6 +269,29 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `No Cerenovus has ended a game by causing an execution for breaking madness yet.`,
   },
   {
+    id: "cerenovus_madness_received",
+    category: "role",
+    roleIds: ["cerenovus"],
+    scope: "affected_player",
+    script: "snv",
+    sao: 3,
+    source: "grimoire_event",
+    label: "Brainwashed",
+    getCount: ({ games }) =>
+      countMatchingEvents(
+        games,
+        (_, event) =>
+          event.event_type === GrimoireEventType.MAD &&
+          event.by_role_id === "cerenovus"
+      ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `You've been made mad by the Cerenovus ${times(count)}.`
+          : `This player has been made mad by the Cerenovus ${times(count)}.`)
+        : `Be made mad by the Cerenovus.`,
+  },
+  {
     id: "devils_advocate_saves",
     category: "role",
     scope: "as_role",
@@ -340,7 +363,38 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         ? `The Demon has been saved from execution by a Devil's Advocate at least ${times(count)}.`
         : `No Demon has been saved from execution by a Devil's Advocate yet.`,
   },
-  // Devil's Advocate: Maybe how many times they protected a good player?
+  {
+    id: "devils_advocate_good_protected",
+    category: "role",
+    scope: "as_role",
+    globalDataNeeds: ["grimoire_events", "grimoire_state"],
+    roleIds: ["devils_advocate"],
+    script: "bmr",
+    sao: 2,
+    source: "grimoire_event",
+    label: "Pro Bono",
+    getCount: ({ games, roleId }) =>
+      !roleId
+        ? 0
+        : countMatchingEvents(
+            games,
+            (game, event) =>
+              event.by_role_id === roleId &&
+              event.event_type === GrimoireEventType.OTHER &&
+              event.status_source === "Survives Execution" &&
+              getEventCurrentToken(game, event)?.alignment === "GOOD"
+          ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Devil's Advocate, you've chosen to protect a good player ${times(count)}.`
+          : `As the Devil's Advocate, this player has chosen to protect a good player ${times(count)}.`)
+        : `As the Devil's Advocate, choose to protect a good player.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `A Devil's Advocate has chosen to protect a good player at least ${times(count)}.`
+        : `No Devil's Advocate has chosen to protect a good player yet.`,
+  },
   {
     id: "evil_twin_game_endings",
     category: "role",
@@ -363,13 +417,65 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As the Evil Twin, you've caused ${count} game${pluralize(count)} to end when your twin was killed.`
-          : `As the Evil Twin, this player has caused ${count} game${pluralize(count)} to end when their twin was killed.`)
-        : `As the Evil Twin, cause a game to end when your twin is killed.`,
+          ? `As the Evil Twin, you've caused ${count} game${pluralize(count)} to end when your twin was executed.`
+          : `As the Evil Twin, this player has caused ${count} game${pluralize(count)} to end when their twin was executed.`)
+        : `As the Evil Twin, cause a game to end when your twin is executed.`,
     getGlobalSentence: ({ count }) =>
       count > 0
-        ? `At least ${count} game${pluralize(count)} ${wasWere(count)} ended by an Evil Twin when their twin was killed.`
-        : `No Evil Twin has ended a game when their twin was killed yet.`,
+        ? `At least ${count} game${pluralize(count)} ${wasWere(count)} ended by an Evil Twin when their twin was executed.`
+        : `No Evil Twin has ended a game when their twin was executed yet.`,
+  },
+  {
+    id: "evil_twin_twin_received",
+    category: "role",
+    roleIds: ["evil_twin"],
+    scope: "affected_player",
+    script: "snv",
+    sao: 1,
+    source: "grimoire_event",
+    label: "Separated at Birth",
+    getCount: ({ games }) =>
+      countMatchingEvents(
+        games,
+        (_, event) =>
+          event.by_role_id === "evil_twin" &&
+          event.event_type === GrimoireEventType.OTHER &&
+          event.status_source === "Twin"
+      ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `You've been the Evil Twin's good twin ${times(count)}.`
+          : `This player has been the Evil Twin's good twin ${times(count)}.`)
+        : `Be the Evil Twin's good twin.`,
+  },
+  {
+    id: "fearmonger_players_chosen",
+    category: "role",
+    scope: "as_role",
+    globalDataNeeds: ["grimoire_events"],
+    roleIds: ["fearmonger"],
+    script: "experimental",
+    source: "grimoire_event",
+    label: "Climate of Fear",
+    getCount: ({ games, roleId }) =>
+      countMatchingEvents(
+        games,
+        (_, event) =>
+          event.by_role_id === roleId &&
+          event.event_type === GrimoireEventType.OTHER &&
+          event.status_source === "Fear"
+      ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Fearmonger, you've chosen ${count} player${pluralize(count)} to fear.`
+          : `As the Fearmonger, this player has chosen ${count} player${pluralize(count)} to fear.`)
+        : `As the Fearmonger, choose a player.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} player${pluralize(count)} ${wasWere(count)} chosen by a Fearmonger.`
+        : `No Fearmonger has chosen a player yet.`,
   },
   {
     id: "fearmonger_game_endings",
@@ -399,6 +505,29 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
       count > 0
         ? `At least ${count} game${pluralize(count)} ${wasWere(count)} ended by a Fearmonger nominating and executing their chosen player.`
         : `No Fearmonger has ended a game by nominating and executing their chosen player yet.`,
+  },
+  {
+    id: "fearmonger_chosen_received",
+    category: "role",
+    roleIds: ["fearmonger"],
+    scope: "affected_player",
+    script: "experimental",
+    source: "grimoire_event",
+    label: "Scared Stiff",
+    getCount: ({ games }) =>
+      countMatchingEvents(
+        games,
+        (_, event) =>
+          event.by_role_id === "fearmonger" &&
+          event.event_type === GrimoireEventType.OTHER &&
+          event.status_source === "Fear"
+      ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `You've been chosen by the Fearmonger ${times(count)}.`
+          : `This player has been chosen by the Fearmonger ${times(count)}.`)
+        : `Be chosen by the Fearmonger.`,
   },
   {
     id: "goblin_ability_wins",
@@ -643,6 +772,28 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
       count > 0
         ? `At least ${count} game${pluralize(count)} ${wasWere(count)} ended by a Harpy causing a death for breaking madness, leaving only two players alive.`
         : `No Harpy has ended a game by causing a death for breaking madness yet.`,
+  },
+  {
+    id: "harpy_madness_received",
+    category: "role",
+    roleIds: ["harpy"],
+    scope: "affected_player",
+    script: "experimental",
+    source: "grimoire_event",
+    label: "Fowl Weather",
+    getCount: ({ games }) =>
+      countMatchingEvents(
+        games,
+        (_, event) =>
+          event.event_type === GrimoireEventType.MAD &&
+          event.by_role_id === "harpy"
+      ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `You've been made mad by the Harpy ${times(count)}.`
+          : `This player has been made mad by the Harpy ${times(count)}.`)
+        : `Be made mad by the Harpy.`,
   },
   // Marionette: Nothing relevant. Only option: None?
   {
@@ -1639,6 +1790,35 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `No Widow has chosen to poison themselves yet.`,
   },
   {
+    id: "witch_curses",
+    category: "role",
+    scope: "as_role",
+    globalDataNeeds: ["grimoire_events"],
+    roleIds: ["witch"],
+    script: "snv",
+    sao: 2,
+    source: "grimoire_event",
+    label: "Hex Marks the Spot",
+    getCount: ({ games, roleId }) =>
+      countMatchingEvents(
+        games,
+        (_, event) =>
+          event.by_role_id === roleId &&
+          event.event_type === GrimoireEventType.OTHER &&
+          event.status_source === "Cursed"
+      ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Witch, you've cursed ${count} player${pluralize(count)}.`
+          : `As the Witch, this player has cursed ${count} player${pluralize(count)}.`)
+        : `As the Witch, curse a player.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} player${pluralize(count)} ${wasWere(count)} cursed by a Witch.`
+        : `No Witch has cursed a player yet.`,
+  },
+  {
     id: "witch_kills",
     category: "role",
     scope: "as_role",
@@ -1647,7 +1827,7 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     script: "snv",
     sao: 2,
     source: "grimoire_event",
-    label: "Death Curse",
+    label: "Hexpired",
     getCount: ({ games, roleId }) =>
       countGrimoireEvents(games, roleId, GrimoireEventType.DEATH),
     getSentence: ({ count, isMe }) =>
@@ -1660,6 +1840,30 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
       count > 0
         ? `At least ${count} player${pluralize(count)} ${wasWere(count)} killed by a Witch.`
         : `No Witch has killed a player yet.`,
+  },
+  {
+    id: "witch_curses_received",
+    category: "role",
+    roleIds: ["witch"],
+    scope: "affected_player",
+    script: "snv",
+    sao: 2,
+    source: "grimoire_event",
+    label: "Hex Appeal",
+    getCount: ({ games }) =>
+      countMatchingEvents(
+        games,
+        (_, event) =>
+          event.by_role_id === "witch" &&
+          event.event_type === GrimoireEventType.OTHER &&
+          event.status_source === "Cursed"
+      ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `You've been cursed by the Witch ${times(count)}.`
+          : `This player has been cursed by the Witch ${times(count)}.`)
+        : `Be cursed by the Witch.`,
   },
   {
     id: "witch_demon_kill_game_endings",
@@ -1703,5 +1907,26 @@ export const MINIONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
   },
   // Wizard: Too complex.
   // Wraith: Nothing relevant. Only option: If they were spotted or not?
-  // Xaan: Nothing relevant. Only option: None?
+  {
+    id: "xaan_poisons",
+    category: "role",
+    scope: "as_role",
+    globalDataNeeds: ["grimoire_events"],
+    roleIds: ["xaan"],
+    script: "experimental",
+    source: "grimoire_event",
+    label: "X Factor",
+    getCount: ({ games, roleId }) =>
+      countGrimoireEvents(games, roleId, GrimoireEventType.POISONED),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Xaan, you've poisoned ${count} Townsfolk.`
+          : `As the Xaan, this player has poisoned ${count} Townsfolk.`)
+        : `As the Xaan, poison the Townsfolk.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} Townsfolk ${wasWere(count)} poisoned by a Xaan.`
+        : `No Xaan has poisoned a Townsfolk yet.`,
+  },
 ];

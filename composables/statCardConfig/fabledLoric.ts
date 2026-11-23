@@ -47,6 +47,63 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
         ? `A player has been punished with death by the Angel at least ${times(count)}.`
         : `No player has been punished with death by the Angel yet.`,
   },
+  {
+    id: "angel_protected_received",
+    category: "role",
+    globalDataNeeds: ["grimoire_events"],
+    roleIds: ["angel"],
+    scope: "affected_player",
+    script: "npc",
+    source: "grimoire_event",
+    label: "Guardian Angel",
+    getCount: ({ games }) =>
+      countMatchingEvents(
+        games,
+        (_, event) =>
+          event.event_type === GrimoireEventType.OTHER &&
+          event.by_role_id === "angel" &&
+          event.status_source === "Protected"
+      ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `You've been protected by the Angel ${times(count)}.`
+          : `This player has been protected by the Angel ${times(count)}.`)
+        : `Be protected by the Angel.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `A player has been protected by the Angel at least ${times(count)}.`
+        : `No player has been protected by the Angel yet.`,
+  },
+  {
+    id: "angel_something_bad_received",
+    category: "role",
+    globalDataNeeds: ["grimoire_events"],
+    roleIds: ["angel"],
+    scope: "affected_player",
+    script: "npc",
+    source: "grimoire_event",
+    label: "Fallen from Grace",
+    hidden: true,
+    getCount: ({ games }) =>
+      countMatchingEvents(
+        games,
+        (_, event) =>
+          event.event_type === GrimoireEventType.OTHER &&
+          event.by_role_id === "angel" &&
+          event.status_source === "Something Bad"
+      ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `Something bad has happened to you because of the Angel ${times(count)}.`
+          : `Something bad has happened to this player because of the Angel ${times(count)}.`)
+        : `Have something bad happen to you because of the Angel.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `Something bad has happened to a player because of the Angel at least ${times(count)}.`
+        : `Nothing bad has happened to a player because of the Angel yet.`,
+  },
   // Buddhist: OK.
   {
     id: "doomsayer_deaths",
@@ -76,6 +133,34 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
         : `No player has died to the Doomsayer yet.`,
   },
   {
+    id: "duchess_false_info_received",
+    category: "role",
+    globalDataNeeds: ["grimoire_events"],
+    roleIds: ["duchess"],
+    scope: "affected_player",
+    script: "npc",
+    source: "grimoire_event",
+    label: "Fake Pleasantries",
+    getCount: ({ games }) =>
+      countMatchingEvents(
+        games,
+        (_, event) =>
+          event.event_type === GrimoireEventType.OTHER &&
+          event.by_role_id === "duchess" &&
+          event.status_source === "False Info"
+      ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `You've been given false info by the Duchess ${times(count)}.`
+          : `This player has been given false info by the Duchess ${times(count)}.`)
+        : `Get false info from the Duchess.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `A player has been given false info by the Duchess at least ${times(count)}.`
+        : `No player has been given false info by the Duchess yet.`,
+  },
+  {
     id: "hells_librarian_deaths",
     category: "role",
     globalDataNeeds: ["grimoire_events"],
@@ -83,7 +168,7 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
     scope: "affected_player",
     script: "npc",
     source: "grimoire_event",
-    label: "Library Fine",
+    label: "Banned for Life",
     hidden: true,
     getCount: ({ games }) =>
       countMatchingEvents(
@@ -102,6 +187,35 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
       count > 0
         ? `A player has been punished with death by Hell's Librarian at least ${times(count)}.`
         : `No player has been punished with death by Hell's Librarian yet.`,
+  },
+  {
+    id: "hells_librarian_something_bad_received",
+    category: "role",
+    globalDataNeeds: ["grimoire_events"],
+    roleIds: ["hells_librarian"],
+    scope: "affected_player",
+    script: "npc",
+    source: "grimoire_event",
+    label: "Library Fine",
+    hidden: true,
+    getCount: ({ games }) =>
+      countMatchingEvents(
+        games,
+        (_, event) =>
+          event.event_type === GrimoireEventType.OTHER &&
+          event.by_role_id === "hells_librarian" &&
+          event.status_source === "Something Bad"
+      ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `Something bad has happened to you because of Hell's Librarian ${times(count)}.`
+          : `Something bad has happened to this player because of Hell's Librarian ${times(count)}.`)
+        : `Have something bad happen to you because of Hell's Librarian.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `Something bad has happened to a player because of Hell's Librarian at least ${times(count)}.`
+        : `Nothing bad has happened to a player because of Hell's Librarian yet.`,
   },
   {
     id: "fiddler_game_end_trigger_received",

@@ -955,6 +955,36 @@ export const DEMONS_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `No Po has killed three players in a single night yet.`,
   },
   {
+    id: "po_charges",
+    category: "role",
+    scope: "as_role",
+    globalDataNeeds: ["grimoire_events"],
+    roleIds: ["po"],
+    script: "bmr",
+    source: "grimoire_event",
+    label: "Late Bloomer",
+    getCount: ({ games, roleId }) =>
+      !roleId
+        ? 0
+        : countMatchingEvents(
+            games,
+            (_, event) =>
+              event.by_role_id === roleId &&
+              event.event_type === GrimoireEventType.OTHER &&
+              event.status_source === "3 Attacks"
+          ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Po, you've charged up ${times(count)}.`
+          : `As the Po, this player has charged up ${times(count)}.`)
+        : `As the Po, choose to charge up.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `A Po has charged up at least ${times(count)}.`
+        : `No Po has charged up yet.`,
+  },
+  {
     id: "pukka_kills",
     category: "role",
     scope: "as_role",

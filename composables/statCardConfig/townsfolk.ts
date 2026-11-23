@@ -623,6 +623,29 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `Turn evil due to the Bounty Hunter.`,
   },
   {
+    id: "bounty_hunter_known_received",
+    category: "role",
+    roleIds: ["bounty_hunter"],
+    scope: "affected_player",
+    script: "experimental",
+    source: "grimoire_event",
+    label: "Wanted: Dead or Alive",
+    getCount: ({ games }) =>
+      countMatchingEvents(
+        games,
+        (_, event) =>
+          event.by_role_id === "bounty_hunter" &&
+          event.event_type === GrimoireEventType.OTHER &&
+          (event.status_source === "Know" || event.status_source === "Known")
+      ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `You've been seen by the Bounty Hunter ${times(count)}.`
+          : `This player has been seen by the Bounty Hunter ${times(count)}.`)
+        : `Be seen by the Bounty Hunter.`,
+  },
+  {
     id: "cannibal_good_lunches",
     category: "role",
     scope: "as_role",
@@ -1353,6 +1376,30 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         : `No Grandmother has died after their grandchild was killed by the Demon yet.`,
   },
   {
+    id: "grandmother_grandchild_received",
+    category: "role",
+    roleIds: ["grandmother"],
+    scope: "affected_player",
+    script: "bmr",
+    sao: 1,
+    source: "grimoire_event",
+    label: "Grandma's Favourite",
+    getCount: ({ games }) =>
+      countMatchingEvents(
+        games,
+        (_, event) =>
+          event.by_role_id === "grandmother" &&
+          event.event_type === GrimoireEventType.OTHER &&
+          event.status_source === "Grandchild"
+      ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `You've been the Grandmother's grandchild ${times(count)}.`
+          : `This player has been the Grandmother's grandchild ${times(count)}.`)
+        : `Be the Grandmother's grandchild.`,
+  },
+  {
     id: "high_priestess_top_role",
     category: "role",
     visibility: "global",
@@ -1885,6 +1932,30 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         ? `A Spy has been killed by a Lycanthrope due to misregistering as good at least ${times(count)}.`
         : `No Spy has been killed by a Lycanthrope due to misregistering as good yet.`,
   },
+  {
+    id: "lycanthrope_faux_paw_received",
+    category: "role",
+    scope: "affected_player",
+    globalDataNeeds: ["grimoire_events"],
+    script: "experimental",
+    roleIds: ["lycanthrope"],
+    source: "grimoire_event",
+    label: "Black Sheep",
+    getCount: ({ games }) =>
+      countMatchingEvents(
+        games,
+        (_, event) =>
+          event.event_type === GrimoireEventType.OTHER &&
+          event.by_role_id === "lycanthrope" &&
+          event.status_source === "Faux Paw"
+      ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `You've been the Lycanthrope's faux paw ${times(count)}.`
+          : `This player has been the Lycanthrope's faux paw ${times(count)}.`)
+        : `Be the Lycanthrope's faux paw.`,
+  },
   // Magician: Nothing relevant. Only option: Can't think of anything..
   {
     id: "mathematician_highest_abnormal",
@@ -2001,7 +2072,29 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
         ? `At least ${count} death${pluralize(count)} ${wasWere(count)} bounced to someone else by a Mayor.`
         : `No Mayor has bounced a death to someone else yet.`,
   },
-  // Minstrel [sao: 10]: @todo
+  {
+    id: "minstrel_drunks",
+    category: "role",
+    scope: "as_role",
+    globalDataNeeds: ["grimoire_events"],
+    script: "bmr",
+    sao: 10,
+    roleIds: ["minstrel"],
+    source: "grimoire_event",
+    label: "Drinking Song",
+    getCount: ({ games, roleId }) =>
+      countGrimoireEvents(games, roleId, GrimoireEventType.DRUNK),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Minstrel, you've made ${count} player${pluralize(count)} drunk.`
+          : `As the Minstrel, this player has made ${count} player${pluralize(count)} drunk.`)
+        : `As the Minstrel, make the players drunk.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `At least ${count} player${pluralize(count)} ${wasWere(count)} made drunk by a Minstrel.`
+        : `No Minstrel has made a player drunk yet.`,
+  },
   {
     id: "monk_saves",
     category: "role",
@@ -2032,6 +2125,38 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
       count > 0
         ? `At least ${count} player${pluralize(count)} ${wasWere(count)} saved from the Demon by a Monk.`
         : `No Monk has saved a player from the Demon yet.`,
+  },
+  {
+    id: "monk_demon_protected",
+    category: "role",
+    scope: "as_role",
+    globalDataNeeds: ["grimoire_events", "grimoire_state"],
+    script: "tb",
+    sao: 8,
+    roleIds: ["monk"],
+    source: "grimoire_event",
+    label: "Blessed Be the Demon",
+    getCount: ({ games, roleId }) =>
+      !roleId
+        ? 0
+        : countMatchingEvents(
+            games,
+            (game, event) =>
+              event.by_role_id === roleId &&
+              event.event_type === GrimoireEventType.OTHER &&
+              event.status_source === "Safe" &&
+              getEventCurrentToken(game, event)?.role?.type === "DEMON"
+          ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `As the Monk, you've chosen to protect the Demon ${times(count)}.`
+          : `As the Monk, this player has chosen to protect the Demon ${times(count)}.`)
+        : `As the Monk, choose to protect the Demon.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `A Monk has chosen to protect the Demon at least ${times(count)}.`
+        : `No Monk has chosen to protect the Demon yet.`,
   },
   {
     id: "nightwatchman_ability_uses",
