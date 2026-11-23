@@ -210,6 +210,36 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
         ? `A player has been brought back as a Traveller by the Hindu at least ${times(count)}.`
         : `No player has been brought back as a Traveller by the Hindu yet.`,
   },
+  {
+    id: "god_of_ug_hat_worn_received",
+    category: "role",
+    globalDataNeeds: ["grimoire_events"],
+    roleIds: ["godofug"],
+    scope: "affected_player",
+    script: "npc",
+    source: "grimoire_event",
+    label: "Ug Wear Hat",
+    // One event per new wearer: the hat on the same player on a later page
+    // is not a new event.
+    getCount: ({ games }) =>
+      countMatchingEvents(
+        games,
+        (_, event) =>
+          event.by_role_id === "godofug" &&
+          event.event_type === GrimoireEventType.OTHER &&
+          event.status_source === "Hat"
+      ),
+    getSentence: ({ count, isMe }) =>
+      count > 0
+        ? (isMe
+          ? `You've worn the Ug hat ${times(count)}.`
+          : `This player has worn the Ug hat ${times(count)}.`)
+        : `Wear the Ug hat.`,
+    getGlobalSentence: ({ count }) =>
+      count > 0
+        ? `A player has worn the Ug hat at least ${times(count)}.`
+        : `No player has worn the Ug hat yet.`,
+  },
   // Pope: Nothing to track really.
   {
     id: "storm_catcher_protected_received",

@@ -178,6 +178,7 @@ const HINTS: [roleId: string, reminder: string, hint: string][] = [
   ["hells_librarian", "Dead", "Place on the player who died for talking when the Storyteller asked for silence. Records Hell's Librarian as the cause of death."],
   // Loric
   ["big_wig", "Dead", "Place on the player who died because they broke the Big Wig's madness. Records the Big Wig as the cause of death."],
+  ["godofug", "Hat", "Place on the player wearing the Ug hat. When they fail, move it to the next wearer. Records each player who wore it."],
   ["hindu", "Reincarnated", "Place on the dead player who came back as a Traveller. Records the revive, caused by the Hindu."],
   ["storm_catcher", "Safe", "Place on the player with the good character the Storm Catcher favours, if it is in play. Records that they can only die by execution."],
   ["ventriloquist", "Saved", "Place on the executed player who was mad as a fresh character and didn't die. Records that the Ventriloquist saved them."],

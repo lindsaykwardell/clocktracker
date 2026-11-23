@@ -502,6 +502,27 @@ test("Storm Catcher and Zenomancer: protection and goals", () => {
   assert.equal(s.card("zenomancer_goals_completed_received", "zenomancer", "b"), 1);
 });
 
+test("God of Ug: each player who wears the hat counts once", () => {
+  const s = scenario([
+    page([
+      { id: "a", role: "chef", reminders: [r("godofug", "Hat")] },
+      { id: "b", role: "empath" },
+    ]),
+    // Still wearing it on the next page: not a new event.
+    page([
+      { id: "a", role: "chef", reminders: [r("godofug", "Hat")] },
+      { id: "b", role: "empath" },
+    ]),
+    // Failed, passed on.
+    page([
+      { id: "a", role: "chef" },
+      { id: "b", role: "empath", reminders: [r("godofug", "Hat")] },
+    ]),
+  ]);
+  assert.equal(s.card("god_of_ug_hat_worn_received", "godofug", "a"), 1);
+  assert.equal(s.card("god_of_ug_hat_worn_received", "godofug", "b"), 1);
+});
+
 test("Hindu: a dead player comes back as a Traveller", () => {
   const s = scenario([
     page([{ id: "a", role: "chef" }]),
