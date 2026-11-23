@@ -268,7 +268,7 @@ const EVENT_GROUPS: RuleGroup[] = [
   group({ reminder: "Goal", eventType: "OTHER", sourceMode: "npc" }, ["zenomancer"]),
   group({ reminder: "Goal Completed", eventType: "OTHER", sourceMode: "npc" }, ["zenomancer"]),
   // Passed by hand to the next wearer; each new wearer is one event.
-  group({ reminder: "Hat", eventType: "OTHER", sourceMode: "npc" }, ["godofug"]),
+  group({ reminder: "Hat", eventType: "OTHER", sourceMode: "npc" }, ["god_of_ug"]),
   group({ reminder: "Is The Demon", eventType: "OTHER" }, [["lil_monsta", "until_night"]]),
   group(
     {

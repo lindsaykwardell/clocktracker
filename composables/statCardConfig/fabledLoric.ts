@@ -214,7 +214,7 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
     id: "god_of_ug_hat_worn_received",
     category: "role",
     globalDataNeeds: ["grimoire_events"],
-    roleIds: ["godofug"],
+    roleIds: ["god_of_ug"],
     scope: "affected_player",
     script: "npc",
     source: "grimoire_event",
@@ -225,7 +225,7 @@ export const FABLEDLORIC_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = 
       countMatchingEvents(
         games,
         (_, event) =>
-          event.by_role_id === "godofug" &&
+          event.by_role_id === "god_of_ug" &&
           event.event_type === GrimoireEventType.OTHER &&
           event.status_source === "Hat"
       ),
