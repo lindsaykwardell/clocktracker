@@ -3,14 +3,31 @@ import { Status } from "~/composables/useFetchStatus";
 
 /**
  * Debug mode for the stats pages: shows which games feed a card or stat and
- * why a game doesn't count. Admins only for now; remembered per browser.
+ * why a game doesn't count. Behind the "stats-debug" feature flag, and only on
+ * the user's own pages (/@username/...) unless they're an admin.
+ * Remembered per browser.
  */
 export function useStatsDebug() {
+  const featureFlags = useFeatureFlags();
   const me = useMe();
+  const route = useRoute();
   const stored = useLocalStorage("statsDebug", false);
 
-  const canDebug = computed(
+  const isAdmin = computed(
     () => me.value.status === Status.SUCCESS && !!me.value.data.is_admin
+  );
+
+  const isOwnPage = computed(() => {
+    if (me.value.status !== Status.SUCCESS) return false;
+    const pageUser = route.params.username;
+    return (
+      typeof pageUser === "string" &&
+      pageUser.toLowerCase() === me.value.data.username.toLowerCase()
+    );
+  });
+
+  const canDebug = computed(
+    () => featureFlags.isEnabled("stats-debug") && (isAdmin.value || isOwnPage.value)
   );
 
   const enabled = computed({
