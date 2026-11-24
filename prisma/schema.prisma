@@ -72,14 +72,16 @@ model Game {
   favorite                   FavoriteGame?
   favorite_id                Int?                 @unique
   grimoire_snapshots         GrimoireSnapshot[]
-  /// When grimoire events were last generated or saved for this game.
-  /// Null means the background fill has not processed it yet.
-  grimoire_events_generated_at DateTime? @db.Timestamptz(6)
+  /// Null until the background fill or an editor save has generated this
+  /// game's events. Otherwise the last catch-up whose rules the events
+  /// include (server/utils/grimoireEventsCatchUps.ts); saves and the fill set
+  /// the latest, games saved before the catch-ups existed have 0.
+  grimoire_events_version    Int?
 
   @@index([user_id])
   @@index([script_id, parent_game_id])
   @@index([end_trigger_role_id])
-  @@index([grimoire_events_generated_at, id])
+  @@index([grimoire_events_version, id])
 }
 
 model ImportedGame {

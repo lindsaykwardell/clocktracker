@@ -24,6 +24,7 @@ import {
   reminderTokenWithType,
   type IncomingReminder,
 } from "~/server/utils/reminderTokenLinks";
+import { GRIMOIRE_EVENTS_VERSION } from "~/server/utils/grimoireEventsCatchUps";
 
 const MAX_GRIMOIRE_PAGE_TITLE_LENGTH = 64;
 
@@ -148,7 +149,7 @@ export default defineEventHandler(async (handler) => {
         grimoire_events: {
           create: mapGrimoireEventsForCreate(incomingGrimoireEvents),
         },
-        grimoire_events_generated_at: new Date(),
+        grimoire_events_version: GRIMOIRE_EVENTS_VERSION,
         grimoire: {
           create: [
             ...body.grimoire.map((g) => ({

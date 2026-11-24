@@ -5,6 +5,7 @@ import {
   prepareReminderLinks,
   reminderTokenWithType,
 } from "~/server/utils/reminderTokenLinks";
+import { GRIMOIRE_EVENTS_VERSION } from "~/server/utils/grimoireEventsCatchUps";
 
 type SnapshotToken = {
   grimoire_participant_id?: string | null;
@@ -195,7 +196,7 @@ export default defineEventHandler(async (handler) => {
             : null) ?? null
         );
   if (Array.isArray(data.grimoire_events)) {
-    gameUpdateData.grimoire_events_generated_at = new Date();
+    gameUpdateData.grimoire_events_version = GRIMOIRE_EVENTS_VERSION;
     gameUpdateData.grimoire_events = {
       deleteMany: {},
       create: data.grimoire_events.map((event) => ({

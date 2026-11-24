@@ -1,6 +1,7 @@
 import { type Alignment,type Game,type GrimoireEvent,type Prisma } from "~/server/generated/prisma/client";
 import { prisma } from "./prisma";
 import { mapGrimoireEventsForCreate } from "./gamePropagation";
+import { GRIMOIRE_EVENTS_VERSION } from "~/server/utils/grimoireEventsCatchUps";
 
 type GameTrackingData=Partial<Pick<Game,
   |"end_trigger"
@@ -15,9 +16,9 @@ type GameTrackingData=Partial<Pick<Game,
 >>&{ grimoire_events?: GrimoireEvent[] };
 
 // A child copy counts as having generated events whenever this save passes
-// the events along, so the background fill never touches it.
-function eventsGeneratedAt(game: GameTrackingData) {
-  return game.grimoire_events===undefined? undefined:new Date();
+// the events along, so the background fill and the catch-ups never touch it.
+function eventsVersion(game: GameTrackingData) {
+  return game.grimoire_events===undefined? undefined:GRIMOIRE_EVENTS_VERSION;
 }
 
 function trackingData(game: GameTrackingData) {
@@ -155,7 +156,7 @@ export async function findOrCreatePlayerChildGame(opts: {
         co_storytellers: game.co_storytellers,
         win_v2: game.win_v2 as any,
         ...trackingData(game),
-        grimoire_events_generated_at: eventsGeneratedAt(game),
+        grimoire_events_version: eventsVersion(game),
         grimoire_events: game.grimoire_events===undefined? undefined:{
           deleteMany: {},
           create: mapGrimoireEventsForCreate(game.grimoire_events),
@@ -228,7 +229,7 @@ export async function findOrCreatePlayerChildGame(opts: {
       co_storytellers: game.co_storytellers,
       win_v2: game.win_v2 as any,
       ...trackingData(game),
-      grimoire_events_generated_at: eventsGeneratedAt(game),
+      grimoire_events_version: eventsVersion(game),
       grimoire_events: game.grimoire_events===undefined? undefined:{
         create: mapGrimoireEventsForCreate(game.grimoire_events),
       },
@@ -317,7 +318,7 @@ export async function findOrCreateStorytellerChildGame(opts: {
         co_storytellers: game.co_storytellers,
         win_v2: game.win_v2 as any,
         ...trackingData(game),
-        grimoire_events_generated_at: eventsGeneratedAt(game),
+        grimoire_events_version: eventsVersion(game),
         grimoire_events: game.grimoire_events===undefined? undefined:{
           deleteMany: {},
           create: mapGrimoireEventsForCreate(game.grimoire_events),
@@ -376,7 +377,7 @@ export async function findOrCreateStorytellerChildGame(opts: {
       co_storytellers: game.co_storytellers,
       win_v2: game.win_v2 as any,
       ...trackingData(game),
-      grimoire_events_generated_at: eventsGeneratedAt(game),
+      grimoire_events_version: eventsVersion(game),
       grimoire_events: game.grimoire_events===undefined? undefined:{
         create: mapGrimoireEventsForCreate(game.grimoire_events),
       },

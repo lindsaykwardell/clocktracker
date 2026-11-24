@@ -1,13 +1,14 @@
 import { Prisma, type PrismaClient } from "~/server/generated/prisma/client";
 import { generateEventsForMissingGames } from "~/server/utils/generateGrimoireEvents";
 import { buildReminderCatalog, type ReminderCatalog } from "~/shared/reminderCatalog";
+import { GRIMOIRE_EVENTS_VERSION } from "~/server/utils/grimoireEventsCatchUps";
 
 /**
  * Background fill for games that have never had grimoire events generated
  * (games recorded before the feature existed).
  *
  * Safety rules:
- * - Only games with `grimoire_events_generated_at = null` are considered.
+ * - Only games with `grimoire_events_version = null` are considered.
  *   Editor saves set that column, so anything a user has saved is skipped.
  * - A game that already has events is only marked, never regenerated.
  * - Events are only ever added; nothing is deleted.
@@ -49,7 +50,7 @@ const MAX_TRACKED_FAILURES = 1000;
  * The catalog entries the reminders of these games point to (by link or by
  * icon), so the events can say exactly which role a reminder came from.
  */
-async function loadReminderCatalogFor(
+export async function loadReminderCatalogFor(
   prisma: PrismaClient,
   games: {
     grimoire: {
@@ -120,7 +121,7 @@ export async function fillMissingGrimoireEvents(
   };
 
   const unprocessed: Prisma.GameWhereInput = {
-    grimoire_events_generated_at: null,
+    grimoire_events_version: null,
     deleted: false,
     ...(options.userId ? { user_id: options.userId } : {}),
     ...(failedGameIds.size ? { id: { notIn: [...failedGameIds] } } : {}),
@@ -192,8 +193,11 @@ export async function fillMissingGrimoireEvents(
       const outcome = await prisma.$transaction(async (tx) => {
         // Claim the game. If an editor save marked it in the meantime, leave it alone.
         const claimed = await tx.game.updateMany({
-          where: { id: game.id, grimoire_events_generated_at: null },
-          data: { grimoire_events_generated_at: new Date() },
+          where: { id: game.id, grimoire_events_version: null },
+          // Generated with every current rule, so no catch-up is needed.
+          data: {
+            grimoire_events_version: GRIMOIRE_EVENTS_VERSION,
+          },
         });
         if (claimed.count === 0) return "skipped" as const;
 
@@ -264,7 +268,9 @@ export async function fillMissingGrimoireEvents(
 
 async function markGenerated(prisma: PrismaClient, gameId: string) {
   await prisma.game.updateMany({
-    where: { id: gameId, grimoire_events_generated_at: null },
-    data: { grimoire_events_generated_at: new Date() },
+    where: { id: gameId, grimoire_events_version: null },
+    // Events saved before this column existed, by an editor that knew none of
+    // the catch-up rules: version 0, so every catch-up still runs.
+    data: { grimoire_events_version: 0 },
   });
 }
