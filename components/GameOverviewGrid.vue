@@ -154,8 +154,9 @@
           <div class="absolute w-full top-0 left-0" />
           <div
             class="absolute top-0 right-0 p-2 flex gap-1 items-center justify-center game-winner game-winner--grid"
-            v-html="displayWinIconSvg(game, props.showCommunityCard)"
-          ></div>
+          >
+            <WinIcon :result="gameResult(game, props.showCommunityCard)" />
+          </div>
         </component>
         <div
           class="absolute bottom-0 left-0 w-full flex justify-between bg-gradient-to-tr from-black/75 via-black/25 to-black/75"
@@ -296,7 +297,7 @@
 </template>
 
 <script setup lang="ts">
-import { displayWinIconSvg } from "~/composables/useGames";
+import { gameResult } from "~/composables/useGames";
 import { FriendStatus } from "~/composables/useFriends";
 const gamesStore = useGames();
 const users = useUsers();

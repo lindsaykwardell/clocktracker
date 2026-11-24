@@ -180,11 +180,10 @@
                                         >
                                             {{ last_character.alignment }}
                                             <div
-                                                v-html="
-                                                    displayWinIconSvg(game.data)
-                                                "
                                                 class="mb-1 text-black dark:text-white"
-                                            ></div>
+                                            >
+                                                <WinIcon :result="gameResult(game.data)" />
+                                            </div>
                                         </span>
                                         <template v-else>
                                             <div
@@ -225,13 +224,10 @@
                                                                 .length -
                                                                 1
                                                         "
-                                                        v-html="
-                                                            displayWinIconSvg(
-                                                                game.data,
-                                                            )
-                                                        "
                                                         class="mb-1 text-black dark:text-white"
-                                                    ></div>
+                                                    >
+                                                        <WinIcon :result="gameResult(game.data)" />
+                                                    </div>
                                                 </span>
                                             </div>
                                         </template>
@@ -979,7 +975,7 @@ import {
     parseEndTriggerSubtype,
 } from "~/composables/endTriggerSubtypeConfig";
 import type { GameRecord } from "~/composables/useGames";
-import { displayWinIconSvg } from "~/composables/useGames";
+import { gameResult } from "~/composables/useGames";
 import dayjs from "dayjs";
 import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
 import { Status } from "~/composables/useFetchStatus";

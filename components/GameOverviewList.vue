@@ -163,8 +163,9 @@
           <td>
             <div
               class="flex gap-1 items-center justify-center game-winner game-winner--table"
-              v-html="displayWinIconSvg(game, props.showCommunityCard)"
-            ></div>
+            >
+              <WinIcon :result="gameResult(game, props.showCommunityCard)" />
+            </div>
           </td>
           <td v-if="!props.readonly">
             <div class="game-actions flex gap-2 items-center justify-center">
@@ -254,7 +255,7 @@
 </template>
 
 <script setup lang="ts">
-import { displayWinIconSvg } from "~/composables/useGames";
+import { gameResult } from "~/composables/useGames";
 import { FriendStatus } from "~/composables/useFriends";
 
 const gamesStore = useGames();

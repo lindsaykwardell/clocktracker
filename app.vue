@@ -8,6 +8,7 @@
             Staging environment. Administrator access only.
         </span>
     </div>
+    <WinIconSprite />
     <NuxtPage />
     <RateLimitNotice />
     <AnnouncementDialog
@@ -276,6 +277,12 @@ ChartJS.defaults.set("animation", false as unknown as Record<string, unknown>);
 </script>
 
 <style>
+/* Keep room for the scrollbar on every page, so content doesn't shift
+   sideways between pages (or tabs) that do and don't scroll. */
+html {
+    scrollbar-gutter: stable;
+}
+
 body {
     @apply bg-stone-50 dark:bg-stone-800 font-gothic dark:text-stone-100;
 }
