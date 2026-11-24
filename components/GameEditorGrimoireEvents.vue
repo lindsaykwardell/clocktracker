@@ -489,14 +489,14 @@ function getTokenForParticipant(pageIndex: number, participantId: string) {
 // Event display helpers
 
 /**
- * Returns a placeholder character object for empty token renders.
+ * Returns a placeholder character object for empty token renders. No role id:
+ * Token would look for that id's image, miss, and show the custom-character art.
  */
 function blankCharacter() {
   return {
     name: "",
     alignment: "NEUTRAL" as const,
     role: {
-      id: "blank",
       token_url: "/1x1.png",
       type: "",
       initial_alignment: "NEUTRAL" as const,
@@ -1546,13 +1546,7 @@ function recordGrimoireEvent(payload: {
   const previousPageIndex = payload.pageIndex - 1;
   const previousToken =
     previousPageIndex >= 0
-      ? findMatchingTokenOnPreviousPage(
-          props.game.grimoire,
-          payload.pageIndex,
-          payload.token,
-          undefined,
-          !payload.isDead
-        )
+      ? findMatchingTokenOnPreviousPage(props.game.grimoire, payload.pageIndex, payload.token)
       : null;
   const wasDeadPreviously = previousToken?.is_dead ?? false;
   const shouldRecordDeath = payload.isDead && !wasDeadPreviously;

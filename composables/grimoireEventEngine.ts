@@ -1,8 +1,9 @@
 import { GrimoireEventType } from "~/composables/useGames";
 import { GRIMOIRE_REMINDER_EVENT_CONFIG } from "~/composables/grimoireReminderEventConfig";
 import {
-  createParticipantId,
-  findMatchingTokenOnPreviousPage,
+  assignParticipantIds,
+  matchPageTokens,
+  seatMoves,
 } from "~/composables/grimoireParticipantMatching";
 import { reminderRoleId, type ReminderCatalog } from "~/shared/reminderCatalog";
 import {
@@ -629,44 +630,6 @@ export function createGrimoireEventEngine(context: GrimoireEventEngineContext) {
     return `${grimoirePage}:${participantId}:${kind}`;
   }
 
-  /**
-   * Detects the single participant who moved when a seat rotation is effectively one move,
-   * because a seat swap recorded as many independent moves is noisy.
-   */
-  function detectSingleSeatMove(previousIds: string[], currentIds: string[]) {
-    if (previousIds.length !== currentIds.length) return null;
-    if (previousIds.join("|") === currentIds.join("|")) return null;
-
-    const prevSet = new Set(previousIds);
-    if (
-      prevSet.size !== previousIds.length ||
-      currentIds.some((id) => !prevSet.has(id))
-    ) {
-      return null;
-    }
-
-    let foundMovedId: string | null = null;
-    for (let from = 0; from < previousIds.length; from += 1) {
-      const moved = previousIds[from];
-      const withoutMoved = previousIds
-        .slice(0, from)
-        .concat(previousIds.slice(from + 1));
-      for (let to = 0; to <= withoutMoved.length; to += 1) {
-        const candidate = withoutMoved
-          .slice(0, to)
-          .concat([moved], withoutMoved.slice(to));
-        if (candidate.join("|") === currentIds.join("|")) {
-          if (foundMovedId && foundMovedId !== moved) {
-            return null;
-          }
-          foundMovedId = moved;
-        }
-      }
-    }
-
-    return foundMovedId;
-  }
-
   /** The events the grimoire implies, keyed by page, participant and kind. */
   function buildExpectations() {
     const grimoire = context.getGrimoire();
@@ -688,28 +651,27 @@ export function createGrimoireEventEngine(context: GrimoireEventEngineContext) {
       }
     >();
 
+    // Every id first: an event's source may sit in a later seat, and needs its
+    // id when the event is made. Existing ids are kept (events point at them).
+    assignParticipantIds(grimoire, { keepExisting: true });
+
     grimoire.forEach((page, pageIndex) => {
       const orderedTokens = page.tokens.slice().sort((a, b) => a.order - b.order);
-      const usedPreviousOrders = new Set<number>();
+      // The token each one continues on the previous page, for the whole page at once.
+      const previousMatches =
+        pageIndex > 0 ? matchPageTokens(grimoire[pageIndex - 1].tokens, page.tokens) : null;
+      // Who changed seat (see seatMoves): not a name moved onto another
+      // character, nor everyone shifted by one player's move.
+      const movedTokens = previousMatches
+        ? seatMoves(grimoire[pageIndex - 1].tokens, page.tokens, previousMatches)
+        : new Set<(typeof page.tokens)[number]>();
       orderedTokens.forEach((token) => {
-        const previousToken =
-          pageIndex > 0
-            ? findMatchingTokenOnPreviousPage(
-                grimoire,
-                pageIndex,
-                token,
-                usedPreviousOrders,
-                !token.is_dead
-              )
-            : null;
+        const previousToken = previousMatches?.get(token) ?? null;
         const wasDeadPreviously = previousToken?.is_dead ?? false;
         const shouldHaveDeath = token.is_dead && !wasDeadPreviously;
         const shouldHaveRevival = !token.is_dead && wasDeadPreviously;
 
-        if (!token.grimoire_participant_id) {
-          token.grimoire_participant_id = createParticipantId();
-        }
-        const participantId = token.grimoire_participant_id;
+        const participantId = token.grimoire_participant_id as string;
         const deadReminderSource = detectDeadReminderSource(orderedTokens, token);
         const oldRoleId = previousToken?.role_id ?? null;
         const newRoleId = token.role_id ?? null;
@@ -846,7 +808,7 @@ export function createGrimoireEventEngine(context: GrimoireEventEngineContext) {
             });
           }
 
-          if (token.order !== previousToken.order) {
+          if (movedTokens.has(token)) {
             expected.set(expectedKey(pageIndex, participantId, "seat"), {
               grimoire_page: pageIndex,
               participant_id: participantId,
@@ -1110,57 +1072,6 @@ export function createGrimoireEventEngine(context: GrimoireEventEngineContext) {
           }
         }
       });
-
-      if (pageIndex > 0) {
-        const previousOrderedTokens = grimoire[pageIndex - 1].tokens
-          .slice()
-          .sort((a, b) => a.order - b.order);
-        const previousIds = previousOrderedTokens
-          .map((t) => t.grimoire_participant_id)
-          .filter((id): id is string => !!id);
-        const currentIds = orderedTokens
-          .map((t) => t.grimoire_participant_id)
-          .filter((id): id is string => !!id);
-
-        if (previousIds.length === currentIds.length && previousIds.length > 0) {
-          const singleMovedParticipantId = detectSingleSeatMove(previousIds, currentIds);
-          if (singleMovedParticipantId) {
-            const token = orderedTokens.find(
-              (t) => t.grimoire_participant_id === singleMovedParticipantId
-            );
-            if (token) {
-              const previousTokenForSeat =
-                previousOrderedTokens.find(
-                  (t) => t.grimoire_participant_id === singleMovedParticipantId
-                ) ?? null;
-              expected.set(expectedKey(pageIndex, singleMovedParticipantId, "seat"), {
-                grimoire_page: pageIndex,
-                participant_id: singleMovedParticipantId,
-                event_type: GrimoireEventType.SEAT_CHANGE,
-                status_source: null,
-                by_participant_id: null,
-                player_name: token.player_name || "",
-                role_id: token.role_id ?? null,
-                by_role_id: null,
-                old_role_id: previousTokenForSeat?.role_id ?? null,
-                new_role_id: token.role_id ?? null,
-                old_alignment: previousTokenForSeat?.alignment ?? null,
-                new_alignment: token.alignment ?? null,
-              });
-            }
-
-            expected.forEach((value, key) => {
-              if (
-                key.startsWith(`${pageIndex}:`) &&
-                value.event_type === GrimoireEventType.SEAT_CHANGE &&
-                value.participant_id !== singleMovedParticipantId
-              ) {
-                expected.delete(key);
-              }
-            });
-          }
-        }
-      }
     });
 
     return expected;

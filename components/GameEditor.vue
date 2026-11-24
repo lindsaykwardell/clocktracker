@@ -992,10 +992,7 @@ import {
   type RoleIncludeConfig,
 } from "~/composables/grimoireEventRoleConfig";
 import dayjs from "dayjs";
-import {
-  createParticipantId,
-  normalizePlayerName,
-} from "~/composables/grimoireParticipantMatching";
+import { assignParticipantIds } from "~/composables/grimoireParticipantMatching";
 
 // The grimoire options above the grimoire, remembered per browser. The
 // reminder dialogs read "show tracking reminders" from here.
@@ -1497,63 +1494,9 @@ function recomputeGrimoireParticipantIds() {
   recomputingParticipantIds = true;
 
   try {
-    const byOrder = (a: { order: number }, b: { order: number }) => a.order - b.order;
-
-    const firstPage = props.game.grimoire[0];
-    firstPage.tokens.forEach((token) => {
-      if (!token.grimoire_participant_id) {
-        token.grimoire_participant_id = createParticipantId();
-      }
-    });
-
-    for (let pageIndex = 1; pageIndex < props.game.grimoire.length; pageIndex += 1) {
-      const page = props.game.grimoire[pageIndex];
-      const previousPage = props.game.grimoire[pageIndex - 1];
-      if (!previousPage) continue;
-
-      const previousTokens = previousPage.tokens.slice().sort(byOrder);
-      const currentTokens = page.tokens.slice().sort(byOrder);
-      const usedPreviousOrders = new Set<number>();
-
-      for (const token of currentTokens) {
-        const tokenName = normalizePlayerName(token.player_name);
-        const scored = previousTokens
-          .filter((candidate) => !usedPreviousOrders.has(candidate.order))
-          .map((candidate) => {
-            let score = 0;
-            if (token.player_id && candidate.player_id && token.player_id === candidate.player_id) {
-              score += 100;
-            }
-            const candidateName = normalizePlayerName(candidate.player_name);
-            if (tokenName && candidateName && tokenName === candidateName) {
-              score += 60;
-            }
-            if (token.role_id && candidate.role_id && token.role_id === candidate.role_id) {
-              score += 40;
-            }
-            if (token.order === candidate.order) {
-              score += 20;
-            }
-            return { candidate, score };
-          })
-          .sort((a, b) => b.score - a.score);
-
-        const best = scored[0];
-        const second = scored[1];
-        const hasStrongMatch = !!best && best.score >= 60;
-        const isAmbiguous = !!best && !!second && best.score === second.score;
-
-        if (hasStrongMatch && !isAmbiguous && best.candidate.grimoire_participant_id) {
-          token.grimoire_participant_id = best.candidate.grimoire_participant_id;
-          usedPreviousOrders.add(best.candidate.order);
-          continue;
-        }
-
-        if (!token.grimoire_participant_id) {
-          token.grimoire_participant_id = createParticipantId();
-        }
-      }
-    }
+    // The same matching as the events and the background fill, so the ids
+    // and the events agree (see grimoireParticipantMatching.ts).
+    assignParticipantIds(props.game.grimoire, { keepExisting: false });
   } finally {
     recomputingParticipantIds = false;
   }

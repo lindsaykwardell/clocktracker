@@ -109,3 +109,21 @@ test("a seat shuffle that isn't one move keeps every seat change", () => {
 
   assert.equal(eventsOfType(events, "SEAT_CHANGE").length, 4);
 });
+
+test("another character's reminder on a self-reminder character isn't its own", () => {
+  // The Preacher's "No Ability" on the Mezepheles: one event, from the
+  // Preacher, not a second one for the Mezepheles' own "No Ability".
+  const noAbility = { reminder: "No Ability", token_url: "/img/role/preacher.webp" };
+  const { events } = generateEventsForMissingGames([
+    page(1, [token("lars", 0, "preacher"), token("yasmin", 1, "mezepheles")]),
+    page(2, [
+      token("lars", 0, "preacher"),
+      token("yasmin", 1, "mezepheles", { reminders: [noAbility] }),
+    ]),
+  ]);
+
+  const removed = events.filter((event) => event.status_source === "No Ability");
+  assert.equal(removed.length, 1);
+  assert.equal(removed[0].by_role_id, "preacher");
+  assert.equal(removed[0].by_participant_id, "lars");
+});
