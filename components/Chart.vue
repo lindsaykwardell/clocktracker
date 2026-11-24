@@ -43,8 +43,9 @@
     />
     <PolarArea
       v-if="options.type === 'POLAR_AREA'"
-      :data="chartData"
-      :options="chartOptions"
+      :data="polarData"
+      :options="polarOptions"
+      :plugins="[pivotSeparators]"
     />
     <List 
       v-if="options.type === 'LIST'" 
@@ -461,8 +462,26 @@ function getPivot(
 ) {
   if (props.options.pivot === null) return null;
 
-  const getColor = (categoryColor: string) =>
-    props.options.type === "BAR" ? categoryColor : dataColors;
+  // Player win/loss pies: each ring in its own category colour, losses left
+  // empty (like the Win Rate highlight), so the rings can be told apart. Other
+  // data fields need their own slice colours.
+  const ringShowsWins =
+    props.options.data === "WIN" &&
+    !props.options.storyteller_only &&
+    props.options.pivot !== "WIN";
+
+  const getColor = (categoryColor: string) => {
+    if (props.options.type === "BAR") return categoryColor;
+    if (ringShowsWins) {
+      // A polar wedge's length is the value, so its loss must stay visible.
+      const loss =
+        props.options.type === "POLAR_AREA"
+          ? colord(categoryColor).alpha(0.35).toRgbString()
+          : "rgba(0,0,0,0.08)";
+      return [categoryColor, loss];
+    }
+    return dataColors;
+  };
 
   if (props.options.pivot === "ROLE") {
     const townsfolk = validators.map(
@@ -796,6 +815,90 @@ function getPivot(
 
   return null;
 }
+
+/**
+ * Polar area charts give every value the same angle and show it by length.
+ * With a pivot, Chart.js would draw each pivot category as its own layer on
+ * the same angles, so the wedges hide each other. Instead, one layer with a
+ * wedge per pivot category and value (empty ones left out), grouped by
+ * category, with a separator line between the groups.
+ */
+const polarData = computed(() => {
+  const data = chartData.value;
+  if (!props.options.pivot) return data;
+
+  const labels: string[] = [];
+  const values: number[] = [];
+  const colors: string[] = [];
+  const groupStarts: number[] = [];
+
+  for (const dataset of data.datasets as {
+    label?: string;
+    data: number[];
+    backgroundColor: string | string[];
+  }[]) {
+    let firstInGroup = true;
+    dataset.data.forEach((value, index) => {
+      if (!value) return;
+      if (firstInGroup) {
+        groupStarts.push(values.length);
+        firstInGroup = false;
+      }
+      labels.push(`${dataset.label} · ${data.labels[index]}`);
+      values.push(value);
+      colors.push(
+        Array.isArray(dataset.backgroundColor)
+          ? dataset.backgroundColor[index % dataset.backgroundColor.length]
+          : dataset.backgroundColor
+      );
+    });
+  }
+
+  return {
+    labels,
+    datasets: [{ data: values, backgroundColor: colors, borderColor: "#fff", borderWidth: 1 }],
+    groupStarts,
+  };
+});
+
+const polarOptions = computed(() => ({
+  ...chartOptions.value,
+  plugins: {
+    ...chartOptions.value.plugins,
+    pivotSeparators: { starts: "groupStarts" in polarData.value ? polarData.value.groupStarts : [] },
+  },
+}));
+
+// Draws a line from the centre to the edge where each pivot group starts.
+const pivotSeparators = {
+  id: "pivotSeparators",
+  afterDatasetsDraw(chart: any, _args: unknown, options: { starts?: number[] }) {
+    const starts = options?.starts ?? [];
+    if (starts.length < 2) return;
+    const arcs = chart.getDatasetMeta(0)?.data ?? [];
+    const radius = chart.scales?.r?.drawingArea;
+    if (!arcs.length || !radius) return;
+
+    const dark = document.documentElement.classList.contains("dark");
+    const { ctx } = chart;
+    ctx.save();
+    // Stone-400/500 at partial opacity: visible between the groups, but quiet.
+    ctx.strokeStyle = dark ? "rgba(168,162,158,0.6)" : "rgba(120,113,108,0.5)";
+    ctx.lineWidth = 1;
+    for (const start of starts) {
+      const arc = arcs[start];
+      if (!arc) continue;
+      ctx.beginPath();
+      ctx.moveTo(arc.x, arc.y);
+      ctx.lineTo(
+        arc.x + Math.cos(arc.startAngle) * radius,
+        arc.y + Math.sin(arc.startAngle) * radius
+      );
+      ctx.stroke();
+    }
+    ctx.restore();
+  },
+};
 
 const chartOptions = computed(() => ({
   responsive: true,

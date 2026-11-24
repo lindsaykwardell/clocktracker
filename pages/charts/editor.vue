@@ -178,6 +178,18 @@ const myGames = computed(() => {
   return games.getByPlayer(me.value.data.username);
 });
 
+// Opened directly (or reloaded), nothing has loaded the games yet: fetchMe
+// skips them when the page is rendered on the server. Load them here, in the
+// browser only: a fetch started during server rendering is sent to the
+// browser as "loading" and never finishes there.
+watchEffect(() => {
+  if (import.meta.server) return;
+  if (me.value?.status !== Status.SUCCESS) return;
+  if (myGames.value?.status === Status.IDLE) {
+    games.fetchPlayerGames(me.value.data.username);
+  }
+});
+
 const myTags = computed(() => {
   if (me.value?.status === Status.SUCCESS) {
     return games.getTagsByPlayer(me.value.data.username);
