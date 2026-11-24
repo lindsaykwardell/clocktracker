@@ -29,7 +29,7 @@
             />
           </nuxt-link>
 
-          <div class="text-center text-sm text-balance max-w-44">
+          <div class="text-center text-sm text-balance max-w-56">
             {{ roleArticle(mostStorytold.name) }}<span class="font-semibold">{{ mostStorytold.name }}</span>
             made an appearance in {{ mostStorytold.total }} game<span v-if="mostStorytold.total !== 1">s</span>.
           </div>
@@ -69,7 +69,7 @@
             />
           </nuxt-link>
 
-          <div class="text-center text-sm text-balance max-w-44">
+          <div class="text-center text-sm text-balance max-w-56">
             {{ roleArticle(favoriteBluff.name) }}<span class="font-semibold">{{ favoriteBluff.name }}</span>
             was shown to the demon a total of {{ favoriteBluff.bluffs }} time<span v-if="favoriteBluff.bluffs !== 1">s</span>!
           </div>

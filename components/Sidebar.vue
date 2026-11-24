@@ -175,6 +175,7 @@
                     id="my-profile"
                     :to="`/@${me.data.username}`"
                     :title="me.data.display_name"
+                    :aria-current="isOnMyProfileTab ? 'page' : undefined"
                 >
                     <Avatar
                         :value="me.data.avatar"
@@ -213,6 +214,15 @@ const { showMenu, toggleSidebar, closeSidebar, isMobile } = useSidebarState();
 const me = useMe();
 const friends = useFriends();
 const featureFlags = useFeatureFlags();
+const route = useRoute();
+
+// The profile link is only the current page on the profile tab; the router's
+// own check ignores ?view=, so it would also claim the Games and Stats tabs.
+const isOnMyProfileTab = computed(() => {
+  if (me.value.status !== Status.SUCCESS) return false;
+  const view = String(route.query.view ?? "");
+  return route.path === `/@${me.value.data.username}` && (view === "" || view === "profile");
+});
 const forumUnreadCount = ref(0);
 const canAccessAdmin = ref(false);
 

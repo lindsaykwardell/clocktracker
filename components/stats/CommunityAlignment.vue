@@ -469,7 +469,7 @@ function biasDetail(name: string) {
   const pct = Math.round(diffRate * 100);
   return `<div class="text-balance max-w-44 space-y-2">
     <p>Based on ${total} game${total === 1 ? "" : "s"} played, this player was expected to draw an Evil token ${expectedEvil.toFixed(1)} time${expectedEvil === 1 ? "" : "s"}.</p>
-    <p>They drew one ${actualEvil} time${actualEvil === 1 ? "" : "s"}, which is a difference of <span style="color:${biasColor(diffRate)}; font-weight:600;">${pct >= 0 ? "+" : ""}${pct}%</span>.</p>
+    <p>They drew an Evil token ${actualEvil} time${actualEvil === 1 ? "" : "s"}, which is a difference of <span style="color:${biasColor(diffRate)}; font-weight:600;">${pct >= 0 ? "+" : ""}${pct}%</span>.</p>
   </div>`;
 }
 

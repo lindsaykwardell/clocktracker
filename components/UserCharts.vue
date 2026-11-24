@@ -5,7 +5,7 @@
       class="flex flex-col gap-3 px-4"
     >
       <div class="flex flex-col lg:flex-row gap-3 justify-between">
-        <div class="flex flex-col md:flex-row gap-3 px-4">
+        <div class="flex flex-col md:flex-row gap-3">
           <div class="relative w-full md:w-auto">
             <Menu>
               <MenuButton class="relative w-full md:w-auto">
@@ -26,11 +26,11 @@
                 leave-to-class="transform scale-95 opacity-0"
               >
                 <MenuItems
-                  class="absolute top-[100%] left-0 md:right-0 md:left-auto lg:right-auto lg:left-0 z-20 bg-stone-950 p-2 rounded shadow-md whitespace-nowrap flex flex-col gap-2 items-start w-full md:w-[355px]"
+                  class="absolute top-[100%] left-0 md:right-0 md:left-auto lg:right-auto lg:left-0 z-20 bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-700 p-2 rounded shadow-md whitespace-nowrap flex flex-col gap-2 items-start w-full md:w-[355px]"
                 >
                   <MenuItem>
                     <div class="flex gap-2 items-center">
-                      <span class="flex-shrink text-stone-200">Dates</span>
+                      <span class="flex-shrink text-stone-800 dark:text-stone-200">Dates</span>
                       <Input
                         @click.stop
                         type="date"
@@ -50,7 +50,7 @@
                     </div>
                   </MenuItem>
                   <MenuItem>
-                    <div class="flex gap-2 items-center text-stone-200">
+                    <div class="flex gap-2 items-center text-stone-800 dark:text-stone-200">
                       Player Count
                       <Input
                         @click.stop
@@ -132,42 +132,32 @@
               </transition>
             </Menu>
           </div>
-        </div>
-        <div class="flex gap-2 items-center justify-center md:justify-end">
           <Button
             v-if="statsDebug.canDebug.value"
             @click="statsDebug.enabled.value = !statsDebug.enabled.value"
             :active="statsDebug.enabled.value"
+            :aria-pressed="statsDebug.enabled.value"
             color="positive"
             variant="soft"
             icon="bug"
-            title="Admins only: show which games feed each card and stat"
+            title="Show which games feed each card and stat"
           >
             Debug
           </Button>
-
-          <Button
-            @click="setMode('player')"
-            :active="mode === 'player'"
-            color="primary"
-            variant="soft"
-            icon="person"
-          >
-            Player
-          </Button>
-
-          <Button
-            @click="setMode('storyteller')"
-            :active="mode === 'storyteller'"
-            color="primary"
-            variant="soft"
-            icon="book"
-          >
-            Storyteller
-          </Button>
+        </div>
+        <div class="flex gap-2 items-center justify-center md:justify-end">
+          <SegmentedControl
+            :model-value="mode"
+            :options="[
+              { value: 'player', label: 'Player', icon: 'person' },
+              { value: 'storyteller', label: 'Storyteller', icon: 'book' },
+            ]"
+            label="Show stats as"
+            @update:model-value="setMode"
+          />
         </div>
       </div>
-      <div class="flex flex-wrap gap-2 px-4">
+      <div class="flex flex-wrap gap-2">
         <Button
           v-if="startDateRange !== null"
           @click.prevent="startDateRange = null"
@@ -230,6 +220,14 @@
           removableTag
         >
           Tag: {{ tag }}
+        </Button>
+        <Button
+          v-if="activeFilters.length > 1"
+          @click.prevent="clearAllFilters"
+          size="sm"
+          variant="link"
+        >
+          Clear all
         </Button>
       </div>
     </div>
@@ -685,6 +683,16 @@ const activeFilters = computed(() => {
       : []),
   ];
 });
+
+function clearAllFilters() {
+  selectedTags.value = [];
+  startDateRange.value = null;
+  endDateRange.value = null;
+  minPlayers.value = null;
+  maxPlayers.value = null;
+  selectedCommunity.value = null;
+  selectedLocation.value = null;
+}
 
 watchEffect(() => {
   if (selectedTag.value) {

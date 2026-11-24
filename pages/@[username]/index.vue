@@ -15,6 +15,7 @@
               :to="`/@${username}`"
               class="profile-tab"
               :class="currentTabClass('profile')"
+              :aria-current="currentTab === 'profile' ? 'page' : undefined"
             >
               Profile
             </nuxt-link>
@@ -22,6 +23,7 @@
               :to="`/@${username}?view=games`"
               class="profile-tab"
               :class="currentTabClass('games')"
+              :aria-current="currentTab === 'games' ? 'page' : undefined"
             >
               Games
             </nuxt-link>
@@ -30,6 +32,7 @@
               :to="`/@${username}?view=pending`"
               class="flex gap-1 items-center relative profile-tab"
               :class="currentTabClass('pending')"
+              :aria-current="currentTab === 'pending' ? 'page' : undefined"
             >
               <span>Tagged / Draft</span>
               <Badge
@@ -46,6 +49,7 @@
               :to="`/@${username}?view=stats`"
               class="profile-tab"
               :class="currentTabClass('stats')"
+              :aria-current="currentTab === 'stats' ? 'page' : undefined"
             >
               Stats
             </nuxt-link>
@@ -96,9 +100,13 @@
             </template>
 
             <template #no-content>
-              <p class="text-center text-2xl my-4 font-sorts">
-                No tagged or draft games
-              </p>
+              <div class="flex flex-col items-center gap-2 my-4 text-center">
+                <p class="text-2xl font-sorts">No tagged or draft games</p>
+                <p class="text-stone-600 dark:text-stone-400 max-w-[60ch]">
+                  Games other players tag you in, and drafts you haven't added yet,
+                  wait here until you add them to your profile.
+                </p>
+              </div>
             </template>
           </UserGamesView>
         </template>
@@ -228,8 +236,22 @@ onMounted(() => {
   gameStore.fetchPlayerGames(username);
 });
 
+// Each tab gets its own title, so browser tabs and history can tell them apart.
+const pageTitle = computed(() => {
+  switch (currentTab.value) {
+    case "games":
+      return `Games · ${username}`;
+    case "pending":
+      return `Tagged / Draft · ${username}`;
+    case "stats":
+      return `Stats · ${username}`;
+    default:
+      return username;
+  }
+});
+
 useHead({
-  title: username,
+  title: pageTitle,
   meta: [
     {
       key: "description",

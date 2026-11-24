@@ -50,15 +50,16 @@
               >
                 <img
                   :src="`/img/role/48x48/storyteller_inv.webp`"
-                  alt="Storyteller Count"
+                  alt=""
                   class="hidden dark:block w-8"
                 />
                 <img
                   :src="`/img/role/48x48/storyteller.webp`"
-                  alt="Storyteller Count"
+                  alt=""
                   class="block dark:hidden w-8"
                 />
                 <div class="flex gap-2">
+                  <span class="sr-only">Games as storyteller:</span>
                   {{ gamesAsStoryteller.length }}
                 </div>
               </div>
@@ -73,10 +74,11 @@
               >
                 <img
                   :src="mostCommonCharacterImage"
-                  alt="Player Count"
+                  alt=""
                   class="w-8"
                 />
                 <div class="flex gap-2">
+                  <span class="sr-only">Games as player:</span>
                   {{ gamesAsPlayer.length }}
                 </div>
               </div>
@@ -94,36 +96,38 @@
             v-if="isUser"
             :to="`/settings`"
             icon="edit"
-            color="primary"
+            :color="isProfileTab ? 'primary' : 'contrast'"
           >
             Edit profile
           </Button>
         </div>
       </div>
-      <div v-if="player.communities?.length" class="flex flex-col gap-1">
+      <!-- Communities and bio belong to the profile tab; the other tabs keep the header short. -->
+      <div v-if="isProfileTab && player.communities?.length" class="flex flex-col gap-1">
         <h2 class="text-xs text-stone-600 dark:text-stone-400 text-center md:text-start uppercase">Communities</h2>
         <ul
           class="flex flex-wrap justify-start gap-[0.125rem]"
         >
-          <nuxt-link
-            v-for="community in player.communities"
-            :to="`/community/${community.slug}`"
-          >
-            <Avatar
-              :value="community.icon"
-              size="xs"
-              class="flex-shrink bg-stone-300 dark:bg-stone-950"
-              v-tooltip="community.name"
-              aria-hidden="true"
-            />
-            <span class=sr-only>{{ community.name }}</span>
-          </nuxt-link>
+          <li v-for="community in player.communities" :key="community.slug">
+            <nuxt-link :to="`/community/${community.slug}`">
+              <Avatar
+                :value="community.icon"
+                size="xs"
+                class="flex-shrink bg-stone-300 dark:bg-stone-950"
+                v-tooltip="community.name"
+                aria-hidden="true"
+              />
+              <span class=sr-only>{{ community.name }}</span>
+            </nuxt-link>
+          </li>
         </ul>
       </div>
-      <hr v-if="player.bio" class="border-stone-100 dark:border-stone-600 w-full" />
-      <p class="whitespace-pre-wrap w-full text-center md:text-start text-sm md:text-base text-balance max-w-[80ch]">
-        {{ player.bio }}
-      </p>
+      <template v-if="isProfileTab">
+        <hr v-if="player.bio" class="border-stone-100 dark:border-stone-600 w-full" />
+        <p class="whitespace-pre-wrap w-full text-center md:text-start text-sm md:text-base text-balance max-w-[80ch]">
+          {{ player.bio }}
+        </p>
+      </template>
       <slot />
     </div>
   </div>
@@ -156,6 +160,15 @@ const props = defineProps<{
 }>();
 
 const isUser = computed(() => user.value?.id === props.player.user_id);
+
+// Editing the profile is the main action only on the profile tab itself
+// (/@username without another view); elsewhere it stays quieter.
+const route = useRoute();
+const isProfileTab = computed(() => {
+  const onUserPage = route.path.split("/").filter(Boolean).length === 1;
+  const view = String(route.query.view ?? "");
+  return onUserPage && !["games", "pending", "stats", "charts"].includes(view);
+});
 
 const allGames = computed(() => {
   return games.getByPlayer(props.player.username);

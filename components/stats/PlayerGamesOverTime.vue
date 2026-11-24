@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full h-64">
+  <div class="w-full">
     <h2 class="font-sorts text-center text-xl lg:text-2xl mb-1 lg:mb-2">
       Games & Win Rate
     </h2>
@@ -10,14 +10,17 @@
       </p>
     </div>
 
-    <Chart
-      id="player-games-win-rate-over-time"
-      type="line"
-      :data="chartData"
-      :options="chartOptions"
-      :plugins="[lineOnTop]"
-      class="mb-16 max-w-[100%]"
-    />
+    <!-- The chart gets its own height; maintainAspectRatio is off, so it fills this box. -->
+    <div class="h-64">
+      <Chart
+        id="player-games-win-rate-over-time"
+        type="line"
+        :data="chartData"
+        :options="chartOptions"
+        :plugins="[lineOnTop]"
+        class="max-w-[100%]"
+      />
+    </div>
   </div>
 </template>
 
@@ -277,7 +280,8 @@ const chartOptions = computed(() => ({
     counts: {
       stacked: true,
       ticks: {
-        stepSize: 1,
+        // Whole numbers, but Chart.js picks how many fit.
+        precision: 0,
       },
       title: {
         display: true,

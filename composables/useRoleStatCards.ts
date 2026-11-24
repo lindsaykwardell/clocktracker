@@ -276,7 +276,7 @@ export function buildRoleStatCardResult(
     count,
     metricLabel: isHiddenLocked ? "Hidden statistic" : definition.label,
     sentence: isHiddenLocked
-      ? "Details for this stat will be shown when unlocked."
+      ? "Details for this card will be shown when unlocked."
       : definition.getSentence({
       games: scopedGames,
       count,
@@ -361,7 +361,7 @@ export function buildRoleStatCardPreview(
       count,
       metricLabel: isHiddenLocked ? "Hidden statistic" : definition.label,
       sentence: isHiddenLocked
-        ? "Details for this stat will be shown when unlocked."
+        ? "Details for this card will be shown when unlocked."
         : definition.getSentence({
         games: scopedGames,
         count,

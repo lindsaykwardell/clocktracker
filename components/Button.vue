@@ -217,6 +217,7 @@ const computedClasses = computed(() => {
 
       &:where(.dark, .dark *) {
         --btn-color: theme(colors.dark-primary);
+        --btn-soft-fg: theme(colors.purple.400);
       }
     }
 
@@ -248,21 +249,41 @@ const computedClasses = computed(() => {
     &-positive {
       --btn-color: theme(colors.positive);
       --btn-fg: theme(colors.positive-content);
+      --btn-soft-fg: theme(colors.emerald.800);
+
+      &:where(.dark, .dark *) {
+        --btn-soft-fg: initial;
+      }
     }
 
     &-caution {
       --btn-color: theme(colors.caution);
       --btn-fg: theme(colors.caution-content);
+      --btn-soft-fg: theme(colors.amber.800);
+
+      &:where(.dark, .dark *) {
+        --btn-soft-fg: initial;
+      }
     }
 
     &-negative {
       --btn-color: theme(colors.negative);
       --btn-fg: theme(colors.negative-content);
+      --btn-soft-fg: theme(colors.rose.700);
+
+      &:where(.dark, .dark *) {
+        --btn-soft-fg: theme(colors.rose.400);
+      }
     }
 
     &-discord {
       --btn-color: theme(colors.discord);
-      --btn-fg: theme(colors.discord-content)
+      --btn-fg: theme(colors.discord-content);
+      --btn-soft-fg: theme(colors.discord-dark);
+
+      &:where(.dark, .dark *) {
+        --btn-soft-fg: theme(colors.indigo.300);
+      }
     }
 
     &-bgg {
@@ -478,9 +499,11 @@ const computedClasses = computed(() => {
 
 
   /* Soft */
+  /* --btn-soft-fg: a shade of the color that reaches 4.5:1 on the soft tint,
+     for colors too light (or, in dark mode, too dark) to be text themselves. */
   .ct-btn-soft:not(.ct-btn-active,:hover,:active:focus,:focus-visible,:disabled,[disabled],.ct-btn-disabled) {
     --btn-shadow:"";
-    --btn-fg: var(--btn-color,var(--color-base-content));
+    --btn-fg: var(--btn-soft-fg, var(--btn-color,var(--color-base-content)));
     --btn-bg: var(--btn-color,var(--color-base-content));
     --btn-border:var(--btn-color,var(--color-base-content));
   }
@@ -495,7 +518,7 @@ const computedClasses = computed(() => {
   @media(hover: none) {
     .ct-btn-soft:not(.ct-btn-active,:active,:focus-visible):hover {
       --btn-shadow:"";
-      --btn-fg: var(--btn-color,var(--color-base-content));
+      --btn-fg: var(--btn-soft-fg, var(--btn-color,var(--color-base-content)));
       --btn-bg: var(--btn-color,var(--color-base-content));
       --btn-border: var(--btn-color,var(--color-base-content));
     }

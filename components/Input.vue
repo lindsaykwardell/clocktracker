@@ -58,10 +58,12 @@ const fontSize = computed(() => {
 
 const colorStyle = computed(() => {
   switch (props.color) {
+    // Placeholders need 4.5:1 on their own background; the browser default
+    // grey only reached about 2.3:1.
     case "light":
-      return "bg-stone-100 dark:bg-stone-800 border-stone-200 dark:border-stone-700";
+      return "bg-stone-100 dark:bg-stone-800 border-stone-200 dark:border-stone-700 placeholder:text-stone-600 dark:placeholder:text-stone-400";
     default:
-      return "bg-stone-300 dark:bg-stone-600 border-stone-100 dark:border-stone-500";
+      return "bg-stone-300 dark:bg-stone-600 border-stone-100 dark:border-stone-500 placeholder:text-stone-600 dark:placeholder:text-stone-300";
   }
 });
 </script>

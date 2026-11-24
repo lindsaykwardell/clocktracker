@@ -27,7 +27,7 @@
             />
           </nuxt-link>
 
-          <div class="text-center text-sm text-balance max-w-44">
+          <div class="text-center text-sm text-balance max-w-56">
             {{ props.isMe ? `You've` : `This player has` }} been {{ roleArticle(mostPlayed.role.name) }}<span class="font-semibold">{{ mostPlayed.role.name }}</span>
             a total of {{ mostPlayed.plays }} game<span v-if="mostPlayed.plays !== 1">s</span>.
           </div>
@@ -66,7 +66,7 @@
             />
           </nuxt-link>
 
-          <div class="text-center text-sm text-balance max-w-44">
+          <div class="text-center text-sm text-balance max-w-56">
             {{ props.isMe ? `You` : `This player` }} finished {{ bestPerforming.plays }} game<span v-if="bestPerforming.plays !== 1">s</span> as
             {{ roleArticle(bestPerforming.role.name) }}<span class="font-semibold">{{ bestPerforming.role.name }}</span> and
             <span v-if="bestPerforming.losses > 0">won {{ bestPerforming.wins }} of those.</span>
@@ -107,7 +107,7 @@
             />
           </nuxt-link>
 
-          <div class="text-center text-sm text-balance max-w-44">
+          <div class="text-center text-sm text-balance max-w-56">
             {{ props.isMe ? `You` : `This player` }} finished {{ worstPerforming.plays }} game<span v-if="worstPerforming.plays !== 1">s</span> as
             {{ roleArticle(worstPerforming.role.name) }}<span class="font-semibold">{{ worstPerforming.role.name }}</span> and
             <span v-if="worstPerforming.wins > 0">won only {{ worstPerforming.wins }} of those.</span>

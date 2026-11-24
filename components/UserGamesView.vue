@@ -3,7 +3,8 @@
     <template v-if="games.data.length">
       <section class="w-full flex flex-col md:flex-row gap-8 pb-20 md:pb-0">
         <div class="w-full flex flex-col gap-4">
-          <div class="flex flex-col lg:flex-row gap-3 px-4">
+          <!-- Same inset as the stats tab and the cards page, so the toolbar doesn't jump between tabs. -->
+          <div class="flex flex-col lg:flex-row gap-3 px-8 lg:px-12">
             <div class="flex flex-col md:flex-row gap-3 items-center">
               <template v-if="!selectMultipleGames.enabled">
                 <label class="sr-only" for="select-sortby">Sort by</label>
@@ -52,11 +53,11 @@
                       leave-to-class="transform scale-95 opacity-0"
                     >
                       <MenuItems
-                        class="absolute top-[100%] left-0 md:right-0 md:left-auto lg:right-auto lg:left-0 z-20 bg-stone-950 p-2 rounded shadow-md whitespace-nowrap flex flex-col gap-2 items-start w-full md:w-[355px]"
+                        class="absolute top-[100%] left-0 md:right-0 md:left-auto lg:right-auto lg:left-0 z-20 bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-700 p-2 rounded shadow-md whitespace-nowrap flex flex-col gap-2 items-start w-full md:w-[355px]"
                       >
                         <MenuItem>
                           <div class="flex gap-2 items-center">
-                            <span class="flex-shrink text-stone-200"
+                            <span class="flex-shrink text-stone-800 dark:text-stone-200"
                               >Dates</span
                             >
                             <Input
@@ -78,7 +79,7 @@
                           </div>
                         </MenuItem>
                         <MenuItem>
-                          <div class="flex gap-2 items-center text-stone-200">
+                          <div class="flex gap-2 items-center text-stone-800 dark:text-stone-200">
                             Player Count
                             <Input
                               @click.stop
@@ -364,6 +365,16 @@
                   </div>
                 </Button>
               </div>
+              <Button
+                v-if="statsDebug.canDebug.value"
+                @click="showGrimoireCheck = true"
+                color="positive"
+                variant="soft"
+                icon="bug"
+                title="List games whose grimoire looks odd (moved seats, changed names)"
+              >
+                Debug grimoires
+              </Button>
             </div>
             <div class="flex-grow"></div>
             <div class="flex gap-2 items-center justify-end">
@@ -374,37 +385,17 @@
                   }}
                 </div>
               </slot>
-              <Button
-                v-if="statsDebug.canDebug.value"
-                @click="showGrimoireCheck = true"
-                color="positive"
-                variant="soft"
-                icon="bug"
-                title="Admins only: list games whose grimoire looks odd (moved seats, changed names)"
-              >
-                Debug
-              </Button>
-              <Button
-                @click="gameView = 'grid'"
-                :active="gameView === 'grid'"
-                color="primary"
-                variant="soft"
-                icon="grid"
-              >
-                Grid
-              </Button>
-              <Button
-                @click="gameView = 'table'"
-                :active="gameView === 'table'"
-                color="primary"
-                icon="table"
-                variant="soft"
-              >
-                Table
-              </Button>
+              <SegmentedControl
+                v-model="gameView"
+                :options="[
+                  { value: 'grid', label: 'Grid', icon: 'grid' },
+                  { value: 'table', label: 'Table', icon: 'table' },
+                ]"
+                label="Show games as"
+              />
             </div>
           </div>
-          <div class="flex flex-col md:flex-row gap-3 px-4">
+          <div class="flex flex-col md:flex-row gap-3 px-8 lg:px-12">
             <div class="flex flex-wrap gap-2">
               <Button
                 v-if="startDateRange !== null"
@@ -543,6 +534,14 @@
                 removableTag
               >
                 Tag: {{ tag }}
+              </Button>
+              <Button
+                v-if="activeFilters.length > 1"
+                @click.prevent="clearAllFilters"
+                size="sm"
+                variant="link"
+              >
+                Clear all
               </Button>
             </div>
           </div>
@@ -896,6 +895,22 @@ const activeFilters = computed(() => {
       : []),
   ];
 });
+
+function clearAllFilters() {
+  selectedTags.value = [];
+  selectedPlayers.value = [];
+  selectedRole.value = null;
+  selectedCommunity.value = null;
+  selectedAlignment.value = null;
+  selectedWinState.value = null;
+  selectedEndTrigger.value = null;
+  minPlayers.value = null;
+  maxPlayers.value = null;
+  startDateRange.value = null;
+  endDateRange.value = null;
+  selectedScript.value = null;
+  selectedLocation.value = null;
+}
 
 function isFavorite(game: GameRecord) {
   const user = users.getUserById(game.user_id);

@@ -52,6 +52,14 @@
               : { to: `/roles/${role.id}` }"
           >
             <div class="relative">
+              <!-- Shows that clicking now opens the debug list instead of the character page. -->
+              <span
+                v-if="statsDebug.enabled.value && characterIsPlayed(role.id)"
+                class="absolute -top-0.5 -left-0.5 z-20 flex items-center justify-center rounded-full p-1 bg-positive text-positive-content shadow-sm pointer-events-none"
+                aria-hidden="true"
+              >
+                <IconUI id="bug" size="xs" />
+              </span>
               <div
                 v-if="!characterIsPlayed(role.id)"
                 class="absolute top-0 left-0 bg-neutral-200/75 dark:bg-stone-800/75 rounded-full aspect-square w-full h-full z-10"
@@ -82,7 +90,7 @@
 
 <script setup lang="ts">
 import naturalOrder from "natural-order";
-import { WinStatus_V2 } from "~/composables/useGames";
+import { WinStatus_V2, gameResult } from "~/composables/useGames";
 import { useStatsDebug } from "~/composables/useStatsDebug";
 
 const NuxtLink = resolveComponent("NuxtLink");
@@ -356,6 +364,7 @@ const roleDebugRows = computed(() => {
 
     let value = "played";
     let reason: string | null = null;
+    let won: boolean | null = null;
     if (game.ignore_for_stats) {
       value = "-";
       reason = "Ignored for stats";
@@ -366,7 +375,9 @@ const roleDebugRows = computed(() => {
     } else if (alignment !== "GOOD" && alignment !== "EVIL") {
       reason = "No alignment: played, no result";
     } else {
-      value = (alignment === "GOOD") === goodWins ? "W" : "L";
+      won = (alignment === "GOOD") === goodWins;
+      // The trophy says it; the alt text carries it for screen readers.
+      value = "";
       reason = `Ended ${alignment.toLowerCase()}`;
     }
 
@@ -379,6 +390,9 @@ const roleDebugRows = computed(() => {
         counts: !game.ignore_for_stats,
         reason,
         details: [characters.map((c) => `${c.name} (${(c.alignment ?? "?").toLowerCase()})`).join(" > ")],
+        // The same trophy the game tiles show (this was the final character, so it
+        // matches the row). Its SVG carries a "Win"/"Loss" title.
+        result: won === null ? undefined : gameResult(game),
       },
     ];
   });

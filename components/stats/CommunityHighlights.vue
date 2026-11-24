@@ -118,7 +118,7 @@
               class="absolute top-0 left-0 w-full h-full bg-neutral-200/75 dark:bg-stone-800/75 rounded-full z-10"
             />
           </div>
-          <div class="text-center text-sm text-balance max-w-44">
+          <div class="text-center text-sm text-balance max-w-56">
             <RedactedName
               class="font-semibold"
               :name="displayName(bestWinRate.player)"

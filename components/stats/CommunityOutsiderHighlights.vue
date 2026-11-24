@@ -28,7 +28,7 @@
                 class="absolute top-0 left-0 w-full h-full bg-neutral-200/75 dark:bg-stone-800/75 rounded-full z-10"
               />
             </div>
-            <div class="text-center text-sm text-balance max-w-44">
+            <div class="text-center text-sm text-balance max-w-56">
               <RedactedName
                 class="font-semibold"
                 :name="displayName(item.player)"
@@ -42,7 +42,7 @@
             <div
               class="rounded-full shadow-lg w-36 h-36 md:w-48 md:h-48 aspect-square bg-stone-200 dark:bg-stone-800 border border-stone-400"
             />
-            <div class="text-center text-stone-400 text-sm text-balance max-w-44">No plays recorded for this character.</div>
+            <div class="text-center text-stone-400 text-sm text-balance max-w-56">No plays recorded for this character.</div>
           </template>
         </div>
       </div>

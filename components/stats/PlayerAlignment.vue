@@ -43,18 +43,18 @@
             </p>
             <p>
               <template v-if="evilBias.diffRate === 0">
-                {{ props.isMe ? 'You' : `This player` }} drew one {{ evilBias?.actualEvil }} times,
+                {{ props.isMe ? 'You' : `This player` }} drew an Evil token {{ evilBias?.actualEvil }} times,
                 which is exactly as probability predicts.
               </template>
               <template v-else-if="evilBias.diffRate < 0.05 && evilBias.diffRate > -0.05">
-                {{ props.isMe ? 'You' : `This player` }} drew one {{ evilBias?.actualEvil }} times,
+                {{ props.isMe ? 'You' : `This player` }} drew an Evil token {{ evilBias?.actualEvil }} times,
                 which is only a small difference of
                 <span class="font-semibold" :style="`color: ${evilBias?.diffRate > 0 ? chartColors.evil : chartColors.good}`">
                   {{ (evilBias?.diffRate > 0 ? '+' : '') + Math.round(evilBias?.diffRate * 100) }}%
                 </span>
               </template>
               <template v-else>
-                {{ props.isMe ? 'You' : `This player` }} actually drew one {{ evilBias?.actualEvil }} times,
+                {{ props.isMe ? 'You' : `This player` }} actually drew an Evil token {{ evilBias?.actualEvil }} times,
                 which is a difference of
                 <span class="font-semibold" :style="`color: ${evilBias?.diffRate > 0 ? chartColors.evil : chartColors.good}`">
                   {{ (evilBias?.diffRate > 0 ? '+' : '') + Math.round(evilBias?.diffRate * 100) }}%
@@ -74,14 +74,14 @@
             @click="showSwitchDebug = true"
             title="Debug: games behind the alignment switches"
             variant="filled"
-            color="contrast"
+            color="positive"
             icon="bug"
             display="icon-only"
             circular
             size="xs"
             class="absolute top-1 left-1 z-10"
           >
-            Debug
+            Debug: alignment switches
           </Button>
           <StatsDebugDialog
             v-model:visible="showSwitchDebug"
@@ -201,7 +201,28 @@
         </div>
       </div>
 
-      <div class="p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col">
+      <div class="relative p-4 border rounded-lg dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 flex flex-col">
+        <template v-if="statsDebug.enabled.value">
+          <Button
+            @click="showStreakDebug = true"
+            title="Debug: games behind the alignment streaks"
+            variant="filled"
+            color="positive"
+            icon="bug"
+            display="icon-only"
+            circular
+            size="xs"
+            class="absolute top-1 left-1 z-10"
+          >
+            Debug: alignment streaks
+          </Button>
+          <StatsDebugDialog
+            v-model:visible="showStreakDebug"
+            title="Alignment streaks: games"
+            :summary="streakDebugSummary"
+            :rows="streakDebugRows"
+          />
+        </template>
         <!-- <h3 class="font-sorts text-center text-lg lg:text-xl mb-2 md:mb-3">
           Alignment Streaks
         </h3> -->
@@ -225,7 +246,7 @@
             <div class="text-center text-sm text-pretty space-y-2">
               <p>
                 {{ props.isMe ? 'Your' : "This player's" }} longest stretch as <span class="font-semibold" :style="`color: ${chartColors.good}`">Good</span>
-                ran for {{ alignmentStreaks.longest.good }} game<span v-if="alignmentStreaks.longest.good !== 1">s</span>
+                ran for {{ alignmentStreaks.longest.good }} game<span v-if="alignmentStreaks.longest.good !== 1">s</span>.
               </p>
               <p>
                 {{ props.isMe ? 'Your' : "This player's" }} longest streak on the side of <span class="font-semibold" :style="`color: ${chartColors.evil}`">Evil</span>
@@ -251,6 +272,7 @@ import { useStatsDebug } from "~/composables/useStatsDebug";
 
 const statsDebug = useStatsDebug();
 const showSwitchDebug = ref(false);
+const showStreakDebug = ref(false);
 
 type Alignment = "GOOD" | "EVIL" | null;
 
@@ -697,6 +719,93 @@ const switchDebugRows = computed(() => {
       details: timeline.length
         ? [timeline.map((alignment) => (alignment ?? "?").toLowerCase()).join(" > ")]
         : [],
+    };
+  });
+});
+
+// Debug mode: every game with the alignment it ended on and its place in a
+// streak, walked the same way as alignmentStreaks (oldest first; ignored games
+// and games without an alignment are skipped without breaking a streak).
+const streakDebug = computed(() => {
+  if (!showStreakDebug.value) return null;
+
+  type Entry = { game: GameWithChars; alignment: Alignment; run: number; group: number; reason?: string };
+  type Run = { alignment: Exclude<Alignment, null>; entries: Entry[] };
+  const entries: Entry[] = [];
+  const runs: Run[] = [];
+
+  for (const game of orderedGames.value) {
+    if (game.ignore_for_stats) {
+      entries.push({ game, alignment: null, run: 0, group: runs.length - 1, reason: "Ignored for stats" });
+      continue;
+    }
+    const alignment = getEndingAlignment(game);
+    if (!alignment) {
+      entries.push({ game, alignment: null, run: 0, group: runs.length - 1, reason: "No alignment found" });
+      continue;
+    }
+    const last = runs.at(-1);
+    const entry: Entry = { game, alignment, run: 0, group: 0 };
+    if (last && last.alignment === alignment) {
+      last.entries.push(entry);
+    } else {
+      runs.push({ alignment, entries: [entry] });
+    }
+    entry.run = runs.at(-1)!.entries.length;
+    entry.group = runs.length - 1;
+    entries.push(entry);
+  }
+
+  // The first streak that reached the longest length, as the stat counts it.
+  const longestRun = (alignment: "GOOD" | "EVIL") =>
+    runs
+      .filter((run) => run.alignment === alignment)
+      .reduce<Run | null>(
+        (best, run) => (!best || run.entries.length > best.entries.length ? run : best),
+        null
+      );
+  return {
+    entries,
+    current: runs.at(-1) ?? null,
+    longestGood: longestRun("GOOD"),
+    longestEvil: longestRun("EVIL"),
+  };
+});
+
+const streakDebugSummary = computed(() => {
+  const streaks = alignmentStreaks.value;
+  if (!streaks) return "Not enough data.";
+  const current = streaks.current
+    ? `Current: ${streaks.current.length} as ${streaks.current.alignment === "GOOD" ? "Good" : "Evil"}.`
+    : "No current streak.";
+  return `${current} Longest: Good ${streaks.longest.good}, Evil ${streaks.longest.evil}.`;
+});
+
+const streakDebugRows = computed(() => {
+  const debug = streakDebug.value;
+  if (!debug) return [];
+  return [...debug.entries].reverse().map((entry) => {
+    const label = entry.alignment === "GOOD" ? "Good" : entry.alignment === "EVIL" ? "Evil" : null;
+    // In a longest streak: those get the border and the larger row.
+    const inLongestStreak = [debug.longestGood, debug.longestEvil].some((run) =>
+      run?.entries.includes(entry)
+    );
+    return {
+      id: String(entry.game.id),
+      date: new Date(entry.game.date).toLocaleDateString(),
+      script: entry.game.script,
+      value: label ? `#${entry.run}` : "-",
+      counts: !!label,
+      reason: entry.reason ?? (label ? `Ended as ${label}` : null),
+      icon: label ? `/img/role/48x48/${entry.alignment === "GOOD" ? "good" : "evil"}_thumb.webp` : undefined,
+      iconAlt: label ?? undefined,
+      // Marks the longest streaks; the rest are smaller.
+      accent: inLongestStreak
+        ? entry.alignment === "GOOD" ? chartColors.good : chartColors.evil
+        : undefined,
+      minor: !!label && !inLongestStreak,
+      // One block per streak; skipped games sit in the streak they fall in.
+      group: String(entry.group),
     };
   });
 });

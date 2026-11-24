@@ -111,7 +111,7 @@ export const GENERAL_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     id: "nominated_and_killed_demon",
     category: "general",
     source: "end_trigger",
-    label: "Nominated And Killed The Demon",
+    label: "Nominated and Killed the Demon",
     getCount: ({ games }) =>
       games.filter(
         (game) =>

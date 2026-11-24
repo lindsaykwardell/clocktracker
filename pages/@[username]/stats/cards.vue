@@ -49,6 +49,7 @@
             <nuxt-link
               :to="`/@${username}?view=stats`"
               class="profile-tab border-stone-500"
+              aria-current="true"
             >
               Stats
             </nuxt-link>
@@ -59,38 +60,47 @@
           <div
             class="flex flex-col gap-3 px-4"
           >
-            <div class="flex items-center justify-between">
-              <Button
-                component="nuxt-link"
-                :to="`/@${username}?view=stats`"
-                color="neutral"
-                variant="soft"
-                icon="arrow-left-short"
-              >
-                Back to Stats
-              </Button>
-
-              <div class="flex gap-2 justify-center">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <!-- Tools on the left, the view toggle on the right, like the stats and games tabs. -->
+              <div class="flex flex-wrap items-center gap-3">
                 <Button
-                  @click="tab = 'role'"
-                  :active="tab === 'role'"
-                  color="primary"
+                  component="nuxt-link"
+                  :to="`/@${username}?view=stats`"
+                  color="neutral"
                   variant="soft"
+                  icon="arrow-left-short"
                 >
-                  Character
+                  Back to Stats
                 </Button>
-                <!-- General cards are still a work in progress. -->
+                <div class="w-full sm:w-64">
+                  <Input
+                    v-model="search"
+                    type="search"
+                    color="light"
+                    :placeholder="tab === 'role' ? 'Search characters or cards' : 'Search cards'"
+                    :aria-label="tab === 'role' ? 'Search characters or cards' : 'Search cards'"
+                  />
+                </div>
+                <!-- Same toggle as the stats tab; the choice is shared between them. -->
                 <Button
-                  @click="tab = 'general'"
-                  :active="tab === 'general'"
-                  color="primary"
+                  v-if="statsDebug.canDebug.value"
+                  @click="statsDebug.enabled.value = !statsDebug.enabled.value"
+                  :active="statsDebug.enabled.value"
+                  :aria-pressed="statsDebug.enabled.value"
+                  color="positive"
                   variant="soft"
-                  disabled
-                  title="Coming soon"
+                  icon="bug"
+                  title="Show which games feed each card"
                 >
-                  General
+                  Debug
                 </Button>
               </div>
+
+              <SegmentedControl
+                v-model="view"
+                :options="viewOptions"
+                label="Show cards"
+              />
             </div>
           </div>
 
@@ -101,39 +111,78 @@
               </h2>
 
               <div class="text-center max-w-[80ch] mx-auto mb-16 space-y-4">
-                <p>
+                <!-- A div, not a p: the hint's tooltip wrapper is a div. -->
+                <div>
                   Statistic cards are ClockTracker's take on achievements for Blood on the Clocktower.<br>
                   They highlight moments that should happen naturally during play, not goals to chase during each game.
-                </p>
-                <p class="text-sm">
-                  A few edge-case cards are included because they are interesting or funny, even though they might encourage suboptimal play. 
-                  Those cards are hidden by default: other players cannot see them, you only see them once they are unlocked, and they cannot be favorited. 
-                </p>
+                  <!-- The exception to "not goals to chase": fine print in a hint to keep the intro short. -->
+                  <InfoHint label="About secret cards">
+                    <p>
+                      A few edge-case cards are included because they are interesting or funny,
+                      even though they might encourage suboptimal play.
+                    </p>
+                    <p>
+                      Those cards are hidden by default: other players cannot see them, you only
+                      see them once they are unlocked, and they cannot be favorited.
+                    </p>
+                  </InfoHint>
+                </div>
                 <p class="text-sm">
                   Counts are attributed to each character's ability based on recorded game data.<br>
                   Older games and partially tracked games may be missing events, so treat every count as "at least".
                 </p>
               </div>
 
+              <!-- Empty or no results, for both card sets; a search gets a way back. -->
               <div
-                v-if="tab === 'role' && rolePreviewCardGroups.length === 0"
-                class="text-sm text-center text-stone-500 dark:text-stone-400 py-8"
+                v-if="noCardsToShow"
+                class="flex flex-col items-center gap-3 py-8 text-center"
               >
-                No cards available.
+                <template v-if="searchTerm">
+                  <p class="text-xl font-sorts">No cards match "{{ search.trim() }}"</p>
+                  <p class="text-stone-600 dark:text-stone-400">
+                    Try a character name or a card title.
+                  </p>
+                  <Button color="neutral" variant="soft" @click="search = ''">
+                    Clear search
+                  </Button>
+                </template>
+                <p v-else class="text-xl font-sorts">No cards available</p>
               </div>
+              <!-- While searching: one flat list, without the edition or type headers. -->
+              <template v-else-if="tab === 'role' && searchTerm">
+                <p class="text-center text-stone-600 dark:text-stone-400 mb-4">
+                  {{ searchResults.length }} matching {{ searchResults.length === 1 ? "card" : "cards" }}
+                </p>
+                <ul class="grid gap-2 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+                  <RoleStatCard
+                    v-for="previewCard in searchResults"
+                    :key="`${tab}-${previewCard.metric_key}-${previewCard.role_id ?? 'general'}`"
+                    :card="cardForDisplay(previewCard)"
+                    :games="games.status === Status.SUCCESS ? games.data : []"
+                    :is-me="isMe"
+                    :username="username"
+                    :show-favorite-control="shouldShowFavoriteControl(previewCard)"
+                    :is-favorite="isFavoriteCard(previewCard)"
+                    show-zero-overlay
+                    variant="horizontal"
+                    @toggleFavorite="toggleFavoriteCard(previewCard)"
+                  />
+                </ul>
+              </template>
               <template v-else-if="tab === 'role'">
                 <div class="space-y-12">
                   <section
                     v-for="scriptGroup in rolePreviewCardGroups"
-                    :key="scriptGroup.script"
+                    :key="`${groupBy}-${scriptGroup.key}`"
                     class="space-y-4"
                   >
                     <div class="flex flex-col items-center gap-4">
                       <img
                         :src="scriptGroup.image"
                         :alt="scriptGroup.title"
-                        class="w-64 h-auto max-w-full"
-                      >  
+                        :class="groupBy === 'type' ? 'w-40 h-40' : 'w-64 h-auto max-w-full'"
+                      >
                       <h3 class="sr-only">
                         {{ scriptGroup.title }}
                       </h3>
@@ -159,8 +208,6 @@
                         :username="username"
                         :show-favorite-control="shouldShowFavoriteControl(previewCard)"
                         :is-favorite="isFavoriteCard(previewCard)"
-                        class="transition-opacity"
-                        :class="previewCard.preview.count === 0 ? 'opacity-40' : ''"
                         show-zero-overlay
                         variant="horizontal"
                         @toggleFavorite="toggleFavoriteCard(previewCard)"
@@ -169,12 +216,6 @@
                   </section>
                 </div>
               </template>
-              <div
-                v-else-if="previewCards.length === 0"
-                class="text-sm text-center text-stone-500 dark:text-stone-400 py-8"
-              >
-                No matching cards available.
-              </div>
 
               <ul
                 v-else
@@ -189,8 +230,6 @@
                   :username="username"
                   :show-favorite-control="shouldShowFavoriteControl(previewCard)"
                   :is-favorite="isFavoriteCard(previewCard)"
-                  class="transition-opacity"
-                  :class="previewCard.preview.count === 0 ? 'opacity-40' : ''"
                   show-zero-overlay
                   variant="horizontal"
                   @toggleFavorite="toggleFavoriteCard(previewCard)"
@@ -215,13 +254,72 @@ import {
 } from "~/composables/useRoleStatCards";
 
 const username = useRoute().params.username as string;
+
+useHead({ title: `Statistic Cards · ${username}` });
 const users = useUsers();
 const gamesStore = useGames();
 const roles = useRoles();
 const friends = useFriends();
 const meUser = useUser();
+const featureFlags = useFeatureFlags();
+const statsDebug = useStatsDebug();
+
+const canSeeGeneralCards = computed(() => featureFlags.isEnabled("general-stat-cards"));
 
 const tab = ref<"role" | "general">("role");
+const groupBy = ref<"script" | "type">("script");
+// One toggle for both: the character cards by edition or by type, or the general cards.
+type CardsView = "script" | "type" | "general";
+const view = computed<CardsView>({
+  get: () => (tab.value === "general" ? "general" : groupBy.value),
+  set: (value) => {
+    if (value === "general") {
+      tab.value = "general";
+    } else {
+      tab.value = "role";
+      groupBy.value = value;
+    }
+  },
+});
+// General cards are still a work in progress: behind the "general-stat-cards" flag.
+const viewOptions = computed(() => [
+  { value: "script" as const, label: "By edition" },
+  { value: "type" as const, label: "By character type" },
+  {
+    value: "general" as const,
+    label: "General",
+    disabled: !canSeeGeneralCards.value,
+    title: canSeeGeneralCards.value ? undefined : "Coming soon",
+  },
+]);
+const search = ref("");
+
+function normalizeSearchText(text: string) {
+  return text
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+const searchTerm = computed(() => normalizeSearchText(search.value));
+
+// Matches only what the card shows: a secret card that isn't unlocked yet
+// shows neither its character nor its title, so it never matches a search.
+function matchesSearch(card: {
+  role_id: string | null;
+  role?: { name?: string } | null;
+  preview: { metricLabel: string; isHiddenLocked?: boolean };
+}) {
+  const term = searchTerm.value;
+  if (!term) return true;
+  if (card.preview.isHiddenLocked) return false;
+  const roleName = card.role_id ? roles.getRole(card.role_id)?.name ?? card.role?.name : null;
+  return [roleName, card.preview.metricLabel].some(
+    (text) => !!text && normalizeSearchText(text).includes(term)
+  );
+}
 
 const playerStatus = computed(() => users.getUser(username));
 const playerFetchStatus = computed(() => playerStatus.value.status);
@@ -271,13 +369,15 @@ const pickerRoles = computed(() => {
 
 const rolePreviewCards = computed(() => {
   if (games.value.status !== Status.SUCCESS) return [];
+  // Read once: the callbacks below can't see that games.value is narrowed.
+  const gameData = games.value.data;
 
   return pickerRoles.value
     .flatMap((role) =>
       getRoleCardDefinitions(role.id).map((definition) =>
         buildRoleStatCardPreview(
           definition.id,
-          games.value.data,
+          gameData,
           isMe.value,
           role,
           username
@@ -302,6 +402,22 @@ const SCRIPT_ORDER = ["tb", "snv", "bmr", "experimental", "npc", "unknown"] as c
 function roleTypeOrderValue(type: string | null | undefined) {
   const index = ROLE_TYPE_ORDER.indexOf(type as RoleType);
   return index === -1 ? ROLE_TYPE_ORDER.length : index;
+}
+
+function roleTypeLabel(type: string) {
+  if (type === RoleType.TOWNSFOLK) return "Townsfolk";
+  if (type === RoleType.OUTSIDER) return "Outsiders";
+  if (type === RoleType.MINION) return "Minions";
+  if (type === RoleType.DEMON) return "Demons";
+  if (type === RoleType.TRAVELER) return "Travellers";
+  if (type === RoleType.FABLED) return "Fabled";
+  if (type === RoleType.LORIC) return "Loric";
+  return type;
+}
+
+function roleTypeImage(type: string) {
+  const file = type === RoleType.TRAVELER ? "traveller" : type.toLowerCase();
+  return `/img/role/160x160/${file}.webp`;
 }
 
 function normalizeScript(script: string | null | undefined) {
@@ -385,14 +501,18 @@ const rolePreviewCardGroups = computed(() => {
     .sort((a, b) => {
     const scriptCompare =
       scriptOrderValue(getScriptFromCard(a)) - scriptOrderValue(getScriptFromCard(b));
-    if (scriptCompare !== 0) return scriptCompare;
+    const typeCompare =
+      roleTypeOrderValue(getRoleTypeFromCard(a)) - roleTypeOrderValue(getRoleTypeFromCard(b));
+
+    // The section's own key first, then locked secret cards last within it.
+    const groupCompare = groupBy.value === "type" ? typeCompare : scriptCompare;
+    if (groupCompare !== 0) return groupCompare;
 
     const hiddenCompare =
       Number(isHiddenLockedCard(a)) - Number(isHiddenLockedCard(b));
     if (hiddenCompare !== 0) return hiddenCompare;
 
-    const typeCompare =
-      roleTypeOrderValue(getRoleTypeFromCard(a)) - roleTypeOrderValue(getRoleTypeFromCard(b));
+    if (scriptCompare !== 0) return scriptCompare;
     if (typeCompare !== 0) return typeCompare;
 
     const saoCompare = getSaoFromCard(a) - getSaoFromCard(b);
@@ -405,22 +525,26 @@ const rolePreviewCardGroups = computed(() => {
     return definitionOrderValue(a) - definitionOrderValue(b);
     });
 
-  const scriptGroups = new Map<string, typeof sorted>();
+  const groups = new Map<string, typeof sorted>();
 
   for (const card of sorted) {
     const type = getRoleTypeFromCard(card);
-    if (!type || !ROLE_TYPE_ORDER.includes(type)) continue;
-    const script = getScriptFromCard(card);
+    if (!type || !ROLE_TYPE_ORDER.includes(type as RoleType)) continue;
+    if (!matchesSearch(card)) continue;
+    const key = groupBy.value === "type" ? type : getScriptFromCard(card);
 
-    if (!scriptGroups.has(script)) {
-      scriptGroups.set(script, []);
+    if (!groups.has(key)) {
+      groups.set(key, []);
     }
-    scriptGroups.get(script)!.push(card);
+    groups.get(key)!.push(card);
   }
 
-  return Array.from(scriptGroups.entries())
-    .sort(([scriptA], [scriptB]) => scriptOrderValue(scriptA) - scriptOrderValue(scriptB))
-    .map(([script, cards]) => {
+  const groupOrderValue = (key: string) =>
+    groupBy.value === "type" ? roleTypeOrderValue(key) : scriptOrderValue(key);
+
+  return Array.from(groups.entries())
+    .sort(([keyA], [keyB]) => groupOrderValue(keyA) - groupOrderValue(keyB))
+    .map(([key, cards]) => {
       const hiddenUnlockedCount = isMe.value
         ? cards.filter(
           (card) =>
@@ -437,9 +561,9 @@ const rolePreviewCardGroups = computed(() => {
       const totalCount = countableCards.length;
 
       return {
-        script,
-        title: scriptLabel(script),
-        image: scriptImage(script),
+        key,
+        title: groupBy.value === "type" ? roleTypeLabel(key) : scriptLabel(key),
+        image: groupBy.value === "type" ? roleTypeImage(key) : scriptImage(key),
         achievedCount,
         totalCount,
         hiddenUnlockedCount,
@@ -449,14 +573,21 @@ const rolePreviewCardGroups = computed(() => {
     .filter((group) => group.cards.length > 0 || group.hiddenUnlockedCount > 0);
 });
 
+// The matching cards in their usual order (edition or type, then character),
+// without the group headers.
+const searchResults = computed(() =>
+  rolePreviewCardGroups.value.flatMap((group) => group.cards)
+);
+
 const generalPreviewCards = computed(() => {
   if (games.value.status !== Status.SUCCESS) return [];
+  const gameData = games.value.data;
 
   return getGeneralCardDefinitions()
     .map((definition) =>
       buildRoleStatCardPreview(
         definition.id,
-        games.value.data,
+        gameData,
         isMe.value,
         null,
         username
@@ -468,8 +599,15 @@ const generalPreviewCards = computed(() => {
     });
 });
 
+const noCardsToShow = computed(() =>
+  tab.value === "role"
+    ? rolePreviewCardGroups.value.length === 0
+    : previewCards.value.length === 0
+);
+
 const previewCards = computed(() => {
-  return tab.value === "role" ? rolePreviewCards.value : generalPreviewCards.value;
+  const cards = tab.value === "role" ? rolePreviewCards.value : generalPreviewCards.value;
+  return cards.filter((card) => matchesSearch(card));
 });
 
 function cardForDisplay<T extends {
@@ -505,9 +643,14 @@ function shouldShowFavoriteControl(card: {
   metric_key: string;
   role_id: string | null;
   source: string;
+  preview?: { count: number };
 }) {
   if (!isMe.value) return false;
-  return !isHiddenConfiguredCard(card) || isFavoriteCard(card);
+  // A card already favorited keeps its button, so it can be removed again.
+  if (isFavoriteCard(card)) return true;
+  // Nothing to show off yet on a card the player hasn't reached.
+  if (card.preview && card.preview.count === 0) return false;
+  return !isHiddenConfiguredCard(card);
 }
 
 async function toggleFavoriteCard(

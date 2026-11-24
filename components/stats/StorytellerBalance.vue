@@ -7,7 +7,7 @@
     />
   </div>
 
-  <div v-if="hasGames" class="text-center text-sm text-balance max-w-44 mt-2 mx-auto">
+  <div v-if="hasGames" class="text-center text-sm text-balance max-w-56 mt-2 mx-auto">
     <span v-if="goodPct >= 0.75">
       <span class="font-semibold" :style="`color: ${chartColors.good}`">Good</span> often prevails.
     </span>

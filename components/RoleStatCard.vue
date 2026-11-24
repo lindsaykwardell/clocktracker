@@ -7,6 +7,7 @@
       'border dark:border-stone-700/50' : !isFavorite,
       'border border-primary' : isFavorite,
       'is-hidden-card': isConfiguredAsHidden && showHiddenStyling,
+      'text-[#716a65] dark:text-[#8e8782]': isDimmed,
     }"
     >
     <Button
@@ -38,8 +39,11 @@
 
     <div 
       v-if="showRoleImage"
-      class="flex flex-col items-center gap-3"
-      :class="variant == 'horizontal' ? 'card-token' : ''"
+      class="flex flex-col items-center gap-3 transition-[opacity,filter]"
+      :class="[
+        variant == 'horizontal' ? 'card-token' : '',
+        isDimmed ? 'opacity-30' : '',
+      ]"
     >
       <Token
         :character="character"
@@ -49,7 +53,7 @@
 
     <div 
       class="flex flex-col"
-      :class="variant == 'vertical' ? 'text-center gap-3' : ''"
+      :class="variant == 'vertical' ? 'text-center gap-3 max-w-56 mx-auto' : ''"
     >
       <template v-if="variant == 'horizontal'">
         <h3 
@@ -68,18 +72,16 @@
 
       <p
         v-if="result.subtitle"
-        class="text-xs text-stone-500 dark:text-stone-400"
-        :class="variant == 'vertical' ? 'text-balance' : 'text-pretty'"
+        class="text-xs"
+        :class="[
+          variant == 'vertical' ? 'text-balance' : 'text-pretty',
+          isDimmed ? '' : 'text-stone-500 dark:text-stone-400',
+        ]"
       >
         {{ result.subtitle }}
       </p>
 
     </div>
-
-    <div
-      v-if="showZeroOverlay && result.count === 0"
-      class="absolute inset-0 rounded-lg bg-neutral-300/20 dark:bg-stone-900/50 pointer-events-none"
-    />
 
     <!-- Character pages pass global previews without games: nothing to explain there. -->
     <template v-if="statsDebug.enabled.value && games.length">
@@ -87,14 +89,14 @@
         @click="showDebug = true"
         title="Debug: which games feed this card"
         variant="filled"
-        color="contrast"
+        color="positive"
         icon="bug"
         display="icon-only"
         circular
         size="xs"
         class="absolute top-1 left-1 z-10"
       >
-        Debug
+        Debug: {{ result.metricLabel }}
       </Button>
       <StatsDebugDialog
         v-model:visible="showDebug"
@@ -164,6 +166,12 @@ const result = computed(() => {
     props.username
   );
 });
+
+// A card the player hasn't reached yet, on pages that show those (the cards page).
+// The token fades (it's decoration); the text keeps the lightest
+// colour that still passes 4.5:1 on the card (#716a65 on #efeeed, #8e8782 on
+// #24201f in dark mode), instead of fading the whole card.
+const isDimmed = computed(() => !!props.showZeroOverlay && result.value.count === 0);
 
 const isConfiguredAsHidden = computed(() => {
   const definition = getRoleStatCardDefinition(props.card.metric_key);

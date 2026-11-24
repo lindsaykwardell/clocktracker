@@ -25,7 +25,7 @@ export default <Partial<Config>>{
         primary: colors.purple[700],
         "primary-content": colors.purple[100],
         positive: colors.emerald[400],
-        "positive-content": colors.emerald[900],
+        "positive-content": colors.emerald[950],
         caution: colors.amber[400],
         "caution-content": colors.amber[900],
         negative: colors.rose[500],
