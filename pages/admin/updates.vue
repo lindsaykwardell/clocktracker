@@ -367,6 +367,7 @@ type GrimoireEventsFillResponse = {
   alreadyHadEvents: number;
   seatPagesRepaired?: number;
   seatPagesUnrepaired?: number;
+  skippedSeatMovingScript?: number;
   failed: number;
   remaining: number;
   [key: string]: unknown;
@@ -392,13 +393,19 @@ const fillSummary = computed(() => {
       (unrepaired ? `, ${pages(unrepaired)} left as they are (see server log).` : ".")
     );
   };
+  // Musical Chairs games get no events, only marked as done.
+  const skipped = (would: boolean) => {
+    const n = r.skippedSeatMovingScript ?? 0;
+    return n ? ` Musical Chairs: ${games(n)} ${would ? "would be " : ""}skipped (no events).` : "";
+  };
   if (r.dryRun) {
     return (
       `Dry run for ${r.username}: looked at ${games(r.examined)} of ` +
       `${games(r.remaining)} never generated. ${r.filled} would get ` +
       `${r.eventsCreated} events, ${r.noEvents} have none to add, ` +
       `${r.alreadyHadEvents} already have events.` +
-      seats(true)
+      seats(true) +
+      skipped(true)
     );
   }
   const parts = [
@@ -412,7 +419,8 @@ const fillSummary = computed(() => {
     parts.join(", ") +
     ". " +
     (r.remaining > 0 ? `${games(r.remaining)} left; run again.` : "All done.") +
-    seats(false)
+    seats(false) +
+    skipped(false)
   );
 });
 

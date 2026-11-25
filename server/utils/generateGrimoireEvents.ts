@@ -4,9 +4,11 @@ import {
 } from "~/server/generated/prisma/client";
 import {
   assignParticipantIds,
+  isEmptySeat,
   matchPageTokens,
   seatMoves,
 } from "~/composables/grimoireParticipantMatching";
+import { isSeatMovingScript } from "~/utils/grimoireChecks";
 import { GRIMOIRE_REMINDER_EVENT_CONFIG } from "~/server/utils/grimoireReminderEventConfig";
 import { reminderRoleId, type ReminderCatalog } from "~/shared/reminderCatalog";
 import {
@@ -571,18 +573,24 @@ function isLifecycleEventType(eventType: GrimoireEventType) {
  */
 export function generateEventsForMissingGames(
   grimoire: PageLike[],
-  catalog?: ReminderCatalog | null
+  catalog?: ReminderCatalog | null,
+  options: { script?: string | null } = {}
 ) {
   activeCatalog = catalog ?? null;
   try {
-    return generateEvents(grimoire);
+    return generateEvents(grimoire, options.script);
   } finally {
     activeCatalog = null;
   }
 }
 
-function generateEvents(grimoire: PageLike[]) {
+function generateEvents(grimoire: PageLike[], script?: string | null) {
   const events: GeneratedEvent[] = [];
+  // In Musical Chairs the characters stay in their seats and the players
+  // move: the shroud stays with the seat. A player who moved is compared with
+  // their new seat on the page before, so moving into a dead seat isn't a
+  // death and moving out of one isn't a revive.
+  const deathFollowsSeat = isSeatMovingScript(script);
 
   // Seats by position: some old pages store the same order twice or skip
   // one. Renumbered here only, nothing is saved. Where a page's numbers
@@ -636,9 +644,17 @@ function generateEvents(grimoire: PageLike[]) {
       const newRoleId = token.role_id ?? null;
       const oldAlignment = previousToken?.alignment ?? null;
       const newAlignment = token.alignment ?? null;
-      const wasDeadPreviously = previousToken?.is_dead ?? false;
+      // Seats are renumbered above, so the same order is the same seat. Also
+      // for a seat nobody is linked to (an open chair a named player left).
+      const seatBefore =
+        deathFollowsSeat && pageIndex > 0 && (movedTokens.has(token) || !previousToken)
+          ? grimoire[pageIndex - 1].tokens.find((other) => other.order === token.order)
+          : previousToken;
+      const wasDeadPreviously = seatBefore?.is_dead ?? false;
       const shouldHaveDeath = token.is_dead && !wasDeadPreviously;
-      const shouldHaveRevival = !token.is_dead && wasDeadPreviously;
+      // A dead Traveller's seat that is emptied when they leave is matched to
+      // them by seat, but nobody came back to life.
+      const shouldHaveRevival = !token.is_dead && wasDeadPreviously && !isEmptySeat(token);
 
       if (shouldHaveDeath) {
         const deadReminderSource = detectDeadReminderSource(orderedTokens, token);

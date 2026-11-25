@@ -2,9 +2,11 @@ import { GrimoireEventType } from "~/composables/useGames";
 import { GRIMOIRE_REMINDER_EVENT_CONFIG } from "~/composables/grimoireReminderEventConfig";
 import {
   assignParticipantIds,
+  isEmptySeat,
   matchPageTokens,
   seatMoves,
 } from "~/composables/grimoireParticipantMatching";
+import { isSeatMovingScript } from "~/utils/grimoireChecks";
 import { reminderRoleId, type ReminderCatalog } from "~/shared/reminderCatalog";
 import {
   carriedOverReminders,
@@ -53,6 +55,11 @@ export type GrimoireEventEngineContext = {
    * from the role names in the icon.
    */
   getCatalog?: () => ReminderCatalog | null | undefined;
+  /**
+   * The game's script name. In Musical Chairs the shroud stays with the seat
+   * when players move (see buildExpectations).
+   */
+  getScript?: () => string | null | undefined;
 };
 
 /**
@@ -654,9 +661,14 @@ export function createGrimoireEventEngine(context: GrimoireEventEngineContext) {
     // Every id first: an event's source may sit in a later seat, and needs its
     // id when the event is made. Existing ids are kept (events point at them).
     assignParticipantIds(grimoire, { keepExisting: true });
+    const deathFollowsSeat = isSeatMovingScript(context.getScript?.());
 
     grimoire.forEach((page, pageIndex) => {
       const orderedTokens = page.tokens.slice().sort((a, b) => a.order - b.order);
+      const previousOrdered =
+        pageIndex > 0
+          ? grimoire[pageIndex - 1].tokens.slice().sort((a, b) => a.order - b.order)
+          : [];
       // The token each one continues on the previous page, for the whole page at once.
       const previousMatches =
         pageIndex > 0 ? matchPageTokens(grimoire[pageIndex - 1].tokens, page.tokens) : null;
@@ -667,9 +679,20 @@ export function createGrimoireEventEngine(context: GrimoireEventEngineContext) {
         : new Set<(typeof page.tokens)[number]>();
       orderedTokens.forEach((token) => {
         const previousToken = previousMatches?.get(token) ?? null;
-        const wasDeadPreviously = previousToken?.is_dead ?? false;
+        // Musical Chairs: the characters stay in their seats and the players
+        // move, so the shroud stays with the seat. A player who moved is
+        // compared with their new seat on the page before: moving into a
+        // dead seat isn't a death, moving out of one isn't a revive.
+        // Also for a seat nobody is linked to (an open chair a named player left).
+        const seatBefore =
+          deathFollowsSeat && pageIndex > 0 && (movedTokens.has(token) || !previousToken)
+            ? previousOrdered[orderedTokens.indexOf(token)]
+            : previousToken;
+        const wasDeadPreviously = seatBefore?.is_dead ?? false;
         const shouldHaveDeath = token.is_dead && !wasDeadPreviously;
-        const shouldHaveRevival = !token.is_dead && wasDeadPreviously;
+        // A dead Traveller's seat that is emptied when they leave is matched
+        // to them by seat, but nobody came back to life.
+        const shouldHaveRevival = !token.is_dead && wasDeadPreviously && !isEmptySeat(token);
 
         const participantId = token.grimoire_participant_id as string;
         const deadReminderSource = detectDeadReminderSource(orderedTokens, token);

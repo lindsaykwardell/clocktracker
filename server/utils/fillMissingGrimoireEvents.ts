@@ -3,6 +3,7 @@ import { generateEventsForMissingGames } from "~/server/utils/generateGrimoireEv
 import { buildReminderCatalog, type ReminderCatalog } from "~/shared/reminderCatalog";
 import { GRIMOIRE_EVENTS_VERSION } from "~/server/utils/grimoireEventsCatchUps";
 import { saveGrimoireRevision } from "~/server/utils/grimoireRevision";
+import { isSeatMovingScript } from "~/utils/grimoireChecks";
 import {
   applySeatRepairs,
   planSeatRepairs,
@@ -23,6 +24,8 @@ import {
  *   first when the neighbouring pages say for certain where everyone sits
  *   (server/utils/repairSeatNumbers.ts). The grimoire as it was is saved as
  *   a revision first, with a message, so "Restore from history" can undo it.
+ * - Musical Chairs games get no events (players move between seats while
+ *   everything else stays with the seat); they are only marked as done.
  * - Each game is claimed and written in one transaction, so a user saving the
  *   same game at the same time wins.
  */
@@ -45,6 +48,8 @@ export type GrimoireEventsFillResult = {
   /** Pages whose seat numbers were repaired, and pages left for a person to look at. */
   seatPagesRepaired: number;
   seatPagesUnrepaired: number;
+  /** Musical Chairs games: marked as done without events (see below). */
+  skippedSeatMovingScript: number;
   alreadyHadEvents: number;
   noEvents: number;
   skippedConcurrentSave: number;
@@ -126,6 +131,7 @@ export async function fillMissingGrimoireEvents(
     participantIdsFilled: 0,
     seatPagesRepaired: 0,
     seatPagesUnrepaired: 0,
+    skippedSeatMovingScript: 0,
     alreadyHadEvents: 0,
     noEvents: 0,
     skippedConcurrentSave: 0,
@@ -196,6 +202,21 @@ export async function fillMissingGrimoireEvents(
         continue;
       }
 
+      // Musical Chairs: the players move between seats while the characters,
+      // shrouds and reminders stay put, which the events (about players)
+      // can't follow yet. Marked as done, without events.
+      if (isSeatMovingScript(game.script)) {
+        result.skippedSeatMovingScript += 1;
+        if (!dryRun) {
+          // The current version: no catch-up rule applies to a game without events.
+          await prisma.game.updateMany({
+            where: { id: game.id, grimoire_events_version: null },
+            data: { grimoire_events_version: GRIMOIRE_EVENTS_VERSION },
+          });
+        }
+        continue;
+      }
+
       // Broken seat numbers first, so the events see the right seats.
       const seatPlan = planSeatRepairs(game.grimoire, { script: game.script });
       for (const left of seatPlan.unrepaired) {
@@ -206,7 +227,9 @@ export async function fillMissingGrimoireEvents(
       applySeatRepairs(game.grimoire, seatPlan);
       const seatChanges = seatPlan.repairs.flatMap((repair) => repair.orders);
 
-      const generated = generateEventsForMissingGames(game.grimoire, catalog);
+      const generated = generateEventsForMissingGames(game.grimoire, catalog, {
+        script: game.script,
+      });
 
       if (dryRun) {
         result.seatPagesRepaired += seatPlan.repairs.length;

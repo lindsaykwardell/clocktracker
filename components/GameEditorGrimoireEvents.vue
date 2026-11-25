@@ -1,13 +1,16 @@
 <template>
   <fieldset v-if="!editingMultipleGames" class="block border rounded border-stone-500 p-4 my-3 bg-center bg-cover">
     <legend>Grimoire Events</legend>
-    <p v-if="game.grimoire_events.length === 0" class="text-sm text-stone-400">
+    <p v-if="eventsSkipped" class="text-sm text-stone-600 dark:text-stone-400">
+      Musical Chairs is currently incompatible with Grimoire Events.
+    </p>
+    <p v-else-if="game.grimoire_events.length === 0" class="text-sm text-stone-400">
       No events recorded yet.
     </p>
     <Alert v-if="grimoireEventSyncSummary" :color="grimoireEventSyncAlertColor">
       {{ grimoireEventSyncSummary }}
     </Alert>
-    <div class="space-y-4">
+    <div v-if="!eventsSkipped" class="space-y-4">
       <details
         v-for="pageGroup in grimoireEventsByPage"
         :key="pageGroup.page"
@@ -391,6 +394,7 @@ import {
   type ReminderLike,
 } from "~/composables/grimoireEventEngine";
 import type { ReminderCatalog } from "~/shared/reminderCatalog";
+import { isSeatMovingScript } from "~/utils/grimoireChecks";
 
 const wildcardRoleIds = new Set(WILDCARD_ROLE_IDS);
 
@@ -426,6 +430,7 @@ const props = defineProps<{
   /** The roles' reminders, to know which role a placed reminder belongs to. */
   reminderCatalog?: ReminderCatalog;
   game: {
+    script?: string | null;
     grimoire: GrimoirePageLike[];
     grimoire_events: GrimoireEventLike[];
     end_trigger?: GameEndTrigger;
@@ -451,6 +456,7 @@ const {
   getGrimoire: () => props.game.grimoire,
   resolveRoleById,
   getCatalog: () => props.reminderCatalog,
+  getScript: () => props.game.script,
 });
 const grimoireEventSyncSummary = ref("");
 const grimoireEventSyncStats = ref({ added: 0, updated: 0, removed: 0 });
@@ -1521,6 +1527,10 @@ function grimoirePageSummaryLabel(pageIndex: number) {
  * Records a direct dead/alive toggle from the grimoire and immediately resyncs events,
  * because manual dead-state changes are one of the main entry points into event syncing.
  */
+// Musical Chairs: no events (see the note in the template). Events already
+// stored are left as they are; nothing is added, changed or removed.
+const eventsSkipped = computed(() => isSeatMovingScript(props.game.script));
+
 function recordGrimoireEvent(payload: {
   token: {
     order: number;
@@ -1534,6 +1544,7 @@ function recordGrimoireEvent(payload: {
   deathType?: "EXECUTION";
   pageIndex: number;
 }) {
+  if (eventsSkipped.value) return;
   const pageToken = getTokenForSeat(payload.pageIndex, payload.token.order);
   if (pageToken && !pageToken.grimoire_participant_id) {
     pageToken.grimoire_participant_id = createParticipantId();
@@ -1605,6 +1616,7 @@ function syncGrimoireEventsFromGrimoire(options?: {
   const force = options?.force ?? false;
   const silent = options?.silent ?? false;
   if ((grimoireEventSyncDone.value && !force) || props.editingMultipleGames) return;
+  if (eventsSkipped.value) return;
   if (!props.game.grimoire.length) return;
 
   let added = 0;

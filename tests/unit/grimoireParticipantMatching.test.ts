@@ -202,6 +202,15 @@ test("Musical Chairs: a player taking over another seat's character changes seat
   assert.ok(ilian);
   assert.equal(ilian.old_role_id, "mutant");
   assert.equal(ilian.new_role_id, "fortune_teller");
+
+  // The unnamed seats Ilian left and took are open chairs, not a player who
+  // moved the other way: only Ilian's name moved.
+  assert.deepEqual(
+    events
+      .filter((event) => event.event_type === "SEAT_CHANGE" || event.event_type === "ROLE_CHANGE")
+      .map((event) => event.player_name),
+    ["Ilian", "Ilian"]
+  );
 });
 
 test("a traveller joining makes no seat changes for the players after them", () => {

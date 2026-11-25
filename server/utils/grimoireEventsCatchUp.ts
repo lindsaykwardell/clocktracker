@@ -1,5 +1,6 @@
 import type { Prisma, PrismaClient } from "~/server/generated/prisma/client";
 import { generateEventsForMissingGames } from "~/server/utils/generateGrimoireEvents";
+import { isSeatMovingScript } from "~/utils/grimoireChecks";
 import { loadReminderCatalogFor } from "~/server/utils/fillMissingGrimoireEvents";
 import {
   GRIMOIRE_EVENTS_VERSION,
@@ -85,6 +86,7 @@ export async function catchUpGrimoireEvents(
     take: batchSize,
     select: {
       id: true,
+      script: true,
       grimoire_events_version: true,
       grimoire: {
         orderBy: [{ id: "asc" }],
@@ -136,9 +138,13 @@ export async function catchUpGrimoireEvents(
           page.tokens.map((token) => token.grimoire_participant_id).filter(Boolean)
         )
       );
-      const generated = generateEventsForMissingGames(game.grimoire, catalog).events.filter(
-        (event) => knownParticipants.has(event.participant_id)
-      );
+      // Musical Chairs games get no events (see fillMissingGrimoireEvents),
+      // so nothing to catch up either; they're still marked as up to date.
+      const generated = isSeatMovingScript(game.script)
+        ? []
+        : generateEventsForMissingGames(game.grimoire, catalog, {
+            script: game.script,
+          }).events.filter((event) => knownParticipants.has(event.participant_id));
 
       const outcome = await prisma.$transaction(async (tx) => {
         const existing = await tx.grimoireEvent.findMany({

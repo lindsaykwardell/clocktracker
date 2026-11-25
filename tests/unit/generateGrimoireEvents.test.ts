@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { generateEventsForMissingGames } from "../../server/utils/generateGrimoireEvents";
+import { createGrimoireEventEngine } from "../../composables/grimoireEventEngine";
 
 type Reminder = { reminder: string; token_url: string };
 
@@ -126,4 +127,96 @@ test("another character's reminder on a self-reminder character isn't its own", 
   assert.equal(removed.length, 1);
   assert.equal(removed[0].by_role_id, "preacher");
   assert.equal(removed[0].by_participant_id, "lars");
+});
+
+test("a Traveller joining and leaving makes no events, also after an exile", () => {
+  const emptySeat = () => ({
+    ...token("", 3, "beggar"),
+    player_name: "",
+    role_id: null,
+    alignment: "NEUTRAL" as const,
+    grimoire_participant_id: null,
+    role: null,
+  });
+  const players = () => [token("ann", 0, "chef"), token("bob", 1, "monk"), token("cid", 2, "chef")];
+  const tia = (isDead = false) => ({
+    ...token("tia", 3, "beggar", { isDead }),
+    role: { name: "Beggar", type: "TRAVELER", initial_alignment: "GOOD" as const },
+  });
+  const grimoire = [
+    [...players(), emptySeat()],
+    [...players(), tia()],
+    [...players(), tia(true)],
+    [...players(), emptySeat()],
+  ].map((tokens, index) => ({ id: index + 1, tokens }));
+
+  const { events } = generateEventsForMissingGames(grimoire as any);
+  assert.deepEqual(
+    events.map((event) => `${event.grimoire_page}:${event.event_type}:${event.player_name}`),
+    ["2:NOT_RECORDED:tia"]
+  );
+
+  const engine = createGrimoireEventEngine({
+    getGrimoire: () => grimoire as any,
+    resolveRoleById: () => null,
+  });
+  assert.deepEqual(
+    [...engine.buildExpectations().values()].map(
+      (event) => `${event.grimoire_page}:${event.event_type}:${event.player_name}`
+    ),
+    ["2:NOT_RECORDED:tia"]
+  );
+});
+
+test("in Musical Chairs the shroud stays with the seat when players move", () => {
+  // Lies moves into the Lunatic's seat as it dies, then on to the Mastermind's
+  // seat; Mo takes the dead Lunatic seat. The characters stay in their seats.
+  const grimoire = () =>
+    [
+      [token("ann", 0, "chef"), token("lies", 1, "philosopher"), token("dee", 2, "lunatic"), token("mo", 3, "mastermind")],
+      [token("ann", 0, "chef"), token("dee", 1, "philosopher"), token("lies", 2, "lunatic", { isDead: true }), token("mo", 3, "mastermind")],
+      [token("ann", 0, "chef"), token("dee", 1, "philosopher"), token("mo", 2, "lunatic", { isDead: true }), token("lies", 3, "mastermind")],
+    ].map((tokens, index) => ({ id: index + 1, tokens }));
+  const lifecycle = (events: { grimoire_page: number; event_type: string | null; participant_id: string }[]) =>
+    events
+      .filter((event) => ["DEATH", "NOT_RECORDED", "REVIVE"].includes(event.event_type ?? ""))
+      .map((event) => `${event.grimoire_page}:${event.event_type}:${event.participant_id}`);
+
+  // Only the seat dying is a death, for whoever sits in it then.
+  const server = generateEventsForMissingGames(grimoire() as any, null, { script: "Musical Chairs" });
+  assert.deepEqual(lifecycle(server.events), ["1:NOT_RECORDED:lies"]);
+
+  const editorGrimoire = grimoire();
+  const engine = createGrimoireEventEngine({
+    getGrimoire: () => editorGrimoire as any,
+    resolveRoleById: () => null,
+    getScript: () => "Musical Chairs",
+  });
+  assert.deepEqual(lifecycle([...engine.buildExpectations().values()] as any), ["1:NOT_RECORDED:lies"]);
+
+  // Any other script: the shroud belongs to the player (a Matron swap moves
+  // the player with their character), so the same pages read as a revive.
+  const other = generateEventsForMissingGames(grimoire() as any);
+  assert.deepEqual(lifecycle(other.events), ["1:NOT_RECORDED:lies", "2:NOT_RECORDED:mo", "2:REVIVE:lies"]);
+});
+
+test("in Musical Chairs an open chair a player left keeps its shroud without a new death", () => {
+  const openChair = (order: number, roleId: string, isDead = false) => ({
+    ...token("x", order, roleId, { isDead }),
+    player_name: "",
+    grimoire_participant_id: null,
+  });
+  const grimoire = [
+    [token("ann", 0, "chef"), token("lies", 1, "lunatic"), openChair(2, "mastermind")],
+    [token("ann", 0, "chef"), token("lies", 1, "lunatic", { isDead: true }), openChair(2, "mastermind")],
+    [token("ann", 0, "chef"), openChair(1, "lunatic", true), token("lies", 2, "mastermind")],
+  ].map((tokens, index) => ({ id: index + 1, tokens }));
+
+  const { events } = generateEventsForMissingGames(grimoire as any, null, { script: "Musical Chairs" });
+  assert.deepEqual(
+    events
+      .filter((event) => ["DEATH", "NOT_RECORDED", "REVIVE"].includes(event.event_type ?? ""))
+      .map((event) => `${event.grimoire_page}:${event.event_type}:${event.player_name}`),
+    ["1:NOT_RECORDED:lies"]
+  );
 });

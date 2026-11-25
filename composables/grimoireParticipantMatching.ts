@@ -19,6 +19,14 @@ export function normalizePlayerName(name?: string | null) {
 }
 
 /**
+ * A seat with nobody on it: no account, no name and no character (a
+ * Traveller's seat before they join or after they leave).
+ */
+export function isEmptySeat(token: ParticipantMatchToken) {
+  return !token.player_id && !normalizePlayerName(token.player_name) && !token.role_id;
+}
+
+/**
  * Generates a stable participant id for tokens that do not have one yet.
  */
 export function createParticipantId() {
@@ -60,7 +68,9 @@ function seated<T extends ParticipantMatchToken>(tokens: T[]): T[] {
  *    the seats shift, so the character comes first, nearest seat winning.
  *
  * Empty seats (no character) are never linked by character, and two tokens
- * with different player names are never linked at all.
+ * with different player names are never linked at all. Seats without a name
+ * or account are only linked by participant id, seat or character, never
+ * paired up with whatever is left over.
  */
 export function matchPageTokens<T extends ParticipantMatchToken>(
   previousTokens: T[],
@@ -122,7 +132,13 @@ export function matchPageTokens<T extends ParticipantMatchToken>(
     linkBy(sameSeat);
     linkBy(sameCharacter);
     // Whoever is left took a seat someone else left: pair them up by distance.
-    linkBy(() => true);
+    // Not a seat without a name or account: nothing says it's the same
+    // player. In Musical Chairs that's an open chair whose character stays
+    // put while a named player moves through it; pairing the chairs a player
+    // left and took would invent a nameless player who moved and changed
+    // character.
+    const nameless = (token: T) => !token.player_id && !nameOf(token);
+    linkBy((token, candidate) => !nameless(token) && !nameless(candidate));
   } else {
     linkBy(sameCharacter);
     linkBy(sameSeat);
@@ -159,9 +175,10 @@ function singleMove<X>(before: X[], after: X[]): X | null {
  * The tokens on a page whose player changed seat since the previous page,
  * given `matches` from matchPageTokens.
  *
- * - Seats are compared among the players on both pages only, so a seat
- *   added or removed partway (rare: traveller seats are usually reserved from
- *   the start) shifts nobody.
+ * - With the same number of seats on both pages (the usual case: traveller
+ *   seats are reserved from the start), a player's seat is compared as is.
+ *   When a seat was added or removed partway, seats are compared among the
+ *   players on both pages only, so the change shifts nobody.
  * - A player who turns up in another seat changed seat, whether or not their
  *   character went with them (Musical Chairs is both a seat and a character
  *   change). Seat changes are rare, so they also show up storyteller mistakes.
@@ -178,17 +195,27 @@ export function seatMoves<T extends ParticipantMatchToken>(
   const current = seated(currentTokens).filter((token) => matches.has(token));
 
   const previousRank = new Map(previous.map((token, rank) => [token, rank]));
-  const moved = current.filter(
+  let moved = current.filter(
     (token, rank) => previousRank.get(matches.get(token)!) !== rank
   );
+  if (previousTokens.length === currentTokens.length) {
+    // Compare the seats themselves: the ranks leave out seats that aren't
+    // linked (Musical Chairs' open chairs), and then a player passing an
+    // unnamed seat looks the same as that seat passing them.
+    const previousSeat = new Map(seated(previousTokens).map((token, seat) => [token, seat]));
+    const currentSeat = new Map(seated(currentTokens).map((token, seat) => [token, seat]));
+    moved = current.filter(
+      (token) => previousSeat.get(matches.get(token)!) !== currentSeat.get(token)
+    );
+  }
   if (moved.length <= 1) return new Set(moved);
 
   const onlyMover = singleMove(
     previous,
     current.map((token) => matches.get(token)!)
   );
-  if (!onlyMover) return new Set(moved);
-  return new Set(moved.filter((token) => matches.get(token) === onlyMover));
+  const mover = moved.filter((token) => matches.get(token) === onlyMover);
+  return onlyMover && mover.length ? new Set(mover) : new Set(moved);
 }
 
 /**
