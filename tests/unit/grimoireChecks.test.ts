@@ -94,7 +94,15 @@ test("a gap in the stored seat numbers is not a shift", () => {
       page(seat(1, "Ann"), seat(1, "Bob"), seat(2, "Cid")),
     ],
   };
-  assert.deepEqual(checkGrimoire(game), []);
+  // Not a shift; the broken numbers themselves are their own finding.
+  assert.deepEqual(
+    checkGrimoire(game).filter((finding) => finding.rule !== "broken-seat-numbers"),
+    []
+  );
+  assert.deepEqual(
+    checkGrimoire(game).map((finding) => finding.message),
+    ["Page 2: no seat 2", "Page 3: seat 2 twice, no seat 1"]
+  );
 });
 
 test("a name on two seats is not also reported as a seat shift", () => {

@@ -37,6 +37,7 @@ export default defineEventHandler(async (handler) => {
     select: {
       id: true,
       created_at: true,
+      message: true,
       snapshot: true,
     },
   });

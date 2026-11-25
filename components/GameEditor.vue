@@ -902,8 +902,10 @@
     <template #title>
       <h2 class="text-2xl font-bold">Grimoire History</h2>
       <p class="text-sm text-stone-400 py-2">
-        Each time a game is saved, a snapshot of the grimoire is stored.
-        You can restore a previous version if something was lost.
+        Each time a game is saved, a snapshot of the grimoire is stored, so you
+        can restore an earlier version if something was lost. When a fix in
+        ClockTracker changes the grimoire, a snapshot is stored first too, with
+        a note saying why.
       </p>
     </template>
 
@@ -929,6 +931,10 @@
               <div class="font-bold text-sm">
                 {{ dayjs(snapshot.created_at).format("MMMM D, YYYY HH:mm:ss") }}
               </div>
+              <!-- Why it was saved, when it wasn't your own save (a repair, say). -->
+              <p v-if="snapshot.message" class="text-sm text-stone-300 mt-1">
+                {{ snapshot.message }}
+              </p>
               <div class="text-xs text-stone-400 mt-1">
                 {{ snapshot.snapshot.pages.length }} page{{
                   snapshot.snapshot.pages.length === 1 ? "" : "s"
@@ -1263,6 +1269,8 @@ const customBackground = ref<string | null>(null);
 type GrimoireSnapshot = {
   id: number;
   created_at: string;
+  /** Why it was saved, when it wasn't the user's own save. */
+  message?: string | null;
   snapshot: {
     // Saved since snapshots started keeping them; older snapshots lack them.
     player_count?: number | null;

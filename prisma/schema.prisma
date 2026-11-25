@@ -192,6 +192,9 @@ model GrimoireSnapshot {
   game_id    String
   game       Game     @relation(fields: [game_id], references: [id])
   snapshot   Json
+  /// Why this revision was saved, when it wasn't the user's own save (a
+  /// repair by the background fill, say). Shown in the grimoire history.
+  message    String?
   created_at DateTime @default(now()) @db.Timestamptz(6)
 
   @@index([game_id])

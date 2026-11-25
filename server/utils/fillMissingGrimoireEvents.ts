@@ -2,6 +2,12 @@ import { Prisma, type PrismaClient } from "~/server/generated/prisma/client";
 import { generateEventsForMissingGames } from "~/server/utils/generateGrimoireEvents";
 import { buildReminderCatalog, type ReminderCatalog } from "~/shared/reminderCatalog";
 import { GRIMOIRE_EVENTS_VERSION } from "~/server/utils/grimoireEventsCatchUps";
+import { saveGrimoireRevision } from "~/server/utils/grimoireRevision";
+import {
+  applySeatRepairs,
+  planSeatRepairs,
+  seatRepairMessage,
+} from "~/server/utils/repairSeatNumbers";
 
 /**
  * Background fill for games that have never had grimoire events generated
@@ -13,6 +19,10 @@ import { GRIMOIRE_EVENTS_VERSION } from "~/server/utils/grimoireEventsCatchUps";
  * - A game that already has events is only marked, never regenerated.
  * - Events are only ever added; nothing is deleted.
  * - Missing token participant ids are filled in; existing ones are kept.
+ * - Pages with broken seat numbers (a seat twice, one missing) are repaired
+ *   first when the neighbouring pages say for certain where everyone sits
+ *   (server/utils/repairSeatNumbers.ts). The grimoire as it was is saved as
+ *   a revision first, with a message, so "Restore from history" can undo it.
  * - Each game is claimed and written in one transaction, so a user saving the
  *   same game at the same time wins.
  */
@@ -32,6 +42,9 @@ export type GrimoireEventsFillResult = {
   filled: number;
   eventsCreated: number;
   participantIdsFilled: number;
+  /** Pages whose seat numbers were repaired, and pages left for a person to look at. */
+  seatPagesRepaired: number;
+  seatPagesUnrepaired: number;
   alreadyHadEvents: number;
   noEvents: number;
   skippedConcurrentSave: number;
@@ -111,6 +124,8 @@ export async function fillMissingGrimoireEvents(
     filled: 0,
     eventsCreated: 0,
     participantIdsFilled: 0,
+    seatPagesRepaired: 0,
+    seatPagesUnrepaired: 0,
     alreadyHadEvents: 0,
     noEvents: 0,
     skippedConcurrentSave: 0,
@@ -133,6 +148,7 @@ export async function fillMissingGrimoireEvents(
     take: batchSize,
     select: {
       id: true,
+      script: true,
       _count: { select: { grimoire_events: true } },
       grimoire: {
         orderBy: [{ id: "asc" }],
@@ -180,9 +196,21 @@ export async function fillMissingGrimoireEvents(
         continue;
       }
 
+      // Broken seat numbers first, so the events see the right seats.
+      const seatPlan = planSeatRepairs(game.grimoire, { script: game.script });
+      for (const left of seatPlan.unrepaired) {
+        console.warn(
+          `[grimoire-events-fill] game ${game.id} page ${left.page + 1}: ${left.problem}; not repaired: ${left.reason}`
+        );
+      }
+      applySeatRepairs(game.grimoire, seatPlan);
+      const seatChanges = seatPlan.repairs.flatMap((repair) => repair.orders);
+
       const generated = generateEventsForMissingGames(game.grimoire, catalog);
 
       if (dryRun) {
+        result.seatPagesRepaired += seatPlan.repairs.length;
+        result.seatPagesUnrepaired += seatPlan.unrepaired.length;
         if (generated.events.length === 0) result.noEvents += 1;
         else result.filled += 1;
         result.eventsCreated += generated.events.length;
@@ -204,6 +232,34 @@ export async function fillMissingGrimoireEvents(
         // Belt and braces: never add generated events next to existing ones.
         const existing = await tx.grimoireEvent.count({ where: { game_id: game.id } });
         if (existing > 0) return "had-events" as const;
+
+        // Pages are shared with the game's copies (tagged players), so another
+        // copy may have repaired them already: only tokens still on their old
+        // seat change, and only then is a revision saved.
+        let seatsRepaired = false;
+        if (seatChanges.length > 0) {
+          const current = await tx.token.findMany({
+            where: { id: { in: seatChanges.map((change) => change.tokenId) } },
+            select: { id: true, order: true },
+          });
+          const currentOrder = new Map(current.map((token) => [token.id, token.order]));
+          const pending = seatChanges.filter(
+            (change) => currentOrder.get(change.tokenId) === change.from
+          );
+          if (pending.length > 0) {
+            await saveGrimoireRevision(tx, game.id, seatRepairMessage(seatPlan));
+            await tx.$executeRaw`
+              UPDATE "Token" AS t
+              SET "order" = v.seat
+              FROM unnest(
+                ${pending.map((change) => change.tokenId)}::int[],
+                ${pending.map((change) => change.to)}::int[]
+              ) AS v(token_id, seat)
+              WHERE t."id" = v.token_id
+            `;
+            seatsRepaired = true;
+          }
+        }
 
         let participantIdsFilled = 0;
         if (generated.tokenParticipantUpdates.length > 0) {
@@ -240,7 +296,7 @@ export async function fillMissingGrimoireEvents(
           });
         }
 
-        return { participantIdsFilled } as const;
+        return { participantIdsFilled, seatsRepaired } as const;
       });
 
       if (outcome === "skipped") {
@@ -249,6 +305,8 @@ export async function fillMissingGrimoireEvents(
         result.alreadyHadEvents += 1;
       } else {
         result.participantIdsFilled += outcome.participantIdsFilled;
+        if (outcome.seatsRepaired) result.seatPagesRepaired += seatPlan.repairs.length;
+        result.seatPagesUnrepaired += seatPlan.unrepaired.length;
         result.eventsCreated += generated.events.length;
         if (generated.events.length === 0) result.noEvents += 1;
         else result.filled += 1;

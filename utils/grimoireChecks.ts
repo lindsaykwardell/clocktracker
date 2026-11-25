@@ -45,14 +45,14 @@ export type GrimoireCheckRule = {
 };
 
 // Characters that legitimately move players to other seats.
-const SEAT_MOVING_ROLES = new Set(["matron"]);
+export const SEAT_MOVING_ROLES = new Set(["matron"]);
 
 // Scripts where players move seats as part of the game (lowercase; matched
 // anywhere in the script name, so versions and suffixes still match).
 // Musical Chairs: players change seats at will.
 const SEAT_MOVING_SCRIPTS = ["musical chairs"];
 
-function isSeatMovingScript(script: string | null | undefined) {
+export function isSeatMovingScript(script: string | null | undefined) {
   const name = (script ?? "").toLowerCase();
   return SEAT_MOVING_SCRIPTS.some((moving) => name.includes(moving));
 }
@@ -250,7 +250,48 @@ export const duplicatePlayer: GrimoireCheckRule = {
   },
 };
 
-export const GRIMOIRE_CHECK_RULES: GrimoireCheckRule[] = [seatsShifted, nameChanged, duplicatePlayer];
+/**
+ * A page that stores the same seat number twice, or skips one. The grimoire
+ * draws it sorted, so a player can land in the wrong seat. The background
+ * fill repairs these from the neighbouring pages when it can; this lists the
+ * ones still left (and those of games the fill hasn't reached yet).
+ */
+export const brokenSeatNumbers: GrimoireCheckRule = {
+  id: "broken-seat-numbers",
+  label: "Incorrect seat numbers",
+  description:
+    "A page stores the same seat number twice or skips one, so a player may be placed in the wrong seat. Check the seats on that page and save.",
+  check(game) {
+    const findings: GrimoireCheckFinding[] = [];
+    (game.grimoire ?? []).forEach((page, index) => {
+      const counts = new Map<number, number>();
+      for (const token of page.tokens) counts.set(token.order, (counts.get(token.order) ?? 0) + 1);
+      const twice = [...counts].filter(([, count]) => count > 1).map(([order]) => order + 1);
+      const missing: number[] = [];
+      for (let seat = 0; seat < page.tokens.length; seat += 1) {
+        if (!counts.has(seat)) missing.push(seat + 1);
+      }
+      if (!twice.length && !missing.length) return;
+      const parts = [
+        ...twice.map((seat) => `seat ${seat} twice`),
+        ...(missing.length ? [`no seat ${missing.join(", ")}`] : []),
+      ];
+      findings.push({
+        rule: brokenSeatNumbers.id,
+        page: index + 1,
+        message: `Page ${index + 1}: ${parts.join(", ")}`,
+      });
+    });
+    return findings;
+  },
+};
+
+export const GRIMOIRE_CHECK_RULES: GrimoireCheckRule[] = [
+  brokenSeatNumbers,
+  seatsShifted,
+  nameChanged,
+  duplicatePlayer,
+];
 
 /** Runs the rules on one game; an empty list means nothing looked wrong. */
 export function checkGrimoire(

@@ -365,6 +365,8 @@ type GrimoireEventsFillResponse = {
   eventsCreated: number;
   noEvents: number;
   alreadyHadEvents: number;
+  seatPagesRepaired?: number;
+  seatPagesUnrepaired?: number;
   failed: number;
   remaining: number;
   [key: string]: unknown;
@@ -379,12 +381,24 @@ const fillSummary = computed(() => {
   const r = fillResult.value;
   if (!r) return "";
   const games = (n: number) => `${n} game${n === 1 ? "" : "s"}`;
+  const pages = (n: number) => `${n} page${n === 1 ? "" : "s"}`;
+  // Broken seat numbers (a seat twice, one missing): repaired, or left for a person.
+  const seats = (would: boolean) => {
+    const repaired = r.seatPagesRepaired ?? 0;
+    const unrepaired = r.seatPagesUnrepaired ?? 0;
+    if (!repaired && !unrepaired) return "";
+    return (
+      ` Seat numbers: ${pages(repaired)} ${would ? "would be " : ""}repaired` +
+      (unrepaired ? `, ${pages(unrepaired)} left as they are (see server log).` : ".")
+    );
+  };
   if (r.dryRun) {
     return (
       `Dry run for ${r.username}: looked at ${games(r.examined)} of ` +
       `${games(r.remaining)} never generated. ${r.filled} would get ` +
       `${r.eventsCreated} events, ${r.noEvents} have none to add, ` +
-      `${r.alreadyHadEvents} already have events.`
+      `${r.alreadyHadEvents} already have events.` +
+      seats(true)
     );
   }
   const parts = [
@@ -397,7 +411,8 @@ const fillSummary = computed(() => {
   return (
     parts.join(", ") +
     ". " +
-    (r.remaining > 0 ? `${games(r.remaining)} left; run again.` : "All done.")
+    (r.remaining > 0 ? `${games(r.remaining)} left; run again.` : "All done.") +
+    seats(false)
   );
 });
 
