@@ -69,6 +69,7 @@
         </ul>
       </div>
     </div>
+    <RoleWallSkeleton v-else storyteller />
   </div>
 </template>
 

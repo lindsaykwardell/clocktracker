@@ -603,7 +603,7 @@
     <ImportGamesDialog v-model:visible="importGamesDialogVisible" />
   </template>
   <template v-else>
-    <Loading />
+    <GamesSkeleton />
   </template>
 </template>
 

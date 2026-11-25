@@ -1,15 +1,21 @@
 <template>
   <div class="px-4 lg:px-8 pb-4 lg:pb-8 space-y-8 md:space-y-12 xl:space-y-16">
+    <!-- Shown while the games load too: none of it needs them, except the
+         filter menu's options, so Filter Stats waits until they're in. -->
     <div
-      v-if="games.status === Status.SUCCESS"
+      v-if="games.status !== Status.ERROR"
       class="flex flex-col gap-3 px-4"
     >
       <div class="flex flex-col lg:flex-row gap-3 justify-between">
         <div class="flex flex-col md:flex-row gap-3">
           <div class="relative w-full md:w-auto">
             <Menu>
-              <MenuButton class="relative w-full md:w-auto">
+              <MenuButton
+                class="relative w-full md:w-auto"
+                :disabled="games.status !== Status.SUCCESS"
+              >
                 <Button 
+                  :disabled="games.status !== Status.SUCCESS"
                   icon="filter"
                   :count="activeFilters.length ? activeFilters.length : ''"
                   countLabel="Active filters"
@@ -232,7 +238,11 @@
       </div>
     </div>
 
-    <template v-if="games.status === Status.LOADING"> <Loading /> </template>
+    <!-- Also before the request starts (IDLE): otherwise the area stays blank. -->
+    <StatsSkeleton
+      v-if="games.status !== Status.SUCCESS && games.status !== Status.ERROR"
+      :mode="mode"
+    />
     <template v-else-if="games.status === Status.ERROR">
       Error loading games
     </template>

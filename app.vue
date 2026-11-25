@@ -287,6 +287,102 @@ body {
     @apply bg-stone-50 dark:bg-stone-800 font-gothic dark:text-stone-100;
 }
 
+/*
+ * Games at the top of a profile: whole rows only. The game grid fits
+ * floor(width / 360px) tiles per row (260px below md), so the grid's own width
+ * says how many columns there are. Show one row from three columns up, three
+ * rows of two, two rows of one, and hide the rest. Used by UserProfile and
+ * ProfileSkeleton.
+ */
+.profile-games {
+    container-type: inline-size;
+}
+
+@media (max-width: 767.98px) {
+    @container (max-width: 519.98px) {
+        .profile-games > ul > li:nth-child(n + 3) { display: none; }
+    }
+    @container (min-width: 520px) {
+        .profile-games > ul > li:nth-child(n + 7) { display: none; }
+    }
+}
+
+@media (min-width: 768px) {
+    @container (max-width: 719.98px) {
+        .profile-games > ul > li:nth-child(n + 3) { display: none; }
+    }
+    @container (min-width: 720px) and (max-width: 1079.98px) {
+        .profile-games > ul > li:nth-child(n + 7) { display: none; }
+    }
+    @container (min-width: 1080px) and (max-width: 1439.98px) {
+        .profile-games > ul > li:nth-child(n + 4) { display: none; }
+    }
+    @container (min-width: 1440px) and (max-width: 1799.98px) {
+        .profile-games > ul > li:nth-child(n + 5) { display: none; }
+    }
+    @container (min-width: 1800px) and (max-width: 2159.98px) {
+        .profile-games > ul > li:nth-child(n + 6) { display: none; }
+    }
+    @container (min-width: 2160px) and (max-width: 2519.98px) {
+        .profile-games > ul > li:nth-child(n + 7) { display: none; }
+    }
+    @container (min-width: 2520px) and (max-width: 2879.98px) {
+        .profile-games > ul > li:nth-child(n + 8) { display: none; }
+    }
+    @container (min-width: 2880px) and (max-width: 3239.98px) {
+        .profile-games > ul > li:nth-child(n + 9) { display: none; }
+    }
+    @container (min-width: 3240px) {
+        .profile-games > ul > li:nth-child(n + 10) { display: none; }
+    }
+}
+
+/*
+ * Skeleton placeholders: a soft highlight sweeping left to right. The
+ * gradient is fixed to the viewport, so every block on the page shows the
+ * same sweep at once instead of each block shimmering on its own.
+ */
+.skeleton-block {
+    background-color: rgb(214 211 209 / 0.55); /* stone-300 */
+    background-image: linear-gradient(
+        100deg,
+        transparent 30%,
+        rgb(255 255 255 / 0.55) 50%,
+        transparent 70%
+    );
+    background-size: 200vw 100%;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    animation: skeleton-sweep 1.6s linear infinite;
+}
+
+.dark .skeleton-block {
+    background-color: rgb(41 37 36 / 0.9); /* stone-800 */
+    background-image: linear-gradient(
+        100deg,
+        transparent 30%,
+        rgb(255 255 255 / 0.06) 50%,
+        transparent 70%
+    );
+}
+
+@keyframes skeleton-sweep {
+    /* Moving the background to the right moves the light band to the right. */
+    from {
+        background-position: -100vw 0;
+    }
+    to {
+        background-position: 100vw 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .skeleton-block {
+        animation: none;
+        background-image: none;
+    }
+}
+
 .ct-card {
     @apply p-4 relative rounded border dark:border-stone-700/50 bg-stone-300/30 dark:bg-stone-900/40 overflow-hidden;
 

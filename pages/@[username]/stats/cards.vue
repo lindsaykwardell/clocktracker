@@ -1,24 +1,22 @@
 <template>
   <StandardTemplate>
     <div class="w-full flex flex-col gap-8">
-      <template v-if="playerFetchStatus === Status.LOADING || games.status === Status.LOADING">
-        <Loading />
-      </template>
-
-      <template v-else-if="playerFetchStatus === Status.ERROR || games.status === Status.ERROR">
+      <template v-if="playerFetchStatus === Status.ERROR || games.status === Status.ERROR">
         <p class="text-center text-xl font-sorts my-8">
           Unable to load achievements.
         </p>
       </template>
 
-      <template v-else-if="!canViewStats">
+      <template v-else-if="player && !canViewStats">
         <p class="text-center text-xl font-sorts my-8">
           This account is private
         </p>
       </template>
 
+      <!-- While loading: the real toolbar and intro, with placeholders for the header and the cards. -->
       <template v-else>
-        <UserHeader :player="player!">
+        <ProfileHeaderSkeleton v-if="!player" />
+        <UserHeader v-else :player="player">
           <div
             v-if="
               player?.privacy === PrivacySetting.PUBLIC ||
@@ -134,8 +132,9 @@
               </div>
 
               <!-- Empty or no results, for both card sets; a search gets a way back. -->
+              <StatCardsSkeleton v-if="cardsLoading" />
               <div
-                v-if="noCardsToShow"
+                v-else-if="noCardsToShow"
                 class="flex flex-col items-center gap-3 py-8 text-center"
               >
                 <template v-if="searchTerm">
@@ -328,6 +327,10 @@ const player = computed(() => {
 });
 
 const games = computed(() => gamesStore.getByPlayer(username));
+// The cards need the player (their settings), the games and every character.
+const cardsLoading = computed(
+  () => !player.value || games.value.status !== Status.SUCCESS || roles.roles.size === 0
+);
 
 const isMe = computed(() => {
   if (!player.value || !meUser.value) return false;

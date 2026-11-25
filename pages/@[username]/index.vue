@@ -126,7 +126,21 @@
         </div>
       </template>
       <template v-else>
-        <Loading class="h-screen" />
+        <!-- The player loads in the browser: show the open tab's shape right away. -->
+        <ProfileHeaderSkeleton :full="currentTab === 'profile'" />
+        <div
+          v-if="currentTab === 'stats'"
+          class="px-4 lg:px-8 pb-4 lg:pb-8 space-y-8 md:space-y-12 xl:space-y-16"
+        >
+          <!-- Stands in for the stats toolbar until UserCharts renders it. -->
+          <div class="flex justify-between gap-3 px-4 pb-3" aria-hidden="true">
+            <div class="skeleton-block h-10 w-28 rounded-md" />
+            <div class="skeleton-block h-10 w-44 rounded-lg" />
+          </div>
+          <StatsSkeleton :mode="storytellerStatsFromQuery ? 'storyteller' : 'player'" />
+        </div>
+        <GamesSkeleton v-else-if="currentTab === 'games' || currentTab === 'pending'" />
+        <ProfileSkeleton v-else />
       </template>
     </div>
   </StandardTemplate>
@@ -235,6 +249,12 @@ onMounted(() => {
   });
   gameStore.fetchPlayerGames(username);
 });
+
+// The Stats tab's Storyteller view (?storyteller=...), the same rule as
+// UserCharts, so the loading skeleton matches the view that will open.
+const storytellerStatsFromQuery = computed(() =>
+  ["1", "true", "storyteller"].includes(String(route.query.storyteller ?? ""))
+);
 
 // Each tab gets its own title, so browser tabs and history can tell them apart.
 const pageTitle = computed(() => {

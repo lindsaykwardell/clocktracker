@@ -16,6 +16,8 @@ export type RoleRecord = Omit<Role, "type"> & {
   reminders: RoleReminder[];
 };
 
+let rolesRequest: Promise<void> | null = null;
+
 export const useRoles = defineStore("roles", {
   state: () => ({
     roles: new Map<string, RoleRecord>(),
@@ -72,10 +74,19 @@ export const useRoles = defineStore("roles", {
         return;
       }
 
-      const roles = await $fetch<RoleRecord[]>("/api/roles");
-      for (const role of roles) {
-        this.roles.set(role.id.toLowerCase(), role);
-      }
+      // Several components ask at once (the profile and both character
+      // walls): share the one request.
+      rolesRequest ??= $fetch<RoleRecord[]>("/api/roles")
+        .then((roles) => {
+          for (const role of roles) {
+            this.roles.set(role.id.toLowerCase(), role);
+          }
+        })
+        .finally(() => {
+          rolesRequest = null;
+        });
+
+      return rolesRequest;
     },
   },
 });

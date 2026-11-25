@@ -47,6 +47,7 @@
         <li v-for="role in roleGroup.roles" :key="role.id">
           <component
             :is="statsDebug.enabled.value ? 'button' : NuxtLink"
+            class="block"
             v-bind="statsDebug.enabled.value
               ? { type: 'button', title: 'Debug: games for this character', onClick: () => openRoleDebug(role) }
               : { to: `/roles/${role.id}` }"
@@ -78,14 +79,15 @@
         </li>
       </ul>
     </div>
-    <StatsDebugDialog
-      v-if="statsDebug.enabled.value"
-      v-model:visible="showRoleDebug"
-      :title="`${debugRole?.name ?? ''}: games`"
-      :summary="roleDebugSummary"
-      :rows="roleDebugRows"
-    />
   </div>
+  <RoleWallSkeleton v-else />
+  <StatsDebugDialog
+    v-if="statsDebug.enabled.value"
+    v-model:visible="showRoleDebug"
+    :title="`${debugRole?.name ?? ''}: games`"
+    :summary="roleDebugSummary"
+    :rows="roleDebugRows"
+  />
 </template>
 
 <script setup lang="ts">

@@ -43,6 +43,12 @@
               </span>
             </div>
             <div class="flex gap-2 items-center">
+              <!-- Keeps the counts' row while the games load, so the header doesn't
+                   grow: one block each for the storyteller and player counts. -->
+              <template v-if="allGames.status !== Status.SUCCESS">
+                <div class="skeleton-block h-6 w-16 rounded" aria-hidden="true" />
+                <div class="skeleton-block h-6 w-16 rounded" aria-hidden="true" />
+              </template>
               <div
                 v-if="gamesAsStoryteller.length"
                 class="flex gap-1 items-center h-6 overflow-y-hidden"
