@@ -22,11 +22,28 @@ export type GrimoireCheckToken = {
   alignment: string | null;
   role?: { name: string } | null;
   player?: { username: string; display_name?: string | null } | null;
+  grimoire_participant_id?: string | null;
+};
+
+export type GrimoireCheckEvent = {
+  grimoire_page: number;
+  participant_id: string;
+  event_type: string;
+  cause: string | null;
+  by_participant_id: string | null;
+  by_role_id: string | null;
+  player_name: string;
+  role_id: string | null;
+  old_role_id: string | null;
+  new_role_id: string | null;
+  old_alignment: string | null;
+  new_alignment: string | null;
 };
 
 export type GrimoireCheckGame = {
   script?: string | null;
   grimoire: { tokens: GrimoireCheckToken[] }[];
+  grimoire_events?: GrimoireCheckEvent[];
 };
 
 export type GrimoireCheckFinding = {
@@ -39,8 +56,12 @@ export type GrimoireCheckFinding = {
 export type GrimoireCheckRule = {
   id: string;
   label: string;
+  /** For a game's findings: "Name changes: 8". Defaults to the label. */
+  plural?: string;
   /** One line for the dialog: what the rule looks for. */
   description: string;
+  /** Off when the dialog opens (for rules that would list nearly every game). */
+  offByDefault?: boolean;
   check: (game: GrimoireCheckGame) => GrimoireCheckFinding[];
 };
 
@@ -177,9 +198,10 @@ export const seatsShifted: GrimoireCheckRule = {
 /** The same seat, character and alignment, but another name. */
 export const nameChanged: GrimoireCheckRule = {
   id: "name-changed",
-  label: "Name changed",
+  label: "Name change",
+  plural: "Name changes",
   description:
-    "A seat keeps its character and alignment on the next page, but the name on it is different, removed, or only linked from that page on. Not for Musical Chairs.",
+    "A seat keeps its character and alignment on the next page, but the name on it is different, removed, or only linked from that page on, and the script isn't Musical Chairs.",
   check(game) {
     // In Musical Chairs players move between seats, so names come and go on
     // a seat while its character stays.
@@ -220,7 +242,8 @@ export const nameChanged: GrimoireCheckRule = {
 /** One player on two seats of the same page. */
 export const duplicatePlayer: GrimoireCheckRule = {
   id: "duplicate-player",
-  label: "Same player twice",
+  label: "Duplicate name",
+  plural: "Duplicate names",
   description: "The same name or linked user sits on two seats of one page.",
   check(game) {
     // The same duplicate usually repeats on every page: one finding for it,
@@ -287,10 +310,10 @@ export const brokenSeatNumbers: GrimoireCheckRule = {
 };
 
 export const GRIMOIRE_CHECK_RULES: GrimoireCheckRule[] = [
-  brokenSeatNumbers,
-  seatsShifted,
   nameChanged,
   duplicatePlayer,
+  seatsShifted,
+  brokenSeatNumbers,
 ];
 
 /** Runs the rules on one game; an empty list means nothing looked wrong. */
@@ -300,3 +323,174 @@ export function checkGrimoire(
 ): GrimoireCheckFinding[] {
   return rules.flatMap((rule) => rule.check(game));
 }
+
+/*
+ * Grimoire events that aren't filled in. Not mistakes: a death the
+ * storyteller didn't record the cause of, or a change without the character
+ * that caused it. They are listed so the ones that can still be filled in
+ * (a Barber swap, a Snake Charmer jump) are easy to find.
+ */
+
+export type GrimoireEventKind = "death" | "change" | "other";
+
+const EVENT_KINDS: Record<string, GrimoireEventKind> = {
+  NOT_RECORDED: "death",
+  DEATH: "death",
+  EXECUTION: "death",
+  ROLE_CHANGE: "change",
+  ALIGNMENT_CHANGE: "change",
+  SEAT_CHANGE: "change",
+  REVIVE: "other",
+  MAD: "other",
+  DRUNK: "other",
+  POISONED: "other",
+  OTHER: "other",
+};
+
+export function eventKind(event: GrimoireCheckEvent): GrimoireEventKind {
+  return EVENT_KINDS[event.event_type] ?? "other";
+}
+
+/**
+ * Whether an event is missing what caused it. A death: it isn't known how
+ * (Not recorded, or a death without a cause or a character). An execution
+ * needs nothing more. Anything else: no character or player caused it. Seat
+ * changes in a game where players move seats themselves (Musical Chairs)
+ * have no cause to fill in.
+ */
+export function isUnfilledEvent(event: GrimoireCheckEvent, script?: string | null) {
+  const hasSource = !!event.by_role_id || !!event.by_participant_id;
+  switch (event.event_type) {
+    case "NOT_RECORDED":
+      return true;
+    case "DEATH":
+      return !event.cause && !hasSource;
+    case "EXECUTION":
+      return false;
+    case "SEAT_CHANGE":
+      return !hasSource && !isSeatMovingScript(script);
+    default:
+      return !hasSource;
+  }
+}
+
+/**
+ * A game's events that aren't filled in. In Musical Chairs a player who
+ * changes seats takes that seat's character, so a character or alignment
+ * change on the same page as the player's seat change is caused by the move.
+ */
+export function unfilledEvents(game: GrimoireCheckGame): GrimoireCheckEvent[] {
+  const events = game.grimoire_events ?? [];
+  const moved = new Set(
+    isSeatMovingScript(game.script)
+      ? events
+          .filter((event) => event.event_type === "SEAT_CHANGE")
+          .map((event) => `${event.grimoire_page}:${event.participant_id}`)
+      : []
+  );
+  return events.filter((event) => {
+    if (
+      (event.event_type === "ROLE_CHANGE" || event.event_type === "ALIGNMENT_CHANGE") &&
+      moved.has(`${event.grimoire_page}:${event.participant_id}`)
+    ) {
+      return false;
+    }
+    return isUnfilledEvent(event, game.script);
+  });
+}
+
+/**
+ * "steven.d" (Barber): the player on that page, or the name the event kept.
+ * Without the character for a character change, which says it already.
+ */
+function describeEventPlayer(game: GrimoireCheckGame, event: GrimoireCheckEvent, withRole = true) {
+  const token = game.grimoire?.[event.grimoire_page]?.tokens.find(
+    (candidate) =>
+      !!event.participant_id && candidate.grimoire_participant_id === event.participant_id
+  );
+  const name = cleanName(token?.player_name) || cleanName(token?.player?.username) || cleanName(event.player_name);
+  const role = withRole ? token?.role?.name : null;
+  if (!name) return role ? `(no name, ${role})` : "(no name)";
+  return role ? `"${name}" (${role})` : `"${name}"`;
+}
+
+function roleNames(game: GrimoireCheckGame) {
+  const names = new Map<string, string>();
+  for (const page of game.grimoire ?? []) {
+    for (const token of page.tokens) {
+      if (token.role_id && token.role?.name) names.set(token.role_id, token.role.name);
+    }
+  }
+  return (id: string | null) => (id ? names.get(id) ?? id : "?");
+}
+
+const ALIGNMENT_NAMES: Record<string, string> = { GOOD: "Good", EVIL: "Evil", NEUTRAL: "Neutral" };
+
+const EVENT_VERBS: Record<string, string> = {
+  NOT_RECORDED: "died",
+  DEATH: "died",
+  REVIVE: "revived",
+  MAD: "mad",
+  DRUNK: "drunk",
+  POISONED: "poisoned",
+  OTHER: "other event",
+};
+
+function describeEvent(game: GrimoireCheckGame, event: GrimoireCheckEvent, role: (id: string | null) => string) {
+  const player = describeEventPlayer(game, event, event.event_type !== "ROLE_CHANGE");
+  switch (event.event_type) {
+    case "ROLE_CHANGE":
+      return `${player} ${role(event.old_role_id)} → ${role(event.new_role_id)}`;
+    case "ALIGNMENT_CHANGE":
+      return `${player} ${ALIGNMENT_NAMES[event.old_alignment ?? ""] ?? "?"} → ${ALIGNMENT_NAMES[event.new_alignment ?? ""] ?? "?"}`;
+    case "SEAT_CHANGE":
+      return `${player} changed seats`;
+    default:
+      return `${player} ${EVENT_VERBS[event.event_type] ?? event.event_type.toLowerCase()}`;
+  }
+}
+
+function unfilledEventRule(
+  kind: GrimoireEventKind,
+  rule: Omit<GrimoireCheckRule, "check">
+): GrimoireCheckRule {
+  return {
+    ...rule,
+    check(game) {
+      const role = roleNames(game);
+      return unfilledEvents(game)
+        .filter((event) => eventKind(event) === kind)
+        .sort((a, b) => a.grimoire_page - b.grimoire_page)
+        .map((event) => ({
+          rule: rule.id,
+          page: event.grimoire_page + 1,
+          message: `Page ${event.grimoire_page + 1}: ${describeEvent(game, event, role)}`,
+        }));
+    },
+  };
+}
+
+export const unfilledDeaths = unfilledEventRule("death", {
+  id: "unfilled-deaths",
+  label: "Deaths",
+  description: "A death without cause.",
+  offByDefault: true,
+});
+
+export const unfilledChanges = unfilledEventRule("change", {
+  id: "unfilled-changes",
+  label: "Changes",
+  description: "A character, alignment or seat change without cause.",
+});
+
+export const unfilledOther = unfilledEventRule("other", {
+  id: "unfilled-other",
+  label: "Other",
+  description: "A revive, poisoning, drunkenness, madness or other event without cause.",
+});
+
+export const GRIMOIRE_EVENT_RULES: GrimoireCheckRule[] = [
+  unfilledDeaths,
+  unfilledChanges,
+  unfilledOther,
+];

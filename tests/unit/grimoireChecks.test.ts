@@ -5,6 +5,10 @@ import {
   duplicatePlayer,
   nameChanged,
   seatsShifted,
+  unfilledChanges,
+  unfilledDeaths,
+  unfilledOther,
+  type GrimoireCheckEvent,
   type GrimoireCheckToken,
 } from "../../utils/grimoireChecks";
 
@@ -158,4 +162,81 @@ test("a duplicate that repeats on every page is reported once", () => {
   const findings = duplicatePlayer.check(game);
   assert.equal(findings.length, 1);
   assert.match(findings[0].message, /Pages 1, 2: "Ann" on seats 1, 2/);
+});
+
+function event(event_type: string, extra: Partial<GrimoireCheckEvent> = {}): GrimoireCheckEvent {
+  return {
+    grimoire_page: 1,
+    participant_id: "p1",
+    event_type,
+    cause: null,
+    by_participant_id: null,
+    by_role_id: null,
+    player_name: "Ann",
+    role_id: "a",
+    old_role_id: null,
+    new_role_id: null,
+    old_alignment: null,
+    new_alignment: null,
+    ...extra,
+  };
+}
+
+test("only events without a cause are listed, one line each", () => {
+  const game = {
+    grimoire: [],
+    grimoire_events: [
+      event("NOT_RECORDED"),
+      event("DEATH", { cause: "ABILITY", by_role_id: "imp" }),
+      event("EXECUTION", { cause: "NOMINATION" }),
+      event("ROLE_CHANGE", { old_role_id: "a", new_role_id: "b" }),
+      event("ROLE_CHANGE", { by_role_id: "barber" }),
+      event("POISONED", { by_role_id: "poisoner" }),
+      event("REVIVE"),
+    ],
+  };
+  assert.deepEqual(unfilledDeaths.check(game).map((finding) => finding.message), ['Page 2: "Ann" died']);
+  assert.deepEqual(unfilledChanges.check(game).map((finding) => finding.message), ['Page 2: "Ann" a → b']);
+  assert.deepEqual(unfilledOther.check(game).map((finding) => finding.message), ['Page 2: "Ann" revived']);
+});
+
+test("an unfilled change says who and what, on the page where it shows", () => {
+  const ann = { grimoire_participant_id: "p1", role: { name: "Barber" } };
+  const game = {
+    grimoire: [
+      page(seat(0, "Ann", "barber", ann)),
+      page(seat(0, "Ann", "snake_charmer", { ...ann, role: { name: "Snake Charmer" } })),
+    ],
+    grimoire_events: [
+      event("ROLE_CHANGE", { old_role_id: "barber", new_role_id: "snake_charmer" }),
+      event("ALIGNMENT_CHANGE", { old_alignment: "GOOD", new_alignment: "EVIL" }),
+    ],
+  };
+  assert.deepEqual(
+    unfilledChanges.check(game).map((finding) => finding.message),
+    ['Page 2: "Ann" Barber → Snake Charmer', 'Page 2: "Ann" (Snake Charmer) Good → Evil']
+  );
+  assert.equal(unfilledDeaths.check(game).length, 0);
+  assert.equal(unfilledOther.check(game).length, 0);
+});
+
+test("players changing seats in Musical Chairs have no cause to fill in", () => {
+  const seatChange = {
+    grimoire: [],
+    grimoire_events: [
+      event("SEAT_CHANGE"),
+      event("ROLE_CHANGE", { old_role_id: "a", new_role_id: "b" }),
+      event("ROLE_CHANGE", { participant_id: "p2", old_role_id: "c", new_role_id: "d" }),
+    ],
+  };
+  assert.equal(unfilledChanges.check(seatChange).length, 3);
+  // The move explains Ann's new character; p2's change still needs a cause.
+  const musical = unfilledChanges.check({ ...seatChange, script: "Musical Chairs" });
+  assert.equal(musical.length, 1);
+  assert.equal(musical[0].message, 'Page 2: "Ann" c → d');
+});
+
+test("deaths are off at first; the grimoire checks don't look at events", () => {
+  assert.equal(unfilledDeaths.offByDefault, true);
+  assert.deepEqual(checkGrimoire({ grimoire: [], grimoire_events: [event("NOT_RECORDED")] }), []);
 });

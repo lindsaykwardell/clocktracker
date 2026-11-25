@@ -371,9 +371,10 @@
                 color="positive"
                 variant="soft"
                 icon="bug"
-                title="List games whose grimoire looks odd (moved seats, changed names)"
+                aria-haspopup="dialog"
+                title="Open the games check: games with grimoire issues or incomplete events"
               >
-                Debug grimoires
+                Debug
               </Button>
             </div>
             <div class="flex-grow"></div>

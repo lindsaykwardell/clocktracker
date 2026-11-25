@@ -9,7 +9,9 @@
       'w-11/12': size === 'xl',
     }"
   >
-    <div ref="dialogContent" v-if="visible">
+    <!-- data-dialog-content: tooltips inside the dialog go here
+         (InfoHint's container), so clicking one isn't a click outside. -->
+    <div ref="dialogContent" v-if="visible" data-dialog-content>
       <div
         class="flex justify-between items-top sticky top-0 bg-stone-900 z-20"
       >

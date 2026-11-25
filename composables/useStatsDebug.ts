@@ -2,9 +2,10 @@ import { useLocalStorage } from "@vueuse/core";
 import { Status } from "~/composables/useFetchStatus";
 
 /**
- * Debug mode for the stats pages: shows which games feed a card or stat and
- * why a game doesn't count. Behind the "stats-debug" feature flag, and only on
- * the user's own pages (/@username/...) unless they're an admin.
+ * Debug mode for the profile pages (Games, Stats, stat cards): shows which
+ * games feed a card or stat and why a game doesn't count, and the games
+ * check. Behind the "profile-pages-debug" feature flag, and only on the
+ * user's own pages (/@username/...) unless they're an admin.
  * Remembered per browser.
  */
 export function useStatsDebug() {
@@ -27,7 +28,7 @@ export function useStatsDebug() {
   });
 
   const canDebug = computed(
-    () => featureFlags.isEnabled("stats-debug") && (isAdmin.value || isOwnPage.value)
+    () => featureFlags.isEnabled("profile-pages-debug") && (isAdmin.value || isOwnPage.value)
   );
 
   const enabled = computed({

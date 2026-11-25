@@ -693,6 +693,11 @@ function getAlignmentTimeline(game: GameWithChars): Alignment[] {
   return getAlignmentTimelineWithSource(game).timeline;
 }
 
+// Why a game has no alignment, for the debug lists: a storyteller has none.
+function noAlignmentReason(game: { is_storyteller?: boolean | null }) {
+  return game.is_storyteller ? "Storyteller game" : "No alignment found";
+}
+
 // Debug mode: every game with its alignment timeline and where it came from.
 const switchDebugRows = computed(() => {
   if (!showSwitchDebug.value) return [];
@@ -705,7 +710,7 @@ const switchDebugRows = computed(() => {
     const reason = game.ignore_for_stats
       ? "Ignored for stats"
       : !timeline.length
-        ? "No alignment found"
+        ? noAlignmentReason(game)
         : switches
           ? `From ${source}`
           : `No switch (from ${source})`;
@@ -741,7 +746,7 @@ const streakDebug = computed(() => {
     }
     const alignment = getEndingAlignment(game);
     if (!alignment) {
-      entries.push({ game, alignment: null, run: 0, group: runs.length - 1, reason: "No alignment found" });
+      entries.push({ game, alignment: null, run: 0, group: runs.length - 1, reason: noAlignmentReason(game) });
       continue;
     }
     const last = runs.at(-1);
@@ -799,11 +804,12 @@ const streakDebugRows = computed(() => {
       reason: entry.reason ?? (label ? `Ended as ${label}` : null),
       icon: label ? `/img/role/48x48/${entry.alignment === "GOOD" ? "good" : "evil"}_thumb.webp` : undefined,
       iconAlt: label ?? undefined,
-      // Marks the longest streaks; the rest are smaller.
+      // Marks the longest streaks; the rest are smaller, and so are the
+      // games that don't count (ignored, storyteller, no alignment).
       accent: inLongestStreak
         ? entry.alignment === "GOOD" ? chartColors.good : chartColors.evil
         : undefined,
-      minor: !!label && !inLongestStreak,
+      minor: !label || !inLongestStreak,
       // One block per streak; skipped games sit in the streak they fall in.
       group: String(entry.group),
     };

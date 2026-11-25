@@ -6,13 +6,24 @@
       <p v-if="warning" class="text-sm text-amber-400 pt-1">{{ warning }}</p>
     </template>
 
-    <div class="px-4 pb-4 text-sm">
-      <label class="flex items-center gap-2 pb-3 text-stone-300">
+    <!-- A fixed height, so showing the games that don't count doesn't
+         resize and move the dialog; only the list scrolls. -->
+    <div class="flex flex-col h-[min(70vh,calc(100vh-12rem))] px-4 pb-4 text-sm">
+      <label class="flex shrink-0 items-center gap-2 pb-3 text-stone-300">
         <input type="checkbox" v-model="showExcluded" />
-        Show games that don't count ({{ excludedCount }})
+        Show games that don't count ({{ gameCount(excludedCount) }})
       </label>
 
-      <p v-if="!visibleRows.length" class="text-stone-400">No games.</p>
+      <!-- relative: the links' sr-only text is absolutely placed, and has to
+           stay inside this scroller instead of stretching the dialog. -->
+      <div class="debug-list relative min-h-0 flex-1 overflow-y-auto border-t border-stone-700 pt-3">
+      <p v-if="!visibleRows.length" class="text-stone-400">
+        <template v-if="!rows.length">No games.</template>
+        <template v-else-if="!showExcluded">
+          No games count toward this. Show the games that don't count to see why.
+        </template>
+        <template v-else>No games.</template>
+      </p>
 
       <!--
         One grid for the whole list: the first column is as wide as the widest
@@ -54,23 +65,29 @@
               {{ row.value }}
             </span>
             <div class="flex flex-wrap items-center gap-x-3">
-              <a
-                :href="`/game/${row.id}`"
-                target="_blank"
-                class="underline underline-offset-2 hover:text-white"
-              >
-                {{ row.date }} · {{ row.script || "No script" }}
-              </a>
+              <span class="tabular-nums text-stone-400">{{ row.date }}</span>
+              <span :class="row.counts ? 'text-stone-100' : 'text-stone-300'">
+                {{ row.script || "No script" }}
+              </span>
               <span v-if="row.reason" class="text-stone-400">{{ row.reason }}</span>
+              <span class="ml-auto flex gap-3">
+                <a :href="`/game/${row.id}`" target="_blank" class="game-link">
+                  View<span class="sr-only"> {{ row.date }} {{ row.script || "No script" }} (opens in a new tab)</span>
+                </a>
+                <a :href="`/game/${row.id}/edit`" target="_blank" class="game-link">
+                  Edit<span class="sr-only"> {{ row.date }} {{ row.script || "No script" }} (opens in a new tab)</span>
+                </a>
+              </span>
             </div>
-            <p
+            <ul
               v-if="row.details?.length"
-              class="col-span-2 pt-1 text-xs text-stone-500 break-words"
+              class="col-span-2 pt-1 text-xs text-stone-400 break-words"
             >
-              {{ row.details.join(" · ") }}
-            </p>
+              <li v-for="(detail, index) in row.details" :key="index">{{ detail }}</li>
+            </ul>
           </li>
         </ul>
+      </div>
       </div>
     </div>
   </Dialog>
@@ -115,6 +132,8 @@ const showExcluded = ref(false);
 
 const excludedCount = computed(() => props.rows.filter((row) => !row.counts).length);
 
+const gameCount = (count: number) => `${count} game${count === 1 ? "" : "s"}`;
+
 const visibleRows = computed(() =>
   showExcluded.value ? props.rows : props.rows.filter((row) => row.counts)
 );
@@ -133,3 +152,15 @@ const groupedRows = computed(() => {
   return groups;
 });
 </script>
+
+<style scoped>
+.debug-list {
+  scrollbar-width: thin;
+  scrollbar-color: theme(colors.stone.600) transparent;
+  scrollbar-gutter: stable;
+}
+
+.game-link {
+  @apply text-stone-300 underline underline-offset-2 hover:text-white;
+}
+</style>
