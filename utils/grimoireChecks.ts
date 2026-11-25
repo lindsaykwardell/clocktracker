@@ -337,6 +337,7 @@ const EVENT_KINDS: Record<string, GrimoireEventKind> = {
   NOT_RECORDED: "death",
   DEATH: "death",
   EXECUTION: "death",
+  EXILE: "death",
   ROLE_CHANGE: "change",
   ALIGNMENT_CHANGE: "change",
   SEAT_CHANGE: "change",
@@ -366,6 +367,7 @@ export function isUnfilledEvent(event: GrimoireCheckEvent, script?: string | nul
     case "DEATH":
       return !event.cause && !hasSource;
     case "EXECUTION":
+    case "EXILE":
       return false;
     case "SEAT_CHANGE":
       return !hasSource && !isSeatMovingScript(script);
@@ -429,6 +431,7 @@ const ALIGNMENT_NAMES: Record<string, string> = { GOOD: "Good", EVIL: "Evil", NE
 const EVENT_VERBS: Record<string, string> = {
   NOT_RECORDED: "died",
   DEATH: "died",
+  EXILE: "exiled",
   REVIVE: "revived",
   MAD: "mad",
   DRUNK: "drunk",

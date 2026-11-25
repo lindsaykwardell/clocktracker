@@ -1328,6 +1328,7 @@ const deathTooltipsForPage = computed(() => {
                 event.event_type === GrimoireEventType.NOT_RECORDED ||
                 event.event_type === GrimoireEventType.DEATH ||
                 event.event_type === GrimoireEventType.EXECUTION ||
+                event.event_type === GrimoireEventType.EXILE ||
                 event.event_type === GrimoireEventType.REVIVE;
             if (!isDeathTimelineEvent) return;
             const existing = grimoireEventsByParticipant.get(event.participant_id);
@@ -1349,11 +1350,15 @@ const deathTooltipsForPage = computed(() => {
             const typeLabel =
                 event.event_type === GrimoireEventType.EXECUTION
                     ? "Executed"
-                    : "Died";
+                    : event.event_type === GrimoireEventType.EXILE
+                        ? "Exiled"
+                        : "Died";
             const causeLabel =
                 event.cause === GrimoireEventCause.NOMINATION
                     ? "nomination"
-                    : event.cause === GrimoireEventCause.ABILITY
+                    : event.cause === GrimoireEventCause.CALL_FOR_EXILE
+                        ? "call for exile"
+                        : event.cause === GrimoireEventCause.ABILITY
                         ? "ability"
                         : null;
 
@@ -1375,7 +1380,12 @@ const deathTooltipsForPage = computed(() => {
                 }
             }
 
-            if (causeLabel) {
+            if (event.cause === GrimoireEventCause.CALL_FOR_EXILE) {
+                // "Exiled, called for by the No Dashii (Sven)"
+                tooltips[seat] = byText
+                    ? `${typeLabel}, called for${byText.replace(/^ of /, " by ")}`
+                    : `${typeLabel}, called for`;
+            } else if (causeLabel) {
                 tooltips[seat] = `${typeLabel} by ${causeLabel}${byText}`;
             } else {
                 tooltips[seat] = `${typeLabel}${byText}`;

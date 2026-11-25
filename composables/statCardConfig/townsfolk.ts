@@ -2421,6 +2421,7 @@ export const TOWNSFOLK_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
           (event) =>
             (event.event_type === GrimoireEventType.DEATH ||
               event.event_type === GrimoireEventType.EXECUTION ||
+              event.event_type === GrimoireEventType.EXILE ||
               event.event_type === GrimoireEventType.NOT_RECORDED) &&
             event.grimoire_page < wakePage
         ).length;

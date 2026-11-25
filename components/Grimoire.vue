@@ -192,7 +192,9 @@
     :playerName="shroudPrompt?.token.player_name ?? ''"
     :suggestions="shroudSuggestions"
     @selectReminder="selectShroudReminder"
+    :isTraveller="shroudPrompt?.token.role?.type === 'TRAVELER'"
     @executed="markShroudDeathAsExecution"
+    @exiled="markShroudDeathAsExile"
     @otherReminders="openReminderDialogFromShroud"
   />
 </template>
@@ -717,7 +719,7 @@ function shouldRemoveShroudFromReminder(reminderName?: string | null) {
 function emitDeathToggled(
   token: Token,
   isDead: boolean,
-  deathType?: "EXECUTION"
+  deathType?: "EXECUTION" | "EXILE"
 ) {
   if (props.readonly) return;
   emit("deathToggled", {
@@ -869,6 +871,12 @@ function selectShroudReminder(reminder: (typeof reminders.value)[number]) {
 function markShroudDeathAsExecution() {
   if (!shroudPrompt.value) return;
   emitDeathToggled(shroudPrompt.value.token, true, "EXECUTION");
+  showShroudDialog.value = false;
+}
+
+function markShroudDeathAsExile() {
+  if (!shroudPrompt.value) return;
+  emitDeathToggled(shroudPrompt.value.token, true, "EXILE");
   showShroudDialog.value = false;
 }
 

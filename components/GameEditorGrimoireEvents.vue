@@ -35,8 +35,8 @@
                   >
                   <span>
                     {{ grimoireEventSummaryParts(event).before }}
-                    <span class="font-semibold text-stone-900 dark:text-stone-300">{{ grimoireEventSummaryParts(event).action }}</span>
-                    {{ grimoireEventSummaryParts(event).after }}
+                    <!-- "after" carries its own leading space (" by …", ", called for by …"). -->
+                    <span class="font-semibold text-stone-900 dark:text-stone-300">{{ grimoireEventSummaryParts(event).action }}</span>{{ grimoireEventSummaryParts(event).after }}
                   </span>
                 </span>
                 <!-- The end-game button on the closed bar, so an event that
@@ -151,7 +151,8 @@
                             event.event_type === null ||
                             event.event_type === GrimoireEventType.NOT_RECORDED ||
                             event.event_type === GrimoireEventType.DEATH ||
-                            event.event_type === GrimoireEventType.EXECUTION
+                            event.event_type === GrimoireEventType.EXECUTION ||
+                            event.event_type === GrimoireEventType.EXILE
                           "
                           src="/img/shroud.png"
                           class="absolute left-[50%] -translate-x-[50%] top-0 w-8 md:w-10"
@@ -197,6 +198,12 @@
                         <option :value="GrimoireEventType.NOT_RECORDED">Not recorded</option>
                         <option :value="GrimoireEventType.DEATH">Death</option>
                         <option :value="GrimoireEventType.EXECUTION">Execution</option>
+                        <option
+                          v-if="isTravellerEvent(event) || event.event_type === GrimoireEventType.EXILE"
+                          :value="GrimoireEventType.EXILE"
+                        >
+                          Exile
+                        </option>
                       </template>
                     </Input>
                   </label>
@@ -235,11 +242,22 @@
                         <template v-else>
                           <option :value="null">Not recorded</option>
                           <option :value="GrimoireEventCause.ABILITY">Ability</option>
+                          <!-- Travellers can't be nominated (a Scapegoat's execution is an ability). -->
                           <option
-                            v-if="event.event_type === GrimoireEventType.EXECUTION"
+                            v-if="
+                              event.event_type === GrimoireEventType.EXECUTION &&
+                              (!isTravellerEvent(event) ||
+                                event.cause === GrimoireEventCause.NOMINATION)
+                            "
                             :value="GrimoireEventCause.NOMINATION"
                           >
                             Nomination
+                          </option>
+                          <option
+                            v-if="event.event_type === GrimoireEventType.EXILE"
+                            :value="GrimoireEventCause.CALL_FOR_EXILE"
+                          >
+                            Call for exile
                           </option>
                         </template>
                       </Input>
@@ -797,6 +815,7 @@ function isStatusSourceLocked(event: {
 function eventSummaryLabel(event: { event_type: GrimoireEventType | null }) {
   if (event.event_type === GrimoireEventType.REVIVE) return "Revived";
   if (event.event_type === GrimoireEventType.EXECUTION) return "Executed";
+  if (event.event_type === GrimoireEventType.EXILE) return "Exiled";
   if (event.event_type === GrimoireEventType.ROLE_CHANGE) return "Character switched";
   if (event.event_type === GrimoireEventType.SEAT_CHANGE) return "Seat changed";
   if (event.event_type === GrimoireEventType.ALIGNMENT_CHANGE) return "Alignment switched";
@@ -820,6 +839,7 @@ function eventTypeOptionLabel(eventType: GrimoireEventType | null) {
   if (eventType === GrimoireEventType.POISONED) return "Poisoned";
   if (eventType === GrimoireEventType.OTHER) return "Other";
   if (eventType === GrimoireEventType.EXECUTION) return "Execution";
+  if (eventType === GrimoireEventType.EXILE) return "Exile";
   if (eventType === GrimoireEventType.DEATH) return "Death";
   return "Not recorded";
 }
@@ -951,6 +971,17 @@ function grimoireEventSummaryParts(event: GrimoireEventLike): GrimoireEventSumma
       before: `${targetName} was `,
       action: "executed",
       after: sourceActor ? ` by ${sourceActor}` : "",
+    };
+  }
+  if (event.event_type === GrimoireEventType.EXILE) {
+    return {
+      before: `${targetName} was `,
+      action: "exiled",
+      after: !sourceActor
+        ? ""
+        : event.cause === GrimoireEventCause.CALL_FOR_EXILE
+          ? `, called for by ${sourceActor}`
+          : ` by ${sourceActor}`,
     };
   }
   if (
@@ -1370,8 +1401,16 @@ function isLifecycleEventType(eventType: GrimoireEventType | null) {
     eventType === GrimoireEventType.NOT_RECORDED ||
     eventType === GrimoireEventType.DEATH ||
     eventType === GrimoireEventType.EXECUTION ||
+    eventType === GrimoireEventType.EXILE ||
     eventType === GrimoireEventType.REVIVE
   );
+}
+
+/** Whether the event's seat holds a Traveller on that page (exile is for Travellers). */
+function isTravellerEvent(event: GrimoireEventLike) {
+  const token = getTokenForParticipant(event.grimoire_page, event.participant_id);
+  const role = token?.role ?? resolveRoleById(token?.role_id ?? event.role_id);
+  return role?.type === "TRAVELER";
 }
 
 function grimoireEventRowKey(pageIndex: number, event: GrimoireEventLike) {
@@ -1472,6 +1511,7 @@ function grimoireEventSortPriority(eventType: GrimoireEventType | null) {
       return 3;
     case GrimoireEventType.DEATH:
     case GrimoireEventType.EXECUTION:
+    case GrimoireEventType.EXILE:
     case GrimoireEventType.REVIVE:
     case GrimoireEventType.NOT_RECORDED:
     case null:
@@ -1541,7 +1581,7 @@ function recordGrimoireEvent(payload: {
   };
   isDead: boolean;
   /** Set when the player was nominated and executed (the shroud dialog's plain Executed). */
-  deathType?: "EXECUTION";
+  deathType?: "EXECUTION" | "EXILE";
   pageIndex: number;
 }) {
   if (eventsSkipped.value) return;
@@ -1585,13 +1625,17 @@ function recordGrimoireEvent(payload: {
       ? GrimoireEventType.REVIVE
       : payload.deathType === "EXECUTION"
         ? GrimoireEventType.EXECUTION
-        : GrimoireEventType.NOT_RECORDED,
+        : payload.deathType === "EXILE"
+          ? GrimoireEventType.EXILE
+          : GrimoireEventType.NOT_RECORDED,
     status_source: null,
     cause: shouldRecordRevival
       ? GrimoireEventCause.ABILITY
       : payload.deathType === "EXECUTION"
         ? GrimoireEventCause.NOMINATION
-        : null,
+        : payload.deathType === "EXILE"
+          ? GrimoireEventCause.CALL_FOR_EXILE
+          : null,
     by_participant_id: null,
     player_name: payload.token.player_name || "",
     role_id: payload.token.role_id ?? null,
@@ -1700,7 +1744,8 @@ function syncGrimoireEventsFromGrimoire(options?: {
         (event.event_type === null ||
           event.event_type === GrimoireEventType.NOT_RECORDED ||
           event.event_type === GrimoireEventType.DEATH ||
-          event.event_type === GrimoireEventType.EXECUTION);
+          event.event_type === GrimoireEventType.EXECUTION ||
+          event.event_type === GrimoireEventType.EXILE);
       if (!keepManualDeathType) {
         event.event_type = expectation.event_type;
         // The old cause belonged to the old type (a Nomination only fits an

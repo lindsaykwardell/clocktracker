@@ -101,3 +101,14 @@ test("the pit-hag turning the demon into a non-demon", () => {
   assert.equal(result?.end_trigger_type, "CHARACTER_CHANGE");
   assert.equal(result?.end_trigger_role_id, "pit_hag");
 });
+
+test("an exiled Traveller never ends the game", () => {
+  const pages = [
+    { tokens: [tok("a", "imp"), tok("s", "scapegoat"), tok("c", "chef")] },
+    { tokens: [tok("a", "imp"), tok("s", "scapegoat", true), tok("c", "chef")] },
+  ];
+  assert.equal(
+    deriveEndTriggerFromEvent(ev({ participant_id: "s", event_type: "EXILE" }), pages, resolveRole),
+    null
+  );
+});

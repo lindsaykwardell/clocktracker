@@ -1,0 +1,1 @@
+ALTER TYPE "GrimoireEventCause" ADD VALUE 'CALL_FOR_EXILE';

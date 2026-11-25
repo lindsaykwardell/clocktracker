@@ -220,3 +220,11 @@ test("in Musical Chairs an open chair a player left keeps its shroud without a n
     ["1:NOT_RECORDED:lies"]
   );
 });
+
+test("the editor matches an exile with the shroud's death", () => {
+  const engine = createGrimoireEventEngine({ getGrimoire: () => [], resolveRoleById: () => null });
+  assert.equal(
+    engine.eventReconciliationKind("EXILE" as any, null),
+    engine.eventReconciliationKind("NOT_RECORDED" as any, null)
+  );
+});

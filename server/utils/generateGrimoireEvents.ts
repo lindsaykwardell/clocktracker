@@ -562,6 +562,7 @@ function isLifecycleEventType(eventType: GrimoireEventType) {
   return (
     eventType === GrimoireEventType.DEATH ||
     eventType === GrimoireEventType.EXECUTION ||
+    eventType === GrimoireEventType.EXILE ||
     eventType === GrimoireEventType.REVIVE
   );
 }

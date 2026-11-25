@@ -1426,7 +1426,7 @@ function recordGrimoireEvent(payload: {
     grimoire_participant_id?: string | null;
   };
   isDead: boolean;
-  deathType?: "EXECUTION";
+  deathType?: "EXECUTION" | "EXILE";
   pageIndex: number;
 }) {
   grimoireEventsRef.value?.recordGrimoireEvent(payload);

@@ -56,6 +56,8 @@ export const GRIMOIRE_EVENT_ROLE_INCLUDES: Record<GrimoireEventType, RoleInclude
     "butcher", // Causes additional execution
     "judge", // Edge case: Could force execution, which is specific player agency.
   ], conditional: [] },
+  // An exile caused by an ability instead of a call: none known yet.
+  [GrimoireEventType.EXILE]: { base: [...WILDCARD_ROLE_IDS], conditional: [] },
   [GrimoireEventType.REVIVE]: { base: [
     ...WILDCARD_ROLE_IDS,
     "professor",

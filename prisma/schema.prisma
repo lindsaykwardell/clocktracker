@@ -132,12 +132,18 @@ enum GameEndTriggerCause {
 enum GrimoireEventCause {
   ABILITY
   NOMINATION
+  /// An exile (of a Traveller) that a player called for; the caller is the
+  /// event's source, like the nominator of an execution.
+  CALL_FOR_EXILE
 }
 
 enum GrimoireEventType {
   NOT_RECORDED
   DEATH
   EXECUTION
+  /// A Traveller exiled: not an execution (any player may vote, it isn't the
+  /// day's execution and execution abilities ignore it).
+  EXILE
   REVIVE
   ROLE_CHANGE
   SEAT_CHANGE

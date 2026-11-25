@@ -240,3 +240,8 @@ test("deaths are off at first; the grimoire checks don't look at events", () => 
   assert.equal(unfilledDeaths.offByDefault, true);
   assert.deepEqual(checkGrimoire({ grimoire: [], grimoire_events: [event("NOT_RECORDED")] }), []);
 });
+
+test("an exile is a complete death, like an execution", () => {
+  const game = { grimoire: [], grimoire_events: [event("EXILE"), event("EXECUTION"), event("NOT_RECORDED")] };
+  assert.deepEqual(unfilledDeaths.check(game).map((finding) => finding.message), ['Page 2: "Ann" died']);
+});

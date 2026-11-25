@@ -45,12 +45,16 @@ export enum GameEndTriggerCause {
 export enum GrimoireEventCause {
   ABILITY = "ABILITY",
   NOMINATION = "NOMINATION",
+  /** A player called for a Traveller's exile; they are the source. */
+  CALL_FOR_EXILE = "CALL_FOR_EXILE",
 }
 
 export enum GrimoireEventType {
   NOT_RECORDED = "NOT_RECORDED",
   DEATH = "DEATH",
   EXECUTION = "EXECUTION",
+  /** A Traveller exiled: a death, but not an execution. */
+  EXILE = "EXILE",
   REVIVE = "REVIVE",
   ROLE_CHANGE = "ROLE_CHANGE",
   SEAT_CHANGE = "SEAT_CHANGE",
