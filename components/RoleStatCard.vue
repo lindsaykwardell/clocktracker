@@ -1,13 +1,15 @@
 <template>
   <li 
-    class="relative flex gap-3 rounded-lg bg-stone-300/30 dark:bg-stone-900/40"
+    class="relative flex gap-3 rounded-lg"
     :class="{
+      'bg-stone-300/30 dark:bg-stone-900/40': !isDimmed,
+      'bg-stone-300/15 dark:bg-stone-900/20': isDimmed,
       'flex-col p-4 pt-6' : variant == 'vertical',
       'items-center p-3 pr-8' : variant == 'horizontal',
       'border dark:border-stone-700/50' : !isFavorite,
       'border border-primary' : isFavorite,
       'is-hidden-card': isConfiguredAsHidden && showHiddenStyling,
-      'text-[#716a65] dark:text-[#8e8782]': isDimmed,
+      'text-[#716a65] dark:text-[#928b86]': isDimmed,
     }"
     >
     <Button
@@ -168,9 +170,11 @@ const result = computed(() => {
 });
 
 // A card the player hasn't reached yet, on pages that show those (the cards page).
+// Its background is lighter (half the card tint), so it reads as empty.
 // The token fades (it's decoration); the text keeps the lightest
-// colour that still passes 4.5:1 on the card (#716a65 on #efeeed, #8e8782 on
-// #24201f in dark mode), instead of fading the whole card.
+// colour that still passes 4.5:1 on that lighter card (#716a65 on #f5f4f3,
+// 4.8:1; #928b86 on #262321 in dark mode, 4.65:1), instead of fading the
+// whole card.
 const isDimmed = computed(() => !!props.showZeroOverlay && result.value.count === 0);
 
 const isConfiguredAsHidden = computed(() => {
@@ -252,7 +256,8 @@ const roleLink = computed(() => {
 </script>
 
 <style>
-  .card-token > .token {
+  /* Any token, also the empty placeholder (no character, so no .token class). */
+  .card-token > * {
     inline-size: 5.5rem;
     block-size: 5.5rem;
   }

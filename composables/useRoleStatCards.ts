@@ -451,6 +451,7 @@ type ScopeIndex = {
   affectedPlayer?: GameRecord[];
   triggeringPlayer?: GameRecord[];
   general?: GameRecord[];
+  generalAffected?: GameRecord[];
   asRole: Map<string, GameRecord[]>;
 };
 
@@ -499,6 +500,25 @@ function getScopedGamesForRole(
   }
 
   const index = getScopeIndex(games, username);
+
+  if (category === "general" && scope === "affected_player") {
+    // General cards about what happened to this player, whatever their role:
+    // the events on their own seat (poisoned, executed, ...). The grimoire
+    // stays whole, for cards that read their seat from it (a Traveller joining).
+    index.generalAffected ??= games.flatMap((game, i) => {
+      const participantIds = index.userParticipantIds[i];
+      if (!participantIds.size) return [];
+      return [
+        {
+          ...game,
+          grimoire_events: game.grimoire_events.filter((event) =>
+            participantIds.has(event.participant_id)
+          ),
+        },
+      ];
+    });
+    return index.generalAffected;
+  }
 
   if (category === "general") {
     // General cards are about what this player did, whatever their role:
