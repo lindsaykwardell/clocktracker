@@ -40,9 +40,9 @@
           </p>
         </div>
         <div class="flex flex-col sm:flex-row gap-2">
-          <Input
+          <AdminUserSearch
             v-model="fillUsername"
-            placeholder="Username"
+            placeholder="Search users by name or username..."
             class="flex-1"
           />
           <Button
@@ -97,9 +97,9 @@
           </p>
         </div>
         <div class="flex flex-col sm:flex-row gap-2">
-          <Input
+          <AdminUserSearch
             v-model="catchUpUsername"
-            placeholder="Username"
+            placeholder="Search users by name or username..."
             class="flex-1"
           />
           <Button

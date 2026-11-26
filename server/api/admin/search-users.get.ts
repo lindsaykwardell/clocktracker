@@ -18,6 +18,8 @@ export default defineEventHandler(async (handler) => {
         "MANAGE_GROUPS",
         "EXPORT_USER_DATA",
         "BAN_USER",
+        // The Updates page's user fields.
+        "MANAGE_APP_TOOLS",
       ].includes(p)
     );
     if (!hasAnyAdminPerm) {
