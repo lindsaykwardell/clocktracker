@@ -16,7 +16,10 @@
           Track your games of Blood on the Clocktower, connect with friends,
           and watch your story unfold.
         </p>
-        <div class="flex flex-col sm:flex-row gap-3">
+        <!-- Full width and centred: sized to its content, the row came out
+             narrower than the two full-size buttons, which then stuck out
+             to the right. -->
+        <div class="w-full flex flex-col sm:flex-row items-center justify-center gap-3">
           <Button
             component="nuxt-link"
             to="/login"
@@ -148,6 +151,14 @@
 
     <!-- Footer -->
     <footer class="pb-6 pt-4 text-center text-sm text-stone-600 border-t border-stone-900">
+      <img
+        src="/img/ccc-sleeve.webp"
+        alt="Community Created Content"
+        width="1072"
+        height="426"
+        class="block h-12 w-auto mx-auto mb-3"
+        loading="lazy"
+      />
       This project is not affiliated with The Pandemonium Institute. All roles
       are the property of Steven Medway and The Pandemonium Institute.
     </footer>
