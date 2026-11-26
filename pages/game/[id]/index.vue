@@ -552,7 +552,7 @@
                                 game.data.associated_script?.version &&
                                 !isBaseScript(game.data.script)
                             "
-                            class="my-1 text-sm text-muted"
+                            class="my-1 text-sm text-stone-600 dark:text-stone-400"
                         >
                             {{ game.data.script }}
                             <template v-if="game.data.ls_game_id">
@@ -772,7 +772,7 @@
                     id="menu-controls"
                 >
                     <Menu v-slot="{ open }">
-                        <MenuButton>
+                        <MenuButton aria-label="Game options">
                             <IconUI id="dots" :rounded="true" shadow />
                         </MenuButton>
                         <transition
@@ -1883,6 +1883,6 @@ onMounted(() => {
 
 .metadata-label {
     /* @apply text-xs text-stone-500 dark:text-stone-400 uppercase; */
-    @apply text-sm text-stone-500 dark:text-stone-400;
+    @apply text-sm text-stone-600 dark:text-stone-400;
 }
 </style>

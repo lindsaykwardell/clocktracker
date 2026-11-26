@@ -218,6 +218,8 @@ const computedClasses = computed(() => {
       &:where(.dark, .dark *) {
         --btn-color: theme(colors.dark-primary);
         --btn-soft-fg: theme(colors.purple.400);
+        /* purple-600 is 3.7:1 as text on the dark background */
+        --btn-link-fg: theme(colors.purple.400);
       }
     }
 
@@ -486,9 +488,11 @@ const computedClasses = computed(() => {
     text-decoration-line: none;
   }
 
+  /* --btn-link-fg: a shade of the color that reaches 4.5:1 as text on the
+     page, for colors that don't themselves (primary in dark mode). */
   .ct-btn-link:not(.ct-btn-disabled,.ct-btn:disabled,.ct-btn[disabled]),
   .ct-btn-link-underline:not(.ct-btn-disabled,.ct-btn:disabled,.ct-btn[disabled]) {
-    --btn-fg: var(--btn-color,var(--color-base-content));
+    --btn-fg: var(--btn-link-fg, var(--btn-color,var(--color-base-content)));
   }
 
   .ct-btn-link:is(.ct-btn-active,:hover,:active:focus,:focus-visible),
