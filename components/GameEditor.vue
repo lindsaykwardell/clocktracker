@@ -1103,6 +1103,7 @@ const props = defineProps<{
       new_role_id: string | null;
       old_alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
       new_alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
+      source_set_by_hand?: boolean;
     }[];
     notes: string;
     image_urls: string[];
@@ -1235,6 +1236,7 @@ const focusedGrimoireEvent = ref<{
   new_role_id: string | null;
   old_alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
   new_alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
+  source_set_by_hand?: boolean;
 } | null>(null);
 const grimoireEventSyncReady = ref(false);
 const grimoireInitialState = ref<string | null>(null);
@@ -2026,6 +2028,7 @@ function openGrimoireEventByRoleDialog(event: {
   new_role_id: string | null;
   old_alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
   new_alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
+  source_set_by_hand?: boolean;
 }) {
   focusedGrimoireEvent.value = event;
   excludeIrrelevantGrimoireEventRoles.value = true;
@@ -2086,6 +2089,8 @@ function selectRoleForToken(role: {
     const event = focusedGrimoireEvent.value;
     if (event) {
       event.by_role_id = role.id || null;
+      // Picked by hand: the sync leaves it alone until it's reset.
+      event.source_set_by_hand = true;
     }
     showRoleSelectionDialog.value = false;
     return;

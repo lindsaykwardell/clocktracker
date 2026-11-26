@@ -115,6 +115,7 @@ export async function saveGrimoireRevision(
           old_alignment: event.old_alignment,
           new_alignment: event.new_alignment,
           status_source: event.status_source,
+          source_set_by_hand: event.source_set_by_hand,
         })),
       })),
     },

@@ -18,6 +18,7 @@ export function mapGrimoireEventsForCreate(events: GrimoireEvent[]) {
     old_alignment: (grimoireEvent as any).old_alignment ?? null,
     new_alignment: (grimoireEvent as any).new_alignment ?? null,
     status_source: (grimoireEvent as any).status_source ?? null,
+    source_set_by_hand: !!grimoireEvent.source_set_by_hand,
   }));
 }
 

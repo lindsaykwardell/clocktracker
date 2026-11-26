@@ -40,29 +40,49 @@
                   </span>
                 </span>
                 <!-- The end-game button on the closed bar, so an event that
-                     closed itself (all its data filled in) doesn't need opening.
-                     On a narrow screen it wraps under the text. -->
+                     closed itself (all its data filled in) doesn't need opening,
+                     then the reset for a hand-picked source (open or closed).
+                     On a narrow screen they wrap under the text. -->
                 <span
-                  v-if="endTriggerForEvent(event)"
-                  class="ml-auto shrink-0 group-open/event:hidden"
+                  v-if="endTriggerForEvent(event) || event.source_set_by_hand"
+                  class="ml-auto shrink-0 flex items-center gap-2"
                 >
                   <span
-                    v-if="eventEndedGame(event)"
-                    class="inline-flex items-center gap-1 text-sm font-semibold text-green-700 dark:text-green-400"
+                    v-if="endTriggerForEvent(event)"
+                    class="group-open/event:hidden"
                   >
-                    <IconUI id="check-circle" size="sm" />
-                    This event ended the game
+                    <span
+                      v-if="eventEndedGame(event)"
+                      class="inline-flex items-center gap-1 text-sm font-semibold text-green-700 dark:text-green-400"
+                    >
+                      <IconUI id="check-circle" size="sm" />
+                      This event ended the game
+                    </span>
+                    <Button
+                      v-else
+                      type="button"
+                      size="sm"
+                      color="neutral"
+                      variant="soft"
+                      icon="check-circle"
+                      @click.prevent.stop="markEventAsGameEnd(event)"
+                    >
+                      This event ended the game
+                    </Button>
                   </span>
+                  <!-- Only on a source picked by hand: hands it back to the grimoire. -->
                   <Button
-                    v-else
+                    v-if="event.source_set_by_hand"
                     type="button"
                     size="sm"
                     color="neutral"
                     variant="soft"
-                    icon="check-circle"
-                    @click.prevent.stop="markEventAsGameEnd(event)"
+                    icon="arrow-counterclockwise"
+                    display="icon-only"
+                    title="Reset the triggering character to what the grimoire says"
+                    @click.prevent.stop="resetGrimoireEventSource(event)"
                   >
-                    This event ended the game
+                    Reset the triggering character to what the grimoire says
                   </Button>
                 </span>
               </summary>
@@ -435,6 +455,7 @@ type GrimoireEventLike = {
   new_role_id: string | null;
   old_alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
   new_alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
+  source_set_by_hand?: boolean;
 };
 
 type SeatOption = {
@@ -777,10 +798,12 @@ function onGrimoireEventTypeChange(event: {
   cause: GrimoireEventCause | null;
   by_participant_id: string | null;
   by_role_id: string | null;
+  source_set_by_hand?: boolean;
 }) {
   event.cause = null;
   event.by_participant_id = null;
   event.by_role_id = null;
+  event.source_set_by_hand = false;
 
   if (event.event_type === GrimoireEventType.REVIVE) {
     event.cause = GrimoireEventCause.ABILITY;
@@ -1305,10 +1328,13 @@ function updateGrimoireEventSeatSelection(
     participant_id: string;
     cause: GrimoireEventCause | null;
     event_type: GrimoireEventType | null;
+    source_set_by_hand?: boolean;
   },
   value: string | "custom" | null
 ) {
   const key = grimoireEventSelectionKey(event);
+  // Picked here: the sync leaves it alone until it's reset.
+  event.source_set_by_hand = true;
   if (value === "custom") {
     event.by_participant_id = null;
     grimoireEventCustomSeatSelections.value.add(key);
@@ -1337,9 +1363,12 @@ function onGrimoireEventCauseChange(event: {
   by_participant_id: string | null;
   by_role_id: string | null;
   event_type: GrimoireEventType | null;
+  source_set_by_hand?: boolean;
 }) {
   event.by_participant_id = null;
   event.by_role_id = null;
+  // The old source belonged to the old cause; the sync may fill a new one.
+  event.source_set_by_hand = false;
   grimoireEventCustomSeatSelections.value.delete(grimoireEventSelectionKey(event));
 }
 
@@ -1650,6 +1679,18 @@ function recordGrimoireEvent(payload: {
 }
 
 /**
+ * Gives a hand-picked source back to the sync: cleared, then filled with what
+ * the grimoire says (or left empty when it says nothing).
+ */
+function resetGrimoireEventSource(event: GrimoireEventLike) {
+  event.source_set_by_hand = false;
+  event.by_participant_id = null;
+  event.by_role_id = null;
+  grimoireEventCustomSeatSelections.value.delete(grimoireEventSelectionKey(event));
+  syncGrimoireEventsFromGrimoire({ force: true, silent: true });
+}
+
+/**
  * Rebuilds grimoire events from page-to-page token diffs while preserving manual edits where possible,
  * because the grimoire is the source of truth but users still need to keep intentional manual overrides.
  */
@@ -1811,18 +1852,21 @@ function syncGrimoireEventsFromGrimoire(options?: {
         event.event_type === GrimoireEventType.ALIGNMENT_CHANGE) &&
       !!expectation.by_role_id;
 
+    // A source picked by hand stays until it's reset (the header's button).
     if (
-      (!event.by_participant_id && expectation.by_participant_id) ||
-      ((isReminderDrivenRow || isChangedRoleEvent) &&
-        event.by_participant_id !== expectation.by_participant_id)
+      !event.source_set_by_hand &&
+      ((!event.by_participant_id && expectation.by_participant_id) ||
+        ((isReminderDrivenRow || isChangedRoleEvent) &&
+          event.by_participant_id !== expectation.by_participant_id))
     ) {
       event.by_participant_id = expectation.by_participant_id;
       updated += 1;
     }
     if (
-      (!event.by_role_id && expectation.by_role_id) ||
+      !event.source_set_by_hand &&
+      ((!event.by_role_id && expectation.by_role_id) ||
       ((isReminderDrivenRow || isChangedRoleEvent) &&
-        event.by_role_id !== expectation.by_role_id)
+        event.by_role_id !== expectation.by_role_id))
     ) {
       event.by_role_id = expectation.by_role_id;
       updated += 1;

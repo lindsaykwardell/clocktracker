@@ -173,6 +173,9 @@ model GrimoireEvent {
   new_role_id       String?
   old_alignment     Alignment?
   new_alignment     Alignment?
+  /// The triggering character/player was picked by hand in the editor: its
+  /// sync leaves them alone until "reset to automatic".
+  source_set_by_hand Boolean           @default(false)
   created_at        DateTime            @default(now()) @db.Timestamptz(6)
 
   @@index([game_id])

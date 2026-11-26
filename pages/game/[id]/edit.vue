@@ -122,6 +122,7 @@ const game = reactive<{
     new_role_id: string | null;
     old_alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
     new_alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
+    source_set_by_hand?: boolean;
   }[];
   notes: string;
   image_urls: string[];
@@ -299,6 +300,7 @@ const formattedGame = computed(() => {
     new_role_id: event.new_role_id,
     old_alignment: event.old_alignment,
     new_alignment: event.new_alignment,
+    source_set_by_hand: !!event.source_set_by_hand,
   })),
   // If the game was waiting for confirmation, mark it as confirmed when saving
   waiting_for_confirmation: savedGame.data.value?.waiting_for_confirmation

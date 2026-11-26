@@ -59,6 +59,7 @@ type SnapshotData = {
     old_alignment?: string | null;
     new_alignment?: string | null;
     status_source?: string | null;
+    source_set_by_hand?: boolean;
   }[];
 };
 
@@ -213,6 +214,7 @@ export default defineEventHandler(async (handler) => {
         old_alignment: (event.old_alignment as any) ?? null,
         new_alignment: (event.new_alignment as any) ?? null,
         status_source: event.status_source ?? null,
+        source_set_by_hand: !!event.source_set_by_hand,
       })),
     };
   }
