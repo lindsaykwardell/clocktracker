@@ -241,7 +241,7 @@
               <template v-if="!selectMultipleGames.enabled && game.bgg_id">
                 <Button
                   component="a"
-                  :href="`https://boardgamegeek.com/play/details/${game.bgg_id}`"
+                  :href="bggPlayLink(game)"
                   target="_blank"
                   class="z-10"
                   :title="`View this game on BoardGameGeek - ${
@@ -298,7 +298,6 @@
 
 <script setup lang="ts">
 import { gameResult } from "~/composables/useGames";
-import { FriendStatus } from "~/composables/useFriends";
 const gamesStore = useGames();
 const users = useUsers();
 const me = useMe();
@@ -322,32 +321,13 @@ const props = withDefaults(
   }
 );
 
-const getChildGameId = (game: GameRecord) => {
-  if (me.value?.status !== Status.SUCCESS) return null;
+const { getGameLink, canViewGame } = useGameLinks();
 
-  const userId = me.value.data.user_id;
-  const childGame = game.child_games?.find((g) => g.user_id === userId);
-  return childGame?.id ?? null;
-};
-
-const getGameLink = (game: GameRecord) => {
-  const childGameId = getChildGameId(game);
-  return childGameId ? `/game/${childGameId}` : `/game/${game.id}`;
-};
-
-const canViewGame = (game: GameRecord) => {
-  if (game.privacy === "PUBLIC") return true;
-  if (me.value?.status !== Status.SUCCESS) return false;
-
-  if (me.value.data.user_id === game.user_id) return true;
-  if (getChildGameId(game)) return true;
-
-  if (game.privacy === "FRIENDS_ONLY") {
-    return friends.getFriendStatus(game.user_id) === FriendStatus.FRIENDS;
-  }
-
-  return false;
-};
+// Built here, not in the template: a "//" in an attribute there makes
+// vue-tsc lose track of the v-for, and it reports every later `game` as
+// unknown.
+const bggPlayLink = (game: GameRecord) =>
+  `https://boardgamegeek.com/play/details/${game.bgg_id}`;
 
 const cardComponent = (game: GameRecord) => {
   if (!props.games.length) return "div";

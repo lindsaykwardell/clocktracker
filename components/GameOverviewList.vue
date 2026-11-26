@@ -256,7 +256,6 @@
 
 <script setup lang="ts">
 import { gameResult } from "~/composables/useGames";
-import { FriendStatus } from "~/composables/useFriends";
 
 const gamesStore = useGames();
 const selectMultipleGames = useSelectMultipleGames();
@@ -285,18 +284,7 @@ function formatDate(date: Date) {
   }).format(new Date(date));
 }
 
-const getChildGameId = (game: GameRecord) => {
-  if (me.value?.status !== Status.SUCCESS) return null;
-
-  const userId = me.value.data.user_id;
-  const childGame = game.child_games?.find((g) => g.user_id === userId);
-  return childGame?.id ?? null;
-};
-
-const getGameLink = (game: GameRecord) => {
-  const childGameId = getChildGameId(game);
-  return childGameId ? `/game/${childGameId}` : `/game/${game.id}`;
-};
+const { getGameLink, canViewGame } = useGameLinks();
 
 const nuxtLink = resolveComponent("nuxt-link");
 
@@ -317,20 +305,6 @@ function isMyGame(game: GameRecord) {
   if (me.value.status !== Status.SUCCESS) return false;
 
   return me.value?.data.user_id === game.user_id;
-}
-
-function canViewGame(game: GameRecord) {
-  if (game.privacy === "PUBLIC") return true;
-  if (me.value?.status !== Status.SUCCESS) return false;
-
-  if (me.value.data.user_id === game.user_id) return true;
-  if (getChildGameId(game)) return true;
-
-  if (game.privacy === "FRIENDS_ONLY") {
-    return friends.getFriendStatus(game.user_id) === FriendStatus.FRIENDS;
-  }
-
-  return false;
 }
 
 function rowTitle(game: GameRecord) {
