@@ -1218,10 +1218,11 @@ const endTriggerSummary = computed(() => {
         }
     }
 
+    // "the Evil Twin (ClockTrackerDeveloper)": the same pattern as the
+    // ability labels below, and it reads well in every sentence (a plain
+    // possessive on "ClockTrackerDeveloper the Evil Twin" didn't).
     const actorLabel = character
-        ? player
-            ? `${player} ${roleArticle(character)}${character}`
-            : `${roleArticle(character)}${character}`
+        ? `${roleArticle(character)}${character}${player ? ` (${player})` : ""}`
         : player;
 
     const subtype = parseEndTriggerSubtype(
@@ -1235,9 +1236,6 @@ const endTriggerSummary = computed(() => {
 
     const details = [subtypeLabel].filter(Boolean).join(" - ");
     const noteText = (data.end_trigger_note || "").trim();
-    const actorPossessiveLabel = actorLabel
-        ? `${actorLabel}${actorLabel.endsWith("s") ? "'" : "'s"}`
-        : "";
     const actorAbilityLabel = character
         ? `Ability of ${roleArticle(character)}${character}${player ? ` (${player})` : ""}`
         : "Additional win condition";
@@ -1267,16 +1265,16 @@ const endTriggerSummary = computed(() => {
 
     const triggerCauseText = (() => {
         if (!triggerEventLabel) return "";
-        if (actorPossessiveLabel) {
+        if (actorLabel) {
             switch (data.end_trigger_cause) {
                 case GameEndTriggerCause.ABILITY:
                     return `${triggerEventLabel} caused by ${actorAbilityCauseLabel}`;
                 case GameEndTriggerCause.FAILED_ABILITY:
-                    return `${triggerEventLabel} caused by ${actorPossessiveLabel} failed ability`;
+                    return `${triggerEventLabel} caused by the failed ability of ${actorLabel}`;
                 case GameEndTriggerCause.NOMINATION:
                     return data.end_trigger_type ===
                         GameEndTriggerType.EXECUTION
-                        ? `${actorPossessiveLabel} nomination led to an execution`
+                        ? `a nomination by ${actorLabel} led to an execution`
                         : `${triggerEventLabel} by nomination from ${actorLabel}`;
                 default:
                     return triggerEventLabel;
