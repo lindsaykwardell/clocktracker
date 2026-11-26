@@ -435,7 +435,7 @@
               :availableRoles="orderedRoles"
               :excludePlayers="storytellerNames"
               :pageIndex="grimPage"
-              :inPlayRoleIds="fabledRoleIds"
+              :inPlayRoleIds="inPlayRoleIds"
               :hasScript="!!game.script_id"
               @deathToggled="recordGrimoireEvent"
               @selectedMe="applyMyRoleToGrimoire"
@@ -1434,11 +1434,22 @@ function recordGrimoireEvent(payload: {
   grimoireEventsRef.value?.recordGrimoireEvent(payload);
 }
 
-const fabledRoleIds = computed(() =>
-  props.game.fabled
-    .map((character) => character.role_id)
-    .filter((roleId): roleId is string => !!roleId)
-);
+// The game's Fabled and Loric, and every character on any page (with small
+// tokens): a Pit-Hag who changes themselves, or anyone changed later, keeps
+// their reminders "in play" on every page.
+const inPlayRoleIds = computed(() => {
+  const ids = new Set<string>();
+  for (const character of props.game.fabled) {
+    if (character.role_id) ids.add(character.role_id);
+  }
+  for (const page of props.game.grimoire) {
+    for (const token of page.tokens ?? []) {
+      if (token.role_id) ids.add(token.role_id);
+      if (token.related_role_id) ids.add(token.related_role_id);
+    }
+  }
+  return [...ids];
+});
 
 function syncGrimoireEventsFromGrimoire(options?: {
   force?: boolean;

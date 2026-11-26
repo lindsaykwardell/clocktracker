@@ -327,7 +327,10 @@ const props = defineProps<{
   canClaimSeat?: boolean;
   pageIndex?: number;
   deathTooltips?: Record<number, string>;
-  /** Fabled and Loric in play; their reminders count as in play too. */
+  /**
+   * More characters in play besides this page's (Fabled and Loric, and the
+   * characters on the game's other pages); their reminders count too.
+   */
   inPlayRoleIds?: string[];
   /** The game has a script (for the reminder dialog's "In play only"). */
   hasScript?: boolean;
@@ -821,7 +824,7 @@ const inPlayRoleIds = computed(() => {
 
 // For the reminder dialog's "In play only": the characters on
 // this page, their small tokens (a Drunk's Townsfolk, a Philosopher's choice)
-// and the game's Fabled and Loric. Undefined while no seat has a character, so
+// and the ones passed in (Fabled, Loric, other pages). Undefined while no seat has a character, so
 // an empty grimoire still lists every reminder.
 const reminderDialogInPlayRoleIds = computed(() => {
   if (!props.tokens.some((token) => token.role_id)) return undefined;
