@@ -1125,22 +1125,29 @@ if (meta?.user) {
     const script = meta.script;
     const dateStr = dayjs(meta.date).format("MMMM D, YYYY");
     const image = meta.associated_script?.logo ?? scriptLogo(script as string);
+    // The name is empty when it's hidden from you (a friends-only profile),
+    // and a game can have no script: leave out what's missing.
+    const title =
+        [displayName, script].filter((part) => !!part).join(" - ") || "Game";
+    const description = `${script ? `Game of ${script}` : "Game"}${
+        displayName ? ` played by ${displayName}` : ""
+    } on ${dateStr}.`;
 
     useHead({
-        title: `${displayName} - ${script}`,
+        title: title,
         meta: [
             {
                 key: "description",
                 name: "description",
-                content: `Game of ${script} played by ${displayName} on ${dateStr}.`,
+                content: description,
             },
             {
                 property: "og:title",
-                content: `${displayName} - ${script}`,
+                content: title,
             },
             {
                 property: "og:description",
-                content: `Game of ${script} played by ${displayName} on ${dateStr}.`,
+                content: description,
             },
             {
                 property: "og:image",
@@ -1160,11 +1167,11 @@ if (meta?.user) {
             },
             {
                 property: "twitter:title",
-                content: `${displayName} - ${script}`,
+                content: title,
             },
             {
                 property: "twitter:description",
-                content: `Game of ${script} played by ${displayName} on ${dateStr}.`,
+                content: description,
             },
             {
                 property: "twitter:image",

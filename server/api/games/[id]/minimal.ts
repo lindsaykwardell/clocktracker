@@ -1,6 +1,7 @@
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { PrivacySetting } from "~/server/generated/prisma/client";
 import { prisma } from "~/server/utils/prisma";
+import { hasPermission } from "~/server/utils/permissions";
 
 export default defineEventHandler(async (handler) => {
   const gameId = handler.context.params?.id;
@@ -12,6 +13,10 @@ export default defineEventHandler(async (handler) => {
       statusMessage: "Bad Request",
     });
   }
+
+  const canViewPrivate = me
+    ? await hasPermission(me.id, "VIEW_PRIVATE_GAMES")
+    : false;
 
   const game = await prisma.game.findUnique({
     where: {
@@ -127,6 +132,9 @@ export default defineEventHandler(async (handler) => {
           },
           privacy: PrivacySetting.FRIENDS_ONLY,
         },
+        // People who may see private games may open every game, the same as
+        // the game itself (see fetchGame): an empty condition matches all.
+        ...(canViewPrivate ? [{}] : []),
       ],
     },
     select: {
@@ -172,8 +180,14 @@ export default defineEventHandler(async (handler) => {
     },
   }));
 
+  // The owner always sees their own name, and so does anyone who may see
+  // private games (the same rules as the game itself, see anonymizeGame).
+  const isOwner = !!me && me.id === game.user_id;
+
   if (
     !isFriend &&
+    !isOwner &&
+    !canViewPrivate &&
     game.user &&
     (game.user.privacy === PrivacySetting.PRIVATE ||
       game.user.privacy === PrivacySetting.FRIENDS_ONLY)
