@@ -1,7 +1,10 @@
 <template>
     <div class="main-layout">
         <Sidebar />
-        <main class="flex-grow">
+        <!-- min-w-0: without it this flex item can't get narrower than its
+             widest content (such as the grimoire), and the whole page
+             scrolls sideways instead of that content's own scroll box. -->
+        <main class="flex-grow min-w-0">
             <Topbar
                 :expandSearchBar="expandSearchBar"
                 :customSearch="customSearch"

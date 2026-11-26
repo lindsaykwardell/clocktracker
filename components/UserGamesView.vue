@@ -5,7 +5,9 @@
         <div class="w-full flex flex-col gap-4">
           <!-- Same inset as the stats tab and the cards page, so the toolbar doesn't jump between tabs. -->
           <div class="flex flex-col lg:flex-row gap-3 px-8 lg:px-12">
-            <div class="flex flex-col md:flex-row gap-3 items-center">
+            <!-- flex-wrap: with every button (admins also get Debug) the row
+                 doesn't fit next to the sidebar on narrower screens. -->
+            <div class="flex flex-col md:flex-row md:flex-wrap gap-3 items-center">
               <template v-if="!selectMultipleGames.enabled">
                 <label class="sr-only" for="select-sortby">Sort by</label>
                 <Input
