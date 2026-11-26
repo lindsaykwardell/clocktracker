@@ -11,6 +11,7 @@ import {
 import { isSeatMovingScript } from "~/utils/grimoireChecks";
 import { GRIMOIRE_REMINDER_EVENT_CONFIG } from "~/server/utils/grimoireReminderEventConfig";
 import { reminderRoleId, type ReminderCatalog } from "~/shared/reminderCatalog";
+import { isImaginedAbilitySource } from "~/shared/imaginedAbility";
 import {
   carriedOverReminders,
   type LifetimeMarkedPage,
@@ -984,6 +985,24 @@ function generateEvents(grimoire: PageLike[], script?: string | null) {
                 orderedTokens
               )
             : [];
+        // A reminder from a character nobody has, while a Drunk, Lunatic or
+        // Marionette thinks they're it: their "ability" did nothing, so no event
+        // (and a death keeps what the shroud says, without this source).
+        if (
+          !source &&
+          isImaginedAbilitySource(
+            orderedTokens,
+            hintedSourceRoleIds.length > 0
+              ? hintedSourceRoleIds
+              : config.sourceRoleIds.length > 0
+                ? config.sourceRoleIds
+                : remindersWithRoleHint
+                    .map((reminder) => catalogRoleId(reminder))
+                    .filter((roleId): roleId is string => !!roleId)
+          )
+        ) {
+          continue;
+        }
         const sourceVariants: Array<{
           by_participant_id: string | null;
           by_role_id: string;

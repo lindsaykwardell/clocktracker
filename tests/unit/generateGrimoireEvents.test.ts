@@ -19,7 +19,7 @@ function token(
     player_name: participantId,
     player_id: null,
     role_id: roleId,
-    related_role_id: null,
+    related_role_id: null as string | null,
     alignment: "GOOD" as const,
     is_dead: options.isDead ?? false,
     grimoire_participant_id: participantId,
@@ -227,4 +227,58 @@ test("the editor matches an exile with the shroud's death", () => {
     engine.eventReconciliationKind("EXILE" as any, null),
     engine.eventReconciliationKind("NOT_RECORDED" as any, null)
   );
+});
+
+test("a reminder from a Drunk's imagined character makes no event; a real one still does", () => {
+  const minion = { reminder: "Minion", token_url: "/img/role/investigator.webp" };
+  const run = (grimoire: { id: number; tokens: ReturnType<typeof token>[] }[]) => {
+    const fill = generateEventsForMissingGames(grimoire as any).events;
+    const engine = createGrimoireEventEngine({
+      getGrimoire: () => grimoire as any,
+      resolveRoleById: () => null,
+    });
+    const editor = [...engine.buildExpectations().values()];
+    return [fill, editor].map((events) =>
+      events
+        .filter((event) => event.status_source === "Minion")
+        .map((event) => `${event.participant_id}:${event.by_role_id}:${event.by_participant_id}`)
+    );
+  };
+  const drunk = (related: string) => ({
+    ...token("kim", 0, "drunk"),
+    related_role_id: related,
+  });
+
+  // Only the Drunk thinks they're the Investigator: no event in either engine.
+  for (const imagined of ["drunk", "lunatic", "marionette"]) {
+    const holder = { ...drunk("investigator"), role_id: imagined };
+    const [fill, editor] = run([
+      page(1, [holder, token("dirk", 1, "librarian")]),
+      page(2, [holder, token("dirk", 1, "librarian", { reminders: [minion] })]),
+    ]);
+    assert.deepEqual(fill, [], imagined);
+    assert.deepEqual(editor, [], imagined);
+  }
+
+  // A real Investigator in the game: theirs, as before.
+  const [fill, editor] = run([
+    page(1, [drunk("investigator"), token("dirk", 1, "librarian"), token("ivy", 2, "investigator")]),
+    page(2, [
+      drunk("investigator"),
+      token("dirk", 1, "librarian", { reminders: [minion] }),
+      token("ivy", 2, "investigator"),
+    ]),
+  ]);
+  assert.deepEqual(fill, ["dirk:investigator:ivy"]);
+  assert.deepEqual(editor, ["dirk:investigator:ivy"]);
+
+  // A Philosopher who chose the Investigator really has the ability: not dropped.
+  const [philFill] = run([
+    page(1, [{ ...token("phil", 0, "philosopher"), related_role_id: "investigator" }, token("dirk", 1, "librarian")]),
+    page(2, [
+      { ...token("phil", 0, "philosopher"), related_role_id: "investigator" },
+      token("dirk", 1, "librarian", { reminders: [minion] }),
+    ]),
+  ]);
+  assert.equal(philFill.length, 1);
 });
