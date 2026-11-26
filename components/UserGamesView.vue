@@ -546,7 +546,11 @@
               </Button>
             </div>
           </div>
-          <div class="w-screen md:w-auto overflow-hidden">
+          <div
+            class="w-screen md:w-auto overflow-hidden"
+            @click.capture="saveGameNavigation"
+            @auxclick.capture="saveGameNavigation"
+          >
             <GameOverviewGrid
               v-if="gameView === 'grid'"
               :games="sortedGames"
@@ -613,6 +617,7 @@ import naturalOrder from "natural-order";
 import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
 import { GameEndTrigger, WinStatus_V2 } from "~/composables/useGames";
 import { useLocalStorage } from "@vueuse/core";
+import { gameNavigationCharacter } from "~/shared/gameNavigation";
 
 const user = useUser();
 const users = useUsers();
@@ -1010,6 +1015,37 @@ const sortedGames = computed(() => {
           game.location.trim() === selectedLocation.value.trim())
     );
 });
+
+// The game pages' Previous and Next buttons go through the games shown here,
+// so they follow these filters and this order (see useGameNavigation). Saved
+// when you open a game from here: saving on every change would let another
+// open games overview (filters sync between tabs) replace it.
+const route = useRoute();
+const gameNavigation = useGameNavigationList();
+const { getLinkedGameId, canViewGame } = useGameLinks();
+
+function saveGameNavigation(event: MouseEvent) {
+  if (selectMultipleGames.enabled) return;
+  const link = (event.target as HTMLElement | null)?.closest("a");
+  if (!link?.getAttribute("href")?.startsWith("/game/")) return;
+  gameNavigation.value = {
+    backTo: route.fullPath,
+    filtered: activeFilters.value.length > 0,
+    dateOrder: sortBy.value === "date" ? orderBy.value : null,
+    savedAt: Date.now(),
+    // The games the cards open: your own copy of a game you were tagged
+    // in, and none you can't view.
+    games: sortedGames.value.filter(canViewGame).map((game) => ({
+      id: getLinkedGameId(game),
+      date: new Date(game.date).toISOString(),
+      script: game.script || null,
+      ...gameNavigationCharacter(
+        game.is_storyteller,
+        game.player_characters[game.player_characters.length - 1]
+      ),
+    })),
+  };
+}
 
 async function deleteMultipleGames() {
   if (

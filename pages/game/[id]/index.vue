@@ -954,6 +954,14 @@
                     </Menu>
                 </div>
             </section>
+            <!-- Below the card, so another game's script isn't read before
+                 this one's title; on wide screens its sides float beside
+                 the card instead. -->
+            <GameNavigationBar
+                :gameId="gameId"
+                :ownGame="isMe"
+                :username="ownerUsername"
+            />
         </template>
         <template v-else>
             <Loading class="h-screen" />
@@ -1068,6 +1076,12 @@ async function shareGame() {
     });
   }
 }
+
+// For the Newer/Older navigation below the card (from the script: down
+// there in the template, vue-tsc no longer knows the game has loaded).
+const ownerUsername = computed(() =>
+    game.value.status === Status.SUCCESS ? game.value.data.user.username : "",
+);
 
 const isMe = computed(() => {
     if (user.value && game.value.status === Status.SUCCESS) {
