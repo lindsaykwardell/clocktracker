@@ -138,6 +138,8 @@ export type GameRecord = Omit<
     new_role_id: string | null;
     old_alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
     new_alignment: "GOOD" | "EVIL" | "NEUTRAL" | null;
+    /** The triggering character/player was picked by hand; the sync keeps it. */
+    source_set_by_hand?: boolean;
     created_at: Date;
   }[];
   player_characters: FullCharacter[];
@@ -202,7 +204,9 @@ export const useGames = defineStore("games", {
   state: () => ({
     games: new Map<string, FetchStatus<GameRecord>>(),
     players: new Map<string, FetchStatus<number>>(),
-    similar: new Map<string, FetchStatus<string[]>>(),
+    // Kept apart from `games`: the similar-games request only returns part
+    // of each game, and a game page can't be shown from that.
+    similar: new Map<string, FetchStatus<GameRecord[]>>(),
   }),
   getters: {
     getGame(): (gameId: string) => FetchStatus<GameRecord> {
@@ -285,13 +289,7 @@ export const useGames = defineStore("games", {
         const similar = this.similar.get(gameId);
         if (!similar || similar.status !== Status.SUCCESS) return [];
 
-        return similar.data
-          .map((gameId) => {
-            const game = this.games.get(gameId);
-            if (!game || game.status !== Status.SUCCESS) return null;
-            return game.data;
-          })
-          .filter((g) => !!g) as GameRecord[];
+        return similar.data;
       };
     },
     getByPlayer(): (username: string) => FetchStatus<GameRecord[]> {
@@ -646,18 +644,9 @@ export const useGames = defineStore("games", {
         `/api/games/${gameId}/similar`
       );
 
-      this.$patch((state) => {
-        state.similar.set(gameId, {
-          status: Status.SUCCESS,
-          data: similar.map((g) => g.id),
-        });
-
-        for (const game of similar) {
-          state.games.set(game.id, {
-            status: Status.SUCCESS,
-            data: markRaw(game),
-          });
-        }
+      this.similar.set(gameId, {
+        status: Status.SUCCESS,
+        data: similar.map((game) => markRaw(game)),
       });
     },
     async fetchCommunityGames(slug: string) {
