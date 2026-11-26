@@ -440,7 +440,6 @@ import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/vue";
 import {
   buildRoleStatCardPreview,
   buildRoleStatCardResult,
-  getGeneralCardDefinitions,
   getRoleStatCardDefinition,
   getRoleCardDefinitions,
 } from "~/composables/useRoleStatCards";
@@ -560,23 +559,6 @@ const rolePickerPreviewCards = computed(() => {
     .filter((card): card is NonNullable<typeof card> => !!card);
 });
 
-const generalPickerPreviewCards = computed(() => {
-  return getGeneralCardDefinitions()
-    .map((definition) =>
-      buildRoleStatCardPreview(
-        definition.id,
-        filteredGames.value,
-        !!isMe.value,
-        null,
-        props.username
-      )
-    )
-    .filter((card): card is NonNullable<typeof card> => !!card);
-});
-
-const allPickerPreviewCards = computed(() => {
-  return [...rolePickerPreviewCards.value, ...generalPickerPreviewCards.value];
-});
 
 const allCardsPageLink = computed(() => {
   return `/@${props.username}/stats/cards`;
@@ -620,7 +602,9 @@ const eligibleFallbackHighlightCards = computed(() => {
     eligibleFavoriteHighlightCards.value.map((card) => statCardKey(card))
   );
 
-  return allPickerPreviewCards.value.filter(
+  // Only character cards fill up the highlights for now: the General cards
+  // are still a work in progress (a favorited one still shows).
+  return rolePickerPreviewCards.value.filter(
     (card) =>
       card.preview.count > 0 &&
       !isHiddenStatCard(card) &&

@@ -79,6 +79,10 @@
                     :aria-label="tab === 'role' ? 'Search characters or cards' : 'Search cards'"
                   />
                 </div>
+                <label class="inline-flex items-center gap-2 text-sm">
+                  <input v-model="hideEmpty" type="checkbox" />
+                  Hide empty cards
+                </label>
                 <!-- Same toggle as the stats tab; the choice is shared between them. -->
                 <Button
                   v-if="statsDebug.canDebug.value"
@@ -144,6 +148,12 @@
                   </p>
                   <Button color="neutral" variant="soft" @click="search = ''">
                     Clear search
+                  </Button>
+                </template>
+                <template v-else-if="hideEmpty">
+                  <p class="text-xl font-sorts">No cards unlocked yet</p>
+                  <Button color="neutral" variant="soft" @click="hideEmpty = false">
+                    Show empty cards
                   </Button>
                 </template>
                 <p v-else class="text-xl font-sorts">No cards available</p>
@@ -292,6 +302,13 @@ const viewOptions = computed(() => [
   },
 ]);
 const search = ref("");
+// Empty cards (a count of 0, including locked secret cards) are shown unless
+// hidden; the completion counts still include them.
+const hideEmpty = ref(false);
+
+function isShownCard(card: { preview: { count: number } }) {
+  return !hideEmpty.value || card.preview.count > 0;
+}
 
 function normalizeSearchText(text: string) {
   return text
@@ -556,9 +573,9 @@ const rolePreviewCardGroups = computed(() => {
             card.preview.count > 0
         ).length
         : 0;
-      const visibleCards = isMe.value
-        ? cards
-        : cards.filter((card) => !isHiddenConfiguredCard(card));
+      const visibleCards = (
+        isMe.value ? cards : cards.filter((card) => !isHiddenConfiguredCard(card))
+      ).filter(isShownCard);
       const countableCards = cards.filter((card) => !isHiddenConfiguredCard(card));
       const achievedCount = countableCards.filter((card) => card.preview.count > 0).length;
       const totalCount = countableCards.length;
@@ -610,7 +627,7 @@ const noCardsToShow = computed(() =>
 
 const previewCards = computed(() => {
   const cards = tab.value === "role" ? rolePreviewCards.value : generalPreviewCards.value;
-  return cards.filter((card) => matchesSearch(card));
+  return cards.filter((card) => matchesSearch(card) && isShownCard(card));
 });
 
 function cardForDisplay<T extends {
