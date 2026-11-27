@@ -38,6 +38,17 @@ export type ReminderLinkFillResult = {
   dryRun: boolean;
 };
 
+/** Reminders the job still has to link. Uses the partial index on unlinked rows. */
+export async function countUnlinkedReminders(prisma: PrismaClient): Promise<number> {
+  const [row] = await prisma.$queryRaw<{ count: bigint }[]>`
+    SELECT COUNT(*) AS "count"
+    FROM "ReminderToken"
+    WHERE "role_reminder_id" IS NULL
+      AND "is_custom" = false
+  `;
+  return Number(row?.count ?? 0);
+}
+
 export async function fillReminderLinks(
   prisma: PrismaClient,
   options: { batchSize?: number; timeBudgetMs?: number; dryRun?: boolean } = {}

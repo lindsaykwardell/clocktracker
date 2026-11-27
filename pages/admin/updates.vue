@@ -6,9 +6,11 @@
     >
       <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 class="font-semibold text-lg">Application Updates</h2>
-          <p class="text-sm text-stone-500 dark:text-stone-400">
-            Run one-off batched data updates safely (dry run, resume, force rerun).
+          <h2 class="font-semibold text-lg">Background jobs</h2>
+          <p class="text-sm text-stone-600 dark:text-stone-400">
+            Jobs that update older data a batch at a time, every five minutes.
+            Each one is switched off, to a dry run or on with its environment
+            variable; a dry run only writes to the server log.
           </p>
         </div>
         <Button
@@ -16,11 +18,59 @@
           variant="soft"
           size="sm"
           :disabled="loading || refreshing"
-          @click="fetchUpdates"
+          @click="fetchStatus"
         >
           {{ refreshing ? "Refreshing..." : "Refresh" }}
         </Button>
       </div>
+
+      <Loading v-if="loading && !status" class="mt-4" />
+
+      <Alert v-else-if="loadError" color="negative" class="mt-4">
+        {{ loadError }}
+      </Alert>
+
+      <template v-else-if="status">
+        <Alert v-if="status.staging" color="caution" class="mt-4">
+          This is staging, where background jobs never run, whatever their
+          setting. Use the tools below to try them on one user's games.
+        </Alert>
+
+        <div class="mt-4 flex flex-col divide-y divide-stone-300/70 dark:divide-stone-700/70">
+          <div
+            v-for="job in status.jobs"
+            :key="job.id"
+            class="py-3 first:pt-0 last:pb-0 flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-4"
+          >
+            <div class="flex flex-col gap-0.5">
+              <h3 class="font-semibold">{{ jobLabels[job.id]?.title ?? job.id }}</h3>
+              <p class="text-sm text-stone-600 dark:text-stone-400">
+                {{ jobLabels[job.id]?.description }}
+              </p>
+              <p class="text-xs text-stone-600 dark:text-stone-400">
+                Setting: <code>{{ job.setting }}</code>
+              </p>
+            </div>
+            <div class="flex flex-col gap-1 sm:items-end shrink-0">
+              <div class="flex flex-wrap gap-2 items-center">
+                <Badge v-if="job.running" color="primary" size="sm">Running</Badge>
+                <Badge :color="modeColor(job.mode)" size="sm">
+                  {{ modeLabel(job.mode) }}
+                </Badge>
+              </div>
+              <span
+                class="text-sm"
+                :class="job.remaining > 0 ? '' : 'text-green-700 dark:text-green-400'"
+              >
+                {{ remainingLabel(job) }}
+              </span>
+              <span v-if="job.waitingForFill" class="text-xs text-stone-600 dark:text-stone-400">
+                Starts when the events fill is done
+              </span>
+            </div>
+          </div>
+        </div>
+      </template>
     </section>
 
     <section
@@ -31,7 +81,7 @@
       <form class="flex flex-col gap-3" @submit.prevent="fillForUser(false)">
         <div>
           <h3 class="font-semibold">Fill grimoire events for a user</h3>
-          <p class="text-sm text-stone-500 dark:text-stone-400">
+          <p class="text-sm text-stone-600 dark:text-stone-400">
             Generates events for that user's games that never had them, the
             same way the background fill does. Events are only added, and games
             already saved in the editor are left alone. Runs for up to about
@@ -64,15 +114,15 @@
             {{ filling ? "Running..." : "Run" }}
           </Button>
         </div>
-        <div v-if="fillError" class="text-sm text-red-500">
+        <div v-if="fillError" class="text-sm text-red-700 dark:text-red-400">
           {{ fillError }}
         </div>
         <div v-if="fillResult" class="text-sm">
-          <p :class="fillResult.remaining > 0 ? 'text-primary' : 'text-green-600 dark:text-green-400'">
+          <p :class="fillResult.remaining > 0 ? 'text-primary' : 'text-green-700 dark:text-green-400'">
             {{ fillSummary }}
           </p>
           <details class="mt-1">
-            <summary class="cursor-pointer text-stone-500">Details</summary>
+            <summary class="cursor-pointer text-stone-600 dark:text-stone-400">Details</summary>
             <pre class="mt-2 p-3 rounded bg-stone-900/90 text-stone-100 overflow-auto">{{ JSON.stringify(fillResult, null, 2) }}</pre>
           </details>
         </div>
@@ -87,7 +137,7 @@
       <form class="flex flex-col gap-3" @submit.prevent="catchUpForUser(false)">
         <div>
           <h3 class="font-semibold">Catch up new reminder rules for a user</h3>
-          <p class="text-sm text-stone-500 dark:text-stone-400">
+          <p class="text-sm text-stone-600 dark:text-stone-400">
             Adds the events of reminder rules added after that user's games
             already had events, the same way the background catch-up does.
             Only those rules' events are added; nothing else is changed. Each
@@ -121,110 +171,21 @@
             {{ catchingUp ? "Running..." : "Run" }}
           </Button>
         </div>
-        <div v-if="catchUpError" class="text-sm text-red-500">
+        <div v-if="catchUpError" class="text-sm text-red-700 dark:text-red-400">
           {{ catchUpError }}
         </div>
         <div v-if="catchUpResult" class="text-sm">
-          <p :class="catchUpResult.remaining > 0 ? 'text-primary' : 'text-green-600 dark:text-green-400'">
+          <p :class="catchUpResult.remaining > 0 ? 'text-primary' : 'text-green-700 dark:text-green-400'">
             {{ catchUpSummary }}
           </p>
           <details class="mt-1">
-            <summary class="cursor-pointer text-stone-500">Details</summary>
+            <summary class="cursor-pointer text-stone-600 dark:text-stone-400">Details</summary>
             <pre class="mt-2 p-3 rounded bg-stone-900/90 text-stone-100 overflow-auto">{{ JSON.stringify(catchUpResult, null, 2) }}</pre>
           </details>
         </div>
       </form>
     </section>
 
-    <Loading v-if="loading && updates.length === 0" />
-
-    <Alert v-else-if="loadError" color="negative" class="mb-4">
-      {{ loadError }}
-    </Alert>
-
-    <div v-else-if="updates.length === 0" class="text-center py-8 text-stone-500">
-      No updates registered.
-    </div>
-
-    <div v-else class="flex flex-col gap-4">
-      <section
-        v-for="update in updates"
-        :key="update.id"
-        class="p-4 rounded border border-stone-300 dark:border-stone-700/50
-               bg-stone-300/40 dark:bg-stone-900/50"
-      >
-        <div class="flex flex-col gap-3">
-          <div class="flex flex-col gap-1">
-            <h3 class="font-semibold">{{ update.id }}</h3>
-            <p class="text-sm text-stone-500 dark:text-stone-400">
-              {{ update.description }}
-            </p>
-          </div>
-
-          <div class="flex flex-wrap gap-2 text-sm">
-            <Badge :color="statusColor(update.status)">
-              {{ update.status }}
-            </Badge>
-            <span v-if="update.started_at" class="text-stone-500">
-              Started: {{ formatDate(update.started_at) }}
-            </span>
-            <span v-if="update.finished_at" class="text-stone-500">
-              Finished: {{ formatDate(update.finished_at) }}
-            </span>
-          </div>
-
-          <div class="flex flex-wrap gap-2">
-            <Button
-              color="neutral"
-              variant="soft"
-              size="sm"
-              :disabled="!!runningById[update.id]"
-              @click="runUpdate(update.id, { dryRun: true })"
-            >
-              Dry Run
-            </Button>
-            <Button
-              color="primary"
-              size="sm"
-              :disabled="!!runningById[update.id]"
-              @click="runUpdate(update.id)"
-            >
-              Run
-            </Button>
-            <Button
-              color="caution"
-              variant="soft"
-              size="sm"
-              :disabled="!!runningById[update.id]"
-              @click="runUpdate(update.id, { force: true })"
-            >
-              Force Rerun
-            </Button>
-          </div>
-
-          <div v-if="runningById[update.id] || update.status === 'RUNNING'" class="text-sm text-primary">
-            {{ runningLabel(update) }}
-          </div>
-
-          <div v-if="errorsById[update.id]" class="text-sm text-red-500">
-            {{ errorsById[update.id] }}
-          </div>
-
-          <div v-if="messagesById[update.id]" class="text-sm text-green-600 dark:text-green-400">
-            {{ messagesById[update.id] }}
-          </div>
-
-          <div v-if="update.error" class="text-sm text-red-500">
-            Last error: {{ update.error }}
-          </div>
-
-          <details v-if="update.stats" class="text-sm">
-            <summary class="cursor-pointer text-stone-500">Stats</summary>
-            <pre class="mt-2 p-3 rounded bg-stone-900/90 text-stone-100 overflow-auto">{{ JSON.stringify(update.stats, null, 2) }}</pre>
-          </details>
-        </div>
-      </section>
-    </div>
   </AdminTemplate>
 </template>
 
@@ -233,28 +194,30 @@ import { Status } from "~/composables/useFetchStatus";
 
 definePageMeta({ middleware: "auth" });
 
-type AppUpdateRow = {
+type JobMode = "off" | "dry-run" | "on";
+
+type BackgroundJob = {
   id: string;
-  description: string;
-  status: string;
-  started_at: string | null;
-  finished_at: string | null;
-  cursor: string | null;
-  stats: Record<string, unknown> | null;
-  error: string | null;
+  setting: string;
+  mode: JobMode;
+  remaining: number;
+  unit: "games" | "reminders";
+  running: boolean;
+  waitingForFill?: boolean;
+};
+
+type BackgroundJobsStatus = {
+  staging: boolean;
+  jobs: BackgroundJob[];
 };
 
 const me = useMe();
 const forumMe = ref<{ permissions: string[]; is_admin: boolean } | null>(null);
 
-const updates = ref<AppUpdateRow[]>([]);
+const status = ref<BackgroundJobsStatus | null>(null);
 const loading = ref(false);
 const refreshing = ref(false);
 const loadError = ref("");
-const runningById = ref<Record<string, boolean>>({});
-const errorsById = ref<Record<string, string>>({});
-const messagesById = ref<Record<string, string>>({});
-let pollHandle: ReturnType<typeof setInterval> | null = null;
 
 const canManageUpdates = computed(() => {
   const meVal = me.value;
@@ -263,97 +226,53 @@ const canManageUpdates = computed(() => {
   return forumMe.value.permissions.includes("MANAGE_APP_TOOLS");
 });
 
-function statusColor(status: string) {
-  if (status === "SUCCESS") return "positive";
-  if (status === "FAILED") return "negative";
-  if (status === "RUNNING") return "caution";
+const jobLabels: Record<string, { title: string; description: string }> = {
+  grimoire_events_fill: {
+    title: "Grimoire events fill",
+    description: "Generates events for games recorded before grimoire events existed.",
+  },
+  grimoire_events_catch_up: {
+    title: "Reminder rule catch-up",
+    description: "Adds the events of reminder rules added after a game already had events.",
+  },
+  reminder_links_fill: {
+    title: "Reminder links",
+    description: "Links reminders saved before the reminder catalogue existed to their catalogue entry.",
+  },
+};
+
+function modeLabel(mode: JobMode) {
+  if (mode === "on") return "On";
+  if (mode === "dry-run") return "Dry run";
+  return "Off";
+}
+
+function modeColor(mode: JobMode) {
+  if (mode === "on") return "positive";
+  if (mode === "dry-run") return "caution";
   return "neutral";
 }
 
-function formatDate(input: string) {
-  return new Intl.DateTimeFormat(navigator.language, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(input));
+function remainingLabel(job: BackgroundJob) {
+  if (job.remaining === 0) return `No ${job.unit} left`;
+  const count = new Intl.NumberFormat(navigator.language).format(job.remaining);
+  const unit = job.remaining === 1 ? job.unit.slice(0, -1) : job.unit;
+  return `${count} ${unit} left`;
 }
 
-function runningLabel(update: AppUpdateRow) {
-  const stats = update.stats || {};
-  const processed = Number(stats.processed ?? 0);
-  const total = Number(stats.total_to_process ?? 0);
-  if (total > 0) return `Running... (${processed} of ${total})`;
-  if (processed > 0) return `Running... (${processed} processed)`;
-  return "Running...";
-}
-
-function ensurePolling() {
-  if (pollHandle) return;
-  pollHandle = setInterval(() => {
-    fetchUpdates().catch(() => {});
-  }, 2000);
-}
-
-function stopPolling() {
-  if (!pollHandle) return;
-  clearInterval(pollHandle);
-  pollHandle = null;
-}
-
-async function fetchUpdates() {
+async function fetchStatus() {
   if (!canManageUpdates.value) return;
-  const isInitialLoad = updates.value.length === 0;
-  if (isInitialLoad) loading.value = true;
-  else refreshing.value = true;
+  if (status.value) refreshing.value = true;
+  else loading.value = true;
   loadError.value = "";
   try {
-    updates.value = await $fetch<AppUpdateRow[]>("/api/admin/updates");
-    const hasRunning =
-      updates.value.some((u) => u.status === "RUNNING") ||
-      Object.values(runningById.value).some(Boolean);
-    if (hasRunning) ensurePolling();
-    else stopPolling();
+    status.value = await $fetch<BackgroundJobsStatus>("/api/admin/background-jobs");
   } catch (error: any) {
     loadError.value =
-      error?.data?.statusMessage || error?.message || "Failed to load updates.";
-    if (isInitialLoad) {
-      updates.value = [];
-    }
-    stopPolling();
+      error?.data?.statusMessage || error?.message || "Failed to load the background jobs.";
   } finally {
     loading.value = false;
     refreshing.value = false;
-  }
-}
-
-async function runUpdate(
-  id: string,
-  options?: { dryRun?: boolean; force?: boolean }
-) {
-  runningById.value[id] = true;
-  ensurePolling();
-  errorsById.value[id] = "";
-  messagesById.value[id] = "";
-  try {
-    const result = await $fetch<{ message: string }>("/api/admin/updates/run", {
-      method: "POST",
-      body: {
-        id,
-        dryRun: !!options?.dryRun,
-        force: !!options?.force,
-      },
-    });
-    messagesById.value[id] = result.message || "Update executed";
-    await fetchUpdates();
-  } catch (error: any) {
-    errorsById.value[id] =
-      error?.data?.statusMessage || error?.message || "Update failed";
-    await fetchUpdates();
-  } finally {
-    runningById.value[id] = false;
-    const anyRunning = Object.values(runningById.value).some(Boolean);
-    if (!anyRunning && !updates.value.some((u) => u.status === "RUNNING")) {
-      stopPolling();
-    }
   }
 }
 
@@ -435,6 +354,7 @@ async function fillForUser(dryRun: boolean) {
       "/api/admin/grimoire-events-fill",
       { method: "POST", body: { username, dryRun } }
     );
+    if (!dryRun) fetchStatus();
   } catch (error: any) {
     fillError.value =
       error?.data?.statusMessage || error?.message || "Fill failed";
@@ -495,6 +415,7 @@ async function catchUpForUser(dryRun: boolean) {
       "/api/admin/grimoire-events-catch-up",
       { method: "POST", body: { username, dryRun } }
     );
+    if (!dryRun) fetchStatus();
   } catch (error: any) {
     catchUpError.value =
       error?.data?.statusMessage || error?.message || "Catch-up failed";
@@ -508,11 +429,7 @@ onMounted(async () => {
     forumMe.value = await $fetch("/api/forum/me");
   } catch {}
 
-  await fetchUpdates();
-});
-
-onBeforeUnmount(() => {
-  stopPolling();
+  await fetchStatus();
 });
 
 useHead({ title: "Updates - Admin" });

@@ -31,6 +31,16 @@ import {
  * The rules per catch-up are in server/utils/grimoireEventsCatchUps.ts.
  */
 
+/** Games with events from before the latest catch-up, not deleted. */
+export function gamesBehindCatchUpWhere(userId?: string): Prisma.GameWhereInput {
+  return {
+    // Null: the fill hasn't reached the game, and gives it every rule itself.
+    grimoire_events_version: { not: null, lt: GRIMOIRE_EVENTS_VERSION },
+    deleted: false,
+    ...(userId ? { user_id: userId } : {}),
+  };
+}
+
 export type GrimoireEventsCatchUpResult = {
   examined: number;
   gamesWithNewEvents: number;
@@ -73,10 +83,7 @@ export async function catchUpGrimoireEvents(
   };
 
   const behind: Prisma.GameWhereInput = {
-    // Null: the fill hasn't reached the game, and gives it every rule itself.
-    grimoire_events_version: { not: null, lt: GRIMOIRE_EVENTS_VERSION },
-    deleted: false,
-    ...(options.userId ? { user_id: options.userId } : {}),
+    ...gamesBehindCatchUpWhere(options.userId),
     ...(failedGameIds.size ? { id: { notIn: [...failedGameIds] } } : {}),
   };
 

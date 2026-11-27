@@ -40,6 +40,15 @@ export function grimoireEventsFillMode(): GrimoireEventsFillMode {
   return "off";
 }
 
+/** Games the fill still has to look at: never generated, not deleted. */
+export function gamesWithoutEventsWhere(userId?: string): Prisma.GameWhereInput {
+  return {
+    grimoire_events_version: null,
+    deleted: false,
+    ...(userId ? { user_id: userId } : {}),
+  };
+}
+
 export type GrimoireEventsFillResult = {
   examined: number;
   filled: number;
@@ -142,9 +151,7 @@ export async function fillMissingGrimoireEvents(
   };
 
   const unprocessed: Prisma.GameWhereInput = {
-    grimoire_events_version: null,
-    deleted: false,
-    ...(options.userId ? { user_id: options.userId } : {}),
+    ...gamesWithoutEventsWhere(options.userId),
     ...(failedGameIds.size ? { id: { notIn: [...failedGameIds] } } : {}),
   };
 

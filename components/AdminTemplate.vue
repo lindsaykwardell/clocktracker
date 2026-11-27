@@ -95,6 +95,7 @@ const canManageFeatureFlags = computed(() => hasPerm("MANAGE_FEATURE_FLAGS"));
 const canViewReports = computed(() => hasPerm("VIEW_REPORTS"));
 const canViewModLog = computed(() => hasPerm("VIEW_MOD_LOG"));
 const canExportUserData = computed(() => hasPerm("EXPORT_USER_DATA"));
+const canManageAppTools = computed(() => hasPerm("MANAGE_APP_TOOLS"));
 
 type GroupKey = "home" | "app" | "discussions" | "tools";
 type NavItem = { label: string; to: string };
@@ -118,8 +119,7 @@ const groupItems = computed<Record<GroupKey, NavItem[]>>(() => ({
   ].filter((item): item is NavItem => !!item),
   tools: [
     canExportUserData.value ? { label: "User Data", to: "/admin/user-data" } : null,
-    canExportUserData.value ? { label: "Updates", to: "/admin/updates" } : null,
-    canExportUserData.value ? { label: "Reminders", to: "/admin/reminders" } : null,
+    canManageAppTools.value ? { label: "Updates", to: "/admin/updates" } : null,
     isAdminUser.value ? { label: "Circular Games", to: "/admin/circular-games" } : null,
   ].filter((item): item is NavItem => !!item),
 }));
@@ -138,7 +138,6 @@ const activeGroupKey = computed<GroupKey>(() => {
   if (
     path.startsWith("/admin/user-data") ||
     path.startsWith("/admin/updates") ||
-    path.startsWith("/admin/reminders") ||
     path.startsWith("/admin/circular-games")
   ) {
     return "tools";
