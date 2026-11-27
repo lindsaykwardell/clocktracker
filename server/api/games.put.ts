@@ -187,27 +187,6 @@ export default defineEventHandler(async (handler) => {
         },
       });
 
-      console.log({
-        storyteller: game.storyteller,
-        co_storytellers: game.co_storytellers,
-        is_storyteller: game.is_storyteller,
-        location_type: game.location_type,
-        location: game.location,
-        community_name: game.community_name,
-        community_id: game.community_id,
-        player_count: game.player_count,
-        traveler_count: game.traveler_count,
-        win_v2: game.win_v2,
-        end_trigger: game.end_trigger,
-        end_trigger_role_id: game.end_trigger_role_id,
-        end_trigger_subtype: game.end_trigger_subtype,
-        end_trigger_note: game.end_trigger_note,
-        end_trigger_participant_id: game.end_trigger_participant_id,
-        end_trigger_participant_alignment: game.end_trigger_participant_alignment,
-        tags: game.tags,
-        privacy: game.privacy,
-      });
-
       const related_games=[...game.child_games];
 
       if(game.parent_game) {
