@@ -179,7 +179,7 @@ export const GENERAL_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
       games.filter((game) => !game.ignore_for_stats && endedByNotableAbility(game)).length,
     getSentence: ({ count, isMe }) =>
       count > 0
-        ? `${isMe ? "You have" : "This player has"} ended ${count} game${pluralize(count)} with ${isMe ? "your" : "their"} ability.`
+        ? `${isMe ? "You've" : "This player has"} ended ${count} game${pluralize(count)} with ${isMe ? "your" : "their"} ability.`
         : `End a game with your ability.`,
     getSubtitle: ({ games }) =>
       getMostCommonEndTriggerRoleSubtitle(games, endedByNotableAbility),
@@ -200,8 +200,8 @@ export const GENERAL_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
       ).length,
     getSentence: ({ count, isMe }) =>
       count > 0
-        ? `${isMe ? "You have" : "This player has"} nominated and executed the demon ${times(count)}.`
-        : `Nominate and execute the demon.`,
+        ? `${isMe ? "You've" : "This player has"} nominated and executed the Demon ${times(count)}.`
+        : `Nominate and execute the Demon.`,
     getSubtitle: ({ games }) =>
       getMostCommonEndTriggerRoleSubtitle(games, (game) =>
         game.end_trigger === GameEndTrigger.NO_LIVING_DEMON &&
@@ -234,9 +234,9 @@ export const GENERAL_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
     getSentence: ({ count, isMe }) =>
       count > 0
         ? (isMe
-          ? `As a demon, you've killed ${count} player${pluralize(count)}.`
-          : `As a demon, this player has killed ${count} player${pluralize(count)}.`)
-        : `As the demon, kill a player.`,
+          ? `As a Demon, you've killed ${count} player${pluralize(count)}.`
+          : `As a Demon, this player has killed ${count} player${pluralize(count)}.`)
+        : `As a Demon, kill a player.`,
     getSubtitle: ({ games }) => getMostCommonByRoleSubtitle(games, isDemonKillEvent),
     getDisplayRole: ({ games }) => getMostCommonByRole(games, isDemonKillEvent),
   },
@@ -265,8 +265,10 @@ export const GENERAL_ROLE_STAT_CARD_DEFINITIONS: RoleStatCardDefinition[] = [
       }, 0),
     getSentence: ({ count, isMe }) =>
       count > 0
-        ? `As the demon, you've killed ${count} of your own minion${pluralize(count)}.`
-        : `As the demon, kill one of your own minions.`,
+        ? (isMe
+          ? `As a Demon, you've killed ${count} Minion${pluralize(count)} on your own team.`
+          : `As a Demon, this player has killed ${count} Minion${pluralize(count)} on their own team.`)
+        : `As a Demon, kill a Minion on your own team.`,
     getSubtitle: ({ games }) =>
       getMostCommonByRoleSubtitle(games, (game, event) => {
         if (event.event_type !== GrimoireEventType.DEATH) return false;
