@@ -190,7 +190,7 @@
                       <img
                         :src="scriptGroup.image"
                         :alt="scriptGroup.title"
-                        :class="groupBy === 'type' ? 'w-40 h-40' : 'w-64 h-auto max-w-full'"
+                        :class="groupBy === 'type' ? 'w-64 h-[276px] max-w-full object-contain' : 'w-64 h-auto max-w-full'"
                       >
                       <h3 class="sr-only">
                         {{ scriptGroup.title }}
@@ -435,9 +435,11 @@ function roleTypeLabel(type: string) {
   return type;
 }
 
+// The type art at 400px (not the 160px token sizes), so it can be as wide as
+// the edition logos; the box has their height, so switching views doesn't jump.
 function roleTypeImage(type: string) {
   const file = type === RoleType.TRAVELER ? "traveller" : type.toLowerCase();
-  return `/img/role/160x160/${file}.webp`;
+  return `/img/role/${file}.webp`;
 }
 
 function normalizeScript(script: string | null | undefined) {
