@@ -23,7 +23,7 @@
             <Button color="primary" size="sm" @click="createCategoryGroup">Create Group</Button>
             <Button color="secondary" size="sm" @click="showNewCategoryGroup = false">Cancel</Button>
           </div>
-          <p v-if="categoryGroupError" class="text-sm text-red-500">{{ categoryGroupError }}</p>
+          <p v-if="categoryGroupError" class="text-sm text-red-700 dark:text-red-400">{{ categoryGroupError }}</p>
         </div>
 
         <!-- New Category Form -->
@@ -71,14 +71,14 @@
             <Button color="primary" size="sm" @click="createCategory">Create Category</Button>
             <Button color="secondary" size="sm" @click="showNewCategory = false">Cancel</Button>
           </div>
-          <p v-if="categoryError" class="text-sm text-red-500">{{ categoryError }}</p>
+          <p v-if="categoryError" class="text-sm text-red-700 dark:text-red-400">{{ categoryError }}</p>
         </div>
 
         <!-- Unified Category List -->
         <div class="flex flex-col gap-4">
           <!-- Ungrouped categories -->
           <div>
-            <h3 class="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-2">
+            <h3 class="text-sm font-semibold text-stone-600 dark:text-stone-400 uppercase tracking-wide mb-2">
               Ungrouped
             </h3>
             <draggable
@@ -122,32 +122,32 @@
                         <Button size="sm" color="primary" @click="saveEditCategory">Save</Button>
                         <Button size="sm" color="secondary" @click="cancelEditCategory">Cancel</Button>
                       </div>
-                      <p v-if="editCategoryError" class="text-sm text-red-500">{{ editCategoryError }}</p>
+                      <p v-if="editCategoryError" class="text-sm text-red-700 dark:text-red-400">{{ editCategoryError }}</p>
                     </div>
                   </template>
                   <template v-else>
                     <div class="flex items-center justify-between">
                       <div class="flex items-center gap-2 flex-wrap">
-                        <span class="drag-handle cursor-grab text-stone-400 hover:text-stone-600 dark:hover:text-stone-300">&#x2807;</span>
+                        <span class="drag-handle cursor-grab text-stone-600 hover:text-stone-900 dark:hover:text-stone-300 dark:text-stone-400">&#x2807;</span>
                         <span class="font-semibold">{{ category.name }}</span>
-                        <span class="text-sm text-stone-500">/forum/{{ category.slug }}</span>
-                        <span v-if="category.is_private" class="text-xs text-amber-600 dark:text-amber-400 font-medium">Private</span>
-                        <span v-if="category.mod_posting_only" class="text-xs text-blue-500 dark:text-blue-400 font-medium">Mod posting only</span>
-                        <span v-if="category.is_announcement" class="text-xs text-green-500 dark:text-green-400 font-medium">Announcement</span>
+                        <span class="text-sm text-stone-600 dark:text-stone-400">/forum/{{ category.slug }}</span>
+                        <span v-if="category.is_private" class="text-xs text-amber-700 dark:text-amber-400 font-medium">Private</span>
+                        <span v-if="category.mod_posting_only" class="text-xs text-blue-700 dark:text-blue-400 font-medium">Mod posting only</span>
+                        <span v-if="category.is_announcement" class="text-xs text-green-700 dark:text-green-400 font-medium">Announcement</span>
                       </div>
                       <div class="flex items-center gap-5">
-                        <button type="button" class="text-stone-400 hover:text-stone-200 transition-colors" title="Edit" @click="startEditCategory(category)">
+                        <button type="button" class="text-stone-600 hover:text-stone-900 transition-colors dark:text-stone-400 dark:hover:text-stone-200" title="Edit" @click="startEditCategory(category)">
                           <IconUI id="edit" size="sm" />
                         </button>
                         <Button v-if="category.is_private" size="xs" color="secondary" @click="toggleAccessPanel(category.slug)">
                           {{ expandedAccess === category.slug ? 'Hide Access' : 'Manage Access' }}
                         </Button>
-                        <button type="button" class="text-red-400 hover:text-red-300 transition-colors" title="Delete" @click="deleteCategory(category.slug)">
+                        <button type="button" class="text-red-700 hover:text-red-900 transition-colors dark:text-red-400 dark:hover:text-red-300" title="Delete" @click="deleteCategory(category.slug)">
                           <IconUI id="trash" size="sm" />
                         </button>
                       </div>
                     </div>
-                    <p v-if="category.description" class="text-sm text-stone-500 dark:text-stone-400 mt-1">{{ category.description }}</p>
+                    <p v-if="category.description" class="text-sm text-stone-600 dark:text-stone-400 mt-1">{{ category.description }}</p>
                     <!-- Access panel -->
                     <div v-if="expandedAccess === category.slug" class="mt-3 pt-3 border-t border-stone-300 dark:border-stone-700/50">
                       <h4 class="text-sm font-semibold mb-2">Group Access Rules</h4>
@@ -169,13 +169,13 @@
                           </div>
                           <Button size="xs" color="negative" @click="removeAccess(category.slug, rule.group.id)">Remove</Button>
                         </div>
-                        <p v-if="!categoryAccessRules[category.slug]?.length" class="text-xs text-stone-400">
+                        <p v-if="!categoryAccessRules[category.slug]?.length" class="text-xs text-stone-600 dark:text-stone-400">
                           No groups have access. This category is hidden from all non-admin users.
                         </p>
                       </div>
                       <div class="flex gap-2 items-end">
                         <div class="flex flex-col gap-1 flex-1">
-                          <label class="text-xs text-stone-500">Add group access</label>
+                          <label class="text-xs text-stone-600 dark:text-stone-400">Add group access</label>
                           <select v-model="addAccessGroupId[category.slug]" class="w-full rounded border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 px-2 py-1 text-sm">
                             <option value="">Select a group...</option>
                             <option v-for="group in availableGroupsForCategory(category.slug)" :key="group.id" :value="group.id">{{ group.name }}</option>
@@ -183,7 +183,7 @@
                         </div>
                         <Button size="sm" color="primary" :disabled="!addAccessGroupId[category.slug]" @click="addAccess(category.slug)">Add</Button>
                       </div>
-                      <p v-if="accessError[category.slug]" class="text-sm text-red-500 mt-1">{{ accessError[category.slug] }}</p>
+                      <p v-if="accessError[category.slug]" class="text-sm text-red-700 mt-1 dark:text-red-400">{{ accessError[category.slug] }}</p>
                     </div>
                   </template>
                 </div>
@@ -210,13 +210,13 @@
                   </div>
                 </template>
                 <div v-else class="flex items-center gap-2 mb-2">
-                  <span class="group-drag-handle cursor-grab text-stone-400 hover:text-stone-600 dark:hover:text-stone-300">&#x2807;</span>
-                  <h3 class="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">{{ cg.name }}</h3>
+                  <span class="group-drag-handle cursor-grab text-stone-600 hover:text-stone-900 dark:hover:text-stone-300 dark:text-stone-400">&#x2807;</span>
+                  <h3 class="text-sm font-semibold text-stone-600 dark:text-stone-400 uppercase tracking-wide">{{ cg.name }}</h3>
                   <div class="flex items-center gap-5">
-                    <button type="button" class="text-stone-400 hover:text-stone-200 transition-colors" title="Edit group" @click="startEditGroup(cg)">
+                    <button type="button" class="text-stone-600 hover:text-stone-900 transition-colors dark:text-stone-400 dark:hover:text-stone-200" title="Edit group" @click="startEditGroup(cg)">
                       <IconUI id="edit" size="sm" />
                     </button>
-                    <button type="button" class="text-red-400 hover:text-red-300 transition-colors" title="Delete group" @click="deleteCategoryGroup(cg.id)">
+                    <button type="button" class="text-red-700 hover:text-red-900 transition-colors dark:text-red-400 dark:hover:text-red-300" title="Delete group" @click="deleteCategoryGroup(cg.id)">
                       <IconUI id="trash" size="sm" />
                     </button>
                   </div>
@@ -263,32 +263,32 @@
                             <Button size="sm" color="primary" @click="saveEditCategory">Save</Button>
                             <Button size="sm" color="secondary" @click="cancelEditCategory">Cancel</Button>
                           </div>
-                          <p v-if="editCategoryError" class="text-sm text-red-500">{{ editCategoryError }}</p>
+                          <p v-if="editCategoryError" class="text-sm text-red-700 dark:text-red-400">{{ editCategoryError }}</p>
                         </div>
                       </template>
                       <template v-else>
                         <div class="flex items-center justify-between">
                           <div class="flex items-center gap-2 flex-wrap">
-                            <span class="drag-handle cursor-grab text-stone-400 hover:text-stone-600 dark:hover:text-stone-300">&#x2807;</span>
+                            <span class="drag-handle cursor-grab text-stone-600 hover:text-stone-900 dark:hover:text-stone-300 dark:text-stone-400">&#x2807;</span>
                             <span class="font-semibold">{{ category.name }}</span>
-                            <span class="text-sm text-stone-500">/forum/{{ category.slug }}</span>
-                            <span v-if="category.is_private" class="text-xs text-amber-600 dark:text-amber-400 font-medium">Private</span>
-                            <span v-if="category.mod_posting_only" class="text-xs text-blue-500 dark:text-blue-400 font-medium">Mod posting only</span>
-                            <span v-if="category.is_announcement" class="text-xs text-green-500 dark:text-green-400 font-medium">Announcement</span>
+                            <span class="text-sm text-stone-600 dark:text-stone-400">/forum/{{ category.slug }}</span>
+                            <span v-if="category.is_private" class="text-xs text-amber-700 dark:text-amber-400 font-medium">Private</span>
+                            <span v-if="category.mod_posting_only" class="text-xs text-blue-700 dark:text-blue-400 font-medium">Mod posting only</span>
+                            <span v-if="category.is_announcement" class="text-xs text-green-700 dark:text-green-400 font-medium">Announcement</span>
                           </div>
                           <div class="flex items-center gap-5">
-                            <button type="button" class="text-stone-400 hover:text-stone-200 transition-colors" title="Edit" @click="startEditCategory(category)">
+                            <button type="button" class="text-stone-600 hover:text-stone-900 transition-colors dark:text-stone-400 dark:hover:text-stone-200" title="Edit" @click="startEditCategory(category)">
                               <IconUI id="edit" size="sm" />
                             </button>
                             <Button v-if="category.is_private" size="xs" color="secondary" @click="toggleAccessPanel(category.slug)">
                               {{ expandedAccess === category.slug ? 'Hide Access' : 'Manage Access' }}
                             </Button>
-                            <button type="button" class="text-red-400 hover:text-red-300 transition-colors" title="Delete" @click="deleteCategory(category.slug)">
+                            <button type="button" class="text-red-700 hover:text-red-900 transition-colors dark:text-red-400 dark:hover:text-red-300" title="Delete" @click="deleteCategory(category.slug)">
                               <IconUI id="trash" size="sm" />
                             </button>
                           </div>
                         </div>
-                        <p v-if="category.description" class="text-sm text-stone-500 dark:text-stone-400 mt-1">{{ category.description }}</p>
+                        <p v-if="category.description" class="text-sm text-stone-600 dark:text-stone-400 mt-1">{{ category.description }}</p>
                         <!-- Access panel -->
                         <div v-if="expandedAccess === category.slug" class="mt-3 pt-3 border-t border-stone-300 dark:border-stone-700/50">
                           <h4 class="text-sm font-semibold mb-2">Group Access Rules</h4>
@@ -310,13 +310,13 @@
                               </div>
                               <Button size="xs" color="negative" @click="removeAccess(category.slug, rule.group.id)">Remove</Button>
                             </div>
-                            <p v-if="!categoryAccessRules[category.slug]?.length" class="text-xs text-stone-400">
+                            <p v-if="!categoryAccessRules[category.slug]?.length" class="text-xs text-stone-600 dark:text-stone-400">
                               No groups have access. This category is hidden from all non-admin users.
                             </p>
                           </div>
                           <div class="flex gap-2 items-end">
                             <div class="flex flex-col gap-1 flex-1">
-                              <label class="text-xs text-stone-500">Add group access</label>
+                              <label class="text-xs text-stone-600 dark:text-stone-400">Add group access</label>
                               <select v-model="addAccessGroupId[category.slug]" class="w-full rounded border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 px-2 py-1 text-sm">
                                 <option value="">Select a group...</option>
                                 <option v-for="group in availableGroupsForCategory(category.slug)" :key="group.id" :value="group.id">{{ group.name }}</option>
@@ -324,7 +324,7 @@
                             </div>
                             <Button size="sm" color="primary" :disabled="!addAccessGroupId[category.slug]" @click="addAccess(category.slug)">Add</Button>
                           </div>
-                          <p v-if="accessError[category.slug]" class="text-sm text-red-500 mt-1">{{ accessError[category.slug] }}</p>
+                          <p v-if="accessError[category.slug]" class="text-sm text-red-700 mt-1 dark:text-red-400">{{ accessError[category.slug] }}</p>
                         </div>
                       </template>
                     </div>
@@ -334,7 +334,7 @@
             </template>
           </draggable>
 
-          <p v-if="categories.length === 0 && categoryGroups.length === 0" class="text-center py-3 text-stone-400">
+          <p v-if="categories.length === 0 && categoryGroups.length === 0" class="text-center py-3 text-stone-600 dark:text-stone-400">
             No categories yet.
           </p>
         </div>

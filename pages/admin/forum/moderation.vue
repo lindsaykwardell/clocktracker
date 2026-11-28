@@ -1,21 +1,21 @@
 <template>
   <AdminTemplate title="Moderation Queue" :has-access="allowed">
-    <p class="mb-4 text-sm text-stone-500">Review held contributions before they become visible. Published content stays unchanged while edits await review.</p>
+    <p class="mb-4 text-sm text-stone-600 dark:text-stone-400">Review held contributions before they become visible. Published content stays unchanged while edits await review.</p>
     <div class="flex flex-wrap gap-2 mb-4">
       <Button size="sm" :color="!reviewed ? 'primary' : 'secondary'" @click="reviewed = false">Pending</Button>
       <Button size="sm" :color="reviewed ? 'primary' : 'secondary'" @click="reviewed = true">Reviewed</Button>
       <nuxt-link to="/admin/forum/reports"><Button size="sm" color="secondary">Reported posts</Button></nuxt-link>
     </div>
-    <p v-if="error" role="alert" class="text-red-500 mb-4">{{ error }}</p>
+    <p v-if="error" role="alert" class="text-red-700 mb-4 dark:text-red-400">{{ error }}</p>
     <Loading v-if="loading" />
-    <p v-else-if="items.length === 0" class="py-8 text-center text-stone-500">{{ reviewed ? 'No reviewed contributions.' : 'Nothing awaiting review.' }}</p>
+    <p v-else-if="items.length === 0" class="py-8 text-center text-stone-600 dark:text-stone-400">{{ reviewed ? 'No reviewed contributions.' : 'Nothing awaiting review.' }}</p>
     <div class="flex flex-col gap-4">
       <article v-for="item in items" :key="item.id" class="p-4 border border-stone-300 dark:border-stone-700 rounded min-w-0">
         <div class="flex flex-wrap justify-between gap-2 text-sm">
           <strong>{{ item.author.display_name }} · {{ labels[item.kind] }}</strong>
           <span>{{ item.status }} · {{ new Date(item.created_at).toLocaleString() }}</span>
         </div>
-        <p class="text-sm text-stone-500 mt-1">{{ item.thread.category.name }} · {{ item.reason }}</p>
+        <p class="text-sm text-stone-600 mt-1 dark:text-stone-400">{{ item.thread.category.name }} · {{ item.reason }}</p>
         <h3 v-if="item.title" class="font-sorts text-xl mt-3 break-words">{{ item.title }}</h3>
         <pre class="whitespace-pre-wrap break-words font-sans text-sm my-3">{{ item.body }}</pre>
         <details v-if="item.base_body || item.base_title" class="mb-3 text-sm">

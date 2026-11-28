@@ -23,7 +23,7 @@
                     :class="
                         tab === 'search'
                             ? 'text-primary border-b border-primary'
-                            : 'text-stone-400 hover:text-stone-600 dark:hover:text-stone-200'
+                            : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                     "
                     @click="tab = 'search'"
                 >
@@ -35,7 +35,7 @@
                     :class="
                         tab === 'games'
                             ? 'text-primary border-b border-primary'
-                            : 'text-stone-400 hover:text-stone-600 dark:hover:text-stone-200'
+                            : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                     "
                     @click="switchToGames"
                 >
@@ -60,19 +60,19 @@
                 <div class="max-h-64 overflow-y-auto">
                     <div
                         v-if="loading"
-                        class="p-3 text-center text-sm text-stone-400"
+                        class="p-3 text-center text-sm text-stone-600 dark:text-stone-400"
                     >
                         Searching...
                     </div>
                     <div
                         v-else-if="query.length < 3"
-                        class="p-3 text-center text-sm text-stone-400"
+                        class="p-3 text-center text-sm text-stone-600 dark:text-stone-400"
                     >
                         Type at least 3 characters
                     </div>
                     <div
                         v-else-if="!hasResults"
-                        class="p-3 text-center text-sm text-stone-400"
+                        class="p-3 text-center text-sm text-stone-600 dark:text-stone-400"
                     >
                         No results found
                     </div>
@@ -80,7 +80,7 @@
                         <!-- Users -->
                         <template v-if="results.users.length > 0">
                             <div
-                                class="px-2 py-1 text-[0.625rem] font-bold uppercase tracking-wider text-stone-400"
+                                class="px-2 py-1 text-[0.625rem] font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400"
                             >
                                 Users
                             </div>
@@ -102,7 +102,7 @@
                                         {{ u.display_name }}
                                     </div>
                                     <div
-                                        class="truncate text-xs text-stone-400"
+                                        class="truncate text-xs text-stone-600 dark:text-stone-400"
                                     >
                                         @{{ u.username }}
                                     </div>
@@ -113,7 +113,7 @@
                         <!-- Roles -->
                         <template v-if="results.roles.length > 0">
                             <div
-                                class="px-2 py-1 text-[0.625rem] font-bold uppercase tracking-wider text-stone-400"
+                                class="px-2 py-1 text-[0.625rem] font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400"
                             >
                                 Roles
                             </div>
@@ -139,7 +139,7 @@
                                         {{ r.name }}
                                     </div>
                                     <div
-                                        class="truncate text-xs text-stone-400 capitalize"
+                                        class="truncate text-xs text-stone-600 dark:text-stone-400 capitalize"
                                     >
                                         {{ r.type }}
                                     </div>
@@ -150,7 +150,7 @@
                         <!-- Scripts -->
                         <template v-if="results.scripts.length > 0">
                             <div
-                                class="px-2 py-1 text-[0.625rem] font-bold uppercase tracking-wider text-stone-400"
+                                class="px-2 py-1 text-[0.625rem] font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400"
                             >
                                 Scripts
                             </div>
@@ -177,7 +177,7 @@
                                     </div>
                                     <div
                                         v-if="s.author"
-                                        class="truncate text-xs text-stone-400"
+                                        class="truncate text-xs text-stone-600 dark:text-stone-400"
                                     >
                                         by {{ s.author }}
                                     </div>
@@ -188,7 +188,7 @@
                         <!-- Communities -->
                         <template v-if="results.communities.length > 0">
                             <div
-                                class="px-2 py-1 text-[0.625rem] font-bold uppercase tracking-wider text-stone-400"
+                                class="px-2 py-1 text-[0.625rem] font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400"
                             >
                                 Communities
                             </div>
@@ -237,19 +237,19 @@
                 <div class="max-h-64 overflow-y-auto">
                     <div
                         v-if="gamesLoading"
-                        class="p-3 text-center text-sm text-stone-400"
+                        class="p-3 text-center text-sm text-stone-600 dark:text-stone-400"
                     >
                         Loading games...
                     </div>
                     <div
                         v-else-if="filteredGames.length === 0 && !gameFilter"
-                        class="p-3 text-center text-sm text-stone-400"
+                        class="p-3 text-center text-sm text-stone-600 dark:text-stone-400"
                     >
                         No games found.
                     </div>
                     <div
                         v-else-if="filteredGames.length === 0"
-                        class="p-3 text-center text-sm text-stone-400"
+                        class="p-3 text-center text-sm text-stone-600 dark:text-stone-400"
                     >
                         No games matching "{{ gameFilter }}"
                     </div>
@@ -271,7 +271,7 @@
                                     {{ game.script }}
                                 </div>
                                 <div
-                                    class="truncate text-xs text-stone-400"
+                                    class="truncate text-xs text-stone-600 dark:text-stone-400"
                                 >
                                     {{ formatGameDate(game.date) }}
                                     <template

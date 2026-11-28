@@ -2,7 +2,7 @@
   <textarea
     ref="textarea"
     v-model="input"
-    class="block w-full border bg-stone-300 dark:bg-stone-600 disabled:bg-stone-400 dark:disabled:bg-stone-700 border-stone-100 dark:border-stone-500 rounded-md p-2"
+    class="block w-full border bg-stone-300 dark:bg-stone-600 disabled:bg-stone-400 dark:disabled:bg-stone-700 border-stone-400 dark:border-stone-500 placeholder:text-stone-600 dark:placeholder:text-stone-300 rounded-md p-2"
     :style="{ minHeight: minHeight }"
   ></textarea>
 </template>

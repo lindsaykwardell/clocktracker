@@ -20,7 +20,7 @@
       </div>
 
       <Loading v-if="loading" />
-      <p v-else-if="subscriptions.length === 0" class="text-center py-8 text-stone-400">
+      <p v-else-if="subscriptions.length === 0" class="text-center py-8 text-stone-600 dark:text-stone-400">
         {{ showUnreadOnly ? "No unread threads." : "You haven't subscribed to any threads yet." }}
       </p>
       <div v-else class="flex flex-col gap-2">
@@ -32,17 +32,21 @@
             ? 'border-primary/50 bg-primary/5 hover:border-primary'
             : 'border-stone-300 dark:border-stone-700/50 bg-stone-300/40 dark:bg-stone-900/50 hover:border-purple-700'"
         >
-          <div class="flex items-center gap-2">
-            <span
-              v-if="sub.hasUnread"
-              class="w-2 h-2 rounded-full bg-primary shrink-0"
-            />
-            <span class="font-semibold">{{ sub.thread.title }}</span>
-          </div>
-          <div class="text-xs text-stone-500 dark:text-stone-400 mt-1">
-            {{ sub.thread.author.display_name }}
-            &middot; {{ sub.thread.postCount }} {{ sub.thread.postCount === 1 ? "post" : "posts" }}
-            &middot; last activity {{ formatDate(sub.thread.lastPostAt) }}
+          <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-4">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <span
+                  v-if="sub.hasUnread"
+                  class="w-2 h-2 rounded-full bg-primary shrink-0"
+                />
+                <span class="font-semibold">{{ sub.thread.title }}</span>
+              </div>
+              <p class="text-sm text-stone-600 dark:text-stone-400">by {{ sub.thread.author.display_name }}</p>
+            </div>
+            <div class="shrink-0 flex flex-wrap sm:flex-col gap-x-3 sm:items-end text-stone-600 dark:text-stone-400">
+              <span class="text-sm">{{ sub.thread.postCount }} {{ sub.thread.postCount === 1 ? "post" : "posts" }}</span>
+              <span class="text-sm sm:text-xs">last post {{ formatShortDate(sub.thread.lastPostAt) }}</span>
+            </div>
           </div>
         </nuxt-link>
 </ForumMutedContent>
@@ -83,13 +87,6 @@ async function fetchSubscriptions() {
   } finally {
     loading.value = false;
   }
-}
-
-function formatDate(date: string) {
-  return new Intl.DateTimeFormat(navigator.language, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(date));
 }
 
 onMounted(fetchSubscriptions);

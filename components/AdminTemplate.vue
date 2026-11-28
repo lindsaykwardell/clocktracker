@@ -2,9 +2,11 @@
   <StandardTemplate>
     <div class="w-full flex flex-col">
       <div class="bg-stone-200 dark:bg-stone-950 shadow-lg">
-        <div class="flex flex-col items-center w-full m-auto py-4 px-8 gap-4">
-          <img src="/logo.png" class="w-24 bg-stone-900 rounded-full" alt="ClockTracker" />
-          <h1 class="font-sorts text-2xl lg:text-3xl">Administration</h1>
+        <div class="flex flex-col items-center w-full m-auto py-4 px-4 md:px-8 gap-3">
+          <div class="flex items-center gap-3">
+            <img src="/logo.png" class="w-10 lg:w-12 bg-stone-900 rounded-full" alt="" />
+            <h1 class="font-sorts text-2xl lg:text-3xl">Administration</h1>
+          </div>
           <nav
             class="flex flex-wrap justify-center w-100 -mb-4 md:-mx-3 md:w-[calc(100%+1.5rem)] gap-2 md:gap-1 py-2 md:py-0"
           >
@@ -24,14 +26,20 @@
         </div>
       </div>
 
-      <div class="px-4 lg:px-8 pt-4 lg:pt-8 pb-4 lg:pb-8 mx-auto w-full">
-        <div class="flex flex-col md:flex-row gap-4">
-          <aside class="w-full md:w-[280px] md:min-w-[280px] pt-14">
-            <ul class="w-full bg-stone-200 dark:bg-stone-700 rounded overflow-hidden">
+      <div class="px-4 lg:px-8 pt-4 lg:pt-8 pb-4 lg:pb-8 mx-auto w-full xl:max-w-[1400px]">
+        <div class="flex flex-col md:flex-row gap-4 lg:gap-8">
+          <aside
+            v-if="activeGroupItems.length > 1"
+            class="w-full md:w-[240px] md:min-w-[240px] lg:w-[280px] lg:min-w-[280px]"
+            :class="{ 'md:pt-14': title !== 'Administration' }"
+          >
+            <ul
+              class="admin-nav w-full flex md:block overflow-x-auto bg-stone-200 dark:bg-stone-700 rounded"
+            >
               <li
                 v-for="item in activeGroupItems"
                 :key="item.to"
-                class="w-full border-b border-stone-300 dark:border-stone-800"
+                class="shrink-0 md:w-full md:border-b border-stone-300 dark:border-stone-800 last:border-b-0"
               >
                 <nuxt-link
                   :to="item.to"
@@ -44,13 +52,13 @@
             </ul>
           </aside>
 
-          <section class="flex-grow px-20">
+          <section class="flex-grow min-w-0">
             <h2 v-if="title !== 'Administration'" class="font-sorts text-xl lg:text-2xl text-center mb-6">
               {{ title }}
             </h2>
 
             <template v-if="!hasAccess">
-              <p class="text-center py-8 text-stone-400">
+              <p class="text-center py-8 text-stone-600 dark:text-stone-400">
                 You do not have permission to access this page.
               </p>
             </template>
@@ -164,8 +172,12 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.admin-nav {
+  scrollbar-width: none;
+}
+
 .admin-nav-link {
-  @apply block w-full p-2 border-l-[6px] hover:border-primary hover:text-primary-content hover:bg-primary dark:hover:bg-dark-primary duration-150;
+  @apply block w-full whitespace-nowrap py-2 px-3 md:px-2 border-b-4 md:border-b-0 md:border-l-[6px] hover:border-primary hover:text-primary-content hover:bg-primary dark:hover:bg-dark-primary duration-150;
 }
 
 li > a:not(.router-link-exact-active,:hover) {

@@ -8,7 +8,7 @@
             <!-- Loading -->
             <div
                 v-if="card.loading"
-                class="px-3 py-2 text-xs text-stone-400 animate-pulse"
+                class="px-3 py-2 text-xs text-stone-600 dark:text-stone-400 animate-pulse"
             >
                 Loading preview...
             </div>
@@ -29,7 +29,7 @@
                     <div class="text-sm font-semibold">
                         {{ card.data.display_name }}
                     </div>
-                    <div class="text-xs text-stone-400">
+                    <div class="text-xs text-stone-600 dark:text-stone-400">
                         @{{ card.data.username }}
                         <template v-if="card.data.pronouns">
                             &middot; {{ card.data.pronouns }}
@@ -37,7 +37,7 @@
                     </div>
                     <div
                         v-if="card.data.bio"
-                        class="text-xs text-stone-400 mt-0.5"
+                        class="text-xs text-stone-600 dark:text-stone-400 mt-0.5"
                     >
                         {{ card.data.bio }}
                     </div>
@@ -50,21 +50,22 @@
                 :to="card.url"
                 class="flex items-center gap-3 px-3 py-2 hover:bg-stone-300/50 dark:hover:bg-stone-700/30 transition-colors"
             >
-                <img
-                    v-if="card.data.token_url"
-                    :src="card.data.token_url"
-                    :alt="card.data.name"
-                    class="w-10 h-10 rounded-full shrink-0"
-                />
+                <!-- Same parchment token as everywhere else a character appears -->
                 <div
-                    v-else
-                    class="w-10 h-10 rounded-full bg-stone-300 dark:bg-stone-600 shrink-0"
-                />
+                    class="w-10 h-10 rounded-full shrink-0 border border-black bg-center bg-cover shadow flex items-center justify-center bg-[url('/img/token-bg.webp')]"
+                >
+                    <img
+                        v-if="card.data.token_url"
+                        :src="card.data.token_url"
+                        :alt="card.data.name"
+                        class="w-full h-full object-contain"
+                    />
+                </div>
                 <div class="min-w-0">
                     <div class="text-sm font-semibold">
                         {{ card.data.name }}
                     </div>
-                    <div class="text-xs text-stone-400 capitalize">
+                    <div class="text-xs text-stone-600 dark:text-stone-400 capitalize">
                         {{ card.data.type }}
                         <template v-if="card.data.initial_alignment">
                             &middot;
@@ -73,7 +74,7 @@
                     </div>
                     <div
                         v-if="card.data.ability"
-                        class="text-xs text-stone-400 mt-0.5"
+                        class="text-xs text-stone-600 dark:text-stone-400 mt-0.5"
                     >
                         {{ card.data.ability }}
                     </div>
@@ -102,7 +103,7 @@
                     <div class="text-sm font-semibold">
                         {{ card.data.name }}
                     </div>
-                    <div class="text-xs text-stone-400">
+                    <div class="text-xs text-stone-600 dark:text-stone-400">
                         <template v-if="card.data.author">
                             by {{ card.data.author }}
                         </template>
@@ -137,13 +138,13 @@
                     </div>
                     <div
                         v-if="card.data.description"
-                        class="text-xs text-stone-400"
+                        class="text-xs text-stone-600 dark:text-stone-400"
                     >
                         {{ card.data.description }}
                     </div>
                     <div
                         v-if="card.data.location"
-                        class="text-xs text-stone-400"
+                        class="text-xs text-stone-600 dark:text-stone-400"
                     >
                         {{ card.data.location }}
                     </div>
@@ -172,7 +173,7 @@
                     <div class="text-sm font-semibold">
                         {{ card.data.script }}
                     </div>
-                    <div class="text-xs text-stone-400">
+                    <div class="text-xs text-stone-600 dark:text-stone-400">
                         {{ formatGameDate(card.data.date) }}
                         <template v-if="card.data.is_storyteller">
                             &middot; Storyteller
@@ -188,7 +189,7 @@
                     </div>
                     <div
                         v-if="card.data.community_name || card.data.location"
-                        class="text-xs text-stone-400"
+                        class="text-xs text-stone-600 dark:text-stone-400"
                     >
                         {{
                             card.data.community_name || card.data.location
@@ -244,16 +245,16 @@
                 <div class="min-w-0 flex-1">
                     <div class="text-sm font-semibold">
                         {{ card.data.title }}
-                        <span class="text-stone-400 font-normal">#{{ card.data.number }}</span>
+                        <span class="text-stone-600 dark:text-stone-400 font-normal">#{{ card.data.number }}</span>
                     </div>
-                    <div class="flex flex-wrap items-center gap-x-1 text-xs text-stone-400">
+                    <div class="flex flex-wrap items-center gap-x-1 text-xs text-stone-600 dark:text-stone-400">
                         <span>{{ card.data.is_pull_request ? "Pull Request" : "Issue" }}</span>
                         <span>&middot;</span>
                         <span
                             :class="
                                 card.data.state === 'open'
-                                    ? 'text-green-400'
-                                    : 'text-purple-400'
+                                    ? 'text-green-700 dark:text-green-400'
+                                    : 'text-purple-700 dark:text-purple-400'
                             "
                         >{{ card.data.state }}</span>
                         <template v-if="card.data.author">
@@ -287,7 +288,7 @@
             <!-- Failed to load -->
             <div
                 v-else-if="!card.loading && !card.data"
-                class="px-3 py-2 text-xs text-stone-400"
+                class="px-3 py-2 text-xs text-stone-600 dark:text-stone-400"
             >
                 <component
                     :is="card.type === 'github' ? 'a' : 'nuxt-link'"

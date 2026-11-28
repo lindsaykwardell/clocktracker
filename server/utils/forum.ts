@@ -256,6 +256,34 @@ export async function logModAction(
   });
 }
 
+// Optional moderator note on an action, stored as the mod log details.
+export const MOD_NOTE_MAX_LENGTH = 500;
+
+export function modLogNote(note: unknown): string | undefined {
+  if (typeof note !== "string") return undefined;
+  const trimmed = note.trim();
+  if (!trimmed) return undefined;
+  if (trimmed.length > MOD_NOTE_MAX_LENGTH) {
+    throw createError({ status: 400, statusMessage: `Notes can be at most ${MOD_NOTE_MAX_LENGTH} characters` });
+  }
+  return trimmed;
+}
+
+// Who locked a thread, when, and their note. Only for moderators: the note
+// was written for the mod log. Null when the lock predates the log.
+export async function getThreadLockInfo(threadId: string) {
+  const log = await prisma.forumModLog.findFirst({
+    where: { action: "LOCK_THREAD", target_type: "thread", target_id: threadId },
+    orderBy: { created_at: "desc" },
+    select: {
+      created_at: true,
+      details: true,
+      actor: { select: { username: true, display_name: true } },
+    },
+  });
+  return log;
+}
+
 // Post body character limit for non-moderators/non-admins
 export const POST_BODY_MAX_LENGTH = 10_000;
 

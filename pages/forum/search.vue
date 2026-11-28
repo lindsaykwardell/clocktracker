@@ -30,11 +30,15 @@
                      bg-stone-300/40 dark:bg-stone-900/50 hover:border-purple-700
                      transition-colors block"
             >
-              <div class="font-semibold">{{ thread.title }}</div>
-              <div class="text-xs text-stone-500 dark:text-stone-400 mt-1">
-                {{ thread.author.display_name }}
-                &middot; {{ thread.postCount }} {{ thread.postCount === 1 ? "post" : "posts" }}
-                &middot; {{ formatDate(thread.last_post_at) }}
+              <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-4">
+                <div class="min-w-0">
+                  <div class="font-semibold">{{ thread.title }}</div>
+                  <p class="text-sm text-stone-600 dark:text-stone-400">by {{ thread.author.display_name }}</p>
+                </div>
+                <div class="shrink-0 flex flex-wrap sm:flex-col gap-x-3 sm:items-end text-stone-600 dark:text-stone-400">
+                  <span class="text-sm">{{ thread.postCount }} {{ thread.postCount === 1 ? "post" : "posts" }}</span>
+                  <span class="text-sm sm:text-xs">last post {{ formatShortDate(thread.last_post_at) }}</span>
+                </div>
               </div>
             </nuxt-link>
 </ForumMutedContent>
@@ -52,13 +56,13 @@
                      bg-stone-300/40 dark:bg-stone-900/50 hover:border-purple-700
                      transition-colors block"
             >
-              <div class="text-sm font-semibold text-stone-500 dark:text-stone-400">
+              <div class="text-sm font-semibold text-stone-600 dark:text-stone-400">
                 {{ post.thread.title }}
               </div>
               <p class="text-sm mt-1 line-clamp-2">{{ post.body }}</p>
-              <div class="text-xs text-stone-500 dark:text-stone-400 mt-1">
-                {{ post.author.display_name }} &middot; {{ formatDate(post.created_at) }}
-              </div>
+              <p class="text-xs text-stone-600 dark:text-stone-400 mt-1">
+                by {{ post.author.display_name }} on {{ formatShortDate(post.created_at) }}
+              </p>
             </nuxt-link>
 </ForumMutedContent>
           </div>
@@ -120,12 +124,6 @@ async function search() {
   } finally {
     loading.value = false;
   }
-}
-
-function formatDate(date: string) {
-  return new Intl.DateTimeFormat(navigator.language, {
-    dateStyle: "medium",
-  }).format(new Date(date));
 }
 
 // If query param is present, search immediately

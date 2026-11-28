@@ -2,7 +2,7 @@
   <AdminTemplate title="Mod Log" :has-access="canViewModLog">
 
       <Loading v-if="loading" />
-      <p v-else-if="logs.length === 0" class="text-center py-8 text-stone-400">
+      <p v-else-if="logs.length === 0" class="text-center py-8 text-stone-600 dark:text-stone-400">
         No mod actions recorded.
       </p>
       <div v-else class="flex flex-col gap-2">
@@ -15,7 +15,7 @@
           <div class="flex-1">
             <span class="font-semibold">{{ log.actor.display_name }}</span>
             {{ " " }}
-            <span class="text-stone-400">{{ actionLabel(log.action) }}</span>
+            <span class="text-stone-600 dark:text-stone-400">{{ actionLabel(log.action) }}</span>
             {{ " " }}
             <nuxt-link
               v-if="log.target.link"
@@ -24,36 +24,21 @@
             >
               {{ log.target.label }}
             </nuxt-link>
-            <span v-else class="text-stone-500">{{ log.target.label }}</span>
-            <span v-if="log.details" class="text-stone-400 italic"> &mdash; {{ log.details }}</span>
+            <span v-else class="text-stone-600 dark:text-stone-400">{{ log.target.label }}</span>
+            <span v-if="log.details" class="text-stone-600 italic dark:text-stone-400"> &mdash; {{ log.details }}</span>
           </div>
-          <div class="text-xs text-stone-500 dark:text-stone-400 shrink-0">
+          <div class="text-xs text-stone-600 dark:text-stone-400 shrink-0">
             {{ formatDate(log.created_at) }}
           </div>
         </div>
 
         <!-- Pagination -->
-        <div v-if="total > perPage" class="flex justify-center gap-2 mt-4">
-          <Button
-            v-if="page > 1"
-            @click="page--"
-            color="secondary"
-            size="sm"
-          >
-            Previous
-          </Button>
-          <span class="flex items-center text-sm text-stone-500">
-            Page {{ page }}
-          </span>
-          <Button
-            v-if="total > page * perPage"
-            @click="page++"
-            color="secondary"
-            size="sm"
-          >
-            Next
-          </Button>
-        </div>
+        <Pager
+          v-if="total > perPage"
+          v-model:page="page"
+          :total-pages="Math.ceil(total / perPage)"
+          class="mt-4"
+        />
       </div>
   </AdminTemplate>
 </template>
@@ -108,6 +93,10 @@ const ACTION_LABELS: Record<string, string> = {
   DELETE_POST: "deleted post in",
   BAN_USER: "banned",
   RESOLVE_REPORT: "resolved report",
+  RESOLVE_REPORT_DISMISSED: "resolved report (Dismissed)",
+  RESOLVE_REPORT_EDITED: "resolved report (Post edited)",
+  RESOLVE_REPORT_DELETED: "resolved report (Post deleted)",
+  RESOLVE_REPORT_BANNED: "resolved report (User banned)",
 };
 
 function actionLabel(action: string) {

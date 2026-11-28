@@ -15,8 +15,12 @@
         <div class="flex items-center gap-2 shrink-0">
           <Button
             v-if="isLoggedIn"
-            :color="isCategorySubscribed ? 'primary' : 'secondary'"
+            color="contrast"
             size="sm"
+            class="![--btn-border:theme(colors.stone.300)] dark:![--btn-border:theme(colors.stone.700)] hover:![--btn-border:var(--btn-bg)]"
+            :class="isCategorySubscribed ? '[&:not(:hover)_.ui-icon]:text-primary dark:[&:not(:hover)_.ui-icon]:text-purple-400' : ''"
+            :icon="isCategorySubscribed ? 'bell-fill' : 'bell'"
+            :aria-pressed="isCategorySubscribed"
             @click="toggleCategorySubscription"
             :disabled="subscribing"
           >
@@ -44,7 +48,7 @@
           <ForumMutedContent v-for="thread in threadData.data.threads" :key="thread.id" :author-id="thread.author.user_id">
 <nuxt-link
             :to="threadLink(thread)"
-            class="flex items-start gap-3 p-3 sm:p-4 rounded border
+            class="flex items-center gap-3 p-3 sm:p-4 rounded border
                    border-stone-300 dark:border-stone-700/50
                    bg-stone-300/40 dark:bg-stone-900/50
                    hover:bg-stone-300/60 dark:hover:bg-stone-800/50
@@ -62,25 +66,32 @@
                 class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-primary border-2 border-stone-100 dark:border-stone-900"
               />
             </div>
-            <div class="min-w-0 flex-1">
+            <!-- Left: what it is and who started it. Right: how active it is. -->
+            <div class="min-w-0 flex-1 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-4">
+            <div class="min-w-0">
               <div class="flex items-center gap-1.5">
-                <h3 class="font-semibold break-words min-w-0" :class="thread.has_unread ? '' : 'text-stone-400 dark:text-stone-500'">{{ thread.title }}</h3>
+                <!-- Unread: bold, full colour. Read: normal weight, a step lighter but still readable. -->
+                <h3 class="break-words min-w-0" :class="thread.has_unread ? 'font-semibold' : 'font-normal text-stone-600 dark:text-stone-400'">{{ thread.title }}</h3>
                 <IconUI v-if="thread.is_pinned" id="pin" size="sm" class="text-primary shrink-0" />
                 <Badge v-if="thread.is_locked" color="caution" size="sm" class="shrink-0">Locked</Badge>
               </div>
-              <div class="flex flex-wrap items-center gap-x-3 text-sm text-stone-500 dark:text-stone-400">
-                <span>by {{ thread.author.display_name }} &middot; {{ formatDate(thread.created_at) }}</span>
-                <span class="flex items-center gap-1">
-                  <IconUI
-                    v-if="thread.is_subscribed"
-                    id="star"
-                    size="xs"
-                    class="text-primary"
-                    title="Subscribed"
-                  />
-                  {{ thread._count.posts }} posts &middot; {{ formatDate(thread.last_post_at) }}
-                </span>
-              </div>
+              <p class="text-sm text-stone-600 dark:text-stone-400">
+                by {{ thread.author.display_name }} on {{ formatShortDate(thread.created_at) }}
+              </p>
+            </div>
+            <div class="shrink-0 flex flex-wrap sm:flex-col gap-x-3 sm:items-end text-stone-600 dark:text-stone-400">
+              <span class="flex items-center gap-1 text-sm">
+                <IconUI
+                  v-if="thread.is_subscribed"
+                  id="bell-fill"
+                  size="xs"
+                  class="text-primary dark:text-purple-400"
+                  title="Subscribed"
+                />
+                {{ thread._count.posts }} {{ thread._count.posts === 1 ? "post" : "posts" }}
+              </span>
+              <span class="text-sm sm:text-xs">last post {{ formatShortDate(thread.last_post_at) }}</span>
+            </div>
             </div>
           </nuxt-link>
 </ForumMutedContent>
@@ -89,30 +100,12 @@
           No threads yet. Start the conversation!
         </p>
 
-        <div
+        <Pager
           v-if="threadData.data.total > threadData.data.perPage"
-          class="flex justify-center gap-2 mt-4"
-        >
-          <Button
-            v-if="page > 1"
-            @click="page--"
-            color="secondary"
-            size="sm"
-          >
-            Previous
-          </Button>
-          <span class="flex items-center text-sm text-stone-500">
-            Page {{ page }}
-          </span>
-          <Button
-            v-if="threadData.data.total > page * threadData.data.perPage"
-            @click="page++"
-            color="secondary"
-            size="sm"
-          >
-            Next
-          </Button>
-        </div>
+          v-model:page="page"
+          :total-pages="Math.ceil(threadData.data.total / threadData.data.perPage)"
+          class="mt-4"
+        />
       </template>
       <Loading v-else />
     </div>
@@ -123,11 +116,12 @@
 import { Status } from "~/composables/useFetchStatus";
 
 const route = useRoute();
+const router = useRouter();
 const slug = computed(() => route.params.slug as string);
 const forum = useForum();
 const user = useUser();
 const me = useMe();
-const page = ref(1);
+const page = ref(Math.max(1, Number(route.query.page) || 1));
 
 const forumMe = ref<{ permissions: string[]; is_admin: boolean } | null>(null);
 const isCategorySubscribed = ref(false);
@@ -196,19 +190,18 @@ function threadLink(thread: { id: string; has_unread?: boolean; _count: { posts:
   return base;
 }
 
-function formatDate(date: string) {
-  return new Intl.DateTimeFormat(navigator.language, {
-    dateStyle: "medium",
-  }).format(new Date(date));
-}
-
 onMounted(async () => {
   forum.fetchThreads(slug.value, page.value);
   try {
     forumMe.value = await $fetch("/api/forum/me");
   } catch {}
 });
-watch(page, (p) => forum.fetchThreads(slug.value, p));
+// Keep ?page in the address in step with the page shown (reload, shared links).
+watch(page, (p) => {
+  forum.fetchThreads(slug.value, p);
+  const { page: _page, ...rest } = route.query;
+  router.replace({ query: p > 1 ? { ...rest, page: String(p) } : rest });
+});
 
 useHead({ title: () => categoryName.value || "Discussions" });
 </script>

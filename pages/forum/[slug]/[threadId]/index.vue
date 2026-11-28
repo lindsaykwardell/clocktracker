@@ -4,20 +4,62 @@
             class="px-4 lg:px-8 pt-4 lg:pt-8 pb-4 lg:pb-8 max-w-4xl mx-auto overflow-hidden"
         >
             <template v-if="threadData?.status === Status.SUCCESS">
-                <div class="flex items-center justify-between">
-                    <nuxt-link
-                        :to="`/forum/${threadData.data.thread.category.slug}`"
-                        class="text-sm text-stone-500 dark:text-stone-400 hover:underline"
-                    >
-                        &larr; {{ threadData.data.thread.category.name }}
-                    </nuxt-link>
-
-                    <div class="flex items-center gap-1 shrink-0">
+                <nuxt-link
+                    :to="`/forum/${threadData.data.thread.category.slug}`"
+                    class="text-sm text-stone-500 dark:text-stone-400 hover:underline"
+                >
+                    &larr; {{ threadData.data.thread.category.name }}
+                </nuxt-link>
+                <div class="flex items-start justify-between gap-4 mt-3 mb-6">
+                    <div class="min-w-0">
+                        <h1 class="font-sorts text-2xl lg:text-3xl">
+                            {{ threadData.data.thread.title }}
+                        </h1>
+                        <div
+                            class="flex flex-wrap items-center gap-x-3 text-sm text-stone-600 dark:text-stone-400 mt-1"
+                        >
+                            <span
+                                >Started by
+                                {{
+                                    threadData.data.thread.author.display_name
+                                }}</span
+                            >
+                            <span>{{
+                                formatDate(threadData.data.thread.created_at)
+                            }}</span>
+                        </div>
+                        <div
+                            class="flex items-center gap-1 mt-2"
+                            v-if="
+                                threadData.data.thread.is_pinned ||
+                                threadData.data.thread.is_locked
+                            "
+                        >
+                            <span
+                                v-if="threadData.data.thread.is_pinned"
+                                class="flex items-center gap-1 text-sm text-primary"
+                            >
+                                <IconUI id="pin" size="sm" />
+                                Pinned
+                            </span>
+                            <Badge
+                                v-if="threadData.data.thread.is_locked"
+                                color="caution"
+                                size="sm"
+                                >Locked</Badge
+                            >
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <!-- The state shows in the bell and label, not a block of colour -->
                         <Button
                             v-if="isLoggedIn"
-                            size="xs"
-                            :color="isSubscribed ? 'primary' : 'secondary'"
-                            :icon="isSubscribed ? 'star' : 'star-bordered'"
+                            size="sm"
+                            color="contrast"
+                            class="![--btn-border:theme(colors.stone.300)] dark:![--btn-border:theme(colors.stone.700)] hover:![--btn-border:var(--btn-bg)]"
+                            :class="isSubscribed ? '[&:not(:hover)_.ui-icon]:text-primary dark:[&:not(:hover)_.ui-icon]:text-purple-400' : ''"
+                            :icon="isSubscribed ? 'bell-fill' : 'bell'"
+                            :aria-pressed="isSubscribed"
                             @click="toggleSubscribe"
                         >
                             {{ isSubscribed ? "Subscribed" : "Subscribe" }}
@@ -32,8 +74,18 @@
                             as="div"
                             class="relative"
                         >
-                            <MenuButton>
-                                <IconUI id="dots" :rounded="true" shadow />
+                            <MenuButton as="template">
+                                <Button
+                                    size="sm"
+                                    color="contrast"
+                                    circular
+                                    icon="dots"
+                                    display="icon-only"
+                                    class="![--btn-border:theme(colors.stone.300)] dark:![--btn-border:theme(colors.stone.700)] hover:![--btn-border:var(--btn-bg)]"
+                                    title="Thread actions"
+                                >
+                                    Thread actions
+                                </Button>
                             </MenuButton>
                             <transition
                                 enter-active-class="transition duration-100 ease-out"
@@ -63,7 +115,7 @@
                                         </MenuItem>
                                         <MenuItem v-if="canModerate">
                                             <ButtonSubmenu
-                                                @click="toggleLock"
+                                                @click="openLockDialog"
                                                 :icon="
                                                     threadData.data.thread
                                                         .is_locked
@@ -125,47 +177,6 @@
                         >
                             {{ githubIssueError }}
                         </span>
-                    </div>
-                </div>
-
-                <div class="mt-2 mb-6">
-                    <h1 class="font-sorts text-2xl lg:text-3xl">
-                        {{ threadData.data.thread.title }}
-                    </h1>
-                    <div
-                        class="flex flex-wrap items-center gap-x-1 text-sm text-stone-500 dark:text-stone-400 mt-1"
-                    >
-                        <span
-                            >Started by
-                            {{
-                                threadData.data.thread.author.display_name
-                            }}</span
-                        >
-                        <span>&middot;</span>
-                        <span>{{
-                            formatDate(threadData.data.thread.created_at)
-                        }}</span>
-                    </div>
-                    <div
-                        class="flex items-center gap-1 mt-2"
-                        v-if="
-                            threadData.data.thread.is_pinned ||
-                            threadData.data.thread.is_locked
-                        "
-                    >
-                        <span
-                            v-if="threadData.data.thread.is_pinned"
-                            class="flex items-center gap-1 text-sm text-primary"
-                        >
-                            <IconUI id="pin" size="sm" />
-                            Pinned
-                        </span>
-                        <Badge
-                            v-if="threadData.data.thread.is_locked"
-                            color="caution"
-                            size="sm"
-                            >Locked</Badge
-                        >
                     </div>
                 </div>
 
@@ -277,52 +288,12 @@
                 </div>
 
                 <!-- Top Pagination -->
-                <div
+                <Pager
                     v-if="threadData.data.total > threadData.data.perPage"
-                    class="flex justify-center gap-2 mb-4"
-                >
-                    <Button
-                        v-if="page > 2"
-                        @click="page = 1"
-                        color="secondary"
-                        size="sm"
-                        icon="chevron-left"
-                    >
-                        First
-                    </Button>
-                    <Button
-                        v-if="page > 1"
-                        @click="page--"
-                        color="secondary"
-                        size="sm"
-                    >
-                        Previous
-                    </Button>
-                    <span class="flex items-center text-sm text-stone-500">
-                        Page {{ page }} of {{ totalPages }}
-                    </span>
-                    <Button
-                        v-if="
-                            threadData.data.total >
-                            page * threadData.data.perPage
-                        "
-                        @click="page++"
-                        color="secondary"
-                        size="sm"
-                    >
-                        Next
-                    </Button>
-                    <Button
-                        v-if="page < totalPages - 1"
-                        @click="page = totalPages"
-                        color="secondary"
-                        size="sm"
-                        icon="chevron-right"
-                        display="icon-after"
-                    >
-                        Last
-                    </Button>
-                </div>
+                    v-model:page="page"
+                    :total-pages="totalPages"
+                    class="mb-4"
+                />
 
                 <!-- Posts -->
                 <div class="flex flex-col gap-4">
@@ -413,6 +384,56 @@
                     </div>
                 </Dialog>
 
+                <!-- Lock / Unlock Dialog -->
+                <Dialog v-model:visible="showLockDialog" size="sm">
+                    <template #title>
+                        <h2 class="font-sorts text-xl">
+                            {{ lockDialogLocks ? "Lock thread" : "Unlock thread" }}
+                        </h2>
+                    </template>
+                    <div class="p-4 flex flex-col gap-3">
+                        <p class="text-sm text-stone-300">
+                            {{
+                                lockDialogLocks
+                                    ? "Nobody can reply until the thread is unlocked."
+                                    : "Members can reply to the thread again."
+                            }}
+                        </p>
+                        <div class="flex flex-col gap-1">
+                            <label for="lock-note" class="text-sm text-stone-300">
+                                Note for the mod log (optional)
+                            </label>
+                            <Input
+                                id="lock-note"
+                                v-model="lockNote"
+                                class="text-stone-900 dark:text-white"
+                                font-size="sm"
+                                :maxlength="500"
+                            />
+                        </div>
+                        <p v-if="lockError" class="text-sm text-red-400" role="alert">
+                            {{ lockError }}
+                        </p>
+                        <div class="flex gap-2 justify-end">
+                            <Button
+                                size="sm"
+                                color="secondary"
+                                @click="showLockDialog = false"
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                size="sm"
+                                color="primary"
+                                :disabled="lockingThread"
+                                @click="confirmLock"
+                            >
+                                {{ lockDialogLocks ? "Lock thread" : "Unlock thread" }}
+                            </Button>
+                        </div>
+                    </div>
+                </Dialog>
+
                 <!-- Move Thread Dialog -->
                 <Dialog v-model:visible="showMoveDialog" size="sm">
                     <template #title>
@@ -476,52 +497,12 @@
                 </Dialog>
 
                 <!-- Pagination -->
-                <div
+                <Pager
                     v-if="threadData.data.total > threadData.data.perPage"
-                    class="flex justify-center gap-2 mt-4"
-                >
-                    <Button
-                        v-if="page > 2"
-                        @click="page = 1"
-                        color="secondary"
-                        size="sm"
-                        icon="chevron-left"
-                    >
-                        First
-                    </Button>
-                    <Button
-                        v-if="page > 1"
-                        @click="page--"
-                        color="secondary"
-                        size="sm"
-                    >
-                        Previous
-                    </Button>
-                    <span class="flex items-center text-sm text-stone-500">
-                        Page {{ page }} of {{ totalPages }}
-                    </span>
-                    <Button
-                        v-if="
-                            threadData.data.total >
-                            page * threadData.data.perPage
-                        "
-                        @click="page++"
-                        color="secondary"
-                        size="sm"
-                    >
-                        Next
-                    </Button>
-                    <Button
-                        v-if="page < totalPages - 1"
-                        @click="page = totalPages"
-                        color="secondary"
-                        size="sm"
-                        icon="chevron-right"
-                        display="icon-after"
-                    >
-                        Last
-                    </Button>
-                </div>
+                    v-model:page="page"
+                    :total-pages="totalPages"
+                    class="mt-4"
+                />
 
                 <!-- Reply form -->
                 <form
@@ -544,7 +525,7 @@
                                 :class="
                                     replyTab === 'write'
                                         ? 'border-primary text-primary'
-                                        : 'border-transparent text-stone-400 hover:text-stone-600 dark:hover:text-stone-200'
+                                        : 'border-transparent text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                                 "
                                 @click="replyTab = 'write'"
                             >
@@ -556,7 +537,7 @@
                                 :class="
                                     replyTab === 'preview'
                                         ? 'border-primary text-primary'
-                                        : 'border-transparent text-stone-400 hover:text-stone-600 dark:hover:text-stone-200'
+                                        : 'border-transparent text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                                 "
                                 @click="replyTab = 'preview'"
                             >
@@ -577,7 +558,7 @@
                             :source="replyBody"
                             :options="{ html: false }"
                         />
-                        <p v-else class="text-sm text-stone-400 italic">
+                        <p v-else class="text-sm text-stone-600 dark:text-stone-400 italic">
                             Nothing to preview
                         </p>
                     </div>
@@ -609,23 +590,36 @@
                             class="hidden md:inline text-xs"
                             :class="
                                 replyBody.length > POST_BODY_MAX_LENGTH
-                                    ? 'text-red-500'
-                                    : 'text-stone-400'
+                                    ? 'text-red-700 dark:text-red-400'
+                                    : 'text-stone-600 dark:text-stone-400'
                             "
                         >
                             {{ replyBody.length.toLocaleString() }} /
                             {{ POST_BODY_MAX_LENGTH.toLocaleString() }}
                         </span>
                     </div>
-                    <p v-if="replyError" class="text-sm text-red-500">
+                    <p v-if="replyError" class="text-sm text-red-700 dark:text-red-400" role="alert">
                         {{ replyError }}
                     </p>
                 </form>
                 <p
                     v-else-if="threadData.data.thread.is_locked"
-                    class="mt-6 text-center text-stone-400"
+                    class="mt-6 text-center text-stone-600 dark:text-stone-400"
                 >
-                    This thread is locked.
+                    <template v-if="threadData.data.thread.lock_info">
+                        Locked by
+                        <nuxt-link
+                            :to="`/@${threadData.data.thread.lock_info.actor.username}`"
+                            class="font-semibold hover:underline"
+                        >
+                            {{ threadData.data.thread.lock_info.actor.display_name }}
+                        </nuxt-link>
+                        on {{ formatDate(threadData.data.thread.lock_info.created_at) }}
+                        <span v-if="threadData.data.thread.lock_info.details" class="italic">
+                            &mdash; {{ threadData.data.thread.lock_info.details }}
+                        </span>
+                    </template>
+                    <template v-else>This thread is locked.</template>
                 </p>
 
                 <!-- Subscription footer -->
@@ -890,8 +884,33 @@ async function togglePin() {
     await forum.togglePin(threadId);
 }
 
-async function toggleLock() {
-    await forum.toggleLock(threadId);
+// Lock / unlock, with an optional note for the mod log
+const showLockDialog = ref(false);
+const lockDialogLocks = ref(true);
+const lockNote = ref("");
+const lockError = ref("");
+const lockingThread = ref(false);
+
+function openLockDialog() {
+    lockDialogLocks.value = !threadData.value?.data?.thread.is_locked;
+    lockNote.value = "";
+    lockError.value = "";
+    showLockDialog.value = true;
+}
+
+async function confirmLock() {
+    lockingThread.value = true;
+    lockError.value = "";
+    try {
+        await forum.toggleLock(threadId, lockNote.value);
+        showLockDialog.value = false;
+    } catch (err: any) {
+        lockError.value =
+            err?.data?.statusMessage ||
+            (lockDialogLocks.value ? "Couldn't lock the thread." : "Couldn't unlock the thread.");
+    } finally {
+        lockingThread.value = false;
+    }
 }
 
 // Move thread
@@ -1077,7 +1096,20 @@ onMounted(async () => {
         );
     }
 });
-watch(page, (p) => forum.fetchThread(threadId, p));
+// Keep ?page in the address in step with the page shown, so a reload or a
+// shared link opens the same page. replace() keeps Back from stepping
+// through every page. The #post anchor is kept for unread and post links.
+function syncPageQuery(p: number) {
+    const current = Number(route.query.page) || 1;
+    if (current === p && !route.query.unread) return;
+    const { unread: _unread, page: _page, ...rest } = route.query;
+    router.replace({ query: p > 1 ? { ...rest, page: String(p) } : rest, hash: route.hash });
+}
+
+watch(page, (p) => {
+    forum.fetchThread(threadId, p);
+    syncPageQuery(p);
+});
 watch(threadData, (data) => {
     if (data?.status === Status.SUCCESS) {
         isSubscribed.value = data.data.subscribed;

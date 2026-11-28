@@ -2,6 +2,8 @@ import {
   requireForumThreadAccess,
   hasForumPermission,
   logModAction,
+  modLogNote,
+  getThreadLockInfo,
 } from "~/server/utils/forum";
 import type { SupabaseUser as User } from "~/server/utils/supabaseUser";
 import { prisma } from "~/server/utils/prisma";
@@ -19,7 +21,8 @@ export default defineEventHandler(async (handler) => {
 
   const threadId = handler.context.params!.id;
   const thread = await requireForumThreadAccess(me.id, threadId);
-
+  const body = (await readBody(handler).catch(() => null)) ?? {};
+  const note = modLogNote(body.note);
 
   const updated = await prisma.forumThread.update({
     where: { id: threadId },
@@ -27,7 +30,10 @@ export default defineEventHandler(async (handler) => {
     select: { id: true, is_locked: true },
   });
 
-  await logModAction(me.id, updated.is_locked ? "LOCK_THREAD" : "UNLOCK_THREAD", "thread", threadId);
+  await logModAction(me.id, updated.is_locked ? "LOCK_THREAD" : "UNLOCK_THREAD", "thread", threadId, note);
 
-  return updated;
+  return {
+    ...updated,
+    lock_info: updated.is_locked ? await getThreadLockInfo(threadId) : null,
+  };
 });

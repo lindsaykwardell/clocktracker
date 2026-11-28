@@ -4,7 +4,7 @@
     class="p-4 rounded border border-stone-300 dark:border-stone-700/50 bg-stone-300/40 dark:bg-stone-900/50"
   >
     <ForumMutedContent :author-id="post.author.user_id">
-    <p v-if="actionError" role="alert" class="text-sm text-red-500 mb-2">{{ actionError }}</p>
+    <p v-if="actionError" role="alert" class="text-sm text-red-700 dark:text-red-400 mb-2">{{ actionError }}</p>
     <!-- Deleted post -->
     <template v-if="post.deleted">
       <div class="flex items-center gap-2 mb-2">
@@ -81,65 +81,39 @@
 
     <!-- Normal post -->
     <template v-else>
-      <!-- Post actions: inline on desktop, 3-dot menu on mobile -->
+      <!-- Post actions: Edit and Delete as buttons, everything else under ••• -->
       <div
-        v-if="isLoggedIn || canEdit || canDelete || showBanAction"
-        class="float-right ml-4 flex items-center gap-1"
+        v-if="canEdit || canDelete || hasMoreActions"
+        class="float-right ml-4 flex items-center gap-1.5"
       >
-        <!-- Desktop: inline icons -->
-        <div class="hidden sm:flex items-center gap-1">
-          <Button
-            v-if="isLoggedIn && !threadIsLocked"
-            variant="link"
-            size="sm"
-            icon="reply"
-            display="icon-only"
-            title="Quote"
-            @click="$emit('quote', post)"
-          >
-            Quote
-          </Button>
-          <Button
-            v-if="canEdit"
-            variant="link"
-            size="sm"
-            icon="edit"
-            display="icon-only"
-            title="Edit"
-            @click="startEdit"
-          >
-            Edit
-          </Button>
-          <Button
-            v-if="canDelete"
-            variant="link"
-            size="sm"
-            color="negative"
-            icon="trash"
-            display="icon-only"
-            title="Delete"
-            @click="handleDelete"
-          >
-            Delete
-          </Button>
-          <Button
-            v-if="showBanAction"
-            variant="link"
-            size="sm"
-            color="caution"
-            icon="disabled"
-            display="icon-only"
-            title="Ban user"
-            @click="$emit('ban', post.author.user_id, post.author.display_name)"
-          >
-            Ban user
-          </Button>
-        </div>
-        <!-- Shared overflow menu; primary actions remain inline on desktop. -->
-        <Menu as="div" class="relative" :class="{ 'sm:hidden': !isLoggedIn || post.author.user_id === currentUserId }" v-slot="{ open }">
+        <Button
+          v-if="canEdit"
+          color="contrast"
+          size="sm"
+          circular
+          icon="edit"
+          display="icon-only"
+          title="Edit post"
+          @click="startEdit"
+        >
+          Edit post
+        </Button>
+        <Button
+          v-if="canDelete"
+          color="contrast"
+          size="sm"
+          circular
+          icon="trash"
+          display="icon-only"
+          title="Delete post"
+          @click="handleDelete"
+        >
+          Delete post
+        </Button>
+        <Menu v-if="hasMoreActions" as="div" class="relative" v-slot="{ open }">
           <MenuButton as="template">
-            <Button variant="link" size="sm" icon="dots" display="icon-only" title="Post actions">
-              Post actions
+            <Button color="contrast" size="sm" circular icon="dots" display="icon-only" title="More actions">
+              More actions
             </Button>
           </MenuButton>
           <transition
@@ -152,43 +126,23 @@
           >
             <div v-show="open">
               <MenuItems static class="ct-contextual-links right-0">
-                <div class="sm:hidden">
-                <MenuItem v-if="isLoggedIn && !threadIsLocked">
-                  <ButtonSubmenu icon="reply" @click="$emit('quote', post)">
-                    Quote
-                  </ButtonSubmenu>
-                </MenuItem>
-                <MenuItem v-if="canEdit">
-                  <ButtonSubmenu icon="edit" @click="startEdit">
-                    Edit
-                  </ButtonSubmenu>
-                </MenuItem>
-                <MenuItem v-if="canDelete">
-                  <ButtonSubmenu icon="trash" color="negative" @click="handleDelete">
-                    Delete
-                  </ButtonSubmenu>
-                </MenuItem>
-                <MenuItem v-if="showBanAction">
-                  <ButtonSubmenu
-                    icon="disabled"
-                    color="caution"
-                    @click="$emit('ban', post.author.user_id, post.author.display_name)"
-                  >
-                    Ban User
-                  </ButtonSubmenu>
-                </MenuItem>
-                </div>
                 <MenuItem v-if="isLoggedIn && post.author.user_id !== currentUserId">
                   <ButtonSubmenu @click="openReportDialog">
                     Report
                   </ButtonSubmenu>
                 </MenuItem>
-                <template v-if="isLoggedIn && post.author.user_id !== currentUserId">
-                  <MenuItem>
-                    <ButtonSubmenu :disabled="preferenceBusy" @click="setPreference(activePreference === 'MUTE' ? null : 'MUTE')">{{ activePreference === 'MUTE' ? 'Unmute user' : 'Mute user' }}</ButtonSubmenu>
-                  </MenuItem>
-
-                </template>
+                <MenuItem v-if="isLoggedIn && post.author.user_id !== currentUserId">
+                  <ButtonSubmenu :disabled="preferenceBusy" @click="setPreference(activePreference === 'MUTE' ? null : 'MUTE')">{{ activePreference === 'MUTE' ? 'Unmute user' : 'Mute user' }}</ButtonSubmenu>
+                </MenuItem>
+                <MenuItem v-if="showBanAction">
+                  <ButtonSubmenu
+                    icon="disabled"
+                    color="negative"
+                    @click="$emit('ban', post.author.user_id, post.author.display_name)"
+                  >
+                    Ban {{ post.author.display_name }}…
+                  </ButtonSubmenu>
+                </MenuItem>
               </MenuItems>
             </div>
           </transition>
@@ -252,7 +206,7 @@
                 :class="
                   editTab === 'write'
                     ? 'border-primary text-primary'
-                    : 'border-transparent text-stone-400 hover:text-stone-600 dark:hover:text-stone-200'
+                    : 'border-transparent text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                 "
                 @click="editTab = 'write'"
               >
@@ -264,7 +218,7 @@
                 :class="
                   editTab === 'preview'
                     ? 'border-primary text-primary'
-                    : 'border-transparent text-stone-400 hover:text-stone-600 dark:hover:text-stone-200'
+                    : 'border-transparent text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                 "
                 @click="editTab = 'preview'"
               >
@@ -285,7 +239,7 @@
               :source="editBody"
               :options="{ html: false }"
             />
-            <p v-else class="text-sm text-stone-400 italic">Nothing to preview</p>
+            <p v-else class="text-sm text-stone-600 dark:text-stone-400 italic">Nothing to preview</p>
           </div>
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
@@ -305,7 +259,7 @@
             </div>
             <span
               class="text-xs"
-              :class="editBody.length > POST_BODY_MAX_LENGTH ? 'text-red-500' : 'text-stone-400'"
+              :class="editBody.length > POST_BODY_MAX_LENGTH ? 'text-red-700 dark:text-red-400' : 'text-stone-600 dark:text-stone-400'"
             >
               {{ editBody.length.toLocaleString() }} / {{ POST_BODY_MAX_LENGTH.toLocaleString() }}
             </span>
@@ -328,15 +282,25 @@
 
       <!-- Reactions -->
       <div class="flex flex-wrap items-center gap-1.5 mt-3">
+        <!-- Quote first so it sits in the same place on every post; managing the post stays top right -->
+        <button
+          v-if="isLoggedIn && !threadIsLocked"
+          type="button"
+          class="mr-2 inline-flex items-center gap-1 h-7 px-2.5 rounded-full border border-stone-400 dark:border-stone-600 text-xs text-stone-600 dark:text-stone-400 hover:border-stone-600 hover:text-stone-900 dark:hover:border-stone-400 dark:hover:text-stone-200 transition-colors"
+          @click="$emit('quote', post)"
+        >
+          <IconUI id="quote" size="xs" />
+          Quote
+        </button>
         <button
           v-for="group in computedReactions"
           :key="group.emoji"
           type="button"
-          class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs border transition-colors"
+          class="inline-flex items-center gap-1 h-7 px-2.5 rounded-full text-xs border transition-colors"
           :class="
             group.reacted
               ? 'border-primary bg-primary/10 text-stone-800 dark:text-stone-100'
-              : 'border-stone-300 dark:border-stone-700 text-stone-500 dark:text-stone-400 hover:border-stone-400 dark:hover:border-stone-500'
+              : 'border-stone-400 dark:border-stone-600 text-stone-600 dark:text-stone-400 hover:border-stone-600 hover:text-stone-900 dark:hover:border-stone-400 dark:hover:text-stone-200'
           "
           :title="group.users.join(', ')"
           @click="handleReaction(group.emoji)"
@@ -347,11 +311,13 @@
         <div v-if="isLoggedIn" class="relative emoji-picker-container">
           <button
             type="button"
-            class="inline-flex items-center justify-center w-7 h-7 rounded-full border border-dashed border-stone-300 dark:border-stone-700 text-stone-400 hover:border-stone-400 dark:hover:border-stone-500 hover:text-stone-200 transition-colors text-xs"
+            class="inline-flex items-center justify-center w-7 h-7 rounded-full border border-dashed border-stone-400 dark:border-stone-600 text-stone-600 dark:text-stone-400 hover:border-stone-600 hover:text-stone-900 dark:hover:border-stone-400 dark:hover:text-stone-200 transition-colors text-xs"
             title="Add reaction"
+            aria-label="Add reaction"
             @click="showEmojiPicker = !showEmojiPicker"
           >
-            +
+            <!-- An icon, not the + character: the font sets that low and off-centre -->
+            <IconUI id="plus-lg" size="xs" />
           </button>
           <div
             v-if="showEmojiPicker"
@@ -481,6 +447,12 @@ const forum = useForum();
 const isLoggedIn = computed(() => !!user.value);
 const canEdit = computed(() => props.canEditPost);
 const canDelete = computed(() => props.canDeletePost);
+// Report and Mute are for other people's posts; Ban needs the permission.
+const hasMoreActions = computed(
+  () =>
+    props.showBanAction ||
+    (isLoggedIn.value && props.post.author.user_id !== props.currentUserId)
+);
 
 // Local state for body and reactions (works for both thread page and dashboard)
 const localBody = ref(props.post.body);

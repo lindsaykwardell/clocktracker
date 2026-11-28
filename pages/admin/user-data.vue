@@ -6,13 +6,13 @@
              bg-stone-300/40 dark:bg-stone-900/50"
     >
       <h2 class="font-semibold text-lg mb-3">Export User Data</h2>
-      <p class="text-sm text-stone-500 dark:text-stone-400 mb-3">
+      <p class="text-sm text-stone-600 dark:text-stone-400 mb-3">
         Download a complete JSON export for a user. Includes games, grimoire data,
         friends, communities, events, forum data, and all referenced entities.
       </p>
       <div class="flex gap-2 items-end">
         <div class="flex flex-col gap-1 flex-1">
-          <label class="text-xs text-stone-500">Username</label>
+          <label class="text-xs text-stone-600 dark:text-stone-400">Username</label>
           <UserSearchInput
             placeholder="Search for a user..."
             @select="exportUsername = $event"
@@ -27,8 +27,8 @@
           {{ exporting ? "Exporting..." : "Download JSON" }}
         </Button>
       </div>
-      <p v-if="exportError" class="text-sm text-red-500 mt-2">{{ exportError }}</p>
-      <p v-if="exportSuccess" class="text-sm text-green-500 mt-2">{{ exportSuccess }}</p>
+      <p v-if="exportError" class="text-sm text-red-700 mt-2 dark:text-red-400">{{ exportError }}</p>
+      <p v-if="exportSuccess" class="text-sm text-green-700 mt-2 dark:text-green-400">{{ exportSuccess }}</p>
     </section>
 
     <!-- Import (dev only) -->
@@ -38,14 +38,14 @@
              bg-stone-300/40 dark:bg-stone-900/50"
     >
       <h2 class="font-semibold text-lg mb-3">Import User Data</h2>
-      <p class="text-sm text-stone-500 dark:text-stone-400 mb-3">
+      <p class="text-sm text-stone-600 dark:text-stone-400 mb-3">
         Upload an exported JSON file to import into this database. IDs are
         automatically remapped to avoid conflicts with existing data.
         Only available in local development.
       </p>
       <div class="flex gap-2 items-end">
         <div class="flex flex-col gap-1 flex-1">
-          <label class="text-xs text-stone-500">JSON File</label>
+          <label class="text-xs text-stone-600 dark:text-stone-400">JSON File</label>
           <input
             ref="fileInput"
             type="file"
@@ -64,8 +64,8 @@
           {{ importing ? "Importing..." : "Import JSON" }}
         </Button>
       </div>
-      <p v-if="importError" class="text-sm text-red-500 mt-2">{{ importError }}</p>
-      <p v-if="importSuccess" class="text-sm text-green-500 mt-2">{{ importSuccess }}</p>
+      <p v-if="importError" class="text-sm text-red-700 mt-2 dark:text-red-400">{{ importError }}</p>
+      <p v-if="importSuccess" class="text-sm text-green-700 mt-2 dark:text-green-400">{{ importSuccess }}</p>
     </section>
   </AdminTemplate>
 </template>

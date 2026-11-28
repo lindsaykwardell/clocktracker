@@ -7,7 +7,7 @@
         </h1>
         <div class="flex flex-wrap justify-center gap-2">
           <nuxt-link to="/forum/subscribed">
-            <Button size="xs" color="secondary" icon="star">Subscribed</Button>
+            <Button size="xs" color="secondary" icon="bell">Subscribed</Button>
           </nuxt-link>
           <nuxt-link to="/forum/submissions"><Button size="xs" color="secondary">Your submissions <ForumSubmissionUpdates /></Button></nuxt-link>
           <nuxt-link to="/forum/preferences"><Button size="xs" color="secondary">Muted users</Button></nuxt-link>
@@ -60,7 +60,7 @@
               forum.categories.data.ungrouped.length === 0 &&
               forum.categories.data.groups.length === 0
             "
-            class="text-center py-3 text-stone-400"
+            class="text-center py-3 text-stone-600 dark:text-stone-400"
           >
             No discussion categories yet.
           </p>

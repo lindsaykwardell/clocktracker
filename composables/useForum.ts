@@ -41,6 +41,12 @@ export type ForumCategoriesResponse = {
   groups: ForumCategoryGroup[];
 };
 
+export type ForumLockInfo = {
+  created_at: string;
+  details: string | null;
+  actor: { username: string; display_name: string };
+};
+
 export type ForumThread = {
   pending?: boolean;
   id: string;
@@ -50,6 +56,8 @@ export type ForumThread = {
   created_at: string;
   last_post_at: string;
   github_issue_url?: string | null;
+  // Moderators only, on locked threads
+  lock_info?: ForumLockInfo | null;
   has_unread?: boolean;
   is_subscribed?: boolean;
   author: ForumUser;
@@ -268,15 +276,16 @@ export const useForum = defineStore("forum", {
       }
     },
 
-    async toggleLock(threadId: string): Promise<void> {
-      const result = await $fetch<{ id: string; is_locked: boolean }>(
+    async toggleLock(threadId: string, note?: string): Promise<void> {
+      const result = await $fetch<{ id: string; is_locked: boolean; lock_info: ForumLockInfo | null }>(
         `/api/forum/threads/${threadId}/lock`,
-        { method: "PUT" }
+        { method: "PUT", body: { note: note || undefined } }
       );
 
       const cached = this.threadDetail.get(threadId);
       if (cached?.status === Status.SUCCESS) {
         cached.data.thread.is_locked = result.is_locked;
+        cached.data.thread.lock_info = result.lock_info;
       }
     },
   },

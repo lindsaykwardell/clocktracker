@@ -19,7 +19,7 @@
       </div>
 
       <Loading v-if="loading" />
-      <p v-else-if="reports.length === 0" class="text-center py-8 text-stone-400">
+      <p v-else-if="reports.length === 0" class="text-center py-8 text-stone-600 dark:text-stone-400">
         No {{ showResolved ? "resolved" : "open" }} reports.
       </p>
       <div v-else class="flex flex-col gap-4">
@@ -27,7 +27,7 @@
           v-for="report in reports"
           :key="report.id"
           :report="report"
-          @resolve="resolve"
+          @resolved="removeReport"
           @deleted="onDeleted"
           @edited="onEdited"
         />
@@ -72,13 +72,9 @@ async function fetchReports() {
   }
 }
 
-async function resolve(reportId: string) {
-  try {
-    await $fetch(`/api/forum/reports/${reportId}/resolve`, { method: "POST" });
-    reports.value = reports.value.filter((r) => r.id !== reportId);
-  } catch (err: any) {
-    console.error(err);
-  }
+// The card settles the report itself; drop it from the list.
+function removeReport(reportId: string) {
+  reports.value = reports.value.filter((r) => r.id !== reportId);
 }
 
 function onDeleted(reportId: string) {

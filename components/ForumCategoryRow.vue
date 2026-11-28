@@ -22,9 +22,9 @@
         </p>
       </div>
     </div>
-    <div class="text-sm text-stone-500 dark:text-stone-400 shrink-0 sm:ml-4 sm:text-right pl-5 sm:pl-0">
+    <div class="text-sm text-stone-600 dark:text-stone-400 shrink-0 sm:ml-4 sm:text-right pl-5 sm:pl-0">
       <div>
-        {{ category.threadCount }} threads<template v-if="category.unread_count"> · <span class="text-primary/80">{{ category.unread_count }} unread</span></template>
+        {{ category.threadCount }} threads<span v-if="category.unread_count" class="ml-3 text-primary dark:text-purple-400">{{ category.unread_count }} unread</span>
       </div>
       <div v-if="category.lastPost" class="text-xs mt-0.5">
         Latest by {{ category.lastPost.author.display_name }}

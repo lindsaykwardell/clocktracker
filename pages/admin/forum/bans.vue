@@ -9,21 +9,21 @@
           >
             <div>
               <span class="font-semibold">{{ ban.user.display_name }}</span>
-              <span class="text-sm text-stone-500 ml-1">@{{ ban.user.username }}</span>
+              <span class="text-sm text-stone-600 ml-1 dark:text-stone-400">@{{ ban.user.username }}</span>
               <Badge v-if="ban.category" size="sm" color="caution" class="ml-2">
                 {{ ban.category.name }}
               </Badge>
               <Badge v-else size="sm" color="negative" class="ml-2">Global</Badge>
-              <p v-if="ban.reason" class="text-sm text-stone-500 dark:text-stone-400 mt-1">
+              <p v-if="ban.reason" class="text-sm text-stone-600 dark:text-stone-400 mt-1">
                 {{ ban.reason }}
               </p>
-              <p v-if="ban.expires_at" class="text-xs text-stone-400 mt-1">
+              <p v-if="ban.expires_at" class="text-xs text-stone-600 mt-1 dark:text-stone-400">
                 Expires: {{ new Date(ban.expires_at).toLocaleDateString() }}
               </p>
             </div>
             <Button size="xs" color="secondary" @click="removeBan(ban.id)">Unban</Button>
           </div>
-          <p v-if="bans.length === 0" class="text-center py-3 text-stone-400">
+          <p v-if="bans.length === 0" class="text-center py-3 text-stone-600 dark:text-stone-400">
             No active bans.
           </p>
         </div>

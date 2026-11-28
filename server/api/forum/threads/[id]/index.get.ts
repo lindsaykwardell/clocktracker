@@ -7,6 +7,7 @@ import {
   getForumNameColors,
   getForumBadges,
   isModerator,
+  getThreadLockInfo,
 } from "~/server/utils/forum";
 import { isAdmin } from "~/server/utils/permissions";
 
@@ -304,9 +305,13 @@ export default defineEventHandler(async (handler) => {
       }))
     : false;
 
+  const lock_info =
+    viewerIsMod && thread.is_locked ? await getThreadLockInfo(threadId) : null;
+
   return {
     thread: {
       ...thread,
+      lock_info,
       author: {
         ...thread.author,
         name_color: nameColors[thread.author.user_id] ?? null,

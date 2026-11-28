@@ -1,11 +1,11 @@
 <template>
   <AdminTemplate title="Circular Games" :has-access="canAccess">
     <Loading v-if="loading" />
-    <p v-else-if="pairs.length === 0" class="text-center py-8 text-stone-400">
+    <p v-else-if="pairs.length === 0" class="text-center py-8 text-stone-600 dark:text-stone-400">
       No circular parent game references detected.
     </p>
     <div v-else class="flex flex-col gap-4">
-      <p class="text-sm text-stone-500 dark:text-stone-400">
+      <p class="text-sm text-stone-600 dark:text-stone-400">
         Found {{ pairs.length }} circular reference{{ pairs.length === 1 ? "" : "s" }}.
         Each pair has two games pointing to each other as the parent.
       </p>
@@ -21,7 +21,7 @@
         </div>
         <div class="flex flex-wrap gap-2">
           <Button
-            color="primary"
+            color="secondary"
             size="sm"
             :disabled="fixing === idx"
             @click="fix(idx, 'unlink_a')"
@@ -29,7 +29,7 @@
             Make B the parent (unlink A)
           </Button>
           <Button
-            color="primary"
+            color="secondary"
             size="sm"
             :disabled="fixing === idx"
             @click="fix(idx, 'unlink_b')"
@@ -45,7 +45,7 @@
             Unlink both
           </Button>
         </div>
-        <p v-if="pairError[idx]" class="text-sm text-red-500 mt-2">{{ pairError[idx] }}</p>
+        <p v-if="pairError[idx]" class="text-sm text-red-700 mt-2 dark:text-red-400">{{ pairError[idx] }}</p>
       </div>
     </div>
   </AdminTemplate>

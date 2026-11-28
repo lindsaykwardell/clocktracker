@@ -11,7 +11,7 @@
             </div>
 
             <Loading v-if="reportsLoading" />
-            <p v-else-if="reports.length === 0" class="text-center py-4 text-stone-400">
+            <p v-else-if="reports.length === 0" class="text-center py-4 text-stone-600 dark:text-stone-400">
               No open reports.
             </p>
             <div v-else class="flex flex-col gap-3">
@@ -19,7 +19,7 @@
                 v-for="report in reports"
                 :key="report.id"
                 :report="report"
-                @resolve="resolveReport"
+                @resolved="removeReport"
                 @deleted="onDeleted"
                 @edited="onEdited"
               />
@@ -36,7 +36,7 @@
             </div>
 
             <Loading v-if="logsLoading" />
-            <p v-else-if="logs.length === 0" class="text-center py-4 text-stone-400">
+            <p v-else-if="logs.length === 0" class="text-center py-4 text-stone-600 dark:text-stone-400">
               No mod actions recorded.
             </p>
             <div v-else class="flex flex-col gap-2">
@@ -49,7 +49,7 @@
                 <div class="flex-1">
                   <span class="font-semibold">{{ log.actor.display_name }}</span>
                   {{ " " }}
-                  <span class="text-stone-400">{{ actionLabel(log.action) }}</span>
+                  <span class="text-stone-600 dark:text-stone-400">{{ actionLabel(log.action) }}</span>
                   {{ " " }}
                   <nuxt-link
                     v-if="log.target.link"
@@ -58,10 +58,10 @@
                   >
                     {{ log.target.label }}
                   </nuxt-link>
-                  <span v-else class="text-stone-500">{{ log.target.label }}</span>
-                  <span v-if="log.details" class="text-stone-400 italic"> &mdash; {{ log.details }}</span>
+                  <span v-else class="text-stone-600 dark:text-stone-400">{{ log.target.label }}</span>
+                  <span v-if="log.details" class="text-stone-600 italic dark:text-stone-400"> &mdash; {{ log.details }}</span>
                 </div>
-                <div class="text-xs text-stone-500 dark:text-stone-400 shrink-0">
+                <div class="text-xs text-stone-600 dark:text-stone-400 shrink-0">
                   {{ formatDate(log.created_at) }}
                 </div>
               </div>
@@ -123,13 +123,9 @@ async function fetchReports() {
   }
 }
 
-async function resolveReport(reportId: string) {
-  try {
-    await $fetch(`/api/forum/reports/${reportId}/resolve`, { method: "POST" });
-    reports.value = reports.value.filter((r) => r.id !== reportId);
-  } catch (err: any) {
-    console.error(err);
-  }
+// The card settles the report itself; drop it from the list.
+function removeReport(reportId: string) {
+  reports.value = reports.value.filter((r) => r.id !== reportId);
 }
 
 function onDeleted(reportId: string) {
@@ -176,6 +172,10 @@ const ACTION_LABELS: Record<string, string> = {
   DELETE_POST: "deleted post in",
   BAN_USER: "banned",
   RESOLVE_REPORT: "resolved report",
+  RESOLVE_REPORT_DISMISSED: "resolved report (Dismissed)",
+  RESOLVE_REPORT_EDITED: "resolved report (Post edited)",
+  RESOLVE_REPORT_DELETED: "resolved report (Post deleted)",
+  RESOLVE_REPORT_BANNED: "resolved report (User banned)",
 };
 
 function actionLabel(action: string) {

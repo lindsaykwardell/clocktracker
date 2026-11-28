@@ -41,13 +41,13 @@
             <div class="flex items-center justify-between mb-3">
               <div>
                 <h2 class="font-semibold text-lg">{{ flag.name }}</h2>
-                <p class="text-sm text-stone-500 dark:text-stone-400">
+                <p class="text-sm text-stone-600 dark:text-stone-400">
                   {{ flag.description }}
                 </p>
               </div>
               <button
                 type="button"
-                class="text-red-400 hover:text-red-300 ml-4 shrink-0"
+                class="text-red-700 hover:text-red-900 ml-4 shrink-0 dark:text-red-400 dark:hover:text-red-300"
                 title="Delete flag"
                 @click="deleteFlag(flag.id)"
               >
@@ -87,12 +87,12 @@
               <button
                 v-if="flag.effective_date"
                 type="button"
-                class="text-xs text-red-400 hover:text-red-300"
+                class="text-xs text-red-700 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
                 @click="updateEffectiveDate(flag.id, '')"
               >
                 Clear
               </button>
-              <span class="text-xs text-stone-400">
+              <span class="text-xs text-stone-600 dark:text-stone-400">
                 {{ flag.effective_date ? 'Flag won\'t activate until this date' : 'No date restriction' }}
               </span>
             </div>
@@ -128,7 +128,7 @@
 
             <!-- Enabled users -->
             <div class="mb-3">
-              <h3 class="text-sm font-medium text-stone-400 mb-2">
+              <h3 class="text-sm font-medium text-stone-600 mb-2 dark:text-stone-400">
                 Enabled for {{ flag.active_for.length }} user{{ flag.active_for.length === 1 ? '' : 's' }}
               </h3>
               <div v-if="flag.active_for.length" class="flex flex-wrap gap-2 mb-2">
@@ -139,10 +139,10 @@
                 >
                   <Avatar :value="u.avatar" size="xs" class="border-stone-800" background />
                   <span>{{ u.display_name }}</span>
-                  <span class="text-stone-400">@{{ u.username }}</span>
+                  <span class="text-stone-600 dark:text-stone-400">@{{ u.username }}</span>
                   <button
                     type="button"
-                    class="text-red-400 hover:text-red-300 ml-1"
+                    class="text-red-700 hover:text-red-900 ml-1 dark:text-red-400 dark:hover:text-red-300"
                     title="Remove"
                     @click="removeUser(flag.id, u.user_id)"
                   >
@@ -172,7 +172,7 @@
                 >
                   <Avatar :value="u.avatar" size="xs" class="border-stone-800" background />
                   <span>{{ u.display_name }}</span>
-                  <span class="text-stone-400">@{{ u.username }}</span>
+                  <span class="text-stone-600 dark:text-stone-400">@{{ u.username }}</span>
                 </button>
               </div>
             </div>
@@ -180,7 +180,7 @@
 
           <p
             v-if="sortedFlags.length === 0"
-            class="text-center py-8 text-stone-400"
+            class="text-center py-8 text-stone-600 dark:text-stone-400"
           >
             No feature flags found.
           </p>

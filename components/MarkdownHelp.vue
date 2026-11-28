@@ -2,8 +2,9 @@
   <div class="relative inline-block">
     <button
       type="button"
-      class="text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 transition-colors"
+      class="text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 transition-colors"
       title="Markdown help"
+      aria-label="Markdown help"
       @click="open = !open"
     >
       <IconUI id="info-circle" size="sm" />
@@ -17,7 +18,8 @@
     >
       <button
         type="button"
-        class="absolute top-1 right-1 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200"
+        class="absolute top-1 right-1 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200"
+        aria-label="Close Markdown help"
         @click="open = false"
       >
         <IconUI id="x" size="xs" />
@@ -26,7 +28,7 @@
       <table class="w-full">
         <tbody>
           <tr v-for="item in items" :key="item.syntax" class="border-b border-stone-300/50 dark:border-stone-700/50 last:border-0">
-            <td class="py-1 pr-2 font-mono text-stone-400">{{ item.syntax }}</td>
+            <td class="py-1 pr-2 font-mono text-stone-600 dark:text-stone-400">{{ item.syntax }}</td>
             <td class="py-1">{{ item.label }}</td>
           </tr>
         </tbody>

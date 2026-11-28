@@ -28,7 +28,7 @@
                                 :class="
                                     bodyTab === 'write'
                                         ? 'border-primary text-primary'
-                                        : 'border-transparent text-stone-400 hover:text-stone-600 dark:hover:text-stone-200'
+                                        : 'border-transparent text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                                 "
                                 @click="bodyTab = 'write'"
                             >
@@ -40,7 +40,7 @@
                                 :class="
                                     bodyTab === 'preview'
                                         ? 'border-primary text-primary'
-                                        : 'border-transparent text-stone-400 hover:text-stone-600 dark:hover:text-stone-200'
+                                        : 'border-transparent text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                                 "
                                 @click="bodyTab = 'preview'"
                             >
@@ -62,7 +62,7 @@
                             :source="body"
                             :options="{ html: false }"
                         />
-                        <p v-else class="text-sm text-stone-400 italic">
+                        <p v-else class="text-sm text-stone-600 dark:text-stone-400 italic">
                             Nothing to preview
                         </p>
                     </div>
@@ -70,8 +70,8 @@
                         class="text-xs self-end"
                         :class="
                             body.length > POST_BODY_MAX_LENGTH
-                                ? 'text-red-500'
-                                : 'text-stone-400'
+                                ? 'text-red-700 dark:text-red-400'
+                                : 'text-stone-600 dark:text-stone-400'
                         "
                     >
                         {{ body.length.toLocaleString() }} /
@@ -103,7 +103,7 @@
                     </Button>
                     <ForumLinkInsert @insert="body += $event" />
                 </div>
-                <p v-if="error" class="text-sm text-red-500">{{ error }}</p>
+                <p v-if="error" class="text-sm text-red-700 dark:text-red-400" role="alert">{{ error }}</p>
             </form>
         </div>
     </StandardTemplate>

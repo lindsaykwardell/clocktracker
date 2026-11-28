@@ -9,6 +9,8 @@ import IconArrowLeftShort from "~/components/icon/ArrowLeftShort.vue";
 import IconArrowRightShort from "~/components/icon/ArrowRightShort.vue";
 import IconArrowUpShort from "~/components/icon/ArrowUpShort.vue";
 import IconArrowsMove from "~/components/icon/ArrowsMove.vue";
+import IconBell from "~/components/icon/Bell.vue";
+import IconBellFill from "~/components/icon/BellFill.vue";
 import IconBgg from "~/components/icon/Bgg.vue";
 import IconBluesky from "~/components/icon/Bluesky.vue";
 import IconBook from "~/components/icon/Book.vue";
@@ -18,6 +20,8 @@ import IconCalenderPlus from "~/components/icon/CalenderPlus.vue";
 import IconChair from "~/components/icon/Chair.vue";
 import IconCheck from "~/components/icon/Check.vue";
 import IconCheckCircle from "~/components/icon/CheckCircle.vue";
+import IconChevronDoubleLeft from "~/components/icon/ChevronDoubleLeft.vue";
+import IconChevronDoubleRight from "~/components/icon/ChevronDoubleRight.vue";
 import IconChevronDown from "~/components/icon/ChevronDown.vue";
 import IconChevronLeft from "~/components/icon/ChevronLeft.vue";
 import IconChevronRight from "~/components/icon/ChevronRight.vue";
@@ -60,6 +64,7 @@ import IconPersonPlus from "~/components/icon/PersonPlus.vue";
 import IconPin from "~/components/icon/Pin.vue";
 import IconPlayers from "~/components/icon/Players.vue";
 import IconPlusLg from "~/components/icon/PlusLg.vue";
+import IconQuote from "~/components/icon/Quote.vue";
 import IconReply from "~/components/icon/Reply.vue";
 import IconSearch from "~/components/icon/Search.vue";
 import IconSign from "~/components/icon/Sign.vue";
@@ -90,6 +95,8 @@ export const uiIcons = {
   "arrow-right-short": IconArrowRightShort,
   "arrow-up-short": IconArrowUpShort,
   "arrows-move": IconArrowsMove,
+  bell: IconBell,
+  "bell-fill": IconBellFill,
   bgg: IconBgg,
   bluesky: IconBluesky,
   book: IconBook,
@@ -98,6 +105,8 @@ export const uiIcons = {
   chair: IconChair,
   check: IconCheck,
   "check-circle": IconCheckCircle,
+  "chevron-double-left": IconChevronDoubleLeft,
+  "chevron-double-right": IconChevronDoubleRight,
   "chevron-down": IconChevronDown,
   "chevron-left": IconChevronLeft,
   "chevron-right": IconChevronRight,
@@ -140,6 +149,7 @@ export const uiIcons = {
   pin: IconPin,
   players: IconPlayers,
   "plus-lg": IconPlusLg,
+  quote: IconQuote,
   reply: IconReply,
   search: IconSearch,
   sign: IconSign,

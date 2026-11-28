@@ -23,7 +23,7 @@
               :key="group.label"
               class="flex flex-col gap-1.5"
             >
-              <span class="text-xs font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wide">{{ group.label }}</span>
+              <span class="text-xs font-medium text-stone-600 dark:text-stone-400 uppercase tracking-wide">{{ group.label }}</span>
               <div class="flex flex-wrap gap-1.5">
                 <button
                   v-for="perm in group.permissions"
@@ -42,13 +42,13 @@
           </div>
           <div class="flex flex-col gap-2">
             <label class="text-sm font-semibold">Restrictions</label>
-            <p class="text-xs text-stone-500">Members of this group will be blocked from these actions.</p>
+            <p class="text-xs text-stone-600 dark:text-stone-400">Members of this group will be blocked from these actions.</p>
             <div
               v-for="rg in restrictionGroups"
               :key="rg.label"
               class="flex flex-col gap-1.5"
             >
-              <span class="text-xs font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wide">{{ rg.label }}</span>
+              <span class="text-xs font-medium text-stone-600 dark:text-stone-400 uppercase tracking-wide">{{ rg.label }}</span>
               <div class="flex flex-wrap gap-1.5">
                 <button
                   v-for="r in rg.restrictions"
@@ -76,13 +76,13 @@
               <Input v-model="newGroup.color" class="max-w-[8rem]" placeholder="#000000" />
               <Button v-if="newGroup.color" size="xs" color="secondary" @click="newGroup.color = ''">Clear</Button>
             </div>
-            <p class="text-xs text-stone-500">Optional. Sets the display name color for members of this group in forum posts.</p>
+            <p class="text-xs text-stone-600 dark:text-stone-400">Optional. Sets the display name color for members of this group in forum posts.</p>
           </div>
           <div class="flex gap-2">
             <Button color="primary" size="sm" @click="createGroup">Create</Button>
             <Button color="secondary" size="sm" @click="showNewGroup = false">Cancel</Button>
           </div>
-          <p v-if="groupError" class="text-sm text-red-500">{{ groupError }}</p>
+          <p v-if="groupError" class="text-sm text-red-700 dark:text-red-400">{{ groupError }}</p>
         </div>
 
         <!-- Group List -->
@@ -107,7 +107,7 @@
                     :key="pg.label"
                     class="flex flex-col gap-1.5"
                   >
-                    <span class="text-xs font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wide">{{ pg.label }}</span>
+                    <span class="text-xs font-medium text-stone-600 dark:text-stone-400 uppercase tracking-wide">{{ pg.label }}</span>
                     <div class="flex flex-wrap gap-1.5">
                       <button
                         v-for="perm in pg.permissions"
@@ -126,13 +126,13 @@
                 </div>
                 <div class="flex flex-col gap-2">
                   <label class="text-sm font-semibold">Restrictions</label>
-                  <p class="text-xs text-stone-500">Members of this group will be blocked from these actions.</p>
+                  <p class="text-xs text-stone-600 dark:text-stone-400">Members of this group will be blocked from these actions.</p>
                   <div
                     v-for="rg in restrictionGroups"
                     :key="rg.label"
                     class="flex flex-col gap-1.5"
                   >
-                    <span class="text-xs font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wide">{{ rg.label }}</span>
+                    <span class="text-xs font-medium text-stone-600 dark:text-stone-400 uppercase tracking-wide">{{ rg.label }}</span>
                     <div class="flex flex-wrap gap-1.5">
                       <button
                         v-for="r in rg.restrictions"
@@ -165,7 +165,7 @@
                   <Button size="sm" color="primary" @click="saveEditUserGroup">Save</Button>
                   <Button size="sm" color="secondary" @click="editingUserGroupId = null">Cancel</Button>
                 </div>
-                <p v-if="editUserGroupError" class="text-sm text-red-500">{{ editUserGroupError }}</p>
+                <p v-if="editUserGroupError" class="text-sm text-red-700 dark:text-red-400">{{ editUserGroupError }}</p>
               </div>
             </template>
 
@@ -182,10 +182,10 @@
                   />
                 </div>
                 <div class="flex items-center gap-5">
-                  <button type="button" class="text-stone-400 hover:text-stone-200 transition-colors" title="Edit group" @click="startEditUserGroup(group)">
+                  <button type="button" class="text-stone-600 hover:text-stone-900 transition-colors dark:text-stone-400 dark:hover:text-stone-200" title="Edit group" @click="startEditUserGroup(group)">
                     <IconUI id="edit" size="sm" />
                   </button>
-                  <button type="button" class="text-red-400 hover:text-red-300 transition-colors" title="Delete group" @click="deleteGroup(group.id)">
+                  <button type="button" class="text-red-700 hover:text-red-900 transition-colors dark:text-red-400 dark:hover:text-red-300" title="Delete group" @click="deleteGroup(group.id)">
                     <IconUI id="trash" size="sm" />
                   </button>
                 </div>
@@ -198,7 +198,7 @@
                 >
                   {{ PERMISSION_LABELS[perm] || perm }}
                 </span>
-                <span v-if="!group.permissions?.length" class="text-xs text-stone-400">No permissions</span>
+                <span v-if="!group.permissions?.length" class="text-xs text-stone-600 dark:text-stone-400">No permissions</span>
               </div>
               <div v-if="group.restrictions?.length" class="flex flex-wrap gap-1 mb-3">
                 <span
@@ -212,7 +212,7 @@
 
               <!-- Members -->
               <div class="mb-3">
-                <h4 class="text-xs text-stone-500 mb-1">Members ({{ group._count.members }})</h4>
+                <h4 class="text-xs text-stone-600 mb-1 dark:text-stone-400">Members ({{ group._count.members }})</h4>
                 <div class="flex flex-wrap gap-2">
                   <div
                     v-for="membership in group.members"
@@ -221,24 +221,24 @@
                   >
                     <Avatar :value="membership.user.avatar" size="xxs" class="border-stone-800" />
                     <span>{{ membership.user.display_name }}</span>
-                    <span class="text-xs text-stone-500">@{{ membership.user.username }}</span>
+                    <span class="text-xs text-stone-600 dark:text-stone-400">@{{ membership.user.username }}</span>
                     <button
                       type="button"
-                      class="text-red-400 hover:text-red-300 transition-colors ml-1 flex items-center"
+                      class="text-red-700 hover:text-red-900 transition-colors ml-1 flex items-center dark:text-red-400 dark:hover:text-red-300"
                       title="Remove member"
                       @click="removeMember(group.id, membership.user.user_id, membership.user.display_name)"
                     >
                       <IconUI id="x" size="xs" />
                     </button>
                   </div>
-                  <p v-if="!group.members?.length" class="text-xs text-stone-400">No members</p>
+                  <p v-if="!group.members?.length" class="text-xs text-stone-600 dark:text-stone-400">No members</p>
                 </div>
               </div>
 
               <!-- Add Member -->
               <div class="flex gap-2 items-end">
                 <div class="flex flex-col gap-1 flex-1">
-                  <label class="text-xs text-stone-500">Add user by username</label>
+                  <label class="text-xs text-stone-600 dark:text-stone-400">Add user by username</label>
                   <UserSearchInput
                     :ref="(el: any) => memberSearchRefs[group.id] = el"
                     placeholder="Search for a user..."
@@ -247,10 +247,10 @@
                 </div>
                 <Button size="sm" color="primary" @click="addMember(group.id)">Add</Button>
               </div>
-              <p v-if="memberError[group.id]" class="text-sm text-red-500 mt-1">{{ memberError[group.id] }}</p>
+              <p v-if="memberError[group.id]" class="text-sm text-red-700 mt-1 dark:text-red-400">{{ memberError[group.id] }}</p>
             </template>
           </div>
-          <p v-if="groups.length === 0" class="text-center py-3 text-stone-400">
+          <p v-if="groups.length === 0" class="text-center py-3 text-stone-600 dark:text-stone-400">
             No user groups yet.
           </p>
         </div>
