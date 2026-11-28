@@ -541,6 +541,32 @@ export function createGrimoireEventEngine(context: GrimoireEventEngineContext) {
     );
   }
 
+  /**
+   * A Scarlet Woman whose token was swapped to the Demon, with her "Is The
+   * Demon" on either page (placed although the hint says it's for an unswapped
+   * token): the character change is hers, as with "Changed".
+   */
+  function scarletWomanBecameDemonSource(
+    token: GrimoireTokenLike,
+    previousToken: GrimoireTokenLike,
+    participantId: string
+  ): { by_participant_id: string | null; by_role_id: string } | null {
+    if (previousToken.role_id !== "scarlet_woman") return null;
+    if (token.role?.type !== "DEMON") return null;
+    const isTheDemon = [...(token.reminders ?? []), ...(previousToken.reminders ?? [])].find(
+      (reminder) => {
+        if (normalizeReminderName(reminder.reminder) !== "is the demon") return false;
+        // Lil' Monsta's "Is The Demon" is about who babysits it, not her.
+        const roleId = catalogRoleId(reminder);
+        if (roleId) return roleId === "scarlet_woman";
+        const hint = normalizeReminderRoleHint(reminder.token_url);
+        return !hint || hint.includes("scarletwoman");
+      }
+    );
+    if (!isTheDemon) return null;
+    return { by_participant_id: participantId, by_role_id: "scarlet_woman" };
+  }
+
   function enforceSelfScopedChangedSource(
     source: { by_participant_id: string | null; by_role_id: string } | null,
     targetRoleId: string | null | undefined,
@@ -796,7 +822,7 @@ export function createGrimoireEventEngine(context: GrimoireEventEngineContext) {
               : null,
             token.role_id,
             previousToken.role_id
-          );
+          ) ?? scarletWomanBecameDemonSource(token, previousToken, participantId);
           const alignmentChangedSource = enforceSelfScopedChangedSource(
             alignmentChangedReminder
               ? resolveChangedReminderSource(

@@ -282,3 +282,60 @@ test("a reminder from a Drunk's imagined character makes no event; a real one st
   ]);
   assert.equal(philFill.length, 1);
 });
+
+test("a swapped Scarlet Woman with \"Is The Demon\" is the cause of her character change", () => {
+  const isTheDemon = { reminder: "Is The Demon", token_url: "/img/role/scarletwoman.webp" };
+  const evil = (participantId: string, order: number, roleId: string, type: string, reminders: Reminder[] = []) => ({
+    ...token(participantId, order, roleId, { reminders }),
+    alignment: "EVIL" as const,
+    role: { name: roleId, type, initial_alignment: "EVIL" as const },
+  });
+  type EvilToken = ReturnType<typeof evil>;
+  const evilPage = (id: number, tokens: EvilToken[]) => ({ id, tokens });
+  const roleChanges = (grimoire: ReturnType<typeof evilPage>[]) => {
+    const fill = generateEventsForMissingGames(grimoire as any).events;
+    const engine = createGrimoireEventEngine({
+      getGrimoire: () => grimoire as any,
+      resolveRoleById: () => null,
+    });
+    const editor = [...engine.buildExpectations().values()];
+    return [fill, editor].map((events) =>
+      events
+        .filter((event) => event.event_type === "ROLE_CHANGE")
+        .map((event) => `${event.participant_id}:${event.by_role_id}:${event.by_participant_id}`)
+    );
+  };
+
+  // Token swapped to the Imp, "Is The Demon" placed (on either page): hers.
+  for (const onPage of [1, 2]) {
+    const [fill, editor] = roleChanges([
+      evilPage(1, [
+        evil("noor", 0, "scarlet_woman", "MINION", onPage === 1 ? [isTheDemon] : []),
+        evil("ivan", 1, "imp", "DEMON"),
+      ]),
+      evilPage(2, [
+        evil("noor", 0, "imp", "DEMON", onPage === 2 ? [isTheDemon] : []),
+        { ...evil("ivan", 1, "imp", "DEMON"), is_dead: true },
+      ]),
+    ]);
+    assert.deepEqual(fill, ["noor:scarlet_woman:noor"], `page ${onPage}`);
+    assert.deepEqual(editor, ["noor:scarlet_woman:noor"], `page ${onPage}`);
+  }
+
+  // Without it, the change has no cause, as before.
+  const [fill, editor] = roleChanges([
+    evilPage(1, [evil("noor", 0, "scarlet_woman", "MINION"), evil("ivan", 1, "imp", "DEMON")]),
+    evilPage(2, [evil("noor", 0, "imp", "DEMON"), { ...evil("ivan", 1, "imp", "DEMON"), is_dead: true }]),
+  ]);
+  assert.deepEqual(fill, ["noor:null:null"]);
+  assert.deepEqual(editor, ["noor:null:null"]);
+
+  // Lil' Monsta's "Is The Demon" on a Scarlet Woman isn't hers.
+  const babysitter = { reminder: "Is The Demon", token_url: "/img/role/lilmonsta.webp" };
+  const [monstaFill, monstaEditor] = roleChanges([
+    evilPage(1, [evil("noor", 0, "scarlet_woman", "MINION", [babysitter]), evil("ivan", 1, "imp", "DEMON")]),
+    evilPage(2, [evil("noor", 0, "imp", "DEMON"), { ...evil("ivan", 1, "imp", "DEMON"), is_dead: true }]),
+  ]);
+  assert.deepEqual(monstaFill, ["noor:null:null"]);
+  assert.deepEqual(monstaEditor, ["noor:null:null"]);
+});
